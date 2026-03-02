@@ -20,10 +20,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  run:
+  fetch_precheck:
     if: github.repository == 'ziwenhahaha/daily-paper-reader'
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    outputs:
+      should_run: ${{ steps.result.outputs.should_run }}
+      has_data: ${{ steps.result.outputs.has_data }}
+      fetch_count: ${{ steps.result.outputs.fetch_count }}
+      raw_path: ${{ steps.result.outputs.raw_path }}
     env:
       SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
       SUPABASE_PAPERS_TABLE: arxiv_papers
@@ -71,20 +76,132 @@ jobs:
           python -m pip install uv
           uv pip install --system -r /tmp/req.txt
 
-      - name: Run Maintainer Ingest (fetch + sync supabase)
+      - name: Run Maintainer Fetch + Precheck
+        id: fetch_precheck
         if: ${{ steps.decide_mode.outputs.should_run == 'true' }}
         run: |
+          set -euo pipefail
           set -x
+
           FETCH_DAYS="${{ github.event.inputs.fetch_days }}"
-          echo "[INFO] 开始维护同步：SUPABASE_PAPERS_TABLE=${SUPABASE_PAPERS_TABLE}，fetch_days=${FETCH_DAYS:-默认}"
-          ARGS="--disable-supabase-read"
+          RUN_DATE="$(date -u +%Y%m%d)"
+          RAW_PATH="${GITHUB_WORKSPACE}/archive/${RUN_DATE}/raw/arxiv_papers_${RUN_DATE}.json"
+          mkdir -p "$(dirname "$RAW_PATH")"
+
+          echo "[INFO] 开始维护抓取预检：SUPABASE_PAPERS_TABLE=${SUPABASE_PAPERS_TABLE}，fetch_days=${FETCH_DAYS:-默认}，raw_path=${RAW_PATH}"
+          ARGS=(--disable-supabase-read --output "$RAW_PATH")
           if [ -n "$FETCH_DAYS" ]; then
-            ARGS="$ARGS --days $FETCH_DAYS"
+            ARGS+=(--days "$FETCH_DAYS")
           fi
+
           echo "::group::1.fetch_paper_arxiv (fetch window)"
-          /opt/hostedtoolcache/Python/3.11.14/x64/bin/python src/1.fetch_paper_arxiv.py $ARGS
+          /opt/hostedtoolcache/Python/3.11.14/x64/bin/python src/1.fetch_paper_arxiv.py "${ARGS[@]}"
           echo "::endgroup::"
+
+          if [ ! -f "$RAW_PATH" ]; then
+            FETCH_COUNT=0
+          else
+            FETCH_COUNT="$(python -c 'import json,sys; path=sys.argv[1]; data=json.load(open(path, "r", encoding="utf-8")); isinstance(data, list) or (_ for _ in ()).throw(SystemExit(f"raw json must be list: {path}")); print(len(data))' "$RAW_PATH")"
+          fi
+
+          HAS_DATA=false
+          if [ "$FETCH_COUNT" -gt 0 ]; then
+            HAS_DATA=true
+          fi
+
+          echo "[INFO] fetch 预检结果：count=${FETCH_COUNT}，has_data=${HAS_DATA}，raw_path=${RAW_PATH}"
+          echo "has_data=${HAS_DATA}" >> "$GITHUB_OUTPUT"
+          echo "fetch_count=${FETCH_COUNT}" >> "$GITHUB_OUTPUT"
+          echo "raw_path=${RAW_PATH}" >> "$GITHUB_OUTPUT"
+
+      - name: Finalize precheck outputs
+        id: result
+        if: ${{ always() }}
+        env:
+          SHOULD_RUN_IN: ${{ steps.decide_mode.outputs.should_run }}
+          HAS_DATA_IN: ${{ steps.fetch_precheck.outputs.has_data }}
+          FETCH_COUNT_IN: ${{ steps.fetch_precheck.outputs.fetch_count }}
+          RAW_PATH_IN: ${{ steps.fetch_precheck.outputs.raw_path }}
+        run: |
+          if [ "${SHOULD_RUN_IN}" != "true" ]; then
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "has_data=false" >> "$GITHUB_OUTPUT"
+            echo "fetch_count=0" >> "$GITHUB_OUTPUT"
+            echo "raw_path=" >> "$GITHUB_OUTPUT"
+            echo "[INFO] 预检输出：未配置 SUPABASE_SERVICE_KEY，本次不执行维护同步。"
+          else
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "has_data=${HAS_DATA_IN:-false}" >> "$GITHUB_OUTPUT"
+            echo "fetch_count=${FETCH_COUNT_IN:-0}" >> "$GITHUB_OUTPUT"
+            echo "raw_path=${RAW_PATH_IN:-}" >> "$GITHUB_OUTPUT"
+            echo "[INFO] 预检输出：has_data=${HAS_DATA_IN:-false}，fetch_count=${FETCH_COUNT_IN:-0}，raw_path=${RAW_PATH_IN:-<empty>}"
+          fi
+
+  sync_supabase:
+    needs: fetch_precheck
+    if: ${{ needs.fetch_precheck.outputs.has_data == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      SUPABASE_PAPERS_TABLE: arxiv_papers
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip + torch
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/torch
+          key: ${{ runner.os }}-dpr-hf-v2-${{ hashFiles('requirements.txt') }}
+
+      - name: Install deps (skip sqlite3)
+        run: |
+          python - <<'PY'
+          import re
+          lines = open("requirements.txt", "r", encoding="utf-8").read().splitlines()
+          lines = [l for l in lines if l.strip() and not re.match(r"^sqlite3\\b", l)]
+          open("/tmp/req.txt", "w", encoding="utf-8").write("\n".join(lines))
+          PY
+          python -m pip install --upgrade pip
+          python -m pip install uv
+          uv pip install --system -r /tmp/req.txt
+
+      - name: Run sync_supabase_public
+        env:
+          RAW_PATH: ${{ needs.fetch_precheck.outputs.raw_path }}
+          FETCH_COUNT: ${{ needs.fetch_precheck.outputs.fetch_count }}
+        run: |
+          set -euo pipefail
+          set -x
           echo "::group::1.2.sync_supabase_public (sync + embedding + upsert)"
-          echo "[INFO] fetch 完成，开始 sync_supabase_public"
-          /opt/hostedtoolcache/Python/3.11.14/x64/bin/python src/1.2.sync_supabase_public.py
+          echo "[INFO] fetch 预检通过，准备执行同步：count=${FETCH_COUNT}，raw_path=${RAW_PATH}"
+          /opt/hostedtoolcache/Python/3.11.14/x64/bin/python src/1.2.sync_supabase_public.py --raw-input "$RAW_PATH"
           echo "::endgroup::"
+
+  no_data_notice:
+    needs: fetch_precheck
+    if: ${{ needs.fetch_precheck.outputs.has_data != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: No data skip notice
+        env:
+          SHOULD_RUN: ${{ needs.fetch_precheck.outputs.should_run }}
+          FETCH_COUNT: ${{ needs.fetch_precheck.outputs.fetch_count }}
+          RAW_PATH: ${{ needs.fetch_precheck.outputs.raw_path }}
+        run: |
+          if [ "${SHOULD_RUN}" != "true" ]; then
+            echo "[INFO] 维护同步跳过：未配置 SUPABASE_SERVICE_KEY。"
+          else
+            echo "[INFO] 本次抓取无新增论文（count=${FETCH_COUNT}），已跳过 Supabase 同步。"
+            echo "[INFO] 预检 raw_path=${RAW_PATH:-<empty>}"
+          fi
