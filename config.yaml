@@ -25,3 +25,45 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: FSS LLM
+      description: 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。
+      enabled: true
+      keywords:
+        - keyword: Secure Transformer Inference
+          keyword_cn: 隐私推理
+          query: Secure Transformer Inference
+        - keyword: Distributed Comparison Function
+          keyword_cn: 分布式比较函数
+          query: Distributed Comparison Function
+        - keyword: Multi-Party Computation
+          keyword_cn: 安全多方计算
+          query: M
+        - keyword: Distributed Point Function
+          keyword_cn: 分布式点函数
+          query: Distributed Point Functions (DPF) and their extensions
+        - keyword: Function Secret Sharing
+          keyword_cn: 函数秘密共享
+          query: Function Secret Sharing (FSS) protocols and advancements
+      intent_queries:
+        - query: Function Secret Sharing supporting floating point operations and verifiable security
+          query_cn: 支持浮点运算和可验证安全性的函数秘密共享
+          enabled: true
+          source: manual
+          note: ''
+        - query: Dealerless Function Secret Sharing architectures for private inference
+          query_cn: 用于隐私推理的无Dealer函数秘密共享架构
+          enabled: true
+          source: manual
+          note: ''
+        - query: FSS based privacy preserving machine learning for large language models
+          query_cn: 基于FSS的大语言模型隐私保护机器学习
+          enabled: true
+          source: manual
+          note: ''
+        - query: Recent advances in malicious secure and verifiable Function Secret Sharing
+          query_cn: 恶意安全及可验证函数秘密共享的最新进展
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-03-15T07:57:54.773Z'
