@@ -41,10 +41,10 @@ subscriptions:
           query: M
         - keyword: Distributed Point Function
           keyword_cn: 分布式点函数
-          query: Distributed Point Functions (DPF) and their extensions
+          query: Distributed Point Functions (DPF) in FSS
         - keyword: Function Secret Sharing
           keyword_cn: 函数秘密共享
-          query: Function Secret Sharing (FSS) protocols and advancements
+          query: Function Secret Sharing (FSS) protocols and theory
       intent_queries:
         - query: Function Secret Sharing supporting floating point operations and verifiable security
           query_cn: 支持浮点运算和可验证安全性的函数秘密共享
@@ -56,14 +56,14 @@ subscriptions:
           enabled: true
           source: manual
           note: ''
-        - query: FSS based privacy preserving machine learning for large language models
-          query_cn: 基于FSS的大语言模型隐私保护机器学习
+        - query: Verifiable FSS protocols for malicious environments in LLM inference
+          query_cn: 大模型推理中针对恶意环境的可验证FSS协议
           enabled: true
-          source: manual
+          source: generated
           note: ''
-        - query: Recent advances in malicious secure and verifiable Function Secret Sharing
-          query_cn: 恶意安全及可验证函数秘密共享的最新进展
+        - query: Dealerless FSS architectures for secure distributed computation
+          query_cn: 用于安全分布式计算的无Dealer FSS架构
           enabled: true
-          source: manual
+          source: generated
           note: ''
-      updated_at: '2026-03-15T07:57:54.773Z'
+      updated_at: '2026-03-15T08:00:33.001Z'
