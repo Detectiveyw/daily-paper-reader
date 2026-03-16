@@ -67,3 +67,41 @@ subscriptions:
           source: generated
           note: ''
       updated_at: '2026-03-15T08:00:33.001Z'
+    - tag: PPML
+      description: 隐私保护机器学习，隐私推理，隐私计算
+      enabled: true
+      keywords:
+        - keyword: privacy-preserving machine learning
+          keyword_cn: 隐私保护机器学习
+          query: privacy-preserving machine learning techniques and frameworks
+        - keyword: private inference
+          keyword_cn: 隐私推理
+          query: secure and private inference in neural networks
+        - keyword: secure multi-party computation
+          keyword_cn: 安全多方计算
+          query: MPC protocols for privacy-preserving computation
+        - keyword: federated learning
+          keyword_cn: 联邦学习
+          query: privacy-preserving federated learning architectures
+      intent_queries:
+        - query: state of the art methods for privacy preserving machine learning
+          query_cn: 隐私保护机器学习的前沿方法
+          enabled: true
+          source: manual
+          note: ''
+        - query: secure inference protocols for deep learning models
+          query_cn: 深度学习模型的安全推理协议
+          enabled: true
+          source: manual
+          note: ''
+        - query: privacy computing technologies in data science
+          query_cn: 数据科学中的隐私计算技术
+          enabled: true
+          source: manual
+          note: ''
+        - query: balancing utility and privacy in machine learning
+          query_cn: 机器学习中效用与隐私的平衡
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-03-16T01:09:32.677Z'
