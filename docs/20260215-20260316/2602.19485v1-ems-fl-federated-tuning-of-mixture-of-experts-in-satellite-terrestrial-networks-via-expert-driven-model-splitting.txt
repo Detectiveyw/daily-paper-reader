@@ -1,0 +1,2072 @@
+Title: EMS-FL: Federated Tuning of Mixture-of-Experts in Satellite-Terrestrial Networks via Expert-Driven Model Splitting
+
+URL Source: https://arxiv.org/pdf/2602.19485v1
+
+Published Time: Tue, 24 Feb 2026 02:42:44 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+> 1
+
+# EMS-FL: Federated Tuning of Mixture-of-Experts in Satellite-Terrestrial Networks via Expert-Driven Model Splitting 
+
+Angzi Xu, Zezhong Zhang, Member, IEEE , Zhi Liu and Shuguang Cui, Fellow, IEEE 
+
+Abstract —The rapid advancement of large AI models imposes stringent demands on data volume and computational resources. Federated learning, though designed to exploit distributed data and computational resources, faces data shortage from limited network coverage and computational constraints from edge devices. To address these issues, both the mixture-of-experts (MoE) and satellite-terrestrial network (STN) provide promising solutions, offering lightweight computation overhead and broad coverage, respectively. However, the satellite-ground relative mo-tion results in intermittent connectivity, hindering conventional federated learning that relies on model synchronization across de-vices. To leverage the coverage of STN while preserving training efficiency, we propose EMS-FL, an expert-driven model splitting and federated learning method. EMS-FL assigns each device cluster only the experts highly correlated to their local data. Through non-overlapping expert assignments, asynchronous local learning is further proposed, where each device cluster trains its assigned experts consecutively and only uploads local parameters to the satellite during connected phases for aggregation and model updates. Consequently, EMS-FL effectively reduces the training overhead and achieves both faster convergence and higher accuracy compared with conventional federated learning. Rigorous convergence analysis is provided to theoretically char-acterize the learning performance. Furthermore, comprehensive experiments are conducted using public datasets and large models, validating the superiority of EMS-FL. 
+
+Index Terms —MoE, large models, satellite-terrestrial network, LEO satellites, federated learning. 
+
+I. I NTRODUCTION 
+
+The rapid advancement of artificial intelligence (AI) has driven an explosive growth of intelligent applications, which are increasingly being deployed at the network edge with the development of edge mobile computing and edge learning [1], [2]. In recent years, the emergence of large-scale mod-els has once again reshaped the industry landscape, owing to their remarkable capabilities and potential in handling tasks across a wide range of domains [3]–[5]. However, as AI models continue to grow in size, it raises much more stringent demands on data and computation resources for model training and tuning. For instance, the training process of Llama-3 involves approximately 15 trillion tokens and 
+
+10 25 Flops of computation capacity, which requires about one year of training on ten thousand A100 GPUs [6], [7]. Currently, large models are typically trained and tuned in a centralized manner, with data aggregated on high-performance GPU servers. However, as distributed data at the network edge grow exponentially, centralized approaches are no longer able to fully exploit the data due to privacy constraints, leading to model obsolescence in turn. Moreover, centralized training also fails to harness the computational resources distributed across edge devices. To address these limitations, federated learning (FL) is considered a favorable solution, which has been widely adopted for collaborative AI model training in distributed wireless networks [8]–[10]. By exchanging model parameters or gradients instead of uploading the raw data sam-ples, FL enables distributed training without compromising data privacy. Nevertheless, when applied to large models, FL faces two practical challenges as described in the following. The first challenge is the limited local computation and communication resources. Since most mobile devices cannot handle even a single round training of large models, such a practical issue has hindered distributed large model training for years. Under such a circumstance, the emergence of mixture-of-experts (MoE), a specialized paradigm of large models, opens the door to practical distributed training [11], [12] . In MoE, each dense feed-forward layer in conventional large models is replaced with multiple expert networks, among which only a sparse subset is activated for each data sample [11], [13]. This design enables lightweight training and in-ference, thereby stimulating the demand for distributed MoE training [14], [15]. Another challenge is the limited coverage of cellular networks. Training large models requires data from a vast number of devices, while the architecture of current cellular networks is unable to support such massive access. Although hierarchical FL has been proposed to involve more devices [16], [17], the architecture grows increasingly complex as the number of participants rises, leading to high latency and heavy communication overhead. To address this issue, the satellite-terrestrial network (STN) offers a promising solution. Satellites inherently provide much broader coverage than terrestrial networks. Furthermore, advancements in Low-Earth-Orbit (LEO) and Very-Low-Earth-Orbit (VLEO) satel-lites have enabled direct connectivity between mobile devices and satellites [18], [19]. Given these advantages, STNs become a highly suitable scenario for distributed training of large models, with satellites serving as the access points for model aggregation and coordination. According to analysis above, federated MoE training over STNs represents a promising paradigm for distributed training of large models. However, despite its notable advantages, this paradigm still faces a key challenge, namely the in-termittent connectivity caused by relative motion between satellites and ground, which is an inherent characteristic of LEO constellations [18], [20]. Conventional FL relies on 
+
+> arXiv:2602.19485v1 [cs.NI] 23 Feb 2026 2
+
+consecutive and synchronous parameter exchange between the server and devices so that stable and persistent connectivity is necessary [8]. However, in STNs, the high-speed relative motion between LEO satellites and ground devices prevents each satellite from maintaining a sustained connection with a fixed set of devices, which thereby disables conventional FL. To tackle this issue, recent research focuses on exploiting Inter Satellite Links (ISLs) and the Space-Air-Ground Inte-grated Network (SAGIN) [21]–[25]. Specifically, existing ISL-enabled solutions are typically targeted for on-board FL across LEO satellites, where the data, such as remote sensing and hyperspectral images, are collected and stored at satellites. In such architectures, a terrestrial ground station may serve as the central server for model aggregation, or even no central server is required [23]. Although ISL-enabled solutions are effective for on-board FL across satellites, they do not account for the scenario where data are distributed at ground devices and thereby infeasible [21]. On the contrary, the SAGIN-based approaches aim to enhance FL across ground devices by ex-ploiting the air nodes (e.g., unmanned aerial vehicles, airships, balloons, etc.) along with satellites for model aggregation [22], [25]. For instance, the authors in [22] propose to exploit the topology of SAGIN for hierarchical FL, where the Ring-All-Reduce algorithm is applied to enable fast inter-satellite parameter exchange. However, these approaches require model synchronization and usually involve topology optimization to enable effective and efficient model aggregation in such a hierarchical architecture. Due to the intricate topology of SAGIN, parameter exchange of large models can result in severe congestion and high communication latency. Therefore, the existing methods based on ISLs and SAGIN are still inadequate for federated MoE training given the model scale. Moreover, though ISLs and SAGIN can assist in model aggregation and update, such approaches usually involve mul-tiple, or even all, satellites in training a single AI model. This could result in significant resource contention and network congestion once concurrent training of multiple large models is demanded, which is a foreseeable trend in the near future. Therefore, enabling a single satellite to manage the training of one or multiple AI models remains a critical requirement. To this end, we further dive deeply into the characteristics of the MoE model and FL framework. In fact, aside from a limited number of shared experts, most experts in an MoE model are specialized and will only be activated for their corresponding data modalities [11], [13]. Moreover, each device, or a cluster of devices, located within a given area, typically owns only a narrow range of data types, such as financial language data in banking scenarios or obstacle images from vehicles on roads [26]. Consequently, local training only activates a small subset of experts at each device or device cluster [11], [12], [27]. In view of the above facts, we first propose an expert-driven model splitting algorithm that assigns each device cluster the experts highly correlated to their local data. Constraints are also introduced to ensure non-overlapping expert assignments across all device clusters, based on which asynchronous local training is further proposed to enable continuous local expert training and updates, regardless of device connectivity to the satellite. This approach exploits the intrinsic parallelism of MoE models, where experts operate independently and can thus be trained in parallel by different device clusters, fully leveraging distributed computational resources. We call the proposed integration of expert-driven model splitting and asyn-chronous federated learning EMS-FL. The main contributions are summarized as follows.  
+
+> •
+
+STN-Assisted FL for Large Models: Although FL has become prominent for distributed training of AI models, the rapid expansion in model scale is making data scarcity the critical bottleneck. To tackle this issue, we first intro-duce a STN-assisted FL framework where a LEO satellite serves as the access point, facilitating massive access and model aggregation. Such a framework leverages the broad coverage of LEO satellites while suffering from its inher-ent intermittent connectivity, representing the two facets of both the opportunity and the challenge. To the best of our knowledge, this work presents the first systematic investigation of distributed large model training under STN scenarios and proposes an efficient solution EMS-FL, which effectively mitigates the impact of intermittent links while capitalizing on the broad coverage.  
+
+> •
+
+Lightweight Expert-Driven Model Splitting: In con-ventional FL, every participating device is required to load the entire AI model for training, which turns out to be infeasible in large model training given limited local resources. Inspired by the observation that MoE only activates a small subset of experts for a given data modality, we propose a non-overlapping expert-driven model-splitting algorithm where each device cluster is assigned the highly correlated experts and only focuses on their training and updating. In this way, gradients of unassigned experts and shared model components can be discarded during training. Moreover, a masked gating mechanism is further proposed in enhanced EMS-FL, which directs inputs only to the assigned experts during local training, eliminating the need to load the unassigned experts into memory. As a result, the pro-posed model-splitting algorithm significantly reduces the resource consumption, enabling lightweight and practical local training on resource-constrained devices.  
+
+> •
+
+High-Efficiency Training under Intermittent Links: 
+
+Due to the model synchronization requirement in conven-tional FL that each training round begins with a shared global model, the intermittent connectivity in STN hin-ders the local training at disconnected devices, severely degrading the training efficiency [20]. To address this issue, EMS-FL further proposes asynchronous and non-overlapping local expert training across device clusters, regardless of device connectivity to the satellite, fully exploiting the distributed computational resources and thereby significantly enhancing the training efficiency. Moreover, mathematical analysis is provided to quantify the convergence rate of the proposed EMS-FL, theoreti-cally demonstrating its superiority over a conventional FL baseline. Comprehensive simulations are also conducted using public datasets and large models to verify the effectiveness and advantages of EMS-FL. 3
+
+The reminder of this paper is organized as follows. The system model is described in Section II. Section III presents the proposed EMS-FL design. In Section IV, the convergence performance of EMS-FL is derived. Experimental results are given in Section V, followed by conclusions in Section VI. II. S YSTEM MODEL 
+
+We consider an FL task for large model tuning in an STN comprising numerous ground devices and an LEO satellite. The objective is to fine-tune an MoE model by exploiting data distributed across all devices. In the following, we present both the learning and satellite-ground communication models. 
+
+A. Learning Model 
+
+In this work, we consider FL under the coordination of a single server, i.e., an LEO satellite, as shown in Fig. 1. The involved devices are naturally partitioned into C clusters, each with J devices, based on their geographic locations, denoted as 
+
+{U 1, . . . , UC }. The cluster indices form a set C = {1, . . . , C }.Without loss of generality, we assume that the satellite stays in high-rate communication with only one device cluster within its instantaneous coverage at each time slot t, given as U(t)
+
+with U(t) = Uc if c = t − ⌊ tC ⌋C, where function ⌊x⌋ gives the greatest integer no larger than x. The local dataset at device j from cluster c is denoted as Dc,j , containing N data samples. The aggregation of all local datasets constitutes a global dataset D = S
+
+> c,j
+
+Dc,j . In the following, we present the FL framework and its adaptation for MoE fine-tuning. 
+
+1) Federated Learning: Federated learning is a method for training an AI model with parameters θ by exploiting data samples distributed across multiple devices. The local loss function at device j from cluster c is defined as 
+
+Fc,j (θ) ≜ 1
+
+N
+
+X
+
+> (xn,y n)∈D c,j
+
+f (θ; xn, y n), (1) where f (θ; xn, y n) denotes the sample-wise loss, and xn
+
+and yn denote the feature vector and label of data sample 
+
+n, respectively. For convenience, we rewrite f (θ; xn, y n) as 
+
+fn(θ). Then, the global loss function is defined as 
+
+F (θ) ≜ 1
+
+CJN 
+
+> C
+
+X
+
+> c=1
+
+X
+
+> j∈U c
+
+X
+
+> n∈D c,j
+
+fn(θ). (2) Combining the definitions in (1) and (2) yields the relation 
+
+F (θ) = 1
+
+CJ 
+
+> C
+
+X
+
+> c=1
+
+X
+
+> j∈U c
+
+Fc,j (θ). (3) The FL process comprises multiple communication rounds. Without loss of generality, we consider the model aggregation case, where each round t involves the four procedures below.  
+
+> •
+
+Model broadcast : The server first broadcasts the latest parameters θt to all devices.  
+
+> •
+
+Local training and model update : After receiving the current parameters θt, each device j from cluster cLocal Model   
+
+> Cluster 1
+> Cluster 2Cluster C
+
+## …
+
+> Global Model
+> Current Time Slot
+> Other Time Slot
+
+Fig. 1: Illustration of large model tuning via FL under STN. × ×  
+
+> ＋
+> Gate
+> Embedding & Encoding
+> MoE Block
+> MoE Block
+> Input
+> …
+> MoE Block
+> Post -Processing
+> Output
+> Llayers
+> Self -Attention
+> Add & Normalize
+> FFN FFN
+> Add & Normalize
+> FFN FFN
+> Top -K
+
+Fig. 2: The architecture of transformer-based MoE [14]. computes a local gradient of the loss function in (1) using its local dataset Dc,j . The local gradient is expressed as 
+
+gt,c,j = 1
+
+N
+
+X
+
+> n∈D c,j
+
+∇θt fn(θt), (4) After local gradient computation, the local model can be updated by applying gradient descent, given as 
+
+θt+1 ,c,j = θt − ηgt,c,j , (5) where η > 0 denotes the step-size.  
+
+> •
+
+Model uploading and aggregation : Suppose reliable communication can be achieved in the model uploading phase. Then the global model update can be obtained through aggregation at the server, given as 
+
+θt+1 = 1
+
+CJ 
+
+> C
+
+X
+
+> c=1
+
+X
+
+> j∈U c
+
+θt+1 ,c,j . (6) This finishes a single round training process. With reliable communication between the server and devices, the FL method is capable of achieving equivalent training performance compared to centralized training [8]. However, with the emergence of large models, the substantial com-putational and communication demands usually exceed the capabilities of distributed devices. The MoE models emerged recently provide a flexible solution based on a sparse activation strategy, wherein only a small fraction of experts are engaged and trained per round. The MoE model and its tuning process under the FL framework are described in the following. 4
+
+2) MoE Fine-tuning via FL: An MoE model Q is composed of L MoE layers, where each layer ℓ consists of a gating network uℓ, a set of Mℓ expert networks {eℓ,m }Mℓ
+
+> m=1
+
+, and a shared backbone, as shown in Fig. 2. In MoE fine-tuning, only the expert networks and the gating network are trainable. Therefore, we omit the backbone parameters for simplicity. Given the input of MoE layer ℓ as xℓ, it first passes the gating network uℓ, outputting a vector Gℓ(uℓ; xℓ) with 
+
+Gℓ(uℓ; xℓ)m = softmax( gℓ(uℓ; xℓ)) m, (7) where gℓ(uℓ; xℓ) represents the result before the softmax operation. The input vector xℓ is also fed into every expert 
+
+m, producing qℓ,m (eℓ,m ; xℓ). Then the output of layer ℓ is 
+
+Qℓ(eℓ, 1, . . . , eℓ,M ℓ , uℓ; xℓ) = 
+
+> Mℓ
+
+X
+
+> m=1
+
+qℓ,m (eℓ,m ; xℓ)Gℓ(uℓ; xℓ)m. (8) To enable efficient training and inference while maintaining learning performance, model sparsification is commonly ap-plied to each MoE layer, resulting in a sparse MoE architecture [28]. In this setup, a Top-K routing strategy is employed at each gating network, given as 
+
+Gℓ(uℓ; xℓ)m = softmax (Top ( gℓ(uℓ; xℓ) + E, K )) m , (9) where the Top(; , K ) operator retains the top K values of a vector and sets the others to −∞ . Then only K out of the 
+
+Mℓ terms effectively contribute to the weighted sum in (8). In subsequent presentation, the term MoE model refers to the 
+
+sparse MoE by default. As the number of experts is typically consistent across layers, i.e., Mℓ = M , we group the expert networks sharing the same index m into a single entity, referred to as expert 
+
+m and parameterized by em [29]. Moreover, we denote the aggregation of all experts as M, parameterized by 
+
+e ≜ [eT 
+
+> 1
+
+, . . . , eTM ]T . (10) The parameters of gating networks across all layers are also denoted collectively as u and termed the gate. Then according to (8), the model output can be described as a function of e
+
+and u. For a given data sample (xn, y n), the model output is Q(xn; e, u) and the sample-wise loss can be denoted by 
+
+fn(e, u). By aggregating all trainable parameters as 
+
+θ = [ eT , uT ]T = [ eT 
+
+> 1
+
+, . . . , eTM , uT ]T , (11) the sample-wise loss can be written as fn(θ), which aligns with the expression in Sec. II-A1. According to (1) and (2), the local and global loss functions are given as 
+
+Fc,j (e, u) = 1
+
+N
+
+X
+
+> (xn,y n)∈D c,j
+
+f (e, u; xn, y n), (12) 
+
+F (e, u) = 1
+
+CJ 
+
+> C
+
+X
+
+> c=1
+
+X
+
+> j∈U c
+
+Fc,j (e, u). (13) Then the MoE model can be tuned with distributed data under the FL framework following procedures in Sec. II-A1. ( ) j t
+
+> min
+
+min 
+
+( ( )) jd t      
+
+> Device j
+> Current Coverage min ( ) jt
+> LEO Satellite
+
+Fig. 3: The instantaneous coverage of an LEO satellite. 
+
+B. Satellite-Ground Communication Model 
+
+By using the LEO satellite as the server, the gradient up-loading and model downloading processes rely on the satellite-ground communication links. As shown in Fig. 3, given the elevation angle between the satellite and device j as θj (t), the channel for device j can be modeled as 
+
+hj (t) = 
+
+a(θj (t)) ejϕ rain ej2πf D(θj (t)) t˜hj (t), if θj (t) ≥ θmin ,
+
+0, otherwise , (14) where 
+
+a(θj (t)) = λ
+
+4πd (θj (t)) · 10 − A(θj (t)) 20 · ζ, (15) gives the large-scale fading coefficient. In (15), the term 
+
+d(θj (t)) represents the distance between the satellite and de-vice j dependent on the elevation angle θj (t). The atmospheric fading is denoted as A(θj (t)) , which is typically inversely pro-portional to the elevation angle, i.e., A(θj (t)) ∝ 1/ sin( θj (t)) .The shadowing effect is denoted as ζ. Furthermore, in the channel model (14), θmin is a constant elevation threshold, where a device j is considered connectable only when θj (t) ≥
+
+θmin . This captures the inherent intermittency characteristic of ground-satellite links. Consequently, when an FL task is considered in this scenario, the intermittent connectivity poses a major challenge to training efficiency. The terms ejϕ rain and 
+
+ej2πf D (θj (t)) t are phase shifts induced by rain and the Doppler effect, respectively. The Doppler frequency is given by 
+
+fD (θj (t)) = vr (θj (t)) 
+
+λ , (16) where λ is the carrier wavelength and vr (θj (t)) represents the radial velocity, which reaches its maximum when the satellite is near the horizon ( θj (t) ≈ 0◦) and drops to zero when the satellite is right above device j (θj (t) = 90 ◦). This characteristic coincides with the previous statement that high-rate transmission is only viable when the satellite is at high elevation angles, i.e. θj (t) ≥ θmin . The small-scale fading 
+
+˜hj (t) follows a Rician fading model. Given the above channel model, we further consider the uplink transmission capability, which is the bottleneck of satellite-ground communication. The received signal at the satellite can be presented as 
+
+yj (t) = pPj Gsat hj (t)sj (t) + zj (t), (17) 5
+
+where sj (t) ∼ CN (0 , 1) is the transmitted signal and zj (t) ∼CN (0 , σ 2 
+
+> z
+
+) is the additional noise at the receiver. The factors 
+
+Pj and Gsat denote the transmit power of device j and the antenna gain at the satellite, respectively. With a Rician channel hj (t), the ergodic channel capacity can be given as 
+
+Cergodic = B · Et
+
+
+
+log 2(1 + Pj Gsat |hj (t)|2
+
+σ2
+
+> z
+
+)
+
+
+
+, (18) with bandwidth B. With proper channel coding, the channel capacity can be evaluated using the Shannon capacity, which is the upper bound of the ergodic channel capacity, given as 
+
+Cupper = B · log 2
+
+
+
+1 + Pj Gsat |a(θj )|2
+
+σ2
+
+> z
+
+
+
+. (19) According to the above elaboration, an uplink transmission rate of 5 Mbps can be achieved with practical settings of a 
+
+23 dBm transmit power, a −160 dB large-scale fading (600 km satellite-ground distance), a 40 dBi antenna gain at the satellite, and a 5 MHz sub-channel bandwidth. The connection phase lasts for 5 ∼ 10 minutes, making it possible to upload a file of 200 MB. However, the current STN still faces the following challenges. Firstly, the intermittency modeled in (14) prevents model synchronization across all devices. Hence only the connected devices can participate in the current training round, causing severe under-utilization of the distributed computation resources. Secondly, full-parameter tuning imposes intensive communication overhead considering the limited capacity of STN links. Moreover, though the MoE architecture alleviates the computational overhead with sparse activation, each device still needs to load the entire model as data samples activates different experts, leading to high memory demands. The above issues urge designs to engage all devices in each training round and enable lightweight local training and parameter uploading. To this end, we propose EMS-FL in the next section. III. EMS-FL FOR STN-A SSISTED MOE F INE -T UNING 
+
+In this section, we first introduce a synchronous FL baseline and then present the detailed design of EMS-FL. An enhanced version of EMS-FL is also provided to facilitate partial model loading at devices by applying a masked gate in local training. 
+
+A. Synchronous FL Baseline 
+
+To facilitate FL with model synchronization, a straight-forward idea is to only involve device cluster within the instantaneous coverage of the satellite in each training round. respectively. In line with the standard FL framework, each training round t in the baseline scheme comprises three steps:  
+
+> •
+
+Model broadcast : The satellite first broadcasts θt =[eTt , uTt ]T to the connected device cluster with index 
+
+c′ = t − ⌊ tC ⌋C, where the function ⌊x⌋ gives the greatest integer no larger than x. 
+
+> •
+
+Local model update : The local gradients of the experts and gate are denoted as 
+
+gE 
+
+> t,c ′,j
+
+= ∇et Fc′,j (et, ut), (20) 
+
+gU 
+
+> t,c ′,j
+
+= ∇ut Fc′,j (et, ut), (21) respectively. The deviation of the local gradient estimates from the global gradients are thereby given as 
+
+δE 
+
+> t,c ′,j
+
+= gE 
+
+> t,c ′,j
+
+− ∇ et F (et, ut), (22) 
+
+δU 
+
+> t,c ′,j
+
+= gU 
+
+> t,c ′,j
+
+− ∇ ut F (et, ut). (23) The local model update can be achieved by 
+
+et+1 ,c ′,j = et − ηE 
+
+> t
+
+gE 
+
+> t,c ′,j
+
+, (24) 
+
+ut+1 ,c ′,j = ut − ηU 
+
+> t
+
+gU 
+
+> t,c ′,j
+
+. (25)  
+
+> •
+
+Model upload and aggregation : With reliable uplink transmission, the global model update at the satellite can be achieved by model aggregation, given as 
+
+et+1 = 1
+
+J
+
+X
+
+> j∈U c′
+
+et+1 ,c ′,j , ut+1 = 1
+
+J
+
+X
+
+> j∈U c′
+
+ut+1 ,c ′,j . (26) Following the training approach above, the MoE model can be tuned until convergence after sufficient number of rounds. However, this baseline scheme suffers from two major draw-backs. Firstly, it engages only the devices within the instanta-neous coverage of the satellite, failing to fully exploit the dis-tributed computation and data resources. Secondly, it requires all devices to load the entire model, imposing high memory demands. To address these limitations, we propose EMS-FL, which splits the MoE model according to the specialization of experts, enabling asynchronous and lightweight local training. 
+
+Remark 1 (Model Update with LoRA) . Low-rank-adaptation (LoRA) is a parameter-efficient fine-tuning technique that reduces communication overhead by decomposing model up-dates into low-rank matrices [30]. Given limited capacity of STN links, we adopt LoRA to facilitate lightweight model aggregation. Taking the baseline scheme as an example, the model update ∆et,c ′,j = et+1 ,c ′,j − et is factorized into two low-rank matrices and uploaded to the satellite. Then the local model et+1 ,c ′,j is reconstructed at the satellite for aggregation. In this work, LoRA is applied by default for model uploading. 
+
+B. EMS-FL for MoE 
+
+The idea of EMS-FL is motivated by the specialization of experts in MoE models, where individual experts are tailored to specific data modalities. Specifically, since MoE employs the Top-K routing strategy, the experts tend to be functionally specialized once trained on multi-modal data. For a well-trained MoE, each expert is only activated when dealing with specific data modalities and remains inactive otherwise. In light of this fact, the EMS-FL design begins with an expert-driven model splitting algorithm, as described in the following. 
+
+Expert-Driven Model Splitting : The idea of expert-driven model-splitting is to assign each device cluster the experts that are strongly correlated with its local data, whereas the remaining parts of the MoE model are kept frozen. To this end, a representative trial dataset Dtrial  
+
+> c
+
+containing N trial data samples is firstly collected from each device cluster c, which reflects the local data distribution. By feeding all the N trial 
+
+data samples into the current MoE model, we first compute the expert relevant probability pm,c , defined as the probability that the gating network routes to expert m at any MoE layer. For 6
+
+Algorithm 1: Expert-Driven Model Splitting 
+
+Input: Model parameters θt, truncated expert relevant probability {˜pm,c , ∀m, ∀c}
+
+Output: Expert sets {M 1, M2, . . . , MC }
+
+Initialize the feasible set as Cfeasible = C and C + 1 
+
+empty sets including M1, M2, . . . , MC and Mfull ;
+
+for m = 1 , 2, . . . do 
+
+Compute expert assignment probability {passign  
+
+> m,c
+
+}Cc=1 ;Form a distribution p(c) = passign  
+
+> m,c
+
+, c = 1 , . . . , C ;
+
+if em /∈ M full then 
+
+Randomly pick c⋆ from C with p(c)̸ = 0 ;
+
+if c⋆ ∈ C feasible or P 
+
+> c∈C feasible
+
+p(c) = 0 then 
+
+Mc⋆ ← M c⋆ ∪ em, Mfull ← M full ∪ em;
+
+Cfeasible ← C feasible \ { c⋆} if |M c⋆ | ≥ K;
+
+return expert sets {M 1, M2, . . . , MC };example, if expert m is selected in Lm(0 ≤ Lm ≤ L × N trial )
+
+MoE layers in total, the expert relevant probability is given by 
+
+pm,c = Lm
+
+L × N trial . (27) To identify the strongly correlated experts for device cluster 
+
+c, a threshold-based truncation operation is applied as 
+
+˜pm,c =
+
+ pm,c , pm,c ≥ pth 
+
+0, pm,c < p th 
+
+, (28) given a threshold pth . The expert assignment probability is then defined as 
+
+passign  
+
+> m,c
+
+= ˜pm,c 
+
+PCc=1 ˜pm,c 
+
+, (29) which naturally satisfies the normalization condition PCc=1 passign  
+
+> m,c
+
+= 1 . For each expert m, it is uniquely assigned to one device cluster through a probabilistic selection based on the distribution of {passign  
+
+> m,c
+
+}Cc=1 . We also set some restrictions in the expert selection process to ensure the experts are assigned to as many device clusters as possible. The details are provided in Algo. 1. The expert group assigned to device cluster c is denoted as Mc and parameterized as 
+
+˜ec, containing Mc experts. The rest M − Mc experts are also loaded while frozen during training. This expert-driven model-splitting algorithm ensures that all experts are assigned non-overlappingly across the C clusters, which thereby gives 
+
+e = [˜ eT 
+
+> 1
+
+, . . . , ˜eTC ]T . (30) The model-splitting operation is conducted periodically so that the experts can be trained by all the strongly-correlated device clusters in turn. Note that the model-splitting operation tends to assign the experts to device clusters with more correlated data. We define two ratio parameters as follows.  
+
+> •
+
+Local Expert Relevant Ratio αc: Defined as the fraction of data samples in Dc that are correlated to ˜ec. 
+
+> •
+
+Global Expert Relevant Ratio βc: Defined as the fraction of data samples in D that are correlated to ˜ec.Nore that the information {(αc, β c), ∀c} is only defined for convergence performance analysis in Sec. IV and unknown 
+
+Algorithm 2: Federated Training (EMS-FL) 
+
+Input: MoE model θ0, step-sizes ηE, η U, threshold 
+
+pth , device sets {U c}Cc=1 
+
+Output: Global parameters utmax and {etmax ,m }Mm=1 
+
+Initialize {M c}Cc=1 with Algo. 1, and u0, {˜e0,c }Cc=1 
+
+according to θ0;
+
+for t = 0 , 1, . . . , t max do for c = 1 , 2 . . . , C do if c = t − ⌊ tC ⌋C then 
+
+Upload local experts {˜et,c,j }j∈U c ;Expert update by aggregation in (31); Model download and local initialization with ˜et,c,j = ˜ et,c , ut,j = ut for j ∈ U c;Local update to get {˜et+1 ,c,j }j∈U c and 
+
+{ut+1 ,j }j∈U c ;Local gate upload for {ut+1 ,j }j∈U c ;Gate update with (32) to get ut+1 ;Download gate ut+1 to j ∈ U c;
+
+else 
+
+Local expert update to get {˜et+1 ,c,j }j∈U c ;
+
+return global parameters utmax and {etmax ,m }Mm=1 ;in practice. We also assume that the data samples correlated to each expert group ˜ec are drawn from the same source distribution while stored non-uniformly across device clusters, thereby creating heterogeneity in the data distribution. 
+
+Remark 2 (Expert Relevant Probability) . For each data modality, e.g., the dataset at a device cluster c, the expert rel-evant probability pm,c typically exhibits a skewed distribution where only a small subset of experts are strongly correlated with the data [11], [31]. Moreover, the strongly correlated experts can be categorized into two classes. One is shared experts which are highly activated for almost all kinds of data. Another is domain-specific experts which are activated only for a specific data modality. The remaining experts are seldom activated, usually with a probability below 1% each. 
+
+Asynchronous Local Training : As the satellite passes each device cluster once per orbital round, each device cluster experiences two phases in each orbital round, i.e., a connected phase and a disconnected phase . To adapt to the intermittent connectivity of satellite-ground communication, we propose asynchronous local expert training. For presentation conve-nience, we assume that a connected phase only comprises a single round of training, and the satellite passes all device clusters continuously, i.e., an orbital round consists of C
+
+connected phases. At time slot t = 1 , the satellite begins the training process from device cluster c = 1 . We take device cluster c as an example in the following elaboration.  
+
+> •
+
+Connected Phase : In training round t = torbit C + c
+
+where torbit ∈ Z, devices in cluster Uc are connected to the satellite. Local experts {˜et,c,j }j∈U c are uploaded to the satellite for expert-wise aggregation to update the 7EG C ... EG 1  EG 2            
+
+> Gate
+> Satellite
+> Experts
+> Aggregation
+> ①
+> ②
+> ③
+> ④
+> ...
+> EG C ... EG 1 EG 2
+> Cluster 1
+> Experts
+> Gate Shared
+> Part
+> Shared
+> Part
+> ③
+> ⑤
+> Trainable
+> Frozen
+> EG Expert Group
+> ⑥
+> ①Expert Aggregation
+> ②Global Expert Update
+> ③Model Download
+> ④Gate Aggregation
+> ⑤Global Gate Update
+> ⑥Gate Download
+
+Fig. 4: Asynchronous federated learning across device clusters. corresponding experts in the global model, given as 
+
+˜et,c = 1
+
+J
+
+X
+
+> j∈U c
+
+˜et,c,j , (31) The entire updated global model is then downloaded to all devices in Uc. For experts and the gate, an initialization is performed with ˜et,c and ut. Subsequently, a round of local training is performed during the connected phase, resulting in {˜et+1 ,c,j }j∈U c and {ut+1 ,j }j∈U c . Then the local gates {ut+1 ,j }j∈U c are uploaded to the satellite for aggregation, given as 
+
+ut+1 = 1
+
+J
+
+X
+
+> j∈U c
+
+ut+1 ,j , (32) and downloaded to devices in Uc. 
+
+> •
+
+Disconnected Phase : Local training is conducted to up-date the experts during the disconnected phase, which comprises C − 1 training rounds. The gate and the rest part of the MoE model are kept frozen during the period. The above training strategy is detailed in Algo. 2 and also illustrated in Fig. 4. The main idea is summarized as follows. During an orbital round, experts in Mc are trained consecu-tively for C rounds at device cluster c, covering both connected and disconnected phases, and then uploaded to the satellite for aggregation and updating. After all experts in Mc are updated and synchronized across device cluster c, the gate is also tuned with one training round during the connected phase. After introducing the framework of EMS-FL, the local training procedures on both experts and the gate are specified as follows. The local loss at device j from cluster c is 
+
+Fc,j (e, u) = 1
+
+N
+
+X
+
+> (x,y )∈D c,j
+
+f (e, u; x, y ). (33) In training round t, the local gradient for expert group eet,c,j 
+
+at device j ∈ U c is given as 
+
+gE 
+
+> t,c,j
+
+= ∇eec Fc,j (eet,c,j , ut,c,j ), (34) and its deviation from the global gradient is written as 
+
+δE 
+
+> t,c,j
+
+= gE 
+
+> t,c,j
+
+− γc∇eec F (eet,c,j , ut,c,j ). (35) 
+
+Algorithm 3: Federated Training (Enhanced EMS-FL) 
+
+Input: MoE model θ0, step-sizes ηE, η U, threshold 
+
+pth , device sets {U c}Cc=1 
+
+Output: Global parameters u and {etmax ,m }Mm=1 
+
+Initialize {M c}Cc=1 with Algo. 1, u, {˜e0,c }Cc=1 
+
+according to θ0, and umask  
+
+> c
+
+= masking( u, Mc);
+
+for t = 0 , 1, . . . , t max do for c = 1 , 2 . . . , C do if c = t − ⌊ tC ⌋C then 
+
+Upload local experts {˜et,c,j }j∈U c ;Expert update by aggregation with (31); Model download and local initialization with ˜et,c for j ∈ U c;Local update to get {˜et+1 ,c,j }j∈U c ;
+
+else 
+
+Local expert update to get {˜et+1 ,c,j }j∈U c ;Train gate u with standard EMS-FL for a few rounds; 
+
+return global parameters u and {etmax ,m }Mm=1 ;with γc = αc 
+
+> βc
+
+. We use a scaled global gradient in (35) because the local density of data samples correlated to expert group 
+
+eec is γc times the corresponding density in the global dataset. For the gate, the gradient is only calculated in the round of the connected phase, given as 
+
+gU 
+
+> t,c,j
+
+= ∇uFc,j (et, ut), if c = t − ⌊ tC ⌋C, (36) and its deviation from the global gradient is 
+
+δU 
+
+> t,c,j
+
+= gU 
+
+> t,c,j
+
+− ∇ uF (et, ut), if c = t − ⌊ tC ⌋C. (37) 
+
+Remark 3 (Global Model Update) . The global model is referred to as the model at the satellite. In each training round 
+
+t, the experts in the global model are partially updated by 
+
+˜et,c =
+
+(
+
+Eq. (31) , if c = t − ⌊ tC ⌋C, 
+
+˜et−1,c , otherwise . (38) The gate in the global model is updated according to Eq. (32). Therefore, from the viewpoint of the satellite, the global model undergoes partial updates in every training round. After one complete orbital cycle, each expert in the global model is updated exactly once, whereas the gate is updated C times. 
+
+C. Enhanced EMS-FL 
+
+Inspired by the idea of asynchronous local training in EMS-FL, this subsection presents a more radical design called the enhanced EMS-FL. We introduce a masking mechanism applied to the local gate, forcing it to route inputs only to the assigned expert group. This idea stems from the observation that the gate is typically well-trained or initialized with empir-ical knowledge, and can be easily tuned after expert training. Thus, the expert training will not be hampered by a frozen and masked gate. Instead, it offers two significant advantages. First, experts assigned to device cluster c are activated and trained with higher probabilities compared with the standard 8
+
+EMS-FL as experts outside Mc will not be activated. Second, since the gate does not route to frozen experts, the local training can be further lightened by not loading them into memory. The training procedures of the enhanced EMS-FL are presented below and also summarized in Algo. 3. Firstly, the model-splitting and expert assignment processes still follow Algo. 1. Then a masked gate is generated as 
+
+umask  
+
+> c
+
+= masking( u, Mc, M), (39) for each device in cluster c, where the masking operation is to set the output logits of the gate corresponding to experts 
+
+m / ∈ M c to zero. The logits after masking are then passed through a softmax( ·) operator to obtain the weighting distri-bution, based on which the experts are selected via the Top-K routing strategy. By using the masked gate, each device cluster c trains only the experts in ˜ec during both the connected and disconnected phases. The model aggregation is performed once during the connected phase in each orbital round to update the global expert ˜et,c . After the experts are well-trained through sufficient orbital rounds, the gate can be tuned by executing the standard EMS-FL for a few rounds. Compared to standard EMS-FL, the enhanced version improves local training efficiency and highly reduces the local memory de-mands. Although the introduction of the masked gate may lead to a more differentiated training of experts, this is not detrimental to the MoE model. On the contrary, the potential of each expert is fully unleashed with sufficient activation. In fact, conventional MoE models often suffer from the issue of load imbalance, resulting in a large number of experts being infrequently activated and under-trained. By introducing the masking operation, the enhanced EMS-FL constrains local training to be routed to the assigned experts ˜ec at each device cluster c, which inherently strengthens the load balance. IV. C ONVERGENCE ANALYSIS 
+
+In this section, we give a theoretical analysis on the con-vergence performance for the proposed EMS-FL and baseline schemes. Since the masking operation is non-differentiable, we confine our analysis to the standard EMS-FL and consider the enhanced version gives comparable performance. For tractable analysis on the convergence of EMS-FL, several widely-adopted assumptions are first given as follows. 
+
+Assumption 1 (L-smoothness) . The global loss function 
+
+F (θ) is differentiable and L-smooth, i.e., there exists a con-stant L > 0 such that 
+
+∇F (θ1) − ∇ F (θ2) ≤ L θ1 − θ2 , ∀θ1, θ2. (40) 
+
+Assumption 2 (Bounded Gradients) . There exist constants 
+
+GE > 0 and GU > 0 satisfying 
+
+∥∇ eF (e, u)∥ ≤ GE , ∥∇ uF (e, u)∥ ≤ GU , ∀e, u. (41) 
+
+Assumption 3 (Bounded Gradient Error in EMS-FL) . It is assumed that the stochastic gradients gE 
+
+> t,c,j
+
+in (34) are independent and unbiased estimates of scaled global gradient 
+
+γ∇eec F  eet,c,j , ut,c,j 
+
+, i.e., 
+
+E[gE 
+
+> t,c,j
+
+] = γc∇eec F (eet,c,j , ut,c,j ), ∀t, c, j, (42) 
+
+E[∥δE 
+
+> t,c,j
+
+∥2] ≤ γ2σ2 
+
+> E
+
+, ∀t, c, j, (43) with constant σ2 
+
+> E
+
+and γ = max {γc, ∀c}. The stochastic gra-dients gU 
+
+> t,c,j
+
+in (36) are unbiased estimates of global gradient 
+
+∇uF  et, ut
+
+ while correlated across devices, i.e., 
+
+E[gU 
+
+> t,c,j
+
+] = ∇uF (et, ut), E[∥δU 
+
+> t,c,j
+
+∥2] ≤ σ2 
+
+> U
+
+, ∀t, c, j, (44) with constant σ2 
+
+> U
+
+.Based on the above assumptions, the analytical convergence performance of EMS-FL is provided in the following. Since updating all experts and the gate of the global model takes one orbital cycle, we only evaluate the convergence performance at training rounds t ∈ { torbit C, t orbit ∈ Z}.
+
+Theorem 1 (Convergence of EMS-FL) . After T orbital-cycle training with step-sizes ηE ≤ ηU 
+
+> γ
+
+≤ 1√T in EMS-FL, the gradient variance is upper bounded by 
+
+1
+
+T
+
+X 
+
+> t=0 ,C,..., (T−1) C
+
+E∥∇ F (θt)∥2
+
+≤ E[F (θ0)−F ⋆]
+
+γC √T + 5LC 2γ[C(G2 
+
+> E
+
++σ2 
+
+> E
+
+)+ G2 
+
+> U
+
++σ2 
+
+> U
+
+]
+
+√T . (45) 
+
+Proof. See Appendix A. The results in Theorem 1 shows that the expected gradient variance is bounded and asymptotically approaches 0 after a sufficient number of orbital cycles T . The coefficient 1
+
+> γC √T
+
+associated with the term E[F (θ0)−F ⋆] defines the convergence rate, which drives the model parameters towards the optimum. The factor γ represents the ratio of the local density of expert-correlated data samples to the corresponding global density. As the experts are assigned to devices clusters that contains more correlated data, the factor γ lies in a range [1 , C ] dependent on the data heterogeneity, which correspondingly affects the convergence rate. The second term quantifies the deviation caused by gradient errors, which also converges to zero asymptotically. For comparison, the analytical convergence performance of the baseline scheme is also derived below. To facilitate convergence analysis for the baseline scheme, we first introduce Assumption 4 to replace the original as-sumptions on gE 
+
+> t,c,j
+
+and δE 
+
+> t,c,j
+
+. in the baseline scheme are incompatible with that used in EMS-FL. 
+
+Assumption 4 (Bounded Gradient Error in Baseline) . We assume the stochastic gradients gE 
+
+> t,c,j
+
+in (20) are unbiased estimates of global gradient ∇et F (et, ut) while correlated across devices, i.e., 
+
+E[gE 
+
+> t,c,j
+
+] = 1
+
+CJ 
+
+> C
+
+X
+
+> c=1
+
+X
+
+> j∈U c
+
+gE 
+
+> t,c,j
+
+= ∇et F (et, ut), ∀t, (46) 
+
+E[∥δE 
+
+> t,c,j
+
+∥2] ≤ ζ2 
+
+> E
+
++ σ2 
+
+> E
+
+, ∀t, (47) where σ2 
+
+> E
+
+is defined in Algo. 3, and ζ2 
+
+> E
+
+accounts for the variance components from data heterogeneity. Based on the assumptions above, the analytical convergence rate of the baseline scheme is derived below. 9
+
+Theorem 2 (Convergence of Baseline) . After T orbital-cycle training with step-sizes ηE ≤ ηU 
+
+> γ
+
+≤ 1√T in the baseline scheme, the gradient variance is upper bounded by 
+
+1
+
+T
+
+X 
+
+> t=0 ,C,..., (T−1) C
+
+E∥∇ F (θt)∥2
+
+≤ E[F (θ0) − F ⋆]
+
+C√T
+
++ 5LC 2(G2 
+
+> E
+
++ ζ2 
+
+> E
+
++ σ2 
+
+> E
+
+) + 5 LC 2γ2(G2 
+
+> U
+
++ σ2 
+
+> U
+
+)
+
+√T . (48) 
+
+Proof. See Appendix B. Therefore, a comparison on theoretical convergence perfor-mance of EMS-FL and the baseline scheme is provided by Theorem 1 and Theorem 2. Both schemes achieve convergence after sufficient training, while at different rates, i.e., 1 
+
+> γC √T
+
+and  
+
+> 1
+> C√T
+
+. Specifically, we further consider two extreme cases with 
+
+γ = 1 and γ = C, corresponding to uniform data distribution and extreme heterogeneity where all data correlated with an given expert group reside in a single device cluster. When 
+
+γ = 1 , the convergence rates turn to be the same for both schemes, while EMS-FL suffers from a larger deviation in the second term due to gradient errors. This is because each expert group is correlated to the data at all device clusters while only trained by a specific device cluster in EMS-FL, leading to under-utilization of the data resource and thereby causing slower convergence. When γ = C, EMS-FL achieves a noticeably faster convergence at rate 1 
+
+> C2√T
+
+. Though in EMS-FL the deviation in the second term is amplified due to the scaling effect in (35), the baseline scheme is penalized by an additional factor ζ2 
+
+> E
+
+, which is large for severe data heterogeneity. Hence, EMS-FL delivers a superior convergence rate in scenarios with highly heterogeneous data distribution. In fact, as clarified in Remark 2, it is usually the case in practice that each expert is correlated with specific data modalities, making γ ≫ 1. And the data heterogeneity can be coarsely evaluated in advance using the expert assignment probability in (29), helping us choose the correct solution. 
+
+Remark 4 (Idle Connection Slots) . Note that we assume con-secutive training across device clusters, where an orbital cycle exactly spans C training rounds. In practice, however, there can be numerous idle connection slots where no device cluster lies in the coverage of the satellite. This further slows down the training process in the baseline scheme, while not affecting EMS-FL that applies asynchronous local training. Therefore, for the case with abundant idle connection slots, EMS-FL remains applicable and maintains high training efficiency. V. S IMULATION RESULTS 
+
+In this section, we provide evaluations on the performance of the proposed EMS-FL through simulations. Two experi-ments are carried out with different settings, corresponding to MoE fine-tuning and training tasks, respectively. For EMS-FL, we use the enhanced version due to its lightweight properties. TABLE I: Communication overhead and peak GPU memory with LoRA ( r = 4 ).          
+
+> Method Uplink Overhead (MB) Peak GPU Memory (GB) EMS-FL 14.16 23.23 Baseline 43.25 46.00 Ratio / Diff. ≈3.06 ×+22.77
+
+A. Experimental Settings 
+
+The default settings are as follows unless specified other-wise. We consider a scenario as described in Sec. II-B. An LEO satellite serves as the server for model aggregation and global model updates. At each time slot, only one device cluster is connected to the satellite with an uplink bandwidth of 5 GHz in total, which can support 1000 devices each with a 5 Mbps transmission rate under the setting of a23 dBm transmit power, a -160 dB large-scale fading (600 km communication distance), a 40 dBi antenna gain at the satellite, and a 5 MHz sub-channel bandwidth. This enables the uploading of a 300 MB file during a 10-minute connection phase. In our experiments, each expert is an 8B large model, which contributes a 10-20 MB gradient parameter file after using LoRA with rank 4. The downlink transmission process is neglected due to the high-capacity broadcast capability of the satellite. The local expert training at each device cluster is simulated using a single 80G A100 GPU. In the following, we further present the training details and the corresponding simulation results of the two experiments. 
+
+B. Experiment 1: MoE Fine-tuning with Top-1 Routing 
+
+In this experiment, we consider a fine-tuning task where an MoE model is constructed by integrating three pre-trained Llama-3-8B variants: Llama-3-8B-Instruct [32], Llama-3-8B-Chinese-Chat [33], and Llama-3-OpenBioLLM-8B [34]. Specifically, the expert networks in MoE layer ℓ are initialized with feed-forward networks (FFNs) from the ℓ-th transformer layers of the three Llama-3-8B models. A gate is introduced with Top-1 routing, which is randomly initialized and pre-trained for a few iterations (60 rounds) on a small set of shared data samples to ensure proper model functionality before tuning. As we consider the case with C ≤ M , three device clusters are involved in this fine-tuning task. Furthermore, three open datasets, i.e., MMLU [35] for general knowledge, CMExam [36] for Chinese-specific medical knowledge, and MedMCQA [37] with English-specific medical knowledge, are used as local datasets at the three device clusters, respectively. Note that there is naturally a one-to-one mapping between the the experts and local datasets due to their inherent correlations. For example, the model Llama-3-8B-Chinese-Chat is highly correlated to the dataset CMExam and is thus assigned to the second device cluster according to the expert-driven model splitting algorithm. All three local datasets are composed of multiple-choice question answering (MCQA) samples. In the tuning process, for each sample, we compute the length-normalized conditional log-likelihood of every option given the question prompt, selecting the option with the highest log-10 0 20 40 60 80 100 
+
+Orbital cycles 
+
+0.577 
+
+0.594 
+
+0.610 
+
+0.627 
+
+0.644 
+
+> Accuracy
+
+Baseline 
+
+EMS-FL     
+
+> (a) Fine-tuning process with step-size ηE= 1 ×10 −5.
+
+0 20 40 60 80 100 
+
+Orbital cycles 
+
+0.577 
+
+0.594 
+
+0.610 
+
+0.627 
+
+0.644 
+
+> Accuracy
+
+Baseline 
+
+EMS-FL     
+
+> (b) Fine-tuning process with step-size ηE= 6 ×10 −6.
+
+0 20 40 60 80 100 
+
+Orbital cycles 
+
+0.577 
+
+0.594 
+
+0.610 
+
+0.627 
+
+0.644 
+
+> Accuracy
+
+Baseline 
+
+EMS-FL     
+
+> (c) Fine-tuning process with step-size ηE= 1 ×10 −6.
+
+Fig. 5: Test accuracy versus number of orbital cycles for EMS-FL and baseline scheme under different step-sizes. likelihood as the prediction [3]. During fine-tuning, we employ cross-entropy loss between the predictions and the labels. The convergence performance of both the EMS-FL and baseline schemes is shown in Fig. 5, trained with step-sizes 
+
+ηE ranging from 10 −6 to 10 −5, illustrating the accuracy improvement process during 100 orbital cycles ( 300 training rounds). Specifically, the accuracy is calculated with respect to the global dataset. In Fig. 5, the proposed EMS-FL always features faster convergence under different step-sizes and even attains a higher accuracy, which aligns with the convergence analysis in Sec. IV, validating the superiority of EMS-FL in convergence performance. Taking the results in Fig. 5(a) as 0 20 40 60 80 100 
+
+Orbital cycles 
+
+0.58 
+
+0.60 
+
+0.62 
+
+0.64 
+
+> Accuracy
+
+step-size=1e-5 
+
+step-size=6e-6 
+
+step-size=1e-6 
+
+> (a) Fine-tuning process of the baseline scheme.
+
+0 20 40 60 80 100 
+
+Orbital cycles 
+
+0.58 
+
+0.60 
+
+0.62 
+
+0.64 
+
+> Accuracy
+
+step-size=1e-5 
+
+step-size=6e-6 
+
+step-size=1e-6 
+
+> (b) Fine-tuning process of EMS-FL.
+
+Fig. 6: Test accuracy under different step-sizes. MMLU CMExam MedMCQA Overall 
+
+0.45 
+
+0.50 
+
+0.55 
+
+0.60 
+
+0.65 
+
+0.70 
+
+0.75 
+
+> Accuracy
+
+Single Expert (Llama-3) 
+
+MoE (Gate-trained) 
+
+Baseline 
+
+EMS-FL 
+
+Fig. 7: Test accuracy over different datasets before and after fine-tuning. an example, with step-size ηE = 10 −5, EMS-FL reaches an accuracy of 63% in around 30 orbital cycles while the baseline scheme requires more than 60 orbital cycles, representing a 50% reduction in training time. Moreover, Fig. 6 also compares the results obtained with different step-sizes for each scheme, indicating that a step-size of ηE = 1 × 10 −5 yields the fastest convergence. A smaller step-size leads to stable but slow accuracy improvement, while a large step-size brings in severe fluctuations that may cause an initial drop in accuracy. Moreover, as described in Sec. III-C, the enhanced EMS-FL also help reduce the memory usage and communication 11 
+
+TABLE II: Comparison of model capabilities before and after fine-tuning.                          
+
+> Prompt / Ground Truth Before Fine-tuning After Fine-tuning Prompt: List some vitamins that can only be supplied from animal source and explain the reason.
+> Ground Truth: Vitamin B12 Vitamin A, Vitamin D, and Vitamin B12 can only be supplied from animal source because they require fat for absorption, and fat is commonly found in animal products. Vitamin B12 is an example of a vitamin that can only be supplied from animal source. Vitamin B12 is synthesized by bacteria in the gastrointestinal tract of animals and is stored in animal tissues such as liver and meat.
+> Prompt: In chronic alcoholism, what is the rate-limiting component of alcohol metabolism, excluding enzymes? Explain the reason.
+> Ground Truth: NAD+ The rate limiting component for alcohol metabolism excluding enzymes in chronic alcoholism is acetaldehyde dehydrogenase. In chronic alcoholism, the rate limiting component for alcohol metabolism excluding enzymes is the availability of NAD+. This is because chronic alcohol consumption leads to the depletion of NAD+ due to its conversion to NADH during alcohol metabolism.
+
+overhead. To quantify this advantage, we record the peak GPU memory usage during the tuning process in Table I, which reflects the memory demand for local devices. The results presented in Table I corresponds a maximum input length of 384 tokens. The results show that EMS-FL achieves a 49 .5% 
+
+reduction in both communication and memory overhead, and only requires to upload a file with size less than 20 MB, which can be easily accomplished in the connected phase. To demonstrate the capability enhancement achieved through fine-tuning, we compare the model outputs before and after tuning using representative question prompts relevant to the training dataset content, as shown in Table II. These results indicate that the MoE has effectively improved its inference capabilities, validating the experimental design. In Fig. 7, we also compare the test accuracy across different models over both the global and local datasets. For each local dataset, four models are involved in the comparison including 1) the most correlated pre-trained Llama-3 model, 2) the MoE model after gate pre-training, 3) the MoE model tuned with the baseline scheme, and 4) the MoE model tuned with EMS-FL. For the global dataset, we only involve the last three models. As shown in Fig. 7, the model tuned with EMS-FL achieves the highest accuracy on CMExam, MedMCQA, and the global dataset, and performs comparably to the baseline scheme on MMLU, demonstrating its superiority. Moreover, tuned with either EMS-FL or the baseline scheme, the resultant MoE models provide apparently higher accuracy in all datasets when compared with the single Llama-3 model, justifying the effec-tiveness of the MoE architecture and STN-assisted FL. Last but not least, the MoE model after gate pre-training achieves similar accuracy to the single Llama-3 model, indicating that the gate has learned the correlations between experts and local datasets in pre-training and can route the data correctly. 
+
+C. Experiment 2: MoE Training with Top-2 Routing 
+
+In the second experiment, we consider a training task to show the proposed EMS-FL can achieve favorable perfor-mance in both tuning and training scenarios. We employ Mixtral-8x7B-Instruct-v0.1, a 47B MoE model with Top-2 routing and 8 experts. Though LoRA is inapplicable to the training case, which may result in communication infeasibility, the simulation results still provide valuable insights for future research on mini-MoE [38] or MoE models with smaller sizes via knowledge distillation or model compression. Four device 0 100 200 300 400 500 
+
+Orbital cycles 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+> Accuracy
+
+Baseline 
+
+EMS-FL 
+
+Fig. 8: Test accuracy versus number of orbital cycles for EMS-FL and the baseline scheme with step-size ηE = 8 × 10 −6.SLJ SSJ NLI QA-NLI Overall 
+
+0.45 
+
+0.50 
+
+0.55 
+
+0.60 
+
+0.65 
+
+0.70 
+
+0.75 
+
+0.80 
+
+0.85 
+
+0.90 
+
+> Accuracy
+
+Baseline EMS-FL 
+
+Fig. 9: Test accuracy over different datasets after training. clusters are involved in this experiment, and four datasets are selected from the GLUE benchmark [39] as the corresponding local datasets. The four datasets exhibit distinct linguistic characteristics: 1) sentence-level judgment (SLJ), 2) semantic similarity judgment (SSJ), 3) natural language inference (NLI), and 4) question-based natural language inference (QA-NLI). The model parameters are randomly initialized and trained with a step-size ηE = ηU = 8 ×10 −6. The experts are assigned to the four device clusters and trained asynchronously. The gate and the shared backbone are trained together by the device cluster connected to the satellite in each training round. For the training details, we treat all four GLUE subsets as sentence-pair classification tasks, replacing the language modeling head with a classification head and training with cross-entropy loss. 12 
+
+The comparison of convergence performance between EMS-FL and the baseline scheme is presented in Fig. 8. The accuracy is evaluated on the global dataset across 500 orbital cycles. It is apparent that EMS-FL achieves a more rapid accuracy improvement and also a much faster convergence compared with the baseline scheme. Specifically, the proposed EMS-FL reaches the accuracy 70% within 400 training rounds, while it takes over 1600 training rounds for the baseline scheme, representing a 75% reduction on the training time. We also compare the test accuracy of EMS-FL and the baseline scheme using both the global and local datasets, as shown in Fig. 9, where the proposed EMS-FL achieves notably higher accuracy over all datasets. Although such a training experiment may be infeasible in STN scenarios without LoRA, this suggests the potential of EMS-FL for training smaller MoE models, such as mini-MoE [38], in future applications. VI. C ONCLUSION 
+
+In this work, we propose EMS-FL, an STN-assisted fed-erated learning method that enables efficient MoE tuning in distributed scenarios by innovative designs of expert-driven model splitting and asynchronous local training. The superi-ority of EMS-FL in lightweight training, rapid convergence, and high accuracy is demonstrated through both theoretical analysis and comprehensive experiments. This work shows the possibility and provides a practical solution to distributed large model tuning by exploiting the assistance of STN. We believe it also sheds light on future designs of efficient model tuning and inference, potentially enhancing applications such as intelligent driving, AI agents, and embodied intelligence. VII. A PPENDIX 
+
+A. Proof of Theorem 1 
+
+For any global training round t, after C cluster contacts (from t to t + C), we have 
+
+F (et+C , ut+C ) − F (et, ut)= F (et+C , ut)−F (et, ut)
+
+| {z }
+
+> expert update
+
++F (et+C , ut+C)−F (et+C , ut)
+
+| {z }
+
+> gate update
+
+.
+
+(49) We first focus on the expert update part. Since et =[˜ eTt, 1, ˜eTt, 2, . . . , ˜eTt,C ]T , we have the following decomposition using Assumption 1 
+
+F (et+C , ut) − F (et, ut)
+
+≤⟨∇ eF (et, ut), et+C − et⟩ + L
+
+2 ∥et+C − et∥2
+
+=
+
+> C
+
+X
+
+> c=1
+
+[⟨∇ ˜ecF (et, ut), ˜et+C,c − ˜et,c ⟩+ L
+
+2∥˜et+C,c − ˜et,c ∥2]. (50) For the first term, its expectation satisfies 
+
+E⟨∇ ˜ec F (et, ut), ˜et+C, c − ˜et,c ⟩
+
+=E⟨∇ ˜ec F (et′ , ut′ ), ˜et′+C,c − ˜et′,c ⟩
+
++ E⟨∇ ˜ec F (et, ut) − ∇ ˜ec F (et′ , ut′ ), ˜et′+C,c − ˜et′,c ⟩≤E⟨∇ ˜ec F (et′ , ut′ ), ˜et′+C,c − ˜et′,c ⟩
+
++ L∥(et, ut) − (et′ , ut′ )∥∥ ˜et′+C,c − ˜et′,c ∥≤E⟨∇ ˜ec F (et′ , ut′ ), ˜et′+C,c − ˜et′,c ⟩
+
++( ηEγ)2LC 3(G2 
+
+> E
+
++σ2 
+
+> E
+
+)+ 12 (ηU)2LC 2(G2 
+
+> U
+
++σ2 
+
+> U
+
+), (51) with C ≥ 2, where t′ is the last connected round for each clus-ter c where ˜ec in the global model is kept frozen for C rounds since then. We further decompose E⟨∇ ˜ec F (et′ , ut′ ), ˜et′+C,c −
+
+˜et′,c ⟩ as 
+
+E⟨∇ ˜ec F (et′ , ut′ ), ˜et′+C,c − ˜et′,c ⟩
+
+= 1
+
+J
+
+> t′+C−1
+
+X 
+
+> τ=t′
+
+X
+
+> j∈U c
+
+E⟨∇ ˜ec F (et′ , ut′ ), −ηEγgE 
+
+> τ,c,j
+
+⟩, (52) The multiplication can be rewritten as 
+
+E⟨∇ ˜ec F (et′ , ut′ ), −ηEγgE 
+
+> τ,c,j
+
+⟩
+
+=E[∇˜ec F (˜ eτ,c,j , ut′ )(˜ eτ +1 ,c,j − ˜eτ,c,j )+ ( ∇˜ec F (et′ , ut′ ) − ∇ ˜ec F (˜ eτ,c,j , ut′ )) (˜ eτ +1 ,c,j − ˜eτ,c,j )] 
+
+≤ − ηEγE[∇2˜ecF (˜ eτ,c,j , ut′)+ L∥˜et′,c − ˜eτ,c,j ∥∥ ˜eτ+1 ,c,j − ˜eτ,c,j ∥]
+
+≤ − ηEγE[∇2˜ec F (˜ eτ,c,j , ut′ )] + ( ηEγ)2LC (G2 
+
+> E
+
++ σ2 
+
+> E
+
+).
+
+Since 
+
+∥∇ ˜ecF (˜ eτ,c,j , ut′ )∥≥∥∇ ˜ecF (et, ut)∥− L∥(˜ et,c , ut) − (˜ eτ,c,j , ut′ )∥, (53) which gives 
+
+E[∥∇ 2˜ec F (˜ eτ,c,j , ut′ )∥]
+
+≥E[∥∇ 2˜ec F (et, ut)∥ − 2LG E ∥(˜ et,c , ut)−(˜ eτ,c,j , ut′ )∥]
+
+≥E[∥∇ 2˜ecF (et, ut)∥]−2LCη Eγ[G2 
+
+> E
+
++σ2 
+
+> E
+
++( ηU
+
+ηEγ)2(G2 
+
+> U
+
++σ2
+
+> U
+
+)] ,
+
+where we use the inequality 
+
+E[∥X∥] = p(E[∥X∥· 1]) 2 ≤ pE[∥X∥2]·E [1 2] = pE[∥X∥2],
+
+for an arbitrary variable X according to the Cauchy-Schwarz inequality. Therefore we have 
+
+E⟨∇ ˜ec F (et′ , ut′ ), −ηEγgE 
+
+> τ,c,j
+
+⟩≤ − ηEγE[∇2˜ec F (et, ut)] + 3( ηEγ)2LC (G2 
+
+> E
+
++ σ2 
+
+> E
+
+) + 2( ηU)2LC (G2 
+
+> U
+
++ σ2 
+
+> U
+
+). (54) Then the result in (52) can be bounded as 
+
+E⟨∇ ˜ec F (et′ , ut′ ), ˜et′+C,c − ˜et′,c ⟩≤ − ηEγC E[∇2˜ec F (et, ut)] +3( ηEγ)2C2L(G2 
+
+> E
+
++σ2 
+
+> E
+
+)+2( ηU)2LC 2(G2 
+
+> U
+
++σ2 
+
+> U
+
+). (55) Moreover, the second term in (50) is directly bounded by 
+
+L
+
+2 E[∥˜et+C,c − ˜et,c ∥2] ≤ 12 (ηEγ)2C2L(G2 
+
+> E
+
++ σ2 
+
+> E
+
+). (56) 13 
+
+Plugging (51), (55) and (56) into (50) gives 
+
+E[F (et+C , ut) − F (et, ut)] 
+
+≤ − ηEγC E[∇2
+
+> e
+
+F (et, ut)] +3( ηEγ)2C4L(G2 
+
+> E
+
++σ2 
+
+> E
+
+)+3( ηU)2LC 3(G2 
+
+> U
+
++σ2 
+
+> U
+
+), (57) for C ≥ 2, which is the upper bound of the expert update part in (49). Next, for the gate update part in (49), we first have 
+
+F (et+C , ut+C ) − F (et+C , ut)=
+
+> t+C−1
+
+X 
+
+> τ=t
+
+[F (et+C , uτ +1 ) − F (et+C , uτ )] . (58) Using L-smoothness, we have 
+
+F (et+C , uτ +1 ) − F (et+C , uτ )
+
+≤⟨∇ uF (et+C , uτ ), uτ +1 − uτ ⟩ + L
+
+2 ∥uτ +1 − uτ ∥2. (59) Let c(τ ) denote the device cluster in the connected phase in round τ , the first term in (59) can be written as 
+
+E⟨∇ uF (et+C , uτ ), uτ +1 − uτ ⟩
+
+= 1
+
+J
+
+X 
+
+> j∈U c(τ)
+
+E⟨∇ uF (et+C , uτ ), −ηUgU  
+
+> τ,c (τ),j
+
+⟩,
+
+= 1
+
+J
+
+X 
+
+> j∈U c(τ)
+
+E[⟨∇ uF (eτ , uτ ), −ηUgU  
+
+> τ,c (τ),j
+
+⟩
+
++ ⟨∇ uF (et+C , uτ ) − ∇ uF (eτ , uτ ), −ηUgU  
+
+> τ,c (τ),j
+
+⟩]
+
+≤ 1
+
+J
+
+X 
+
+> j∈U c(τ)
+
+E[−ηU∇2
+
+> u
+
+F (eτ , uτ )+ L∥et+C − eτ ∥∥ uτ +1 ,c (τ ),j − uτ ∥]
+
+≤ 1
+
+J
+
+X 
+
+> j∈U c(τ)
+
+E[−ηU∇2
+
+> u
+
+F (eτ , uτ )+ L
+
+2 (∥et+C − et∥2 + ∥uτ +1 ,c (τ ),j − uτ ∥2)] 
+
+≤ − ηUE[∇2
+
+> u
+
+F (eτ , uτ )] + L
+
+2 C3(ηEγ)2(G2 
+
+> E
+
++ σ2 
+
+> E
+
+) + L
+
+2 (ηU)2(G2 
+
+> U
+
++ σ2 
+
+> U
+
+) (60) Moreover, since 
+
+∥∇ uF (eτ , uτ )∥ ≥ ∥∇ uF (et, ut)∥− L∥(eτ , uτ ) − (et, ut)∥,
+
+we further have 
+
+E[∇2
+
+> u
+
+F (eτ , uτ )] 
+
+≥E[∇2
+
+> u
+
+F (et, ut) − 2LG U ∥(eτ , uτ ) − (et, ut)∥]
+
+≥E[∇2
+
+> u
+
+F (et, ut)] −2ηULC [G2 
+
+> U
+
++σ2 
+
+> U
+
++( Cη EγηU )2(G2 
+
+> E
+
++σ2 
+
+> E
+
+)] .
+
+And the result in (60) can be rewritten as 
+
+E⟨∇ uF (et+C , uτ ), uτ +1 − uτ ⟩≤ − ηUE[∇2
+
+> u
+
+F (et, ut)] +2( ηEγ)2LC 3(G2 
+
+> E
+
++σ2 
+
+> E
+
+)+ 52 (ηU)2LC (G2 
+
+> U
+
++σ2 
+
+> U
+
+), (61) with C ≥ 2. Also, the second term can be bounded by 
+
+L
+
+2 E∥uτ +1 − uτ ∥2] ≤ L
+
+2 (ηU)2(G2 
+
+> U
+
++ σ2 
+
+> U
+
+). (62) Therefore, by plugging (61) and (62) into (58), we have 
+
+E[F (et+C , ut+C ) − F (et+C , ut)] 
+
+≤ − ηUCE[∇2
+
+> u
+
+F (et, ut)] +2( ηEγ)2LC 4(G2 
+
+> E
+
++σ2 
+
+> E
+
+)+3( ηU)2LC 2(G2 
+
+> U
+
++σ2 
+
+> U
+
+). (63) Combining the results in (57) and (63), we finally obtain 
+
+F (et+C , ut+C ) − F (et, ut)
+
+≤ − ηEγC E[∇2
+
+> e
+
+F (et, ut)] − ηUCE[∇2
+
+> u
+
+F (et, ut)] +5( ηEγ)2C4L(G2 
+
+> E
+
++σ2 
+
+> E
+
+)+5( ηU)2LC 3(G2 
+
+> U
+
++σ2 
+
+> U
+
+), (64) for C ≥ 2. By summing the above results at rounds t ∈{0, C, . . . , (T − 1) C} with ηE ≤ ηU 
+
+> γ
+
+≤ 1√T , we further obtain 
+
+1
+
+T
+
+X  
+
+> t=0 , C, ..., (T−1) C
+
+E∥∇ F (θt)∥2
+
+≤ E[F (θ0)−F ⋆]
+
+γC √T + 5LC 2γ[C(G2 
+
+> E
+
++σ2 
+
+> E
+
+)+ G2 
+
+> U
+
++σ2 
+
+> U
+
+]
+
+√T . (65) Note that similar results can still be obtained with ηE = qη U ≤ 
+
+> 1√T
+
+where q ≤ 1 
+
+> γ
+
+.
+
+B. Proof of Theorem 2 
+
+For the baseline scheme, the decomposition in (49) still holds. Since all the experts update simultaneously, the expert update part can be rewritten as 
+
+F (et+C , ut) − F (et, ut)
+
+≤⟨∇ eF (et, ut), et+C − et⟩ + L
+
+2 ∥et+C − et∥2 (66) For the first term, we have 
+
+E⟨∇ eF (et, ut), et+C − et⟩
+
+=
+
+> t+C−1
+
+X 
+
+> τ=t
+
+E⟨∇ eF (et, ut), eτ +1 − eτ ⟩. (67) The multiplication can be rewritten as 
+
+E⟨∇ eF (et, ut), eτ +1 − eτ ⟩
+
+=E[⟨∇ eF (eτ , uτ ), eτ +1 − eτ ⟩
+
++ ⟨∇ eF (et, ut) − ∇ eF (eτ , uτ ), eτ +1 − eτ ⟩]
+
+≤E⟨∇ eF (eτ , uτ ), eτ +1 − eτ ⟩
+
++ L E[∥(eτ , uτ ) − (et, ut)∥ ∥ eτ +1 − eτ ∥]
+
+≤ − ηEE∥∇ 2
+
+> e
+
+F (eτ , uτ )∥ + ( ηU)2LC 2(G2 
+
+> U
+
++ σ2 
+
+> U
+
+)+ ( ηE)2L(C2 + 12 )( G2 
+
+> E
+
++ ζ2 
+
+> E
+
++ σ2 
+
+> E
+
+). (68) We also have 
+
+E[∇2
+
+> e
+
+F (eτ , uτ )] 
+
+≥E[∇2
+
+> e
+
+F (et, ut) − 2L∥∇ eF (et, ut)∥∥ (eτ , uτ )−(et, ut)∥]
+
+≥E[∇2
+
+> e
+
+F (et, ut)] 
+
+− 2ηELC [G2 
+
+> E
+
++ ζ2 
+
+> E
+
++ σ2 
+
+> E
+
++ ( ηU
+
+ηE )2(G2 
+
+> U
+
++ σ2 
+
+> U
+
+)] . (69) 14 
+
+The the result in (67) is then upper-bounded by 
+
+E⟨∇ eF (et, ut), et+C − et⟩≤ − ηECE∥∇ 2
+
+> e
+
+F (et, ut)∥ + 2( ηU)2LC 3(G2 
+
+> U
+
++ σ2 
+
+> U
+
+)+ ( ηE)2LC (2 C2 + 12 )( G2 
+
+> E
+
++ ζ2 
+
+> E
+
++ σ2 
+
+> E
+
+). (70) Moreover, the second term in (66) is directly bounded by 
+
+L
+
+2 E∥et+C − et∥2 ≤ L
+
+2 (ηE)2C2(G2 
+
+> E
+
++ ζ2 
+
+> E
+
++ σ2 
+
+> E
+
+). (71) Plugging (70) and (71) into (66) gives the upper bound of the expert update part as 
+
+E[F (et+C , ut) − F (et, ut)] 
+
+≤ − ηEC E∥∇ eF (et, ut)∥2 + 3( ηU)2L C 3(G2 
+
+> U
+
++ σ2 
+
+> U
+
+)+ 3( ηE)2L C 3(G2 
+
+> E
+
++ ζ2 
+
+> E
+
++ σ2 
+
+> E
+
+), (72) For the gate update part in (49), we have 
+
+F (et+C , ut+C ) − F (et+C , ut)=
+
+> t+C−1
+
+X 
+
+> τ=t
+
+[F (et+C , uτ +1 ) − F (et+C , uτ )] 
+
+≤
+
+> t+C−1
+
+X 
+
+> τ=t
+
+[⟨∇ uF (et+C , uτ ), uτ +1 −uτ ⟩+ L
+
+2∥uτ +1 −uτ ∥2]. (73) Let c(τ ) denote the device cluster in the connected phase in round τ , the first term can be written as 
+
+E⟨∇ uF (et+C , uτ ), uτ +1 − uτ ⟩
+
+= 1
+
+J
+
+X 
+
+> j∈U c(τ)
+
+E⟨∇ uF (et+C , uτ ), −ηUgU  
+
+> τ,c (τ),j
+
+⟩,
+
+= 1
+
+J
+
+X 
+
+> j∈U c(τ)
+
+E[⟨∇ uF (eτ , uτ ), −ηUgU  
+
+> τ,c (τ),j
+
+⟩
+
++ ⟨∇ uF (et+C , uτ ) − ∇ uF (eτ , uτ ), −ηUgU  
+
+> τ,c (τ),j
+
+⟩]
+
+≤ 1
+
+J
+
+X 
+
+> j∈U c(τ)
+
+E[−ηU∇2
+
+> u
+
+F (eτ , uτ )+ L∥et+C − eτ ∥∥ uτ +1 ,c (τ ),j − uτ ∥]
+
+≤ − ηUE[∇2
+
+> u
+
+F (eτ , uτ )] + L
+
+2 C2(ηE)2(G2 
+
+> E
+
++ζ2 
+
+> E
+
++σ2 
+
+> E
+
+)+ L
+
+2 (ηU)2(G2 
+
+> U
+
++σ2 
+
+> U
+
+) (74) We also have 
+
+E[∇2
+
+> u
+
+F (eτ , uτ )] 
+
+≥E[∇2
+
+> u
+
+F (et, ut) − 2L∥∇ uF (et, ut)∥∥ eτ −et +uτ −ut∥]
+
+≥E[∇2
+
+> u
+
+F (et, ut)] −2ηULC [( ηE
+
+ηU)2(G2 
+
+> E
+
++ζ2 
+
+> E
+
++σ2
+
+> E
+
+)+ G2 
+
+> U
+
++σ2 
+
+> U
+
+].
+
+Moreover, the second term in (73) can be bounded by 
+
+L
+
+2 E∥uτ +1 − uτ ∥2] ≤ L
+
+2 (ηU)2(G2 
+
+> U
+
++ σ2 
+
+> U
+
+). (75) Therefore, the gate update part can be bounded as 
+
+E[F (et+C , ut+C ) − F (et+C , ut)] 
+
+≤ − ηUC E∇2
+
+> u
+
+F (et, ut) + 3( ηU)2LC 2(G2 
+
+> U
+
++ σ2 
+
+> U
+
+)+ 2( ηE)2LC 3(G2 
+
+> E
+
++ ζ2 
+
+> E
+
++ σ2 
+
+> E
+
+). (76) Combining the results in (72) and (76), we finally obtain 
+
+E[F (et+C , ut+C ) − F (et, ut)] 
+
+≤ − ηEC E∥∇ eF (et, ut)∥2 − ηUC E∇2
+
+> u
+
+F (et, ut)
+
++ 5( ηE)2L C 3(G2 
+
+> E
+
++ ζ2 
+
+> E
+
++ σ2 
+
+> E
+
+)+ 5( ηU)2L C 3(G2 
+
+> U
+
++ σ2 
+
+> U
+
+). (77) for C ≥ 2. By summing the above results at rounds t ∈{0, C, . . . , (T − 1) C} with ηE = ηU 
+
+> γ
+
+= 1√T , the result in (48) can be directly obtained. REFERENCES [1] Y. Mao, C. You, J. Zhang, K. Huang, and K. B. Letaief, “A survey on mobile edge computing: The communication perspective,” IEEE Commun. Surveys Tuts. , vol. 19, no. 4, pp. 2322–2358, 4th Quart 2017. [2] K. B. Letaief, Y. Shi, J. Lu, and J. Lu, “Edge artificial intelligence for 6G: Vision, enabling technologies, and applications,” IEEE J. Sel. Areas Commun. , vol. 40, no. 1, pp. 5–36, Jan. 2022. [3] T. Brown, B. Mann, N. Ryder, M. Subbiah, J. D. Kaplan et al. ,“Language models are few-shot learners,” in Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 33, May 2020, pp. 1877–1901. [4] OpenAI, “GPT-4 Technical Report,” arXiv preprint arXiv:2303.08774 ,Mar. 2023. [5] A. Chowdhery, S. Narang, J. Devlin et al. , “PaLM: Scaling language modeling with pathways,” J. Mach. Learn. Res. , vol. 24, no. 1, Jan. 2023. [6] Llama Team, AI @ Meta, “The Llama 3 herd of models,” arXiv preprint arXiv:2407.21783 , Jul. 2024. [7] W. Chu, X. Xie et al. , “Scaling Llama 3 training with efficient par-allelism strategies,” in Proc. Annu. Int. Symp. Comput. Archit. (ISCA) ,Jun. 2025, pp. 1703–1716. [8] B. McMahan, E. Moore, D. Ramage, S. Hampson, and B. A. y. Arcas, “Communication-efficient learning of deep networks from decentralized data,” in Proc. Int. Conf. Artif. Intell. Stat. (AISTATS) , vol. 54, Apr. 2017, pp. 1273–1282. [9] M. Chen, Z. Yang, W. Saad, C. Yin, H. V. Poor, and S. Cui, “A joint learning and communications framework for federated learning over wireless networks,” IEEE Trans. Wireless Commun. , vol. 20, no. 1, pp. 269–283, Jan. 2021. [10] G. Zhu, Y. Du, D. G¨ und¨ uz, and K. Huang, “One-bit over-the-air aggregation for communication-efficient federated edge learning: Design and convergence analysis,” IEEE Trans. Wireless Commun. , vol. 20, no. 3, pp. 2120–2135, Mar. 2021. [11] W. Fedus, B. Zoph, and N. Shazeer, “Switch transformers: Scaling to trillion parameter models with simple and efficient sparsity,” J. Mach. Learn. Res. , vol. 23, no. 120, pp. 1–39, Jan. 2022. [12] N. Du, Y. Huang, A. M. Dai et al. , “GLaM: Efficient scaling of language models with mixture-of-experts,” in Proc. Int. Conf. Mach. Learn. (ICML) , vol. 162, Jul. 2022, pp. 5547–5569. [13] N. Shazeer, A. Mirhoseini, K. Maziarz, A. Davis, Q. V. Le, G. Hinton, and J. Dean, “Outrageously large neural networks: The sparsely-gated mixture-of-experts layer,” in Proc. Int. Conf. Learn. Represent. (ICLR) ,Apr. 2017. [14] N. Xue, Y. Sun, Z. Chen, M. Tao, X. Xu, L. Qian, S. Cui, W. Zhang, and P. Zhang, “WDMoE: Wireless distributed mixture of experts for large language models,” IEEE Trans. Wireless Commun. , vol. 25, pp. 559–572, 2026. [15] Q. Chen, X. Chen, and K. Huang, “SlimCaching: Edge caching of mixture-of-experts for distributed inference,” arXiv preprint arXiv:2507.06567 , Jul. 2025. [16] C. You, K. Guo, H. H. Yang, and T. Q. S. Quek, “Hierarchical personalized federated learning over massive mobile edge computing networks,” IEEE Trans. Wireless Commun. , vol. 22, no. 11, pp. 8141– 8157, Nov. 2023. [17] O. Ayg¨ un, M. Kazemi, D. G¨ und¨ uz, and T. M. Duman, “Over-the-air federated edge learning with hierarchical clustering,” IEEE Trans. Wireless Commun. , vol. 23, no. 12, pp. 17 856–17 871, Dec. 2024. [18] K. Ntontin, E. Lagunas, J. Querol, J. u. Rehman, J. Grotz, S. Chatzinotas, and B. Ottersten, “A vision, survey, and roadmap toward space commu-nications in the 6g and beyond era,” Proc. IEEE , vol. 113, no. 9, pp. 987–1023, Sept. 2025. 15 
+
+[19] T. T. T. Le, N. U. Hassan, X. Chen, M.-S. Alouini, Z. Han, and C. Yuen, “A survey on random access protocols in direct-access LEO satellite-based IoT communication,” IEEE Commun. Surveys Tuts. , vol. 27, no. 1, pp. 426–462, Feb. 2025. [20] B. Matthiesen, N. Razmi, I. Leyva-Mayorga, A. Dekorsy, and P. Popovski, “Federated learning in satellite constellations,” IEEE Netw. ,vol. 38, no. 2, pp. 232–239, Mar. 2024. [21] N. Razmi, B. Matthiesen, A. Dekorsy, and P. Popovski, “On-board federated learning for satellite clusters with inter-satellite links,” IEEE Trans. Commun. , vol. 72, no. 6, pp. 3408–3424, Jun. 2024. [22] Q. Fang, Z. Zhai, S. Yu, Q. Wu, X. Gong, and X. Chen, “Olive branch learning: A topology-aware federated learning framework for space-air-ground integrated network,” IEEE Trans. Wireless Commun. , vol. 22, no. 7, pp. 4534–4551, Jul. 2023. [23] Y. Shi, L. Zeng, J. Zhu, Y. Zhou, C. Jiang, and K. B. Letaief, “Satellite federated edge learning: Architecture design and convergence analysis,” 
+
+IEEE Trans. Wireless Commun. , vol. 23, no. 10, pp. 15 212–15 229, Oct. 2024. [24] Z. Zhai, Q. Wu, S. Yu, R. Li, F. Zhang, and X. Chen, “FedLEO: An offloading-assisted decentralized federated learning framework for low earth orbit satellite networks,” IEEE Trans. Mobile Comput. , vol. 23, no. 5, pp. 5260–5279, May 2024. [25] C. Huang, G. Chen, P. Xiao, J. A. Chambers, and W. Huang, “Fair resource allocation for hierarchical federated edge learning in space-air-ground integrated networks via deep reinforcement learning with hybrid control,” IEEE J. Sel. Areas Commun. , vol. 42, no. 12, pp. 3618–3631, Dec. 2024. [26] B. Guo, Y. Mei, D. Xiao, and W. Wu, “PFL-MoE: Personalized federated learning based on mixture of experts,” in Web and Big Data (APWeb-WAIM 2021) , Aug. 2021, pp. 480–486. [27] D. Lepikhin, H. Lee, Y. Xu, D. Chen, O. Firat, Y. Huang, M. Krikun, N. Shazeer, and Z. Chen, “GShard: Scaling giant models with condi-tional computation and automatic sharding,” in Proc. Int. Conf. Learn. Represent. (ICLR) , May 2021. [28] W. Cai, J. Jiang, F. Wang, J. Tang, S. Kim, and J. Huang, “A survey on mixture of experts in large language models,” IEEE Trans. Knowl. Data Eng. , vol. 37, no. 7, pp. 3896–3915, Jul. 2025. [29] S. Qin, H. Wu, H. Du, and K. Huang, “Optimal expert selection for distributed mixture-of-experts at the wireless edge,” arXiv preprint arXiv:2503.13421 , 2025. [30] E. J. Hu, Y. Shen, P. Wallis, Z. Allen-Zhu, Y. Li, S. Wang, L. Wang, W. Chen et al. , “LoRA: Low-rank adaptation of large language models,” in Proc. Int. Conf. Learn. Represent. (ICLR) , vol. 1, no. 2, 2022, p. 3. [31] B. Zoph, I. Bello, S. Kumar, N. Du, Y. Huang, J. Dean, N. Shazeer, and W. Fedus, “ST-MoE: Designing stable and transferable sparse expert models,” arXiv preprint arXiv:2202.08906 , Feb. 2022. [32] Meta AI, “Meta-llama-3-8b-instruct,” [Online]. Available: https:// huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct, Apr. 2024. [33] S. Wang, Y. Zheng, G. Wang, S. Song, and G. Huang, “Llama3-8B-Chinese-Chat,” [Online]. Available: https://huggingface.co/ shenzhi-wang/Llama3-8B-Chinese-Chat, Mar. 2024. [34] A. Pal, “Llama3-OpenBioLLM-8B,” [Online]. Available: https:// huggingface.co/aaditya/Llama3-OpenBioLLM-8B, Apr. 2024. [35] D. Hendrycks, C. Burns, S. Basart, A. Zou, M. Mazeika, D. Song, and J. Steinhardt, “Measuring massive multitask language understanding,” in 
+
+Proc. Int. Conf. Learn. Represent. (ICLR) , May 2021. [36] J. Liu, P. Zhou, Y. Hua, D. Chong, Z. Tian, A. Liu, H. Wang, C. You, Z. Guo, L. Zhu, and M. L. Li, “Benchmarking large language models on CMExam - a comprehensive chinese medical exam dataset,” in Adv. Neural Inf. Process. Syst. (NeurIPS) , Dec. 2023. [37] A. Pal, L. K. Umapathi, and M. Sankarasubbu, “MedMCQA: A large-scale multi-subject multi-choice dataset for medical domain question answering,” in Proc. Conf. Health Inference Learn. (CHIL) , vol. 174, Apr. 2022, pp. 248–260. [38] A. Komatsuzaki, J. Puigcerver, J. Lee-Thorp, C. Riquelme Ruiz, B. Mustafa, J. Ainslie, Y. Tay, M. Dehghani, and N. Houlsby, “Sparse upcycling: Training mixture-of-experts from dense checkpoints,” in 
+
+Proc. Int. Conf. Learn. Represent. (ICLR) , May 2023. [39] A. Wang, A. Singh, J. Michael, F. Hill, O. Levy, and S. R. Bowman, “GLUE: A multi-task benchmark and analysis platform for natural language understanding,” in Proc. Int. Conf. Learn. Represent. (ICLR) ,May 2019.

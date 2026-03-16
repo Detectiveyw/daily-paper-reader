@@ -1,0 +1,275 @@
+Title: Towards Secure and Scalable Energy Theft Detection: A Federated Learning Approach for Resource-Constrained Smart Meters
+
+URL Source: https://arxiv.org/pdf/2602.16181v1
+
+Published Time: Thu, 19 Feb 2026 01:25:42 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# Towards Secure and Scalable Energy Theft Detection: A Federated Learning Approach for Resource-Constrained Smart Meters 
+
+1st Diego Labate 
+
+DIMES University of Calabria 
+
+Rende, Italy diego.labate@dimes.unical.it 
+
+2nd Dipanwita Thakur 
+
+DIMES University of Calabria 
+
+Rende, Italy dipanwita.thakur@unical.it 
+
+3rd Giancarlo Fortino 
+
+DIMES University of Calabria 
+
+Rende, Italy giancarlo.fortino@unical.it 
+
+Abstract —Energy theft poses a significant threat to the stability and efficiency of smart grids, leading to substantial economic losses and operational challenges. Traditional centralized machine learning approaches for theft detection require aggregating user data, raising serious concerns about privacy and data security. These issues are further exacerbated in smart meter environ-ments, where devices are often resource-constrained and lack the capacity to run heavy models. In this work, we propose a privacy-preserving federated learning framework for energy theft detection that addresses both privacy and computational constraints. Our approach leverages a lightweight multilayer perceptron (MLP) model, suitable for deployment on low-power smart meters, and integrates basic differential privacy (DP) by injecting Gaussian noise into local model updates before aggregation. This ensures formal privacy guarantees without compromising learning performance. We evaluate our framework on a real-world smart meter dataset under both IID and non-IID data distributions. Experimental results demonstrate that our method achieves competitive accuracy, precision, recall, and AUC scores while maintaining privacy and efficiency. This makes the proposed solution practical and scalable for secure energy theft detection in next-generation smart grid infrastructures. 
+
+Index Terms —Electricity theft detection, Federated Learning, Smart meters, Differential Privacy 
+
+I. I NTRODUCTION 
+
+Energy theft is a pervasive issue across global power grids, resulting in annual losses exceeding 96 billion worldwide, with developing countries accounting for over 80% of the total loss [1]. As energy systems evolve toward digital smart grids, the integration of smart meters plays a vital role in improving monitoring, billing accuracy, and demand forecast-ing. However, the increased granularity and connectivity of smart meters have also opened new avenues for malicious activities and privacy violations. Regions like India, Brazil, and parts of Africa report energy theft rates ranging from 15% to over 40% of distributed electricity, largely due to tampering, bypassing meters, or manipulating reported consumption [2]. While machine learning (ML) techniques have been explored to detect anomalous consumption patterns indicative of theft, most of these approaches rely on centralized data collection, raising major concerns about user privacy, especially in light of regula-tions like the EU’s GDPR and India’s Personal Data Protection Bill. Moreover, the heterogeneity and resource constraints of smart meters—often equipped with limited CPU and mem-ory—render many complex ML models impractical for on-device deployment. High-latency and energy costs further dis-courage frequent data transmission to centralized servers. These challenges necessitate a shift toward decentralized, privacy-aware, and computationally lightweight learning paradigms. Federated learning (FL) [3] addresses the problem of data centralization by enabling collaborative training directly on edge devices. Yet, FL alone does not guarantee formal privacy preservation. Differential privacy (DP) [4] enhances FL by adding mathematically bounded noise to the model updates, significantly reducing the risk of sensitive data leakage—even in the event of server compromise. This work is thus driven by the dual need to detect energy theft accurately while preserving data privacy and accommodating hardware limitations. By in-tegrating basic DP mechanisms into a lightweight MLP model within an FL framework, we aim to provide a deployable, efficient, and privacy-conscious solution to real-world energy theft detection in smart grids. These contributions aim to address critical issues related to privacy, data security, and computational constraints in the context of energy theft detection in smart grids listed as follows:  
+
+> •
+
+The work proposes a federated learning framework de-signed specifically for energy theft detection in smart grids, addressing both privacy concerns and computational constraints. A MLP model is introduced as a lightweight solution that is suitable for deployment on low-power smart meters, which are typically resource-constrained. The approach incorporates basic DP by injecting Gaussian noise into local model updates before aggregation, ensur-ing privacy while maintaining formal privacy guarantees.  
+
+> arXiv:2602.16181v1 [cs.LG] 18 Feb 2026 •
+
+The framework is evaluated on a real-world smart me-ter dataset, testing it under both IID and non-IID data distributions. The experimental results demonstrate that the proposed method achieves competitive performance results, including accuracy, precision, recall, and AUC scores, while maintaining privacy and computational effi-ciency.  
+
+> •
+
+The proposed solution is shown to be practical and scal-able for energy theft detection in next-generation smart grid infrastructures, making it suitable for real-world de-ployment. II. R ELATED WORK 
+
+This section provides a brief overview of recent research, with an emphasis on FL techniques and smart grid energy theft detection systems. Several FL frameworks have been proposed for energy theft detection, each with unique strengths and limitations. FedDe-tect [5] introduced a comprehensive FL framework for energy theft detection, combining local differential privacy and homo-morphic encryption for strong privacy guarantees. It features a secure aggregation protocol without requiring a trusted third party and utilizes a Temporal Convolutional Network (TCN) for accurate detection of time-dependent patterns. However, the limitations include high computational overhead that eliminates the need for a trusted third party and utilizes a Temporal Convolutional Network (TCN) for homomorphic encryption, reduced model accuracy due to data-level differential pri-vacy, and reliance on a semi-trusted multi-entity infrastructure. Additionally, its use of a heavy TCN model makes it less suitable for deployment on resource-constrained smart meters. In [6], the authors presented a FL framework for anomaly detection in smart grids, evaluating seven ML models across multiple datasets in both centralized and FL setups. Using a Raspberry Pi-based testbed, it demonstrates the feasibility of FL on resource-constrained devices by analyzing accuracy and hardware metrics such as CPU, memory, power, and bandwidth. While the approach is comprehensive, it assumes near-IID data across clients, lacks integration of formal differential privacy mechanisms, and does not focus on cost-sensitive learning specific to energy theft. Moreover, performance slightly drops with non-IID distributions, and there’s no adaptive method to handle skewed client data. Techniques like SMOTE or noise addition for balancing or privacy are also not explored. FedGrid [7] presents a novel FL-based framework designed to enhance smart grid (SG) operations by jointly addressing renewable energy generation forecasting and electric load prediction. The framework ensures data privacy by enabling decentralized model training across distributed entities, eliminating the need to share raw data. This approach is particularly valuable for safeguarding sensitive inputs such as user-specific electricity usage and localized weather conditions. By facilitating collab-orative learning without compromising privacy, FedGrid offers a scalable and secure solution to key predictive challenges in modern energy systems. However, the major limitation is its reliance on IID data assumptions, which undermines its applicability to real-world smart grid environments where data is typically non-IID due to diverse user behaviors, regional weather variations, and infrastructure heterogeneity. In [8], the authors proposed a privacy-preserving FL method (FL-CNN) for energy theft detection, combining a cost-sensitive loss, SMOTE-based class balancing, and a bias-aware CNN to improve accuracy and reduce financial loss. While effective, the method faces scalability issues, assumes IID data, lacks formal differential privacy, and does not address temporal patterns or resource constraints on edge devices. The authors in [9] introduced a FL framework for electricity theft detection using a CNN-LSTM model, homomorphic encryption, and prototype-based class imbalance handling. It achieves strong performance and privacy guarantees but suffers from high computational overhead, reliance on trusted third parties, and limited suitability for resource-constrained smart meters. Table I provides a comprehensive comparison of recent FL methods proposed for energy theft and anomaly detection in smart grids. However, we consider FedDetect [5] and FL-CNN [8] as the baseline to compare with our proposed methods, as both used the same data set for the evaluation. III. M ETHODOLOGY 
+
+This study applies an FL framework as shown in Figure 1 for binary classification in a privacy-preserving setting. The key components of the methodology are outlined below. 
+
+A. Data Preprocessing 
+
+Let the dataset be denoted by: 
+
+D = {(xi, y i)}Ni=1 , xi ∈ Rd, yi ∈ { 0, 1}
+
+Features are standardized using z-score normalization: 
+
+x′ 
+
+> i
+
+= xi − μσ , ∀i ∈ { 1, . . . , N }
+
+The dataset is partitioned into training and testing sets using an 80:20 split: 
+
+Dtrain , Dtest = split (D)
+
+B. Client Partitioning 
+
+Assume K clients ( K = 2 , 3and 5 in our implementation). The training set is distributed among the clients as follows:  
+
+> •
+
+IID Partition: 
+
+D(k) 
+
+> train
+
+∼ Uniform Partition (Dtrain ) 
+
+> •
+
+Non-IID Partition: Data is grouped by class labels and distributed so that each client receives samples from a limited subset of the label distribution. TABLE I: Comparison of Related Federated Learning Methods for Energy Theft Detection 
+
+Aspect FedDetect [5] FL-CNN [8] HeteroFL [9] [6] FedGrid [7] Our Proposed Method 
+
+Model Type Temporal Convolutional Net-work (TCN) CNN-B (Convolutional with bias correction) Hybrid CNN-LSTM Multiple models (LogReg, FFNN, 1D-CNN, Autoencoder, RNN, LSTM, GRU) DSS-LSTM (Deep State Space LSTM) for forecasting Lightweight MLP (Multi-layer Perceptron) Privacy Mechanism Local Differential Privacy (K-RR) + Homomorphic Encryp-tion + CL* Signatures No formal privacy mechanism; relies on data locality CKKS Homomorphic Encryp-tion + Shamir Secret Sharing SSL/TLS encryption on pa-rameter updates Federated Learning (privacy by design) only; no DP or HE used Basic Differential Privacy (Gaussian noise on model updates) Secure Aggregation Cryptographic protocol using ECC and bilinear pairing Standard FedAvg in Flower framework Multi-party secure protocol with secret sharing SSL-secured FedAvg (no cryp-tographic aggregation) Standard FedAvg; secure transport assumed but not formalized Standard federated averaging with DP noise Class Imbalance Handling Not addressed explicitly SMOTE + weighted loss Attentional prototype learning + class-weighted loss SMOTE-NC for mixed feature types Not addressed Not addressed explicitly Data Distribution Support IID only IID only (after SMOTE) Non-IID via clustering (k-means) Both IID and non-IID (via ran-dom sampling) IID only (not tested with non-IID) Both IID and non-IID via sam-pling Hardware Suitability Mid-range edge servers or DTSs with cryptographic ca-pabilities Edge devices (Raspberry Pi-level) Requires moderate compute (smart substations) Raspberry Pi (smart meter pro-totype) Tested on NVIDIA Jetson Nano; targets mid-tier edge hardware Optimized for resource-constrained smart meters Infrastructure Requirements Control Center + Data Center + DTS; certificate-based trust Requires FL server using Flower Assumes regulatory authority for clustering/label weights Light FL server + Raspberry Pi clients (low-cost setup) FL server + multiple utility datasets; centralized coordina-tion Fully decentralized; no trusted infrastructure needed Communication Overhead High (encrypted model up-dates + certificates) Moderate (FedAvg updates) High (encrypted updates + se-cure masks) Low to moderate (model up-dates over SSL) Moderate (FedAvg, no com-pression or quantization) Low (DP-noised plaintext up-dates) Deployment Complexity High (encryption, secure key exchanges, certificates) Moderate (standard FL frame-work + CNN tuning) High (encryption + attention + trusted authority) Moderate (TensorFlow +Flower + SSL setup) Moderate (custom LSTM + evaluation on three real datasets) Low (simple PyTorch-based FL) Energy Efficiency Not optimized for energy effi-ciency Measured CPU, memory, bandwidth, and power use Not optimized for edge effi-ciency Measured (memory, CPU, power usage optimized for Raspberry Pi) Not explicitly optimized for energy use Designed for low-power smart meters 
+
+Fig. 1: FL Framework 
+
+C. Model Architecture 
+
+MLP is used as the local and global model. The forward pass is defined as: 
+
+fθ (x) = Softmax 
+
+
+
+W3 · ReLU 
+
+
+
+W2 · ReLU  W1x + b1
+
+
+
++b2
+
+ 
+
+where: 
+
+W1 ∈ R128 ×d, W2 ∈ R64 ×128 , W3 ∈ R2×64 
+
+b1 ∈ R128 , b2 ∈ R64 , b3 ∈ R2
+
+D. Local Training 
+
+Each client trains its model locally using Cross-Entropy Loss: 
+
+LCE (θ) = −
+
+BX
+
+i=1 
+
+yi log ˆ yi,
+
+where B is the batch size. The optimizer used is Stochastic Gradient Descent (SGD) with a decaying learning rate: 
+
+ηr = η0 · γr , where r is the communication round 
+
+E. Federated Averaging 
+
+After local training, model parameters from each client k are aggregated at the server via federated averaging: 
+
+θglobal = 1
+
+K
+
+KX
+
+k=1 
+
+θk
+
+To simulate privacy-preserving noise injection, Gaussian noise is optionally added: 
+
+θk ← θk+N (0 , σ 2), where σ is the noise standard deviation 
+
+F. Communication Cost and Bandwidth Reduction 
+
+In FL, communication overhead is a significant factor com-pared to centralized training. The communication cost primarily arises from transmitting model parameters between the server and clients over multiple rounds. Let P denote the total number of model parameters, B be the size in bytes of each parameter (typically B = 4 for 32-bit floats), K be the number of clients, and R be the total number of communication rounds. The total communication cost is given by: Cost FL = 2 × R × K × P × B
+
+The factor of 2 accounts for both uploading local models and downloading the global model in each round. In contrast, centralized training requires each client to trans-mit its entire local dataset D(k) to a central server. The cost of centralized data upload is: Cost centralized =
+
+KX
+
+k=1 
+
+|D (k)| × d × Bwhere |D (k)| is the number of samples held by client k and d
+
+is the feature dimensionality. The bandwidth reduction achieved by FL compared to cen-tralized training is computed as: Bandwidth Reduction = 1 − Cost FL 
+
+Cost centralized 
+
+This metric quantifies the efficiency of the proposed method in minimizing data transmission, making it suitable for privacy-sensitive and resource-constrained environments. 
+
+G. Evaluation Metrics 
+
+The global model is evaluated on the test dataset using the following metrics:  
+
+> •
+
+Accuracy :Accuracy = T P + T N T P + T N + F P + F N  
+
+> •
+
+Precision :Precision = T P T P + F P  
+
+> •
+
+Recall :Recall = T P T P + F N  
+
+> •
+
+F1-weighted :F1 weighted =
+
+PCi=1 si · F1 i
+
+PCi=1 si
+
+where: 
+
+C is the number of classes, 
+
+si is the support (number of true instances) of class i, F1 i is the F1-score for class i.  
+
+> •
+
+AUC (Area Under the ROC Curve): AUC =
+
+Z 10
+
+TPR (F P R −1(x)) dx 
+
+H. Visualization and Logging 
+
+The training process is logged over multiple communication rounds, and performance is visualized using accuracy/loss plots and ROC curves. All results are saved to disk for post-analysis. 
+
+I. Federated Learning Algorithm 
+
+Algorithm 1 Federated Learning with MLP 
+
+1: Input: Training dataset Dtrain , number of clients K, num-ber of rounds R, local epochs E, learning rate η, noise standard deviation σ
+
+2: Partition Dtrain into K subsets: D(1) , . . . , D(K)
+
+3: Initialize global model θ(0) 
+
+4: for r = 1 to R do 
+
+5: for each client k ∈ { 1, . . . , K } in parallel do 
+
+6: θ(r,k ) ← θ(r−1) ▷ Initialize local model 
+
+7: for each local epoch e = 1 to E do 
+
+8: Update θ(r,k ) using SGD on D(k)
+
+9: end for 
+
+10: Optionally add noise: θ(r,k ) ← θ(r,k ) + N (0 , σ 2)
+
+11: end for 
+
+12: Aggregate: θ(r) ← 1
+
+> K
+
+PKk=1 θ(r,k )
+
+13: end for 
+
+14: Return: Final global model θ(R)
+
+The presented algorithm 1 outlines the used FL framework with a MLP model. It begins by dividing the training dataset into K subsets, each assigned to a different client. A global model is initialized and iteratively improved over R communi-cation rounds. In each round, every client starts with the current global model and locally updates it for E epochs using SGD on their private data. Optionally, Gaussian noise with standard deviation σ can be added to enhance privacy. After all clients finish their local training, their models are averaged to update the global model. This process continues until the final global model is obtained after R rounds. IV. E XPERIMENTAL RESULTS                          
+
+> Clients Distribution Clients Samples
+> 2IID Client 0 12696 (Label 0: 11643, Label 1: 1053) Client 1 12696 (Label 0: 11671, Label 1: 1025) non-IID Client 0 12696 (Label 0: 11657, Label 1: 1039) Client 1 12696 (Label 0: 11657, Label 1: 1039) 3IID Client 0 8464 (Label 0: 7752, Label 1: 712) Client 1 8464 (Label 0: 7785, Label 1: 679) Client 2 8464 (Label 0: 7777, Label 1: 687) non-IID Client 0 8465 (Label 0: 7772, Label 1: 693) Client 1 8464 (Label 0: 7771, Label 1: 693) Client 2 8463 (Label 0: 7771, Label 1: 692) 5IID Client 0 5079 (Label 0: 4656, Label 1: 423) Client 1 5079 (Label 0: 4658, Label 1: 421) Client 2 5078 (Label 0: 4667, Label 1: 411) Client 3 5078 (Label 0: 4660, Label 1: 418) Client 4 5078 (Label 0: 4673, Label 1: 405) non-IID Client 0 5079 (Label 0: 4663, Label 1: 416) Client 1 5079 (Label 0: 4663, Label 1: 416) Client 2 5079 (Label 0: 4663, Label 1: 416) Client 3 5078 (Label 0: 4663, Label 1: 415) Client 4 5077 (Label 0: 4662, Label 1: 415)
+
+TABLE II: Dataset distributions among clients (devices) We conduct the experiment on a realistic electricity con-sumption dataset, which was released by State Grid Corpora-tion of China (SGCC) [10]. Specifically, this dataset includes information on 42,372 power users’ electricity use for a period of 1035 days (January 1, 2014 to October 31, 2016). In addition to the publicly available dataset, the SGCC made it clear that 3615 electricity thieves are included in it. Since power thieves account for about 9% of all customers, it is clear that there is a significant problem with electricity theft in China. When assessing the effectiveness of the suggested plan and any comparable programs, we use the provided electricity thieves as the ground truth. It is important to note that there are some inaccurate and missing numbers in the dataset. The data set is divided into 3 different clients (devices) for both the IID and non-IID. For non-IID distribution, label based partitioning is used, which results in client optimizing their local models with skewed label distributions, making global aggregation more challenging due to conflicting gradient updates. In this work, we consider full participation of the clients. Table II shows the data distributions among the clients for our experiment. The classification model employed in this study is a MLP, serving as both the local client model and the global aggregated model. It consists of three fully connected layers: an input layer projecting the d-dimensional input to 128 hidden units, followed by a second layer reducing the dimensionality to 64 units, and finally an output layer producing logits for the two target classes. Non-linear activation is introduced via the ReLU function after each hidden layer, and a Softmax function is applied to the final output for probability estimation. The model parameters include weight matrices W1, W 2, W 3 and bias vec-tors b1, b 2, b 3, all of which are updated during local training and aggregated during the federated rounds. This architecture balances simplicity and expressive capacity, making it well-suited for distributed learning across heterogeneous devices. The models are implemented using PyTorch (v.2.0), and the experiments are conducted on a computer equipped with an Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz, Windows-11-10.0.26100-SP0, 11.851 GB RAM, and 8 CPU count. Table II shows the label-based distribution values in run-time. In this work, no data balancing approach is applied; keep in mind that resource-constrained edge devices are not powerful enough to compute much in real-time. However, the perfor-mance as shown in the Figures 2, 3, and 4 with an imbalance dataset for 2, 3, and 5 clients is competitive enough with state-of-the-art (SOTA) methods. The results are shown for 80 rounds and 3 epochs. In this experiment, SGD optimization algorithm is used with a decaying learning rate. The initial learning rate is 0.01. Empirical evaluations confirm the effectiveness and robustness of the method, as the global model consistently improves in both accuracy and loss across communication rounds. The ability to scale the system by simply increasing the number of participating clients demonstrates the framework’s adaptability to larger smart grid networks. Collectively, these characteristics make the proposed approach not only practical and privacy-aware but also scalable and efficient for next-generation energy monitoring systems. Moreover, the performance of the proposed method is shown using different performance metrics such as loss, accuracy, precision, recall, and AUC-ROC. In addition, we also cal-culate the reduction in communication and bandwidth (BW) in MegaBytes (MB) as shown in Table III. The performance of our proposed method outperforms the SOTA methods. To benchmark our approach, we compare our proposed method against some of the recently proposed methods on the same dataset as shown in III. The FL communication cost and BW reduction are more due to the increased number of rounds. We perform 80 rounds to analyse the performance of the proposed method. Though we achieve higher test accuracy and lower cost within 10 rounds. Almost all the methods did not consider the non-IID distributions and the resource-constrained limitations of the edge devices. For example, compared to the FL-CNN model in [8], our approach differs in its simplicity, modularity, and focus on evaluating the core aspects of FL, such as model generalization, data distribution effects, and communication ef-ficiency. While FL-CNN integrates energy-aware cost functions and advanced bias correction through SMOTE and custom loss weighting, our model emphasizes practical deployment with minimal computational and communication overhead, making it more accessible to resource-constrained environments. How-ever, our method does not yet incorporate temporal patterns, cost-based penalties, or advanced differential privacy frame-works, which are addressed in part by the FL-CNN architecture. Similarly, compared to FedDetect [5], which employs a heavy TCN model with complex privacy mechanisms such as local differential privacy and homomorphic encryption, our proposed method uses a lightweight MLP optimized for edge devices. While FedDetect assumes moderate resources and a multi-layered security infrastructure, our approach targets resource-constrained smart meters with simple FL and optional Gaus-sian noise for differential privacy. Additionally, our method explicitly supports non-IID data distribution and minimizes communication and computation overhead, making it more suitable for practical, decentralized deployment scenarios. On the other hand, the HeteroFL framework proposed by Wen et al. [9] utilizes a CNN-LSTM model with homomorphic encryption and attentional prototype learning for electricity theft detection. While their method achieves high detection accuracy, it incurs significant computational and communication overhead, mak-ing it less suitable for deployment on edge devices. In contrast, our proposed method, based on a lightweight MLP architecture with differential privacy, achieves competitive accuracy while significantly reducing resource consumption. Additionally, our framework demonstrates better scalability and faster conver-gence under both IID and non-IID settings, confirming its practical advantage for real-world smart meter applications. It is pertinent to note that, as shown in Table III, the model performs better with non-IID data than with IID data, despite theory suggesting that IID data should be easier to learn from. However, any oversampling or rebalancing is applied in this (a) Accuracy-loss with IID (b) ROC with IID (c) Accuracy-loss with Non-IID (d) ROC with non-IID 
+
+Fig. 2: Performance of 2 clients for 3 epochs and 80 rounds 
+
+(a) Accuracy-loss with IID (b) ROC with IID (c) Accuracy-loss with Non-IID (d) ROC with non-IID 
+
+Fig. 3: Performance of 3 clients for 3 epochs and 80 rounds 
+
+(a) Accuracy-loss with IID (b) ROC with IID (c) Accuracy-loss with Non-IID (d) ROC with non-IID 
+
+Fig. 4: Performance of 5 clients for 3 epochs and 80 rounds                                                                                                     
+
+> Reference Clients Loss Accuracy Precision Recall F1-Score AUC-ROC Communication Cost (MB) BW Reduction (MB) Centralized MLP -0.2439 91.93 65.62 11.62 19.75 81.50 -100.06 FLDetect [5] 2-91.98 91.00 90.98 40.18 --57.0 5-92.58 91.03 92.58 36.07 --10.32 FL-CNN [8] 2-87.75 91.90 87.75 49.29 --69.8 5-80.53 90.34 80.53 37.11 --23.12 Our Proposed Method 2 (IID) 0.0962 97.69 88.89 82.05 97.65 98.12 122.07 37.93 2 (non-IID) 0.0648 98.22 99.01 78.92 98.12 98.33 122.07 37.93 3 (IID) 0.1112 96.49 94.66 60.59 96.14 95.94 183.11 28.97 3 (non-IID) 0.1120 96.42 96.43 58.42 96.01 95.62 183.11 28.97 5 (IID) 0.1750 94.08 85.96 33.01 92.84 89.42 305.18 21.49 5 (non-IID) 0.1748 94.17 87.34 33.88 92.98 89.70 305.18 21.49
+
+TABLE III: Comparison with SOTA methods dataset. In non-IID, each client might train primarily on one class (e.g., label 0 or 1). This forces the global model to learn class-specific patterns more robustly from each client. Hence, the global model may develop sharper class boundaries, improving precision and recall. Moreover, the simple MLP model, DP, which adds noise and non-IID data with a class-specific focus, regularizes the learning and prevents overfitting on overly smooth, well-mixed IID data. Hence, it gives better test generalization from diverse, focused local models. Another reason for the better performance of the non-IID data can be dilution of the minority class. If the theft class (label 1) is rare, in an IID split, each client might only get a few minority-class examples, and local models won’t learn meaningful theft patterns, then the performance decreases. In contrast, non-IID clients might get more concentrated theft samples (even accidentally), which improves learning. Moreover, the energy reduction is the same for IID and non-IID data distributions as the formula does not depend on the data distribution (IID or non-IID). It only cares about model size, number of rounds, and number of clients, which remain constant in both setups. V. C ONCLUSION AND FUTURE WORK 
+
+In this study, we proposed a privacy-preserving federated learning framework for detecting energy theft in smart me-ter networks. Our approach leverages lightweight MLPs to accommodate resource-constrained devices, while employing differential privacy mechanisms to ensure client data confi-dentiality during collaborative training. Experimental results on real-world smart meter data demonstrate that our frame-work achieves promising performance in terms of accuracy, precision, recall, and AUC, despite the challenges posed by non-IID data distributions and strict privacy constraints. The integration of differential privacy introduces noise into model updates, slightly impacting model performance, but offering strong privacy guarantees. Overall, our method presents aviable solution for secure and scalable energy theft detection in smart grids, particularly in environments where centralized data collection is infeasible or raises privacy concerns. Moreover, the architecture of the proposed framework supports horizon-tal scalability, enabling effective integration of an increasing number of clients without degrading model performance or communication efficiency. This inherent adaptability ensures the framework remains robust and performant across large-scale smart grid infrastructures. As a result, the solution is not only privacy-preserving and computationally efficient but also architecturally suited for widespread deployment in next-generation energy monitoring and theft detection systems. Future work will focus on several key directions. First, we aim to explore adaptive privacy budgets and personalized noise injection to better balance privacy and performance per client. Second, we plan to extend our framework to support asynchronous federated learning and incorporate more realistic scenarios with client dropout, varying energy constraints, and communication delays. Finally, we are investigating the integra-tion of explainable AI techniques to enhance the interpretability of the theft detection decisions, which is crucial for stakeholder trust and transparency in smart grid systems. ACKNOWLEDGMENT 
+
+This work contributes to the basic research activities of the PNRR project FAIR - Future AI Research (PE00000013), Spoke 9 - Green-aware AI, under the NRRP MUR program funded by the NextGenerationEU. REFERENCES [1] International Energy Agency, “Global energy review 2025,” https://www.iea.org/reports/global-energy-review-2025, 2025, accessed: 2025-04-08. [2] World Bank, “Reducing technical and non-technical losses in power networks,” https://openknowledge.worldbank.org/handle/10986/34524, 2020, accessed: 2025-04-08. [3] B. McMahan, E. Moore, D. Ramage, S. Hampson, and B. A. y Arcas, “Communication-efficient learning of deep networks from decentralized data,” in Artificial intelligence and statistics . PMLR, 2017, pp. 1273– 1282. [4] K. Wei, J. Li, M. Ding, C. Ma, H. H. Yang, F. Farokhi, S. Jin, T. Q. S. Quek, and H. Vincent Poor, “Federated learning with differential privacy: Algorithms and performance analysis,” IEEE Transactions on Information Forensics and Security , vol. 15, pp. 3454–3469, 2020. [5] M. Wen, R. Xie, K. Lu, L. Wang, and K. Zhang, “Feddetect: Anovel privacy-preserving federated learning framework for energy theft detection in smart grid,” IEEE Internet of Things Journal , vol. 9, no. 8, pp. 6069–6080, 2022. [6] J. Jithish, B. Alangot, N. Mahalingam, and K. S. Yeo, “Distributed anomaly detection in smart grids: A federated learning-based approach,”

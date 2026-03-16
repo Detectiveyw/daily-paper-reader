@@ -1,0 +1,1282 @@
+Title: Efficient Multi-Party Secure Comparison over Different Domains with Preprocessing Assistance
+
+URL Source: https://arxiv.org/pdf/2602.19604v1
+
+Published Time: Tue, 24 Feb 2026 02:32:26 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+> JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 1
+
+# Efficient Multi-Party Secure Comparison over Different Domains with Preprocessing Assistance 
+
+Kaiwen Wang, Xiaolin Chang, Yuehan Dong, Ruichen Zhang 
+
+Abstract —Secure comparison is a fundamental primitive in multi-party computation, supporting privacy-preserving applica-tions such as machine learning and data analytics. A critical performance bottleneck in comparison protocols is their pre-processing phase, primarily due to the high cost of generating the necessary correlated randomness. Recent frameworks intro-duce a passive, non-colluding dealer to accelerate preprocessing. However, two key issues still remain. First, existing dealer-assisted approaches treat the dealer as a drop-in replacement for conventional preprocessing without redesigning the comparison protocol to optimize the online phase. Second, most protocols are specialized for particular algebraic domains, adversary models, or party configurations, lacking broad generality. In this work, we present the first dealer-assisted n-party LTBits (Less-Than-Bits) and MSB (Most Significant Bit) extraction protocols over both 
+
+Fp and Z2k , achieving perfect security at the protocol level. By fully exploiting the dealer’s capability to generate rich correlated randomness, our Fp construction achieves constant-round online complexity and our Z2k construction achieves O(log n k) rounds with tunable branching factor. All protocols are formulated as black-box constructions via an extended ABB model, ensuring portability across MPC backends and adversary models. Experi-mental results demonstrate 1.79 × to 19 .4× speedups over state-of-the-art MPC frameworks, highlighting the practicality of our protocols for comparison-intensive MPC applications. 
+
+Index Terms —Multi-party computation, secure comparison, dealer-assisted preprocessing, perfect security. 
+
+I. I NTRODUCTION 
+
+Secure multi-party computation (MPC) [1] enables multiple parties to jointly compute functions over their private inputs without revealing anything beyond the output. In practice, such functions often involve complex compositions of multiple op-erations, while modern MPC frameworks [2] [3] [4] are highly optimized primarily for arithmetic operations like addition and multiplication. However, many practical applications such as privacy-preserving machine learning [5], secure auctions [6], and data analytics [7] fundamentally require comparison op-erations in addition to arithmetic operations. At a high level, a comparison operation determines the relative order of two secret values, such as whether one value is smaller than another or whether a value is neg-ative. Although conceptually simple, secure comparison is notoriously more challenging than arithmetic operations in MPC. Arithmetic operations can be efficiently supported based on secret sharing and well-established Beaver triple tech-niques [8], whereas comparison does not admit such a direct formulation. MPC-based comparison protocols typically re-quire non-trivial transformations, including bit decomposition of arithmetic shares, prefix computations over secret bits, or masked zero-testing procedures. These operations signifi-cantly increase communication overhead, interaction rounds, and preprocessing overhead compared to purely arithmetic computations, making secure comparison one of the main performance bottlenecks [9] in practical MPC systems. In particular, the preprocessing phase of comparison protocols often dominates overall system performance, as it involves generating complex correlated randomness such as daBits, edaBits [10] and function secret sharing (FSS) [11]. Such preprocessing overhead can be several or even dozens of times higher than online costs, as observed even in state-of-the-art frameworks such as Rabbit [12], severely limiting the practical deployment of MPC-based comparison. To alleviate the costly preprocessing bottleneck, re-cent MPC frameworks introduced a passive, non-colluding dealer to accelerate the generation of correlated random-ness [13] [14] [15] [16] [17]. In this paradigm, a dealer that does not participate in the online computation generates and distributes preprocessing data to all parties in a preprocessing phase, bypassing the expensive cryptographic procedures [18] otherwise required. Preprocessing data exist mainly in the form of correlated randomness. While this dealer-assisted approach has shown promise in reducing preprocessing costs for general MPC tasks, its application to secure comparison still leaves significant room for improvement. In particular, we identify the following two key issues that remain unaddressed. 
+
+Issue 1: Underutilized Dealer Capability for Online Phase Optimization. Existing dealer-assisted MPC frame-works [13] [14] [15] [16] [17] largely employ the dealer as a drop-in replacement for conventional preprocessing methods, generating the same types of correlated randomness such as multiplication triples and edaBits without rethinking the structure of comparison protocols. However, a passive dealer possesses a unique capability: it can efficiently generate richer and more complex forms of correlated randomness that would be prohibitively expensive to produce using standard MPC techniques. These include powers of random masks, per-fectly consistent arithmetic and bitwise decompositions, and exponentially-sized preprocessing data for multi-input gates. Whether such enhanced preprocessing can enable fundamental redesigns of comparison protocols with substantially lower online round complexity and communication cost remains an open question. 
+
+Issue 2: Lack of Generality across Algebraic Do-mains, Adversary Models, and Party Conffgurations. Here, alge-braic domains refer to the algebraic structures over which computation is performed such as prime fields Fp and integer rings Z2k ; adversary models specify the corruption power of the adversary, including whether it is passive (semi-honest) 
+
+or active (malicious) ; and party configurations encompass the number of participating parties and the corruption threshold  
+
+> arXiv:2602.19604v1 [cs.CR] 23 Feb 2026 JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 2
+
+Preprocessing 
+
+Online 
+
+Generate s complex 
+
+correlated randomness 
+
+and sends to the parties. 
+
+Compute F( ) x
+
+> 
+
+without revealing x
+
+> 
+
+is supplied by 
+
+the parties. x
+
+> 
+
+,
+
+Dealer 0P1P1nP −nP
+
+...  
+
+> Fig. 1. The dealer-assisted MPC framework.
+
+such as honest-majority and dishonest-majority . Section III-A offers a detailed introduction. Most existing comparison pro-tocols [13] [14] [15] [19] [20] [21] [22] [23] [24] [25] [26], whether dealer-assisted or not, are designed as specialized solutions that exploit techniques available only under restricted configurations. For instance, FSS [11] and Replicated secret sharing [27] enable highly efficient comparison [26] in the two/three-party setting but cannot be extended to the general 
+
+n-party case. Truncation-based optimizations [24] are effective over rings Z2k but do not carry over to prime fields Fp. These specialized techniques achieve strong performance precisely because they leverage structural properties of specific config-urations. In the general n-party setting with arbitrary adversary models and multiple algebraic domains, such techniques are no longer applicable, and protocol designers must rely on more general primitives that typically incur higher overhead. Designing comparison protocols that simultaneously support general n-party computation, multiple algebraic domains, and diverse adversary models while maintaining a black-box rela-tionship with the underlying MPC backend remains a funda-mental challenge. Motivated by the above discussions, this apper revisits MPC-based comparison from a dealer-assisted perspective, aiming to fully exploit the dealer’s preprocessing capability to redesign comparison protocols with reduced online complexity and broad generality. Figure 1 illustrates the dealer-assisted MPC framework adopted in this work. The main contributions are summarized as follows.  
+
+> •
+
+Efficient dealer-assisted comparison protocols with perfect security. For Issue 1 , we design the first dealer-assisted n-party LTBits (Less-Than-Bits) and MSB (Most Significant Bit) extraction protocols over both Fp and 
+
+Z2k , achieving perfect security at the protocol level. Our protocols fully leverage the dealer’s efficient preprocess-ing capability to minimize online overhead: 
+
+– For Fp, we develop a polynomial-based construc-tion where the dealer generates perfectly consistent arithmetic and bitwise decomposition of random masks during preprocessing, eliminating statistical errors from edaBits-style conversions and achieving constant-round (2 rounds) online complexity. 
+
+– For Z2k , we propose a multi-input AND gate op-timization technique that utilizes the dealer to ef-ficiently generate exponentially-sized preprocessing data ( 2m −1 secret shares for m-input gates), achiev-ing O(log n k) online round complexity with tunable branching factor n. 
+
+> •
+
+Black-box construction and domain independence. For 
+
+Issue 2 , our protocols are formulated entirely in terms of abstract MPC functionalities via an extended ABB model, supporting computation under both honest/dishonest-majority and passive/active adversary models. This makes them portable across different MPC backends and alge-braic domains without relying on backend-specific tech-niques. We implement our protocols and conduct extensive experimental evaluations under realistic network settings (LAN/WAN), demonstrating substantial performance improve-ments over state-of-the-art frameworks: up to 19 .4× speedup for ΠMSB p in WAN settings with small batch sizes, and 1.79 ×
+
+to 2.78 × speedup for ΠMSB 2k across various configurations compared to Rabbit. The rest of this paper is organized as follows. Section II re-views related work. Section III introduces background and the extended ABB model. Sections IV and V present our LTBits protocols for Fp and Z2k respectively. Section VI derives MSB extraction protocols and discusses perfect security. Section VII presents experimental evaluations. Section VIII concludes the paper. Due to page limitations, an incorrect MSB construction from prior work is analyzed Section I of the supplementary file, and the proof of ABB extension with multi-input AND gates is given in Section II. II. R ELATED WORK 
+
+The past two decades saw a large body of work on studying MPC-based comparison protocols under different adversary models, algebraic domains, and efficiency goals. This section reviews representative protocols that support the general n-party setting. Table I summarizes these works along several key dimensions. We first discuss prior protocols and then provide a more detailed discussion of Rabbit [12], which is widely regarded as the state-of-the-art comparison framework. 
+
+a) MPC comparison protocols prior to Rabbit.: Early work by Damg˚ ard et al. [19] initiated the study of secure com-parison in MPC, focusing on unconditional or information-theoretic security under honest-majority assumptions. While these protocols established important theoretical foundations, they typically incur a large number of communication rounds and substantial online overhead. Nishide and Ohta [20] pro-posed comparison protocols over Fp without explicit bit-decomposition, reducing computational cost in the passive, honest-majority setting. Reistad [21] further optimized round complexity and demonstrated that constant-round comparison is achievable under certain assumptions, at the cost of addi-tional preprocessing or relaxed adversary models. Subsequent work by Catrina and de Hoogh [22] identified comparison and truncation as major bottlenecks in integer MPC and proposed improved primitives to enhance practical performance. Lipmaa and Toft [23] focused on reducing online communication complexity, achieving logarithmic or constant online costs for comparison under active security with honest JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 3   
+
+> TABLE I COMPARISON OF RELATED MPC C OMPARISON PROTOCOLS
+
+Protocol Dealer Black- Domain Security Adversary/ Online Online Assisted Box † Level ‡ Majority Rounds Comm. 
+
+Damg˚ ard et al. [19] 2006 ✗ ✓ Fp Perfect Active/Honest 44 O(k log k)
+
+Nishide et al. [20] 2007 ✗ ✗ Fp Perfect Passive/Honest 15 O(k)
+
+Reistad [21] 2009 ✗ ✓ Fp Perfect Unrestricted 5 O(k)
+
+Catrina et al. [22] 2010 ✗ ✗ Fp Statistical Passive/Honest 3 O(k)
+
+Lipmaa et al. [23] 2013 ✗ ✓ Fp Perfect Active/Honest O(log k) O(log k)
+
+Damg˚ ard et al. [24] 2019 ✗ ✓ Z2k Statistical Active/Dishonest O(log k) O(k log k)
+
+Duan et al. [25] 2021 ✗ ✗ Fp Perfect Active/Honest O(log k) O(k)
+
+Rabbit [12] 2021 ✗ ✓ Z2k , Fp Perfect/Statistical ∗ Unrestricted O(log k) O(k log k)
+
+Our Work ( ΠMSB p ) ✓ ✓ Fp Perfect Unrestricted 2 O(k)
+
+Our Work ( ΠMSB 2k ) ✓ ✓ Z2k Perfect Unrestricted O(log n k) O(k log n k)      
+
+> †: A protocol is marked as black-box if it is specified solely in terms of abstract MPC functionalities and does not rely on properties of a particular secret-sharing backend. The black-box abstraction used in this work is formally defined and discussed in Section III-A.
+> ‡: Security levels refer to the protocol-level security. Concrete instantiations may achieve different security levels depending on the underlying MPC backend. For example, instantiations using SPDZ 2kor TinyOT may provide statistical security even when the protocol achieves perfect security.
+> k: bit length of plaintext values; n: maximum branching factor for multi-input AND gates.
+> ∗Perfect security for Z2k, statistical security for Fp.
+
+majority. More recent efforts extended comparison to ring-based computation over Z2k , which is particularly relevant for privacy-preserving machine learning. Damg˚ ard et al. [24] studied comparison in malicious settings over Z2k , while Duan 
+
+et al. [25] incorporated comparison as a core primitive in an MPC framework supporting arithmetic circuits. Despite these advances, most existing protocols either rely on non-trivial preprocessing with high complexity or achieve limited reductions in online rounds under strong adversary models. 
+
+b) Rabbit comparison framework.: Rabbit by Makri et al. [12] represents a major milestone in MPC-based compar-ison protocols. It introduces a unified framework for MPC-based comparison, in which Less-Than-Bits (LTBits) serves as a core primitive from which Less-Than-Constant (LTC), Less-Than-Secret (LTS), and Most Significant Bit (MSB) extraction protocols are systematically derived. Rabbit [12] supports general n-party computation under both honest-majority and dishonest-majority settings, and applies to multiple algebraic domains, including Fp and Z2k .Unlike prior designs that rely on slack or bounded-input as-sumptions, Rabbit [12] provides comparison protocols whose correctness does not depend on inflating the representation space beyond the length of the input bit. This allows compar-ison to be integrated naturally into arithmetic MPC engines over both fields and rings. As a result, Rabbit establishes a widely adopted baseline for modern MPC comparison proto-cols. III. P RELIMINARIES 
+
+In this section, we provide the necessary background. Sec-tion III-A introduces the security model and black-box design philosophy. Section III-B defines abstract sharing semantics. Section III-C presents concrete instantiation examples for performance evaluation. Section III-D reviews Rabbit’s LTBits protocol [12], which serves as a foundation for our work. 
+
+A. Security Model and Black-box Abstraction 
+
+We consider a universal multi-party computation (MPC) setting with n parties jointly evaluating a comparison function-ality over secret inputs. The adversary may be passive (semi-honest) or active(malicious) and honest-majority or dishonest-majority. A passive adversary follows the prescribed protocol but attempts to learn additional information from its view. An active adversary may arbitrarily deviate from the protocol; if detected, execution is immediately aborted. For a system with 
+
+n parties, the number of corrupted parties is bounded by t
+
+such that 2t < n in the honest-majority setting. In contrast, in the dishonest-majority setting, the adversary may corrupt up to n − 1 parties. Rather than committing to a specific corruption threshold or MPC backend at the protocol-design level, our goal is to design comparison protocols that are described as black-box constructions with respect to the underlying MPC functional-ity. 
+
+1) Black-box abstraction via the ABB model: We formalize our black-box design philosophy using an extended version of Arithmetic Black-Box (ABB) model [10] which is an ideal functionality in the universal composability framework [28]. The ABB model abstracts MPC as an ideal functionality that provides fixed interfaces for operations on shared values. In our protocol descriptions, all steps are expressed solely through the abstract operations provided by ABB. Figure 2 presents the ideal functionalities defined in the extended ABB model. We note that our work extends the standard ABB model again by incorporating multi-input multiplication gates into the ABB interface. The correct proof of this extension follows from combining FLinComb , FMult and FOpen with multiplication tuples, as detailed in Section II of supplementary file. Con-sequently, our protocols make a purely black-box use of the underlying ABB functionality. Any backend securely realizing the ABB interface can instantiate our protocols, and the end-JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 4
+
+FInput : On input (Input, Pi, type, id, x) from Pi and (Input, Pi,type, id) from all other parties, with id a fresh identifier, type ∈{binary, arithmetic } and x ∈ M , store (type, id, x). 
+
+FLinComb : On input (LinComb, type, id, (id j )mj=1 , type, c, (cj )mj=1 ), where each id j is stored in memory, compute y = c + P 
+
+> j
+
+xj · cj
+
+modulo 2 if type = binary and modulo M if type = arithmetic, and store (type, id, y). 
+
+FMult : On input (Mult, type, id, id 1, id 2) from all parties, retrieve (type, id 1, x), (type, id 2, y), compute z = x · y modulo 2 if type = binary and modulo M if type = arithmetic, and store (id, z). 
+
+Fm-Mult : On input (m-Mult, type, id, (id j )mj=1 ) from all parties, re-trieve ((type, id 1, x1), . . . , (type, id m, xm)), compute z = Qmj=1 xj
+
+modulo 2 if type = binary and modulo M if type = arithmetic, and store (id, z). This extends standard multiplication to support m-input AND gates. 
+
+FB2A : On input (ConvertB2A, id, id ′) from all parties, retrieve (binary, id ′, x) and store (arithmetic, id, x). 
+
+FOpen : On input (Output, type, id) from all honest parties, retrieve (type, id, y) and output it to the adversary. Wait for an input from the adversary; if this is Proceed then output y to all parties, otherwise output Abort .
+
+FdaBits : On input (daBits, k, id, id ′) from all parties, sample 
+
+r1, . . . , r k
+
+> $
+
+←− F2 uniformly at random and store (binary, id ′, ri)and (arithmetic, id, ri) for i ∈ [1 , k ].
+
+FedaBits : On input (edaBits, m, k, id, id ′) from all parties, for 
+
+j ∈ [1 , k ], sample rj
+
+> $
+
+←− Z2m uniformly at random, compute bit decomposition rj = Pm−1 
+
+> i=0
+
+rj,i · 2i where rj,i ∈ { 0, 1}, and store (arithmetic, id, rj ), (binary, id ′, rj,i ) for i ∈ [0 , m − 1] , j ∈ [1 , k ].
+
+Functionality F+ABB     
+
+> Fig. 2. Ideal functionality for the MPC arithmetic black-box model modulo
+> M, where Mis either a ring or a finite field.
+
+to-end security will naturally inherit the concrete guarantees provided by the chosen backend. As a consequence, we do not provide standalone security proofs for each protocol. All protocols inherit their security directly from the underlying ABB model via the composition theorem [28]: once a concrete backend securely realizes the ABB interface, the security of our protocols follows immedi-ately. 
+
+2) Introduction of dealer and design rationale: In our concrete protocol constructions, we adopt a preprocessing-and-online paradigm. The preprocessing phase is performed by a passive, non-colluding dealer that generates and distributes the appropriate preprocessing data to all parties. This process does not require participation from the computing parties and therefore does not affect the security of the online phase. The dealer-based preprocessing approach enables efficient generation of complex correlated randomness, such as powers of random masks or multiplication tuples, that would be expensive to produce using standard MPC techniques. The dealer only participates in the preprocessing phase and learns no information about the actual inputs processed during the online computation. 
+
+3) Instantiation for evaluation: While the protocol design is black-box, concrete instantiations are necessary to imple-ment the protocols and evaluate their practical performance. For this purpose, we instantiate our protocols using two                                                    
+
+> TABLE II NOTATION USED THROUGHOUT THE PAPER
+> Notation Description
+> Z2kThe ring of integers modulo 2k, where kis a positive integer.
+> FNFinite field of order N, where N∈ { p, 2,2s},pis a large prime, sis a positive integer. ⃗x,⃗ x[i]Vector ⃗xand the i-th element of vector ⃗x.
+> x[i]The i-th bit of value x.
+> 1{x < y }Indicator function: return 1 if x < y , otherwise return 0.
+> δxMasked value for value x.
+> σxRandom mask for value x.
+> αthe global MAC key for active security
+> MAn algebraic structure that is either a ring or a finite field.
+> [x]MAdditive secret sharing of x, where x∈M.
+> [[ x]] MAuthenticated secret sharing of x, where x∈M. In passive settings, authentication may be omitted.
+> ⟨x⟩MAbstract secret sharing of x, where x∈M.
+
+representative MPC backends in Section III-C: an SPDZ-style authenticated arithmetic sharing backend [29] [30] for computations over Fp and Z2k , and a TinyOT-style sharing backend [31] for Boolean circuits. These instantiations are used only to demonstrate feasibility and measure performance; they do not limit the applicability of our protocols to other MPC frameworks that support the same abstract operations. 
+
+B. Abstract Sharing Semantics and Notation 
+
+Throughout the paper, a value x ∈ M is said to be secret-shared if it is distributed among the parties such that no individual party can learn x from its local information alone, where M denotes the underlying algebraic structure. We denote by ⟨x⟩M an abstract secret sharing of a value x ∈ M ,representing that x is distributed among the parties according to the underlying MPC backend. Our protocols involve computations over multiple algebraic domains, including arithmetic domains such as Fp and Z2k ,as well as the binary field F2 for Boolean operations. When necessary, we explicitly indicate the domain of a shared value using subscripts. The purpose of this abstract shar-ing semantics is to decouple protocol design from concrete implementation details. Although concrete instantiations of 
+
+⟨x⟩M are introduced later for implementation and performance evaluation, the comparison protocols themselves are defined solely based on the abstract sharing semantics presented here. Table II summarizes the notation used throughout this paper. 
+
+C. Instantiation Examples 
+
+Concrete instantiations are required to implement the pro-tocols and evaluate their performance. In this work, we in-stantiate our protocols using SPDZ-style authenticated shar-ing [29] [32] [30] for arithmetic circuits over M ∈ { Z2k , Fp}
+
+and TinyOT [31] for Boolean circuits over F2 [12] [26] [10]. We employ optimized representations [33] [34] [35]: ⟨x⟩M =(δx, [[ σx]] M ) where δx is the masked value opened online, σx
+
+is a random mask, and x = δx −σx (mod M ) (or x = δx ⊕σx
+
+for Boolean). Table III summarizes the sharing schemes. For SPDZ-style sharing, [[ x]] M = ([ x]M , [m]M ) where each party PiJOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 5  
+
+> TABLE III INSTANTIATION OF SECRET -S HARING SCHEMES
+
+Component Z2k (SPDZ 2k ) Fp (SPDZ ) F2 (TinyOT )Secret x Z2k Fp F2
+
+Share [x] Z2k+s Fp F2
+
+MAC key α Z2k+s Fp F2s
+
+MAC [m] Z2k+s Fp F2s
+
+Masked δx Z2k Fp F2
+
+Mask σx Z2k Fp F2
+
+Sharing: [[ x]] M = ([ x]M , [m]M ) where M ∈ { Z2k , Fp, F2}
+
+Optimized: ⟨x⟩M = ( δx, [[ σx]] M )    
+
+> s: statistical security parameter; k: plaintext bit length. SPDZ 2koperates over extended ring Z2k+sfor active security.
+
+ΠLTBits (Rabbit with dealer version) 
+
+Inputs: Secret value x shared bitwise, such that parties hold ⟨x0⟩2, ⟨x1⟩2, . . . , ⟨xl−1⟩2 where x = Pl−1 
+
+> i=0
+
+xi ·
+
+2i, and public value R with its bitwise representation 
+
+R0, R 1, . . . , R l−1.
+
+Outputs: The boolean value ⟨z⟩2, where z = 1 {x < R }.
+
+Preprocessing Phase: 
+
+1) Dealer generates the preprocessing data required by 
+
+ΠPrefixAND 2 for l-bit inputs. 
+
+Online Phase: 
+
+1) Parties compute ⟨yi⟩2 = ⟨xi⟩2 ⊕ R1 ⊕ 1, where 
+
+i ∈ [0 , l − 1] .2) Parties compute ⟨⃗q⟩ 2 = 1 ⊕ΠPrefixAND 2 (⟨y0⟩2, ⟨y1⟩2,. . . , ⟨yl−1⟩2).3) Parties compute ⟨⃗w[i]⟩ 2 = ⟨⃗z[i]⟩ 2 −⟨ ⃗z[i+1] ⟩ 2,where 
+
+i ∈ [0 , l − 1] ,⃗z l = 0 .4) Result: ⟨z⟩2 = Pl−1 
+
+> i=0
+
+Ri · ⟨ ⃗w[i]⟩ 2.
+
+holds ([ x]i, [m]i, [α]i) satisfying MAC relation Pni=1 [m]i =(Pni=1 [x]i) · (Pni=1 [α]i) over the appropriate domain. For TinyOT, the MAC relation is Pni=1 [m]i = (Lni=1 [x]i) ·
+
+(Pni=1 [α]i) ∈ F2s .
+
+D. Rabbit’s LTBits Protocol 
+
+ΠLTBits from Rabbit [12] provides an efficient construction for comparing a secret bitwise-shared value against a public constant. We adapt this protocol to work with our passive dealer in the preprocessing phase. This adapted protocol forms the foundation for our ΠLTBits n 
+
+> 2
+
+construction in Section V-A. IV. C OMPARISON WITH BITWISE -SHARED INPUT OVER Fp
+
+This section presents our efficient n-party comparison pro-tocol for bitwise-shared inputs over Fp (ΠLTBits p ). 
+
+A. Protocol Description 
+
+Protocol ΠLTBits p presents the detailed construction of our comparison protocol for bitwise-shared inputs over Fp. Our protocol leverages a passive dealer in the preprocessing phase to shift computational complexity away from the online phase. 
+
+Protocol 1: ΠLTBits p
+
+Inputs: Secret value x shared bitwise, such that parties hold ⟨x0⟩p, ⟨x1⟩p, . . . , ⟨xℓ−1⟩p where x = Pℓ−1 
+
+> i=0
+
+xi ·
+
+2i, and public value R with its bitwise representation 
+
+R0, R 1, . . . , R ℓ−1.
+
+Outputs: Compute the comparison result ⟨b⟩p, where b =1{x < R }.
+
+Preprocessing Phase: 
+
+1) Dealer computes the polynomial f (ℓ) = Qℓ+1 
+
+> u=1
+
+(u −
+
+t) = Pℓ+1  
+
+> k=0
+
+αktk and its coefficient inverse γ =[(( ℓ + 1)!) −1], where {αk}ℓ+1 
+
+> k=0
+
+, γ ∈ Fp.2) For i = 0, 1, . . . , ℓ − 1, dealer indepen-dently samples ri
+
+> $
+
+←− Fp and secret-shares ri
+
+among n parties, generating the power sequence 
+
+(⟨ri⟩p, ⟨r2 
+
+> i
+
+⟩p, . . . , ⟨rℓ+1  
+
+> i
+
+⟩p).3) Dealer distributes {αk}ℓ+1 
+
+> k=0
+
+, γ from Step 1 and the 
+
+ℓ × (ℓ + 1) secret shares generated in Step 2 to all parties. 
+
+Online Phase: 
+
+1) Parties compute locally: for (i = 0; i < ℓ ; i + +) 
+
+⟨⃗u[i]⟩ p = ⟨⃗x[i]⟩ p − R[i]
+
+⟨⃗w[i]⟩ p = ⟨⃗x[i]⟩ p ⊕ R[i]
+
+⟨⃗c[i]⟩ p = ⟨⃗u[i]⟩ p +
+
+
+
+1 + Pℓk=i+1 ⟨⃗w[k]⟩ p
+
+
+
+2) Parties compute ⟨⃗ d[i]⟩p = ⟨⃗c[i] − r i⟩p, i ∈ [0 , ℓ − 1] .3) Parties open ⃗ d to obtain ⃗ d in the clear. ▷ One round of communication 4) Parties compute locally: for (i = 0; i < ℓ ; i + +) 
+
+for (k = 0; k < ℓ + 1; k + +) 
+
+⟨⃗z[i] k⟩p = Pkj=0 
+
+ kj
+
+⟨rji ⟩p · dk−ji
+
+5) Parties compute ⟨⃗e[i]⟩ p = γ · Pℓ+1 
+
+> k=0
+
+αk · ⟨ ⃗z[i] k⟩p
+
+for i ∈ [0 , ℓ − 1] .6) Result: ⟨b⟩p = Pℓ−1 
+
+> i=0
+
+⟨⃗e[i]⟩ p.Specifically, the online phase requires only one round of communication when opening ⃗ d in Step 3, while all other operations are performed locally by the parties. We note that the computation of ⟨⃗w[i]⟩ p = ⟨⃗x[i]⟩ p ⊕ R[i]
+
+in Step 1 is a purely local operation, as R[i] is a public bit. Concretely, this operation corresponds to a conditional local assignment: if R[i] = 1 , then ⟨⃗w[i]⟩ p = ⟨⃗x[i]⟩ p, and if R[i] = 0, then ⟨⃗w[i]⟩ p = 1 − ⟨ ⃗x[i]⟩ p.An important feature of ΠLTBits p is that the plaintext domain and the secret sharing domain are independent. As long as the plaintext values x and R can be represented in ℓ binary bits and p > ℓ + 1 , the protocol executes correctly. This independence implies that smaller plaintext domains lead to better performance : protocols with smaller ℓ incur lower computational and communication costs in the online phase, resulting in faster execution. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 6
+
+V. C OMPARISON WITH BITWISE -SHARED INPUT OVER F2
+
+In this section, we present our efficient comparison pro-tocol for bitwise-shared inputs over F2 (ΠLTBits n 
+
+> 2
+
+). While the previous protocol ΠLTBits p operates over prime fields Fp, it cannot be directly adapted to the ring Z2k . The reason is the requirement of multiplying by the coefficient inverse 
+
+γ = [(( l + 1)!) −1] in the final step. Since not all elements in 
+
+Z2k possess multiplicative inverses, naively migrating ΠLTBits p
+
+to ring-based computation would result in protocol failures. To address this limitation, we design ΠLTBits n 
+
+> 2
+
+, which per-forms computation in the binary field F2. By leveraging additional FB2A conversion, ΠLTBits n 
+
+> 2
+
+can support execution over both the ring Z2k and the field Fp, providing enhanced scalability. 
+
+A. Protocol Description 
+
+Protocol 2: ΠAND-m (TinyOT-style instantiation) 
+
+Inputs: Secret-shared input bits ⟨x0⟩2, ⟨x1⟩2, . . . , 
+
+⟨xm−1⟩2 in TinyOT-style over F2.
+
+Outputs: Secret-shared result ⟨z⟩2 where z = x0 ∧ x1 ∧· · · ∧ xm−1.
+
+Preprocessing Phase: 
+
+1) Dealer independently samples r0, r 1, . . . , r m−1, σ z
+
+> $
+
+←− F2 and generates secret shares [[ σz ]] 2 and [[ ri]] 2
+
+for i ∈ { 0, 1, . . . , m − 1}, where σz is the output mask. 2) For each non-empty subset S ⊆ { 0, 1, . . . , m − 1},dealer computes V 
+
+> i∈S
+
+ri and generates secret shares 
+
+[[ V 
+
+> i∈S
+
+ri]] 2.3) Dealer computes εi = ri ⊕ σxi for all i ∈ { 0, 1, . . . , m − 1}, where σxi is the input mask of ⟨xi⟩2.4) Dealer distributes to all parties:  
+
+> •
+
+Secret shares [[ ri]] 2 and [[ σz ]] 2 from Step 1  
+
+> •
+
+2m − 1 secret shares [[ V 
+
+> i∈S
+
+ri]] 2 from Step 2  
+
+> •
+
+Pre-opened values {εi}m−1
+
+> i=0
+
+Online Phase: 
+
+1) Parties locally compute: 
+
+mi = δxi ⊕ εi, i ∈ { 0, 1, . . . , m − 1}
+
+2) Parties locally compute: 
+
+[[ δz ]] 2 = X
+
+> S
+
+" ^
+
+> i / ∈S
+
+mi
+
+!
+
+· [[ ^
+
+> i∈S
+
+ri]] 2
+
+#
+
+⊕ [[ σz ]] 2
+
+3) Parties open [[ δz ]] 2 to get δz , ⟨z⟩2 = ( δz , [[ σz ]] 2). ▷
+
+One round of communication 
+
+The ΠAND-m and ΠPrefixAND n protocols provide the specific construction for m-input AND gates and PrefixAND circuits composed of AND gates with maximum input size n. We note that ΠAND-m presents a TinyOT-style instantiation of the m-input AND gate, chosen to demonstrate an engineer-ing optimization that achieves one-round online complexity 
+
+Protocol 3: ΠPrefixAND n
+
+Inputs: Secret-shared input vector ⟨⃗x⟩ 2 where xi ∈ F2,the size of ⃗x is k with i ∈ [0 , k − 1] , and the maximum input size for AND gates is n.
+
+Outputs: Secret-shared output vector ⟨⃗z⟩ 2 where zj =
+
+Vji=0 xi for j ∈ [0 , k − 1] .
+
+Algorithm: buildPrefixTree() for j = 0 to ⌈log n k⌉ − 1:
+
+for i = 0 to k − 1: ▷ Can be executed in parallel 
+
+m =
+
+j i mod n(j+1) 
+
+> nj
+
+k
+
++ 1 
+
+group start =  in(j+1) 
+
+ × n(j+1) ⃗
+
+vec = ( group start + t · nj − 1) m−1
+
+> t=1
+
+⟨⃗z i⟩2 = Π AND-m(⟨⃗x vec ⟩, ⟨xi⟩)
+
+Wait for all threads in the inner loop to complete 
+
+Preprocessing Phase: 
+
+1) Execute the preprocessing process required by buildPrefixTree(). 
+
+Online Phase: 
+
+1) Execute the online process required by buildPrefix-Tree() to obtain ⟨⃗z⟩ 2.2x3x4x5x6x7x8x9x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x0x1x1z2z3z4z5z6z7z8z9z0z10 z11 z12 z13 z14 z15 z16 z17 z18 z19 z: AND -2 : AND -3 : AND -4     
+
+> Fig. 3. Example of PrefixAND circuit with input length k= 20 and maximum branching factor n= 4 .
+
+through preprocessing assistance. However, we emphasize that constant-round realizations of m-input AND gates exist across all mainstream MPC backends, including Shamir secret sharing [21], Replicated secret sharing [36], and SPDZ-style secret sharing [37]. Figure 3 illustrates an example of a PrefixAND circuit with input length k = 20 and maximum branching factor n = 4 .Using the following formula, we can transform a PrefixAND circuit into a PrefixOR circuit: 
+
+zi =
+
+> i
+
+_
+
+> j=0
+
+xj = 1 ⊕
+
+> i
+
+^
+
+> j=0
+
+(1 ⊕ xj )
+
+Following the construction methodology of Rabbit’s LTBits protocol [12], we can construct our ΠLTBits n 
+
+> 2
+
+protocol. The detailed construction is presented in Section III-D. The com-munication rounds of ΠLTBits n 
+
+> 2
+
+depend on the maximum AND gate’s input size n and the bit length k of plaintext x, specifi-cally O(log n k) rounds with O(k·log n k) communication cost. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 7
+
+VI. E XTENSION TO MSB P ROTOCOL 
+
+While the comparison protocols ΠLTBits p and ΠLTBits n 
+
+> 2
+
+pre-sented in previous sections provide efficient solutions for determining whether x < R (where R is a public value), they require the input ⟨x⟩ to be in bitwise-shared form. This design lacks the generality needed for arithmetic circuits where values are typically shared in their native arithmetic representation. The Most Significant Bit (MSB) extraction protocol serves as a crucial building block that bridges this gap and enables a rich family of comparison functionalities. By extending our LTBits protocols to MSB extraction, we can derive a comprehensive suite of comparison protocols that operate on arithmetically shared inputs, including:  
+
+> •
+
+ΠLTS [12]: Less-than comparison for secret-shared values, determining whether x < y where both x and y are given in secret-shared form.  
+
+> •
+
+ΠSelect [26]: Select (x, y ) = 1 {x ≥ 0} · y. The protocol 
+
+ΠSelect outputs ⟨y⟩ if x ≥ 0, and ⟨0⟩ otherwise.  
+
+> •
+
+ΠMax [26]: Maximum value computation between secret-shared inputs.  
+
+> •
+
+ΠReLU [33] [12]: Rectified Linear Unit activation function where ReLU (x) = max(0 , x ). 
+
+> •
+
+ΠEQZ [24]: Equality-to-zero test for secret-shared values. These derived protocols provide diverse and flexible compari-son primitives that are essential for complex secure computa-tion tasks, such as privacy-preserving machine learning, secure auctions. This section is organized as follows: First, we present the methodology for extending ΠLTBits p and ΠLTBits n 
+
+> 2
+
+to MSB extraction in Section VI-A. Then, we discuss the perfect security of ΠMSB p and ΠMSB 2k . In Section I of supplementary file, we analyzes an incorrect MSB construction from prior work. 
+
+A. Extending ΠLTBits p and ΠLTBits n 
+
+> 2
+
+to MSB 
+
+We consider the MSB construction from two cases based on the underlying arithmetic secret sharing domain. 
+
+Case 1: MSB over Fp. In the first case, arithmetic se-cret sharing is performed over the prime field Fp, meaning that both the plaintext domain and the arithmetic secret sharing domain are Fp. The MSB operation is defined as MSB (x) = 1{x ≥ ⌊p/ 2⌋} . For this scenario, we adopt the Less-Than-Constant (LTC) construction approach from Rabbit [12], where the constant is set to ⌊p/ 2⌋.Our construction differs from Rabbit in two aspects: (1) Since ΠLTBits p protocol operates directly in Fp, we do not require the final FB2A conversion step to transform the result from ⟨z⟩2 to ⟨z⟩p. (2) In contrast to Rabbit’s [12] Fp instan-tiation, which relies on edaBits [10] and thus only achieves statistical security due to potential wrap-around inconsisten-cies, the preprocessing phase of our ΠMSB p protocol is carried out by a passive dealer that samples r ∈ [0 , p −1] and provides a perfectly consistent arithmetic/bit decomposition of r. As a result, our ΠMSB p does not incur statistical errors and achieves perfect security [38]. ΠMSB p provides the detailed construction of MSB over Fp.Note that constructing the MSB protocol over Fp using 
+
+ΠLTBits n 
+
+> 2
+
+follows an identical procedure, with the only addi-tional step being a FB2A conversion. We omit the details here for brevity. 
+
+Case 2: MSB over Z2k . In the second case, arithmetic secret sharing is performed over the ring Z2k , meaning the plaintext domain is Z2k . Under the passive security model, arithmetic secret shares are in Z2k , while under the active security model, they are in Z2k+s [30]. For this scenario, our 
+
+ΠMSB 2k protocol draws inspiration from [26], [39], [40] using the following formula: MSB (x) = MSB (˜ x) ⊕ MSB (2 k − r) ⊕ 1{ ˜y0 > 2k−1 − ˜y1 − 1}
+
+In our construction, this translates to: MSB (x) = MSB (˜ x)⊕MSB (2 k−r)⊕ΠLTBits n 
+
+> 2
+
+(⟨2k−1− ˜y1−1⟩, ˜y0)
+
+where r is a random mask in Z2k , ˜x = x + r mod 2 k,
+
+˜y0 = ˜ x mod 2 k−1, and ˜y1 = (2 k − r) mod 2 k−1.Our ΠLTBits n 
+
+> 2
+
+protocol provides unique advantages for this construction. First, MSB (˜ x) can be obtained by opening in the online phase. Second, MSB (2 k − r) is generated as 
+
+⟨MSB (2 k − r)⟩ by the dealer during the preprocessing phase. The introduction of the dealer eliminates the need for an addi-tional MSB protocol invocation in the preprocessing phase. Fi-nally, a FB2A converts the result from ⟨z⟩2 to ⟨z⟩2k . In ΠMSB 2k ,
+
+˜x revealed during the online phase are masked by uniformly random elements over Z2k , ensuring information-theoretic privacy. Meanwhile dealer generates ⟨2k−1 − ˆy1 − 1⟩2 in bitwise representation, the bit-decomposition of 2k−1 − ˆy1 − 1
+
+is perfectly consistent. As a result, our ΠLTBits n 
+
+> 2
+
+does not incur statistical errors and achieves perfect security [38]. ΠMSB 2k
+
+provides the detailed construction of MSB over Z2k . Our construction ensures that the online runtime of ΠMSB 2k is close to that of ΠLTBits n 
+
+> 2
+
+.
+
+B. Discussion of Perfect Security 
+
+In this section, we clarify the notion of perfect security and 
+
+statistical security . Then we explain why ΠMSB p and ΠMSB 2k
+
+achieve perfect security at the protocol level . We emphasize that the discussion here is restricted to the abstract protocol-level description and does not take into account any concrete backend realization. 
+
+a) Perfect Security vs. Statistical Security. (Complete Definition in A.3 of [41]): In the context of MPC, a protocol is said to achieve perfect (information-theoretic) security if the view of any adversary is exactly independent of the honest parties’ private inputs, except for what can be inferred from the prescribed output. Equivalently, the real execution and the ideal execution are distributed identically, without introducing any error probability or security parameter. In contrast, a protocol is statistically secure if the adver-sary’s view is only approximately independent of the private inputs. In this case, the statistical distance between the real and ideal executions is bounded by a negligible function in a security parameter s, and the protocol may fail with probability at most 2−s. Such statistical guarantees commonly arise from consistency checks, authentication mechanisms, or probabilistic preprocessing procedures. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 8
+
+Protocol 4: ΠMSB p (with ΠLTBits p )
+
+Inputs: Secret-shared value ⟨x⟩p over Fp, and public value ⌊p/ 2⌋.
+
+Outputs: The Boolean value ⟨z⟩p = ⟨1{x ≥ ⌊ p/ 2⌋}⟩ p.
+
+Preprocessing Phase: 
+
+1) Dealer independently samples r $
+
+←− Fp, computes its binary expansion r = Pm−1 
+
+> i=0
+
+ri · 2i, where m
+
+denotes the bit length of prime p. Dealer generates secret shares ⟨r⟩p, ⟨r0⟩p, ⟨r1⟩p, . . . , ⟨rm−1⟩p.2) Dealer generates double copies of the preprocessing data required by ΠLTBits p for m-bit inputs. 3) Dealer distributes the generated shares ⟨r⟩p, ⟨r0⟩p,. . . , ⟨rm−1⟩p and the ΠLTBits p preprocessing data to all parties. 
+
+Online Phase: 
+
+1) Parties compute the values: ⟨a⟩p = ⟨x + r⟩p and 
+
+⟨b⟩p = ⟨x + r + ⌈p/ 2⌉⟩ p.2) Parties open the values a and b.3) Parties compute: ▷ Can be executed in parallel 
+
+⟨w1⟩p = Π LTBits p (a, ⟨r0⟩p, . . . , ⟨rm−1⟩p)
+
+⟨w2⟩p = Π LTBits p (b, ⟨r0⟩p, . . . , ⟨rm−1⟩p)
+
+w3 = 1 {b < ⌈p/ 2⌉} 
+
+4) Result: ⟨z⟩p = ⟨w1⟩p − ⟨ w2⟩p + w3
+
+b) Perfect Security of ΠMSB p .: Recall that in ΠMSB p ,the parties first open masked values of x + r over Fp,where r is a uniformly random field element generated during preprocessing and used exactly once. Since r is information-theoretically uniform, the opened value x+r is itself uniformly distributed over Fp and statistically independent of the secret input x.Unlike existing Fp-based MSB constructions such as Rab-bit [12], which rely on edaBits [10] and may incur statistical errors due to arithmetic/bit decomposition inconsistencies, the preprocessing phase of ΠMSB p is carried out by a passive dealer that provides a perfectly consistent arithmetic and bitwise decomposition of the random mask r. As a result, no statistical deviation is introduced. All subsequent computations operate either on public values or on secret-shared randomness provided by the preprocessing phase. Therefore, the adversary’s view is identically distributed for all possible inputs x, implying that ΠMSB p achieves perfect security at the protocol level. 
+
+c) Perfect Security of ΠMSB 2k .: A similar argument ap-plies to ΠMSB 2k . In this protocol, the parties open the masked value ˆx = x + r mod 2 k, where r is uniformly random over Z2k . By the one-time masking property, ˆx is uniformly distributed and independent of x, and therefore reveals no information about the secret input. The remaining steps only involve comparisons between public values derived from ˆx and secret-shared values derived from r, together with fixed public constants. Since all secret-shared inputs to these subprotocols originate from perfectly random preprocessing material and are independent of x,
+
+Protocol 5: ΠMSB 2k (with ΠLTBits n 
+
+> 2
+
+)
+
+Inputs: Secret-shared value ⟨x⟩2k over Z2k , and AND gate’s maximum branching factor n.
+
+Outputs: The Boolean value ⟨z⟩2k = ⟨1{x < 0}⟩ 2k .
+
+Preprocessing Phase: 
+
+1) Dealer independently samples r $
+
+←− Z2k and com-putes ˆy1 = (2 k − r) mod 2 k−1.2) Dealer generates ⟨MSB (2 k − r)⟩2 and generates 
+
+⟨2k−1 − ˆy1 − 1⟩2 in bitwise representation. 3) Dealer generates the preprocessing data required by 
+
+ΠLTBits n 
+
+> 2
+
+for k-bit inputs. 4) Dealer distributes to all parties: ⟨r⟩2k , ⟨MSB (2 k −
+
+r)⟩2, ⟨2k−1 − ˆy1 −1⟩2 in bitwise representation, and the preprocessing data from Step 3. 
+
+Online Phase: 
+
+1) Parties compute ⟨ˆx⟩2k = ⟨x⟩2k + ⟨r⟩2k and open ˆx.2) Parties compute ˆy0 = ˆ x mod 2 k−1, then compute: 
+
+⟨w⟩2 = Π LTBits n 
+
+> 2
+
+(⟨2k−1 − ˆy1 − 1⟩bitwise  
+
+> 2
+
+, ˆy0)
+
+3) Parties compute: 
+
+⟨z⟩2 = MSB (ˆ x) ⊕ ⟨ MSB (2 k − r)⟩2 ⊕ ⟨ w⟩2
+
+4) Parties invoke FB2A to get ⟨z⟩2k from ⟨z⟩2.the entire execution transcript is information-theoretically in-dependent of the private input. Consequently, ΠMSB 2k also achieves perfect security at the protocol level. VII. E VALUATION PERFORMANCE 
+
+In this section, we evaluate the performance of our proposed comparison protocols against Rabbit [12], which represents the state-of-the-art in MPC-based comparison protocols. We organize the evaluation as follows: Section VII-A describes the experimental setup including hardware configuration, network settings, and implementation details. Section VII-B presents the performance evaluation of ΠMSB p over Fp. Section VII-C evaluates ΠMSB 2k over Z2k .
+
+A. Experimental Setup a) Hardware and software configuration.: All experi-ments are conducted on a machine running Ubuntu 20.04.5 LTS equipped with a 2.2GHz AMD Ryzen Threadripper 3970X 32-Core Processor (64 logical cores) and 251GB of RAM. We implement all protocols in C++20 for efficient cryptographic computation. 
+
+b) Implementation framework.: Since the MP-SPDZ li-brary [29] does not provide the sophisticated preprocessing functionality required by our dealer-assisted protocols, we fol-low the implementation paradigm established by MD-ML [34], which similarly relies on a passive dealer for preprocessing. Our codebase adopts the same modular architecture to facili-tate dealer-based preprocessing while maintaining compatibil-ity with standard MPC backend interfaces. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 9
+
+c) Network configuration.: To evaluate protocol perfor-mance under realistic network conditions, we employ the Linux Traffic Control utility to simulate two represen-tative network settings:  
+
+> •
+
+WAN (Wide Area Network): 100ms network delay, 1% packet loss rate, and 100Mbps bandwidth.  
+
+> •
+
+LAN (Local Area Network): 1ms network delay, 0.01% packet loss rate, and 10Gbps bandwidth. 
+
+d) MPC backend instantiation.: As described in Sec-tion III-C, we instantiate our protocols using two represen-tative MPC backends. Both instantiations support dishonest-majority adversaries and enforce active security through MAC-based verification during the opening phase. 
+
+B. Performance of ΠMSB p
+
+We evaluate the performance of ΠMSB p across different prime field sizes, security models, and network configurations. We compare our protocol against Rabbit’s MSB protocol over 
+
+Fp under identical experimental conditions. The evaluation considers three representative prime choices: p = 2 16 −15 (16-bit plaintext domain), p = 2 31 − 1 (31-bit plaintext domain), and p = 2 61 − 1 (61-bit plaintext domain). For each prime, we measure both runtime and communication cost under passive and active security models in LAN and WAN settings. Figure 4 presents the comprehensive performance compari-son across 10, 100, 1,000, and 10,000 comparison operations. The results are organized in a 3 ×3 grid, where each row corresponds to a specific prime field size and each column represents a different performance metric: LAN runtime, WAN runtime, and communication cost. 
+
+a) Performance analysis and recommended usage sce-narios.: The experimental results reveal that ΠMSB p demon-strates significant performance advantages in specific oper-ational regimes. Our protocol achieves substantial speedups over Rabbit when the number of comparison operations is relatively small (typically fewer than 100 comparisons) and the prime field size is modest. This advantage is particularly pronounced in WAN settings. For the smallest tested prime ( p = 2 16 − 15 ), our protocol achieves 5.75 × to 6.6× speedup in LAN settings and 5.11 ×
+
+to 5.96 × speedup in WAN settings when performing 10 comparisons. Under the medium-sized prime ( p = 2 31 − 1), the speedup increases to 6.6× to 8.0× in LAN and reaches 
+
+9.8× to 13 .3× in WAN. Notably, for the largest prime (p = 2 61 − 1), while Rabbit maintains superior performance in LAN environments, our protocol still achieves remarkable speedups of 16 .5× to 19 .4× in WAN settings for small-scale comparisons. The performance characteristics stem from two key factors. First, our protocol’s reduced round complexity provides sub-stantial benefits when the number of comparisons is small, as the per-round network latency overhead dominates in WAN environments. Second, smaller prime fields reduce the local computational burden of polynomial evaluation in our con-struction, making the constant factor overhead more accept-able. As the number of comparisons increases beyond 100, Rabbit’s optimized circuit construction and better asymptotic                                                       
+
+> TABLE IV RECOMMENDED USAGE FOR ΠMSB pAND MAXIMUM SPEEDUP
+> Prime Security Recommended Max Speedup Range †(LAN/WAN)
+> 216 −15 Active <100 5.8×/6.0×
+> Passive <100 6.6×/5.1×
+> 231 −1Active <100 /<1000 8.0×/9.8×
+> Passive <1000 /<1000 6.6×/13 .3×
+> 261 −1Active – / <100 – / 16 .5×
+> Passive – / <100 – / 19 .4×
+> †: Range favoring our protocol (LAN / WAN format). ”–” indicates Rabbit is faster across all tested counts.
+
+complexity begin to dominate, particularly in LAN settings where round complexity has less impact. Table IV summarizes the recommended operational regimes for ΠMSB p across different configurations. ΠMSB p is more ef-fective for applications requiring small batches of comparisons over modest-sized fields, particularly in network-constrained environments. 
+
+C. Performance of ΠMSB 2k
+
+We evaluate the performance of ΠMSB 2k across different ring sizes and AND gate branching factors. The evaluation considers two representative configurations: k = s = 32 and 
+
+k = s = 64 , k represents the size of plaintext domain, s
+
+represents statistical security parameter. For each configura-tion, we test our protocol for 10000 comparison operations with varying maximum AND gate input sizes n ∈ [2 , 10] ,measuring both runtime and communication cost under passive and active security models in LAN and WAN settings. Figure 5 presents the comprehensive performance compari-son for 10000 comparison operations across different branch-ing factors. The results are organized in a 2 ×5 grid. The first row shows results for k = s = 32 , while the second row presents k = s = 64 . Each row displays five performance metrics: passive LAN runtime, passive WAN runtime, active LAN runtime, active WAN runtime, and communication cost. 
+
+a) Performance analysis and optimal branching factor selection.: The experimental results demonstrate that the op-timal choice of AND gate branching factor n varies signifi-cantly across different configurations. Table V summarizes the optimal n and corresponding performance comparisons with Rabbit for 10,000 comparison operations. For the k = s = 32 configuration, ΠMSB 2k achieves sub-stantial speedups across all scenarios. Under passive security, the optimal branching factor is n = 5 for LAN environ-ments, yielding 270ms runtime compared to Rabbit’s 750ms— a 2.78 × speedup. In WAN settings, larger branching factors become preferable due to the dominance of network latency: 
+
+n = 8 provides 6.07 seconds runtime versus Rabbit’s 13.3 seconds, achieving a 2.19 × speedup. Under active security, the pattern holds with optimal n values of 5 for LAN and 6 for WAN, delivering speedups of 2.06 × and 2.40 × respectively. For the larger k = s = 64 configuration, the benefits of increased branching become more pronounced for runtime JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 10 10 100 1K 10K 
+
+Number of Comparisons 
+
+10 1
+
+10 2
+
+10 3
+
+10 4
+
+> Runtime (ms)
+
+p = 2 31 1 - LAN 
+
+Our (Active) 
+
+Our (Passive) 
+
+Rabbit (Active) 
+
+Rabbit (Passive) 
+
+10 100 1K 10K 
+
+Number of Comparisons 
+
+10 3
+
+10 4
+
+10 5
+
+10 6
+
+> Runtime (ms)
+
+p = 2 31 1 - WAN 
+
+Our (Active) 
+
+Our (Passive) 
+
+Rabbit (Active) 
+
+Rabbit (Passive) 
+
+10 100 1K 10K 
+
+Number of Comparisons 
+
+10 3
+
+10 4
+
+10 5
+
+10 6
+
+> Communication (bytes)
+
+p = 2 31 1 - Communication 
+
+Our (Active) 
+
+Our (Passive) 
+
+Rabbit (Active) 
+
+Rabbit (Passive) 
+
+10 100 1K 10K 
+
+Number of Comparisons 
+
+10 3
+
+10 4
+
+10 5
+
+10 6
+
+> Runtime (ms)
+
+p = 2 61 1 - LAN 
+
+Our (Active) 
+
+Our (Passive) 
+
+Rabbit (Active) 
+
+Rabbit (Passive) 
+
+10 100 1K 10K 
+
+Number of Comparisons 
+
+10 4
+
+10 5
+
+10 6
+
+> Runtime (ms)
+
+p = 2 61 1 - WAN 
+
+Our (Active) 
+
+Our (Passive) 
+
+Rabbit (Active) 
+
+Rabbit (Passive) 
+
+10 100 1K 10K 
+
+Number of Comparisons 
+
+10 3
+
+10 4
+
+10 5
+
+10 6
+
+10 7
+
+> Communication (bytes)
+
+p = 2 61 1 - Communication 
+
+Our (Active) 
+
+Our (Passive) 
+
+Rabbit (Active) 
+
+Rabbit (Passive) 
+
+10 100 1K 10K 
+
+Number of Comparisons 
+
+10 1
+
+10 2
+
+10 3
+
+10 4
+
+> Runtime (ms)
+
+p = 2 16 15 - LAN 
+
+Our (Active) 
+
+Our (Passive) 
+
+Rabbit (Active) 
+
+Rabbit (Passive) 
+
+10 100 1K 10K 
+
+Number of Comparisons 
+
+10 3
+
+10 4
+
+10 5
+
+10 6
+
+> Runtime (ms)
+
+p = 2 16 15 - WAN 
+
+Our (Active) 
+
+Our (Passive) 
+
+Rabbit (Active) 
+
+Rabbit (Passive) 
+
+10 100 1K 10K 
+
+Number of Comparisons 
+
+10 3
+
+10 4
+
+10 5
+
+10 6
+
+> Communication (bytes)
+
+p = 2 16 15 - Communication 
+
+Our (Active) 
+
+Our (Passive) 
+
+Rabbit (Active) 
+
+Rabbit (Passive) 
+
+Fig. 4. Performance comparison between ΠMSB p and Rabbit’s MSB protocol over Fp under different prime field sizes, security models, and network configurations. Each row represents a different prime p, while columns show LAN runtime, WAN runtime, and communication cost respectively. 2 3 4 5 6 7 8 9 10 
+
+AND Gate Max Input Size (n) 
+
+300 
+
+400 
+
+500 
+
+600 
+
+700 
+
+800 
+
+> Runtime (ms)
+
+k = s = 32 - Passive LAN 
+
+2 3 4 5 6 7 8 9 10 
+
+AND Gate Max Input Size (n) 
+
+6
+
+7
+
+8
+
+9
+
+10 
+
+11 
+
+12 
+
+13 
+
+14 
+
+> Runtime (s)
+
+k = s = 32 - Passive WAN 
+
+2 3 4 5 6 7 8 9 10 
+
+AND Gate Max Input Size (n) 
+
+1200 
+
+1400 
+
+1600 
+
+1800 
+
+2000 
+
+2200 
+
+2400 
+
+> Runtime (ms)
+
+k = s = 32 - Active LAN 
+
+2 3 4 5 6 7 8 9 10 
+
+AND Gate Max Input Size (n) 
+
+12.5 
+
+15.0 
+
+17.5 
+
+20.0 
+
+22.5 
+
+25.0 
+
+27.5 
+
+30.0 
+
+> Runtime (s)
+
+k = s = 32 - Active WAN 
+
+2 3 4 5 6 7 8 9 10 
+
+AND Gate Max Input Size (n) 
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+> Communication (MB)
+
+k = s = 32 - Communication 
+
+2 3 4 5 6 7 8 9 10 
+
+AND Gate Max Input Size (n) 
+
+800 
+
+1000 
+
+1200 
+
+1400 
+
+1600 
+
+1800 
+
+> Runtime (ms)
+
+k = s = 64 - Passive LAN 
+
+2 3 4 5 6 7 8 9 10 
+
+AND Gate Max Input Size (n) 
+
+14 
+
+16 
+
+18 
+
+20 
+
+22 
+
+24 
+
+26 
+
+28 
+
+> Runtime (s)
+
+k = s = 64 - Passive WAN 
+
+2 3 4 5 6 7 8 9 10 
+
+AND Gate Max Input Size (n) 
+
+3000 
+
+3500 
+
+4000 
+
+4500 
+
+5000 
+
+5500 
+
+6000 
+
+> Runtime (ms)
+
+k = s = 64 - Active LAN 
+
+2 3 4 5 6 7 8 9 10 
+
+AND Gate Max Input Size (n) 
+
+25 
+
+30 
+
+35 
+
+40 
+
+45 
+
+50 
+
+> Runtime (s)
+
+k = s = 64 - Active WAN 
+
+2 3 4 5 6 7 8 9 10 
+
+AND Gate Max Input Size (n) 
+
+2.5 
+
+5.0 
+
+7.5 
+
+10.0 
+
+12.5 
+
+15.0 
+
+17.5 
+
+20.0 
+
+> Communication (MB)
+
+k = s = 64 - Communication             
+
+> Our (n=2) Our (n=3) Our (n=4) Our (n=5) Our (n=6) Our (n=7) Our (n=8) Our (n=9) Our (n=10) Rabbit Passive Rabbit Active =Passive, =Active
+
+Fig. 5. Performance comparison between ΠMSB 2k and Rabbit’s MSB protocol over Z2k for 10000 comparison operations. Each subplot shows our protocol’s performance across different AND gate branching factors ( n = 2 to 10 ) versus Rabbit’s baseline (restricted in n = 2 ). The first row shows results for 
+
+k = s = 32 , and the second row for k = s = 64 .
+
+reduction. Passive security achieves optimal performance at 
+
+n = 7 in LAN (752ms vs 1,684ms, 2.24 × speedup) and n = 8 
+
+in WAN (13.1s vs 25.7s, 1.96 × speedup). Active security shows similar trends with optimal values at n = 5 for LAN (1.79 × speedup) and n = 7 for WAN ( 1.86 × speedup). The results reveal several key insights. First, WAN envi-ronments consistently benefit from larger branching factors (n ≥ 6) compared to LAN settings, as the reduction in commu-nication rounds outweighs the increased per-round overhead when network latency is high. Second, optimal n values tend to increase with larger plaintext domains ( k = s = 64 favors 
+
+n = 7-8 vs k = s = 32 favoring n = 5-6), reflecting the greater benefit of reducing rounds when processing more bits. Third, passive security generally permits slightly larger JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 11 
+
+TABLE V OPTIMAL FACTOR AND PERFORMANCE COMPARISON FOR ΠMSB 2k
+
+Config Network Opt. Our Rabbit Speed-
+
+n Time Time up 
+
+32 Passive LAN 5 270ms 750ms 2.78 ×
+
+WAN 8 6.1s 13.3s 2.19 ×
+
+32 Active LAN 5 1.1s 2.3s 2.06 ×
+
+WAN 6 11.4s 27.3s 2.40 ×
+
+64 Passive LAN 7 752ms 1.7s 2.24 ×
+
+WAN 8 13.1s 25.7s 1.96 ×
+
+64 Active LAN 5 3.1s 5.5s 1.79 ×
+
+WAN 7 26.2s 48.8s 1.86 ×
+
+Config: 32/64 denotes k = s values. 
+
+optimal n values than active security due to lower per-round overhead. Across all configurations, our protocol ΠMSB 2k
+
+achieves 1.79 × to 2.78 × speedup over Rabbit, demonstrating the effectiveness of multi-input AND gate optimization. VIII. C ONCLUSION 
+
+In this work, we presented the first dealer-assisted LTBits and MSB extraction protocols over both Fp and Z2k , achieving perfect security at the protocol level while supporting general 
+
+n-party computation under diverse adversary models. Our polynomial-based construction for Fp achieves constant-round online complexity, while our multi-input AND gate optimiza-tion for Z2k reduces round complexity to O(log n k) with tun-able branching factors. Experimental evaluations demonstrate substantial speedups of 1.79 × to 19 .4× over state-of-the-art frameworks. Our protocols provide a strong foundation for privacy-preserving machine learning, where comparison operations are fundamental in neural network inference (ReLU, max pooling) and training (gradient clipping). Future work includes integrating our protocols into end-to-end PPML frameworks and extending our techniques to related primitives such as secure division and truncation. REFERENCES [1] A. C. Yao, “Protocols for secure computations,” in 23rd annual sympo-sium on foundations of computer science (sfcs 1982) . IEEE, 1982, pp. 160–164. [2] H. Dohmen, R. Hundt, N. Khayata, and T. Schneider, “Seec: memory safety meets efficiency in secure two-party computation,” in Proceedings of the 20th ACM Asia Conference on Computer and Communications Security , 2025, pp. 118–135. [3] H. Smajlovi´ c, D. Froelicher, A. Shajii, B. Berger, H. Cho, and I. Nu-managi´ c, “Shechi: A secure distributed computation compiler based on multiparty homomorphic encryption,” in 34th USENIX Security Symposium (USENIX Security 25) , 2025, pp. 7703–7722. [4] M. Keller, “How to scale multi-party computation,” in Proceedings of the 2025 Australasian Computer Science Week , 2025, pp. 1–8. [5] P. Mohassel and Y. Zhang, “Secureml: A system for scalable privacy-preserving machine learning,” in 2017 IEEE symposium on security and privacy (SP) . IEEE, 2017, pp. 19–38. [6] S. Sharma, K. J. Pradhan, P. Goyal, S. Singh, and D. Suhag, “Blockbid: A blockchain-based privacy-preserving and fair auction system,” in 
+
+International Conference on Data Analytics & Management . Springer, 2025, pp. 332–344. [7] M. Van Kenhove, E. Pohle, L. Schild, M. Zbudila, M. Sebrechts, F. De Turck, B. Volckaert, and A. Abidin, “Mozaik: A privacy-preserving analytics platform for iot data using mpc and fhe,” arXiv preprint arXiv:2601.02245 , 2026. [8] D. Beaver, “Efficient multiparty protocols using circuit randomization,” in Annual international cryptology conference . Springer, 1991, pp. 420–432. [9] A. Diaa, L. Fenaux, T. Humphries, M. Dietz, F. Ebrahimianghazani, B. Kacsmar, X. Li, N. Lukas, R. A. Mahdavi, S. Oya et al. , “Fast and private inference of deep neural networks by co-designing activation functions,” in 33rd USENIX Security Symposium (USENIX Security 24) ,2024, pp. 2191–2208. [10] D. Escudero, S. Ghosh, M. Keller, R. Rachuri, and P. Scholl, “Improved primitives for mpc over mixed arithmetic-binary circuits,” in Annual international cryptology conference . Springer, 2020, pp. 823–852. [11] E. Boyle, N. Gilboa, and Y. Ishai, “Function secret sharing,” in Annual international conference on the theory and applications of cryptographic techniques . Springer, 2015, pp. 337–367. [12] E. Makri, D. Rotaru, F. Vercauteren, and S. Wagh, “Rabbit: Efficient comparison for secure multi-party computation,” in International con-ference on financial cryptography and data security . Springer, 2021, pp. 249–270. [13] A. Y. Kei and S. S. Chow, “Shaft: Secure, handy, accurate, and fast transformer inference,” in Network and Distributed System Security Symposium, NDSS , vol. 2025, 2025. [14] N. Jawalkar, K. Gupta, A. Basu, N. Chandran, D. Gupta, and R. Sharma, “Orca: Fss-based secure training and inference with gpus,” in 2024 IEEE Symposium on Security and Privacy (SP) . IEEE, 2024, pp. 597–616. [15] K. Gupta, N. Jawalkar, A. Mukherjee, N. Chandran, D. Gupta, A. Pan-war, and R. Sharma, “Sigma: Secure gpt inference with function secret sharing,” Cryptology ePrint Archive , 2023. [16] M. Zbudila, A. Suresh, H. Yalame, O. Mirzamohammadi, A. Abidin, and B. Preneel, “Sok: Connecting the dots in privacy-preserving ml-systematization of mpc protocols and conversions between secret sharing schemes,” Cryptology ePrint Archive , 2025. [17] M. Hastings, B. Hemenway, D. Noble, and S. Zdancewic, “Sok: General purpose compilers for secure multi-party computation,” in 2019 IEEE symposium on security and privacy (SP) . IEEE, 2019, pp. 1220–1237. [18] S. Sun and E. Makri, “Sok: Multiparty computation in the preprocessing model,” Cryptology ePrint Archive , 2025. [19] I. Damg˚ ard, M. Fitzi, E. Kiltz, J. B. Nielsen, and T. Toft, “Uncon-ditionally secure constant-rounds multi-party computation for equality, comparison, bits and exponentiation,” in Theory of Cryptography Con-ference . Springer, 2006, pp. 285–304. [20] T. Nishide and K. Ohta, “Multiparty computation for interval, equality, and comparison without bit-decomposition protocol,” in International Workshop on Public Key Cryptography . Springer, 2007, pp. 343–360. [21] T. I. Reistad, “Multiparty comparison-an improved multiparty protocol for comparison of secret-shared values,” in International Conference on Security and Cryptography , vol. 1. SCITEPRESS, 2009, pp. 325–330. [22] O. Catrina and S. De Hoogh, “Improved primitives for secure multiparty integer computation,” in International Conference on Security and Cryptography for Networks . Springer, 2010, pp. 182–199. [23] H. Lipmaa and T. Toft, “Secure equality and greater-than tests with sublinear online complexity,” in International Colloquium on Automata, Languages, and Programming . Springer, 2013, pp. 645–656. [24] I. Damg˚ ard, D. Escudero, T. Frederiksen, M. Keller, P. Scholl, and N. Volgushev, “New primitives for actively-secure mpc over rings with applications to private machine learning,” in 2019 IEEE Symposium on Security and Privacy (SP) . IEEE, 2019, pp. 1102–1120. [25] X. Duan, V. Goyal, H. Li, R. Ostrovsky, A. Polychroniadou, and Y. Song, “Acco: algebraic computation with comparison,” in Proceedings of the 2021 on Cloud Computing Security Workshop , 2021, pp. 21–38. [26] K. Cheng, Y. Xia, A. Song, J. Fu, W. Qu, Y. Shen, and J. Zhang, “Mos-former: Maliciously secure three-party inference framework for large transformers,” in Proceedings of the 2025 ACM SIGSAC Conference on Computer and Communications Security , 2025, pp. 4124–4138. [27] A. Baccarini, M. Blanton, and C. Yuan, “Multi-party replicated secret sharing over a ring with applications to privacy-preserving machine learning,” Proceedings on Privacy Enhancing Technologies , 2023. [28] R. Canetti, “Universally composable security: A new paradigm for cryptographic protocols,” in Proceedings 42nd IEEE Symposium on Foundations of Computer Science . IEEE, 2001, pp. 136–145. [29] M. Keller, “Mp-spdz: A versatile framework for multi-party computa-tion,” in Proceedings of the 2020 ACM SIGSAC conference on computer and communications security , 2020, pp. 1575–1590. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 12 
+
+[30] R. Cramer, I. Damg˚ ard, D. Escudero, P. Scholl, and C. Xing, “Spd: efficient mpc mod for dishonest majority,” in Annual International Cryptology Conference . Springer, 2018, pp. 769–798. [31] S. S. Burra, E. Larraia, J. B. Nielsen, P. S. Nordholt, C. Orlandi, E. Orsini, P. Scholl, and N. P. Smart, “High-performance multi-party computation for binary circuits based on oblivious transfer,” Journal of Cryptology , vol. 34, no. 3, p. 34, 2021. [32] D. Feng and K. Yang, “A survey on concretely efficient multi-party computation,” Security and Safety , vol. 1, p. 2021001, 2022. [33] Y. Zhang, X. Chen, Y. Dong, Q. Zhang, R. Hou, Q. Liu, and X. Chen, “Md-sonic: Maliciously-secure outsourcing neural network inference with reduced online communication,” IEEE Transactions on Information Forensics and Security , 2025. [34] B. Yuan, S. Yang, Y. Zhang, N. Ding, D. Gu, and S.-F. Sun, “ {MD-ML }: Super fast {Privacy-Preserving } machine learning for malicious security with a dishonest majority,” in 33rd USENIX Security Symposium (USENIX Security 24) , 2024, pp. 2227–2244. [35] B. Karmakar, N. Koti, A. Patra, S. Patranabis, P. Paul, and D. Ravi, “Asterisk: Super-fast mpc with a friend,” in 2024 IEEE Symposium on Security and Privacy (SP) . IEEE, 2024, pp. 542–560. [36] P. Mohassel and P. Rindal, “Aby3: A mixed protocol framework for machine learning,” in Proceedings of the 2018 ACM SIGSAC conference on computer and communications security , 2018, pp. 35–52. [37] A. Patra, T. Schneider, A. Suresh, and H. Yalame, “{ABY2. 0}:Improved {Mixed-Protocol } secure {Two-Party } computation,” in 30th USENIX Security Symposium (USENIX Security 21) , 2021, pp. 2165– 2182. [38] D. Evans, V. Kolesnikov, M. Rosulek et al. , “A pragmatic introduction to secure multi-party computation,” Foundations and Trends® in Privacy and Security , vol. 2, no. 2-3, pp. 70–246, 2018. [39] J. Fu, K. Cheng, Y. Xia, A. Song, Q. Li, and Y. Shen, “Private decision tree evaluation with malicious security via function secret sharing,” in 
+
+European Symposium on Research in Computer Security . Springer, 2024, pp. 310–330. [40] K. Gupta, N. Jawalkar, A. Mukherjee, N. Chandran, D. Gupta, A. Pan-war, and R. Sharma, “Sigma: Secure gpt inference with function secret sharing,” Proceedings on Privacy Enhancing Technologies , vol. 4, p. 61´ s79, 2024. [41] C. Cr´ epeau, D. Gottesman, and A. Smith, “Secure multi-party quantum computation,” in Proceedings of the thiry-fourth annual ACM symposium on Theory of computing , 2002, pp. 643–652.

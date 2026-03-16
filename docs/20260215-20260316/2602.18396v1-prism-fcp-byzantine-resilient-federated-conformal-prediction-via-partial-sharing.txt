@@ -1,0 +1,1145 @@
+Title: PRISM-FCP: Byzantine-Resilient Federated Conformal Prediction via Partial Sharing
+
+URL Source: https://arxiv.org/pdf/2602.18396v1
+
+Published Time: Mon, 23 Feb 2026 01:53:15 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 1
+
+# PRISM-FCP: Byzantine-Resilient Federated Conformal Prediction via Partial Sharing 
+
+Ehsan Lari, Reza Arablouei, and Stefan Werner, Fellow, IEEE 
+
+Abstract —We propose PRISM-FCP (Partial shaRing and robust calIbration with Statistical Margins for Federated Conformal Prediction), a Byzantine-resilient federated conformal prediction framework that utilizes partial model sharing to improve robust-ness against Byzantine attacks during both model training and conformal calibration. Existing approaches address adversarial behavior only in the calibration stage, leaving the learned model susceptible to poisoned updates. In contrast, PRISM-FCP mitigates attacks end-to-end. During training, clients partially share updates by transmitting only M of D parameters per round. This attenuates the expected energy of an adversary’s perturbation in the aggregated update by a factor of M/D , yielding lower mean-square error (MSE) and tighter prediction intervals. During calibration, clients convert nonconformity scores into characteri-zation vectors, compute distance-based maliciousness scores, and downweight or filter suspected Byzantine contributions before estimating the conformal quantile. Extensive experiments on both synthetic data and the UCI Superconductivity dataset demonstrate that PRISM-FCP maintains nominal coverage guarantees under Byzantine attacks while avoiding the interval inflation observed in standard FCP with reduced communication, providing a robust and communication-efficient approach to federated uncertainty quantification. 
+
+Index Terms —federated learning, conformal prediction, uncer-tainty quantification, Byzantine attacks, partial sharing 
+
+I. I NTRODUCTION 
+
+# FEDERATED learning (FL) [1]–[5] is a distributed learn-ing paradigm in which a population of clients, such as smartphones, hospitals, or financial institutions, collaboratively train a shared model without exchanging raw data. Over the past few years, FL has progressed from early formulations rooted in distributed optimization [6]–[8] to increasingly large-scale and production-oriented implementations [9]–[11]. This paradigm is particularly attractive when data is inherently decentralized and centralized training is unfeasible or impractical due to privacy, regulatory, or logistical constraints [12]–[14]. However, FL also introduces new attack surfaces: the server must 
+
+This work was partially supported by the Research Council of Norway and the Research Council of Finland (Grant 354523). A conference version of this work is submitted to the 2026 European Signal Processing Conference (EUSIPCO), Bruges, Belgium, Aug. 2026. (Corresponding author: Ehsan Lari.) 
+
+Ehsan Lari is with the Department of Electronic Systems, Norwegian University of Science and Technology, 7491 Trondheim, Norway (e-mail: ehsanl@alumni.ntnu.no). Reza Arablouei is with the Commonwealth Scientific and Industrial Research Organisation, Pullenvale, QLD 4069, Australia (e-mail: reza.arablouei@csiro.au). Stefan Werner is with the Department of Electronic Systems, Norwegian University of Science and Technology, 7491 Trondheim, Norway. He is also with the Department of Information and Communications Engineering, Aalto University, 00076, Finland (e-mail: stefan.werner@ntnu.no). Digital Object Identifier XXXXXX 
+
+aggregate client-provided updates that are often unverifiable, making the learning process vulnerable to corrupted or malicious participants [15], [16]. As FL moves into high-stakes domains, reliable deployment requires not only accurate point predictions, but also calibrated uncertainty with rigorous guarantees. For instance, in a network of hospitals collaboratively training a diagnostic model, a single compromised institution could poison its updates to induce systematically overconfident predictions, leading to unsafe clinical decisions that should have been flagged as uncertain. Conformal prediction (CP) [17]–[21] is a principled frame-work for uncertainty quantification that constructs prediction sets (or intervals) with user-specified coverage, assuming only that samples are exchangeable. In regression, the distribution-free, finite-sample guarantees established in [22] provide a canonical foundation for prediction interval construction. In addition, extensions to robust conformal inference can maintain validity under distribution shift, including covariate shift [23], a property that is especially relevant in federated environments where client distributions may differ. To bring these benefits to decentralized learning, federated conformal prediction (FCP) has emerged [24]– [28], enabling clients to compute prediction intervals without sharing calibration data and addressing practical constraints such as communication efficiency and heterogeneity across clients (e.g., label shift). In network environments, Byzantine clients pose a critical challenge due to arbitrary and potentially malicious behavior that can derail collaborative training. The work in [29] formalizes this threat model and demonstrates that even a single Byzantine participant can drive gradient-based learning toward arbitrarily poor solutions. In practice, adversaries may inject misleading gradients or manipulate model updates [30], [31], degrading performance and compromising the integrity of the global model. More recently, self-driven entropy aggregation has been pro-posed for Byzantine-robust FL under client heterogeneity [32], reflecting the realistic regime in which benign clients themselves hold non-IID data. For FCP, the threat is amplified as Byzantine behavior can target not only training but also calibration. Training-phase attacks reduce predictive accuracy, whereas calibration-phase attacks can silently violate coverage guarantees by distorting the estimated conformal quantile, producing overly narrow intervals and systematic undercoverage, a particularly dangerous failure mode in safety-critical applications such as clinical decision support or financial risk assessment. To mitigate Byzantine behavior during training, a large body of work has proposed robust aggregation rules [29], [33],  
+
+> arXiv:2602.18396v1 [cs.LG] 20 Feb 2026 IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 2
+
+[34]. Coordinate-wise median and trimmed-mean estimators, for example, can suppress outlying (potentially adversarial) updates [33]. Recent advances further include Byzantine client identification with false discovery rate control [35] and privacy-preserving Byzantine-robust mechanisms [36]. However, these approaches are typically most effective when many clients participate in each round (often under assumptions akin to full participation and can suffer noticeable degradation under strong client heterogeneity and partial participation, conditions that are common in practical FL deployments. In the context of FCP, the Rob-FCP algorithm [37] addresses calibration-stage attacks by encoding local nonconformity-score distributions into characterization vectors and excluding clients whose vectors deviate significantly from the population, thereby providing certifiable coverage guarantees. Nevertheless, Rob-FCP assumes that training is secure and focuses exclusively on calibration. Conversely, robust training aggregators protect the training phase but remain oblivious to calibration-phase manipulation. As a result, existing defenses are stage-specific 
+
+and do not provide an end-to-end solution for Byzantine-resilient FCP. This gap motivates methods that can jointly defend both training and calibration while remaining communication-efficient. In this paper, we propose PRISM-FCP, which integrates partial-sharing online federated learning (PSO-Fed) [16], [38] with FCP to achieve Byzantine resilience across both training and calibration phases while reducing communication. In each round, every selected client exchanges only a randomly chosen subset of M out of D model parameters with the server. Our key motivation is that partial sharing (originally introduced for communication efficiency) provides a principled Byzantine-robustness effect at no additional computational cost to clients. Specifically, the random parameter mask acts as a stochastic filter: when a Byzantine client injects an adversarial perturbation, the perturbation energy entering the aggregated update is attenuated by a factor of M/D in expectation. This reduced Byzantine influence during training improves model accuracy, which in turn tightens the residual distributions at benign clients. Tighter residuals yield more concentrated nonconformity-score distributions. This increases separability in the characterization-vector space, improving distance-based maliciousness scoring and mitigating coverage loss and interval distortions under attack. In summary, our main contributions are:  
+
+> •
+
+Training robustness via partial sharing: We demonstrate that partial model sharing attenuates Byzantine pertur-bations by a factor proportional to M/D , reducing the steady-state mean-square error (MSE) and yielding tighter prediction intervals (Section IV).  
+
+> •
+
+Calibration robustness via improved separability: We show that this training-phase attenuation concentrates benign clients’ nonconformity-score distributions, improving the separability of characterization vectors and enhancing distance-based detection of Byzantine outliers during calibration (Section IV-D).  
+
+> •
+
+End-to-end empirical validation: Through experiments on synthetic benchmarks and the UCI Superconductivity dataset, we demonstrate that PRISM-FCP preserves nomi-nal coverage under Byzantine attacks that cause standard FCP to fail, while reducing communication relative to full-model-sharing baselines (Section V). We organize the remainder of the paper as follows. In Section II, we introduce the system model, review the PSO-Fed algorithm, and summarize CP in federated settings. In Section IV, we theoretically analyze Byzantine perturbation attenuation under partial sharing and derive the resulting interval-width scaling. In Section IV-D , we examine how training-phase attenuation improves calibration-phase Byzantine detection. In Section V, we verify our theoretical findings through numerical experiments. Finally, in Section VI, we present some concluding remarks. 
+
+Mathematical Notations: We denote scalars by italic letters, column vectors by bold lowercase letters, and matrices by bold uppercase letters. The superscripts (·)⊺ and (·)−1 denote the transpose and inverse operations, respectively, and ∥·∥ denotes the Euclidean norm. We use 1{·} as the indicator function of its event argument and ID for the D × D identity matrix. Lastly, 
+
+tr( ·) denotes the trace of a matrix, and calligraphic letters such as S and B denote sets. II. P RELIMINARIES 
+
+In this section, we introduce the considered system model, review the partial sharing mechanism used in PSO-Fed [15], [16], [38], [39], and outline CP in a federated setting. 
+
+A. System Model 
+
+We consider a federated network consisting of K clients communicating with a central server. At iteration n, client k
+
+observes a data (feature-label) pair xk,n ∈ RD and yk,n ∈ R,generated according to 
+
+yk,n = w⋆⊺xk,n + νk,n , (1) where w⋆ ∈ RD is the unknown parameter vector to be estimated collaboratively and νk,n denotes observation noise. The global learning objective is to minimize the MSE aggregated across clients: 
+
+J (w) = 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+Jk(w), (2) where the local risk at client k is 
+
+Jk(w) = E |yk,n − w⊺xk,n |2 (3) and the expectation is taken with respect to the (possibly client-dependent) data distribution at client k. In general, these client distributions may differ substantially (i.e., the data can be non-IID across clients). The FL goal is to obtain the minimizer arg min w J (w) via decentralized collaboration, without exchanging raw data. IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 3       
+
+> server (aggregate)
+> benign client benign client Byzantine client
+> (a) Full sharing ( M=D): Byzantine perturbation is passed in full.
+> server (aggregate)
+> benign client benign client Byzantine client
+> (b) Partial sharing ( M < D ): Byzantine perturbation is attenuated by M/D .
+
+Fig. 1. Illustration of how partial sharing attenuates Byzantine perturbations. 
+
+Remark 1 (Scope of the linear model): The linear regression model in (1) is adopted for analytical tractability, enabling a closed-form characterization of Byzantine perturbation attenua-tion under partial sharing. While a complete theory for more general models is beyond the scope of this work, the underlying mechanism (attenuating adversarial energy by a factor of M/D )extends conceptually beyond linear regression, and developing such analyses is an interesting direction for future work. 
+
+B. Partial Model Sharing 
+
+In our prior work [15], [16], we have studied partial model sharing through PSO-Fed in detail (see Fig. 1). Here, we summarize the mechanism most relevant to this paper. Unlike conventional FL, where the full parameter vector is exchanged between the server and clients at every iteration, PSO-Fed communicates only a subset of parameters. Specifically, at iteration n, client k receives the masked global model estimate and uploads only a masked version of its local model estimate. This masking is represented by a diagonal selection matrix 
+
+Sk,n ∈ RD×D with exactly M ones on the diagonal (and D−M
+
+zeros), which specifies the model parameters communicated between client k and the server at iteration n. Therefore, the PSO-Fed recursions for minimizing (2) are given by 
+
+ϵk,n = yk,n − [Sk,n −1wn−1 + ( ID − Sk,n −1) wk,n −1]⊺ xk,n 
+
+wk,n = Sk,n −1wn−1 + ( ID − Sk,n −1) wk,n −1 + μ xk,n ϵk,n 
+
+wn = 1
+
+|S n|
+
+X
+
+> k∈S n
+
+[Sk,n wk,n + ( ID − Sk,n ) wn−1] ,
+
+where wk,n is the local model estimate at client k and iteration 
+
+n, wn is the global model estimate at iteration n, μ is the stepsize parameter, and Sn is the set of participating clients at iteration n, and |S n| is the cardinality of Sn.
+
+C. Byzantine Attack during Training Phase 
+
+Let SB denote the set of Byzantine clients, and let βk ∈{0, 1} indicate whether client k is Byzantine ( βk = 1 if client 
+
+k ∈ S B and βk = 0 otherwise). The number of Byzantine clients is |S B |, which is assumed to be known by the server 1.We consider an uplink attack model in which, at each iteration, every Byzantine client perturbs its transmitted (partial) model update with probability pa. Specifically, we model the corruption as wk,n + τk,n δk,n , where τk,n is a Bernoulli random variable with Pr( τk,n = 1) = pa, and δk,n ∼ N (0, σ 2 
+
+> B
+
+ID ) is zero-mean white Gaussian noise [40]. Accordingly, the server receives 
+
+Sk,n wk,n + βkτk,n Sk,n δk,n instead of the benign partial update 
+
+Sk,n wk,n . This model captures stochastic Byzantine behavior that injects additive noise into the aggregation process. 
+
+Remark 2 (Stochastic vs. adversarial attack model): The Gaussian perturbation model is standard in the Byzantine-resilient distributed learning [29], [40] and enables closed-form analysis. More powerful adversaries may be adaptive and concentrate perturbations on the shared coordinates if they observe the selection masks Sk,n . In our setting, the masks are selected randomly and independently (Assumption A3 in Section IV-A ), implying that partial sharing attenuates the injected perturbation energy by a factor proportional to 
+
+M/D in expectation. Extending the guarantees to fully adaptive adversaries is an interesting direction for future work. 
+
+D. Federated Conformal Prediction 
+
+CP for regression constructs prediction intervals with a user-specified confidence level (e.g., 90% ) under the assumption of data exchangeability. Given a trained predictor, CP calculates nonconformity scores (typically absolute residuals) on a calibra-tion set and uses an empirical quantile of these scores to form prediction intervals with distribution-free marginal coverage. Importantly, these guarantees do not rely on the correctness of the underlying model and hold for arbitrary model classes. In the standard CP pipeline, we train a model on a training set and compute conformal calibration scores on a held-out cali-bration dataset {(xj , y j )}Nj=1 using the learned model parameter vector ˆw. The non-conformity score for each calibration sample is 
+
+rj = |yj − ˆw⊺xj |, j = 1 , . . . , N. (4) Let q1−α be the ⌈(N + 1)(1 − α)⌉-th order statistic of {rj }Nj=1 .Then, the two-sided (1 − α) prediction interval for a new input 
+
+x is 
+
+C(x) = [ ˆ w⊺x − q1−α, ˆw⊺x + q1−α] . (5) The confidence parameter α ∈ (0 , 1) controls interval width: smaller α yields wider intervals. Under exchangeability, CP guarantees marginal coverage 
+
+P (y ∈ C (x)) ≥ 1 − α. (6)       
+
+> 1This assumption can be relaxed to an upper bound or an estimate. IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 40.00.10.20.30.40.5Normalized Nonconformity Score
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+> 0.20
+> 0.25 Probability Benign Clients Byzantine Clients
+
+(a) Efficiency attack 0.0 0.2 0.4 0.6 0.8 1.0Normalized Nonconformity Score  
+
+> 0.00
+> 0.03
+> 0.05
+> 0.08
+> 0.10
+> 0.12
+> 0.15
+> 0.18
+> 0.20
+
+(b) Coverage attack 0.0 0.1 0.2 0.3 0.4 0.5Normalized Nonconformity Score  
+
+> 0.00
+> 0.03
+> 0.05
+> 0.08
+> 0.10
+> 0.12
+> 0.15
+> 0.18
+
+(c) Random attack 
+
+Fig. 2. Histograms illustrating the effect of different Byzantine attacks during the calibration phase: (a) efficiency attack (adversaries report all-zero normalized scores), (b) coverage attack (adversaries report all-one normalized scores), and (c) random attack (adversaries add Gaussian noise to their scores). In FL, after training of a global model ˆw, each client k
+
+holds a local calibration set {(xk,j , y k,j )}Nk 
+
+> j=1
+
+(with partial exchangeability [24], [41] assumption) and computes local nonconformity scores 
+
+rk,j = |yk,j − ˆw⊺xk,j |, j = 1 , . . . , N k. (7) Privacy constraints prevent clients from sharing raw calibration data (or even individual scores) with the server. The FCP algorithm [24] addresses this by employing secure aggregation or sketching mechanisms (e.g., T-Digest [42]) to enable the server to approximate the global conformal quantile from the pooled score population as 
+
+ˆq1−α ≈ Quantile 1−α
+
+> K
+
+[
+
+> k=1
+
+{rk,j }Nk
+
+> j=1
+
+!
+
+. (8) The resulting interval is constructed by replacing q1−α with 
+
+ˆq1−α. In practice, when the sketching/aggregation error is small, this approximation can preserve coverage closely while protecting client-level calibration privacy. 
+
+E. Byzantine Attack during Calibration Phase 
+
+During the calibration phase, Byzantine clients in SB may submit arbitrary or adversarially crafted nonconformity scores (or score summaries) instead of their true values, with the aim of biasing the global quantile estimate used to construct prediction intervals. By manipulating the estimated quantile 
+
+q1−α, adversaries can induce either overly narrow intervals (causing systematic undercoverage) or overly wide intervals (yielding vacuous uncertainty), thereby compromising the prac-tical reliability of CP. In this work, we consider three representative calibration-phase Byzantine attacks, whose effects are illustrated in Fig. 2:  
+
+> •
+
+Efficiency attack : Byzantine clients report near-zero scores (e.g., all zeros after normalization), deflating q1−α and leading to undercoverage.  
+
+> •
+
+Coverage attack : Byzantine clients report maximal scores (e.g., all ones after normalization), inflating q1−α and producing excessively wide prediction intervals.  
+
+> •
+
+Random attack : Byzantine clients perturb their scores by ad-ditive noise, injecting randomness into the quantile estimation (e.g., ˜rk,j = rk,j + ηk,j with ηk,j ∼ N (0 , σ 2 
+
+> C
+
+), optionally clipped to the score range). III. B YZANTINE -R ESILIENT FCP VIA PARTIAL SHARING 
+
+In this section, we present PRISM-FCP, an efficient FCP framework that is resilient to Byzantine attacks at both the training and calibration phases. The key insight is that the partial model sharing mechanism [16], which is originally designed for communication efficiency, also attenuates Byzantine perturbations during training. This, in turn, improves downstream calibration robustness by making benign score distributions more concentrated and hence easier to separate from outliers. 
+
+A. Mitigating Byzantine Attack during Training 
+
+Partial model sharing reduces communication overhead by allowing each participating client to exchange only a subset of model parameters with the server [15], [16]. Beyond communication savings, partial sharing also improves robustness to stochastic model-poisoning attacks. In particular, prior results establish mean and mean-square convergence of PSO-Fed under noisy Byzantine updates [16]. In this work, we exploit this built-in property to mitigate Byzantine influence during training, thereby reducing the prediction error that propagates into conformal calibration. 
+
+B. Mitigating Byzantine Attacks during Calibration 
+
+To mitigate Byzantine attacks in the calibration phase, each benign client computes nonconformity scores {rk,j }Nk 
+
+> j=1
+
+on its IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 5
+
+local calibration set and summarizes them via a histogram-based characterization vector vk ∈ ∆H defined as 
+
+vk,h = 1
+
+NkNkX
+
+> j=1
+
+1{ah−1 ≤ ˜rk,j < a h}, h = 1 , . . . , H, (9) where ˜rk,n denotes a normalized (or clipped) score mapped to 
+
+[0 , 1] , and 0 = a0 < a 1 < · · · < a H = 1 are H bin boundaries. Each entry vk,h is the empirical probability that the local scores fall into bin h. The set 
+
+∆H ≜
+
+(
+
+vk ∈ RH vk,h ≥ 0,
+
+> H
+
+X
+
+> h=1
+
+vk,h = 1 
+
+)
+
+(10) denotes the H-dimensional probability simplex. Clients transmit 
+
+vk to the server, while Byzantine clients may submit arbitrary or adversarial vectors (cf. Fig. 2 with H = 30 ). In practice, the bin boundaries {ah} can be fixed a priori based on expected residual ranges or estimated from a small benign pilot round. This histogram summary preserves coarse distributional structure without transmitting raw scores, reducing commu-nication and offering an additional privacy layer. Moreover, benign clients tend to produce similar characterization vectors, whereas Byzantine submissions typically deviate, enabling robust detection. We compute pairwise ℓ2 distances between characterization vectors as 
+
+dk,k ′ = ∥vk − vk′ ∥2 , ∀ k, k ′ ∈ { 1, · · · , K }. (11) Let Kb := K − |S B | denote the number of benign clients. Following Rob-FCP [37], we assign each client k a malicious-ness score, mk, as the sum of distances to its Kb − 1 farthest neighbors: 
+
+mk = X
+
+> k′∈FN( k,K b−1)
+
+dk,k ′ , (12) where FN( k, K b − 1) is the set of the Kb − 1 clients with the largest distances from client k. Intuitively, Byzantine clients lie farther from the benign population and hence attain larger mk.We declare the |S B | clients with the largest maliciousness scores as Byzantine and form the benign set B from the remaining clients. 
+
+Remark 3 (Handling unknown |S B |): When the number of Byzantine clients is unknown, we replace the top-|S B | filtering by a robust outlier rule such as the median absolute deviation (MAD) criterion [43]. Specifically, we compute each client’s distance to a robust population center (e.g., the coordinate-wise median characterization vector) and flag clients whose distance exceeds a MAD-based threshold. Our experiments in Section V demonstrate that both known-|S B | filtering and MAD-based filtering can preserve nominal coverage under attack. Finally, the server estimates the conformal quantile ˆq1−α
+
+using only the scores (or sketches) contributed by clients in B, and constructs prediction intervals accordingly. This calibration-stage filtering follows Rob-FCP’s robust detection procedure [37], while PRISM-FCP additionally reduces training-stage Byzantine influence and communication via partial sharing, yielding reliable prediction intervals under Byzantine attacks. IV. T HEORETICAL ANALYSIS 
+
+In this section, we provide theoretical justification for the Byzantine resilience of PRISM-FCP. Our main results are: (i) partial sharing attenuates the energy of injected Byzantine perturbations by a factor proportional to M/D per iteration, (ii) the corresponding steady-state MSE under Byzantine attacks is reduced, and (iii) this reduction translates into tighter residual distributions and hence narrower FCP prediction intervals at the same nominal coverage. Collectively, these results formalize the intuition that partial sharing acts as a stochastic filter that dilutes adversarial influence. 
+
+A. Assumptions and Definitions 
+
+To make the analysis tractable, we adopt the following standard assumptions. A1: The input vectors xk,n at each client k and iteration n are drawn from a wide-sense stationary multivariate random process with covariance Rk = Exk,n x⊺
+
+> k,n
+
+.
+
+A2: The observation noise νk,n and the Byzantine perturbations 
+
+δk,n are IID across clients and iterations. Moreover, they are mutually independent and independent of all other stochastic variables, including xk,n and Sk,n .A3: The selection matrices Sk,n are independent across clients and iterations. 
+
+B. Mean and Mean-Square Convergence and Steady-State MSE 
+
+We summarize key results from [16] for PSO-fed, which we will use to analyze PRISM-FCP under Byzantine attacks. 
+
+Lemma 1 (Mean convergence ): PSO-Fed converges in the mean sense under Byzantine attacks with a suitable stepsize [16, Sec. III-A]. 
+
+Lemma 2 (Mean-square convergence): PSO-Fed converges in the mean-square sense under Byzantine attacks with a suitable stepsize [16, Sec. III-B]. 
+
+Lemma 3 (Steady-state MSE decomposition): Under mean-square convergence, the steady-state MSE of PSO-Fed admits the decomposition [16, Sec. III-C] 
+
+E := Eϕ + Eω + EΘ. (13) 
+
+Remark 4 (Interpretation of the MSE decomposition): The steady-state MSE (13) decomposes into three additive terms: 1) Eϕ: error due to observation noise as it propagates through the learning dynamics (affected by partial sharing, client scheduling, and stepsize), 2) Eω : error induced exclusively by Byzantine perturbations (the key quantity for attack resilience), 3) EΘ: irreducible error due to observation noise that is independent of the learning dynamics. IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 6
+
+Lemma 4 (Partial sharing attenuates Byzantine contribution): 
+
+Partial sharing and client scheduling reduce the Byzantine-induced term Eω , thereby enhancing resilience to model-poisoning attacks [16, Sec. IV]. In particular, when Sk,n 
+
+selects M parameters uniformly at random, the expected energy (squared ℓ2-norm) of the injected perturbation in the aggregated update is attenuated by a factor M/D .
+
+C. Consequences of Partial Sharing for FCP Quantiles 
+
+We connect the training-phase partial sharing to the prediction-interval width. In particular, we show that attenuation of the Byzantine-induced MSE term (Lemma 4) leads to smaller param-eter error, which tightens residual (nonconformity) distributions and thus reduces the conformal quantile to form prediction intervals. A central objective of CP is to produce intervals that are both 
+
+valid (achieving target marginal coverage 1−α) and efficient (as narrow as possible). Validity is ensured by conformal quantile calibration under exchangeability, whereas efficiency depends on the distribution of nonconformity scores, which is directly influenced by the trained model’s prediction error. 
+
+Lemma 5 (Lipschitz continuity of residuals): Let rk,n (w) = 
+
+|yk,n − w⊺xk,n | denote the residual at client k and iteration n.For any w and w⋆, we have 
+
+|rk,n (w) − rk,n (w⋆)| ≤ ∥ xk,n ∥2 ∥w − w⋆∥2. (14) 
+
+Proof: Let a = yk,n − w⊺xk,n and b = yk,n − w⋆⊺xk,n . By the reverse triangle inequality, |a| − | b| ≤ | a − b|. Moreover, 
+
+a − b = ( w⋆ − w)⊺xk,n , hence 
+
+|a − b| = |(w − w⋆)⊺xk,n | ≤ ∥ w − w⋆∥2 ∥xk,n ∥2,
+
+where the last inequality follows from Cauchy-Schwarz. 
+
+Theorem 1 (Quantile stability under local density bounds): 
+
+Let q⋆ = F ⋆−1(1 −α) and qk,n = F −1
+
+> k,n
+
+(1 −α) denote the (1 −α)
+
+quantiles of the benign residual distribution F ⋆ (under w⋆) and a perturbed residual distribution Fk,n (under wk,n ), respectively. Assume there exists a neighborhood N of q⋆ such that: (i) F ⋆
+
+admits a density f ⋆ with inf t∈N f ⋆(t) ≥ fmin > 0, and (ii) 
+
+F ⋆ is Lipschitz on N with constant L, i.e., |F ⋆(t) − F ⋆(s)| ≤ 
+
+L|t − s| for all s, t ∈ N . Then, with X := rk,n (wk,n ) and 
+
+Y := rk,n (w⋆), we have 
+
+|qk,n − q⋆| ≤ 2√2Lfmin 
+
+pE |X − Y | . (15) 
+
+Proof: Since inf t∈N f ⋆(t) ≥ fmin , the inverse CDF F ⋆−1 is locally Lipschitz on N with constant 1/f min , hence |qk,n −q⋆| ≤  
+
+> 1
+> fmin
+
+sup t∈N |Fk,n (t) − F ⋆(t)|. Fix ε > 0. For any t, we have 
+
+1{X ≤ t} − 1{Y ≤ t}
+
+≤ 1{| X − Y | ≥ ε} + 1{t − ε < Y ≤ t + ε}. (16) Taking expectations gives 
+
+|Fk,n (t) − F ⋆(t)|≤ P(|X − Y | ≥ ε) +  F ⋆(t + ε) − F ⋆(t − ε)
+
+≤ E|X − Y |
+
+ε + 2 Lε, (17) where we use Markov’s inequality and the Lipschitz property of 
+
+F ⋆ on N . Optimizing over ε yields sup t∈N |Fk,n (t)−F ⋆(t)| ≤ 
+
+2p2L E|X − Y | and the claim follows. 
+
+Remark 5 (Interpreting the constant): The prefactor admits a natural decomposition. First, 1/f min arises from the local Lipschitz continuity of the inverse CDF around q⋆, which requires the benign density to be bounded away from zero in a neighborhood of q⋆. Second, the √L dependence comes from a smoothing argument that converts an expected residual perturbation, E|X − Y |, into a uniform bound on the local CDF gap sup t∈N |Fk,n (t) − F ⋆(t)|, with L capturing the local steepness of q⋆. In particular, when scores are normalized so that 
+
+L ≤ 1, the bound simplifies to |qk,n − q⋆| ≤ 2√2
+
+> fmin
+
+pE|X − Y |.
+
+Corollary 1 (Impact of partial sharing on FCP quantiles): 
+
+Let Lx := pE∥xk,n ∥22 and ewk,n := wk,n − w⋆. Under the assumptions of Theorem 1, we have 
+
+|qk,n − q⋆| ≤ 2√2Lfmin 
+
+L1/2
+
+> x
+
+
+
+E∥ ewk,n ∥22
+
+1/4
+
+. (18) 
+
+Proof: By Lemma 5, we have 
+
+|rk,n (wk,n ) − rk,n (w⋆)| ≤ ∥ xk,n ∥2 ∥ ewk,n ∥2. (19) Taking expectations and applying Cauchy-Schwarz yields 
+
+E|rk,n (wk,n ) − rk,n (w⋆)| ≤ 
+
+q
+
+E∥xk,n ∥22
+
+q
+
+E∥ ewk,n ∥22
+
+= Lx
+
+q
+
+E∥ ewk,n ∥22. (20) Substituting into Theorem 1, which bounds |qk,n − q⋆| by a constant times pE|X − Y |, gives the stated fourth-root dependence on E∥ ewk,n ∥22. Finally, Lemma 4 implies that partial sharing attenuates the injected Byzantine perturbation energy by a factor proportional to M/D , thereby reducing the steady-state 
+
+E∥ ewk,n ∥22 and consequently tightening the quantile deviation bound. 
+
+Corollary 2 (Quantile deviation via steady-state MSE de-composition): Assume the conditions of Theorem 1 and let 
+
+Lx := pE∥xk,n ∥22. If the steady-state parameter error sat-isfies lim n→∞ E∥wk,n − w⋆∥22 = E with the decomposition 
+
+E = Eϕ + Eω + EΘ in (13), then 
+
+lim sup 
+
+> n→∞
+
+|qk,n − q⋆| ≤ 2√2Lfmin 
+
+L1/2
+
+> x
+
+
+
+Eϕ + Eω + EΘ
+
+1/4
+
+.
+
+(21) Moreover, by Lemma 4, partial sharing reduces the Byzantine-induced term Eω (and hence tightens the above bound). 
+
+Remark 6 (Coverage vs. efficiency): Conformal validity is enforced by the calibration quantile construction (under ex-changeability), whereas efficiency is governed by the interval width. Byzantine perturbations degrade the trained model and increase the steady-state MSE through the Byzantine-induced IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 7
+
+term Eω in (13) . This increases the typical magnitude of residuals and hence the (1 − α) quantile used for calibration, leading to wider prediction intervals. Partial sharing mitigates this effect: by reducing Eω (Lemma 4), it decreases the resulting quantile shift and the associated interval inflation. This prediction is consistent with the empirical trends in section V. 
+
+Proposition 1 (Width perturbation bound): Let C(x) =[w⊺x − q, w⊺x + q] with width ω = 2 q. Let ω⋆ := 2 q⋆
+
+(under w⋆) and ωk,n := 2qk,n (under wk,n ). Assume the conditions of Theorem 1 hold on a neighborhood N of q⋆
+
+with inf t∈N f ⋆(t) ≥ fmin > 0 and local Lipschitz constant L
+
+for F ⋆. Let Rk := E[xk,n x⊺
+
+> k,n
+
+] and ewk,n := wk,n − w⋆. Then, 
+
+|ωk,n − ω⋆| ≤ 4√2Lfmin 
+
+tr( Rk)1/4
+
+| {z } 
+
+> =: Kω
+
+
+
+E∥ ewk,n ∥22
+
+1/4
+
+. (22) 
+
+Theorem 2 (Per-iteration Byzantine attenuation and im-plications for width inflation): Consider the training-phase Byzantine model in Section II-C , where client k uploads 
+
+wk,n +1 + βkτk,n δk,n , with τk,n ∼ Bernoulli( pa) and δk,n 
+
+having IID entries of variance σ2 
+
+> B
+
+. Under partial sharing, the transmitted perturbation is masked by Sk,n (a diagonal matrix with exactly M ones). Then the injected perturbation energy satisfies 
+
+E
+
+h
+
+βkτk,n Sk,n δk,n 
+
+> 22
+
+i
+
+= βk pa M σ 2 
+
+> B
+
+. (23) In particular, conditional on an attack occurring (i.e., τk,n = 1 )at a Byzantine client ( βk = 1 ), we have 
+
+E∥Sk,n δk,n ∥22 τk,n = 1  = M σ 2 
+
+> B
+
+, (24) whereas under full sharing ( M = D) the corresponding energy is 
+
+Dσ 2 
+
+> B
+
+. Hence, partial sharing reduces the instantaneous injected energy by the exact factor M/D relative to full sharing. Let ωk,n = 2 qk,n and ω⋆ = 2 q⋆ denote the conformal interval widths under wk,n and w⋆, respectively, and define the steady-state width inflation Φ( M ) := lim sup n→∞ |ωk,n − ω⋆|. If Proposition 1 bounds |ωk,n −ω⋆| by a constant times  E∥wk,n −
+
+w⋆∥22
+
+1/4 and Lemma 3 provides the steady-state decomposition 
+
+E = Eϕ + Eω + EΘ, then 
+
+Φ( M ) ≤ eK  Eϕ(M ) + Eω (M ) + EΘ
+
+1/4, (25) for an explicit constant eK inherited from Proposition 1. While (23) gives an exact M/D reduction in the instantaneous injected energy, the resulting dependence of Eω (M ) (and also Eϕ(M ))on M is determined by how the attenuated perturbations propagate through the system dynamics via the selection matrices Sk,n .
+
+Proof: Since Sk,n is diagonal with exactly M ones and δk,n 
+
+has IID entries with variance E[δ2
+
+> k,n,d
+
+] = σ2 
+
+> B
+
+, we have 
+
+E ∥Sk,n δk,n ∥22
+
+ =
+
+> D
+
+X
+
+> d=1
+
+[Sk,n ]2 
+
+> dd
+
+E[δ2
+
+> k,n,d
+
+] = M σ 2 
+
+> B
+
+.
+
+Multiplying by βk and using E[τ 2
+
+> k,n
+
+] = E[τk,n ] = pa yields (23) . The M/D reduction in (24) follows by comparing M σ 2
+
+> B
+
+to the full-sharing case Dσ 2 
+
+> B
+
+.For the steady-state width bound in (25) , Proposition 1 links the width deviation to the fourth root of the steady-state parameter error (MSE). By Lemma 3, this errors decomposes as 
+
+E = Eϕ(M ) + Eω (M ) + EΘ. The Byzantine component Eω (M )
+
+reflects the attenuated injected energy in (23) , while its steady-state impact is determined by how this perturbation propagates through the system dynamics via the involved matrices whose spectral properties also depend on M .
+
+D. How Training-Phase Partial Sharing Improves Calibration 
+
+In Section IV-C , we showed that partial sharing yields tighter conformal intervals by reducing the steady-state MSE and hence the residual quantiles. Here, we show an additional benefit: it also improves Byzantine detection during calibration. The key insight is that smaller training error concentrates benign clients’ nonconformity-score histograms, increasing their separation from Byzantine outliers and enabling more reliable filtering. We adopt the histogram-based characterization approach of Rob-FCP [37], which summarizes each client’s local score distribution by a finite-dimensional vector and applies distance-based outlier detection. We show that partial sharing strengthens this procedure, i.e., by reducing training error, it makes benign histograms more tightly clustered, thereby increasing the detec-tion margin and further tightening the post-filtering quantiles. 
+
+Remark 7 (Homogeneity assumption and non-IID extension): 
+
+For analytical tractability, we assume benign clients’ calibration residuals are IID drawn from distributions Fk that are small perturbations of a common reference F ⋆. In practice, federated clients often hold heterogeneous (non-IID) data, hence popula-tion histograms may differ across benign clients even under the optimal model. Our experiments in Section V include non-IID data and still yield effective filtering, suggesting robustness to moderate heterogeneity in practice. Let F ⋆ denote the benign residual CDF under the optimal parameter vector w⋆. After training, all clients calibrate using a trained model bw (e.g., the steady-state global model), and define the parameter error e := bw − w⋆. Client k holds Nk
+
+calibration residuals rk, 1, . . . , r k,N k drawn IID from a residual distribution Fk that is a perturbation of F ⋆ induced by e2
+
+We partition the (normalized/clipped) score range [0 , 1] into H
+
+bins [ah−1, a h) and form the empirical histogram vector vk ∈
+
+∆H . Define the corresponding benign population histogram 
+
+p⋆ :=  F ⋆(ah) − F ⋆(ah−1)Hh=1 , and let q ∈ ∆H denote an attack-dependent adversarial mean histogram. Intuitively, partial sharing reduces ∥e∥ and hence makes benign vk concentrate more tightly around p⋆, whereas Byzantine submissions tend to deviate toward q (cf. Fig. 2). Following Rob-FCP [37], the server computes pairwise distances and assigns each client a             
+
+> 2For linear models with square loss, Lemma 5implies that residual perturbations scale as O(∥e∥), which in turn induces a small local perturbation of the residual CDF. IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 8
+
+maliciousness score based on its farthest neighbors: dk,k ′ := 
+
+∥vk − vk′ ∥2, mk := P 
+
+> k′∈FN( k,K b−1)
+
+dk,k ′ , where FN( k, K b −
+
+1) is the set of the Kb − 1 farthest clients from k and Kb := 
+
+K − |S B | is the expected number of benign clients. The server then retains the Kb clients with the smallest maliciousness scores as the benign set used for quantile estimation. 
+
+Lemma 6 (Histogram concentration for benign clients): Let a benign client k have Nk IID calibration residuals, binned into 
+
+H fixed intervals [ah−1, a h) to form the empirical histogram 
+
+vk ∈ ∆H , with population vector pk = E[vk]. Then, for any 
+
+δ ∈ (0 , 1) , with probability at least 1 − δ, we have 
+
+∥vk − pk∥2 ≤ CH
+
+s
+
+log(2 H/δ )
+
+Nk
+
+, (26) where one can take CH = √3. The constant depends only on the boundedness of the one-hot bin indicators and not on Nk.
+
+Proof: Let zj ∈ { e1, . . . , e H } be the one-hot vector indicating the bin of the j-th residual. Then, vk = 1
+
+> Nk
+
+PNk 
+
+> j=1
+
+zj and pk =
+
+E[z1]. Define ξj = zj − pk, which are independent, mean-zero, and satisfy ∥ξj ∥2 ≤ ∥ zj ∥2 + ∥pk∥2 ≤ 1 + 1 = √2. Applying a vector Bernstein (or Hilbert-space Hoeffding) inequality [44] to ξ = PNk 
+
+> j=1
+
+ξj yields 
+
+P(∥vk − pk∥2 ≥ ε) = P(∥ξ∥2 ≥ Nkε) ≤ 2H exp 
+
+
+
+− Nkε2
+
+3
+
+
+
+.
+
+(27) Setting ε =
+
+q 3 
+
+> Nk
+
+log(2 H/δ ) completes the proof. 
+
+Lemma 7 (Training error causes benign histogram drift): Let 
+
+r(w) := |y − x⊺w| be the residual of linear regression and 
+
+Lx := pE∥xk,n ∥22. Fix H bins with boundaries {ah}Hh=0 and let p⋆ be the benign population histogram under w⋆, and pk
+
+the population histogram under w = w⋆ + ek. Assume the benign residual distribution under w⋆ admits a density f ⋆ such that sup h=0 ,...,H f ⋆(ah) ≤ fmax < ∞. Then, we have 
+
+∥pk − p⋆∥2 ≤ 2p2( H + 1) fmax Lx ∥ek∥2. (28) Equivalently, ∥pk −p⋆∥2 ≤ Cbin fmax Lx ∥ek∥2 where Cbin := 2p2( H + 1) depends only on the binning. 
+
+Proof: Let r⋆ := r(w⋆) = |y − x⊺w⋆| and rk := r(w⋆ +
+
+ek) = |y − x⊺(w⋆ + ek)|, with CDFs F ⋆ and Fk, respectively. By Lemma 5, we have |rk −r⋆| ≤ ∥ x∥2 ∥ek∥2 =: ∆( x). Hence, for any t ≥ 0,
+
+{r⋆ ≤ t − ∆( x)} ⊆ { rk ≤ t} ⊆ { r⋆ ≤ t + ∆( x)}.
+
+Taking probabilities over (x, y ) yields 
+
+F ⋆(t − ∆( x)) ≤ Fk(t) ≤ F ⋆(t + ∆( x)) .
+
+Therefore, 
+
+|Fk(t) − F ⋆(t)| ≤ F ⋆(t + ∆( x)) − F ⋆(t − ∆( x)) .
+
+Assuming F ⋆ admits a density f ⋆ with sup u∈R f ⋆(u) ≤ fmax 
+
+(in particular at the bin edges), the mean-value bound gives 
+
+F ⋆(t + ∆( x)) − F ⋆(t − ∆( x)) ≤ 2fmax ∆( x).
+
+Taking expectations over x and using Cauchy-Schwarz, 
+
+|Fk(t) − F ⋆(t)| ≤ 2fmax E[∆( x)] = 2 fmax ∥ek∥2 E∥x∥2
+
+≤ 2fmax ∥ek∥2
+
+q
+
+E∥x∥22
+
+= 2 fmax Lx ∥ek∥2. (29) Now define the edge deviations gh := Fk(ah) − F ⋆(ah) for 
+
+h = 0 , . . . , H , so that each bin-mass difference is 
+
+(pk − p⋆)h =  Fk(ah) − Fk(ah−1) −  F ⋆(ah) − F ⋆(ah−1)
+
+= gh − gh−1, h = 1 , . . . , H. (30) Let g := ( g0, . . . , g H )⊺ and let B ∈ RH×(H+1) be the first-difference matrix such that pk − p⋆ = Bg . Since each row of 
+
+B has exactly one +1 and one −1, we have ∥B∥2 ≤ √2, and hence 
+
+∥pk − p⋆∥2 ≤ ∥ B∥2 ∥g∥2 ≤ √2 ∥g∥2 ≤ p2( H + 1) ∥g∥∞.
+
+Using the CDF bound at t = ah gives 
+
+∥g∥∞ = max  
+
+> h
+
+|gh| ≤ 2fmax Lx∥ek∥2,
+
+and therefore 
+
+∥pk − p⋆∥2 ≤ 2p2( H + 1) fmax Lx ∥ek∥2, (31) which proves the claim. 
+
+Proposition 2 (Separation margin improves under partial sharing): Let ∆ := ∥q − p⋆∥2 denote the (attack-dependent) separation between the adversarial mean histogram q and the benign population histogram p⋆. Let Kb be the number of benign clients and Nmin := min k∈B Nk. Assume Lemma 7 gives ∥pk − p⋆∥2 ≤ Cdrift Lx ∥ek∥2 for benign k (with Cdrift 
+
+depending only on the binning and fmax ), and define erms := max k∈B 
+
+pE∥ek∥22. Then, with probability at least 1 − δ over benign sampling, 
+
+min   
+
+> Byz j
+
+min   
+
+> benign k
+
+∥vj − vk∥2 ≥ ∆ − rb − ra, (32) where rb := CH
+
+q log(2 HK b/δ ) 
+
+> Nmin
+
++ Cdrift Lx erms and ra is a radius controlling adversarial concentration around q (e.g., analogous to the first term if the attack is stochastic). Moreover, partial sharing reduces the Byzantine-induced steady-state error component Eω (M ) (Lemma 4), which decreases erms in attack-dominated regimes, thereby shrinking rb and increasing the separation margin ∆ − rb − ra.
+
+Proof (sketch): For any Byzantine j and benign k, by the triangle inequality, 
+
+∥vj − vk∥2 ≥ ∥ q − p⋆∥2 − ∥ vj − q∥2 − ∥ vk − p⋆∥2.
+
+The benign term satisfies ∥vk −p⋆∥2 ≤ ∥ vk −pk∥2+∥pk −p⋆∥2.Apply Lemma 6 with a union bound over Kb benign clients IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 9
+
+to bound max k∈B ∥vk − pk∥2 by the first term in rb, and apply Lemma 7 plus Jensen to bound max k∈B ∥pk − p⋆∥2 by 
+
+Cdrift Lxerms . The adversarial term is controlled by ra. Taking minima yields the claim. 
+
+Theorem 3 (Distance-based filtering under partial sharing): 
+
+Consider the calibration-stage filtering in Section III-B , where maliciousness scores {mk}Kk=1 are computed according to (12) and the B := |S B | clients with the largest scores are removed. Let Kb := K − B and define ∆ := ∥q − p⋆∥2, where p⋆ is the benign population histogram and q is the adversarial mean histogram. Let Nmin := min k∈B Nk and define 
+
+rb := CH
+
+s
+
+log(2 HK b/δ )
+
+Nmin 
+
++ Cdrift Lx erms , (33) where erms upper bounds benign regression error (as defined in Proposition 2) and Cdrift is the drift constant from Lemma 7. Assume an adversarial concentration radius ra such that 
+
+max j∈S B ∥vj − q∥2 ≤ ra holds with probability at least 1 − δa,and assume B < K b − 1. Define γ := ∆ − ra − rb and 
+
+Γ := ∆ + ra + rb. If the score-separation condition 
+
+(Kb − 1) γ > B Γ + ( Kb − 1 − B) 2 rb (34) holds, then with probability at least 1 − (δ + δa) the filtering is exact (no benign client is removed and no Byzantine client is retained). In particular, P(misfiltering ) ≤ δ + δa. Moreover, under partial sharing, the Byzantine-induced steady-state training error decreases (Lemma 4), which reduces erms (in attack-dominated regimes), shrinks rb in (33) , and makes (34) easier to satisfy. 
+
+Proof: See Appendix A. Building on the filtering guarantee of Theorem 3, we obtain the following corollaries. 
+
+Corollary 3 (Post-filtering quantile bias): Let bC denote the set of clients retained by the calibration-stage filter (Section III-B ). Let ˆq1−α be the (1 − α) conformal quantile computed from the 
+
+scores (or sketches) contributed by clients in bB, and let q⋆
+
+> 1−α
+
+denote the corresponding benign quantile under w⋆. Define the filtering failure probability ε := P( bB̸ = B). Under the hypotheses of Theorem 3, ε ≤ δ + δa (and, for the standard parameter choices in Lemma 6, it decays exponentially in Nmin ). Assume the local density conditions of Theorem 1 hold around 
+
+q⋆
+
+> 1−α
+
+. Then 
+
+|ˆq1−α − q⋆
+
+> 1−α
+
+| ≤ Cq
+
+
+
+E∥ek∥22
+
+1/4
+
+| {z }
+
+> training-phase effect
+
++ Cadv ε
+
+| {z } 
+
+> residual adversaries
+
+, (35) where Cq is the constant from Corollary 1 (or Corollary 2), and 
+
+Cadv depends only on the score range (e.g., Cadv = 1 if scores are normalized to [0 , 1] ). Consequently, partial sharing reduces the first term via training MSE attenuation and, by increasing the separation margin γ, suppresses ε, tightening the overall calibration quantile. 
+
+Corollary 4 (Coverage bounds under Byzantine attacks): Let 
+
+K be the total number of clients, Kb = K − |S B | the number of benign clients, and nb the number of calibration samples per benign client. Let ε denote the filtering failure probability (a Byzantine client passes the filter). For the post-filtering empirical coverage dCov , following the certification framework of [37], with probability at least 1 − β, we have 1 − α − δL ≤ dCov ≤
+
+1 − α + δU , where 
+
+δL = εn b + 1 
+
+nb + Kb
+
++ H · Φ−1(1 − β/ (2 HK b)) 2√nb
+
+· 1 + τ
+
+1 − τ ,δU = ε + Kb
+
+nb + Kb
+
++ H · Φ−1(1 − β/ (2 HK b)) 2√nb
+
+· 1 + τ
+
+1 − τ ,
+
+(36) with τ = ( K − Kb)/K b and Φ−1 the standard normal quantile function. 
+
+Corollary 5 (Tighter bounds under partial sharing): Under PRISM-FCP with partial sharing ratio M/D < 1, the coverage bounds in Corollary 4 are tightened through a reduction in the filtering failure probability ε.
+
+Mechanism. By Theorem 3, filtering succeeds with probability at least 1 − (δ + δa) whenever the score-separation condition holds, with benign radius rb and error level erms as defined therein. Partial sharing attenuates Byzantine influence during training (Lemma 4), reducing erms (in attack-dominated regimes) and hence shrinking rb, which enlarges the separation margin 
+
+γ = ∆ − ra − rb. This decreases the failure probability ε and tightens both δL and δU , since they are monotone increasing in ε.V. S IMULATION RESULTS 
+
+A. Synthetic-Data Experiments Experimental setup. We consider a federated network of 
+
+K = 100 clients. At each training iteration, the server uniformly samples |S n| = 10 clients to participate. Each client k
+
+observes a non-IID stream (xk,n , y k,n ) generated by the linear model (1) , with the ground-truth parameter vector normalized as 
+
+∥w⋆∥2 = 1 . We set the model dimension to D = 50 and apply partial sharing with M = 15 parameters per iteration (sharing ratio M/D = 0 .3), which corresponds to a 70% reduction in the number of exchanged parameters. The entries of xk,n 
+
+are drawn from zero-mean Gaussian distributions with client-specific variances ς2 
+
+> k
+
+∼ U (0 .2, 1.2) , while the observation noise is Gaussian with variance σ2 
+
+> νk
+
+∼ U (0 .005 , 0.025) . All results are averaged over 100 independent Monte Carlo trials. 
+
+Byzantine model. We consider |S B | = 20 Byzantine clients (20% of the network). During training, these clients inject additive Gaussian perturbations into their transmitted model updates with probability pa = 0 .25 , using variance σ2 
+
+> B
+
+= 0 .1
+
+(cf. Section II-C ). During calibration, the same Byzantine clients submit adversarial nonconformity scores according to three attack scenarios (Fig. 2): (i) efficiency attack (deflating scores to shrink intervals by sending all-zero scores), (ii) coverage attack (inflating scores to widen intervals by sending scores IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 10 Efficiency Coverage Random Attack Type 10 20 30 40 50 60 Maliciousness Score  mk
+
+> Byzantine
+
+Fig. 3. Distribution of maliciousness scores mk (cf. (12) ) under different calibration-phase Byzantine attacks. Byzantine clients (red) attain markedly larger scores than benign clients, enabling reliable outlier filtering. 
+
+10 × the benign mean), and (iii) random attack (adding zero-mean Gaussian noise with variance σ2 
+
+> C
+
+= 0.5 to original scores while keeping them nonnegative). We set the size of the characterization vectors to H = 100 to balance histogram resolution and communication cost, and target 90% coverage (i.e., α = 0 .1 in (8)). 
+
+Maliciousness-score separation. In Fig. 3, we show the mali-ciousness scores of all clients under the three calibration attacks. In each case, Byzantine clients concentrate on substantially larger scores than benign clients, making them clear outliers and enabling reliable filtering prior to quantile estimation. Note that random attacks present a particularly formidable challenge in the context of mitigation strategies. As the variance of the added Gaussian noise diminishes, specifically when σ2 
+
+> C
+
+≤ 0.2,the difficulty associated with effectively countering these attacks increases. This phenomenon can be attributed to the increasingly covert nature of the random attacks, making their detection and subsequent mitigation notably more complex. Consequently, addressing the subtlety of these reduced-variance random attacks necessitates the development of more sophisticated and nuanced approaches in future works to ensure resilience. We present the marginal coverage and average prediction-interval width for FCP, Rob-FCP, and PRISM-FCP under the same Byzantine attack scenarios as in Fig. 4 and Table I. We train for 1,000 iterations, then perform conformal calibration using 1,000 samples and evaluate on 1,000 test samples per client. For clarity, in Fig. 4, we only visualize the first 30 test samples. In Table I, we compare FCP, Rob-FCP, and PRISM-FCP under Byzantine attacks that affect both the training and calibration phases. Rob-FCP uses full model sharing ( M/D = 1 ) with Byzantine filtering, while FCP uses full sharing without filtering. Under the coverage attacks, FCP exhibits inflated coverage (100 .0% ) together with interval widths that are 8.4× larger than TABLE I: Marginal coverage and average interval width under different Byzantine attacks ( K = 100 clients, |S B | = 20 
+
+Byzantine, D = 50 , α = 0 .1).                                                                    
+
+> Attack Method M/D Coverage ( %)Interval Width Efficiency PRISM-FCP 0.3 90 .0±0.10.91 ±0.13
+> Rob-FCP 1.0 90 .0±0.11.68 ±0.28
+> FCP 1.0 87 .5±0.21.58 ±0.25
+> Coverage PRISM-FCP 0.3 90 .0±0.10.91 ±0.13
+> Rob-FCP 1.0 90 .0±0.11.68 ±0.28
+> FCP 1.0 100 .0±0.07.67 ±1.23
+> Random PRISM-FCP 0.3 90 .0±0.10.91 ±0.13
+> Rob-FCP 1.0 90 .0±0.11.68 ±0.28
+> FCP 1.0 91 .9±0.61.87 ±0.27
+
+PRISM-FCP, while both PRISM-FCP and Rob-FCP remain close to the nominal 90% target. Under the efficiency and random attacks, the three methods achieve similar coverage, but PRISM-FCP consistently produces tighter intervals, reflecting its lower training error. Overall, these results show that calibration-phase filtering is necessary for reliable uncertainty quantification under adversarial manipulation. PRISM-FCP further improves over Rob-FCP by substantially tightening the prediction intervals. Although both methods filter Byzantine clients during calibration, PRISM-FCP yields intervals that are 1.8× narrower than Rob-FCP by additionally mitigating Byzantine influence during training via partial sharing. This agrees with Theorem 2, which predicts an M/D attenuation of injected perturbation energy. The training MSE corroborates this effect: PRISM-FCP achieves an MSE of −26 .4dB compared to Rob-FCP’s MSE of −21 .4dB (5dB improvement), consistent with the MSE decomposition in Lemma 3. Fig. 5 corroborates Corollary 2 by reporting the calibration-quantile deviation across sharing ratios. The deviation decreases monotonically with M/D , and at M/D = 0 .1 it is roughly 
+
+70% smaller than under full sharing ( M/D = 1 ). This trend aligns with the MSE decomposition in Lemma 3: partial sharing attenuates the Byzantine-induced term Eω (Lemma 4), which in turn reduces the perturbation of residuals and the resulting conformal quantile. 
+
+Robustness to unknown |S B |. PRISM-FCP can be deployed either with a known Byzantine count |S B |, where score-based filtering excludes exactly |S B | clients, or without this knowledge using a MAD-based outlier rule with a scale factor 1.4826 and a threshold of 2.5 as its parameters. Across all three attack types, the known-|S B | setting achieves perfect detection ( 20 /20 
+
+true positives and no false positives). When |S B | is unknown, a practical alternative is to flag outliers using a robust MAD-based rule (Remark 3). The MAD rule also attains 100% recall, while incurring roughly one false positive on average. Importantly, both settings preserve nominal coverage ( 90% ), indicating that PRISM-FCP remains robust even when |S B | is not known a priori. 
+
+B. Real-Data Experiments (UCI Superconductivity Dataset) 
+
+To demonstrate practical applicability, we evaluate PRISM-FCP on the UCI Superconductivity dataset [45], which contains IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 11 5 10 15 20 25 30 Time Index ( n)
+
+> −3
+> −2
+> −1012Target Value  y
+
+(a) Efficiency attack 5 10 15 20 25 30 Time Index ( n) 
+
+> −4
+> −2024
+
+(b) Coverage attack 5 10 15 20 25 30 Time Index ( n) 
+
+> −3
+> −2
+> −1012
+
+(c) Random attack 
+
+Fig. 4. Illustrative prediction intervals under (a) efficiency, (b) coverage, and (c) random attacks. The true target values are shown as dashed lines, while prediction intervals from FCP and PRISM-FCP ( M/D = 0 .3) are shown in red and green, respectively. 0.0 0.2 0.4 0.6 0.8 1.0Sharing Ratio M/D 
+
+0.0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1.0Quantile Deviation 
+
+Fig. 5. Quantile deviation |ˆq1−α − q⋆
+
+> 1−α
+
+| of PRISM-FCP versus sharing ratio M/D under different types of Byzantine attacks. 
+
+21 ,263 samples with D = 81 features describing material properties, with the target being the critical temperature, in Kelvin (K), at which superconductivity occurs. 
+
+Experimental Setup. We distribute the dataset across K = 100 
+
+clients, including |S B | = 20 Byzantine clients. Each client is assigned 3,000 samples, split into 1,000 training, 1,000 
+
+calibration, and 1,000 test samples. 3 At each training iteration, the server uniformly samples |S n| = 20 clients to participate. Features are standardized to zero mean and unit variance, and targets are normalized similarly. As before, we compare: (i) PRISM-FCP with partial sharing ( M < D ) and Byzantine filtering, (ii) Rob-FCP with full sharing ( M = D) and Byzantine filtering, and (iii) FCP with full sharing and no filtering.       
+
+> 3To simulate non-IID data heterogeneity, we partition the target variable (critical temperature) into 10 equal-frequency quantile bins and draw each client’s mixing proportions over these bins from a Dir(0 .5) distribution [46]. Each client receives 3,000 samples accordingly, with overlap permitted across clients.
+
+TABLE II: Evaluation results on the UCI Superconductivity dataset with D = 81 .                                                                                                                      
+
+> Attack Method M/D Coverage ( %)Interval Width (K) Efficiency PRISM-FCP 0.25 90 .0±0.164 .09 ±1.25
+> 0.49 90 .0±0.166 .43 ±1.99
+> 0.74 90 .0±0.269 .87 ±2.81
+> 1.0 90 .0±0.274 .33 ±4.37
+> Rob-FCP 1.0 90 .0±0.274 .33 ±4.37
+> FCP 1.0 87 .5±0.269 .36 ±4.10
+> Coverage PRISM-FCP 0.25 90 .0±0.164 .09 ±1.25
+> 0.49 90 .0±0.166 .43 ±1.99
+> 0.74 90 .0±0.269 .87 ±2.81
+> 1.0 90 .0±0.274 .33 ±4.37
+> Rob-FCP 1.0 90 .0±0.274 .33 ±4.37
+> FCP 1.0 100 .0±0.0364 .98 ±22 .33
+> Random PRISM-FCP 0.25 90 .0±0.164 .33 ±1.28
+> 0.49 90 .0±0.166 .66 ±2.04
+> 0.74 90 .0±0.270 .09 ±2.86
+> 1.0 90 .0±0.274 .52 ±4.39
+> Rob-FCP 1.0 90 .0±0.274 .52 ±4.39
+> FCP 1.0 91 .7±0.378 .43 ±4.17
+
+We sweep sharing ratios M/D ∈ { 0.25 , 0.49 , 0.74 , 1.0} (i.e., 
+
+M ∈ { 20 , 40 , 60 , 81 }) and average results over 100 independent trials. The target coverage is 1 − α = 90% .In Table II, we present marginal coverage and average interval width under the three calibration-phase attack scenarios. The results corroborate the synthetic experiments and validate PRISM-FCP on real-world data: 
+
+Coverage validity. Across all three attacks and all sharing ratios, PRISM-FCP stays close to the 90% coverage target, indicating that partial sharing does not compromise conformal validity in practice. In contrast, FCP without Byzantine filtering fails under adversarial calibration: it substantially inflates intervals under coverage attacks (reaching 100 .0% coverage with widths exceeding 5×) and undercovers under efficiency attacks (e.g., 87 .5% coverage). 
+
+Interval efficiency. PRISM-FCP yields tighter intervals than Rob-FCP. For example, at M/D = 0 .25 (M = 20 ), PRISM-FCP produces intervals that are about 13% narrower than Rob-FCP across all three attacks. This improvement is attributable IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 12 
+
+to reduced training error from partial sharing, which attenuates Byzantine influence during training. 
+
+Communication-accuracy trade-off. Smaller sharing ratios generally tighten intervals due to stronger Byzantine attenuation, but the benefit saturates around M/D ≈ 0.5. In particular, reducing M/D from 0.49 to 0.25 provides only marginal additional width reduction while slightly slowing convergence, suggesting 0.3 ≤ M/D ≤ 0.5 as a practical operating range that balances efficiency and communication cost. 
+
+Attack-type invariance. The relative advantage of PRISM-FCP over Rob-FCP is stable across efficiency, coverage, and random attacks, consistent with the interpretation that training-stage mitigation via partial sharing complements the calibration-phase filtering. Overall, PRISM-FCP provides two complementary benefits: (i) resilience to Byzantine behavior in both training and calibration, and (ii) communication efficiency through partial model parameter sharing and client subsampling, making it a practical approach for scalable FCP. VI. C ONCLUSION AND FUTURE WORK 
+
+We proposed PRISM-FCP to mitigate Byzantine attacks in both training and calibration phases of federated conformal prediction. We showed that partial sharing attenuates adversarial perturbation energy during training, reducing steady-state error and tightening prediction intervals, while histogram-based filter-ing strengthens robustness during calibration. Comprehensive experiments on both synthetic and real data corroborated our theoretical analysis. Several directions merit future investigation. Extending the theory beyond linear regression to nonlinear models and deep networks is an important next step. In addition, analyzing robustness against fully adaptive adversaries that exploit partial-sharing patterns will further strengthen the guarantees. APPENDIX APROOF OF THEOREM 3We prove that on a high-probability event, every Byzantine client has a strictly larger maliciousness score than every benign client, hence removing the B largest scores recovers exactly the Byzantine set. 
+
+Step 1: Benign histogram concentration. For each benign client k ∈ B , Lemma 6 implies that for any δ′ ∈ (0 , 1) ,
+
+P
+
+∥vk − pk∥2 > C H
+
+s
+
+log(2 H/δ ′)
+
+Nk
+
+ ≤ δ′. (37) Choose δ′ = δ/K b and use Nk ≥ Nmin to get 
+
+P
+
+∥vk − pk∥2 > C H
+
+s
+
+log(2 HK b/δ )
+
+Nmin 
+
+ ≤ δKb
+
+. (38) A union bound over all benign clients yields the event 
+
+Eb := 
+
+max  
+
+> k∈B
+
+∥vk − pk∥2 ≤ CH
+
+s
+
+log(2 HK b/δ )
+
+Nmin 
+
+ (39) satisfies P(Eb) ≥ 1 − δ.
+
+Step 2: Drift due to training error. Lemma 7 gives, for each benign k, ∥pk − p⋆∥2 ≤ Cdrift Lx ∥ek∥2. By the definition of 
+
+erms used in the manuscript (as an upper bound on benign regression error), we have ∥ek∥2 ≤ erms for benign k, hence 
+
+max k∈B ∥pk − p⋆∥2 ≤ Cdrift Lx erms . Combining this with Eb
+
+and the triangle inequality, 
+
+max  
+
+> k∈B
+
+∥vk − p⋆∥2 ≤ max  
+
+> k∈B
+
+∥vk − pk∥2 + max  
+
+> k∈B
+
+∥pk − p⋆∥2 ≤ rb
+
+on Eb, where rb is defined in (33). 
+
+Step 3: Adversarial concentration and distance bounds. Define the adversarial concentration event 
+
+Ea := {max j∈S B ∥vj − q∥2 ≤ ra}, which holds with probability at least 1 − δa by (3) . Let E := Eb ∩ E a, thus 
+
+P(E) ≥ 1 − (δ + δa). Conditioning on E, for any two benign clients k, k ′, we have 
+
+∥vk − vk′ ∥2 ≤ ∥ vk − p⋆∥2 + ∥vk′ − p⋆∥2 ≤ 2rb.
+
+For any Byzantine client j and benign client k, the triangle inequality yields the lower bound 
+
+∥vj − vk∥2 ≥ ∥ q − p⋆∥2 − ∥ vj − q∥2 − ∥ vk − p⋆∥2
+
+≥ ∆ − ra − rb =: γ, (40) and similarly, the upper bound 
+
+∥vj − vk∥2 ≤ ∥ vj − q∥2 + ∥q − p⋆∥2 + ∥vk − p⋆∥2
+
+≤ ∆ + ra + rb =: Γ . (41) 
+
+Step 4: Lower bound on Byzantine scores. Fix any Byzantine client j ∈ S B . There are Kb benign clients, and by the bound above, each benign k satisfies ∥vj − vk∥2 ≥ γ. Consider any subset T ⊆ B with |T | = Kb − 1. Then, 
+
+X
+
+> k∈T
+
+∥vj − vk∥2 ≥ (Kb − 1) γ. 
+
+Since FN( j, K b − 1) contains the Kb − 1 largest distances from 
+
+j, its sum is at least the sum over any Kb − 1 clients, hence 
+
+mj = X
+
+> k′∈FN( j,K b−1)
+
+∥vj − vk′ ∥2 ≥ (Kb − 1) γ. 
+
+Step 5: Upper bound on benign scores. Fix any benign client 
+
+k ∈ B . Among its Kb − 1 farthest neighbors, at most B can be Byzantine (there are only B Byzantine clients total). For any benign neighbor k′ we have ∥vk − vk′ ∥2 ≤ 2rb, and for any Byzantine neighbor j we have ∥vk − vj ∥2 ≤ Γ. Therefore, 
+
+mk = X
+
+> k′∈FN( k,K b−1)
+
+∥vk − vk′ ∥2 ≤ BΓ + ( Kb − 1 − B)2 rb.
+
+Step 6: Score separation implies exact filtering. By Steps 4–5, on E we have for every Byzantine j and benign k, mj ≥
+
+(Kb − 1) γ, mk ≤ BΓ + ( Kb − 1 − B)2 rb. Under condition (34) ,this yields mj > m k for all Byzantine j and benign k. Hence the B largest scores {mk} belong exactly to the Byzantine clients, so filtering by (12) is exact on E.IEEE TRANSACTIONS ON SIGNAL PROCESSING, VOL. XX, 2026 13 
+
+Step 7: Misfiltering probability. Since misfiltering can occur only if E fails, 
+
+P(misfiltering ) ≤ P(Ec) ≤ P(Ecb ) + P(Eca) ≤ δ + δa,
+
+which completes the proof. REFERENCES [1] H. B. McMahan, E. Moore, D. Ramage, S. Hampson, and B. A. Y. Arcas, “Communication-efficient learning of deep networks from decentralized data,” in Proc. Int. Conf. Artif. Intell. Stat. , 2017, pp. 1273–1282. [2] Q. Yang, Y. Liu, T. Chen, and Y. Tong, “Federated machine learning: Concept and applications,” ACM Trans. Intell. Syst. Technol. , vol. 10, no. 2, pp. 1–19, 2019. [3] T. Li, A. K. Sahu, A. Talwalkar, and V. Smith, “Federated learning: Challenges, methods, and future directions,” IEEE Signal Process. Mag. ,vol. 37, no. 3, pp. 50–60, 2020. [4] P. Kairouz, H. B. McMahan, B. Avent, A. Bellet, M. Bennis, A. N. Bhagoji, K. Bonawitz, Z. Charles, G. Cormode, R. Cummings et al. , “Advances and open problems in federated learning,” Found. Trends Mach. Learn. ,vol. 14, no. 1–2, pp. 1–210, 2021. [5] E. Lari, V. C. Gogineni, R. Arablouei, and S. Werner, “Noise-robust and resource-efficient ADMM-based federated learning,” Signal Process. , vol. 233, p. 109988, 2025. [6] V. Smith, C. Chiang, M. Sanjabi, and A. S. Talwalkar, “Federated multi-task learning,” in Proc. Adv. Neural Inf. Process. Syst. , 2017. [7] J. Wang, Q. Liu, H. Liang, G. Joshi, and H. V. Poor, “Tackling the objective inconsistency problem in heterogeneous federated optimization,” in Proc. Adv. Neural Inf. Process. Syst. , vol. 33, 2020, pp. 7611–7623. [8] S. Reddi, Z. Charles, M. Zaheer, Z. Garrett, K. Rush, J. Kone ˇcn `y, S. Kumar, and H. B. McMahan, “Adaptive federated optimization,” in Proc. Int. Conf. Learn. Represent. , 2021. [9] K. Bonawitz, H. Eichner, W. Grieskamp, D. Huba, A. Ingerman, V. Ivanov, C. Kiddon, J. Kone ˇcn `y, S. Mazzocchi, B. McMahan et al. , “Towards federated learning at scale: System design,” in Proc. MLSys , 2019, pp. 374–388. [10] J. Wang, Z. Charles, Z. Xu, G. Joshi, H. B. McMahan, M. Al-Shedivat, G. Andrew, S. Avestimehr, K. Deng, J. Duchi et al. , “A field guide to federated optimization,” in Proc. Int. Conf. Learn. Represent. , 2024. [11] Z. Charles, N. Garrett, Z. Xu, and G. Joshi, “Towards federated foundation models: Scalable dataset pipelines for group-structured learning,” in Proc. Adv. Neural Inf. Process. Syst. , 2024. [12] Q. Yang, Y. Liu, Y. Cheng, Y. Kang, T. Chen, and H. Yu, “Federated learning,” IEEE Trans. Big Data , vol. 6, no. 4, pp. 673–688, 2020. [13] W. Y. B. Lim, N. C. Luong, D. T. Hoang, Y. Jiao, Y.-C. Liang, Q. Yang, D. Niyato, and C. Miao, “Federated learning in mobile edge networks: A comprehensive survey,” IEEE Commun. Surv. Tutor. , vol. 22, no. 3, pp. 2031–2063, 2020. [14] T. Gafni, N. Shlezinger, K. Cohen, Y. C. Eldar, and H. V. Poor, “Federated learning: A signal processing perspective,” IEEE Signal Process. Mag. ,vol. 39, no. 3, pp. 14–41, 2022. [15] E. Lari, V. C. Gogineni, R. Arablouei, and S. Werner, “On the resilience of online federated learning to model poisoning attacks through partial sharing,” in Proc. IEEE Int. Conf. Acoust. Speech Signal Process. , 2024, pp. 9201–9205. [16] E. Lari, R. Arablouei, V. C. Gogineni, and S. Werner, “Resilience in online federated learning: Mitigating model-poisoning attacks via partial sharing,” IEEE Trans. Signal Inf. Process. Netw. , vol. 11, pp. 388–400, 2025. [17] V. Vovk, A. Gammerman, and G. Shafer, Algorithmic learning in a random world . Springer, 2005. [18] V. Plassier, N. Kotelevskii, A. Rubashevskii, F. Noskov, M. Velikanov, A. Fishkov, S. Horvath, M. Takac, E. Moulines, and M. Panov, “Efficient conformal prediction under data heterogeneity,” in Proc. Int. Conf. Artif. Intell. Stat. PMLR, 2024, pp. 4879–4887. [19] M. Zhu, M. Zecchin, S. Park et al. , “Federated inference with reliable uncertainty quantification over wireless channels via conformal prediction,” 
+
+IEEE Trans. Signal Process. , vol. 72, pp. 1235–1250, 2024. [20] F. Ye, M. Yang, J. Pang, L. Wang, D. Wong, E. Yilmaz, S. Shi, and Z. Tu, “Benchmarking LLMs via uncertainty quantification,” Proc. Adv. Neural Inf. Process. Syst. , vol. 37, pp. 15 356–15 385, 2024. [21] X. Zhou, B. Chen, Y. Gui, and L. Cheng, “Conformal prediction: A data perspective,” ACM Comput. Surv. , vol. 58, no. 2, pp. 1–37, 2025. [22] J. Lei, M. G’Sell, A. Rinaldo, R. J. Tibshirani, and L. Wasserman, “Distribution-free predictive inference for regression,” J. Am. Stat. Assoc. ,vol. 113, no. 523, pp. 1094–1111, 2018. [23] J. Ai and Z. Ren, “Not all distributional shifts are equal: Fine-grained robust conformal inference,” in Proc. Int. Conf. Mach. Learn. , 2024, pp. 641–665. [24] C. Lu, Y. Yu, S. P. Karimireddy, M. Jordan, and R. Raskar, “Federated conformal predictors for distributed uncertainty quantification,” in Proc. Int. Conf. Mach. Learn. PMLR, 2023, pp. 22 942–22 964. [25] P. Humbert, B. Le Bars, A. Bellet, and S. Arlot, “One-shot federated conformal prediction,” in Proc. Int. Conf. Mach. Learn. PMLR, 2023, pp. 14 153–14 177. [26] V. Plassier, M. Makni, A. Rubashevskii, E. Moulines, and M. Panov, “Conformal prediction for federated uncertainty quantification under label shift,” in Proc. Int. Conf. Mach. Learn. , 2023, pp. 28 101–28 139. [27] Y. Min, C. Zhang, L. Peng, and C. Zou, “Personalized federated conformal prediction with localization,” in Proc. Adv. Neural Inf. Process. Syst. , 2025. [28] N. Koutsoubis, A. Waqas, Y. Yilmaz et al. , “Privacy-preserving federated learning and uncertainty quantification in medical imaging,” Radiol.: Artif. Intell. , vol. 7, no. 4, 2025. [29] P. Blanchard, E. M. El Mhamdi, R. Guerraoui, and J. Stainer, “Machine learning with adversaries: Byzantine tolerant gradient descent,” Proc. Adv. Neural Inf. Process. Syst. , vol. 30, 2017. [30] E. M. E. Mhamdi, R. Guerraoui, and S. Rouault, “The hidden vulnerability of distributed learning in byzantium,” in Proc. Int. Conf. Mach. Learn. ,2018, pp. 3521–3530. [31] M. Fang, X. Cao, J. Jia, and N. Gong, “Local model poisoning attacks to Byzantine-Robust federated learning,” in USENIX Security Symp. , Aug. 2020, pp. 1605–1622. [32] W. Huang, Z. Shi, M. Ye, H. Li, and B. Du, “Self-driven entropy aggregation for Byzantine-robust heterogeneous federated learning,” in 
+
+Proc. Int. Conf. Mach. Learn. , 2024, pp. 20 096–20 110. [33] D. Yin, Y. Chen, R. Kannan, and P. Bartlett, “Byzantine-robust distributed learning: Towards optimal statistical rates,” in Proc. Int. Conf. Mach. Learn. , 2018, pp. 5650–5659. [34] K. Pillutla, S. M. Kakade, and Z. Harchaoui, “Robust aggregation for federated learning,” IEEE Trans. Signal Process. , vol. 70, pp. 1142–1154, 2022. [35] C. Qian, M. Wang, H. Ren, and C. Zou, “ByMI: Byzantine machine identification with false discovery rate control,” in Proc. Int. Conf. Mach. Learn. , 2024, pp. 41 357–41 382. [36] B. Zhang, M. Fang, Z. Liu, B. Yi, P. Zhou, Y. Wang, T. Li, and Z. Liu, “Practical framework for privacy-preserving and Byzantine-robust federated learning,” IEEE Trans. Inf. Forensics Security , 2025. [37] M. Kang, Z. Lin, J. Sun, C. Xiao, and B. Li, “Certifiably byzantine-robust federated conformal prediction,” in Proc. Int. Conf. Mach. Learn. PMLR, 2024, pp. 23 022–23 057. [38] V. C. Gogineni, S. Werner, Y.-F. Huang, and A. Kuh, “Communication-efficient online federated learning framework for nonlinear regression,” in 
+
+Proc. IEEE Int. Conf. Acoust. Speech Signal Process. , 2022, pp. 5228– 5232. [39] ——, “Communication-efficient online federated learning strategies for kernel regression,” IEEE Internet Things J. , vol. 10, pp. 4531–4544, 2023. [40] B. Kailkhura, S. Brahma, and P. K. Varshney, “Data falsification attacks on consensus-based detection systems,” IEEE Trans. Signal Inf. Process. Netw. , vol. 3, no. 1, pp. 145–158, 2017. [41] B. De Finetti, “On the condition of partial exchangeability,” Stud. Inductive Logic Probab. , vol. 2, pp. 193–205, 1980. [42] T. Dunning, “The T-Digest: Efficient estimates of distributions,” Software Impacts , vol. 7, p. 100049, 2021. [43] C. Leys, C. Ley, O. Klein, P. Bernard, and L. Licata, “Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median,” J. Exp. Soc. Psychol. , vol. 49, pp. 764–766, 2013. [44] J. A. Tropp, “User-friendly tail bounds for sums of random matrices,” 
+
+Found. Comput. Math. , vol. 12, no. 4, pp. 389–434, 2012. [45] K. Hamidieh, “A data-driven statistical model for predicting the critical temperature of a superconductor,” Comput. Mater. Sci. , vol. 154, pp. 346–354, 2018. [46] T.-M. H. Hsu, H. Qi, and M. Brown, “Measuring the effects of non-identical data distribution in federated optimization,” arXiv preprint arXiv:1909.06335 , 2019.

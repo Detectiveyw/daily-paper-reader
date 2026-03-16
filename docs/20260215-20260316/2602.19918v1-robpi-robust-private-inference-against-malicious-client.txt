@@ -1,0 +1,636 @@
+Title: RobPI: Robust Private Inference against Malicious Client
+
+URL Source: https://arxiv.org/pdf/2602.19918v1
+
+Published Time: Tue, 24 Feb 2026 02:55:54 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+# RobPI: Robust Private Inference against Malicious Client 
+
+Jiaqi Xue 
+
+University of Central Florida 
+
+jiaqi.xue@ucf.edu 
+
+Mengxin Zheng 
+
+University of Central Florida 
+
+mengxin.zheng@ucf.edu 
+
+Qian Lou 
+
+University of Central Florida 
+
+qian.lou@ucf.edu 
+
+Abstract —The increased deployment of machine learning inference in various applications has sparked privacy concerns. In response, private inference (PI) protocols have been created to allow parties to perform inference without revealing their sensitive data. Despite recent advances in the efficiency of PI, most current methods assume a semi-honest threat model where the data owner is honest and adheres to the protocol. However, in reality, data owners can have different motivations and act in unpredictable ways, making this assumption unrealistic. To demonstrate how a malicious client can compromise the semi-honest model, we first designed an inference manipulation attack against a range of state-of-the-art private inference protocols. This attack allows a malicious client to modify the model output with 3× to 8 × fewer queries than current black-box attacks. Motivated by the attacks, we proposed and implemented RobPI, a robust and resilient private inference protocol that withstands malicious clients. RobPI integrates a distinctive cryptographic protocol that bolsters security by weaving encryption-compatible noise into the logits and features of private inference, thereby efficiently warding off malicious-client attacks. Our extensive experiments on various neural networks and datasets show that RobPI achieves ∼ 91 .9% 
+
+attack success rate reduction and increases more than 10 × query number required by malicious-client attacks. 
+
+I. I NTRODUCTION 
+
+Machine-learning-as-a-service (MLaaS) is a powerful method to provide clients with intelligent services and has been widely adopted for real-world applications [1], such as image classification/segmentation for home monitoring systems [2], [3], intrusion detection [4], fraud detection [5], [6]. Nevertheless, the integration of MLaaS into many such applications engenders privacy concerns [6]–[8]. For instance, home monitoring systems like Kuna and Wyze utilize neural networks to categorize objects in user home video feeds, such as vehicles stationed near the user’s residence or identifying visitors’ faces, which may intrude on personal privacy. To address these privacy concerns, numerous recent studies, as illustrated in Table I, have put forth protocols for crypto-graphic prediction, specifically, private inference over (convo-lutional) neural networks, by leveraging various cryptographic primitives, e.g., fully homomorphic encryption (FHE) [9]–[15]. A private inference protocol facilitates interaction between data owners and model owners, denoted by PNet, in a way that allows the user to receive the prediction outcome while simultaneously guaranteeing that neither party obtains any additional information pertaining to the user’s input or the model’s weight parameters. Numerous studies, for instance, Client 
+
+## Private Inference  Private Inference 
+
+# Client 
+
+predict 
+
+PNet 
+
+PNet 
+
+# Server 
+
+PNet 
+
+query  predict  query 
+
+Fig. 1: Client may be malicious in private inference. [16]–[23], as indicated in Table I, have achieved these as-surances. However, all these studies make an assumption of semi-honest protocol adherence, implying that both the client-side data owner and server-side model owner comply with the protocol without malicious behaviors. 
+
+vulnerable to adversarial examples requires network modification LoLa 
+
+CryptoNets 
+
+CryptoDL 
+
+CHET 
+
+HEMET 
+
+TenSEAL 
+
+HeLayers 
+
+RobPI (ours) # #
+
+=provides property 
+
+#=does not provide property 
+
+TABLE I: Prior private inferences are vulnerable to malicious-client adversarial examples and need network modification for higher robustness. While the majority of the literature adopts the semi-honest threat model, it is fundamentally less probable that all clients will adhere to proper behavior. The server is hosted by a single service provider, and existing cloud providers employ strict access control, and physical security measures, making it considerably challenging to circumvent these safeguards. Furthermore, if a service provider is found to be acting maliciously, the repercussions could be severe due to public 
+
+> arXiv:2602.19918v1 [cs.CR] 23 Feb 2026
+
+accountability [23], [24]. In contrast, clients are numerous, operate on diverse setups under user control, have varying motives, and it suffices that one behaves maliciously, as Figure 1 shows. The incentives for a client to cheat are substantial: service providers offer high-stakes services such as intrusion detection, home monitoring systems, and fraud detection. Consequently, a client, who may be an attacker, could seek to obtain unauthorized access to information or manipulate the decision-making processes of the MLaaS system to attain personal or financial advantages. The recent study, MUSE [23], investigates malicious clients attempting to pilfer models through queries, but it does not offer solutions for adversarial output manipulation attacks. To highlight the dangers associated with a malicious client, we introduce a new adversarial output manipulation attack against semi-honest private inference protocols, i.e., PI-ATTACK. This attack enables a malicious client to modify the model’s output using a reduced number of inference queries. With an efficiency improvement of 3× ∼ 8× compared to the most effective prediction manipulation attacks for plaintext inference [25], [26], this attack demonstrates that the utilization of semi-honest private inference protocols can significantly enhance a malicious client’s ability to alter model predictions. To counteract such amplification of security risk, we intro-duce RobPI, a robust private inference protocol designed to function effectively under a client-malicious threat model. In this context, the server is presumed to maintain semi-honest behavior, while the client may diverge substantially from the protocol’s stipulations. As we will elaborate, adopting this model empowers RobPI to surpass current state-of-the-art methods in its performance efficiency. 
+
+Contributions. We summarize our contributions as follows: (i) We show an inference manipulation attack, denoted by PI-Attack , against private inference protocols. This attack enables a malicious client to manipulate the model’s output with few queries. (ii) We introduce RobPI , a robust private inference protocol resilient to malicious clients. In designing RobPI , we propose to add cryptography-compatible noise in the features and logits layer. In addition, we introduce a dynamic noise training (DNT) technique to further improve the resilience against malicious clients. RobPI increases more than 10 ×
+
+query numbers compared to prior defense methods, which increases the attack difficulties. (iii) We provide theoretical analysis on RobPI and our implementation of RobPI is able to decrease attack success rate by ∼ 91 .88% against malicious clients on various neural networks and datasets. II. B ACKGROUND AND RELATED WORKS 
+
+Private Inference. One popular private inference paradigm is based on fully homomorphic encryption (FHE) [9], which stands out as FHE-based private inference allows non-interactive neural network inference privacy-preserving, i.e., inference on encrypted data without needing to decrypt it [14], [27]–[33]. Compared to interactive private inference based on multi-party computation [6], [12], [34]–[37], FHE-based private inference has two main advantages: (1) non-interactive end-to-end inference and (2) more secure against layer-by-layer attacks, e.g., client-malicious model extraction attacks. In particular, non-interactive inference is more friendly to clients who have no powerful machines or high-bandwidth network connections. This is because interactive private inference has the drawback that the clients must stay online during the computation. We noticed that many protocols of private inference in Table I, such as [22], [23], share a similar workflow where the client sends encrypted data to a server. The server then transforms a regular inference (RI) into a Privacy-preserving Inference (PI), which allows inference on encrypted data without decryption. The original real-number convolution in the RI is replaced with a fixed-point FHE convolution, and the non-linear ReLU 
+
+function is swapped for polynomial-approximated functions like the square function. The result remains encrypted and can only be decrypted by the data owner with a private key, ensuring privacy preservation. 
+
+Black-box Inference Manipulation Attacks. The malicious-client attack operates on the principle that the attacker can access the black-box MLaaS based on private inference, thereby gaining the capability to manipulate input data to achieve unauthorized access or influence decisions derived from private inference. Current black-box inference manipu-lation attacks [25], [26], have been validated as effective in producing adversarial examples that can control the inference output without the necessity for retraining a surrogate model. Specifically, these methods illustrate how a mathematical tool -the discrete cosine transform (DCT) - can be employed to shift an image from the spatial domain to the frequency domain. By initiating a search from lower frequencies and progressing to higher ones, one can effectively pinpoint an adversarial sample, thereby reducing the number of required queries. Our PI-Attack 
+
+strategy follows this DCT-based method [25], [26]. 
+
+Resilient Neural Networks. To defend against query-based black-box attacks, [38], [39] show that adding random noise into the input [40] or model [39] can defend against attacks without perceiving the inputs. Also, R&P [41] proposes an input random-transform defense method. RSE [42] adds large Gaussian noise into both input and activation and uses ensembles to avoid an accuracy decrease. PNI [43]–[45] incorporates noise in the training. However, these defense methods sacrifice enormous accuracy. And the input-transform function in R&P and the ensemble method in RSE introduce a large overhead for PI. [46] introduces that the model with Gaussian augmentation training could defend the common corruptions. RND [40] extends the methods in [39], [46] and achieves the state-of-the-art defense against black-box attacks. However, RND does not consider the distinct features of PI, i.e., quantized activation and model, and polynomial activation that has a significant decay on the added noise of the input, thus restricting the defense effect on private inference. III. PI-A TTACK : A TTACKS ON PRIVATE INFERENCE 
+
+Attack Threat Model. Our attack strategies are designed to manipulate the output of private inference to gain unauthorized …         
+
+> FHE -Convolution 1
+> Polynomial Acti.
+> FHE -Convolution 2
+> PI
+> admin
+> Adversarial data
+> Server
+> Client
+> (a) Our PI -Attack workflow (b) Our RobPI overview
+> …
+> FHE -Convolution 1
+> Polynomial Acti .
+> FHE -Convolution 2
+> RobPI
+> Clean or PI -Attack data
+> RobPI block
+> ++admin
+> pass no pass
+
+Fig. 2: (a) PI-Attack use case on the privacy-preserving face recognition system. (b) Our RobPI enables a fast, accurate, and robust PI. 
+
+Algorithm 1 PI-Attack in Pseudocode  
+
+> 1:
+
+Input: image x ∈ Rd×d×c, label y, step size ϵ. 
+
+> 2:
+
+adversarial perturbation δ = 0  
+
+> 3:
+
+O = Mp(x), t = 0  
+
+> 4:
+
+ˆx = DCT (x) # for each channel  
+
+> 5:
+
+while Oy = max y′ Oy′ and t < d 2 do  
+
+> 6:
+
+get ˆxi,j with the lowest frequency from ˆx. 
+
+> 7:
+
+ˆx = ˆ x.pop ( ˆ xi,j ) 
+
+> 8:
+
+Q = Basis ( ˆ xi,j ) 
+
+> 9:
+
+for ˆαt ∈ { λt · ϵ, −λt · ϵ} do  
+
+> 10:
+
+t + +  
+
+> 11:
+
+O′ = Mp(x + δt + IDCT ( ˆ αt · Q))  
+
+> 12:
+
+if sign (O′ 
+
+> y
+
+− Oy ) < 0 then  
+
+> 13:
+
+δt+1 = δt + IDCT ( ˆ αt · Q) 
+
+> 14:
+
+O = O′ 
+
+> 15:
+
+break  
+
+> 16:
+
+Return δ
+
+access, potentially resulting in personal or financial benefits, as seen in intrusion detection systems [2], [3] and fraud detection systems [5]. These attacks target semi-honest private inference protocols that possess a specific characteristic: the client’s final output should coincide with the plaintext output of the final linear layer. Several private inferences, including all the current FHE-based methods [16]–[23], satisfy this condition. In Figure 2(a), we take a privacy-preserving face-recognition authentication system as an example to illustrate more about our threat model use case, where a non-admin client attacker aims to obtain admin permission. To achieve this goal, the attacker has a motivation to find an adversarial noise or example that causes the system to produce a target-class prediction, e.g., admin, in order to bypass the recognition system. 
+
+Attack Strategy. To efficiently manipulate the inference, we propose a PI-Attack method that is optimized for PNet shown in Algorithm 1. The PI-Attack method takes one clean image 
+
+X ∈ Rd×d×c, true label y, and step size ϵ as inputs, and generates adversarial perturbation δ, where d is the input width or height, c is channel number. We define the prediction score probability of PNet model as O = Mp(x). Instead of adding perturbation in the spatial domain, we adopt a more efficient search direction Q in the frequency domain by the existing DCT tool and convert the frequency domain perturbation ˆαt · Q
+
+back to the spatial domain by inverse DCT (IDCT). DCT and IDCT are defined in the Appendix. The key idea of the algorithm is simple, i.e., for any direction Q and step size 
+
+ˆαt, one of x + IDCT (λt · ϵ · Q) or x + IDCT (−λt · ϵ · Q)
+
+may decrease O = Mp(x). We iteratively pick direction basis 
+
+Q in the ascending order of frequency value ˆxi,j in ˆx. Note that we randomly sample one ˆxi,j when there are multiple entries with the same value. For each query t, if the prediction probability O′ of x + IDCT (λt · ϵ · Q) is decreased over O,we will accumulate the perturbation δt with it, otherwise, we will accumulate the IDCT (−λt · ϵ · Q).The search efficiency of PI-Attack algorithm is mainly dependent on two components, i.e., arc-shaped search order Q
+
+in the frequency domain and perturbation size schedule λt. In particular, frequency domain input ˆx is calculated by DCT (x)
+
+for each channel, where the top-left positions of ˆx have lower frequency values. Since low-frequency subspace adversarial directions have a much higher density than high-frequency directions, we try to perform the search from lower frequency to higher frequency before a successful attack. To achieve this goal, we iteratively extract the value ˆxi,j with the lowest frequency from ˆx. To avoid the repeating search, we pop out the ˆxi,j from the remaining search space ˆx by ˆx = ˆ x.pop (x)
+
+shown in Algorithm 1. The search direction basis Q is set as ˆxi,j for the t-th query, which means that we only add the perturbation in the position of ˆxi,j and check if it decreases the prediction probability at the t-th query. 
+
+λt = λmin + 12 (λmax − λmin )(1 + cos ( tT ) · π) (1) 
+
+Since ˆxi,j with lower frequency contains more dense infor-mation than high-frequency values, we propose a perturbation size schedule λt to assign a larger perturbation size to the positions with lower frequency, which further improves the search efficiency. For t-th query, the perturbation size αt is defined as the multiplication between λt and frequency domain perturbation seed ϵ. We define the cosine annealing schedule 
+
+λt in Equation 1, where λmin and λmax are the minimum and maximum coefficients of perturbation size, respectively, and 
+
+λt ∈ [λmin , λ max ], T is the query range cycle. 1 2 5 9             
+
+> 34712
+> 6811 …
+> 10 13 ……
+> DCT
+> Lower frequency
+> Lower frequency
+> Arc -shaped
+> search
+> Larger pert. size &priority
+> Larger pert.  size  & priority Pert. size
+> schedule
+> (a)
+> (b) (c)
+
+Fig. 3: PI-Attack workflow. In Figure 3, we illustrate the proposed PI-Attack workflow. In particular, Figure 3(b) describes the conversion from input 
+
+x into frequency domain ˆx whose values decide the search priority in our Algorithm 1, i.e., PI-Attack. For example, the top-left position is of the highest priority to add perturbation, thus we perform the perturbation search on it in the first query. In Figure 3(c), we list the number of search orders, i.e., query orders. For instance, in the second query, we add a perturbation on the element in the first row, second column. This search order forms an arc shape, so we call this search order an arc-shaped search. Figure 3(a) demonstrates the perturbation schedule, i.e., the schedule size coefficient λt over the query order. For example, the first query with the lowest frequency uses the largest λt and the following queries with larger frequency will use smaller λt.IV. R OB PI: R OBUST PRIVATE INFERENCE AGAINST 
+
+MALICIOUS CLIENT 
+
+Defense Model. In the context of protocol adherence, a semi-honest adversary adheres strictly to the prescribed protocol, yet attempts to extract information about other parties’ inputs by analyzing the messages it receives. On the other hand, a malicious adversary is not bound by these rules and has the freedom to deviate from the protocol in any way it sees fit. We design RobPI to defend the new threat model named security against malicious clients . We use Figure 2(b) to show our RobPI will defend against this attack, so that the attacker can no longer fool the recognition system. 
+
+RobPI Design Principle. In contrast to NN used for plain-text inference, the private inference-designed PNet exhibits unique characteristics, such as polynomial activation and quantized parameters. Consequently, directly adapting previous work [40]—which injects Gaussian noise into the input layer—may not be optimal for PNet. We noticed that previous work [40] displays a diminished defense impact when applied to private inference. This can be attributed to the significant attenuation of the injected noise by the multi-layer polynomial-approximated activation in PNet, such as the square function, rendering the defense noise virtually ineffective on the model output, especially for deeper neural networks. The diminished noise cannot significantly influence the final-layer logits, thus reducing the defense performance of prior work on PNet. In 
+
+RobPI , we propose a simple, efficient, and provably effective method that circumvents the noise decay issue by adding noise to the output layer. Nonetheless, this strategy might be susceptible to an average inference attack —a phenomenon we detail in Appendix—particularly when the injected noise has a zero mean. To counteract this, one can simply use non-zero-mean noise and integrate it into the final two layers of the network. To further augment the effectiveness of RobPI , we also introduce a novel dynamic noise training (DNT) technique. In query-based inference manipulation attacks, the aggressor iteratively introduces a minor disruption to the input, subse-quently inspecting whether consecutive queries yield varying prediction probabilities. If the probability of the objective prediction for the ( t + 1 )-th query diminishes compared to the 
+
+t-th query, the introduced perturbation is retained. Conversely, the attacker removes the adversarial disruption. The efficiency of the search heavily relies on the correct determination of the perturbation search direction, i.e., whether to add or subtract the disruption in each query. Consequently, a defender can reduce the efficiency of the attack by perturbing the perturbation search direction, thus misleading the prediction probabilities. Inspired by these observations, we propose a swift and accurate defense methodology that simply introduces noise to the output probability in each query, resulting in a robust RobPI. Our RobPI defense approach is designed to achieve two objectives: (i) ensuring that the introduced defense noise doesn’t significantly alter the prediction probability of the normal dataset, thus maintaining accuracy, and (ii) ensuring that the introduced defense noise significantly disrupts the attack search direction, thereby reducing the search efficiency. 
+
+RobPI Defense Formulation. We use Equation 2 to define the prediction prabability difference of two queries on PNet, 
+
+Mp(x + δt + μt) and Mp(x + δt), where δt is the accumulated perturbation at t-th query, μt is the perturbation of t-th query, e.g., IDCT ( ˆ αt · Q) if defending PI-Attack in Algorithm 1.           
+
+> Ap(x, t ) = Mp(x+δt+μt)−Mp(x+δt)(2)
+
+In Equation 3, we define the main step of the proposed RobPI defense method. One can see that two noises σ∆t+1 and σ∆t
+
+are added into (t + 1) -th query and t-th query, respectively, to disturb the attack search direction. Those noises are sampled from the same standard Gaussian distribution ∆ ∼ N (0 , 1) and multiplied by a small factor σ. Note that the added noise shares the same encoding method with PNet for correct decryption of prediction result. The key idea of adding noise in the query result is to disturb the difference, i.e., Ap(x, t ), of two attack queries and mislead the search directions.               
+
+> Dp(x, t ) = ( Mp(x+δt+μt) + σ∆t+1 )−(Mp(x+δt) + σ∆t)=Ap(x, t ) + σ(∆ t+1 −∆t)
+> (3)
+
+Specifically, the disturbance success happens when the signs of Ap(x, t ) and Dp(x, t ) are different. We use Equation 4 to define the probability of disturbance success (DSP). A higher DSP will induce a lower attack success rate (ASR). Therefore, it is of great importance to understand the factors impacting the DSP.      
+
+> S(x, t ) = P(sign (Ap(x, t )) ̸=sign (Dp(x, t ))) (4)
+
+We theoretically analyze and calculate the DSP in Equation 5. According to Equation 3, the only difference of Dp(x, t )
+
+and Ap(x, t ) is σ(∆ t+1 − ∆t), thus S(x, t ) is equal to the probability of adding σ(∆ t+1 − ∆t) to change the sign of 
+
+Ap(x, t ). Given the Gaussian distribution σ(∆ t+1 − ∆t) ∼N (0 , 2σ2), the S(x, t ) is equal to 1 − ϕ(|Ap(x, t )|; 0 , 2σ2),where ϕ() is the cumulative distribution function (CDF) of Gaussian distribution. This is because if Ap(x, t ) < 0, the added noise sampled from N (0 , 2σ2) should be larger than 
+
+|Ap(x, t )| to change the sign of Ap(x, t ), thus its probability is 1 − ϕ(|Ap(x, t )|; 0 , 2σ2); otherwise, the added noise should (a) Shaded area: disturbance          
+
+> success probability
+> (b) Shaded area: misclassification
+> rate after adding noise (c) Distribution of 𝑀 𝑝
+> 𝑖 −𝑀 𝑝
+> 𝑗
+
+Fig. 4: (a) Disturbance success probability S(x, t) for one query. (b) incorrect prediction rate P (i̸ = j), which means the probability of misclassification after adding noise on the confidence scores. (c) distribution of the difference between the highest predicted score M ip and the second highest predicted score M jp .larger than |Ap(x, t )| to change the sign of Ap(x, t ), thus the probability is also 1−ϕ(|Ap(x, t )|; 0 , 2σ2). Therefore, using the CDF equation, one can calculate the DSP in Equation 5, where 
+
+erf is Gauss error function. We demonstrate in Equation 5 that DSP is impacted by two factors, i.e., |Ap(x, t )| and σ. DSP has a positive relationship with σ but is negatively relative to 
+
+|Ap(x, t )|. In Figure 4 (a), we use the shaded area to illustrate the value of S(x, t ).
+
+S(x, t ) = 1 − ϕ(|Ap(x, t )|; μ, 2σ2)= 1 − 12σ√π
+
+Z |Ap(x,t )|−∞ 
+
+exp ( (|Ap(x, t )| − μ)2
+
+−4σ2 )d|Ap(x, t )|
+
+= 12 − 12 erf ( |Ap(x, t )|
+
+2σ ) where μ = 0 
+
+(5) 
+
+RobPI Analysis. We theoretically analyze the effects of our RobPI defense method on clean accuracy. When applying our PNet on a n-class classification task, we can define prediction score as O = {M 0 
+
+> p
+
+, M 1 
+
+> p
+
+, ..., M n−1 
+
+> p
+
+} for clean data. Since our defense method adds Gaussian noise σ∆t to the 
+
+O, we define the prediction score after our defense method as Oσ = {M 0 
+
+> p
+
++ σ∆0 
+
+> t
+
+, M 1 
+
+> p
+
++ σ∆1 
+
+> t
+
+, ..., M n−1 
+
+> p
+
++ σ∆n−1 
+
+> t
+
+}. The classification results of O and Oσ are i = argmax (O) and 
+
+j = argmax (Oσ ), respectively. Therefore, RobPI will predict an incorrect classification if i̸ = j. We use Equation 6 to describe the probability of P (i̸ = j) that is positively relative to σ but negatively relative to M ip −M jp . In Figure 4 (b), we use the shaded area to illustrate the value of P (i̸ = j). Our RobPI achieves a tiny P (i̸ = j) and a large S(x, t ) given a small σ,therefore obtaining an accurate and robust PNet. Figure 4 (c) demonstrates the distribution of M ip − M jp and most of the values are larger than 0.5 on CIFAR-10. The M ip−M jp 
+
+> σ
+
+> 5 since the σ value is < 0.1. Those observations show that P (i̸ = j) is tiny since 1-ϕ( M ip−M jp 
+
+> σ
+
+> 5; 0 , σ 2 = 2) is near zero. Therefore, the defender can adjust σ based on the validation accuracy and misclassification budget obtained in the training to achieve better defense effectiveness according to Equation 6. 
+
+P (i̸ = j) = P (( M ip + σ∆it) < (M jp + σ∆jt )) = P ( M ip − M jp
+
+σ < ∆jt − ∆it)= 12 − 12 erf ( M ip − M jp
+
+2σ )
+
+(6) 
+
+RobPI with dynamic noise training (DNT). By analyzing the Disturbance success probability S(x, t ) in Equation 5 and clean accuracy decrease rate P (i̸ = j) after applying our RobPI defense method, we reveal that a larger σ will improve the defense effect but also may decrease the clean accuracy. To further avoid the clean accuracy decrease, one can reduce the noise sensitivity of PNet model or enlarge the difference between M iP and M jP in Equation 6. Inspired by those observations, we additionally equip our RobPI with dynamic noise training, denoted by RobPI-DNT, to enable a better balance between clean accuracy and defense effects. We use Algorithm 2 to describe RobPI-DNT that adds dynamic epoch-wise Gaussian noise σi∆t during each training iteration. Our results in Table III show RobPI-DNT attains higher clean accuracy over RobPI. 
+
+Algorithm 2 RobPI with DNT  
+
+> 1:
+
+Input: RobPI model Mp, training data ( x, y ).  
+
+> 2:
+
+t = 0  
+
+> 3:
+
+for i = 1 to epochs do  
+
+> 4:
+
+Randomly sample σi ∈ [0 , σ max ] 
+
+> 5:
+
+for j = 1 to iterations do  
+
+> 6:
+
+pred = Mp(x + σi∆t) 
+
+> 7:
+
+t + +  
+
+> 8:
+
+minimize loss (pred, y ) 
+
+> 9:
+
+update Mp 
+
+> 10:
+
+Return Mp
+
+V. E XPERIMENTAL SETUP 
+
+Datasets and Models. Aligned with recent non-interactive private inference studies [19], [20], [22], we perform our exper-iments on MNIST, CIFAR-10, and Diabetic Retinopathy [47]. For MNIST, we adopt a network with a convolution block and two fully connected layers, as described in HeLayers [22]. For other datasets, we use a structure with three convolution blocks and two fully connected layers. Networks are quantized into 8 bits for MNIST, 10 bits for CIFAR-10, and 16 bits for medical datasets. 
+
+Evaluation Metrics. Attack Success Rate (ASR): This is the proportion of successful attacks out of the total evaluated images. Higher ASR signifies better attack performance. Average Queries: This represents the mean number of queries for each evaluated image, calculated by dividing the total number of queries by the total number of images. Fewer average queries suggest a more efficient attack. Average ℓ2
+
+Norm: This is the mean ℓ2 norm for each adversarial image, derived by dividing the total ℓ2 norm by the total number of evaluated images. A lower average ℓ2 norm indicates a smaller adversarial perturbation. Defense Success Rate (DSR): This is the proportion of successful defenses, equivalent TABLE II: The attack comparisons of PI-Attack and prior works, e.g, SimBA-DCT [25] and Square attack [26] on CIFAR-10 and medical dataset. Untar., Target means untarget and target attacks, respectively.                                                                    
+
+> Schemes CIFAR-10 Diabetic Retinopathy Average Queries Average ℓ2Success Rate Average Queries Average ℓ2Success Rate Untar. Target Untar. Target Untar. Target Untar. Target Untar. Target Untar. Target Square 100 .1301 .64.21 5.44 85 .64% 71 .56% 50 .099 .11.47 1.18 64 .32% 64 .14%
+> SimBA-DCT 101 .6302 .42.86 4.81 78 .28% 73 .98% 51 .8101 .00.82 0.92 73 .28% 51 .49%
+> PI-Attack 103 .4299 .42.79 4.09 81 .33% 81 .48% 50 .5102 .50.84 0.87 84 .36% 63 .28%
+> +Schedule 99 .8201 .53.61 4.87 94 .38 %94 .22 %50 .498 .51.15 1.31 89 .92 %76 .48 %
+
+to the attack failure rate. A higher DSR signifies superior defense effectiveness. Clean Accuracy (ACC): This measures the model’s accuracy on the non-adversarial (clean) data. Disturbance Success Probability (DSP): This is the likelihood of successfully disrupting the attack search direction. 
+
+Methodologies Study. For attack methods, we compare prior works including SimBA-DCT [25] and Square attack [26] with our PNet-Attack without a schedule and with a schedule in Figure 5 and Table II. For defense methods, we compare prior works RND, its variant RND-GF [40] and Adversarial Training [48] with our techniques including RobPI, RobPI with input noise, and RobPI-DNT. RobPI simply adds noise in the output layer shown in Equation 3. RobPI+Input noise means adding the noise with a different scaling factor in the input layer. RobPI-DNT further incorporates the DNT technique. 
+
+Parameter Settings. We set the maximum number of queries for a single evaluated image as 300/100 for the targeted/untargeted attacks, respectively. For Adversarial Train-ing(AT), we add adversarial examples which is generated by SimBA-DCT, and the ration of adversarial examples is 10% of the entire training data. For PNet-Attack, the cycle of schedule 
+
+T is 400, ϵ is 1, and λmin is 0.5, λmax is 1.5. For RobPI, we set σ as 0.1. The scaling factor of input noise is set as 
+
+0.05 . For the defense method, the σmax is set as 0.25. More experimental settings are included in Appendix. The results of the MNIST are shown in Appendix. VI. E XPERIMENTAL RESULTS 
+
+PI-Attack Evaluation. In Table II, the performance of our proposed PI-Attack is compared against that of SimBA-DCT and the Square attack on CIFAR-10 and a medical dataset. For CIFAR-10, the Square attack achieved a targeted attack success rate (ASR) of 71.56%, requiring an average of 301.6 queries and an average ℓ2 norm of 5.44. SimBA-DCT, on the other hand, achieved a slightly higher ASR of 73.98% with a smaller adversarial size, as indicated by a lower ℓ2 norm of 4.81. In comparison, our PI-Attack, even without a perturbation size schedule, improved the ASR by 7.5% while reducing the average ℓ2 perturbation norm by 0.72 compared to SimBA-DCT. The introduction of a perturbation size schedule further improved the ASR of PI-Attack by 12.74%, achieving an average perturbation ℓ2 norm of 4.87 with only 201.5 average queries. This is a 22.66% ASR improvement, a 0.61 reduction in average ℓ2 norm, and a reduction of 100.1 queries compared to the Square attack. Compared to SimBA-DCT, PI-Attack with a schedule increased the ASR by 20.24% and reduced the average query count by 100.9, while maintaining a similar average 
+
+ℓ2 norm. For untargeted attacks, PI-Attack with a schedule improved the ASR by 8.74% and 16.1% over the Square attack and SimBA-DCT, respectively. A similar trend was observed with the PI-Attack on the medical Diabetic Retinopathy dataset. Figure 5 (a) and (b) illustrate the attack processes of our PI-Attack and previous methods on both the CIFAR-10 and Diabetic Retinopathy datasets. With a similar number of queries, our PI-Attack with scheduling consistently achieves a higher targeted ASR compared to SimBA-DCT and Square attack. This improvement can be attributed to the enhanced attack search efficiency realized through the perturbation scheduling and arc-shaped search order of the PI-Attack. Additionally, when the adversarial examples have the same ℓ2 norm, PI-Attack still manages to reach a higher ASR compared to other techniques. Specifically, on the CIFAR-10 dataset, PI-Attack with scheduling secures an ASR over 20% higher than other methods while maintaining an average ℓ2 norm of approximately 3.0. Square -Attack  SimBA -DCT 
+
+> PI -Attack + Schedule PI -Attack
+
+(a) CIFAR -10  (b) Diabetic Retinopathy 
+
+Fig. 5: Attack success rate (ASR) of different methods. 
+
+RobPI Defense Evaluation. Table III presents a comparison of the defense effects achieved by our RobPI and previous methods, including RND and RND-GF, as proposed by [40]. For targeted attacks on CIFAR-10, RND achieves a Defense Success Rate (DSR) of 39.22% while maintaining a clean accuracy of 72.86%. The RND-GF method, which includes Gaussian noise during training, reaches an defense success rate of 56.33% with an accuracy of 73.71%. In contrast to RND that incorporates noise into the input, our RobPI method introduces noise into the logits, which notably enhances the DSR by approximately 30%. This improvement can be TABLE III: The defense comparisons of RobPI and prior works, e.g, RND [40], RND-GF [40] and Adversarial Training(AT) [48], on CIFAR-10 and medical dataset. ’+Input noise’, and ’+DNT’ represent adding Gaussian noise into the input layer and using an additional DNT method, respectively, on RobPI.                                                                              
+
+> Schemes CIFAR-10 Diabetic Retinopathy Clean Accuracy Average queries Success Rate Clean Accuracy Average queries Success Rate Untar. Target Untar. Target Untar. Target Untar. Target Untar. Target Untar. Target RND 72 .86% 199 .8301 .12.03% 39 .22% 66 .81% 48 .553 .115 .00% 46 .40%
+> RND-GF 73 .71% 204 .2300 .410 .39% 56 .33% 67 .73% 50 .249 .310 .08% 59 .60%
+> AT 67 .88% 199 .5302 .549 .08% 86 .20% 61 .37% 50 .051 .337 .36% 79 .05%
+> RobPI 74 .10% 198 .2299 .156 .17% 88 .04% 67 .91% 51 .750 .149 .77% 74 .14%
+> +Input noise 73 .53% 202 .7300 .149 .69% 83 .28% 65 .82% 49 .350 .736 .17% 74 .53%
+> +DNT 74 .55 %199 .4299 .763 .36 %91 .88 %68 .09% 48 .952 .066 .41 %88 .67 %
+
+attributed to the fact that adding noise to the input of PNet with a polynomial activation function considerably diminishes the noise. However, introducing noise to the output bypasses this decay, as substantiated by our theoretical analysis of RobPI and empirical results. For example, RobPI-DNT registers a DSR of 91.88% while maintaining a higher clean accuracy of 74.55%. When compared to RND-GF in the context of targeted attacks on CIFAR-10, RobPI-DNT enhances DSR by 35.55% and clean accuracy by 0.84%. Our RobPI and RobPI-DNT demonstrate consistent en-hancements during untargted attacks and across other medical datasets. Specifically, RobPI-DNT shows a notable increase in untargeted defense success rate by 52.97% compared to RND-GF on CIFAR-10. Likewise, on the Diabetic Retinopathy dataset, RobPI exhibits a rise of 14.54% and 39.69% in the targeted and untargeted defense success rates, respectively, over RND-GF, while achieving a 0.18% increase in clean accuracy. The injection of noise into the input doesn’t yield significant improvements in defense success rates. However, the DNT technique notably enhances both the defense success rate and clean accuracy. RND  RND -GF   
+
+> RobPI + Input Noise
+> RobPI
+> RobPI + Input Noise + DNT
+
+(a) CIFAR -10  (b) Diabetic Retinopathy 
+
+> e
+
+opathy 
+
+Fig. 6: Defense success rate (DSR) of different methods. Figure 6 presents the defense outcomes of prior works RND, RND-GF, and our techniques, including RobPI, RobPI+Input noise, and RobPI-DNT with input noise. Notably, all techniques display a high defense success rate in the initial queries due to the low attack success rate associated with a limited number of queries. However, as the number of queries increases, the defense success rates of both RND and RND-GF significantly decline. In contrast, our RobPI maintains a high defense success rate. Similar to RND-GF, the addition of noise to the input layer in RobPI+Input noise doesn’t result in a significant improvement in defense. This suggests that the input noise might be diminished by the polynomial activation of PNet. With the incorporation of DNT techniques, RobPI-DNT further enhances the defense outcomes. It’s important to note that without adding noise to the output layer, RobPI with input noise and DNT still fails to sustain a high defense effect. Figure 7 highlights the superior defense efficiency of RobPI in comparison to RND. By achieving a higher Disturbance Success Probability in both targeted and untargeted attacks, RobPI provides an empirical explanation for its heightened defense efficacy. Figure 8 demonstrates that RobPI strikes a more effective balance between defense effect and accuracy than RND-GF. Specifically, for a given σ (e.g., 0.1), Figure 8(a) shows that RobPI realizes a higher defense success rate than RND-GF. Similarly, Figure 8(b) indicates that, for the same 
+
+σ, RobPI achieves a higher clean accuracy. RobPI therefore exhibits less noise sensitivity than RND-GF. (a) Targeted  (b) Untargeted  (a) DSR 
+
+Fig. 7: RobPI achieves a higher probability of disturbance success probability (DSP) than prior work RND. 
+
+Ablation Study. As depicted in Figure 8, RobPI outperforms RND-GF in terms of striking a superior balance between defense proficiency and accuracy. Specifically, for a given 
+
+σ value (e.g., 0.1), Figure 8(a) reveals that RobPI yields a higher defense success rate compared to RND-GF. Meanwhile, Figure 8(b) indicates that, for an equivalent σ value, RobPI se-cures higher clean accuracy. Consequently, RobPI demonstrates less sensitivity to noise than RND-GF. TABLE IV: The attack performance under different query numbers of Average PI-Attack.                                                                    
+
+> Nq
+> CIFAR-10 Diabetic Retinopathy Clean Accuracy Average Queries Defense Success Rate Clean Accuracy Average Queries Defense Success Rate Untar. Target Untar. Target Untar. Target Untar. Target Untar. Target Untar. Target
+> 174 .55% 199 .4299 .763 .36% 91 .88% 68 .09% 48 .952 .066 .41% 88 .67% 274 .55% 200 302 62 .19% 86 .99% 68 .09% 49 .551 .558 .53 %71 .85 %374 .55% 199 .6299 .359 .08% 83 .52 %68 .09% 48 .349 .360 .88% 79 .01% 474 .55% 200 300 54 .76 %87 .31% 68 .09% 50 .549 69 .09% 85 .96% 574 .55% 200 .4299 .861 .93% 91 .98% 68 .09% 50 .248 .471 .67% 89 .44%
+
+TABLE V: The defense performance against Average PI-Attack using two proposed methods.                                                 
+
+> Schemes CIFAR-10 Diabetic Retinopathy Clean Accuracy Average Queries Defense Success Rate Clean Accuracy Average Queries Defense Success Rate Untar. Target Untar. Target Untar. Target Untar. Target Untar. Target Untar. Target RobPI 74 .55% 200 299 .354 .76% 83 .52% 68 .09% 49 .551 .558 .53% 71 .85%
+> μ= 3 74 .53% 200 300 64 .19% 90 .74% 68 .16% 50 .550 .564 .96% 86 .75%
+> Penultimate layer 70 .83% 201 300 .659 .92% 85 .77% 66 .89% 50 .549 61 .56% 77 .30%
+
+argeted  (a) DSR v.s . noise factor 𝝈  (b) ACC v.s . noise factor 𝝈 
+
+Fig. 8: RobPI achieves a better balance between defense effect and clean accuracy than RND-GF. VII. P OTENTIAL ATTACKS AGAINST ROB PI 
+
+Average Inference Attacks. In this section, we will examine a different attack: an adversary may send the same adversarial input multiple times and averages their outputs to bypass the RobPI’s defense that adds Gaussian noise with zero means. We call this attack as average inference attack . This type of attack is designed to exploit the fact that RobPI adds noise to the output probability distribution in each query, which has a zero mean and could potentially be averaged out by repeated queries. Firstly, we investigate whether sending the same adversarial input multiple times and averaging their outputs can decrease the Defense Success Rate (DSR) of RobPI. By analyzing the results of this investigation in Table IV, we can gain a better understanding of RobPI’s robustness against this type of attack and identify potential countermeasures to further improve its defense effectiveness. In our experiments, the number of queries for identical adversarial inputs ( Nq ) varied from 1 to 5. Tabel IV reveals that for the CIFAR10 dataset, DSR decreases from 91 .88% to 
+
+86 .99% when Nq is set to 2, and further decrease to 83 .52% 
+
+when Nq is set to 3. However, when Nq is increased to 5, the DSR increases to 91 .98% .This trend can be explained by the fact that when Nq is increased, the attacker needs to query Nq times to add noise once, which means that the total number of queries available for adding noise decreases as Nq increases. Therefore, with a fixed number of total queries, the attacker will add less noise when Nq is larger. For example, under a fixed total number of queries, e.g., 300, an attacker can add noise up to 300 times when Nq = 1 but only up to 60 times when Nq = 5 .
+
+Defense of Average Inference Attacks. In this section, we propose two defense methods to counteract the average inference attack. The first method suggests using a Gaussian distribution with a non-zero mean ( μ) instead of a standard Gaussian distribution. The second method recommends adding noise at the penultimate layer rather than at the last layer. To assess their effectiveness, we measured RobPI’s DSR when (μ) was set to 3 and when noise was added at the penultimate layer. We determined that Nq should be set to values that result in lower DSRs based on Table 3: Nq = 4 for untargeted attacks against CIFAR10, Nq = 3 for targeted attacks on CIFAR10, and Nq = 2 for both untargeted and targeted attacks on Diabetic Retinopathy. Based on the results presented in Table V, we can observe that using a non-zero mean Gaussian distribution renders the Average PI-Attack ineffective while maintaining a high Clean Accuracy (ACC) similar to that of using a zero mean Gaussian distribution. For instance, on the CIFAR10 dataset, the DSR of targeted attacks increased from 83 .52% to 90 .47% , and the DSR of untargeted attacks increased from 54 .76% to 64 .19% ,while the ACC remained at 74 .53% . Similarly, adding noise at the penultimate layer instead of the last layer also improved DSR. For example, on CIFAR10, the DSR of targeted attacks increased from 83 .52% to 85 .77% , and the DSR of untargeted attacks increased from 54 .76% to 59 .92% .VIII. C ONCLUSION 
+
+This work first introduces PI-Attack, an innovative inference manipulation attack for private inference protocols reliant on fully homomorphic encryption. The attack necessitates 
+
+3× ∼ 8× fewer queries than current approaches. Moreover, we present RobPI, a robust private inference protocol designed to withstand malicious clients, achieved by incorporating cryptography-compatible noise in the feature and logits layers and deploying a DNT technique. RobPI demands over 10 ×
+
+more query numbers compared to previous defense methods, substantially elevating the attack difficulty. Theoretical analysis and empirical testing show that RobPI can diminish the attack success rate by approximately 91 .9% across various neural networks and datasets. LLM U SAGE CONSIDERATIONS 
+
+LLMs were used for editorial purposes only in this manuscript, specifically to check grammar, spelling, and minor typographical issues. All generated outputs were carefully inspected by the authors to ensure accuracy, originality, and compliance with the scientific content. No part of the method-ology, experiments, or research contributions relied on LLMs. APPENDIX 
+
+A. DCT and IDCT 
+
+The discrete cosine transform (DCT) is a mathematical tool that can be employed to shift an image from the spatial domain to the frequency domain. By initiating a search from lower frequencies and progressing to higher ones, one can effectively pinpoint an adversarial sample, thereby reducing the number of required queries. DCT represents an image as a sum of sinusoids of varying magnitudes and frequencies. Specifically, for an input image X ∈ Rd×d, the DCT transform V =
+
+DCT (X) is: 
+
+Vm,n = αmαnd−1X
+
+> i=0
+> d−1
+
+X
+
+> j=0
+
+Xi,j cos π(2 i + 1) m
+
+2d cos π(2 j + 1) n
+
+2d (7) 
+
+where 
+
+αm =
+
+q 1 
+
+> d
+
+, m = 0 
+
+q 2 
+
+> d
+
+, 1 ≤ m ≤ d − 1 (8) 
+
+and 
+
+αn =
+
+q 1 
+
+> d
+
+, n = 0 
+
+q 2 
+
+> d
+
+, 1 ≤ n ≤ d − 1 (9) 
+
+for 0 ≤ m, n ≤ d − 1.The values Vm,n are called the DCT coefficients of. The DCT is an invertible transform, and its inverse IDCT is given by: 
+
+Xi,j =
+
+> d−1
+
+X
+
+> m=0
+> d−1
+
+X
+
+> n=0
+
+αmαnVm,n cos π(2 i + 1) m
+
+2d cos π(2 j + 1) n
+
+2d
+
+(10) 
+
+for 0 ≤ i, j ≤ d − 1. The basis functions are: 
+
+αmαn cos π(2 i + 1) m
+
+2d cos π(2 j + 1) n
+
+2d (11) 
+
+The inverse DCT (IDCT) is an inverse phase of DCT. The IDCT equation can be interpreted as meaning that any d × d
+
+image can be written as a sum of basis functions. The DCT coefficients Vm,n can be regarded as the weights applied to each basis function, with lower frequencies represented by lower m, n . Especially for 8 × 8 images, the 64 basis functions are illustrated by Figure 9. Horizontal frequencies increase 
+
+Fig. 9: The 64 Basis Functions of an 8-by-8 Image. from left to right, and vertical frequencies increase from top to bottom. 
+
+B. Cryptosystems Settings 
+
+For cryptosystems of RobPI, one can follow the LoLa [16], where the BFV scheme in SEAL [49] is used. For MNIST and CIFAR-10, the plaintext modulus m = 2148728833 ×
+
+2148794369 × 2149810177 , modulus degree N = 16384 ,coefficient modulus q =∼ 440 bits. The security level is larger than 128 bits which are verified by lwe estimator [50]. To run RobPIs, one can run all experiments on the same Azure standard B8ms virtual machine with 8 vCPUs and 32GB DRAM. 
+
+C. Results on MNIST dataset 0 25 50 75 100 125 150       
+
+> Queries
+> 20
+> 40
+> 60
+> 80
+> 100
+> Attack Failure Rate
+> (a)
+> Attack Method
+> RND
+> RND-GF
+> RPNet
+> RPNet + Input Noise
+> RPNet + Input Noise + DNT
+> 025 50 75 100 125 150
+> Queries
+> 20
+> 40
+> 60
+> 80
+> 100
+> Attack Failure Rate
+> (b)
+> Attack Method
+> RND
+> RND-GF
+> RPNet
+> RPNet + Input Noise
+> RPNet + Input Noise + DNT
+
+Fig. 10: defense results on MNIST. In Figure 10, we compare different defense methods on MNIST. We show that compared with the traditional methods, the DSR of RobPI proposed in our paper is greatly improved. REFERENCES [1] W. Liu, Z. Wang, X. Liu, N. Zeng, Y. Liu, and F. E. Alsaadi, “A survey of deep neural network architectures and their applications,” 
+
+Neurocomputing , vol. 234, pp. 11–26, 2017. [Online]. Available: https://www.sciencedirect.com/science/article/pii/S0925231216315533 [2] Kuna, “Kuna ai: The smartest home security yet,” https://getkuna.com/ blogs/news/2017-05-24-introducing-kuna-ai, 2022. [3] Wyze, “Wyze: Contact and motion sensors for your home,” https://www. wyze.com/, 2024. [4] L. Ashiku and C. Dagli, “Network intrusion detection system using deep learning,” Procedia Computer Science , vol. 185, pp. 239–247, 2023, big Data, IoT, and AI for a Smarter Future. [Online]. Available: https://www.sciencedirect.com/science/article/pii/S1877050921011078 [5] P. Raghavan and N. E. Gayar, “Fraud detection using machine learning and deep learning,” in 2019 International Conference on Computational Intelligence and Knowledge Economy (ICCIKE) , 2019, pp. 334–339. [6] P. Mishra, R. Lehmkuhl, A. Srinivasan, W. Zheng, and R. A. Popa, “Delphi: A cryptographic inference service for neural networks,” in 
+
+USENIX Security Symposium . Boston, MA: USENIX Association, Aug. 2020. [Online]. Available: https://www.usenix.org/conference/ usenixsecurity20/presentation/mishra [7] N. Dowlin et al. , “CryptoNets: Applying Neural Networks to Encrypted Data with High Throughput and Accuracy,” in International Conference on Machine Learning , 2016. [8] Q. Lou, Y. Shen, H. Jin, and L. Jiang, “Safenet: A secure, accurate and fast neural network inference,” in International Conference on Learning Representations , 2021. [Online]. Available: https://openreview.net/forum?id=Cz3dbFm5u-[9] C. Gentry, “A fully homomorphic encryption scheme,” Ph.D. dissertation, Stanford, CA, USA, 2009, aAI3382729. [10] J. Xue, Y. Zhang, Y. Wang, X. Wang, H. Zheng, and Q. Lou, “Cryptotrain: Fast secure training on encrypted dataset,” LAMPS’24 , p. 97, 2024. [11] M. Kumar, J. Xue, M. Zheng, and Q. Lou, “FHE-coder: Evaluating LLM agents for secure fully homomorphic encryption code generation,” in 
+
+The Fourteenth International Conference on Learning Representations ,2026. [12] Y. Zhang, J. Xue, M. Zheng, M. Xie, M. Zhang, L. Jiang, and Q. Lou, “Cipherprune: Efficient and scalable private transformer inference,” in 
+
+The Thirteenth International Conference on Learning Representations .[13] M. Zheng, F. Chen, L. Jiang, and Q. Lou, “Priml: An electro-optical accelerator for private machine learning on encrypted data,” in 2023 24th International Symposium on Quality Electronic Design (ISQED) . IEEE, 2023, pp. 1–7. [14] J. Xue, X. Xin, W. Zhang, M. Zheng, Q. Song, M. Zhou, Y. Dong, D. Wang, X. Chen, J. Xie et al. , “Measuring computational universality of fully homomorphic encryption,” in Proceedings on Privacy Enhancing Technologies (PoPETs) , 2026. [15] J. Xue, M. Kumar, Y. Shang, S. Gao, R. Ning, M. Zheng, X. Jiang, and Q. Lou, “Dictpfl: Efficient and private federated learning on encrypted gradients,” in The Thirty-ninth Annual Conference on Neural Information Processing Systems .[16] A. Brutzkus et al. , “Low Latency Privacy Preserving Inference,” in 
+
+International Conference on Machine Learning , 2019. [17] E. Chou et al. , “Faster CryptoNets: Leveraging Sparsity for Real-World Encrypted Inference,” arXiv , vol. abs/1811.09953, 2018. [18] E. Hesamifard et al. , “Deep neural networks classification over encrypted data,” in ACM Conference on Data and Application Security and Privacy ,2019. [19] R. Dathathri, O. Saarikivi, H. Chen, K. Laine, K. Lauter, S. Maleki, M. Musuvathi, and T. Mytkowicz, “Chet: An optimizing compiler for fully-homomorphic neural-network inferencing,” in PLDI 2019 . ACM, June 2019, pp. 142–156. [20] Q. Lou and L. Jiang, “Hemet: A homomorphic-encryption-friendly privacy-preserving mobile neural network architecture,” in International Conference on Machine Learning , 2021. [21] A. Benaissa, B. Retiat, B. Cebere, and A. E. Belfedhal, “Tenseal: A library for encrypted tensor operations using homomorphic encryption,” CoRR , vol. abs/2104.03152, 2021. [Online]. Available: https://arxiv.org/abs/2104.03152 [22] E. Aharoni, A. Adir, M. Baruch, G. Ezov, A. Farkash, L. Greenberg, R. Masalha, D. Murik, and O. Soceanu, “Tile tensors: A versatile data structure with descriptive shapes for homomorphic encryption,” CoRR ,vol. abs/2011.01805, 2020. [Online]. Available: https://arxiv.org/abs/ 2011.01805 [23] R. Lehmkuhl, P. Mishra, A. Srinivasan, and R. A. Popa, “Muse: Secure inference resilient to malicious clients,” Cryptology ePrint Archive, Paper 2021/1040, 2021, https://eprint.iacr.org/2021/1040. [Online]. Available: https://eprint.iacr.org/2021/1040 [24] F. Brasser, U. M ¨uller, A. Dmitrienko, K. Kostiainen, S. Capkun, and A.-R. Sadeghi, “Software grand exposure: Sgx cache attacks are practical,” in 
+
+Proceedings of the 11th USENIX Conference on Offensive Technologies ,ser. WOOT’17. USA: USENIX Association, 2017, p. 11. [25] C. Guo, J. Gardner, Y. You, A. G. Wilson, and K. Weinberger, “Simple black-box adversarial attacks,” in International Conference on Machine Learning . PMLR, 2019, pp. 2484–2493. [26] M. Andriushchenko, F. Croce, N. Flammarion, and M. Hein, “Square attack: a query-efficient black-box adversarial attack via random search,” in European Conference on Computer Vision . Springer, 2020, pp. 484–501. [27] Q. Lou and L. Jiang, “She: A fast and accurate deep neural network for encrypted data,” in Advances in Neural Information Processing Systems (NeurIPS) 2019 , 2019, pp. 10 035–10 043. [28] Q. Lou, W.-j. Lu, C. Hong, and L. Jiang, “Falcon: Fast spectral inference on encrypted data,” NeurIPS 2020 (Advances in Neural Information Processing Systems) , vol. 33, 2020. [29] Q. Lou, B. Song, and L. Jiang, “Autoprivacy: Automated layer-wise parameter selection for secure neural network inference,” NeurIPS 2020 ,2020. [30] Q. Lou, “Efficient private deep learning,” Ph.D. dissertation, Indiana University, 2021. [31] Q. Lou, Y. Shen, and H. Jin, “Secure, accurate and fast neural network inference by replacing at least one non-linear activation channel,” Dec. 2 2025, uS Patent 12,488,249. [32] M. Zheng, Q. Lou, F. Chen, L. Jiang, and Y. Zhu, “Cryptolight: An electro-optical accelerator for fully homomorphic encryption,” in Proceedings of the 17th ACM International Symposium on Nanoscale Architectures ,2022, pp. 1–2. [33] M. Kumar, Q. Lou, P. Barreto, M. De Cock, and S. Pentyala, “Fhaim: Fully homomorphic aim for private synthetic data generation,” arXiv preprint arXiv:2602.05838 , 2026. [34] M. Zheng, Q. Lou, and L. Jiang, “Primer: Fast private transformer inference on encrypted data,” DAC 2023 , 2023. [35] Y. Zhang, M. Zheng, Y. Shang, X. Chen, and Q. Lou, “Heprune: Fast private training of deep neural networks with encrypted data pruning,” 
+
+Advances in Neural Information Processing Systems , vol. 37, pp. 51 063– 51 084, 2024. [36] B. Feng, Q. Lou, L. Jiang, and G. C. Fox, “Cryptogru: Low latency privacy-preserving text analysis with gru,” arXiv preprint arXiv:2010.11796 , 2020. [37] H. Zhang, N. Javidnia, S. Pardeshi, Q. Lou, and F. Koushanfar, “Cryptogen: Secure transformer generation with encrypted kv-cache reuse,” 
+
+arXiv preprint arXiv:2602.08798 , 2026. [38] H. Salman, M. Sun, G. Yang, A. Kapoor, and J. Z. Kolter, “Denoised smoothing: A provable defense for pretrained classifiers,” Advances in Neural Information Processing Systems , vol. 33, pp. 21 945–21 957, 2020. [39] J. Byun, H. Go, and C. Kim, “Small input noise is enough to defend against query-based black-box attacks,” arXiv preprint arXiv:2101.04829 ,2021. [40] Z. Qin, Y. Fan, H. Zha, and B. Wu, “Random noise defense against query-based black-box attacks,” Advances in Neural Information Processing Systems , vol. 34, pp. 7650–7663, 2021. [41] C. Xie, J. Wang, Z. Zhang, Z. Ren, and A. Yuille, “Mitigating adversarial effects through randomization,” arXiv preprint arXiv:1711.01991 , 2017. [42] X. Liu, M. Cheng, H. Zhang, and C.-J. Hsieh, “Towards robust neural networks via random self-ensemble,” in Proceedings of the European Conference on Computer Vision (ECCV) , 2018, pp. 369–385. [43] Z. He, A. S. Rakin, and D. Fan, “Parametric noise injection: Trainable randomness to improve deep neural network robustness against adversarial attack,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2019, pp. 588–597. [44] J. Cohen, E. Rosenfeld, and Z. Kolter, “Certified adversarial robustness via randomized smoothing,” in International Conference on Machine Learning . PMLR, 2019, pp. 1310–1320. [45] H. Salman, J. Li, I. Razenshteyn, P. Zhang, H. Zhang, S. Bubeck, and G. Yang, “Provably robust deep learning via adversarially trained smoothed classifiers,” Advances in Neural Information Processing Systems , vol. 32, 2019. [46] E. Rusak, L. Schott, R. S. Zimmermann, J. Bitterwolf, O. Bringmann, M. Bethge, and W. Brendel, “A simple way to make neural networks robust against diverse image corruptions,” in European Conference on Computer Vision . Springer, 2020, pp. 53–69. [47] V. Gulshan et al. , “Development and Validation of a Deep Learning Algorithm for Detection of Diabetic Retinopathy in Retinal Fundus Photographs,” The Journal of the American Medical Association , vol. 316, no. 22, 2016. [48] I. J. Goodfellow, J. Shlens, and C. Szegedy, “Explaining and harnessing adversarial examples,” arXiv preprint arXiv:1412.6572 , 2014. [49] “Microsoft SEAL (release 3.4),” https://github.com/Microsoft/SEAL, Oct. 2019, microsoft Research, Redmond, WA. [50] M. R. Albrecht, R. Player, and S. Scott, “On the concrete hardness of learning with errors,” Cryptology ePrint Archive, Report 2015/046, 2015, https://eprint.iacr.org/2015/046.

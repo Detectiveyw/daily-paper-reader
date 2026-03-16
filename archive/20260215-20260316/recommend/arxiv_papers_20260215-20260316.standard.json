@@ -1,0 +1,1161 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-16T01:26:33.976742+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 41,
+    "deep_cap": 7,
+    "deep_selected": 18,
+    "quick_candidates": 57,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2602.14397v1",
+      "title": "LRD-MPC: Efficient MPC Inference through Low-rank Decomposition",
+      "abstract": "Secure Multi-party Computation (MPC) enables untrusted parties to jointly compute a function without revealing their inputs. Its application to machine learning (ML) has gained significant attention, particularly for secure inference services deployed across multiple cloud virtual machines (VMs), where each VM acts as an MPC party. Model providers secret-share model weights, and users secret-share inputs, ensuring that each server operates only on random shares. While MPC provides strong cryptographic guarantees, it incurs substantial computational and communication overhead. Deep neural networks rely heavily on convolutional and fully connected layers, which require costly matrix multiplications in MPC. To reduce this cost, we propose leveraging low-rank decomposition (LRD) for linear layers, replacing one large matrix multiplication with two smaller ones. Each matrix multiplication in MPC incurs a round of communication, meaning decomposing one matrix multiplication into two leads to an additional communication round. Second, the added matrix multiplication requires an additional truncation step to maintain numerical precision. Since truncation itself requires communication and computation, these overheads can offset the gains from decomposition. To address this, we introduce two complementary optimizations: truncation skipping and efficient linear layer concatenation. Truncation skipping removes the extra truncation induced by LRD, while linear layer concatenation pipelines operations to hide the additional communication round. Together, these techniques mitigate the main overheads of LRD in MPC and improve overall efficiency. Our approach is broadly applicable across MPC protocols. Experiments show up to 25% speedup in n-PC and 33% in 3-PC protocols over full-rank baselines, along with up to 52% GPU energy savings and 88% reduction in offline-phase latency.",
+      "authors": [
+        "Tingting Tang",
+        "Yongqin Wang",
+        "Murali Annavaram"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-02-16T02:11:38+00:00",
+      "link": "https://arxiv.org/pdf/2602.14397v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "MPC inference for deep neural networks using secret sharing",
+      "llm_evidence_cn": "使用秘密共享的深度神经网络MPC推理",
+      "llm_evidence": "使用秘密共享的深度神经网络MPC推理",
+      "canonical_evidence": "使用秘密共享的深度神经网络MPC推理",
+      "llm_tldr_en": "Proposes low-rank decomposition to reduce computational and communication overhead in MPC-based secure inference.",
+      "llm_tldr_cn": "提出低秩分解方法，旨在降低基于MPC的安全推理中的计算和通信开销。",
+      "llm_tldr": "提出低秩分解方法，旨在降低基于MPC的安全推理中的计算和通信开销。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "MPC protocols for privacy-preserving computation",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.15380v1",
+      "title": "Fractional-Order Federated Learning",
+      "abstract": "Federated learning (FL) allows remote clients to train a global model collaboratively while protecting client privacy. Despite its privacy-preserving benefits, FL has significant drawbacks, including slow convergence, high communication cost, and non-independent-and-identically-distributed (non-IID) data. In this work, we present a novel FedAvg variation called Fractional-Order Federated Averaging (FOFedAvg), which incorporates Fractional-Order Stochastic Gradient Descent (FOSGD) to capture long-range relationships and deeper historical information. By introducing memory-aware fractional-order updates, FOFedAvg improves communication efficiency and accelerates convergence while mitigating instability caused by heterogeneous, non-IID client data. We compare FOFedAvg against a broad set of established federated optimization algorithms on benchmark datasets including MNIST, FEMNIST, CIFAR-10, CIFAR-100, EMNIST, the Cleveland heart disease dataset, Sent140, PneumoniaMNIST, and Edge-IIoTset. Across a range of non-IID partitioning schemes, FOFedAvg is competitive with, and often outperforms, these baselines in terms of test performance and convergence speed. On the theoretical side, we prove that FOFedAvg converges to a stationary point under standard smoothness and bounded-variance assumptions for fractional order $0<α\\le 1$. Together, these results show that fractional-order, memory-aware updates can substantially improve the robustness and effectiveness of federated learning, offering a practical path toward distributed training on heterogeneous data.",
+      "authors": [
+        "Mohammad Partohaghighi",
+        "Roummel Marcia",
+        "YangQuan Chen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-02-17T06:25:23+00:00",
+      "link": "https://arxiv.org/pdf/2602.15380v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "privacy-preserving federated learning architecture",
+      "llm_evidence_cn": "隐私保护联邦学习架构",
+      "llm_evidence": "隐私保护联邦学习架构",
+      "canonical_evidence": "隐私保护联邦学习架构",
+      "llm_tldr_en": "Proposes FOFedAvg to improve convergence and communication efficiency in privacy-preserving federated learning.",
+      "llm_tldr_cn": "提出FOFedAvg算法，旨在提高隐私保护联邦学习中的收敛速度和通信效率。",
+      "llm_tldr": "提出FOFedAvg算法，旨在提高隐私保护联邦学习中的收敛速度和通信效率。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.16480v1",
+      "title": "SRFed: Mitigating Poisoning Attacks in Privacy-Preserving Federated Learning with Heterogeneous Data",
+      "abstract": "Federated Learning (FL) enables collaborative model training without exposing clients' private data, and has been widely adopted in privacy-sensitive scenarios. However, FL faces two critical security threats: curious servers that may launch inference attacks to reconstruct clients' private data, and compromised clients that can launch poisoning attacks to disrupt model aggregation. Existing solutions mitigate these attacks by combining mainstream privacy-preserving techniques with defensive aggregation strategies. However, they either incur high computation and communication overhead or perform poorly under non-independent and identically distributed (Non-IID) data settings. To tackle these challenges, we propose SRFed, an efficient Byzantine-robust and privacy-preserving FL framework for Non-IID scenarios. First, we design a decentralized efficient functional encryption (DEFE) scheme to support efficient model encryption and non-interactive decryption. DEFE also eliminates third-party reliance and defends against server-side inference attacks. Second, we develop a privacy-preserving defensive model aggregation mechanism based on DEFE. This mechanism filters poisonous models under Non-IID data by layer-wise projection and clustering-based analysis. Theoretical analysis and extensive experiments show that SRFed outperforms state-of-the-art baselines in privacy protection, Byzantine robustness, and efficiency.",
+      "authors": [
+        "Yiwen Lu"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.DC"
+      ],
+      "published": "2026-02-18T14:14:38+00:00",
+      "link": "https://arxiv.org/pdf/2602.16480v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "privacy-preserving federated learning with defensive aggregation",
+      "llm_evidence_cn": "具有防御性聚合的隐私保护联邦学习",
+      "llm_evidence": "具有防御性聚合的隐私保护联邦学习",
+      "canonical_evidence": "具有防御性聚合的隐私保护联邦学习",
+      "llm_tldr_en": "Proposes SRFed to mitigate poisoning and inference attacks in heterogeneous federated learning environments.",
+      "llm_tldr_cn": "提出 SRFed 框架，旨在减轻异构联邦学习环境中的投毒攻击和推理攻击。",
+      "llm_tldr": "提出 SRFed 框架，旨在减轻异构联邦学习环境中的投毒攻击和推理攻击。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.17223v1",
+      "title": "Privacy-Preserving Mechanisms Enable Cheap Verifiable Inference of LLMs",
+      "abstract": "As large language models (LLMs) continue to grow in size, fewer users are able to host and run models locally. This has led to increased use of third-party hosting services. However, in this setting, there is a lack of guarantees on the computation performed by the inference provider. For example, a dishonest provider may replace an expensive large model with a cheaper-to-run weaker model and return the results from the weaker model to the user. Existing tools to verify inference typically rely on methods from cryptography such as zero-knowledge proofs (ZKPs), but these add significant computational overhead, and remain infeasible for use for large models. In this work, we develop a new insight -- that given a method for performing private LLM inference, one can obtain forms of verified inference at marginal extra cost. Specifically, we propose two new protocols which leverage privacy-preserving LLM inference in order to provide guarantees over the inference that was carried out. Our approaches are cheap, requiring the addition of a few extra tokens of computation, and have little to no downstream impact. As the fastest privacy-preserving inference methods are typically faster than ZK methods, the proposed protocols also improve verification runtime. Our work provides novel insights into the connections between privacy and verifiability in LLM inference.",
+      "authors": [
+        "Arka Pal",
+        "Louai Zahran",
+        "William Gvozdjak",
+        "Akilesh Potti",
+        "Micah Goldblum"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-02-19T10:15:51+00:00",
+      "link": "https://arxiv.org/pdf/2602.17223v1",
+      "tags": [
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Verifiable inference of LLMs using privacy-preserving mechanisms",
+      "llm_evidence_cn": "利用隐私保护机制实现大模型的可验证推理",
+      "llm_evidence": "利用隐私保护机制实现大模型的可验证推理",
+      "canonical_evidence": "利用隐私保护机制实现大模型的可验证推理",
+      "llm_tldr_en": "Uses privacy-preserving techniques to enable low-cost verification of LLM inference results from third parties.",
+      "llm_tldr_cn": "利用隐私保护技术实现对第三方大模型推理结果的低成本验证。",
+      "llm_tldr": "利用隐私保护技术实现对第三方大模型推理结果的低成本验证。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.17614v1",
+      "title": "Guarding the Middle: Protecting Intermediate Representations in Federated Split Learning",
+      "abstract": "Big data scenarios, where massive, heterogeneous datasets are distributed across clients, demand scalable, privacy-preserving learning methods. Federated learning (FL) enables decentralized training of machine learning (ML) models across clients without data centralization. Decentralized training, however, introduces a computational burden on client devices. U-shaped federated split learning (UFSL) offloads a fraction of the client computation to the server while keeping both data and labels on the clients' side. However, the intermediate representations (i.e., smashed data) shared by clients with the server are prone to exposing clients' private data. To reduce exposure of client data through intermediate data representations, this work proposes k-anonymous differentially private UFSL (KD-UFSL), which leverages privacy-enhancing techniques such as microaggregation and differential privacy to minimize data leakage from the smashed data transferred to the server. We first demonstrate that an adversary can access private client data from intermediate representations via a data-reconstruction attack, and then present a privacy-enhancing solution, KD-UFSL, to mitigate this risk. Our experiments indicate that, alongside increasing the mean squared error between the actual and reconstructed images by up to 50% in some cases, KD-UFSL also decreases the structural similarity between them by up to 40% on four benchmarking datasets. More importantly, KD-UFSL improves privacy while preserving the utility of the global model. This highlights its suitability for large-scale big data applications where privacy and utility must be balanced.",
+      "authors": [
+        "Obaidullah Zaland",
+        "Sajib Mistry",
+        "Monowar Bhuyan"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.DC"
+      ],
+      "published": "2026-02-19T18:40:12+00:00",
+      "link": "https://arxiv.org/pdf/2602.17614v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "privacy-preserving learning methods and federated split learning",
+      "llm_evidence_cn": "隐私保护学习方法和联邦拆分学习",
+      "llm_evidence": "隐私保护学习方法和联邦拆分学习",
+      "canonical_evidence": "隐私保护学习方法和联邦拆分学习",
+      "llm_tldr_en": "Protects intermediate representations in federated split learning to prevent client data exposure.",
+      "llm_tldr_cn": "保护联邦拆分学习中的中间表示，防止客户端数据泄露。",
+      "llm_tldr": "保护联邦拆分学习中的中间表示，防止客户端数据泄露。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.18758v1",
+      "title": "UFO: Unlocking Ultra-Efficient Quantized Private Inference with Protocol and Algorithm Co-Optimization",
+      "abstract": "Private convolutional neural network (CNN) inference based on secure two-party computation (2PC) suffers from high communication and latency overhead, especially from convolution layers. In this paper, we propose UFO, a quantized 2PC inference framework that jointly optimizes the 2PC protocols and quantization algorithm. UFO features a novel 2PC protocol that systematically combines the efficient Winograd convolution algorithm with quantization to improve inference efficiency. However, we observe that naively combining quantization and Winograd convolution faces the following challenges: 1) From the inference perspective, Winograd transformations introduce extensive additions and require frequent bit width conversions to avoid inference overflow, leading to non-negligible communication overhead; 2) From the training perspective, Winograd transformations introduce weight outliers that make quantization-aware training (QAT) difficult, resulting in inferior model accuracy. To address these challenges, we co-optimize both protocol and algorithm. 1) At the protocol level, we propose a series of graph-level optimizations for 2PC inference to minimize the communication. 2) At the algorithm level, we develop a mixed-precision QAT algorithm based on layer sensitivity to optimize model accuracy given communication constraints. To accommodate the outliers, we further introduce a 2PC-friendly bit re-weighting algorithm to increase the representation range without explicitly increasing bit widths. With extensive experiments, UFO demonstrates 11.7x, 3.6x, and 6.3x communication reduction with 1.29%, 1.16%, and 1.29% higher accuracy compared to state-of-the-art frameworks SiRNN, COINN, and CoPriv, respectively.",
+      "authors": [
+        "Wenxuan Zeng",
+        "Chao Yang",
+        "Tianshi Xu",
+        "Bo Zhang",
+        "Changrui Ren",
+        "Jin Dong",
+        "Meng Li"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-02-21T08:45:05+00:00",
+      "link": "https://arxiv.org/pdf/2602.18758v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "quantized private inference based on secure 2PC",
+      "llm_evidence_cn": "基于安全两方计算的量化隐私推理",
+      "llm_evidence": "基于安全两方计算的量化隐私推理",
+      "canonical_evidence": "基于安全两方计算的量化隐私推理",
+      "llm_tldr_en": "Optimizes 2PC protocols and quantization for ultra-efficient private CNN inference.",
+      "llm_tldr_cn": "通过协同优化2PC协议和量化算法，实现超高效的卷积神经网络隐私推理。",
+      "llm_tldr": "通过协同优化2PC协议和量化算法，实现超高效的卷积神经网络隐私推理。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "secure and private inference in neural networks",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.18900v1",
+      "title": "PrivacyBench: Privacy Isn't Free in Hybrid Privacy-Preserving Vision Systems",
+      "abstract": "Privacy preserving machine learning deployments in sensitive deep learning applications; from medical imaging to autonomous systems; increasingly require combining multiple techniques. Yet, practitioners lack systematic guidance to assess the synergistic and non-additive interactions of these hybrid configurations, relying instead on isolated technique analysis that misses critical system level interactions. We introduce PrivacyBench, a benchmarking framework that reveals striking failures in privacy technique combinations with severe deployment implications. Through systematic evaluation across ResNet18 and ViT models on medical datasets, we uncover that FL + DP combinations exhibit severe convergence failure, with accuracy dropping from 98% to 13% while compute costs and energy consumption substantially increase. In contrast, FL + SMPC maintains near-baseline performance with modest overhead. Our framework provides the first systematic platform for evaluating privacy-utility-cost trade-offs through automated YAML configuration, resource monitoring, and reproducible experimental protocols. PrivacyBench enables practitioners to identify problematic technique interactions before deployment, moving privacy-preserving computer vision from ad-hoc evaluation toward principled systems design. These findings demonstrate that privacy techniques cannot be composed arbitrarily and provide critical guidance for robust deployment in resource-constrained environments.",
+      "authors": [
+        "Nnaemeka Obiefuna",
+        "Samuel Oyeneye",
+        "Similoluwa Odunaiya",
+        "Iremide Oyelaja",
+        "Steven Kolawole"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.CV"
+      ],
+      "published": "2026-02-21T16:45:56+00:00",
+      "link": "https://arxiv.org/pdf/2602.18900v1",
+      "tags": [
+        "keyword:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Benchmarking hybrid privacy-preserving vision systems (FL + DP)",
+      "llm_evidence_cn": "混合隐私保护视觉系统（联邦学习+差分隐私）的基准测试",
+      "llm_evidence": "混合隐私保护视觉系统（联邦学习+差分隐私）的基准测试",
+      "canonical_evidence": "混合隐私保护视觉系统（联邦学习+差分隐私）的基准测试",
+      "llm_tldr_en": "PrivacyBench evaluates the performance and privacy trade-offs of combining multiple PPML techniques.",
+      "llm_tldr_cn": "PrivacyBench评估了结合多种隐私保护机器学习技术时的性能与隐私权衡。",
+      "llm_tldr": "PrivacyBench评估了结合多种隐私保护机器学习技术时的性能与隐私权衡。",
+      "llm_tags": [
+        "query:ppml:composite"
+      ],
+      "matched_query_tag": "query:ppml:composite",
+      "matched_query_text": "Papers central to 隐私保护机器学习，隐私推理，隐私计算, especially work that connects or combines: privacy-preserving machine learning techniques and frameworks; secure and private inference in neural networks; MPC protocols for privacy-preserving computation; privacy-preserving federated learning architectures; state of the art methods for privacy preserving machine learning; secure inference protocols for deep learning models; privacy computing technologies in data science; balancing utility and privacy in machine learning.",
+      "matched_requirement_id": "req-composite-ppml",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.19604v1",
+      "title": "Efficient Multi-Party Secure Comparison over Different Domains with Preprocessing Assistance",
+      "abstract": "Secure comparison is a fundamental primitive in multi-party computation, supporting privacy-preserving applications such as machine learning and data analytics. A critical performance bottleneck in comparison protocols is their preprocessing phase, primarily due to the high cost of generating the necessary correlated randomness. Recent frameworks introduce a passive, non-colluding dealer to accelerate preprocessing. However, two key issues still remain. First, existing dealer-assisted approaches treat the dealer as a drop-in replacement for conventional preprocessing without redesigning the comparison protocol to optimize the online phase. Second, most protocols are specialized for particular algebraic domains, adversary models, or party configurations, lacking broad generality. In this work, we present the first dealer-assisted $n$-party LTBits (Less-Than-Bits) and MSB (Most Significant Bit) extraction protocols over both $\\mathbb{F}_p$ and $\\mathbb{Z}_{2^k}$, achieving perfect security at the protocol level. By fully exploiting the dealer's capability to generate rich correlated randomness, our $\\mathbb{F}_p$ construction achieves constant-round online complexity and our $\\mathbb{Z}_{2^k}$ construction achieves $O(\\log_n k)$ rounds with tunable branching factor. All protocols are formulated as black-box constructions via an extended ABB model, ensuring portability across MPC backends and adversary models. Experimental results demonstrate $1.79\\times$ to $19.4\\times$ speedups over state-of-the-art MPC frameworks, highlighting the practicality of our protocols for comparison-intensive MPC applications.",
+      "authors": [
+        "Kaiwen Wang",
+        "Xiaolin Chang",
+        "Yuehan Dong",
+        "Ruichen Zhang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-02-23T08:45:47+00:00",
+      "link": "https://arxiv.org/pdf/2602.19604v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "multi-party secure comparison for machine learning and data analytics",
+      "llm_evidence_cn": "用于机器学习和数据分析的多方安全比较",
+      "llm_evidence": "用于机器学习和数据分析的多方安全比较",
+      "canonical_evidence": "用于机器学习和数据分析的多方安全比较",
+      "llm_tldr_en": "Optimizes secure comparison protocols in MPC using dealer-assisted preprocessing for better performance.",
+      "llm_tldr_cn": "通过辅助预处理优化多方计算中的安全比较协议，提升在线阶段性能。",
+      "llm_tldr": "通过辅助预处理优化多方计算中的安全比较协议，提升在线阶段性能。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "MPC protocols for privacy-preserving computation",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.19918v1",
+      "title": "RobPI: Robust Private Inference against Malicious Client",
+      "abstract": "The increased deployment of machine learning inference in various applications has sparked privacy concerns. In response, private inference (PI) protocols have been created to allow parties to perform inference without revealing their sensitive data. Despite recent advances in the efficiency of PI, most current methods assume a semi-honest threat model where the data owner is honest and adheres to the protocol. However, in reality, data owners can have different motivations and act in unpredictable ways, making this assumption unrealistic. To demonstrate how a malicious client can compromise the semi-honest model, we first designed an inference manipulation attack against a range of state-of-the-art private inference protocols. This attack allows a malicious client to modify the model output with 3x to 8x fewer queries than current black-box attacks. Motivated by the attacks, we proposed and implemented RobPI, a robust and resilient private inference protocol that withstands malicious clients. RobPI integrates a distinctive cryptographic protocol that bolsters security by weaving encryption-compatible noise into the logits and features of private inference, thereby efficiently warding off malicious-client attacks. Our extensive experiments on various neural networks and datasets show that RobPI achieves ~91.9% attack success rate reduction and increases more than 10x the number of queries required by malicious-client attacks.",
+      "authors": [
+        "Jiaqi Xue",
+        "Mengxin Zheng",
+        "Qian Lou"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-02-23T14:58:08+00:00",
+      "link": "https://arxiv.org/pdf/2602.19918v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "robust private inference against malicious clients",
+      "llm_evidence_cn": "针对恶意客户端的鲁棒隐私推理",
+      "llm_evidence": "针对恶意客户端的鲁棒隐私推理",
+      "canonical_evidence": "针对恶意客户端的鲁棒隐私推理",
+      "llm_tldr_en": "Develops RobPI to protect private inference protocols against manipulation by malicious clients.",
+      "llm_tldr_cn": "开发RobPI框架，保护隐私推理协议免受恶意客户端的操纵攻击。",
+      "llm_tldr": "开发RobPI框架，保护隐私推理协议免受恶意客户端的操纵攻击。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "secure inference protocols for deep learning models",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.19926v1",
+      "title": "Rethinking LoRA for Privacy-Preserving Federated Learning in Large Models",
+      "abstract": "Fine-tuning large vision models (LVMs) and large language models (LLMs) under differentially private federated learning (DPFL) is hindered by a fundamental privacy-utility trade-off. Low-Rank Adaptation (LoRA), a promising parameter-efficient fine-tuning (PEFT) method, reduces computational and communication costs by introducing two trainable low-rank matrices while freezing pre-trained weights. However, directly applying LoRA in DPFL settings leads to performance degradation, especially in LVMs. Our analysis reveals three previously underexplored challenges: (1) gradient coupling caused by the simultaneous update of two asymmetric low-rank matrices, (2) compounded noise amplification under differential privacy, and (3) sharpness of the global aggregated model in the parameter space. To address these issues, we propose LA-LoRA (\\textbf{L}ocal \\textbf{A}lternating \\textbf{LoRA}), a novel approach that decouples gradient interactions and aligns update directions across clients to enhance robustness under stringent privacy constraints. Theoretically, LA-LoRA strengthens convergence guarantees in noisy federated environments. Extensive experiments demonstrate that LA-LoRA achieves state-of-the-art (SOTA) performance on Swin Transformer and RoBERTa models, showcasing robustness to DP noise and broad applicability across both LVMs and LLMs. For example, when fine-tuning the Swin-B model on the Tiny-ImageNet dataset under a strict privacy budget ($ε= 1$), LA-LoRA outperforms the best baseline, RoLoRA, by 16.83\\% in test accuracy. Code is provided in \\repolink.",
+      "authors": [
+        "Jin Liu",
+        "Yinbin Miao",
+        "Ning Xi",
+        "Junkang Liu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-02-23T15:05:28+00:00",
+      "link": "https://arxiv.org/pdf/2602.19926v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "privacy-preserving federated learning in large models",
+      "llm_evidence_cn": "大模型中的隐私保护联邦学习",
+      "llm_evidence": "大模型中的隐私保护联邦学习",
+      "canonical_evidence": "大模型中的隐私保护联邦学习",
+      "llm_tldr_en": "Analyzes and improves LoRA for differentially private federated learning in large vision and language models.",
+      "llm_tldr_cn": "分析并改进了用于大语言模型和视觉模型差分隐私联邦学习的 LoRA 技术。",
+      "llm_tldr": "分析并改进了用于大语言模型和视觉模型差分隐私联邦学习的 LoRA 技术。",
+      "llm_tags": [
+        "query:ppml:composite"
+      ],
+      "matched_query_tag": "query:ppml:composite",
+      "matched_query_text": "Papers central to 隐私保护机器学习，隐私推理，隐私计算, especially work that connects or combines: privacy-preserving machine learning techniques and frameworks; secure and private inference in neural networks; MPC protocols for privacy-preserving computation; privacy-preserving federated learning architectures; state of the art methods for privacy preserving machine learning; secure inference protocols for deep learning models; privacy computing technologies in data science; balancing utility and privacy in machine learning.",
+      "matched_requirement_id": "req-composite-ppml",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.22037v1",
+      "title": "A Critical Look into Threshold Homomorphic Encryption for Private Average Aggregation",
+      "abstract": "Threshold Homomorphic Encryption (Threshold HE) is a good fit for implementing private federated average aggregation, a key operation in Federated Learning (FL). Despite its potential, recent studies have shown that threshold schemes available in mainstream HE libraries can introduce unexpected security vulnerabilities if an adversary has access to a restricted decryption oracle. This oracle reflects the FL clients' capacity to collaboratively decrypt the aggregated result without knowing the secret key. This work surveys the use of threshold RLWE-based HE for federated average aggregation and examines the performance impact of using smudging noise with a large variance as a countermeasure. We provide a detailed comparison of threshold variants of BFV and CKKS, finding that CKKS-based aggregations perform comparably to BFV-based solutions.",
+      "authors": [
+        "Miguel Morona-Mínguez",
+        "Alberto Pedrouzo-Ulloa",
+        "Fernando Pérez-González"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-02-25T15:45:27+00:00",
+      "link": "https://arxiv.org/pdf/2602.22037v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "threshold homomorphic encryption for private aggregation",
+      "llm_evidence_cn": "用于隐私聚合的门限同态加密",
+      "llm_evidence": "用于隐私聚合的门限同态加密",
+      "canonical_evidence": "用于隐私聚合的门限同态加密",
+      "llm_tldr_en": "Evaluates the security and performance of threshold homomorphic encryption in federated learning aggregation.",
+      "llm_tldr_cn": "评估了联邦学习聚合中门限同态加密的安全性和性能影响。",
+      "llm_tldr": "评估了联邦学习聚合中门限同态加密的安全性和性能影响。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "MPC protocols for privacy-preserving computation",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.00196v1",
+      "title": "Your Inference Request Will Become a Black Box: Confidential Inference for Cloud-based Large Language Models",
+      "abstract": "The increasing reliance on cloud-hosted Large Language Models (LLMs) exposes sensitive client data, such as prompts and responses, to potential privacy breaches by service providers. Existing approaches fail to ensure privacy, maintain model performance, and preserve computational efficiency simultaneously. To address this challenge, we propose Talaria, a confidential inference framework that partitions the LLM pipeline to protect client data without compromising the cloud's model intellectual property or inference quality. Talaria executes sensitive, weight-independent operations within a client-controlled Confidential Virtual Machine (CVM) while offloading weight-dependent computations to the cloud GPUs. The interaction between these environments is secured by our Reversible Masked Outsourcing (ReMO) protocol, which uses a hybrid masking technique to reversibly obscure intermediate data before outsourcing computations. Extensive evaluations show that Talaria can defend against state-of-the-art token inference attacks, reducing token reconstruction accuracy from over 97.5% to an average of 1.34%, all while being a lossless mechanism that guarantees output identical to the original model without significantly decreasing efficiency and scalability. To the best of our knowledge, this is the first work that ensures clients' prompts and responses remain inaccessible to the cloud, while also preserving model privacy, performance, and efficiency.",
+      "authors": [
+        "Chung-ju Huang",
+        "Huiqiang Zhao",
+        "Yuanpeng He",
+        "Lijian Li",
+        "Wenpin Jiao",
+        "Zhi Jin",
+        "Peixuan Chen",
+        "Leye Wang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-02-27T06:37:07+00:00",
+      "link": "https://arxiv.org/pdf/2603.00196v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Confidential inference for cloud-based LLMs using CVMs",
+      "llm_evidence_cn": "基于机密虚拟机(CVM)的云端大模型机密推理",
+      "llm_evidence": "基于机密虚拟机(CVM)的云端大模型机密推理",
+      "canonical_evidence": "基于机密虚拟机(CVM)的云端大模型机密推理",
+      "llm_tldr_en": "Proposes Talaria, a framework for confidential LLM inference using CVMs to protect client data in the cloud.",
+      "llm_tldr_cn": "提出Talaria框架，利用机密虚拟机在云端实现大模型机密推理，保护客户端数据隐私。",
+      "llm_tldr": "提出Talaria框架，利用机密虚拟机在云端实现大模型机密推理，保护客户端数据隐私。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.01499v1",
+      "title": "Towards Privacy-Preserving LLM Inference via Collaborative Obfuscation (Technical Report)",
+      "abstract": "The rapid development of large language models (LLMs) has driven the widespread adoption of cloud-based LLM inference services, while also bringing prominent privacy risks associated with the transmission and processing of private data in remote inference. For privacy-preserving LLM inference technologies to be practically applied in industrial scenarios, three core requirements must be satisfied simultaneously: (1) Accuracy and efficiency losses should be minimized to mitigate degradation in service experience. (2) The inference process can be run on large-scale clusters consist of heterogeneous legacy xPUs. (3) Compatibility with existing LLM infrastructures should be ensured to reuse their engineering optimizations. To the best of our knowledge, none of the existing privacy-preserving LLM inference methods satisfy all the above constraints while delivering meaningful privacy guarantees. In this paper, we propose AloePri, the first privacy-preserving LLM inference method for industrial applications. AloePri protects both the input and output data by covariant obfuscation, which jointly transforms data and model parameters to achieve better accuracy and privacy. We carefully design the transformation for each model component to ensure inference accuracy and data privacy while keeping full compatibility with existing infrastructures of Language Model as a Service. AloePri has been integrated into an industrial system for the evaluation of mainstream LLMs. The evaluation on Deepseek-V3.1-Terminus model (671B parameters) demonstrates that AloePri causes accuracy loss of 0.0%~3.5% and exhibits efficiency equivalent to that of plaintext inference. Meanwhile, AloePri successfully resists state-of-the-art attacks, with less than 5\\% of tokens recovered. To the best of our knowledge, AloePri is the first method to exhibit practical applicability to large-scale models in real-world systems.",
+      "authors": [
+        "Yu Lin",
+        "Qizhi Zhang",
+        "Wenqiang Ruan",
+        "Daode Zhang",
+        "Jue Hong",
+        "Ye Wu",
+        "Hanning Xia",
+        "Yunlong Mao",
+        "Sheng Zhong"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-03-02T06:16:36+00:00",
+      "link": "https://arxiv.org/pdf/2603.01499v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "privacy-preserving LLM inference via collaborative obfuscation",
+      "llm_evidence_cn": "通过协作混淆实现隐私保护的LLM推理",
+      "llm_evidence": "通过协作混淆实现隐私保护的LLM推理",
+      "canonical_evidence": "通过协作混淆实现隐私保护的LLM推理",
+      "llm_tldr_en": "Addresses privacy risks in cloud-based LLM inference through a collaborative obfuscation approach.",
+      "llm_tldr_cn": "通过协作混淆方法解决云端LLM推理中的隐私风险。",
+      "llm_tldr": "通过协作混淆方法解决云端LLM推理中的隐私风险。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.02969v1",
+      "title": "Integrating Homomorphic Encryption and Synthetic Data in FL for Privacy and Learning Quality",
+      "abstract": "Federated learning (FL) enables collaborative training of machine learning models without sharing sensitive client data, making it a cornerstone for privacy-critical applications. However, FL faces the dual challenge of ensuring learning quality and robust privacy protection while keeping resource consumption low, particularly when using computationally expensive techniques such as homomorphic encryption (HE). In this work, we enhance an FL process that preserves privacy using HE by integrating it with synthetic data generation and an interleaving strategy. Specifically, our solution, named Alternating Federated Learning (Alt-FL), consists of alternating between local training with authentic data (authentic rounds) and local training with synthetic data (synthetic rounds) and transferring the encrypted and plaintext model parameters on authentic and synthetic rounds (resp.). Our approach improves learning quality (e.g., model accuracy) through datasets enhanced with synthetic data, preserves client data privacy via HE, and keeps manageable encryption and decryption costs through our interleaving strategy. We evaluate our solution against data leakage attacks, such as the DLG attack, demonstrating robust privacy protection. Also, Alt-FL provides 13.4% higher model accuracy and decreases HE-related costs by up to 48% with respect to Selective HE.",
+      "authors": [
+        "Yenan Wang",
+        "Carla Fabiana Chiasserini",
+        "Elad Michael Schiller"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-03T13:23:29+00:00",
+      "link": "https://arxiv.org/pdf/2603.02969v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "homomorphic encryption and synthetic data in federated learning",
+      "llm_evidence_cn": "联邦学习中的同态加密与合成数据",
+      "llm_evidence": "联邦学习中的同态加密与合成数据",
+      "canonical_evidence": "联邦学习中的同态加密与合成数据",
+      "llm_tldr_en": "Integrates homomorphic encryption with synthetic data to enhance privacy and quality in federated learning.",
+      "llm_tldr_cn": "将同态加密与合成数据结合，以提高联邦学习的隐私保护能力和学习质量。",
+      "llm_tldr": "将同态加密与合成数据结合，以提高联邦学习的隐私保护能力和学习质量。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.03711v1",
+      "title": "LDP-Slicing: Local Differential Privacy for Images via Randomized Bit-Plane Slicing",
+      "abstract": "Local Differential Privacy (LDP) is the gold standard trust model for privacy-preserving machine learning by guaranteeing privacy at the data source. However, its application to image data has long been considered impractical due to the high dimensionality of pixel space. Canonical LDP mechanisms are designed for low-dimensional data, resulting in severe utility degradation when applied to high-dimensional pixel spaces. This paper demonstrates that this utility loss is not inherent to LDP, but from its application to an inappropriate data representation. We introduce LDP-Slicing, a lightweight, training-free framework that resolves this domain mismatch. Our key insight is to decompose pixel values into a sequence of binary bit-planes. This transformation allows us to apply the LDP mechanism directly to the bit-level representation. To further strengthen privacy and preserve utility, we integrate a perceptual obfuscation module that mitigates human-perceivable leakage and an optimization-based privacy budget allocation strategy. This pipeline satisfies rigorous pixel-level $\\varepsilon$-LDP while producing images that retain high utility for downstream tasks. Extensive experiments on face recognition and image classification demonstrate that LDP-Slicing outperforms existing DP/LDP baselines under comparable privacy budgets, with negligible computational overhead.",
+      "authors": [
+        "Yuanming Cao",
+        "Chengqi Li",
+        "Wenbo He"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-04T04:25:41+00:00",
+      "link": "https://arxiv.org/pdf/2603.03711v1",
+      "tags": [
+        "keyword:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Local Differential Privacy for privacy-preserving machine learning on images",
+      "llm_evidence_cn": "用于图像隐私保护机器学习的本地差分隐私",
+      "llm_evidence": "用于图像隐私保护机器学习的本地差分隐私",
+      "canonical_evidence": "用于图像隐私保护机器学习的本地差分隐私",
+      "llm_tldr_en": "Proposes LDP-Slicing to enable efficient local differential privacy for high-dimensional image data.",
+      "llm_tldr_cn": "提出了LDP-Slicing框架，为高维图像数据实现高效的本地差分隐私保护。",
+      "llm_tldr": "提出了LDP-Slicing框架，为高维图像数据实现高效的本地差分隐私保护。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving machine learning techniques and frameworks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.04742v1",
+      "title": "Efficient Privacy-Preserving Sparse Matrix-Vector Multiplication Using Homomorphic Encryption",
+      "abstract": "Sparse matrix-vector multiplication (SpMV) is a fundamental operation in scientific computing, data analysis, and machine learning. When the data being processed are sensitive, preserving privacy becomes critical, and homomorphic encryption (HE) has emerged as a leading approach for addressing this challenge. Although HE enables privacy-preserving computation, its application to SpMV has remained largely unaddressed. To the best of our knowledge, this paper presents the first framework that efficiently integrates HE with SpMV, addressing the dual challenges of computational efficiency and data privacy. In particular, we introduce a novel compressed matrix format, named Compressed Sparse Sorted Column (CSSC), which is specifically designed to optimize encrypted sparse matrix computations. By preserving sparsity and enabling efficient ciphertext packing, CSSC significantly reduces storage and computational overhead. Our experimental results on real-world datasets demonstrate that the proposed method achieves significant gains in both processing time and memory usage. This study advances privacy-preserving SpMV and lays the groundwork for secure applications in federated learning, encrypted databases, scientific computing, and beyond.",
+      "authors": [
+        "Yang Gao",
+        "Gang Quan",
+        "Wujie Wen",
+        "Scott Piersall",
+        "Qian Lou",
+        "Liqiang Wang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-05T02:29:50+00:00",
+      "link": "https://arxiv.org/pdf/2603.04742v1",
+      "tags": [
+        "keyword:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Privacy-preserving sparse matrix-vector multiplication using HE",
+      "llm_evidence_cn": "使用同态加密的隐私保护稀疏矩阵向量乘法",
+      "llm_evidence": "使用同态加密的隐私保护稀疏矩阵向量乘法",
+      "canonical_evidence": "使用同态加密的隐私保护稀疏矩阵向量乘法",
+      "llm_tldr_en": "Introduces a framework for efficient privacy-preserving SpMV using homomorphic encryption and a new matrix format.",
+      "llm_tldr_cn": "介绍了一个使用同态加密和新型矩阵格式实现高效隐私保护SpMV的框架。",
+      "llm_tldr": "介绍了一个使用同态加密和新型矩阵格式实现高效隐私保护SpMV的框架。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving machine learning techniques and frameworks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.04894v1",
+      "title": "Differentially Private Multimodal In-Context Learning",
+      "abstract": "Vision-language models are increasingly applied to sensitive domains such as medical imaging and personal photographs, yet existing differentially private methods for in-context learning are limited to few-shot, text-only settings because privacy cost scales with the number of tokens processed. We present Differentially Private Multimodal Task Vectors (DP-MTV), the first framework enabling many-shot multimodal in-context learning with formal $(\\varepsilon, δ)$-differential privacy by aggregating hundreds of demonstrations into compact task vectors in activation space. DP-MTV partitions private data into disjoint chunks, applies per-layer clipping to bound sensitivity, and adds calibrated noise to the aggregate, requiring only a single noise addition that enables unlimited inference queries. We evaluate on eight benchmarks across three VLM architectures, supporting deployment with or without auxiliary data. At $\\varepsilon=1.0$, DP-MTV achieves 50% on VizWiz compared to 55% non-private and 35% zero-shot, preserving most of the gain from in-context learning under meaningful privacy constraints.",
+      "authors": [
+        "Ivoline C. Ngong",
+        "Zarreen Reza",
+        "Joseph P. Near"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-05T07:36:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.04894v1",
+      "tags": [
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "differentially private multimodal in-context learning",
+      "llm_evidence_cn": "差分隐私多模态上下文学习",
+      "llm_evidence": "差分隐私多模态上下文学习",
+      "canonical_evidence": "差分隐私多模态上下文学习",
+      "llm_tldr_en": "Presents DP-MTV for private multimodal in-context learning using task vectors in activation space.",
+      "llm_tldr_cn": "提出DP-MTV框架，利用激活空间中的任务向量实现受差分隐私保护的多模态上下文学习。",
+      "llm_tldr": "提出DP-MTV框架，利用激活空间中的任务向量实现受差分隐私保护的多模态上下文学习。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "secure and private inference in neural networks",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.05158v1",
+      "title": "Balancing Privacy-Quality-Efficiency in Federated Learning through Round-Based Interleaving of Protection Techniques",
+      "abstract": "In federated learning (FL), balancing privacy protection, learning quality, and efficiency remains a challenge. Privacy protection mechanisms, such as Differential Privacy (DP), degrade learning quality, or, as in the case of Homomorphic Encryption (HE), incur substantial system overhead. To address this, we propose Alt-FL, a privacy-preserving FL framework that combines DP, HE, and synthetic data via a novel round-based interleaving strategy. Alt-FL introduces three new methods, Privacy Interleaving (PI), Synthetic Interleaving with DP (SI/DP), and Synthetic Interleaving with HE (SI/HE), that enable flexible quality-efficiency trade-offs while providing privacy protection.   We systematically evaluate Alt-FL against representative reconstruction attacks, including Deep Leakage from Gradients, Inverting Gradients, When the Curious Abandon Honesty, and Robbing the Fed, using a LeNet-5 model on CIFAR-10 and Fashion-MNIST. To enable fair comparison between DP- and HE-based defenses, we introduce a new attacker-centric framework that compares empirical attack success rates across the three proposed interleaving methods. Our results show that, for the studied attacker model and dataset, PI achieves the most balanced trade-offs at high privacy protection levels, while DP-based methods are preferable at intermediate privacy requirements. We also discuss how such results can be the basis for selecting privacy-preserving FL methods under varying privacy and resource constraints.",
+      "authors": [
+        "Yenan Wang",
+        "Carla Fabiana Chiasserini",
+        "Elad Michael Schiller"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-05T13:28:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.05158v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "balancing privacy, quality, and efficiency in FL",
+      "llm_evidence_cn": "在联邦学习中平衡隐私、质量和效率",
+      "llm_evidence": "在联邦学习中平衡隐私、质量和效率",
+      "canonical_evidence": "在联邦学习中平衡隐私、质量和效率",
+      "llm_tldr_en": "Introduces Alt-FL to balance privacy, quality, and efficiency using DP, HE, and synthetic data interleaving.",
+      "llm_tldr_cn": "提出Alt-FL框架，通过交替使用DP、HE和合成数据来平衡联邦学习的隐私与效率。",
+      "llm_tldr": "提出Alt-FL框架，通过交替使用DP、HE和合成数据来平衡联邦学习的隐私与效率。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "balancing utility and privacy in machine learning",
+      "matched_requirement_id": "req-17",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2602.14302v1",
+      "title": "Floe: Federated Specialization for Real-Time LLM-SLM Inference",
+      "abstract": "Deploying large language models (LLMs) in real-time systems remains challenging due to their substantial computational demands and privacy concerns. We propose Floe, a hybrid federated learning framework designed for latency-sensitive, resource-constrained environments. Floe combines a cloud-based black-box LLM with lightweight small language models (SLMs) on edge devices to enable low-latency, privacy-preserving inference. Personal data and fine-tuning remain on-device, while the cloud LLM contributes general knowledge without exposing proprietary weights. A heterogeneity-aware LoRA adaptation strategy enables efficient edge deployment across diverse hardware, and a logit-level fusion mechanism enables real-time coordination between edge and cloud models. Extensive experiments demonstrate that Floe enhances user privacy and personalization. Moreover, it significantly improves model performance and reduces inference latency on edge devices under real-time constraints compared with baseline approaches.",
+      "authors": [
+        "Chunlin Tian",
+        "Kahou Tam",
+        "Yebo Wu",
+        "Shuaihang Zhong",
+        "Li Li",
+        "Nicholas D. Lane",
+        "Chengzhong Xu"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC",
+        "cs.LG"
+      ],
+      "published": "2026-02-15T20:28:38+00:00",
+      "link": "https://arxiv.org/pdf/2602.14302v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Privacy-preserving LLM inference on edge devices",
+      "llm_evidence_cn": "边缘设备上的隐私保护大模型推理",
+      "llm_evidence": "边缘设备上的隐私保护大模型推理",
+      "canonical_evidence": "边缘设备上的隐私保护大模型推理",
+      "llm_tldr_en": "A hybrid federated framework for low-latency, privacy-preserving LLM-SLM inference.",
+      "llm_tldr_cn": "一种用于低延迟、隐私保护的LLM-SLM推理的混合联邦框架。",
+      "llm_tldr": "一种用于低延迟、隐私保护的LLM-SLM推理的混合联邦框架。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "secure and private inference in neural networks",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2602.15337v1",
+      "title": "FedPSA: Modeling Behavioral Staleness in Asynchronous Federated Learning",
+      "abstract": "Asynchronous Federated Learning (AFL) has emerged as a significant research area in recent years. By not waiting for slower clients and executing the training process concurrently, it achieves faster training speed compared to traditional federated learning. However, due to the staleness introduced by the asynchronous process, its performance may degrade in some scenarios. Existing methods often use the round difference between the current model and the global model as the sole measure of staleness, which is coarse-grained and lacks observation of the model itself, thereby limiting the performance ceiling of asynchronous methods. In this paper, we propose FedPSA (Parameter Sensitivity-based Asynchronous Federated Learning), a more fine-grained AFL framework that leverages parameter sensitivity to measure model obsolescence and establishes a dynamic momentum queue to assess the current training phase in real time, thereby adjusting the tolerance for outdated information dynamically. Extensive experiments on multiple datasets and comparisons with various methods demonstrate the superior performance of FedPSA, achieving up to 6.37\\% improvement over baseline methods and 1.93\\% over the current state-of-the-art method.",
+      "authors": [
+        "Chaoyi Lu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-02-17T03:57:07+00:00",
+      "link": "https://arxiv.org/pdf/2602.15337v1",
+      "tags": [
+        "keyword:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "fine-grained asynchronous federated learning framework",
+      "llm_evidence_cn": "细粒度异步联邦学习框架",
+      "llm_evidence": "细粒度异步联邦学习框架",
+      "canonical_evidence": "细粒度异步联邦学习框架",
+      "llm_tldr_en": "Introduces FedPSA to improve asynchronous federated learning by modeling parameter sensitivity.",
+      "llm_tldr_cn": "引入FedPSA，通过建模参数敏感性来改进异步联邦学习的性能。",
+      "llm_tldr": "引入FedPSA，通过建模参数敏感性来改进异步联邦学习的性能。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2602.15161v1",
+      "title": "Exploiting Layer-Specific Vulnerabilities to Backdoor Attack in Federated Learning",
+      "abstract": "Federated learning (FL) enables distributed model training across edge devices while preserving data locality. This decentralized approach has emerged as a promising solution for collaborative learning on sensitive user data, effectively addressing the longstanding privacy concerns inherent in centralized systems. However, the decentralized nature of FL exposes new security vulnerabilities, especially backdoor attacks that threaten model integrity. To investigate this critical concern, this paper presents the Layer Smoothing Attack (LSA), a novel backdoor attack that exploits layer-specific vulnerabilities in neural networks. First, a Layer Substitution Analysis methodology systematically identifies backdoor-critical (BC) layers that contribute most significantly to backdoor success. Subsequently, LSA strategically manipulates these BC layers to inject persistent backdoors while remaining undetected by state-of-the-art defense mechanisms. Extensive experiments across diverse model architectures and datasets demonstrate that LSA achieves a remarkably backdoor success rate of up to 97% while maintaining high model accuracy on the primary task, consistently bypassing modern FL defenses. These findings uncover fundamental vulnerabilities in current FL security frameworks, demonstrating that future defenses must incorporate layer-aware detection and mitigation strategies.",
+      "authors": [
+        "Mohammad Hadi Foroughi",
+        "Seyed Hamed Rastegar",
+        "Mohammad Sabokrou",
+        "Ahmad Khonsari"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-02-16T19:59:53+00:00",
+      "link": "https://arxiv.org/pdf/2602.15161v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "backdoor attacks in federated learning exploiting layer vulnerabilities",
+      "llm_evidence_cn": "联邦学习中利用层漏洞的后门攻击",
+      "llm_evidence": "联邦学习中利用层漏洞的后门攻击",
+      "canonical_evidence": "联邦学习中利用层漏洞的后门攻击",
+      "llm_tldr_en": "Analyzes layer-specific vulnerabilities in federated learning to develop a novel backdoor attack method.",
+      "llm_tldr_cn": "分析了联邦学习中神经网络层的特定漏洞，并提出了一种新型后门攻击方法。",
+      "llm_tldr": "分析了联邦学习中神经网络层的特定漏洞，并提出了一种新型后门攻击方法。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2602.15304v1",
+      "title": "Hybrid Federated and Split Learning for Privacy Preserving Clinical Prediction and Treatment Optimization",
+      "abstract": "Collaborative clinical decision support is often constrained by governance and privacy rules that prevent pooling patient-level records across institutions. We present a hybrid privacy-preserving framework that combines Federated Learning (FL) and Split Learning (SL) to support decision-oriented healthcare modeling without raw-data sharing. The approach keeps feature-extraction trunks on clients while hosting prediction heads on a coordinating server, enabling shared representation learning and exposing an explicit collaboration boundary where privacy controls can be applied. Rather than assuming distributed training is inherently private, we audit leakage empirically using membership inference on cut-layer representations and study lightweight defenses based on activation clipping and additive Gaussian noise. We evaluate across three public clinical datasets under non-IID client partitions using a unified pipeline and assess performance jointly along four deployment-relevant axes: factual predictive utility, uplift-based ranking under capacity constraints, audited privacy leakage, and communication overhead. Results show that hybrid FL-SL variants achieve competitive predictive performance and decision-facing prioritization behavior relative to standalone FL or SL, while providing a tunable privacy-utility trade-off that can reduce audited leakage without requiring raw-data sharing. Overall, the work positions hybrid FL-SL as a practical design space for privacy-preserving healthcare decision support where utility, leakage risk, and deployment cost must be balanced explicitly.",
+      "authors": [
+        "Farzana Akter",
+        "Rakib Hossain",
+        "Deb Kanna Roy Toushi",
+        "Mahmood Menon Khan",
+        "Sultana Amin",
+        "Lisan Al Amin"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-02-17T01:57:27+00:00",
+      "link": "https://arxiv.org/pdf/2602.15304v1",
+      "tags": [
+        "keyword:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Hybrid Federated and Split Learning for privacy preserving clinical prediction",
+      "llm_evidence_cn": "用于隐私保护临床预测的混合联邦与拆分学习",
+      "llm_evidence": "用于隐私保护临床预测的混合联邦与拆分学习",
+      "canonical_evidence": "用于隐私保护临床预测的混合联邦与拆分学习",
+      "llm_tldr_en": "Combines FL and SL to enable collaborative healthcare modeling without raw data sharing.",
+      "llm_tldr_cn": "结合联邦学习和拆分学习，在不共享原始数据的情况下实现协作医疗建模。",
+      "llm_tldr": "结合联邦学习和拆分学习，在不共享原始数据的情况下实现协作医疗建模。",
+      "llm_tags": [
+        "query:ppml:composite"
+      ],
+      "matched_query_tag": "query:ppml:composite",
+      "matched_query_text": "Papers central to 隐私保护机器学习，隐私推理，隐私计算, especially work that connects or combines: privacy-preserving machine learning techniques and frameworks; secure and private inference in neural networks; MPC protocols for privacy-preserving computation; privacy-preserving federated learning architectures; state of the art methods for privacy preserving machine learning; secure inference protocols for deep learning models; privacy computing technologies in data science; balancing utility and privacy in machine learning.",
+      "matched_requirement_id": "req-composite-ppml",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2602.18396v1",
+      "title": "PRISM-FCP: Byzantine-Resilient Federated Conformal Prediction via Partial Sharing",
+      "abstract": "We propose PRISM-FCP (Partial shaRing and robust calIbration with Statistical Margins for Federated Conformal Prediction), a Byzantine-resilient federated conformal prediction framework that utilizes partial model sharing to improve robustness against Byzantine attacks during both model training and conformal calibration. Existing approaches address adversarial behavior only in the calibration stage, leaving the learned model susceptible to poisoned updates. In contrast, PRISM-FCP mitigates attacks end-to-end. During training, clients partially share updates by transmitting only $M$ of $D$ parameters per round. This attenuates the expected energy of an adversary's perturbation in the aggregated update by a factor of $M/D$, yielding lower mean-square error (MSE) and tighter prediction intervals. During calibration, clients convert nonconformity scores into characterization vectors, compute distance-based maliciousness scores, and downweight or filter suspected Byzantine contributions before estimating the conformal quantile. Extensive experiments on both synthetic data and the UCI Superconductivity dataset demonstrate that PRISM-FCP maintains nominal coverage guarantees under Byzantine attacks while avoiding the interval inflation observed in standard FCP with reduced communication, providing a robust and communication-efficient approach to federated uncertainty quantification.",
+      "authors": [
+        "Ehsan Lari",
+        "Reza Arablouei",
+        "Stefan Werner"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "eess.SP",
+        "math.PR",
+        "stat.AP",
+        "stat.ML"
+      ],
+      "published": "2026-02-20T18:01:59+00:00",
+      "link": "https://arxiv.org/pdf/2602.18396v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Byzantine-resilient federated framework with partial sharing",
+      "llm_evidence_cn": "具有部分共享机制的拜占庭容错联邦框架",
+      "llm_evidence": "具有部分共享机制的拜占庭容错联邦框架",
+      "canonical_evidence": "具有部分共享机制的拜占庭容错联邦框架",
+      "llm_tldr_en": "Proposes a robust federated conformal prediction framework using partial sharing to mitigate Byzantine attacks.",
+      "llm_tldr_cn": "提出一种鲁棒的联邦符合性预测框架，通过部分共享缓解拜占庭攻击。",
+      "llm_tldr": "提出一种鲁棒的联邦符合性预测框架，通过部分共享缓解拜占庭攻击。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2602.15337v2",
+      "title": "FedPSA: Modeling Behavioral Staleness in Asynchronous Federated Learning",
+      "abstract": "Asynchronous Federated Learning (AFL) has emerged as a significant research area in recent years. By not waiting for slower clients and executing the training process concurrently, it achieves faster training speed compared to traditional federated learning. However, due to the staleness introduced by the asynchronous process, its performance may degrade in some scenarios. Existing methods often use the round difference between the current model and the global model as the sole measure of staleness, which is coarse-grained and lacks observation of the model itself, thereby limiting the performance ceiling of asynchronous methods. In this paper, we propose FedPSA (Parameter Sensitivity-based Asynchronous Federated Learning), a more fine-grained AFL framework that leverages parameter sensitivity to measure model obsolescence and establishes a dynamic momentum queue to assess the current training phase in real time, thereby adjusting the tolerance for outdated information dynamically. Extensive experiments on multiple datasets and comparisons with various methods demonstrate the superior performance of FedPSA, achieving up to 6.37\\% improvement over baseline methods and 1.93\\% over the current state-of-the-art method.",
+      "authors": [
+        "Chaoyi Lu",
+        "Yiding Sun",
+        "Zhichuan Yang",
+        "Jinqian Chen",
+        "Dongfu Yin",
+        "Jihua Zhu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-02-17T03:57:07+00:00",
+      "link": "https://arxiv.org/pdf/2602.15337v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Asynchronous Federated Learning framework",
+      "llm_evidence_cn": "异步联邦学习框架",
+      "llm_evidence": "异步联邦学习框架",
+      "canonical_evidence": "异步联邦学习框架",
+      "llm_tldr_en": "Proposes a fine-grained asynchronous federated learning method to handle client staleness.",
+      "llm_tldr_cn": "提出一种细粒度的异步联邦学习方法来处理客户端陈旧性问题。",
+      "llm_tldr": "提出一种细粒度的异步联邦学习方法来处理客户端陈旧性问题。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2602.16181v1",
+      "title": "Towards Secure and Scalable Energy Theft Detection: A Federated Learning Approach for Resource-Constrained Smart Meters",
+      "abstract": "Energy theft poses a significant threat to the stability and efficiency of smart grids, leading to substantial economic losses and operational challenges. Traditional centralized machine learning approaches for theft detection require aggregating user data, raising serious concerns about privacy and data security. These issues are further exacerbated in smart meter environments, where devices are often resource-constrained and lack the capacity to run heavy models. In this work, we propose a privacy-preserving federated learning framework for energy theft detection that addresses both privacy and computational constraints. Our approach leverages a lightweight multilayer perceptron (MLP) model, suitable for deployment on low-power smart meters, and integrates basic differential privacy (DP) by injecting Gaussian noise into local model updates before aggregation. This ensures formal privacy guarantees without compromising learning performance. We evaluate our framework on a real-world smart meter dataset under both IID and non-IID data distributions. Experimental results demonstrate that our method achieves competitive accuracy, precision, recall, and AUC scores while maintaining privacy and efficiency. This makes the proposed solution practical and scalable for secure energy theft detection in next-generation smart grid infrastructures.",
+      "authors": [
+        "Diego Labate",
+        "Dipanwita Thakur",
+        "Giancarlo Fortino"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-02-18T04:37:54+00:00",
+      "link": "https://arxiv.org/pdf/2602.16181v1",
+      "tags": [
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "privacy-preserving federated learning for smart meters",
+      "llm_evidence_cn": "智能电表的隐私保护联邦学习",
+      "llm_evidence": "智能电表的隐私保护联邦学习",
+      "canonical_evidence": "智能电表的隐私保护联邦学习",
+      "llm_tldr_en": "Develops a lightweight privacy-preserving federated learning framework for energy theft detection.",
+      "llm_tldr_cn": "开发了一个用于窃电检测的轻量级隐私保护联邦学习框架。",
+      "llm_tldr": "开发了一个用于窃电检测的轻量级隐私保护联邦学习框架。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2602.19485v1",
+      "title": "EMS-FL: Federated Tuning of Mixture-of-Experts in Satellite-Terrestrial Networks via Expert-Driven Model Splitting",
+      "abstract": "The rapid advancement of large AI models imposes stringent demands on data volume and computational resources. Federated learning, though designed to exploit distributed data and computational resources, faces data shortage from limited network coverage and computational constraints from edge devices. To address these issues, both the mixture-of-experts (MoE) and satellite-terrestrial network (STN) provide promising solutions, offering lightweight computation overhead and broad coverage, respectively. However, the satellite-ground relative motion results in intermittent connectivity, hindering conventional federated learning that relies on model synchronization across devices. To leverage the coverage of STN while preserving training efficiency, we propose EMS-FL, an expert-driven model splitting and federated learning method. EMS-FL assigns each device cluster only the experts highly correlated to their local data. Through non-overlapping expert assignments, asynchronous local learning is further proposed, where each device cluster trains its assigned experts consecutively and only uploads local parameters to the satellite during connected phases for aggregation and model updates. Consequently, EMS-FL effectively reduces the training overhead and achieves both faster convergence and higher accuracy compared with conventional federated learning. Rigorous convergence analysis is provided to theoretically characterize the learning performance. Furthermore, comprehensive experiments are conducted using public datasets and large models, validating the superiority of EMS-FL.",
+      "authors": [
+        "Angzi Xu",
+        "Zezhong Zhang",
+        "Zhi Liu",
+        "Shuguang Cui"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-02-23T04:02:43+00:00",
+      "link": "https://arxiv.org/pdf/2602.19485v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Federated tuning of MoE models in satellite networks",
+      "llm_evidence_cn": "卫星网络中混合专家模型的联邦微调",
+      "llm_evidence": "卫星网络中混合专家模型的联邦微调",
+      "canonical_evidence": "卫星网络中混合专家模型的联邦微调",
+      "llm_tldr_en": "EMS-FL enables federated tuning of MoE models in satellite-terrestrial networks via model splitting.",
+      "llm_tldr_cn": "EMS-FL通过专家驱动的模型拆分实现卫星-地面网络中的MoE模型联邦微调。",
+      "llm_tldr": "EMS-FL通过专家驱动的模型拆分实现卫星-地面网络中的MoE模型联邦微调。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2602.15802v1",
+      "title": "Local Node Differential Privacy",
+      "abstract": "We initiate an investigation of node differential privacy for graphs in the local model of private data analysis. In our model, dubbed LNDP, each node sees its own edge list and releases the output of a local randomizer on this input. These outputs are aggregated by an untrusted server to obtain a final output.   We develop a novel algorithmic framework for this setting that allows us to accurately answer arbitrary linear queries on a blurry approximation of the input graph's degree distribution. For some natural problems, the resulting algorithms match the accuracy achievable with node privacy in the central model, where data are held and processed by a trusted server. We also prove lower bounds on the error required by LNDP that imply the optimality of our algorithms for several fundamental graph statistics. We then lift these lower bounds to the interactive LNDP setting, demonstrating the optimality of our algorithms even when constantly many rounds of interaction are permitted. Obtaining our lower bounds requires new approaches, since those developed for the usual local model do not apply to the inherently overlapping inputs that arise from graphs. Finally, we prove structural results that reveal qualitative differences between local node privacy and the standard local model for tabular data.",
+      "authors": [
+        "Sofya Raskhodnikova",
+        "Adam Smith",
+        "Connor Wagaman",
+        "Anatoly Zavyalov"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS",
+        "cs.CR"
+      ],
+      "published": "2026-02-17T18:41:48+00:00",
+      "link": "https://arxiv.org/pdf/2602.15802v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:PPML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "local node differential privacy for graph data",
+      "llm_evidence_cn": "图数据的本地节点差分隐私",
+      "llm_evidence": "图数据的本地节点差分隐私",
+      "canonical_evidence": "图数据的本地节点差分隐私",
+      "llm_tldr_en": "Investigates node differential privacy in the local model for private graph data analysis.",
+      "llm_tldr_cn": "研究本地模型下的节点差分隐私，用于保护隐私的图数据分析。",
+      "llm_tldr": "研究本地模型下的节点差分隐私，用于保护隐私的图数据分析。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy computing technologies in data science",
+      "matched_requirement_id": "req-16",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2602.17973v1",
+      "title": "PenTiDef: Enhancing Privacy and Robustness in Decentralized Federated Intrusion Detection Systems against Poisoning Attacks",
+      "abstract": "The increasing deployment of Federated Learning (FL) in Intrusion Detection Systems (IDS) introduces new challenges related to data privacy, centralized coordination, and susceptibility to poisoning attacks. While significant research has focused on protecting traditional FL-IDS with centralized aggregation servers, there remains a notable gap in addressing the unique challenges of decentralized FL-IDS (DFL-IDS). This study aims to address the limitations of traditional centralized FL-IDS by proposing a novel defense framework tailored for the decentralized FL-IDS architecture, with a focus on privacy preservation and robustness against poisoning attacks. We propose PenTiDef, a privacy-preserving and robust defense framework for DFL-IDS, which incorporates Distributed Differential Privacy (DDP) to protect data confidentiality and utilizes latent space representations (LSR) derived from neural networks to detect malicious updates in the decentralized model aggregation context. To eliminate single points of failure and enhance trust without a centralized aggregation server, PenTiDef employs a blockchain-based decentralized coordination mechanism that manages model aggregation, tracks update history, and supports trust enforcement through smart contracts. Experimental results on CIC-IDS2018 and Edge-IIoTSet demonstrate that PenTiDef consistently outperforms existing defenses (e.g., FLARE, FedCC) across various attack scenarios and data distributions. These findings highlight the potential of PenTiDef as a scalable and secure framework for deploying DFL-based IDS in adversarial environments. By leveraging privacy protection, malicious behavior detection in hidden data, and working without a central server, it provides a useful security solution against real-world attacks from untrust participants.",
+      "authors": [
+        "Phan The Duy",
+        "Nghi Hoang Khoa",
+        "Nguyen Tran Anh Quan",
+        "Luong Ha Tien",
+        "Ngo Duc Hoang Son",
+        "Van-Hau Pham"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-02-20T03:58:48+00:00",
+      "link": "https://arxiv.org/pdf/2602.17973v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "privacy-preserving decentralized federated learning framework",
+      "llm_evidence_cn": "隐私保护去中心化联邦学习框架",
+      "llm_evidence": "隐私保护去中心化联邦学习框架",
+      "canonical_evidence": "隐私保护去中心化联邦学习框架",
+      "llm_tldr_en": "Proposes PenTiDef to enhance privacy and robustness against poisoning in decentralized federated IDS.",
+      "llm_tldr_cn": "提出PenTiDef框架，增强去中心化联邦入侵检测系统的隐私性和抗中毒攻击能力。",
+      "llm_tldr": "提出PenTiDef框架，增强去中心化联邦入侵检测系统的隐私性和抗中毒攻击能力。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2602.20003v1",
+      "title": "A Secure and Private Distributed Bayesian Federated Learning Design",
+      "abstract": "Distributed Federated Learning (DFL) enables decentralized model training across large-scale systems without a central parameter server. However, DFL faces three critical challenges: privacy leakage from honest-but-curious neighbors, slow convergence due to the lack of central coordination, and vulnerability to Byzantine adversaries aiming to degrade model accuracy. To address these issues, we propose a novel DFL framework that integrates Byzantine robustness, privacy preservation, and convergence acceleration. Within this framework, each device trains a local model using a Bayesian approach and independently selects an optimal subset of neighbors for posterior exchange. We formulate this neighbor selection as an optimization problem to minimize the global loss function under security and privacy constraints. Solving this problem is challenging because devices only possess partial network information, and the complex coupling between topology, security, and convergence remains unclear. To bridge this gap, we first analytically characterize the trade-offs between dynamic connectivity, Byzantine detection, privacy levels, and convergence speed. Leveraging these insights, we develop a fully distributed Graph Neural Network (GNN)-based Reinforcement Learning (RL) algorithm. This approach enables devices to make autonomous connection decisions based on local observations. Simulation results demonstrate that our method achieves superior robustness and efficiency with significantly lower overhead compared to traditional security and privacy schemes.",
+      "authors": [
+        "Nuocheng Yang",
+        "Sihua Wang",
+        "Zhaohui Yang",
+        "Mingzhe Chen",
+        "Changchuan Yin",
+        "Kaibin Huang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-02-23T16:12:02+00:00",
+      "link": "https://arxiv.org/pdf/2602.20003v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Distributed Bayesian Federated Learning with privacy preservation",
+      "llm_evidence_cn": "具有隐私保护的分布式贝叶斯联邦学习",
+      "llm_evidence": "具有隐私保护的分布式贝叶斯联邦学习",
+      "canonical_evidence": "具有隐私保护的分布式贝叶斯联邦学习",
+      "llm_tldr_en": "A decentralized federated learning framework integrating Byzantine robustness and privacy preservation.",
+      "llm_tldr_cn": "一种集成了拜占庭容错和隐私保护的去中心化联邦学习框架。",
+      "llm_tldr": "一种集成了拜占庭容错和隐私保护的去中心化联邦学习框架。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2602.16100v1",
+      "title": "LLM-Driven Intent-Based Privacy-Aware Orchestration Across the Cloud-Edge Continuum",
+      "abstract": "With the rapid advancement of large language models (LLMs), efficiently serving LLM inference under limited GPU resources has become a critical challenge. Recently, an increasing number of studies have explored applying serverless computing paradigms to LLM serving in order to maximize resource utilization. However, LLM inference workloads are highly diverse, and modern GPU clusters are inherently heterogeneous, making it necessary to dynamically adjust deployment configurations online to better adapt to the elastic and dynamic nature of serverless environments. At the same time, enabling such online reconfiguration is particularly challenging due to the stateful nature of LLM inference and the massive size of model parameters. In this paper, we propose a dynamic pipeline reconfiguration approach that enables online adjustment of pipeline configurations while minimizing service downtime and performance degradation. Our method allows the system to select the optimal pipeline configuration in response to changing workloads. Experimental results on heterogeneous GPU platforms, including NVIDIA A100 and L40s, demonstrate that our migration mechanism incurs less than 50 ms of service downtime, while introducing under 10% overhead on both time-to-first-token (TTFT) and time-per-output-token (TPOT).",
+      "authors": [
+        "Zijie Su",
+        "Muhammed Tawfiqul Islam",
+        "Mohammad Goudarzi",
+        "Adel N. Toosi"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-02-18T00:09:09+00:00",
+      "link": "https://arxiv.org/pdf/2602.16100v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "privacy-aware orchestration for LLM inference",
+      "llm_evidence_cn": "大模型推理的隐私感知编排",
+      "llm_evidence": "大模型推理的隐私感知编排",
+      "canonical_evidence": "大模型推理的隐私感知编排",
+      "llm_tldr_en": "Proposes a privacy-aware orchestration framework for efficient LLM inference in cloud-edge environments.",
+      "llm_tldr_cn": "提出了一种用于云边协同环境下高效大模型推理的隐私感知编排框架。",
+      "llm_tldr": "提出了一种用于云边协同环境下高效大模型推理的隐私感知编排框架。",
+      "llm_tags": [
+        "query:ppml:composite"
+      ],
+      "matched_query_tag": "query:ppml:composite",
+      "matched_query_text": "Papers central to 隐私保护机器学习，隐私推理，隐私计算, especially work that connects or combines: privacy-preserving machine learning techniques and frameworks; secure and private inference in neural networks; MPC protocols for privacy-preserving computation; privacy-preserving federated learning architectures; state of the art methods for privacy preserving machine learning; secure inference protocols for deep learning models; privacy computing technologies in data science; balancing utility and privacy in machine learning.",
+      "matched_requirement_id": "req-composite-ppml",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

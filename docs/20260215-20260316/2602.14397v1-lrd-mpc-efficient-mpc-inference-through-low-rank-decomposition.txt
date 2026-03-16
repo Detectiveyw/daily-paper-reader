@@ -1,0 +1,804 @@
+Title: LRD-MPC: Efficient MPC Inference through Low-rank Decomposition
+
+URL Source: https://arxiv.org/pdf/2602.14397v1
+
+Published Time: Tue, 17 Feb 2026 02:29:45 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+# LRD-MPC: Efficient MPC Inference through Low-rank Decomposition 
+
+# Tingting Tang 
+
+University of Southern California Los Angeles, California, USA tangting@usc.edu 
+
+# Yongqin Wang 
+
+University of Southern California Los Angeles, California, USA yongqin@usc.edu 
+
+# Murali Annavaram 
+
+University of Southern California Los Angeles, California, USA annavara@usc.edu 
+
+## Abstract 
+
+Secure Multi-party Computation (MPC) enables a group of un-trusted parties to collaboratively compute a function while ensuring that no party learns any information about the inputs. The appli-cation of MPC to machine learning (ML) has gained significant attention. ML inference services can now be hosted on multiple cloud virtual machines (VMs), where each VM acts as an MPC party. The model provider can secretly share their model across VMs while the users can secretly share their inputs. In this setting, MPC offers cryptographically robust security guarantees for both model weights and input data; namely, every MPC server only sees random data for both model parameters and inputs on which they operate. However, MPC protocols pay significant computational and communication overheads. Deep neural network-based ma-chine learning (ML) algorithms heavily depend on convolutional and fully connected layers. For performing a matrix multiplication of two matrices of dimensions [ 𝑚 × 𝑛 ] and [ 𝑛 × 𝑜 ] 𝑛 -PC MPC proto-cols perform 3 ∗𝑚 ∗ 𝑛 ∗ 𝑜 multiplications and communicate 𝑚 ∗ 𝑛 ∗𝑜 
+
+elements across parties. In this paper, we propose leveraging low-rank approximation for the linear layers of ML models, which has been demonstrated to work well in ML algorithms. Low-rank decomposition replaces one matrix multiplication between large matrices with two matrix mul-tiplications between smaller matrices. Each matrix multiplication in MPC incurs a round of communication, meaning decomposing one matrix multiplication into two leads to an additional commu-nication round. Second, the added matrix multiplication requires an additional truncation step, which is necessary to maintain pre-cision after each multiplication. Since truncation involves both communication and computation, these overheads can potentially outweigh the benefits of reducing multiplications through low-rank approximation. To address these challenges, we propose two com-plementary optimizations: truncation skipping and efficient linear layer concatenation. Truncation skipping is designed to eliminate the additional truncation steps introduced by low-rank decom-position, while efficient linear layer concatenation leverages an optimized pipeline to conceal the added round of communication.  
+
+> Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the full citation on the first page. Copyrights for components of this work owned by others than the author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or republish, to post on servers or to redistribute to lists, requires prior specific permission and/or a fee. Request permissions from permissions@acm.org.
+> Conference’17, Washington, DC, USA
+> ©2026 Copyright held by the owner/author(s). Publication rights licensed to ACM. ACM ISBN 978-x-xxxx-xxxx-x/YYYY/MM https://doi.org/10.1145/nnnnnnn.nnnnnnn
+
+Together, these techniques address the key overheads of low-rank decomposition in MPC, enhancing overall performance. Our proposed optimizations are broadly applicable across vari-ous MPC protocols. In this paper, we experimentally demonstrate the benefits of LRD-MPC in both 𝑛 -PC and 3-PC protocols. Our results show that LRD-MPC achieves up to 25% performance im-provement in 𝑛 -PC protocols and 33% in 3-PC protocols compared to the full-rank baseline. Moreover, LRD-MPC improves GPU en-ergy efficiency by up to 52% and reduces offline phase latency by up to 88% , maximizing the benefits of low-rank decomposition in MPC ML. 
+
+ACM Reference Format: 
+
+Tingting Tang, Yongqin Wang, and Murali Annavaram. 2026. LRD-MPC: Efficient MPC Inference through Low-rank Decomposition. In . ACM, New York, NY, USA, 14 pages. https://doi.org/10.1145/nnnnnnn.nnnnnnn 
+
+## 1 Introduction 
+
+ML models are able to accurately perform a variety of tasks, such as image classification and graph network analysis. ML providers are relying on cloud computing platforms to deploy their models for wider use. Users then submit their inputs to the cloud-hosted models for inference. However, both the model weights and user-provided inputs are often sensitive or proprietary. In a cloud environment, these data are vulnerable to a wide range of threats, including compromised operating systems, physical access breaches, side-channel attacks, and other potential vulnerabilities [ 1, 13 , 19 , 25 ]. Multi-party computation (MPC) protocols provide cryptographic proven security in the cloud, enabling both model providers and users to interact securely in an untrusted cloud environment. The model providers can secretly share their model weights across mul-tiple untrusted cloud virtual machines (VMs), while users can also secretly share their inputs. These VMs then perform computations on the encrypted data and communicate with each other as required by the protocol to complete the inference process. In this paper, we focus on matrix multiplications, a fundamental operation in deep neural network (DNN)-based ML algorithms. All linear layers (convolutional and fully connected layers) in DNNs are implemented as matrix multiplications. As we show in our result section, in MPC-based ML, matrix multiplication is a major con-tributor to inference runtime ( 36% -51% ) and energy consumption (67% -86% ), primarily due to increased computation and additional communication rounds. In the MPC setting, compared to plaintext matrix multiplications, MPC servers perform approximately 2× and 
+
+3× more multiplications in 3-PC and 𝑛 -PC protocols, respectively. These computations also require one round of communication per multiplication. Furthermore, since MPC represents operands in fixed-point format, each multiplication is followed by a truncation  
+
+> arXiv:2602.14397v1 [cs.CR] 16 Feb 2026 Conference’17, July 2017, Washington, DC, USA Tingting Tang, Yongqin Wang, and Murali Annavaram
+
+step to maintain precision (see Section 3.5 for details). Truncation itself requires additional computation and communication. These extra computations and communication overheads make matrix multiplication a leading bottleneck, significantly impacting both inference latency and energy efficiency. Thus, optimizations on linear layers in ML can widen MPC’s appeal for secure ML. In this paper, we propose LRD-MPC, which contains a collection of optimizations to enable fast and energy-efficient MPC inference through low-rank decomposition. Low-rank approximation [ 42 ]has been demonstrated to work well in ML inference, as model weight matrices have been shown to exhibit low rank. By exploit-ing the low rank property, a single large matrix multiplication can be reduced to performing two smaller-dimension matrix multipli-cations. However, naively performing low-rank decomposition will not give us the best performance. We draw this conclusion based on the following observations: 
+
+Added truncation: When applying low-rank approximation, MPC parties will need to evaluate two matrix multiplications over smaller dimensions rather than one matrix multiplication over large matrices. Hence, low-rank approximation adds an additional trunca-tion overhead. Even though the matrix dimension is reduced, each truncation for MPC incurs one round of additional communication between parties. This added communication can be a significant portion of runtime for MPC configurations with restricted network bandwidth and latency demands. 
+
+Added rounds of communication: Network latency is a major factor affecting MPC performance. In general, each round of com-munication involves a fixed network latency followed by the data transmission. In the low-rank approach, the fixed network latency is paid twice for each multiplication and twice for the truncation steps. In our measurements, the network latency is almost 35 mil-liseconds on unloaded servers communicating between Southern California and Seattle. Thus, even with a reduced matrix dimension with low rank, the added network latency of low rank can exceed the benefits of smaller matrix multiplications. 
+
+## 1.1 Our contribution 
+
+Based on those key observations, we propose LRD-MPC, a collec-tion of optimizations for faster MPC inference through low-rank decomposition. Our contribution in LRD-MPC includes: 
+
+Low-rank decomposition for MPC ML: We apply low-rank decomposition to linear layers in ML models in an MPC setting. Our preliminary evaluations showed that the benefits from reduced ma-trix dimensions did not lead to the expected reduction in inference latency. Further analysis of the results highlighted the bottlenecks of added computation and communication due to additional trun-cation and multiplication resulting from low-rank decomposition. 
+
+Truncation skipping: Based on the analysis, we propose trun-cation skipping in low-rank MPC. When a linear layer in a model is approximated with low-rank decomposition, truncation skipping will omit the truncation steps for the first low-rank matrix multi-plication. However, skipping the truncation in one layer must be accounted for during the final truncation step. We propose a mod-ified truncation approach after the second multiplication, where more bits are truncated for the second low-rank linear layers. Our truncation protocol’s runtime does not depend on the number of bits truncated. Hence, we effectively eliminate the one truncation step with no impact on latency. Note that ML inference requires lim-ited precision, as has been demonstrated by numerous quantization approaches [ 2 , 30 ]. The MPC protocols we use in our experiments use 64-bit fixed-point representation with 5 bits of precision, which rarely causes overflows. Hence, skipping a truncation does not negatively impact model accuracy in ML inference. 
+
+Linear layer concatenation: Truncation skipping opens up new avenues for improving MPC performance. In particular, two linear layer computations are performed back-to-back, which is an unusual opportunity that is not present in the full-rank models. We exploit the availability of two back-to-back matrix multiplica-tions to overlap computation and communication, hiding the extra communication induced by two multiplications in low-rank MPC. 
+
+Applicability to many MPC protocols: Our techniques above can be applied to many MPC protocols. We demonstrate our opti-mization for a semi-honest 𝑛 -PC and 3-PC [11] protocols. 
+
+Concrete ML performance benefit: Using a detailed end-to-end implementation of low rank based ML we demonstrate up to 
+
+33% end-to-end performance improvement of LRD-MPC for the semi-honest 𝑛 -PC and semi-honest 3-PC [11 ] protocols. In addition to runtime reduction, LRD-MPC lowers energy consumption and offline cost by up to 52% and 88% , respectively. 
+
+## 1.2 Paper organization 
+
+The rest of the paper is organized as follows: Section 2 discusses related works. Section 3 discusses notations and related background information. Section 4 presents motivation data, and Section 5 details our contribution and security analysis of our optimization. Section 6 shows the benefits of LRD-MPC in terms of runtime reduction, energy cost reduction, and offline phase cost reduction. Finally, Section 7 concludes the paper. 
+
+## 2 Related works 
+
+MPC-based privacy-preserving machine learning (PPML) frame-works optimize secure computation via two primary approaches, protocol design and framework implementation. SecureML [ 29 ]was among the first to enable deep learning training in MPC, utiliz-ing additive secret sharing for linear layers and Yao’s garbled cir-cuits [ 50 ] for non-linear operations, with efficient transformations between these sharing types. Subsequent protocols have refined secret-sharing-based PPML [ 5, 7 , 20 , 21 , 28 ]. Building on these ad-vancements, Trio [ 11 ] minimizes computational complexity in semi-honest 3-PC by reducing correlations between party shares, while CompactTag [ 46 ] focuses on optimizing Message Authentication Code tag computation overheads for deep neural networks under an actively secure, dishonest-majority model. While we demonstrate our optimizations on semi-honest 𝑛 -PC and Trio’s semi-honest 3-PC protocol, our techniques are applicable to a broader range of MPC protocols that use secret sharing for linear layer computations. Beyond protocol design, another research direction leverages software and hardware optimizations, particularly GPU acceler-ation, to improve MPC-based PPML performance. CrypTen [ 18 ]extends PyTorch [ 33 ] to enable efficient 𝑛 -PC computation in the semi-honest setting with GPU support. CryptGPU [ 39 ] enhances this by implementing both linear and non-linear operations on LRD-MPC: Efficient MPC Inference through Low-rank Decomposition Conference’17, July 2017, Washington, DC, USA 
+
+GPUs via floating-point CUDA [ 31 ] kernels for fixed-point arith-metic, achieving up to 8 × speed improvements over CPU-based frameworks. Further improvements include Piranha [ 48 ] which utilizes NVIDIA’s CUTLASS library [ 32 ] to provide native integer kernels for fixed-point computations, leading to a 4 × speedup over CryptGPU. PIGEON [ 12 ] dynamically switches between arithmetic vectorization and bitslicing for non-linear layers on the CPU while offloading linear layers to the GPU, achieving 1–2 orders of mag-nitude higher throughput for large ImageNet batch sizes. Rather than developing a new framework, our work optimizes linear layer inference in a way that is portable across MPC-based PPML frame-works. To validate this, we evaluate LRD-MPC on both CrypTen and PIGEON, demonstrating its broad applicability and performance benefits. While a majority of the overhead in MPC stems from commu-nication during non-linear operations like ReLU and Softmax[ 47 ], prior research has addressed this by designing MPC-friendly ap-proximations [ 23 , 34 , 40 , 41 ], developing model architectures with fewer non-linear layers [ 6, 15 , 22 ], or optimizing existing MPC algorithms for non-linear operations [ 27 ]. In contrast, our work focuses on reducing the overhead in linear operations, which also significantly impacts inference runtime in MPC. Low-rank approximation has been widely used to accelerate plaintext ML traning and inference [ 14 , 37 , 42 , 43 ], leveraging the inherent low-rank structure of model weight matrices [ 49 ]. How-ever, its application in MPC-based ML inference remains largely unexplored. To the best of our knowledge, this is the first work to apply low-rank approximation to optimize linear operations in the MPC setting, improving inference efficiency. 
+
+## 3 Background 3.1 Notation 
+
+We used the following notations in this paper. P = {P1, P2, ..., P𝑛 }
+
+denotes a set of MPC parties. Boldfont capital letters like X are used to denote a matrix. We will use tuples of smaller letters like [𝑚 × 𝑛 ] and [ 𝑚 × 𝑛 × 𝑜 × 𝑝 ] to denote the dimension of matrices. 
+
+X ⊙ Y denotes matrix multiplication between X and Y. X ⊛ Y
+
+denotes 2D convolution between X and Y. We will use doubly square bracket JXK𝑖 to denote the secret share of X in P𝑖 . Depending on the protocols, JXK𝑖 can be a single matrix or a tuple of matrices. We will use singly square bracket [X]𝑖 to denote additive secret sharing, such that X = Í𝑛  
+
+> 1
+
+[X]𝑖 . Note that JXK𝑖 and [X]𝑖 are different, JXK𝑖 
+
+denote generic secret sharing, and [X]𝑖 represents a specific secret share matrix X, based on the MPC protocol used. 
+
+## 3.2 MPC overview 
+
+MPC protocols allow a collection of untrusted parties, denoted as P = {P1, P2, ..., P𝑛 }, to jointly compute a function over inputs. As long as there is a certain number of parties in this P that has not been controlled or corrupted by the adversary, MPC protocols can guarantee input security. In this paper, to demonstrate the performance improvement of LRD-MPC, we will focus on the state-of-art semi-honest 𝑛 -PC protocol using Beaver triples and the latest 
+
+3-PC protocol Trio [ 11 ]. In the following sections, we will provide a brief overview of those two protocols. 
+
+Threat model: MPC protocols have different threat models. MPC threat models are characterized by the intention of the adver-sary and the number of participating parties. MPC’s adversaries are categorized into semi-honest (passively malicious) and actively malicious. Both semi-honest and actively malicious adversaries are interested in the user’s secret. However, semi-honest adversaries will not modify the final computation results, whereas actively malicious adversaries might. Compared with protocols for semi-honest adversaries, protocols for actively malicious adversaries contain additional mechanisms, such as tag checks, to detect poten-tial errors introduced by adversaries. In this paper, we focus more on semi-honest adversaries because those protocols require fewer overheads than actively malicious secure MPC protocols. Another defining aspect of MPC is the number of participants involved. This paper focuses on semi-honest secure protocols, particularly 𝑛 -PC and 3-PC , to demonstrate our contributions. In the 𝑛 -PC protocol, security is guaranteed as long as fewer than n parties are compro-mised by adversaries. In the Trio protocol, security holds as long as no more than one party is compromised. Figure 1 illustrates the system topology of 𝑛 -PC protocols, and Figure 3 illustrates the system topology for the Trio protocol. 
+
+MPC usage procedures: Three steps are involved in using MPC protocols, and the steps are the following: (1) Secretly sharing inputs with all parties. (2) MPC parties compute secret sharing of outputs. (3) Retrieving computation results from MPC parties. The first step is to secretly distribute inputs to parties while ensuring no parties can gain any information about the original inputs. As shown in Figure 1 and 3, all parties will contain JXK and JYK after the secret sharing process is done. Then, parties will collectively compute a function on secret shares. During this computation, MPC parties might need to communicate with each other. In Figure 1 and 3, 𝑛 -PC parties will need to access broadcast channels, while 
+
+3-PC parties only need to communicate with specific parties during this process. After all parties are done with computation, one can retrieve the results by collecting all the secret shares of the final results from all parties involved. In the following sections, we will describe how 𝑛 -PC and 3-PC protocols share inputs and compute the final secret-sharing results. 𝐗 𝟏 
+
+𝐏 𝟏 
+
+𝐘 𝟏 
+
+𝐗 𝟐 
+
+𝐏 𝟐 
+
+𝐘 𝟐 
+
+𝐗 𝟑 
+
+𝐏 𝟑 
+
+𝐘 𝟑 
+
+> Comm Channel
+
+𝐗 𝒏 
+
+𝐏 𝒏 
+
+𝐘 𝒏 
+
+> …
+> …
+
+Figure 1: 𝑛 -PC system topology. Conference’17, July 2017, Washington, DC, USA Tingting Tang, Yongqin Wang, and Murali Annavaram 
+
+## 3.3 𝑛 -PC protocols 
+
+Secret sharing: The most common secret sharing method in 𝑛 -PC to compute multiplication-related workload is additive secret shar-ing. For 𝑛 -PC protocols, JXK𝑖 = [X]𝑖 , and each [X]𝑖 appears to be complete random to each party P𝑖 . To reconstruct X from JXK𝑖 ad-versaries needs to collet all JXK𝑖 from all parties. Therefore, security is preserved as long as at least one party remains uncorrupted by adversaries. Additionally, given two constants 𝑐 1 and 𝑐 2, and secret shared matrices [X]𝑖 and [Y]𝑖 , J𝑐 1X + 𝑐 2YK𝑖 = 𝑐 1 [X]𝑖 + 𝑐 2 [Y]𝑖 , due to linearity of additive sharing. 
+
+Matrix Multiplication: 𝑛 -PC protocols use Beaver triples to perform multiplication among 𝑛 parties [ 18 , 45 , 47 ]. Beaver triples are secretly shared random matrices A, B, and C, such that C = A⊙B.Elements in those three matrices are completely random and remain unknown to all MPC parties. Figure 2 outlined the detailed proce-dures to perform matrix multiplication in 𝑛 -PC protocols. Πn-MatMul 
+
+for 𝑛 -PC is divided into two phases: offline and online. Offline phase handles input-independent operations, such as Beaver triple gen-eration. (Figure 2 does not specify details about Beaver triple gen-eration as this is a known approach. We refer interested readers to [ 35 ] for more details.). Online phase handles input-dependent operations related to X and Y.
+
+Procedure Πn-MatMul 
+
+Input: JXK𝑖 = [X]𝑖 and JYK𝑖 = [Y]𝑖 .
+
+Output: JZK𝑖 where Z = X ⊙ Y.
+
+Offline phase: Generate J·K-shares of Beaver matrix triple A,
+
+B and C, such that C = A ⊙ B.
+
+Online phase: 
+
+1. P𝑖 locally compute [E]𝑖 = [X]𝑖 − [ A]𝑖 and [U]𝑖 =
+
+[Y]𝑖 − [ B]𝑖 .2. Parties broadcast to reveal E = X − A and U = Y − B.3. P𝑖 locally compute [Z]𝑖 = [C]𝑖 + E ⊙ [ B]𝑖 + [ A]𝑖 ⊙ U.4. P1 locally computes [Z]1 = [Z]1 + E ⊙ U.5. JZK𝑖 = [Z]𝑖 .
+
+Figure 2: Procedure of 𝑛 -PC matrix multiplication. 
+
+To perform matrix multiplication, MPC parties first reconstruct 
+
+X − A and Y − B as E and U. After reconstructing E and U, each MPC party computes certain local operations to output secret shares of the final results. Adding all [Z]𝑖 𝑠 together, one will obtain Z = X⊙Y.Note that revealing X − A and Y − B does not reveal information about X and Y since both A and B are random values that are unknown to all MPC parties. Having covered the fundamentals of 𝑛 -PC protocols, we now present Trio, the latest 3-PC protocol demonstrating the benefits of LRD-MPC. 
+
+## 3.4 Trio 3-PC protocols 
+
+Trio is introduced in [ 11 ], and Figure 3 shows the system topology of Trio. Unlike 𝑛 -PC protocols, parties in 3-PC protocols do not need broadcast channels. Instead, P1 only needs to send data to P2,𝐗 𝟏 
+
+𝐏 𝟏 
+
+𝐘 𝟏 
+
+𝐗 𝟐 
+
+𝐏 𝟐 
+
+𝐘 𝟐  𝐗 𝟑 
+
+𝐏 𝟑 
+
+𝐘 𝟑 
+
+> Comm
+> Channel
+
+Figure 3: Trio [11] system topology. 
+
+and does not need to communicate with P3 at all. In the meantime, 
+
+P2 receive data from P1 and send/receive data to/from P3. Thus, a one-direction channel is needed between P1 and P2, and another bi-directional channel is needed between P2 and P3. Note that we selected these two diverse protocols to demonstrate our scheme while the protocol design is not our focus. 
+
+Secret sharing: Trio uses a slightly more complex sharing scheme. The following shows how a matrix X is shared among those three parties. 
+
+JXK1 = {𝜆 2
+
+> X
+
+, 𝜆 3 
+
+> X
+
+}, JXK2 = {mX,3, 𝜆 2 
+
+> X
+
+}, JXK3 = {mX,2, 𝜆 3 
+
+> X
+
+}
+
+𝜆 2 
+
+> X
+
+is a random matrix shared between P1 and P2, and 𝜆 3 
+
+> X
+
+is another random matrix shared between P1 and P3. Moreover, mX,{2,3} is the sum between X and 𝜆 {2,3} 
+
+> X
+
+.
+
+mX,2 = X + 𝜆 2
+
+> X
+
+, mX,3 = X + 𝜆 3
+
+> X
+
+Due to the randomness of 𝜆 {2,3} 
+
+> X
+
+, mX,{2,3} will appear to be com-pletely random to the parties who do not know 𝜆 {2,3} 
+
+> X
+
+. Effectively, 
+
+X is additively shared between P1&P2, P1&P3, and P2&P3. Thus, as long as fewer than two of these parties are corrupted, adversaries will not gain any knowledge about the original input X.
+
+Matrix Multiplication: Figure 4 shows the detailed procedure of matrix multiplication for Trio. Matrix multiplication in Trio also adopts the offline/online computation paradigm. In the offline phase, besides generating shared randomness, P1 will compute M
+
+using local operands and send M to P3. During the online phases, 
+
+P2 and P3 will first compute V and W and send V and W to the corresponding recipient. After this communication is done, P2 and 
+
+P3 can locally compute mZ,3 and mZ,2. Finally, in the last step of the online phase, each party will output JZK𝑖 .After executing Π3-MatMul , one can reconstruct Z by collecting secret shares of Z from two parties in {P1, P2, P3 }. In MPC, Π3-MatMul 
+
+alone is not sufficient for matrix multiplication for MPC ML. A truncation protocol is also needed after every matrix multiplication protocol, and we will discuss this in the next section. 
+
+## 3.5 MPC Truncation 
+
+Fixed-point arithmetic: The truncation protocol is another key component that MPC parties rely on. To accurately represent real numbers in ML models, parties use fixed-point arithmetic. In this representation, a real number is shared on a 𝑘 -bit ring, with the last f
+
+bits reserved for precision. For instance, if a value x is shared on the LRD-MPC: Efficient MPC Inference through Low-rank Decomposition Conference’17, July 2017, Washington, DC, USA 
+
+Procedure Π3-MatMul 
+
+Input: JXK𝑖 and JYK𝑖 .
+
+Output: JZK𝑖 where Z = X ⊙ Y.
+
+Offline phase: 
+
+1. P1 and P2 jointly sample 𝜆 2 
+
+> Z
+
+and R. Dimension of 𝜆 2
+
+> Z
+
+and R are the same as the output Z.2. P1 and P3 jointly sample 𝜆 3
+
+> Z
+
+. The dimension of 𝜆 3 
+
+> Z
+
+is the same as the output Z.3. P1 locally computes M = 𝜆 3 
+
+> X
+
+⊙ 𝜆 3 
+
+> Y
+
+− ( 𝜆 2 
+
+> X
+
+− 𝜆 3
+
+> X
+
+) ⊙ ( 𝜆 2 
+
+> Y
+
+−
+
+𝜆 3
+
+> Y
+
+) + R.4. P1 send M to P3.
+
+Online phase: 
+
+1. P2 computes V = mX,3 ⊙ 𝜆 2 
+
+> Y
+
++ 𝜆 2 
+
+> X
+
+⊙ mY,3 + R.2. P3 computes W = mX,2 ⊙ mY,2 + M.3. P2 sends V − 𝜆 2 
+
+> Z
+
+to P3, and P3 sends W − 𝜆 3 
+
+> Z
+
+to P2.4. P2 computes mZ,3 = W − 𝜆 3 
+
+> Z
+
+− V , and P3 computes 
+
+mZ,2 = W − ( V − 𝜆 2
+
+> Z
+
+).5. P1 outputs JZK1 = {𝜆 2
+
+> Z
+
+, 𝜆 3 
+
+> Z
+
+}; P2 outputs JZK2 =
+
+{mZ,3, 𝜆 2 
+
+> Z
+
+}; and P3 outputs JZK3 = {mZ,2, 𝜆 3 
+
+> Z
+
+}.
+
+Figure 4: Procedure of Trio matrix multiplication. 
+
+ring with f precision bits, the value stored in hardware is x·2f . When MPC parties multiply their local shares of x and y, the resulting value stored in hardware is x · y · 22f , which corresponds to the real number x · y · 2f —not the desired x · y. To correct this, the protocol must remove the trailing f bits after each multiplication to ensure accuracy. This removal process is called truncation. Figure 5 details the truncation protocol [ 4 ] we use in this paper. This truncation protocol has been shown to have no errors, even for large ML models [ 36 ]. While recently the security of probabilistic truncation like ΠfTrunc was questioned [ 24 ], [ 36 ] has proven the security of probabilistic truncation using a modified ideal functionality. Note that ΠfTrunc , illustrated in Figure 5, is compatible with both 
+
+𝑛 -PC and Trio protocols. To securely execute truncation using 
+
+ΠfTrunc , MPC parties simply need to perform the appropriate ad-dition and multiplication operations specific to 𝑛 -PC or Trio when executing ΠfTrunc . We will see in later sections that this truncation process can pose challenges when low-rank decomposition is ap-plied. 
+
+## 3.6 Other ML operations 
+
+Besides matrix multiplication in FC layers, ML models contain other operations like 2D convolution in convolution layers and comparisons in ReLU layers. In this section, we will briefly describe how those layers are computed in MPC ML. 
+
+Convolution: Convolution layers are another type of layer com-monly used in ML models and, like FC layers, are also classified as linear layers. In MPC, convolution operations are computed similarly to matrix multiplication. For instance, to perform a 2D convolution between input images X and a weight matrix W, both 
+
+Procedure ΠfTrunc 
+
+Input: JXK, shared on 𝑘 -bit ring, and elements in X are less than 2𝑙 , 𝑙 < 𝑘 .
+
+Output: JXf K where elements in matrix Xf are the truncated versions of the elements in X.
+
+Preprocessing phase: All parties jointly sample matrices 
+
+JRK, JR′K, and JBK, such that elements in R, R′, and B are random, respectively in Z2𝑙 −f , Z2f , and Z2.
+
+Online phase: Parties do the following. 1. P𝑖 computes JSK𝑖 = 2𝑘 − ( 𝑙 +1) · ( JXK𝑖 +2𝑙 · JBK𝑖 +2f JRK𝑖 +
+
+JR′K𝑖 ) and reconstruct S from JSK.2. Denote S = 2𝑘 −𝑙 −1 · ˆS.3. P𝑖 computes JVK𝑖 = JBK𝑖 + ˆS𝑙 · ( 1 − 2JBK𝑖 ), where every elements in ˆS𝑙 is the 𝑙 −th bit of every element in ˆS.4. Parties output JXf K = 2𝑙 −f JVK + ( ˆS mod 2𝑙 )/ 2f − JRK.
+
+Figure 5: Procedure for truncating the last f bits of each ele-ment in a J·K-shared matrix X [4]. 
+
+X and W are first secret-shared among the MPC parties. The con-volution process then follows a similar procedure to that depicted in Figures 2 and 4, with the key difference being that all matrix multiplications are replaced by their corresponding convolution operations. 
+
+Comparison: Comparison operations are integral to the non-linear layers of ML models. Commonly used layers such as ReLU, MaxPooling, and Softmax rely on these operations. For instance, ReLU compares inputs against zero, while Softmax and MaxPooling involve finding the maximum value among a set of inputs. In MPC, comparison operations are computationally expensive, requiring multiple rounds of communication, which significantly increases the overall runtime of non-linear layers. Since LRD-MPC focuses on optimizing the linear layers in MPC, we do not delve into the detailed implementation of non-linear layers. For readers interested in these aspects, we refer to [18, 47]. 
+
+## 3.7 Low-rank decomposition 
+
+In this section, we will discuss how to apply low-rank decomposi-tion to matrix multiplication and convolution layers in ML models. 
+
+Low rank matrix multiplication: For ML models, inference for FC layer is to perform a matrix multiplication between an input matrix X (such as a batch of images) and a static weight W. The static weight in ML models has been shown to satisfy low-rank properties, such that we can decompose a larger matrix W into two smaller matrices U and V. W’s dimension is [ n × o] while U and 
+
+V’s dimension will be [ n × r] and [ r × o], where r is the estimated rank of W and U ⊙ V ≈ W. Assuming the full-rank FC layer is to compute matrix multiplication between input matrix X, whose dimension is [ m × n], low-rank decomposition is shown below: 
+
+X ⊙ W ≈ X ⊙ U ⊙ V (1) Conference’17, July 2017, Washington, DC, USA Tingting Tang, Yongqin Wang, and Murali Annavaram 
+
+When evaluating the full-rank FC layer, the total number of multi-plication is m · n · o, while the total number of multiplications for the low-rank FC layer is m · n · r + m · r · o. As long as r < n · o/( n + o),the total number of multiplications for the low-rank FC is fewer than that for full-rank FC. The ratio of r/𝑚𝑖𝑛 (n, o) is referred to as the rank ratio. 
+
+Low rank convolution: Similarly, full-rank convolution layer evaluate this convolution X ⊛ W during inference, where X of dimension [ b×h×w×i] is the input to the layer and W of dimension [3 × 3 × i × o] is the static weight. Likewise, we will decompose this 
+
+W into two smaller matrices as shown below: 
+
+X ⊛ W ≈ X ⊛ U ⊛ V (2) Dimensions of U and V are [ 3 × 3 × i × r] and [ 1 × 1 × r × o], respec-tively. This low-rank decomposition will also lead to a reduction in computation complexity. Similarly, the ratio of r/o is referred to as the rank ratio. Applying low-rank approximations to plaintext models is rela-tively straightforward, often yielding performance speedups with minimal effort. However, extending these techniques to MPC-based ML introduces additional costs and overheads. We will delve into these challenges and their implications in the following sections. 
+
+## 4 Motivation 
+
+Before introducing LRD-MPC, we first present motivating data on 
+
+𝑛 -PC ML, highlighting the importance of optimizing linear layers in MPC-based ML. Linear layers remain a primary contributor to latency and energy consumption in MPC systems, underscoring the need for targeted optimization. 
+
+Inference runtime: Although activation functions (ReLU, Soft-max, and MaxPool) generally still take longer to evaluate in MPC than linear layers [ 47 ], recent advancements in MPC frameworks [ 12 ,18 , 39 , 45 , 48 ] and optimizations to activation functions [ 10 , 16 ,23 , 26 ] have reduced their relative impact. Thus, convolution and FC layers now constitute a substantial portion of ML inference. The first column (Runtime) in Table 1 highlights the percentage of runtime contribution of linear layers during the online phases (Section 3.3) of 𝑛 -PC ML inference across three representative ML workloads—vision, language, and graph models— demonstrating that linear layers can account for up to 51 .6% of the total runtime. 
+
+Table 1: Linear layer runtime (%) and power (%) in MPC in-ference online phase (5Gbps WAN) for 𝑛 -PC. Protocol Runtime Power VGG 42.8% 72.4% BERT LARGE 51.6% 67.8% GCN 36.1% 85.3% 
+
+Power consumption: In MPC ML, linear layers dominate en-ergy consumption. While activation functions may have longer runtimes due to communication overhead, their energy impact is minimal. This is because activation functions in MPC primarily involve waiting for communication to complete, with only light-weight bitwise operations like XOR and AND, which consume far less energy on cloud servers than convolutional and fully connected layers. Thus, as shown in the second column (Power) in Table 1, for 
+
+𝑛 -PC protocols, linear layers—driven by computationally intensive convolution and FC operations—consume between 68% and 86% of GPU energy. Given the impact of linear layers on inference runtime and power consumption, optimizing them is crucial to pushing the MPC’s ef-ficiency boundaries further. Low-rank approximation has proven effective in plaintext ML, reducing both runtime and energy costs in linear layers [ 42 , 43 ]. However, applying low-rank decomposi-tion in MPC is not straightforward. MPC-specific challenges, such as communication overhead and truncation procedures, limit the potential benefits of low-rank approximation. In the next section, we examine these challenges in detail and present our solutions to overcome them. 
+
+## 5 LRD-MPC 
+
+In this section, we will discuss challenges for low-rank MPC ML and how we address them. UE     
+
+> MatMul
+> [Z]
+> Truncation
+> (a) 𝑛 -PC. MatMul Truncation
+> W(b) P3in Trio.
+
+Figure 6: Computation and communication workflow for 
+
+𝑛 -PC and Trio matrix multiplication; boxes labeled with a router icon denote communication runtime, and boxes la-beled with a GPU icon denote computation runtime. 
+
+## 5.1 Low rank decomposition 
+
+Equations 3 and 4 demonstrate how matrix multiplication and con-volution operations are adapted using low-rank decomposition in MPC. 
+
+JXK ⊙ JWK → JXK ⊙ JUK ⊙ JVK (3) 
+
+JXK ⊛ JWK → JXK ⊛ JUK ⊛ JVK (4) Similar to plaintext ML inference, applying low-rank decompo-sition to linear layers in MPC reduces the number of multiplica-tions required. The reduction in the number of multiplications by low-rank decomposition for linear layers significantly benefits the offline phase of MPC ML. For instance, in 𝑛 -PC protocols, a Beaver triple must be generated for each multiplication in the online phase, and generating these triples is the primary overhead [ 9] for 𝑛 -PC protocols. In 3-PC protocols, P1 can spend less time computing 
+
+M for P3 (as illustrated in Figure 4). However, the advantages of low-rank decomposition for the online phase are less clear-cut. The additional communication rounds and truncation steps can diminish its ability to accelerate the online phase. 
+
+Computation and communication workflow: Figure 9 illus-trates the communication and computation workflow of the online phase for full-rank matrix multiplication in 𝑛 -PC (Figure 6a) and Trio (Figure 6b) protocols. In Figure 6a, parties begin by reconstruct-ing E and U through broadcasting. Once broadcasting is complete, LRD-MPC: Efficient MPC Inference through Low-rank Decomposition Conference’17, July 2017, Washington, DC, USA UE       
+
+> MatMul
+> [Z]
+> Trunc .
+> UE[Z]
+> MatMul Trunc .
+> (a) 𝑛 -PC. MatMul Trunc MatMul
+> W
+> Trunc
+> W
+> (b) P3in Trio.
+
+Figure 7: Computation and communication workflow of low-rank matrix multiplication for 𝑛 -PC and Trio protocol. 
+
+the parties compute [Z] and subsequently execute the truncation protocol to remove the last f bits of [Z] , which introduces an addi-tional round of communication. In Figure 6b, P3 will compute W
+
+and then send a masked W to P2, followed by truncation protocol. After applying low-rank decomposition to matrix multiplication, the computation and communication workflow of the matrix mul-tiplication is modified as depicted in Figure 7. For both protocols, a single matrix multiplication with a large matrix is transformed into two matrix multiplications with smaller matrices due to the appli-cation of low-rank decomposition. As a result, in both Figure 7a and Figure 7b, we observe two separate matrix multiplications. In MPC ML, each matrix multiplication is immediately followed by a truncation step, meaning both protocols require two truncations with low-rank decomposition. 
+
+Added communication: Compared with the full-rank matrix multiplication, low rank decomposition incurs two additional rounds of communication for both 𝑛 -PC protocol and Trio protocols. Those two added communication rounds come from 1) added matrix multiplication and 2) added truncation .Since low-rank decomposition converts one matrix multiplica-tion into two matrix multiplications, and in the MPC setting, each matrix multiplication will incur one round of communication (for the 𝑛 -PC protocol, E and U can be sent back-to-back, resulting in one round of communication). The other added communication is incurred by truncation. Due to the usage of fixed-point arithmetic, after every multiplication, MPC parties will jointly execute trun-cation protocols (Figure 5) to discard trailing f bits of the product. Since the truncation protocol will incur one round of communica-tion when using low-rank decomposition for matrix multiplication, additional truncation steps incur one more round of communication. Those added communications, due to additional matrix multipli-cation and additional truncation protocol, can hinder low-rank decomposition from achieving its full potential for the online phase. For example, when evaluating the low-rank Transformers in BERT models, the reduction in computation time roughly accounts for 
+
+11 .4% . However, the added communication mentioned above is able to add 3.4% communication runtime cost, offsetting the benefits of low-rank to 7% . The added communication overhead associated with low-rank decomposition prevents it from fully realizing its potential in the MPC setting. LRD-MPC incorporates two techniques designed to optimize performance: 1) truncation skipping and 2) efficient layer concate-nation. These techniques work synergistically with low-rank de-composition to mitigate communication costs and maximize its overall effectiveness. In the following sections, we will delve into the details of these techniques. UE       
+
+> MatMul
+> [Z] UE[Z]
+> MatMul Trunc 2f
+> (a) 𝑛 -PC. MatMul
+> W
+> MatMul
+> W
+> Trunc 2f (b) P3in Trio.
+
+Figure 8: Computation and communication workflow of low-rank matrix multiplication for 𝑛 -PC and Trio protocol with truncation skipping. 
+
+## 5.2 Truncation skipping 
+
+In the previous example, we observed that applying low-rank de-composition to linear layers introduces additional truncation steps due to the extra matrix multiplication. To address this issue, we implement a technique called truncation skipping. This approach bypasses the truncation step after the first matrix multiplication and instead adjusts the truncation after the second multiplication to remove 2f bits from the final product. Specifically, rather than performing ΠfTrunc {ΠfTrunc (X ⊙ U) ⊙ V}, the MPC parties compute 
+
+Π2fTrunc (X ⊙ U ⊙ V). This optimization effectively reduces the number of truncation steps while preserving the correctness of the result. Figure 8a illustrates the computation and communication workflow after applying truncation skipping. 
+
+Correctness: Our truncation skipping technique ensures the correctness of computation by applying a single truncation step that removes 2f bits at the end. Without any intermediate truncation operations, the actual value stored in computer hardware after evaluating JXK ⊙ JUK ⊙ JVK is JXK ⊙ JUK ⊙ JVK · 23f . This occurs because multiplying three inputs together accumulates 3f precision bits in the final product. By performing the Π2fTrunc step at the end, the trailing 2f bits are removed, leaving the final value in hardware as JXK ⊙ JUK ⊙ JVK · 2f . This result correctly represents the intended outcome of JXK ⊙ JUK ⊙ JVK, ensuring that the expected result of low-rank matrix multiplication is achieved without introducing unnecessary truncation overhead during intermediate steps. 
+
+Costs of ΠfTrunc and Π2fTrunc : Both the computation and communi-cation costs associated with Π2fTrunc and ΠfTrunc at the end of low-rank matrix multiplication are identical, as truncation costs do not scale with the number of truncated bits. As shown in Figure 5, the on-line phase involves reconstructing the J·K-ed S, which requires one round of broadcasting JSK. The amount of data broadcasted remains constant regardless of the number of bits being truncated. Similarly, the value of f does not affect the other computations performed during this online phase. For the offline phase, the total number of secretly shared bits that need to be generated is 𝑙 − f + f + 1,where 𝑙 − f bits are used for R, f bits for R′, and one bit for B. This number is unaffected by the specific number of bits being truncated. Conference’17, July 2017, Washington, DC, USA Tingting Tang, Yongqin Wang, and Murali Annavaram 
+
+Therefore, by skipping the intermediate truncation step, we effec-tively remove the associated costs without increasing the cost of the final truncation. This optimization allows us to avoid unnecessary intermediate operations while maintaining overall efficiency. 
+
+Impact on model accuracy: Truncation skipping can poten-tially impact model accuracy. In MPC, inputs are shared on a 𝑘 -bit ring, where f bits are allocated for fractional precision and 𝑘 − f bits for integer representation. Using truncation skipping, more bits are effectively utilized for fractions, leaving fewer bits for integer representation (for the second matrix multiplication). This adjust-ment may lead to precision loss and could degrade the accuracy of ML models. In LRD-MPC, we address this issue by experimen-tally evaluating the impact of truncation skipping on model accu-racy (Section 6.3). To ensure consistent evaluation while balancing performance and accuracy, we conservatively enable truncation skipping for all low-rank layers across all models. Through truncation skipping, we successfully eliminate most of the additional costs introduced by the extra truncation steps required due to the additional matrix multiplications. However, this is not the extent of LRD-MPC’s contributions. As observed earlier, the additional matrix multiplications also result in increased rounds of communication, further impacting efficiency. In the next subsection, we will explore how LRD-MPC addresses this issue through an effective linear layer concatenation, which reduces communication overhead and further enhances performance. 
+
+## 5.3 Efficient linear layer concatenation 
+
+The next technique employed in LRD-MPC is referred to as efficient linear layer concatenation. This method effectively mitigates the additional round of communication introduced by the extra matrix multiplication, seamlessly hiding the overhead into the overall computation to enhance efficiency. As illustrated in Figure 8, after applying truncation skipping, MPC parties execute two matrix multiplication protocols back-to-back for both protocols. This setup enables the design of innovative pipeline techniques, allowing us to establish a streamlined communication and computation pipeline. These pipelines effectively hide the extra round of communication caused by the additional matrix multiplication, further optimizing the performance of the system. In this section, we will go into the detail of 𝑛 -PC and 3-PC protocols to showcase how efficient linear layer concatenation works for both protocols. 
+
+Trio: Let’s first see how efficient linear layer concatenation works for the Trio protocol. In the previous section, for simplicity, to showcase the effect of low-rank decomposition and truncation skipping, we only show the computation and communication work-flow for P3 in Figure 6b, 7b and 8b. However, that is not the full picture of the Trio protocol. During the online phase, P2 and P3 will compute V and W respectively, before sending data to P3 and P2.Figure 9a illustrates the computation and communication workflow for P2 and P3 when low-rank decomposition is applied. As shown in Figure 4, P2 must perform twice the amount of computation com-pared to P3 before transmitting data to P3. This additional workload explains why P2’s computation block is significantly longer than 
+
+P3’s. More importantly, P3 must wait to receive data from P2 be-fore proceeding to the next layer, resulting in periods where P3MatMul   
+
+> W
+> MatMul
+> W
+> VV
+> P3
+> P2
+> (a) without efficient layer con-catenation. MatMul
+> W
+> MatMul
+> W
+> VV
+> P3
+> P2
+> (b) with efficient layer concate-nation.
+
+Figure 9: Trio online phase matrix multiplication computa-tion and communication workflow. 
+
+is entirely idle, waiting for P2 to complete its computations and transmission. However, the use of low-rank decomposition introduces an inter-esting synergy between two linear layers, as MPC parties evaluate two matrix multiplications back-to-back. Since the computation in 
+
+P2 is long, before P2 finishes computing, it already receives the nec-essary data from P3 to proceed with the second layer. This enables 
+
+P2 to immediately begin processing the next layer as soon as it com-pletes the current one, effectively overlapping its communication with the computation for the subsequent layer. Figure 9b illustrates this pipelined workflow, where part of P2’s communication is con-cealed beneath its computation for the next layer. This overlap reduces the overall latency of executing two matrix multiplications, improving efficiency and minimizing idle periods in the workflow. This efficient concatenation is feasible only when two linear lay-ers are executed consecutively. Without low-rank decomposition, each linear layer is immediately followed by a truncation protocol, which lacks sufficient computational workload for P2 to overlap its communication with computation. As a result, the communication and computation phases remain sequential rather than overlap-ping, preventing the latency optimizations achieved through the pipelined execution enabled by LRD-MPC. Besides Trio, other 3-PC like [5, 28] can also benefit from this efficient concatenation. 
+
+𝑛 -PC : In LRD-MPC, we introduce pipelining for linear layers to enable efficient layer concatenation in 𝑛 -PC protocols. As illustrated in Figure 8a, parties in the 𝑛 -PC protocol must first broadcast to reconstruct U and E before proceeding to compute JZK. However, in ML workloads, one of the inputs for matrix multiplication is typically the model’s static weight. This creates an opportunity to optimize because the broadcasting of U for the second layer, derived from static weights, is independent of B (prepared during the offline phase). Taking advantage of this lack of dependency, we overlap the broadcasting of U for the second matrix multiplication with the computation of JZK for the first layer. As shown in Figure 10, the transmission of U is effectively hidden under the computation of 
+
+JZK in the first layer, reducing idle time and improving the overall efficiency of consecutive matrix multiplications in 𝑛 -PC protocols. In addition to hiding the transmission of U, we can also conceal the broadcasting of E by overlapping it with the local computation of the current layer. Recall that the computation of JZK consists of two components: E ⊙ [ B]𝑖 and [A]𝑖 ⊙ U. Notably, the calculation of 
+
+[A]𝑖 ⊙ U does not depend on E. Since U for the second linear layer LRD-MPC: Efficient MPC Inference through Low-rank Decomposition Conference’17, July 2017, Washington, DC, USA UE
+
+> MatMul
+> [Z]
+> EU
+> MatMul
+> [A]*U
+
+Figure 10: 𝑛 -PC online phase matrix multiplication computa-tion and communication workflow with efficient layer con-catenation. 
+
+is already received before the first layer’s computation is complete, MPC parties can immediately begin computing [A]𝑖 ⊙ U for the second layer as soon as they finish computing the first layer’s 
+
+JZK, while broadcasting E in parallel. As depicted in Figure 10, this approach effectively hides the transmission of E beneath the computation of [A]𝑖 ⊙ U for the second layer, further reducing communication overhead and improving the efficiency of the low-rank MPC models. In LRD-MPC, we integrate low-rank decomposition into MPC ML models to achieve significant overall performance improvements. Additionally, we enhance the effectiveness of low-rank decompo-sition by incorporating truncation skipping and efficient linear layer concatenation techniques. These optimizations maximize the performance gains from low-rank approximation, ensuring its full potential is realized in improving computational and communica-tion efficiency. In the next subsection, we will discuss the security of the proposed optimizations. 
+
+## 5.4 Security analysis 
+
+Low-rank decomposition: MPC ML models continue to preserve security even with the application of low-rank decomposition. Low-rank decomposition transforms a single matrix multiplica-tion involving a large matrix into two matrix multiplications with smaller matrices. Consequently, MPC parties execute Πn-MatMul and 
+
+Π3-MatMul twice for 𝑛 -PC and 3-PC protocols, respectively. Since both Πn-MatMul and Π3-MatMul are secure by design, ML models em-ploying low-rank decomposition maintain the same security level as their full-rank counterparts. However, one aspect that MPC protocols cannot conceal is the dimension of the matrices being processed. As a result, adversaries can infer the rank chosen for dif-ferent low-rank layers based on matrix dimensions. Despite this, the protection provided by secret sharing ensures that adversaries gain no information about the actual elements of the inputs, preserving the confidentiality of the data. 
+
+Truncation skipping: Truncation skipping eliminates one trun-cation step in a low-rank matrix multiplication layer but does not alter any other aspects of the underlying MPC protocols. As a re-sult, the security guarantees remain identical to those of low-rank models without truncation skipping, ensuring no compromise in the overall security level. 
+
+Efficient linear layer concatenation: The efficient linear layer concatenation technique in LRD-MPC simply rearranges the order of communication and computation without altering the actual communication content. This means that the adversaries observing the protocol will have the same view as they would in the stan-dard MPC protocol without this concatenation. Since no additional information is leaked, and the communication contents remain un-changed, the security guarantees of the underlying MPC protocol are fully preserved. Therefore, the efficient linear layer concate-nation technique does not introduce any new vulnerabilities or weaken the protocol’s security. In conclusion, the techniques introduced in LRD-MPC, including low-rank decomposition, truncation skipping, and efficient linear layer concatenation, preserve the security guarantees of the under-lying MPC protocols. Truncation skipping eliminates unnecessary steps without altering protocols, while linear layer concatenation merely reorganizes communication without changing its content, ensuring that adversaries gain no additional information. These techniques maintain the same security level as standard MPC im-plementations. Having established the security of LRD-MPC, we now transition to the evaluation section, where we demonstrate the practical benefits of these techniques through detailed performance and accuracy analyses. 
+
+## 6 Evaluation 
+
+In this section, we present the empirical performance impact of LRD-MPC on MPC ML workflows. The metrics included in this section are inference runtime reduction (online and offline), power consumption, and impact on model accuracy. 
+
+## 6.1 Evaluation environment 
+
+Server configurations: We evaluate our design using servers equipped with an AMD EPYC 7502 CPU and an Nvidia Quadro RTX 5000 GPU. Each server is connected via an interconnection bandwidth of 5Gbps, which is widely available across Amazon AWS nodes [ 3 ]. The network latency used in our evaluation is 35ms, rep-resenting the average latency between northern and southern cities in the United States. 
+
+MPC Frameworks: We implement our modifications for the Trio protocol using the PIGEON framework [ 12 ], while our imple-mentation for the 𝑛 -PC protocol is based on CrypTen [ 18 ]. To pro-vide a comprehensive analysis, we separately measure the timing for the online and offline phases in both frameworks and demon-strate the performance improvements achieved by LRD-MPC for each phase. The diversity of frameworks and models enables us to demonstrate the efficacy of our approach broadly. 
+
+## 6.2 Models evaluated 
+
+We evaluate the performance impact of LRD-MPC on four ML models: VGG19 [ 38 ], WideResNet18 (WRN18) [ 51 ], Graph Con-volutional Network (GCN) [ 17 ] and BERT LARGE [ 8]. VGG19 and WideResNet18 are widely recognized for their effectiveness in com-puter vision tasks. GCN is a prominent model designed for node classification in large-scale graph datasets. BERT LARGE is a widely used Transformer model designed for natural language processing tasks, excelling in tasks such as text classification. By including these models in our evaluation, we demonstrate LRD-MPC’s versa-tility and performance benefits across a diverse set of ML workloads. Conference’17, July 2017, Washington, DC, USA Tingting Tang, Yongqin Wang, and Murali Annavaram 
+
+For readers unfamiliar with GCN, the following outlines the algorithm typically used during GCN inference. 
+
+GCN (X) = A ⊙ ReLU (A ⊙ X ⊙ W) ⊙ W′ (5) 
+
+X represents the input node features to be classified, while A de-notes the adjacency matrix that encodes the graph’s structure. The matrices W and W′ are the weight parameters learned during the training phase and are used for node classification during inference. These components work together to propagate information across the graph and make predictions for each node. 
+
+## 6.3 Model configurations 
+
+In this subsection, we will discuss which layer we apply low-rank decomposition and truncation skipping for each model. 
+
+Low-rank decomposition: If we apply low-rank decomposition to a Conv2d layer, the rank ratio (Section 3) is selected to be 0.5 . If we apply low-rank decomposition to an FC layer, the rank ratio will be 0.25 . These hyper parameters provided virtually no accuracy drop and have also been suggested in prior work [42]. 
+
+Vision models: For both VGG and WideResNet, we adopt the low-rank decomposition policy outlined in [ 42 ], as it ensures the best accuracy for these models. VGG19 consists of 16 Conv2d layers and three FC layers. Low-rank decomposition is applied to Conv2d layers ranging from the 10th to the 16th , while the first nine Conv2d layers remain as full-rank convolutions. As for FC layers in VGG19, we apply low-rank decomposition to the first two FC layers. For WideResNet18, we apply low-rank decomposition ex-clusively to Conv2d layers from the third to the 18th , excluding any downsampling layers. All FC layers are kept as full-rank to maintain accuracy. 
+
+GCN: Low-rank decomposition is applied to the matrix mul-tiplications within the GraphConvolution operation. Specifically, both W and A are decomposed into smaller matrices, optimizing the computational efficiency while preserving the model’s effectiveness for node classification. 
+
+BERT LARGE : For BERT LARGE , we adopt the same low-rank de-composition policy for the Transformer architecture outlined in plaintext approach [ 42 ]. The very first Transformer layer is kept as a full-rank layer, and all other Transformer layers are low-rank layers. For each low-rank Transformer layer, we use the rank ratio at 0.25 and decompose the weight matrices in the multi-head attention and the FC layers in the feed-forward networks (FFN). The embedding layer and the prediction layer are kept as full-rank. 
+
+Truncation Skipping: To ensure consistent evaluation, we con-servatively enable truncation skipping for all low-rank layers across all models. While truncation skipping may impact model accuracy, our evaluations show that it maintains acceptable accuracy levels while optimizing performance. With the model architectures and configurations outlined, we now turn our attention to discussing LRD-MPC’s impact on the inference runtime of these models. 
+
+## 6.4 Online phase speedups 
+
+In this section, we analyze the online phase runtime speedup of LRD-MPC. We calculate the runtime speedup using the equation 
+
+( 𝑇 𝑏𝑎𝑠𝑒  
+
+> 𝑇 𝑜𝑢𝑟𝑠
+
+− 1) × 100% , where 𝑇 𝑏𝑎𝑠𝑒 is the baseline runtime measured using MPC on full rank matrices, and 𝑇 𝑜𝑢𝑟𝑠 is the runtime of MPC ML with our optimizations. 
+
+Trio protocol: Figure 11 presents the online phase speedup achieved by LRD-MPC across different models in the Trio proto-col. The first bar (LR) shows how much speedup is acheived by basic low-rank without any of our optimizations on top of a full rank baseline. The remaining bars illustrate the contributions of truncation skipping (TS), and the combined effect with efficient linear layer concatenation (Combined). Truncation skipping (TS) yields a significant improvement in speedup across all models, with WideResNet18 exhibiting the highest gain at approximately 
+
+7.5% (6.58% → 14 .18% ). These results indicate that removing re-dundant truncation operations effectively reduces computational overhead, leading to improved efficiency. Efficient linear layer con-catenation further enhances performance, though its impact varies across models. The improvement from LR + TS → Combined is more pronounced in GCN and BERT LARGE , suggesting that models with extensive matrix multiplications benefit more from inter-layer optimizations, which is the current model trend. The Combined approach consistently achieves the highest speedup, demonstrating that truncation skipping and efficient linear layer concatenation are complementary techniques that, when applied together, maximize performance improvements. The observed speedup varies across models due to differences in the proportion of linear vs. nonlinear layers and model architecture. GCN achieves the highest speedup, benefiting from a low proportion of nonlinear layers. Since GCNs rely heavily on matrix multiplications, low-rank decomposition and inter-layer optimizations have a substantial impact on reducing computation time. WideResNet18 exhibits a moderate speedup, as truncation skipping and layer concatenation contribute to efficiency gains, but the presence of nonlinear layers such as ReLU limits over-all improvements. VGG19 shows the smallest speedup, as most of its computation lies in full-rank convolutional and nonlinear layers unaffected by LRD-MPC. To maintain accuracy, low-rank decom-position is applied only from the 10th convolutional layer onward, limiting its coverage to 9 of 19 linear layers. This also reduces op-portunities for truncation skipping and layer concatenation, further constraining the performance gains from LRD-MPC. BERT LARGE achieves a moderate speedup, demonstrating that Transformer-based models benefit from low-rank decomposition and truncation skipping, though nonlinear components still con-strain overall improvements. The effectiveness of LRD-MPC in BERT LARGE is further supported by the QUAD approximations [ 23 ], which reduce the proportion of nonlinear computations. 
+
+𝑛 -PC protocol: Figure 12 presents the online phase speedup achieved by LRD-MPC in the 𝑛 -PC protocol. The impact of trunca-tion skipping and efficient linear layer concatenation follow a simi-lar trend as that in Trio. Due to different implementation, VGG19 sees a higher relative speedup in 𝑛 -PC compared to other models, whereas in Trio, it achieved the smallest improvement. GCN and BERT LARGE continue to benefit from LRD-MPC in both protocols, though the improvements are more pronounced in Trio. This is because linear layers account for a larger portion of the online phase runtime in full-rank model inference under Trio compared to 𝑛 -PC . Specifically, GCN’s linear layers contribute 81.9% of the LRD-MPC: Efficient MPC Inference through Low-rank Decomposition Conference’17, July 2017, Washington, DC, USA LR LR 
+
+> +TS
+> Combined
+> 0%
+> 5%
+> 10%
+> 15%
+> 20%
+> 25%
+> 30%
+> Speedup
+> 19.09%
+> 25.83%
+> 30.23%
+
+(a) GCN, Cora LR LR   
+
+> +TS
+> Combined
+> 0%
+> 2%
+> 4%
+> 6%
+> 8%
+> 10%
+> 12%
+> 14%
+> 16%
+> Speedup
+> 6.58%
+> 14.18% 14.95%
+
+(b) WRN18, CIFAR10 LR LR   
+
+> +TS
+> Combined
+> 0%
+> 1%
+> 2%
+> 3%
+> 4%
+> 5%
+> 6%
+> Speedup  3.97%
+> 5.38% 5.92%
+
+(c) VGG19, ImageNet LR LR  
+
+> +TS
+> Combined
+> 0%
+> 5%
+> 10%
+> 15%
+> 20%
+> 25%
+> 30%
+> 35%
+> Speedup  23.23%
+> 26.56%
+> 32.99%
+
+(d) BERT LARGE , IMDb 
+
+Figure 11: LRD-MPC online phase performance improvement for Trio. LR LR  
+
+> +TS
+> Combined
+> 0%
+> 2%
+> 4%
+> 6%
+> 8%
+> 10%
+> 12%
+> 14%
+> Speedup  10.79%
+> 12.62% 13.96%
+
+(a) GCN, Cora LR LR  
+
+> +TS
+> Combined
+> 0%
+> 5%
+> 10%
+> 15%
+> 20%
+> Speedup
+> 10.83%
+> 15.66%
+> 20.83%
+
+(b) WRN18, CIFAR10 LR LR    
+
+> +TS
+> Combined
+> 0%
+> 5%
+> 10%
+> 15%
+> 20%
+> 25%
+> Speedup
+> 23.05% 24.03% 25.14%
+
+(c) VGG19, ImageNet LR LR  
+
+> +TS
+> Combined
+> 0%
+> 5%
+> 10%
+> 15%
+> 20%
+> Speedup  15.67%
+> 19.05%
+> 21.76%
+
+(d) BERT LARGE , IMDb 
+
+Figure 12: LRD-MPC online phase performance improvement for 𝑛 -PC. 
+
+runtime in Trio versus 36.1% in 𝑛 -PC , while BERT LARGE sees a con-tribution of 73.2% in Trio compared to 51.6% in 𝑛 -PC . Consequently, optimizations targeting linear layers have a greater impact in Trio. 
+
+## 6.5 Speedups on different networks 
+
+This section evaluates speedup of LRD-MPC for different network setups, using the same equation as Section 6.4. LAN reports a low-latency setup where servers are connected with a 10 Gbps band-width. MAN models a network with 5 Gbps bandwidth and 5 ms round-trip latency, while WAN simulates conditions with the same bandwidth but a higher round-trip latency of 35 ms. 
+
+Table 2: Speedup of LRD-MPC on different network setups. Protocol Model LAN MAN WAN 
+
+Trio GCN 44.8% 44.45% 30.23% WideResNet18 37.49% 28.06% 14.95% VGG19 11.36% 10.92% 5.92% BERT LARGE 39.64% 37.91% 32.99% 
+
+𝑛 -PC GCN 37.41% 36.01% 13.96% WideResNet18 174.76% 125.64% 20.83% VGG19 115.71% 113.96% 25.14% BERT LARGE 18.28% 13.53% 21.76% As shown in Table 2, across both MPC protocols (Trio and 𝑛 -PC ), LRD-MPC consistently shows solid improvements across all net-works, with gains becoming more notable under LAN setup. For ex-ample, under the 𝑛 -PC protocol, WideResNet18 achieves a 174.76% speedup in LAN, compared to 125.64% in MAN and 20.83% in WAN. This trend is expected, as computation becomes the dominant bot-tleneck when communication delays are reduced. These results confirm that LRD-MPC provides strong performance improvements across a range of network setups. While speedups are the highest under low-latency conditions, LRD-MPC maintains its advantage even as communication overhead increases, making it a practical and scalable optimization across deployment scenarios. 
+
+## 6.6 Power consumption 
+
+In this section, we demonstrate the online phase power consump-tion savings of LRD-MPC. In CrypTen, we run private inference on GPU and measure the GPU power consumption for both the full-rank model and our method LRD-MPC. As shown in Table 3, LRD-MPC reduces power consumption across multiple models by up to 52.2%, demonstrating significant energy savings. At the data cen-ter scale, such reductions translate to substantial cost savings and improved sustainability for private inference workloads, making LRD-MPC a practical solution for energy-efficient secure computa-tion. Power usage reduction is more pronounced than the reduction 
+
+Table 3: LRD-MPC online phase GPU power consumption saving (%) for 𝑛 -PC Model Saving (%) 
+
+GCN 30.26% WideResNet18 52.24% VGG19 48.41% BERT LARGE 34.09% Conference’17, July 2017, Washington, DC, USA Tingting Tang, Yongqin Wang, and Murali Annavaram 
+
+in runtime because, in MPC ML, linear layers dominate energy consumption. While activation functions may have longer runtime, most of activation runtime is spent on energy lightweight opera-tions like communication and bitwise XOR and AND operations. Thus, LRD-MPC, which significantly improves the efficiency of linear layers, can make a huge dent in energy usage. Although equipment constraints and design choices in the PI-GEON framework prevent direct energy logging for Trio, we expect its energy profile to align closely with that of the 𝑛 -PC protocols. 
+
+## 6.7 Offline phase speedups 
+
+This section evaluates the offline phase runtime speedup of LRD-MPC. 
+
+Trio protocol: The offline phase in the Trio protocol is designed to minimize communication overhead. Specifically, P1 generates all required random masks and sends all preprocessing materials to P3 in a single communication round. Consequently, LRD-MPC’s offline phase speedup stems solely from low-rank decomposition, as truncation skipping does not apply since no truncation occurs in offline phases, and efficient linear layer concatenation is irrelevant due to the absence of inter-layer communication. Table 4 presents the LRD-MPC offline phase speedup for various models in the Trio protocol, with GCN achieving highest improvement over 88% .
+
+Table 4: LRD-MPC offline phase speedup for Trio Model Speedup 
+
+GCN 88.27% WideResNet18 15.38% VGG19 5.28% BERT LARGE 35.69% 
+
+Table 5: Reduction in Beaver triples generated for 𝑛 -PC us-ing LRD-MPC Model Reduction 
+
+GCN 55.98% WideResNet18 37.25% VGG19 17.16% BERT LARGE 55.29% The variation in speedup is driven by the proportion of linear vs. nonlinear layers in each model. GCN benefits the most because nonlinear layers constitute a relatively small portion of the model, allowing low-rank decomposition to substantially reduce computa-tion time, leading to a high speedup. BERT LARGE sees a moderate speedup, as the QUAD approximations reduce the impact of non-linear operations, making its computations more amenable to low-rank optimization. In contrast, VGG19 and WideResNet18 contain a higher proportion of nonlinear layers, such as ReLU and pooling layers, which remain unaffected by low-rank decomposition. As a result, the gains from optimizing linear layers translate to a smaller overall speedup in these models. 
+
+𝑛 -PC protocol: Since CrypTen implements only the online phase, we cannot directly measure the offline phase speedup for 
+
+𝑛 -PC . Instead, we report the reduction in the number of Beaver triples required to be generated for the linear layers when applying LRD-MPC compared to the full-rank baseline. Table 5 shows that LRD-MPC significantly decreases the number of required triples for linear layers across all models, directly minimizing the computa-tional overhead of the offline phase. This is particularly important because the offline phase is often a bottleneck in MPC protocols due to the high cost of generating correlated randomness. Overall, these results demonstrate that LRD-MPC effectively reduces offline phase overhead, particularly for models where lin-ear layers dominate computation, reinforcing its practicality for improving MPC efficiency in ML workloads. 
+
+## 6.8 Model accuracy 
+
+To evaluate the impact of LRD-MPC on model accuracy, we present inference results in Table 6. Low-rank represents the baseline where low-rank decomposition is applied to the pre-trained model weights, without truncation skipping and efficient linear layer con-catenation techniques, and LRD-MPC includes all the optimiza-tions we proposed in this paper. 
+
+Table 6: LRD-MPC and baseline model accuracy Dataset Model Low-rank LRD-MPC 
+
+Cora GCN 83% 82.9% CIFAR10 WideResNet18 92.83% 92.83% ImageNet VGG19 56.3% 56.5% Our primary focus is the accuracy drop between the low-rank baseline and LRD-MPC, as this isolates the impact of truncation skipping. Table 6 shows that all models maintain a minimal accu-racy drop within 0.5% , including BERT LARGE (0.32% ), indicating that truncation skipping has a negligible impact. BERT LARGE experiences a >10% accuracy drop when transitioning from full-rank ( 96% ) to the low-rank baseline, an expected decline. Prior works [ 42 –44 ] mit-igate this by training low-rank models to recover full-rank accuracy, making it complementary to LRD-MPC. 
+
+## 7 Conclusion 
+
+In this paper, we introduce LRD-MPC, a suite of optimizations for efficient low-rank decomposition in MPC ML. Our approach hides and removes the additional overheads introduced by low-rank approximations in MPC ML through techniques such as truncation skipping and efficient linear layer concatenation. We demonstrate that LRD-MPC improves inference runtime, power consumption, and offline phase costs by up to 33% , 52% , and 88% , respectively. 
+
+## References                 
+
+> [1] [n. d.]. I2C bus monitor. https://www.jupiteri.com/. Accessed: 2023-08-3. [2] Anonymous. 2024. Advances in the Neural Network Quantization: A Compre-hensive Review. Applied Sciences 14, 17 (2024), 7445. [3] Amazon AWS. [n. d.]. Amazon EC2 instance network bandwidth. https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-network-bandwidth.html. Accessed: 2024-08-20. [4] Octavian Catrina and Sebastiaan de Hoogh. 2010. Improved Primitives for Secure Multiparty Integer Computation. In Security and Cryptography for Networks ,Juan A. Garay and Roberto De Prisco (Eds.). Springer Berlin Heidelberg, Berlin, Heidelberg, 182–199. [5] Harsh Chaudhari, Ashish Choudhury, Arpita Patra, and Ajith Suresh. 2019. AS-TRA: high throughput 3pc over rings with application to secure prediction. In
+> Proceedings of the 2019 ACM SIGSAC Conference on Cloud Computing Security Workshop . 81–92. [6] Minsu Cho, Ameya Joshi, Brandon Reagen, Siddharth Garg, and Chinmay Hegde. 2022. Selective Network Linearization for Efficient Private Inference. In Pro-ceedings of the 39th International Conference on Machine Learning (Proceedings
+
+LRD-MPC: Efficient MPC Inference through Low-rank Decomposition Conference’17, July 2017, Washington, DC, USA 
+
+of Machine Learning Research, Vol. 162) , Kamalika Chaudhuri, Stefanie Jegelka, Le Song, Csaba Szepesvari, Gang Niu, and Sivan Sabato (Eds.). PMLR, 3947–3961. https://proceedings.mlr.press/v162/cho22a.html [7] Anders Dalskov, Daniel Escudero, and Marcel Keller. 2021. Fantastic Four: Honest-Majority Four-Party Secure Computation With Malicious Security. In 
+
+30th USENIX Security Symposium (USENIX Security 21) . USENIX Association, 2183–2200. https://www.usenix.org/conference/usenixsecurity21/presentation/ dalskov [8] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019. BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. In 
+
+Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers) , Jill Burstein, Christy Doran, and Thamar Solorio (Eds.). Association for Computational Linguistics, Minneapolis, Minnesota, 4171–4186. doi:10.18653/ v1/N19-1423 [9] Karthik Garimella, Zahra Ghodsi, Nandan Kumar Jha, Siddharth Garg, and Bran-don Reagen. 2023. Characterizing and Optimizing End-to-End Systems for Private Inference. In Proceedings of the 28th ACM International Conference on Architectural Support for Programming Languages and Operating Systems, Volume 3 (<conf-loc>, <city>Vancouver</city>, <state>BC</state>, <country>Canada</country>, </conf-loc>) (ASPLOS 2023) . Association for Computing Machinery, New York, NY, USA, 89–104. doi:10.1145/3582016.3582065 [10] Zahra Ghodsi, Nandan Kumar Jha, Brandon Reagen, and Siddharth Garg. 2021. Circa: Stochastic ReLUs for Private Deep Learning. arXiv:2106.08475 [cs.LG] https://arxiv.org/abs/2106.08475 [11] Christopher Harth-Kitzerow, Ajith Suresh, Yongqin Wang, Hossein Yalame, and Murali Annavaram Georg Carle. 2025. High-Throughput Secure Multiparty Computation with an Honest Majority in Various Network Settings. In 25th Privacy Enhancing Technologies Symposium (PETS 2025) , Vol. 2025. [12] Christopher Harth-Kitzerow, Yongqin Wang, Rachit Rajat, Georg Carle, and Murali Annavaram. 2024. PIGEON: A Framework for Private Inference of Neural Networks. Cryptology ePrint Archive, Paper 2024/1371. https://eprint.iacr.org/ 2024/1371 [13] Hanieh Hashemi, Wenjie Xiong, Liu Ke, Kiwan Maeng, Murali Annavaram, G. Edward Suh, and Hsien-Hsin S. Lee. 2022. Data Leakage via Access Patterns of Sparse Features in Deep Learning-based Recommendation Systems. (2022). arXiv:2212.06264 [cs.CE] [14] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen. 2022. LoRA: Low-Rank Adaptation of Large Language Models. In International Conference on Learning Representations . https: //openreview.net/forum?id=nZeVKeeFYf9 [15] Nandan Kumar Jha, Zahra Ghodsi, Siddharth Garg, and Brandon Reagen. 2021. DeepReDuce: ReLU Reduction for Fast Private Inference. In Proceedings of the 38th International Conference on Machine Learning (Proceedings of Machine Learning Research, Vol. 139) , Marina Meila and Tong Zhang (Eds.). PMLR, 4839–4849. https://proceedings.mlr.press/v139/jha21a.html [16] Nandan Kumar Jha, Zahra Ghodsi, Siddharth Garg, and Brandon Reagen. 2021. DeepReDuce: ReLU Reduction for Fast Private Inference. arXiv:2103.01396 [cs.LG] https://arxiv.org/abs/2103.01396 [17] Thomas N. Kipf and Max Welling. 2017. Semi-Supervised Classification with Graph Convolutional Networks. In International Conference on Learning Repre-sentations . https://openreview.net/forum?id=SJU4ayYgl [18] Brian Knott, Shobha Venkataraman, Awni Y. Hannun, Shubho Sengupta, Mark Ibrahim, and Laurens van der Maaten. 2021. CrypTen: Secure Multi-Party Com-putation Meets Machine Learning. In Advances in Neural Information Processing Systems 34: Annual Conference on Neural Information Processing Systems 2021, NeurIPS 2021, December 6-14, 2021, virtual . 4961–4973. [19] Paul Kocher, Jann Horn, Anders Fogh, Daniel Genkin, Daniel Gruss, Werner Haas, Mike Hamburg, Moritz Lipp, Stefan Mangard, Thomas Prescher, Michael Schwarz, and Yuval Yarom. 2019. Spectre Attacks: Exploiting Speculative Execution. In 2019 IEEE Symposium on Security and Privacy (SP) . 1–19. doi:10.1109/SP.2019.00002 [20] Nishat Koti, Mahak Pancholi, Arpita Patra, and Ajith Suresh. 2021. SWIFT: Super-fast and Robust Privacy-Preserving Machine Learning. In 30th USENIX Security Symposium (USENIX Security 21) . USENIX Association, 2651–2668. https: //www.usenix.org/conference/usenixsecurity21/presentation/koti [21] Nishat Koti, Arpita Patra, Rahul Rachuri, and Ajith Suresh. 2022. Tetrad: Actively Secure 4PC for Secure Training and Inference. In 29th Annual Network and Distributed System Security Symposium, NDSS 2022, San Diego, California, USA, April 24-28, 2022 . The Internet Society. https://www.ndss-symposium.org/ndss-paper/auto-draft-202/ [22] Souvik Kundu, Shunlin Lu, Yuke Zhang, Jacqueline Tiffany Liu, and Peter An-thony Beerel. 2023. Learning to Linearize Deep Neural Networks for Secure and Efficient Private Inference. In The Eleventh International Conference on Learning Representations . https://openreview.net/forum?id=BGF9IeDfmlH [23] Dacheng Li, Rulin Shao, Hongyi Wang, Han Guo, Eric P. Xing, and Hao Zhang. 2022. MPCFormer: fast, performant and private Transformer inference with MPC. 
+
+arXiv preprint arXiv:2211.01452 (2022). https://arxiv.org/abs/2211.01452 ICLR 2023 notable top 25%. [24] Yun Li, Yufei Duan, Zhicong Huang, Cheng Hong, Chao Zhang, and Yifan Song. 2023. Efficient 3PC for Binary Circuits with Application to Maliciously-Secure DNN Inference. In 32nd USENIX Security Symposium (USENIX Security 23) . USENIX Association, Anaheim, CA, 5377–5394. https://www.usenix.org/ conference/usenixsecurity23/presentation/li-yun [25] Moritz Lipp, Michael Schwarz, Daniel Gruss, Thomas Prescher, Werner Haas, Anders Fogh, Jann Horn, Stefan Mangard, Paul Kocher, Daniel Genkin, Yuval Yarom, and Mike Hamburg. 2018. Meltdown: Reading Kernel Memory from User Space. In 27th USENIX Security Symposium (USENIX Security 18) .[26] Kiwan Maeng and G. Edward Suh. 2023. Approximating ReLU on a Reduced Ring for Efficient MPC-based Private Inference. arXiv:2309.04875 [cs.LG] https: //arxiv.org/abs/2309.04875 [27] Kiwan Maeng and G. Edward Suh. 2024. Accelerating ReLU for MPC-Based Private Inference with a Communication-Efficient Sign Estimation. In Proceedings of Machine Learning and Systems , P. Gibbons, G. Pekhimenko, and C. De Sa (Eds.), Vol. 6. 128–147. https://proceedings.mlsys.org/paper_files/paper/2024/ file/4e3157021c5f833bb2204081f1dda573-Paper-Conference.pdf [28] Payman Mohassel and Peter Rindal. 2018. ABY3: A mixed protocol framework for machine learning. In Proceedings of the 2018 ACM SIGSAC conference on computer and communications security . 35–52. [29] Payman Mohassel and Yupeng Zhang. 2017. SecureML: A System for Scalable Privacy-Preserving Machine Learning. In 2017 IEEE Symposium on Security and Privacy (SP) . 19–38. doi:10.1109/SP.2017.12 [30] Markus Nagel, Marios Fournarakis, Rana Ali Amjad, Yelysei Bondarenko, Mart van Baalen, and Tijmen Blankevoort. 2021. A White Paper on Neural Network Quantization. arXiv preprint arXiv:2106.08295 (2021). [31] NVIDIA Corporation. n.d. [n. d.]. Cuda Libraries Documentation. https://docs. nvidia.com/cuda-libraries/index.html [32] NVIDIA Corporation. n.d. [n. d.]. CUTLASS: CUDA Templates for Linear Algebra Subroutines. https://github.com/NVIDIA/cutlass. [33] Adam Paszke, Sam Gross, Francisco Massa, Adam Lerer, James Bradbury, Gregory Chanan, Trevor Killeen, Zeming Lin, Natalia Gimelshein, Luca Antiga, Alban Desmaison, Andreas Köpf, Edward Yang, Zach DeVito, Martin Raison, Alykhan Tejani, Sasank Chilamkurthy, Benoit Steiner, Lu Fang, Junjie Bai, and Soumith Chintala. 2019. PyTorch: an imperative style, high-performance deep learning library . Curran Associates Inc., Red Hook, NY, USA. [34] Deevashwer Rathee, Mayank Rathee, Nishant Kumar, Nishanth Chandran, Divya Gupta, Aseem Rastogi, and Rahul Sharma. 2020. CrypTFlow2: Practical 2-Party Secure Inference. In Proceedings of the 2020 ACM SIGSAC Conference on Computer and Communications Security (Virtual Event, USA) (CCS ’20) . Association for Com-puting Machinery, New York, NY, USA, 325–342. doi:10.1145/3372297.3417274 [35] Deevashwer Rathee, Thomas Schneider, and K. K. Shukla. 2019. Improved Multi-plication Triple Generation over Rings via RLWE-based AHE. Cryptology ePrint Archive, Paper 2019/577. doi:10.1007/978-3-030-31578-8_19 [36] Manuel B. Santos, Dimitris Mouris, Mehmet Ugurbil, Stanislaw Jarecki, José Reis, Shubho Sengupta, and Miguel de Vega. 2024. Curl: Private LLMs through Wavelet-Encoded Look-Up Tables. Cryptology ePrint Archive, Paper 2024/1127. https://eprint.iacr.org/2024/1127 https://eprint.iacr.org/2024/1127. [37] Steffen Schotthöfer, Emanuele Zangrando, Jonas Kusch, Gianluca Ceruti, and Francesco Tudisco. 2022. Low-rank lottery tickets: finding efficient low-rank neural networks via matrix differential equations. In Advances in Neural Information Processing Systems , S. Koyejo, S. Mohamed, A. Agar-wal, D. Belgrave, K. Cho, and A. Oh (Eds.), Vol. 35. Curran Associates, Inc., 20051–20063. https://proceedings.neurips.cc/paper_files/paper/2022/file/ 7e98b00eeafcdaeb0c5661fb9355be3a-Paper-Conference.pdf [38] Karen Simonyan and Andrew Zisserman. 2014. Very Deep Convolutional Net-works for Large-Scale Image Recognition. CoRR abs/1409.1556 (2014). http: //arxiv.org/abs/1409.1556 [39] Sijun Tan, Brian Knott, Yuan Tian, and David J. Wu. 2021. CryptGPU : Fast Privacy-Preserving Machine Learning on the GPU. In IEEE S&P .[40] Sameer Wagh, Divya Gupta, and Nishanth Chandran. 2019. SecureNN: 3-Party Secure Computation for Neural Network Training. Proceedings on Privacy En-hancing Technologies (2019). [41] Sameer Wagh, Shruti Tople, Fabrice Benhamouda, Eyal Kushilevitz, Prateek Mit-tal, and Tal Rabin. 2020. Falcon: Honest-Majority Maliciously Secure Framework for Private Deep Learning. Proceedings on Privacy Enhancing Technologies 2021 (2020), 188 – 208. https://api.semanticscholar.org/CorpusID:214802385 [42] Hongyi Wang, Saurabh Agarwal, and Dimitris Papailiopoulos. 2021. Puffer-fish: Communication-efficient Models At No Extra Cost. In The Fourth Annual Conference on Machine Learning and Systems .[43] Hongyi Wang, Saurabh Agarwal, Pongsakorn U-chupala, Yoshiki Tanaka, Eric P. Xing, and Dimitris Papailiopoulos. 2023. Cuttlefish: Low-Rank Model Training without All the Tuning. arXiv:2305.02538 [cs.LG] https://arxiv.org/abs/2305. 02538 [44] Sinong Wang, Belinda Z. Li, Madian Khabsa, Han Fang, and Hao Ma. 2020. Linformer: Self-Attention with Linear Complexity. arXiv:2006.04768 [cs.LG] https://arxiv.org/abs/2006.04768 Conference’17, July 2017, Washington, DC, USA Tingting Tang, Yongqin Wang, and Murali Annavaram 
+
+[45] Yongqin Wang, Rachit Rajat, and Murali Annavaram. 2024. MPC-Pipe: An Ef-ficient Pipeline Scheme for Semi-honest MPC Machine Learning. In 2024 ACM Conference on Architectural Support for Programming Languages and Operating Systems .[46] Yongqin Wang, Pratik Sarkar, Nishat Koti, Arpita Patra, and Murali Annavaram. 2023. CompactTag: Minimizing Computation Overheads in Actively-Secure MPC for Deep Neural Networks. Cryptology ePrint Archive, Paper 2023/1729. https://eprint.iacr.org/2023/1729 [47] Yongqin Wang, G. Edward Suh, Wenjie Xiong, Benjamin Lefaudeux, Brian Knott, Murali Annavaram, and Hsein-Hsin S. Lee. 2022. Characterization of MPC-based Private Inference for Transformer-based Models. In 2022 IEEE International Symposium on Performance Analysis of Systems and Software . IEEE Computer Society, Los Alamitos, CA, USA, 187–197. doi:10.1109/ISPASS55109.2022.00025 [48] Jean-Luc Watson, Sameer Wagh, and Raluca Ada Popa. 2022. Piranha: A {GPU }
+
+platform for secure computation. In 31st USENIX Security Symposium (USENIX Security 22) . 827–844. [49] Jian Xue, Jinyu Li, and Yifan Gong. 2013. Restructuring of deep neural network acoustic models with singular value decomposition.. In Interspeech . 2365–2369. [50] Andrew Chi-Chih Yao. 1986. How to generate and exchange secrets. In 27th Annual Symposium on Foundations of Computer Science (sfcs 1986) . 162–167. doi:10. 1109/SFCS.1986.25 [51] Sergey Zagoruyko and Nikos Komodakis. 2016. Wide Residual Networks. In 
+
+BMVC .

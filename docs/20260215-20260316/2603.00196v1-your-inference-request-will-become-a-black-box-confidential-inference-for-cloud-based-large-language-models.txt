@@ -1,0 +1,885 @@
+Title: Your Inference Request Will Become a Black Box: Confidential Inference for Cloud-based Large Language Models
+
+URL Source: https://arxiv.org/pdf/2603.00196v1
+
+Published Time: Tue, 03 Mar 2026 01:11:52 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# Your Inference Request Will Become a Black Box: Confidential Inference for Cloud-based Large Language Models 
+
+Chung-ju Huang 1,2 , Huiqiang Zhao 3, Yuanpeng He 1,2 , Lijian Li 4,Wenpin Jiao 1,2 , Zhi Jin 1,2 , Peixuan Chen 3, Leye Wang 1,2 
+
+> 1
+
+Key Lab of High Confidence Software Technologies (Peking University), Ministry of Education, China, 
+
+> 2
+
+School of Computer Science, Peking University, Beijing, China, 
+
+> 3
+
+Tencent, Shenzhen, China 4Macau university, China 
+
+Abstract 
+
+The increasing reliance on cloud-hosted Large Language Models (LLMs) exposes sensitive client data, such as prompts and responses, to potential privacy breaches by service providers. Existing approaches fail to ensure privacy, maintain model performance, and preserve computational efficiency simultaneously. To address this challenge, we propose Talaria, a confidential inference framework that parti-tions the LLM pipeline to protect client data without compromising the cloud’s model in-tellectual property or inference quality. Ta-laria executes sensitive, weight-independent operations within a client-controlled Confiden-tial Virtual Machine (CVM) while offloading weight-dependent computations to the cloud GPUs. The interaction between these environ-ments is secured by our Reversible Masked Outsourcing (ReMO) protocol, which uses a hybrid masking technique to reversibly obscure intermediate data before outsourcing computa-tions. Extensive evaluations show that Talaria can defend against state-of-the-art token infer-ence attacks, reducing token reconstruction ac-curacy from over 97.5% to an average of 1.34%, all while being a lossless mechanism that guar-antees output identical to the original model without significantly decreasing efficiency and scalability. To the best of our knowledge, this is the first work that ensures clients’ prompts and responses remain inaccessible to the cloud, while also preserving model privacy, perfor-mance, and efficiency. 
+
+1 Introduction 
+
+The widespread deployment of cloud-hosted Large Language Models (LLMs), such as Gemini 2.5 (Co-manici et al., 2025) and GPT 5 (OpenAI, 2025a), brings powerful capabilities but also an immediate privacy hazard. Client data, including prompts and model responses, often contains personal, finan-cial, or health information and, when processed on cloud, are exposed to the service provider (Fig. 1) (Gim et al., 2024; Lin et al., 2025a). This exposure has already chilled adoption across reg-ulated sectors (e.g., JPMorgan, Citi, and Gold-man Sachs restrictions (Farrell, 2023; Bushard, 2023); healthcare cautions about HIPAA compli-ance (Bruce, 2023)), underscoring that data confi-dentiality becomes a deployment prerequisite for trust. Beyond market signals, regulators likewise now expect systematic risk assessments: GDPR generally requires a Data Protection Impact Assess-ment (PIA) for high-risk processing, and authori-ties have enforced these obligations against LLM providers (Wolford, 2025). For example, ChatGPT was temporarily banned in Italy and later fined C15 million for training on personal data without an ad-equate legal basis (Pollina and Armellini, 2024). In parallel, U.S. FTC oversight is pushing PIA-like reviews for AI services (Bissex, 2025), and Que-bec’s Law 25 makes PIAs mandatory with signifi-cant penalties (LégisQuébec, 2021). Consequently, any trustworthy cloud-based LLM solution must provide end-to-end safeguards for prompts (and responses) to demonstrate PIA compliance. Prompt  
+
+> Personal data
+> Confidential info.
+> Proprietary query
+> Response
+> Inferred data
+> Sensitive summary
+> Extracted entities
+> Client
+> Privacy leakage
+> User portrait
+> Political spectrum
+> Clinical diagnosis
+> Send
+> Receive Cloud
+> Provider
+> Analysis
+> LLM
+> Inference
+
+Figure 1: Privacy leakage in cloud-based LLMs. 
+
+Challenges. While ensuring prompt-response con-fidentiality, the primary challenge is satisfying three conflicting requirements, often termed the “impossible trinity” (Gim et al., 2024; Luo et al., 2024): ① Model Privacy , which requires safeguard-ing client data without compromising the confiden-tiality of cloud-hosted models; ② Model Perfor-mance , which requires output invariance, i.e., that 1
+
+> arXiv:2603.00196v1 [cs.CR] 27 Feb 2026
+
+new mechanisms do not alter the model’s outputs; 
+
+③ Model Efficiency , which requires that privacy mechanisms introduce only modest computational overhead. This paper aims to realize a confidential inference mechanism that prevents the cloud from obtaining the client’s prompt and response while balancing the impossible trinity of model privacy, performance, and efficiency. 
+
+Status Quo. Current approaches to private LLM inference uniformly fail to balance this trinity (Tbl. 1). Data-centric methods, including differen-tial privacy (Wu et al., 2024, 2025) and anonymiza-tion (Chen et al., 2023; Zeng et al., 2024), com-promise performance by altering inputs, which vio-lates output invariance. Homomorphic encryption-based mechanisms (Liu and Liu, 2023; Huang et al., 2022) provide provable security, but the large com-putational overhead and the need to access model parameters limit their widespread application in LLMs. Confidential Virtual Machines (CVMs) with GPU support have been proposed as a path forward, promising greater efficiency by leverag-ing secure hardware enclaves. While CVMs can effectively isolate the runtime environment, exist-ing implementations remain vulnerable; they do not prevent leakage of model parameters and the response, thus failing to provide comprehensive privacy guarantees (Gim et al., 2024). LLM  
+
+> Response
+> Prompt LLM
+> Response
+> Prompt
+
+Figure 2: The left figure shows the existing CVM-based methods, which isolates the prompt in the CVM but ex-poses the response. The right figure shows our method, which isolates both prompt and response in CVM. 
+
+Our Solution. To address these limitations, we propose Talaria 1, a novel CVM-based confiden-tial inference paradigm that protects client prompts and responses by balancing model privacy, per-formance, and efficiency. The difference between Talaria and the existing CVM-based methods is shown in Fig. 2. Talaria uniquely partitions the LLM inference pipeline: sensitive operations in-volving client data are executed within a secure,                    
+
+> 1In Greek mythology, Hermes wore the winged sandals Talaria, which allowed him to travel freely between the divine realm and the mortal world. Our method enables client data to traverse securely and efficiently between secure and non-secure zones.
+> Solution Privacy Performance Efficiency
+> Prompt Response Model Output variance DP G###G#
+> HE ####
+> CVM ##G#
+> Ours G#G#
+
+Table 1: Comparison of existing solutions ( : Fully support, #: Not support, G#: Partial support). 
+
+client-controlled cloud CVM, while computation-ally intensive, weight-dependent operations are of-floaded to the public cloud GPU. This Confiden-tial Partitioned Inference (CPI) interaction is se-cured by our novel Reversible Masked Outsourcing (ReMO) protocol, which provides two-way protec-tion by preventing the cloud from seeing client data and the client from inferring model weights. Empirically, Talaria thwarts state-of-the-art attacks, reducing token reconstruction accuracy from over 97.5% to just 1.34%. It achieves this robust se-curity losslessly–guaranteeing bit-for-bit identical output to the original model–while demonstrating superior efficiency over existing CVM-based se-cure inference methods. 
+
+Our Contributions. The contributions of our work can be summarized as follows: • To the best of our knowledge, this is the first work that protects client’s prompts and re-sponses in cloud-based LLM inference. • Talaria provides strong data privacy protection while maintaining a balance between model privacy, performance, and efficiency. 
+
+2 Related Work 
+
+DP-based methods. Differential privacy (Dwork, 2006) offers an efficient way to protect client prompts by perturbing the inputs, but this often comes at the cost of performance. DP-based tech-niques inject noise into token distributions, em-beddings, or use paraphrasing to obscure original inputs (Wu et al., 2025, 2024; Hong et al., 2024; Lin et al., 2025b). While highly efficient and not requiring changes to the backend model, this noise injection inevitably creates a trade-off between pri-vacy and performance, as it can degrade the quality of downstream tasks. 
+
+HE-based methods. Homomorphic Encryption, often used with secure multi-party computation, allows for direct computation on encrypted data, promising strong, provable security for LLM infer-ence without degrading output quality (Liu and Liu, 22023; Huang et al., 2022). However, the practical application of these methods to large-scale cloud-based LLMs is hindered by two major obstacles: prohibitive computational overhead that violates efficiency, and the need for model access, which compromises the model confidentiality. 
+
+CVM-based methods. CVMs provide a hardware-based TEE to isolate client data, but practical im-plementation for LLMs remains challenging. The naive approach of running one full LLM instance per client CVM, while secure (Hanzlik et al., 2021; Lee et al., 2019), is unscalable and economically impractical due to the immense memory require-ments of LLMs. Hybrid solutions attempt to solve this by processing prompts inside the CVM while offloading token generation to the cloud (Gim et al., 2024). This improves efficiency but critically un-dermines the security model: it violates model con-fidentiality by exposing the model to the client and compromises client privacy by revealing the plain-text response to the cloud provider. 
+
+3 Threat Model 
+
+We consider a typical two-party cloud inference setting with: a cloud provider holds LLMs, and a client holds privacy-sensitive prompts and receives model responses. 
+
+Cloud. Consistent with related work (Gim et al., 2024; Wu et al., 2025), we assume the cloud provider operates under the honest-but-curious 
+
+threat model. The cloud is honest as it is econom-ically motivated to follow the inference protocol faithfully; its business model relies on customer trust, which would be destroyed by any detected malicious tampering (Sharma and Chen, 2021; Xue et al., 2018). Simultaneously, the cloud is curious ,meaning it may leverage its extensive computa-tional resources to analyze prompts and responses, aiming to reconstruct sensitive client information or user attributes via inversion attacks (Luo et al., 2025; Qu et al., 2025). 
+
+Client. The client is also honest-but-curious : it adheres to the protocol to obtain inference results while attempting to learn the cloud’s proprietary pa-rameters (e.g., reverse-engineering model weights) from any messages it legitimately receives. 
+
+Trusted Computing Base (CVM). Our secu-rity model is based on the availability of GPU-accelerated CVMs. This assumption is practical, as major cloud platforms like Amazon Web Ser-vices (AWS, 2025), Microsoft Azure (Azure, 2025), and Google Cloud (Google, 2025) already provide such offerings. The client can verify the integrity of a CVM through remote attestation. Once ver-ified, the CVM is considered a trusted extension of the client, allowing them to form a single logi-cal party and securely share secrets. The CVM’s runtime state is cryptographically isolated from the cloud; the provider cannot directly access plaintext data inside the CVM. While the cloud cannot read the CVM’s runtime data, it retains control over how the CVM is provisioned. Following indus-try practice (Russinovich, 2024; Martinez, 2024), the provider may enforce a minimal, pre-approved software stack and capability set to reduce misuse and to narrow the attack surface (e.g., blocking privileged or abuse-prone instructions and inter-faces (Schwarz and Rossow, 2024), or enforcing launch control policies that only allow signed en-clave binaries (Schwarz et al., 2020)). These con-trols prevent a curious client from turning the CVM into an oracle for model extraction or systems in-trospection, without granting the cloud visibility into the CVM’s plaintext. 
+
+Out of scope. Following standard CVM prac-tice (Gim et al., 2024; Hanzlik et al., 2021), we ex-clude microarchitectural and side-channel attacks, physical attacks, supply-chain compromises, and denial-of-service. We also do not consider a fully malicious cloud that arbitrarily deviates from the protocol (see Sec. 7 for discussion). 
+
+4 Methodology 
+
+4.1 Design Insight 
+
+Talaria enables Confidential Partitioned Inference (CPI) by decoupling computations that require pro-prietary parameters from computations that touch client plaintext. Concretely, we partition the stan-dard LLM layer into: • Weighted (weight-dependent) decoding: lin-ear projections and other ops that multiply by model weights W .• Structural (weight-free) decoding: nor-malization, attention-score/softmax, residuals, and sampling that do not require direct access to W .We run the first category on the cloud GPU (holding 
+
+W ) and the second inside the CVM, preventing the cloud from learning client data and the client from learning W (Fig. 3). 3Notations. We use E ∈ Rn×d for a layer’s inter-mediate embeddings (sequence length n, hidden di-mension d), W ∈ Rd×d for the relevant weight ma-trix, ˆE and ˆO for masked inputs/outputs, O = EW 
+
+for the true weighted result, and X for tokens. We list all the notations in Appx. A. RMS   
+
+> Norm
+> Q
+> Proj
+> K
+> Proj
+> V
+> Proj
+> Input
+> Q
+> K
+> V
+> Attention Multi -Head
+> Proj
+> RMS
+> Norm
+> RMS
+> Norm
+> Output
+> Residual
+> Weighted decoding Structural decoding
+
+Figure 3: Using a Qwen (Team, 2025) attention layer as an example, we split inference into two parts. The green box (weighted decoding) performs linear projec-tions that apply model weights W to inputs. The yel-low box (structural decoding) comprises weight-free ops–RMSNorm (Zhang and Sennrich, 2019), attention score/softmax (Vaswani et al., 2017), and residual con-nections. We run green-box ops on public GPUs and yellow-box ops on cloud CVMs to minimize exposure of confidential weights. 
+
+4.2 System Overview 
+
+The confidential inference process of Talaria is shown in Fig. 4. Prompt  
+
+> Request
+> Reversible
+> Mask
+> Prompt
+> Weighted
+> Decoding
+> Plaintext
+> Restore
+> Structural
+> Decoding
+> Sampling 𝒕 𝟏
+> 𝒕 𝟐
+> 𝒕 𝒏
+> CPI
+> CPI
+> CPI
+> CVM Cloud
+> Outsource
+> LLM
+> Response
+> Send
+> Protected Data
+> CVM Ops
+> Outsourced Ops
+> CPI Process
+> Partition Process
+> Decoding
+> Secure Transmission
+
+Figure 4: The overview of Talaria. The client first trans-mits the prompt to the CVM through a secure channel. For each new token generated, we use CPI for secure collaborative inference. When all tokens are generated, the CVM sends the response back to the client confi-dentially. All private data is isolated in the CVM and is invisible to the cloud. 
+
+4.2.1 One-time setup. 
+
+The client remotely attests a CVM and establishes a secure channel. The provider loads the model on a public GPU. We then precompute a reusable restoration pool for later recovery (Sec. 4.4). 
+
+Model partitioning. Each layer is split so that linear ops (e.g., Q/K/V and output projections in attention; MLP projections) execute on the unpro-tected cloud GPU, while structural decoding ops execute inside the CVM. 
+
+Restoration pool preparation. The CVM gen-erates a public base Mpub ∈ Rm×d with m < d ,sends it to the GPU, and receives Rpub = Mpub W
+
+back. Rpub will let the CVM later undo outsourced multiplications without ever obtaining W .
+
+4.2.2 Iterative inference. 
+
+For each decoding step, the client’s prompt X is decrypted inside the CVM and embedded to E.Before outsourcing any weight multiplication, the CVM masks E (Sec. 4.3), sends only the masked tensor to the unprotected GPU for weighted decod-ing, and then locally restores the exact plaintext result and proceeds with structural decoding. The private KV cache remains in the CVM. The process repeats until EOS ; see pseudocode in Appx. B.1. 
+
+4.3 Reversible Masked Outsourcing (ReMO) 
+
+Naively outsourcing EW reveals E to the cloud. ReMO prevents this with a reversible additive mask. Given E ∈ Rn×d and W ∈ Rd×d, the CVM sam-ples a secret mask M ∈ Rn×d and forms 
+
+ˆE = E + M. 
+
+Only ˆE is sent to the GPU, which computes 
+
+ˆO = ˆEW = EW + M W. 
+
+To recover the true result O = EW inside the CVM, we must subtract the restoration term R =
+
+M W . The core challenge is that R depends jointly on the CVM secret M and the cloud secret W . Our protocol ensures neither secret ever leaves its trust boundary while still enabling exact restoration. 
+
+Correctness (output invariance). ReMO is al-gebraically lossless: after restoration (Sec. 4.4), the CVM obtains exactly O = EW . Hence, under a fixed sampler, responses with and without Talaria are bitwise identical (validated in Sec. 6.4). 
+
+4.4 Hybrid Masking Protocol 
+
+Hybrid masking separates mask generation from mask application so that the CVM can compute 
+
+R = M W without W and the cloud can process masked data without M .
+
+Public base (setup). The CVM samples a public base Mpub ∈ Rm×d, m < d , and sends it to the GPU. The GPU returns the pre-multiplied pool 
+
+Rpub ≜ Mpub W, 
+
+4which the CVM stores locally. Mpub is non-sensitive; Rpub is safe to keep in the CVM because, with m < d , it reveals an underdetermined sketch of W (formalized in Sec. 5.2). 
+
+Ephemeral private mixing (per token). For each decoding step with sequence length n, the CVM samples a fresh, private Mpvt ∈ Rn×m
+
+(never leaves the CVM) and derives 
+
+M = Mpvt Mpub .
+
+It forms ˆE = E + M and outsources ˆE. After re-ceiving ˆO = ˆEW , the CVM restores the plaintext result using only local secrets: 
+
+O = ˆO − M W = ˆO − Mpvt Rpub . (1) 
+
+Security hooks for later analysis. Eq. (1) keeps 
+
+M and W in separate trust boundaries, supporting: • Data confidentiality (Sec. 5.1): Each token uses a fresh, full-space mask (instantiated via a pseudorandom generator (PRG) inside the CVM), matching Def. 1.Additive masking gives the quantitative bound in Thm. 1. • Model confidentiality (Sec. 5.2): With m < d, Rpub = Mpub W leaves a nontrivial right-kernel, so recovering W from (Mpub , R pub )
+
+is information-theoretically impossible. 
+
+Practical notes. Rpub is prepared once per opera-tion W and reused across tokens; Mpvt is sampled per token to ensure freshness. The KV cache is private and persists only inside the CVM. 
+
+4.5 Security Challenge and Threat Focus 
+
+Outsourcing weighted decoding naively exposes E
+
+to a cloud adversary A, enabling prompt/response inversion X′ ← A (E) with X′ ≈ X. ReMO with hybrid masking removes this leakage by ensuring the GPU only ever sees masked tensors and never receives enough information to infer M (or undo it), while the CVM never obtains W .
+
+5 Privacy Guarantee Analysis 
+
+5.1 Data Confidentiality Adversary and domain. We protect client prompts and responses against an “honest-but-curious” cloud that may adaptively query the pro-tocol and analyze all public transcripts. We treat intermediate embeddings E ∈ Rn×d under a fixed, deterministic quantization into a finite ring (e.g., 
+
+Z2k ) so that masking and indistinguishability are defined over a finite domain. All results extend to reals via standard discretization arguments. 
+
+Mask generation and freshness. For each de-coding step (per token), the CVM samples a fresh, ephemeral private matrix Mpvt ∈ Rn×m and forms an additive mask M = Mpvt Mpub using a public base Mpub ∈ Rm×d established during setup. The mask is applied entrywise: ˆE = E +M . Freshness (single-use) and full-space randomness ensure the masked distribution does not concentrate on any known low-dimensional subspace. 
+
+Definition 1 (Computational indistinguishability) .
+
+Let A be any PPT adversary with access to all public auxiliary information Z (including proto-col transcripts and Mpub ). For any two inputs 
+
+E1, E 2 ∈ Rn×d with corresponding masked ver-sions ˆE1, ˆE2, the distinguishing advantage is 
+
+Pr[ A( ˆE1, Z ) = 1] − Pr[ A( ˆE2, Z ) = 1] 
+
+≤ ε(κ, q ), (2) 
+
+where κ is the security parameter of PRG used to derive masks and q is the number of masked samples observed. If ε is negligible in κ for any polynomially bounded q, the scheme is privacy-preserving. Instantiation in Talaria. Within the CVM, masks are derived from a PRG keyed by a secret seed of length κ; conditioned on Z, the mask distribution is computationally indistinguishable from uniform over the ring (Appx. B.2). Because a fresh mask is used per token, the cloud cannot correlate observa-tions across steps to reduce uncertainty. 
+
+Quantitative information-theoretic bound. Be-yond computational security, the masking admits an information-theoretic guarantee that depends only on signal magnitude versus mask range. 
+
+Theorem 1 (Information-theoretic bound) . Let 
+
+e = vec( E) ∈ RN with N = nd . Suppose the mask has i.i.d. coordinates mi ∼ Unif[ −λ/ 2, λ/ 2] 
+
+and ˆeb = eb + m for b ∈ { 1, 2}. Then the opti-mal adversary (with unbounded computation) that observes ˆe satisfies 
+
+Pr[ correctly distinguish E1 from E2 | ˆe]
+
+≤ 12 + 12 min 
+
+ ∥e1 − e2∥1
+
+λ , 1
+
+
+
+. (3) 
+
+Implications for parameterization. The distinguish-ing advantage scales as (effective) signal over mask 5range. Choosing λ so that ∥e1 − e2∥1/λ is negli-gible for inputs drawn from the task distribution makes the optimal success probability arbitrarily close to 1/2. Practically, one can upper-bound 
+
+∥e1 − e2∥1 via sensitivity estimates of the embed-ding map and set λ with a safety margin to cover worst-case layers/tokens (Appx. B.3). 
+
+5.2 Model Confidentiality Goal. Prevent a curious client from recovering proprietary weights W ∈ Rd×d.
+
+Mathematical isolation. The client observes only the linearly transformed Rpub = Mpub W
+
+with Mpub ∈ Rm×d and m < d. Since 
+
+rank( Mpub ) ≤ m < d , the right null space is nontrivial, dim(ker( Mpub )) ≥ d − m > 0, and 
+
+{W ′ : Mpub W ′ = Rpub } = (4) 
+
+W0 + {Z : each column of Z ∈ ker( Mpub )}.
+
+Thus the feasible set is an affine subspace of posi-tive dimension (infinitely many candidates), mak-ing unique recovery of W information-theoretically impossible. Here ker( M ) = {v ∈ Rd : M v = 0 }.
+
+System-level hardening. We enforce remote attes-tation of the CVM image and restrict its capabilities to the minimal Talaria logic: no debug hooks, no general linear-algebra toolkits exposing arbitrary solves, and no interfaces that could be repurposed to probe Rpub beyond its intended use. Attestation binds code and configuration to a hash verified by the cloud, preventing a curious client from modi-fying the CVM to mount offline model-recovery oracles. See Appx. B.4 for formal proofs. 
+
+6 Evaluations 
+
+6.1 Evaluation Setup 
+
+All evaluations are conducted on a cloud node with 8 Nvidia H800 with 80GB of memory, 10 AMD EPYC processor cores, and 6400 GB of sys-tem memory. We enable security features such as AMD SEV-SNP (AMD, 2023) and NVIDIA GPU CC (Nvidia, 2023) for evaluations that require confidential computing. Detailed evaluation setup (datasets, metrics, etc.) can be found in Appx. C.1. 
+
+Datasets and models. We evaluate Talaria on four diverse datasets: Midjourney prompts (AI, 2024), WikiText-2 (Merity et al., 2017), Patient-notes (Ha et al., 2022), and GPT-OSS20B-samples (Morris, 2025). To simulate our threat model, we use 20% of each dataset as private client prompts and allow the remaining 80% to be used for training attack models. Our experiments leverage models from the Llama3 (1B, 8B, 70B) (Meta, 2025) and Qwen3 (0.6B, 8B, 32B) (Alibaba, 2025) families. By de-fault, we use Qwen3-8B for all evaluations unless stated otherwise. 
+
+Metrics. For protection evaluation, we use To-ken Reconstruction Accuracy (TRA) and Cosine Semantic Similarity (CSS). The higher the TRA and CSS, the higher the similarity between the two texts, which can reflect the higher accuracy of the token reconstruction attack. For efficiency evalua-tion, we use end-to-end latency and Time to First Token (TTFT). 
+
+Attacks. We validate our defense against three SOTA reconstruction attacks targeting in-termediate data: TokenInfer (Luo et al., 2025) (classification-based), TokenInv (Qu et al., 2025) (optimization-based), and SentenceInv (Gu et al., 2023) (generation-based). By default, we use To-kenInfer for most evaluations. According to Token-Infer, the reconstruction performance decreases as the number of layers increases. Therefore, in order to maximize the attack effect, we use the outputs of the first attention layer as the attack object. 
+
+Baselines. We first use No Protection and Full Iso-lation as the baseline, where the former is normal unprotected cloud inference and the latter is where each client loads a copy of the complete LLM into CVM for inference. Then we also use two SOTA defense mechanisms as baselines: SPD (Gim et al., 2024), Cape (Wu et al., 2025). 
+
+6.2 Protection Evaluations 
+
+We assess data privacy protection along two di-mensions: input prompts and output responses. To facilitate comparison of metrics, we set the maxi-mum number of output tokens per request to 100. Additional evaluations can be found at Appx. C.2. 
+
+Comparison with baselines. We evaluate the pro-tection performance of Talaria against several base-lines, with results summarized in Tbl. 2. No Pro-tection highlights the severe privacy risk, as an ad-versary can infer both prompts and responses with near-perfect accuracy (avg. TRA > 97.5% and avg. CSS > 0.95). This demonstrates that without pro-tecting the intermediate data, the cloud can easily infer the private prompt and response. While exist-ing methods like Cape offer limited mitigation, they remain largely vulnerable. Another baseline, SPD, effectively protects prompts by processing the pre-fill phase within the CVM. However, this approach has a critical flaw: it exposes confidential model 6Attack Target Methods Midjourney WikiText2 Patient GPT-samples                                                         
+
+> Prompt
+> No Protection 96.87% 0.9352 97.21% 0.9444 98.64% 0.9834 97.53% 0.9421 Cape 85.25% 0.8824 84.55% 0.8984 84.12% 0.9023 85.89% 0.8334 Talaria 1.24% 0.4876 0.47% 0.4299 1.53% 0.5012 2.11% 0.4535 Response
+> No Protection 97.53% 0.9326 97.54% 0.9401 97.28% 0.9885 97.68% 0.9456 Cape 85.53% 0.8921 84.65% 0.8906 84.64% 0.9005 86.10% 0.8389 SPD 97.16% 0.9344 96.87% 0.9375 98.76% 0.9903 97.24% 0.9413 Talaria 1.08% 0.4724 0.38% 0.4242 1.58% 0.4980 1.97% 0.4463
+> Table 2: Effectiveness of different methods in defending against TokenInfer attack. Bold: TRA. Gray: CSS. Shaded cells highlight the best protection.
+
+weights to the client. Furthermore, SPD leaves the generated response completely unprotected, as in-termediate data during the decoding phase is trans-mitted in plaintext, leading to similarly high at-tack success rates (avg. TRA: 97.51%, avg. CSS: 0.9509). In stark contrast, Talaria provides robust protection across the board. It slashes the aver-age TRA for prompt inference from 97.56% to just 1.34% and for response inference from 97.51% to 1.25%. Similarly, CSS plummets from over 0.95 to under 0.47. These results demonstrate that Talaria effectively defends inference attacks, rendering the recovery of private tokens nearly impossible. 
+
+Different LLMs. To assess the generalizability of our approach, we evaluate Talaria across a diverse set of models with varying architectures and param-eter scales. As shown in Tbl. 3, Talaria consistently delivers strong protection for both client prompts and model responses, demonstrating its robustness and broad applicability.                             
+
+> Attack Target Models TRA CSS
+> Prompt Qwen3 0.6B 1.56% 0.4573 8B 1.24% 0.4876 32B 1.43% 0.4753 Llama3 1B 1.46% 0.4323 8B 1.39% 0.4632 70B 1.57% 0.4553 Response Qwen3 0.6B 1.34% 0.4326 8B 1.08% 0.4724 32B 1.21% 0.4683 Llama3 1B 0.89% 0.4521 8B 1.15% 0.4646 70B 0.78% 0.4328
+> Table 3: The effectiveness of Talaria in defending against TokenInfer attack under different model struc-tures and parameters (Midjourney dataset).
+
+Different Attacks. To rigorously assess its secu-rity, we evaluate Talaria against three SOTA attacks: TokenInfer, TokenInv, and SentenceInv. Against TokenInfer, the most potent of the three, Talaria proves exceptionally effective, reducing the aver-age TRA to a mere 1.16% and the average CSS to 0.48. Our approach is similarly successful in thwarting TokenInv. Furthermore, Talaria effec-tively defends against SentenceInv, a prompt-only reconstruction attack for which TRA is not an ap-plicable metric. These results demonstrate that Talaria provides comprehensive protection against a diverse range of sophisticated attacks. 
+
+Attack Target Attacks TRA CSS 
+
+Prompt TokenInfer 1.24% 0.4876 TokenInv 0.45% 0.3893 SentenceInv - 0.4435 Response TokenInfer 1.08% 0.4724 TokenInv 0.56% 0.3954 SentenceInv - - 
+
+> Table 4: The effectiveness of Talaria in defending against different attacks (Midjourney dataset).
+
+6.3 Efficiency Evaluations 
+
+Our evaluation setup includes 1 to 32 clients, each of whom randomly selects 10 prompts from the Midjourney dataset. For ease of comparison, we fix the number of output tokens to 100. Finally, we calculate the average efficiency metrics. 
+
+Number of clients. Full Isolation requires a sepa-rate LLM instance for each CVM. When the num-ber of concurrent clients increases, the operating system and GPU driver must perform expensive context switches. Therefore, as shown in Fig. 5a, the end-to-end latency curve of Full Isolation rises sharply with the number of clients. Compared with the SPD mechanism, Talaria achieves better scala-bility because the SPD mechanism needs to infer multiple virtual prompts simultaneously to protect client privacy, which increases the memory usage. 70 5 10 15 20 25 30 
+
+> Number of clients
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> 30
+> End-to-end latency (s)  No Protection Full Isolation Cape SPD Ours
+
+(a) End-to-end latency with varying num-ber of clients. Qwen3-0.6B Qwen3-8B Qwen3-32B 
+
+> Models
+> 0
+> 10
+> 20
+> 30
+> 40
+> End-to-end latency (s)  No Protection Full Isolation Cape SPD Ours
+
+(b) End-to-end latency with different model parameters. (10 clients) 64 128 256 
+
+> Number of input tokens
+> 0
+> 50
+> 100
+> 150
+> 200
+> 250
+> 300
+> TTFT (ms)
+> No Protection Full Isolation Cape SPD Ours
+
+(c) TTFT with varying number of input tokens. (10 clients) 
+
+Figure 5: Efficiency Evaluation. 
+
+Compared to these two CVM-based approaches, Talaria demonstrates superior scalability by main-taining lower end-to-end latency as the number of concurrent clients grows. 
+
+Size of model parameters. As model size grows, all methods exhibit increased end-to-end latency (Fig. 5b). Compared with Full Isolation and SPD, Talaria is less affected by the expansion of parame-ter scale. Intuitively, Talaria confines weight-free operations to the CVM and outsources weight-dependent multiplications efficiently, avoiding the per-client model duplication and heavy context switching costs that penalize Full Isolation , as well as the additional overheads present in SPD. Ta-laria maintains robust token generation speed under larger models, delivering lower latency growth than 
+
+Full Isolation and SPD as parameter scale expands. 
+
+Number of input tokens. Fig. 5c shows the change of TTFT as the number of input tokens increases (64 →256). TTFT increases for all methods, but the growth is particularly steep for Cape, whose core routine computes contextual logits for every input token. Unlike No Protection , the three CVM-based designs ( Full Isolation , SPD, and Talaria) cannot amortize prefill via multi-client batching because each request must run inside an isolated CVM, which inherently raises TTFT as inputs lengthen. Even under this constraint, Talaria consistently de-livers the lowest TTFT among secure baselines and exhibits the mildest growth with respect to input length, yielding a faster first token–especially for long prompts. Talaria preserves strong isolation while keeping prefill latency close to the practical minimum for CVM-based schemes, thus offering the fastest initial response among secure methods as input tokens scale. 
+
+6.4 Output Invariance Evaluations. 
+
+We assess whether Talaria preserves the exact func-tional behavior of the LLM by generating paired responses with and without Talaria under an identi-cal decoding setup (same model, tokenizer, fixed random seed, and deterministic sampler). We then compare the paired outputs using TRA and CSS, which respectively measure token-level identity and semantic equivalence. As detailed in Tbl. 5, Ta-laria achieves TRA=100% and CSS=1.00 for each dataset, indicating bit-for-bit identical responses relative to No Protection . These results empiri-cally validate the losslessness of ReMO and local restoration pipeline and confirm that Talaria pre-serves output quality without perturbation and then satisfies the performance of the “impossible trinity” by guaranteeing output invariance while adding pri-vacy protection. Additional invariance evaluations can be found in Appx. C.3.             
+
+> Metrics Midjourney WikiText2 Patient GPT-samples
+> TRA 100% 100% 100% 100% CSS 1.00 1.00 1.00 1.00
+
+Table 5: The changes in response before and after using Talaria. 
+
+7 Conclusion 
+
+We introduced Talaria, a confidential inference framework for cloud-based LLMs by partition-ing the inference pipeline and leveraging CVMs and the ReMO protocol. Empirically, Talaria cuts reconstruction success to near-negligible levels across models, datasets, and attacks, while pre-serving bit-for-bit outputs and competitive latency. To the best of our knowledge, the first to keep both prompts and responses confidentiality while bal-ancing model privacy, performance, and efficiency. 8Limitations 
+
+The limitations of this work mainly include the following two aspects: 
+
+Threat Scenario. We adopt the standard honest-but-curious setting: the cloud provider executes the protocol correctly but may analyze observed artifacts to infer private information. This as-sumption is reasonable for cloud LLM services because ① providers are economically and reputa-tionally incentivized to follow deployed protocols, making arbitrary deviation unlikely in practice; ②
+
+confidential-computing primitives (e.g., CVM at-testation and capability scoping) already constrain what either party can do while still enabling rou-tine operations; and ③ it aligns with the dominant threat model used in prior confidential-inference work (Gim et al., 2024; Wu et al., 2025) and in our system design. Under this setting, our guaran-tees are testable, and the resulting system remains practical to deploy at scale. We do not defend against a fully malicious or compromised cloud provider that can arbitrarily de-viate from the protocol (e.g., returning malformed messages or bypassing attested images). Defend-ing against such adversaries would require stronger mechanisms (e.g., verifiable execution, runtime au-diting, or side-channel–resilient defenses), which we leave to future work. 
+
+Partial model protection. Talaria does not attempt to hide the entire model implementation from the client. Instead, it prioritizes weight confidential-ity : proprietary weight parameters remain on the cloud side, while weight-free operators (e.g., nor-malization, attention scoring/softmax, residual con-nections, and sampling) are executed within the CVM. This choice is deliberate and reasonable. In contemporary LLM stacks, the structure of these operators is largely standardized and often public, whereas the learned weight matrices encode the provider’s core intellectual property and present the primary model-extraction risk. By keeping all weight-dependent computations on the cloud provider’s hardware and exposing only weight-free control flow, the client may observe the computa-tion pattern but not the parameters. Moreover, visibility into non-weight operators does not enable parameter recovery under our pro-tocol. The client observes at most a fixed, under-determined sketch Rpub = Mpub W with m < d ,leaving a non-trivial right kernel and thus infinitely many W consistent with the observation; without additional side information, the true weights are non-identifiable. In contrast, fully obscuring every non-weight detail would require heavy obfusca-tion or cryptography, undermining our efficiency and output-invariance goals. Prioritizing weight confidentiality therefore strikes a practical balance among privacy, performance, and scalability, yield-ing bit-for-bit identical outputs while protecting the provider’s proprietary parameters. 
+
+References       
+
+> Succinctly AI. 2024. Datasets: succinctly/midjourney-prompts. Accessed: 2025-08-04. Alibaba. 2025. Qwen 3. Accessed: 2025-08-04. AMD. 2023. Amd secure encrypted virtualization (sev). Accessed: 2025-08-18. AWS. 2025. Aws confidential computing. Accessed: 2025-09-21. Azure. 2025. Azure confidential gpu options. Accessed: 2025-09-21. Christopher Bissex. 2025. Ftc launches inquiry into ai chatbots acting as companions. Accessed: 2025-09-21. Giles Bruce. 2023. Iowa health system warns against using chatgpt to draft patient letters. Accessed: 2025-07-02. Brian Bushard. 2023. Workers’ chatgpt use restricted at more banks—including goldman, citigroup. Ac-cessed: 2025-07-02. Yu Chen, Tingxin Li, Huiming Liu, and Yang Yu. 2023. Hide and seek (has): A lightweight framework for prompt privacy protection. CoRR , abs/2309.03057. Gheorghe Comanici, Eric Bieber, Mike Schaekermann, Ice Pasupat, Noveen Sachdeva, Inderjit S. Dhillon, Marcel Blistein, Ori Ram, Dan Zhang, Evan Rosen, Luke Marris, Sam Petulla, Colin Gaffney, Asaf Aha-roni, Nathan Lintz, Tiago Cardal Pais, Henrik Ja-cobsson, Idan Szpektor, Nan-Jiang Jiang, and 81 others. 2025. Gemini 2.5: Pushing the frontier with advanced reasoning, multimodality, long con-text, and next generation agentic capabilities. CoRR ,abs/2507.06261. Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019. BERT: pre-training of deep bidirectional transformers for language under-standing. In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Tech-nologies, NAACL-HLT 2019, Minneapolis, MN, USA, June 2-7, 2019, Volume 1 (Long and Short Papers) ,pages 4171–4186. Association for Computational Linguistics.
+
+9Cynthia Dwork. 2006. Differential privacy. In Au-tomata, Languages and Programming, 33rd Inter-national Colloquium, ICALP 2006, Venice, Italy, July 10-14, 2006, Proceedings, Part II , volume 4052 of Lecture Notes in Computer Science , pages 1–12. Springer. Paul Farrell. 2023. Jpmorgan restricts chatgpt usage for its 250k staff over fears it could steal sensitive banking secrets. Accessed: 2025-07-02. Edoardo Federici. 2022. sentence-bert-base, sentence-transformer for italian. In Gim, Caihua Li, and Lin Zhong. 2024. Confidential prompting: Protecting user prompts from cloud LLM providers. CoRR , abs/2409.19134. Google. 2025. Google cloud confidential computing. Accessed: 2025-09-21. Kang Gu, Ehsanul Kabir, Neha Ramsurrun, Soroush Vosoughi, and Shagufta Mehnaz. 2023. Towards sentence level inference attack against pre-trained language models. Proc. Priv. Enhancing Technol. ,2023(3):62–78. Le An Ha, Maggie, Ryan Holbrook, and Victoria Yaneva. 2022. Nbme - score clinical patient notes. Accessed: 2025-08-18. Lucjan Hanzlik, Yang Zhang, Kathrin Grosse, Ahmed Salem, Maximilian Augustin, Michael Backes, and Mario Fritz. 2021. Mlcapsule: Guarded offline de-ployment of machine learning as a service. In IEEE Conference on Computer Vision and Pattern Recog-nition Workshops, CVPR Workshops 2021, virtual, June 19-25, 2021 , pages 3300–3309. Computer Vi-sion Foundation / IEEE. Junyuan Hong, Jiachen T. Wang, Chenhui Zhang, Zhangheng Li, Bo Li, and Zhangyang Wang. 2024. DP-OPT: make large language model your privacy-preserving prompt engineer. In The Twelfth Inter-national Conference on Learning Representations, ICLR 2024, Vienna, Austria, May 7-11, 2024 . Open-Review.net. Zhicong Huang, Wen-jie Lu, Cheng Hong, and Jian-sheng Ding. 2022. Cheetah: Lean and fast se-cure two-party deep neural network inference. In 
+
+31st USENIX Security Symposium, USENIX Security 2022, Boston, MA, USA, August 10-12, 2022 , pages 809–826. USENIX Association. Taegyeong Lee, Zhiqi Lin, Saumay Pushp, Caihua Li, Yunxin Liu, Youngki Lee, Fengyuan Xu, Chenren Xu, Lintao Zhang, and Junehwa Song. 2019. Occlu-mency: Privacy-preserving remote deep-learning in-ference using SGX. In The 25th Annual International Conference on Mobile Computing and Networking, MobiCom 2019, Los Cabos, Mexico, October 21-25, 2019 , pages 46:1–46:17. ACM. Sam Lin, Wenyue Hua, Zhenting Wang, Mingyu Jin, Lizhou Fan, and Yongfeng Zhang. 2025a. Emo-jiprompt: Generative prompt obfuscation for privacy-preserving communication with cloud-based llms. In 
+
+Proceedings of the 2025 Conference of the Nations of the Americas Chapter of the Association for Compu-tational Linguistics: Human Language Technologies, NAACL 2025 - Volume 1: Long Papers, Albuquerque, New Mexico, USA, April 29 - May 4, 2025 , pages 12342–12361. Association for Computational Lin-guistics. Yu Lin, Ruining Yang, Yunlong Mao, Qizhi Zhang, Jue Hong, Quanwei Cai, Ye Wu, Huiqi Liu, Zhiyu Chen, Bing Duan, and Sheng Zhong. 2025b. Ob-fuslm: Privacy-preserving language model service against embedding inversion attacks. In Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), ACL 2025, Vienna, Austria, July 27 - August 1, 2025 ,pages 1160–1174. Association for Computational Linguistics. Xuanqi Liu and Zhuotao Liu. 2023. Llms can under-stand encrypted prompt: Towards privacy-computing friendly transformers. CoRR , abs/2305.18396. Ilya Loshchilov and Frank Hutter. 2019. Decoupled weight decay regularization. In 7th International Conference on Learning Representations, ICLR 2019, New Orleans, LA, USA, May 6-9, 2019 . OpenRe-view.net. Jinglong Luo, Guanzhong Chen, Yehong Zhang, Shiyu Liu, Hui Wang, Yue Yu, Xun Zhou, Yuan Qi, and Zenglin Xu. 2024. Centaur: Bridging the impossi-ble trinity of privacy, efficiency, and performance in privacy-preserving transformer inference. CoRR ,abs/2412.10652. Xinjian Luo, Ting Yu, and Xiaokui Xiao. 2025. Prompt inference attack on distributed large language model inference frameworks. CoRR , abs/2503.09291. LégisQuébec. 2021. Act respecting the protection of personal information in the private sector. Accessed: 2025-09-21. Laura Martinez. 2024. Advancing security for large lan-guage models with nvidia gpus and edgeless systems. Accessed: 2025-09-21. Stephen Merity, Caiming Xiong, James Bradbury, and Richard Socher. 2017. Pointer sentinel mixture mod-els. In 5th International Conference on Learning Representations, ICLR 2017, Toulon, France, April 24-26, 2017, Conference Track Proceedings . Open-Review.net. Meta. 2025. Llama 3. Accessed: 2025-08-04. Jack Morris. 2025. jxm/gpt-oss20b-samples. Accessed: 2025-08-18. Nvidia. 2023. Nvidia confidential computing. Ac-cessed: 2025-08-18. 
+
+10 OpenAI. 2025a. Gpt-5 system card. Accessed: 2025-08-18. OpenAI. 2025b. Gpt-oss-120b & gpt-oss-20b model card. Preprint , arXiv:2508.10925. Elvira Pollina and Alvise Armellini. 2024. Italy fines openai over chatgpt privacy rules breach. Accessed: 2025-09-21. Wenjie Qu, Yuguang Zhou, Yongji Wu, Tingsong Xiao, Binhang Yuan, Yiming Li, and Jiaheng Zhang. 2025. Prompt inversion attack against collaborative infer-ence of large language models. In IEEE Symposium on Security and Privacy, SP 2025, San Francisco, CA, USA, May 12-15, 2025 , pages 1695–1712. IEEE. Mark Russinovich. 2024. Azure ai confidential infer-encing: Technical deep-dive. Accessed: 2025-09-21. Fabian Schwarz and Christian Rossow. 2024. 00seven -re-enabling virtual machine forensics: Introspecting confidential vms using privileged in-vm agents. In 
+
+33rd USENIX Security Symposium, USENIX Security 2024, Philadelphia, PA, USA, August 14-16, 2024 .USENIX Association. Michael Schwarz, Samuel Weiser, Daniel Gruss, Clé-mentine Maurice, and Stefan Mangard. 2020. Mal-ware guard extension: abusing intel SGX to conceal cache attacks. Cybersecur. , 3(1):2. Sagar Sharma and Keke Chen. 2021. Confidential ma-chine learning on untrusted platforms: a survey. Cy-bersecur. , 4(1):30. Qwen Team. 2025. Qwen3 technical report. Preprint ,arXiv:2505.09388. Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin. 2017. Attention is all you need. In Advances in Neural Information Pro-cessing Systems 30: Annual Conference on Neural Information Processing Systems 2017, December 4-9, 2017, Long Beach, CA, USA , pages 5998–6008. Ben Wolford. 2025. Data protection impact assessment (dpia). Accessed: 2025-09-21. Haoqi Wu, Wei Dai, Li Wang, and Qiang Yan. 2025. Cape: Context-aware prompt perturba-tion mechanism with differential privacy. CoRR ,abs/2505.05922. Tong Wu, Ashwinee Panda, Jiachen T. Wang, and Pra-teek Mittal. 2024. Privacy-preserving in-context learning for large language models. In The Twelfth International Conference on Learning Representa-tions, ICLR 2024, Vienna, Austria, May 7-11, 2024 .OpenReview.net. Kaiping Xue, Weikeng Chen, Wei Li, Jianan Hong, and Peilin Hong. 2018. Combining data owner-side and cloud-side access control for encrypted cloud storage. 
+
+IEEE Trans. Inf. Forensics Secur. , 13(8):2062–2074. Ziqian Zeng, Jianwei Wang, Zhengdong Lu, Huip-ing Zhuang, and Cen Chen. 2024. Privacyrestore: Privacy-preserving inference in large language mod-els via privacy removal and restoration. CoRR ,abs/2406.01394. Biao Zhang and Rico Sennrich. 2019. Root mean square layer normalization. In Advances in Neural Information Processing Systems 32: Annual Confer-ence on Neural Information Processing Systems 2019, NeurIPS 2019, December 8-14, 2019, Vancouver, BC, Canada , pages 12360–12371. 
+
+A Notations 
+
+We summarize all the notations used in this paper in Tbl. 6. 
+
+B Additional Method Details 
+
+B.1 Pseudocode Implementation 
+
+The confidential inference process of Talaria is de-scribed as Alg. 1. 
+
+Algorithm 1 Pseudocode of Talaria.                                               
+
+> Input: client prompt X.
+> Output: model response.
+> Phase 1: One-time setup
+> Initialize Mpub [CVM]
+> Rpub ←Mpub W[Cloud]
+> Phase 2: Decoding
+> Xnew ←X
+> while Xnew ̸=EOS do
+> Initialize Mpvt [CVM]
+> R←Mpvt Rpub [CVM]
+> M←Mpvt Mpub [CVM]
+> E1←EMBEDDING (Xnew )[CVM]
+> for i= 1 to kdo
+> ˆEi←MASK (M, E i)[CVM]
+> ˆOi←WEIGHTED DEC ( ˆEi, W i)[Cloud]
+> Oi←RECOVER ( ˆOi, R )[CVM]
+> Ei+1 ←STRUCTURAL DEC (Oi)[CVM]
+> end for
+> Xnew ←SAMPLE (Ek)[CVM]
+> end while
+
+B.2 Theoretical Analysis of Def. 1 
+
+This section provides a theoretical foundation for Def. 1, which establishes the privacy guarantee of Talaria based on the standard cryptographic con-cept of computational indistinguishability. This principle is a cornerstone of modern cryptography, used to formally define the security of primitives such as pseudorandom generators and encryption schemes. 
+
+The indistinguishability game. The notion of computational indistinguishability is captured via a security game between a challenger and a Proba-bilistic Polynomial-Time (PPT) adversary A:11 Notation Description 
+
+X Client prompt (token sequence). 
+
+E ∈ Rn×d Intermediate embedding matrix (sequence length n, hidden dimension d). 
+
+W ∈ Rd×d Proprietary model weight matrix (linear projection). 
+
+O = EW True weighted result of applying weights. 
+
+ˆE = E + M Masked embedding after additive mask M .
+
+ˆO = ˆEW Masked weighted output computed by the cloud. 
+
+M ∈ Rn×d Additive mask matrix sampled per token. 
+
+Mpub ∈ Rm×d Public base mask ( m < d ) generated in setup. 
+
+Rpub = Mpub W Pre-multiplied restoration pool returned to CVM. 
+
+Mpvt ∈ Rn×m Ephemeral private mixing matrix, sampled per token. 
+
+M = Mpvt Mpub Full mask derived from public and private parts. 
+
+R = Mpvt Rpub Restoration term used to recover O.
+
+O = ˆO − R Local recovery of the true weighted result. 
+
+EOS End-of-sequence token for decoding termination. 
+
+k Number of decoding layers. 
+
+A Probabilistic polynomial-time adversary. 
+
+D0, D1 Two probability distributions in indistinguishability game. 
+
+Z Public auxiliary information (e.g., protocol transcript, Mpub ). Adv (A) Distinguishing advantage of adversary A.
+
+ε(κ, q ) Negligible bound in computational indistinguishability, depends on security parameter κ and query count q.
+
+κ Security parameter (PRG seed length). 
+
+q Number of masked samples observed by adversary. 
+
+∥ · ∥ 1, ∥ · ∥ ∞ ℓ1 norm, ℓ∞ norm (used in bounds). 
+
+ker( M ) Kernel (null space) of matrix M , i.e., {v ∈ Rd : M v = 0 }.
+
+DTV Total variation distance between two distributions. 
+
+λ Range parameter of uniform mask distribution. 
+
+e = vec( E) ∈ RN Vectorized embedding, N = nd .TRA Token Reconstruction Accuracy (attack metric). CSS Cosine Semantic Similarity (attack metric). TTFT Time to First Token (efficiency metric). 
+
+Table 6: Summary of notations used in the paper. 
+
+1. Setup: The game is defined over two proba-bility distributions, D0 and D1. The adversary, 
+
+A, is aware of these two distributions. 2. Challenge: The challenger secretly flips a fair coin, choosing a bit b ∈ { 0, 1}. It then samples a value v from the distribution Db
+
+(i.e., v ∼ D b) and sends v to the adversary. 3. Adversary’s Goal: Upon receiving v, the ad-versary A must guess the original bit b. It outputs a guess, b′.The adversary wins the game if its guess is cor-rect ( b′ = b). An adversary with no information can do no better than guessing randomly, succeed-ing with a probability of 1/2. The advantage of an adversary is defined as how much better than random guessing it can perform. Adv (A) = Pr[ b′ = b] − 12
+
+The two distributions, D0 and D1, are said to be computationally indistinguishable if the advantage of any PPT adversary is negligible –that is, smaller than any inverse polynomial in the security param-eter. The formula presented in Def. 1 is an equivalent and widely used formulation of this concept. Let 
+
+A(v) be the output of the adversary on input v. We can normalize the adversary’s output to be either 0 or 1. Let’s say A outputs 1 when it guesses the sample came from D1, and 0 otherwise. The probability of the adversary guessing correctly can be expanded as: 
+
+Pr[ b′ = b] = Pr[ b′ = 1 | b = 1] Pr[ b = 1] + Pr[ b′ = 0 | b = 0] Pr[ b = 0] = 12
+
+
+
+Pr[ A(v, Z ) = 1 | v ∼ D 1]+ Pr[ A(v, Z ) = 0 | v ∼ D 0]
+
+
+
+= 12
+
+
+
+Pr 
+
+> v∼D 1
+
+[A(v, Z ) = 1] +  1 − Pr 
+
+> v∼D 0
+
+[A(v, Z ) = 1] 
+
+Now, we can substitute this into the advantage for-12 mula: Adv (A) = 12
+
+
+
+Pr 
+
+> v∼D 1
+
+[A(v, Z ) = 1] + 1 − Pr 
+
+> v∼D 0
+
+[A(v, Z ) = 1] 
+
+
+
+− 12
+
+= 12 Pr 
+
+> v∼D 1
+
+[A(v, Z ) = 1] 
+
+− 12 Pr 
+
+> v∼D 0
+
+[A(v, Z ) = 1] 
+
+= 12 Pr 
+
+> v∼D 1
+
+[A(v, Z ) = 1] 
+
+− Pr 
+
+> v∼D 0
+
+[A(v, Z ) = 1] 
+
+The formula in Def. 1 is: 
+
+| Pr[ A( ˆE1, Z ) = 1] − Pr[ A( ˆE2, Z ) = 1] | < ϵ 
+
+Here, ˆE1 is a sample from the distribution of masked embeddings derived from input E1, and 
+
+ˆE2 is a sample from the distribution derived from input E2. This expression is exactly twice the ad-versary’s advantage. Since a negligible function multiplied by a constant remains negligible, this formulation is cryptographically equivalent. It di-rectly measures the difference in the adversary’s behavior when presented with samples from the two worlds, which is the essence of distinguishabil-ity. 
+
+Instantiation for Talaria. In our setting, the two distributions correspond to masked embeddings: • D1: ˆE1 = Mask (E1),• D2: ˆE2 = Mask (E2),where Mask (·) is a randomized masking transfor-mation applied to the intermediate embedding ma-trix E. To ensure soundness, the mask must satisfy two conditions: 1. Freshness: A fresh independent mask is sam-pled for each instance (e.g., per token). 2. Full-rank randomness: The distribution of masks must not confine noise to a publicly known low-dimensional subspace. Otherwise, the adversary could project onto the orthog-onal complement and recover information about E exactly. To prevent this leakage, the mask must span the full ambient space, e.g., via additive pads sampled from a pseudoran-dom generator (PRG) over a fixed modulus or via two-sided linear masking with secret invertible matrices. In all cases, masking is performed element-wise over a fixed ring (e.g., Z2k after deterministic quan-tization of E), so that arithmetic and indistinguisha-bility are defined over a finite domain. 
+
+Security guarantee. Formally, Def. 1 states that for all PPT adversaries A, for any two inputs 
+
+E1, E 2, and for any public auxiliary information Z
+
+(including protocol transcripts and public parame-ters), 
+
+Pr[ A( ˆE1, Z ) = 1] −Pr[ A( ˆE2, Z ) = 1] ≤ ε(κ, q )
+
+where κ is the security parameter (e.g., PRG key length), q is the number of masked samples ob-served by A (including adaptive/chosen-input in-teractions), and ε(κ, q ) is negligible in κ for any polynomially bounded q.This guarantee holds under the assumption that, conditioned on Z, the mask distribution is com-putationally indistinguishable from uniform over the chosen domain, i.e., masks are generated by a secure PRG keyed within the client’s trusted envi-ronment. 
+
+Interpretation. Intuitively, the masking acts like a one-time pad over the chosen ring: once an em-bedding E is combined with fresh pseudorandom noise that spans the full space, the resulting ˆE leaks negligible information about E. Therefore, even a PPT cloud adversary observing ˆE together with 
+
+Z cannot distinguish whether the input embedding originated from E1 or E2 with non-negligible ad-vantage. This formalizes the confidentiality guar-antee of Talaria. 
+
+B.3 Theoretical Analysis of Thm. 1 
+
+This section provides a formal derivation for the information-theoretic security bound presented in Thm. 1. The theorem quantifies the maximum prob-ability with which an adversary can distinguish between two inputs, E1 and E2, given only their masked versions. The analysis is “information-theoretic” because the resulting bound does not depend on the adversary’s computational power, but only on the statistical properties of the data and the masking mechanism. The core of the proof relies on bounding the total variation distance ( DT V ) between the probability distributions of the two possible masked outputs. 13 The adversary’s optimal advantage in any distin-guishing task is directly related to this statistical distance. 
+
+Preliminaries. We consider a game between a chal-lenger and an adversary A. The challenger chooses one of two inputs, E1 or E2, with equal probability ( 12 ). It then applies the random masking mecha-nism to produce a masked output ˆE = Eb + M ,where b ∈ { 1, 2} and M is a random mask. The adversary observes ˆE and must guess the original bit b.The optimal adversary’s probability of guessing correctly is given by: 
+
+Pr[ A succeeds ] = 12 + 12 DT V (P ˆE1 , P ˆE2 )
+
+where P ˆE1 and P ˆE2 are the probability distributions of the masked outputs corresponding to inputs E1
+
+and E2, respectively. The total variation distance for two continuous distributions with probability density functions (PDFs) p1(x) and p2(x) is de-fined as: 
+
+DT V (P1, P 2) = 12
+
+Z ∞−∞ 
+
+|p1(x) − p2(x)| dx 
+
+Our goal is to bound this distance for our additive masking scheme. 
+
+Derivation for a single dimension. To build intu-ition, let us first consider a single-dimensional case. Let the inputs be two scalars e1, e 2 ∈ R. The mask 
+
+m is a random variable. For analytical clarity, we model the mask as being drawn from a continuous uniform distribution over the range [−λ/ 2, λ/ 2] .The PDF of the mask, pm(z), is: 
+
+pm(z) = 
+
+( 1 
+
+> λ
+
+if z ∈ [−λ/ 2, λ/ 2] 0 otherwise The adversary observes ˆe = eb + m. The PDF of the observed value ˆe, conditioned on the original input being e1 or e2, is simply a shifted version of the mask’s PDF: 
+
+p1(x) = pm(x − e1) and p2(x) = pm(x − e2)
+
+We can now compute the total variation distance: 
+
+DT V (Pˆe1 , P ˆe2 )= 12
+
+Z ∞−∞ 
+
+|pm(x − e1) − pm(x − e2)| dx 
+
+The functions pm(x−e1) and pm(x−e2) represent two rectangular windows of height 1/λ and width 
+
+λ, centered at e1 and e2. The integral computes half the area of the symmetric difference between these two windows. The area of this symmetric difference is the sum of the areas of the two non-overlapping parts. Each of these parts has a width of |e1 −e2| and a height of 
+
+1/λ , provided that |e1 − e2| ≤ λ (i.e., the windows overlap). The total area of the symmetric difference is 2 × | e1 − e2| × 1 
+
+> λ
+
+.Substituting this into the DT V formula: 
+
+DT V (Pˆe1 , P ˆe2 ) = min 
+
+ 12
+
+
+
+2 · |e1 − e2|
+
+λ
+
+
+
+, 1
+
+
+
+= min 
+
+ |e1 − e2|
+
+λ , 1
+
+
+
+Thus if |e1 − e2| ≤ λ, the distance scales linearly; if |e1 − e2| > λ , the distributions are disjoint and 
+
+DT V = 1 .
+
+Generalization to multiple dimensions. Now let E ∈ Rn×d and vectorize it as e ∈ RN with 
+
+N = nd . Assume that the mask M has indepen-dent coordinates mi ∼ Unif[ −λ/ 2, λ/ 2] . Then the masked outputs ˆe1 and ˆe2 are uniform over two 
+
+N -dimensional boxes of width λ but shifted by 
+
+δ = e1 − e2. The total variation distance factorizes across coordinates: 
+
+DT V (Pˆe1 , P ˆe2 ) = 1 −
+
+> N
+
+Y
+
+> i=1
+
+max 
+
+
+
+1 − |δi| 
+
+> λ
+
+, 0
+
+
+
+Using the inequality 1 − Q
+
+> i
+
+(1 − ai) ≤ P 
+
+> i
+
+ai for 
+
+ai ∈ [0 , 1] , we obtain the upper bound: 
+
+DT V (Pˆe1 , P ˆe2 ) ≤ min 
+
+ ∥e1 − e2∥1
+
+λ , 1
+
+
+
+Thus, the adversary’s distinguishing advantage is controlled by the ℓ1 distance between the inputs relative to the masking range. 
+
+Final bound. Substituting into the adversary’s success probability yields: 
+
+Pr[ A correctly distinguishes E1 from E2 | ˆE]
+
+≤ 12 + 12 min 
+
+ ∥E1 − E2∥1
+
+λ , 1
+
+
+
+This establishes the bound stated in Thm. 1. The result shows that the privacy guarantee is strength-ened by increasing the masking range λ, and that the adversary’s advantage over random guessing vanishes as λ grows. 
+
+Remark on assumptions. The above derivation holds under the assumption that the mask entries 14 are independent uniform random variables. If the masking distribution is generated differently (e.g., via structured or low-rank randomness), the exact form of the bound must be adapted to that distribu-tion. In that case, the same total variation frame-work applies, but one must analyze the overlap of the induced distributions accordingly. 
+
+B.4 Theoretical Analysis of Model Confidentiality 
+
+This section provides a formal analysis of the mathematical guarantees that underpin Talaria’s model confidentiality, as introduced in the main paper. The core principle is to prevent a curi-ous client, who controls a CVM instance, from reverse-engineering the cloud’s proprietary model weights, W . This protection is achieved by struc-turing the interaction between the CVM and the public GPU as an underdetermined system of lin-ear equations, making the unique recovery of W
+
+information-theoretically impossible. 
+
+Problem formulation. During the one-time setup phase, the CVM receives a transformed version of the weight matrix: 
+
+Rpub = Mpub W
+
+where Mpub ∈ Rm×d is a publicly generated base mask, Rpub ∈ Rm×d is the published sketch, and 
+
+W ∈ Rd×d are the secret model weights. From the client’s perspective, Mpub and Rpub are known, while W is unknown. 
+
+Analysis as a system of linear equations. The matrix equation above can be decomposed into d
+
+independent systems of linear equations, one for each column of W . Let wj and rj be the j-th columns of W and Rpub , respectively. For each column j ∈ { 1, . . . , d }, we have the following system: 
+
+Mpub wj = rj
+
+In this system, the matrix Mpub is the coefficient matrix, wj is the vector of d unknown variables (the weights in that column), and rj is the known result vector. 
+
+Underdetermined constraint. The protocol en-forces m < d , so each system Mpub wj = rj is underdetermined. Since rank( Mpub ) ≤ m < d ,the null space is non-trivial, with 
+
+dim(ker( Mpub )) ≥ d − m > 0
+
+The notation ker( Mpub ) denotes the kernel (or null space) of a matrix Mpub , defined as 
+
+ker( Mpub ) = {x ∈ Rd : Mpub x = 0 }
+
+It represents the set of directions that are invisible to Mpub . If ker( Mpub ) is non-trivial, then any so-lution to Mpub x = b can be shifted by an element of ker( Mpub ) to produce another valid solution, yielding infinitely many possibilities. 
+
+Solution space. Each solution set has the affine form: 
+
+wj = wp + wh
+
+where wp is a particular solution (e.g., wp =
+
+M +pub rj with the Moore–Penrose pseudoinverse), and wh ∈ ker( Mpub ). Thus, infinitely many can-didate weight vectors are consistent with the ob-served data. 
+
+Proposition (Non-identifiability under no pri-ors). Let Sj = {wp + z : z ∈ ker( Mpub )} be the solution set for column wj . If no auxiliary con-straints on wj are available (i.e., the admissible set is Rd), then |S j | = ∞ and the true weight vec-tor is not uniquely identifiable. Uniqueness may arise only if additional side information restricts 
+
+Sj to a singleton (e.g., sparsity, low-rank priors, quantization). 
+
+Protocol constraints. To preserve confidentiality in practice, the following requirements are critical: 1. Fixed sketch per matrix. For each W , the cloud publishes a single Rpub = Mpub W
+
+with fixed Mpub . Re-issuing with linearly independent Mpub is disallowed, since stack-ing multiple sketches could collapse the null space. 2. CVM attestation and isolation. Although the CVM performs unmasking internally, the client cannot read intermediate tensors 
+
+(E, O = EW ); otherwise, by collecting enough input–output pairs, the client could solve EW = O and reconstruct W . Talaria relies on cloud-based attestation and runtime isolation to prevent such leakage. 3. Independent masking. Distinct, untied weight matrices (e.g., WQ, W K , W V , W O)must use independent masks Mpub to avoid cross-module linkability. 4. Domain specification. The analysis assumes real-valued arithmetic. If weights are repre-sented in finite rings (e.g., Z2k ), rank and null-space properties must be verified in that alge-braic domain. 15 Conclusion. The dimensionality constraint m < d guarantees that Mpub W alone does not uniquely determine W , ensuring non-identifiability under standard assumptions. Model confidentiality thus holds provided that (i) no additional independent sketches are revealed, (ii) clients cannot access intermediate tensors, and (iii) no strong structural priors on W are externally available. 
+
+C Additional Evaluations 
+
+C.1 Detailed Evaluation Setup C.1.1 Datasets 
+
+We use four representative datasets in our experi-ments: • Midjourney prompts (AI, 2024) is a dataset containing 246,381 natural language prompts for text-to-image service. • WikiText-2 (Merity et al., 2017) contains over 100 million tokens extracted from high-quality, curated Wikipedia articles. • Patient-notes (Ha et al., 2022) is a dataset con-taining 40,000 patient note history portions. • GPT-OSS20B-samples (Morris, 2025) dataset is a collection of 8,960,000 text samples generated from a version of OpenAI’s GPT-OSS20B model (OpenAI, 2025b). 
+
+C.1.2 Metrics 
+
+For defense evaluation, we use Token Reconstruc-tion Accuracy (TRA) and Cosine Semantic Simi-larity (CSS). TRA is formally defined as TRA = 
+
+> 1
+> |T tgt |
+
+P  
+
+> ti∈T tgt
+
+I(ˆ ti = ti) where I is the indicator function, T tgt represents the set of target tokens, and ˆti denotes the reconstructed token correspond-ing to ti. CSS first extracts semantic embeddings of both reconstructed and ground truth prompts using Sentence-BERT (Federici, 2022) and then calcu-lates their cosine similarity. Based on the prior work (Luo et al., 2025), a TRA greater than 40% is considered sufficient for plausible reconstruction. For efficiency evaluation, we use end-to-end la-tency and Time to First Token (TTFT). End-to-end latency measures the end-to-end time from when the client sends a prompt to when they receive the complete response. Time to first token measures the time from request arrival to the generation of the first output token. 
+
+C.1.3 Attacks 
+
+We validate our defense against three SOTA recon-struction attacks. 
+
+Classification-based attack. TokenInfer (Luo et al., 2025) reconstructs private tokens by inter-cepting the intermediate embeddings exchanged between devices in a distributed LLM framework. The core of the attack relies on the discovery that these intermediate embeddings form distinct clus-ters corresponding to their input tokens. The ad-versary trains a classification model to map the intercepted embeddings back to their original to-kens. The attack model is a multi-layer perceptron consisting of six layers. Layer normalization and ReLU activation functions are used between con-secutive layers. The training epochs for the attack model are 10. 
+
+Optimization-based attack. TokenInv (Qu et al., 2025) is divided into two stages: First, a con-strained optimization phase is used to recover a continuous embedding that is a close approxima-tion of the original prompt. Second, an adaptive discretization phase accurately converts this em-bedding back into discrete text tokens by using the activation data and semantic speculation from an-other LLM to improve accuracy and readability. The attack model is set as optimization learning rate to 0.1, constraint coefficient to 0.1, optimiza-tion iteration number to 1500, embedding-based candidate size to 10, and semantic-based candidate size to 10. 
+
+Generation-based attack. SentenceInv (Gu et al., 2023) trains a decoder model using a publicly avail-able dataset from the same domain as a private tar-get dataset. The decoder learns to reconstruct the original text from its sentence embeddings, which are generated by a pre-trained language model like BERT (Devlin et al., 2019). The adversary then uses this trained decoder on the private embeddings to reconstruct the original, sensitive sentences, re-vealing high-level semantic information. The at-tack model is an adversarial decoder, which inherits from the transformer architecture with 6 decod-ing layers and 8 heads. The decoder is trained for 100 epochs with cross-entropy loss, AdamW optimizer (Loshchilov and Hutter, 2019), and a learning rate of 1e-4. 
+
+C.1.4 Baselines 
+
+We use two SOTA representative defense mecha-nisms as baselines: 16 Attack Target Models Midjourney WikiText2 Patient GPT-samples                                                                                                 
+
+> Prompt Qwen3 0.6B 1.56% 0.4573 0.89% 0.4453 1.06% 0.4835 1.88% 0.4735 8B 1.24% 0.4876 0.47% 0.4299 1.53% 0.5012 2.11% 0.4535 32B 1.43% 0.4753 1.06% 0.5022 1.25% 0.4875 1.63% 0.4925 Llama3 1B 1.46% 0.4323 0.93% 0.4687 1.14% 0.4566 1.88% 0.4753 8B 1.39% 0.4632 0.56% 0.4436 1.42% 0.4653 1.68% 0.4923 70B 1.57% 0.4553 0.88% 0.4329 1.32% 0.4587 1.79% 0.4780 Response Qwen3 0.6B 1.34% 0.4326 0.42% 0.4420 0.96% 0.4885 1.97% 0.4821 8B 1.08% 0.4724 0.38% 0.4242 1.58% 0.4980 1.97% 0.4463 32B 1.21% 0.4683 0.43% 0.4876 0.89% 0.5342 1.48% 0.4983 Llama3 1B 0.89% 0.4521 0.87% 0.4853 0.98% 0.5421 1.28% 0.5021 8B 1.15% 0.4646 0.38% 0.4154 0.76% 0.5015 1.54% 0.4875 70B 0.78% 0.4328 0.25% 0.4423 0.92% 0.5201 1.29% 0.4857
+> Table 7: Effectiveness of Talaria against TokenInfer attack under different model structures and sizes. Bold: TRA. Gray: CSS
+
+Attack Target Attacks Midjourney WikiText2 Patient GPT-samples 
+
+Prompt TokenInfer 1.24% 0.4876 0.47% 0.4299 1.53% 0.5012 2.11% 0.4535 TokenInv 0.45% 0.3893 0.52% 0.4021 0.64% 0.3988 0.58% 0.4085 SentenceInv – 0.4435 – 0.3735 – 0.4051 – 0.3835 Response TokenInfer 1.08% 0.4724 0.38% 0.4242 1.58% 0.4980 1.97% 0.4463 TokenInv 0.56% 0.3954 0.38% 0.3785 0.56% 0.4123 0.72% 0.4025 SentenceInv – – – – – – – –
+
+> Table 8: Effectiveness of Talaria in defending against different attacks. Bold: TRA. Gray: CSS.
+
+• SPD (Gim et al., 2024) first confines the client’s prompt and private data to a CVM, while splitting the computational workload with the untrusted cloud LLM provider. Then SPD uses prompt obfuscation to generate mul-tiple plausible but fake “virtual prompts” that are processed alongside the client’s real one, making it impossible for the provider to dis-tinguish the authentic prompt from the fake ones. In the evaluations, we set the number of virtual prompts to 15. • Cape (Wu et al., 2025) protects client privacy by locally perturbing the original prompt on the client’s device before it is sent to the cloud. It uses a hybrid utility function that considers both the context and token similarity to find suitable replacement words. A bucketized sampling method is then used to efficiently select a replacement token, which ensures dif-ferential privacy while trying to maintain the prompt’s original meaning. We set the number of buckets to 50 and use Bert (Devlin et al., 2019) to capture contextual information. 
+
+C.2 Additional Protection Evaluations Different LLMs. We assess the scale-robustness of Talaria by evaluating four datasets–M IDJOURNEY ,WIKI TEXT -2, PATIENT NOTES , and GPT-
+
+> SAMPLES
+
+–across language models with increas-ing parameter scale. For each model, we mea-sure the effectiveness of TokenInfer attack using two metrics, TRA and CSS. As summarized in Tbl. 7, Talaria consistently suppresses reconstruc-tion across all model sizes and datasets, and the magnitude of protection remains stable as model ca-pacity grows, indicating that the defense is largely model-agnostic. 
+
+Different attacks. We evaluate Talaria against three SOTA reconstruction attacks on four datasets. As summarized in Tbl. 8, Talaria consistently de-presses both indicators across all datasets and at-tack families. The relative protection remains sta-ble even when attacks are tuned to their strongest published settings, suggesting that Talaria provides attack-agnostic robustness rather than overfitting to any single threat. 
+
+Different layers. We evaluate the protection per-17 formance of Talaria against token reconstruction attacks at different layers, and use TokenInfer to attack the outsourced inputs of different layers of Qwen3-8B. For consistent comparison, we re-port both TRA and CSS over the concatenated prompt–response sequence rather than treating them separately. As summarized in Tbl. 9, across Q/K/V projections and MLP blocks at layers 1, 5, and 10 of Qwen3-8B, Talaria consistently collapses TokenInfer’s success from near-perfect to negligi-ble. Before defense, early layers leak the most (e.g., Layer-1: TRA ≈98-99%, CSS ≈0.93-0.95), and leakage naturally diminishes with depth (Layer-10: TRA ≈83-84%, CSS ≈0.82-0.83). After apply-ing Talaria, all submodules converge to low, layer-insensitive residuals: defended TRA stays around 1.1-1.4% (best: 1.08–1.14%; worst: 1.43%), and CSS falls to 0.45-0.48. The protection is uniform across pathways (Q, K, V, MLP vary within little TRA at a given depth), indicating that hybrid mask-ing plus partitioned execution neutralizes the prin-cipal layer-specific leakage channels rather than merely shifting them deeper. Talaria turns high pre-defense leakage at shallow layers into uniformly low, sub-2% TRA and ≤0.48 CSS across layers and submodules, demonstrating robust protection.                           
+
+> Attack Layer TRA CSS
+> Layer 1 Q98.64% →1.42% 0.9443 →0.4573 K99.13% →1.08% 0.9512 →0.4876 V98.54% →1.26% 0.9337 →0.4753 MLP 98.04% →1.17% 0.9375 →0.4805 Layer 5 Q93.42% →1.13% 0.8653 →0.4687 K92.88% →1.43% 0.8654 →0.4724 V93.10% →1.36% 0.8634 →0.4653 MLP 94.05% →1.23% 0.8723 →0.4564 Layer 10 Q84.25% →1.14% 0.8326 →0.4666 K84.48% →1.21% 0.8268 →0.4532 V83.21% →1.09% 0.8251 →0.4483 MLP 83.45% →1.12% 0.8265 →0.4503
+> Table 9: The protection performance of Talaria under different model layers (Midjourney dataset).
+
+C.3 Additional Invariance Evaluations 
+
+Tbl. 10 provides three prompts together with the corresponding responses generated with and with-out Talaria. To remove randomness, we fix the model, tokenizer, decoding policy, and random seed. In all cases, the outputs are identical, with green shading used to mark the one-to-one corre-spondence. These examples complement the quan-titative metrics and demonstrate that Talaria’s re-versible masking and local restoration preserve the model’s behavior exactly, rather than only ensuring semantic similarity. Taken together, the results in Tbl. 10 confirm that Talaria maintains deterministic outputs while adding privacy protection, highlight-ing its effectiveness as a lossless mechanism. 18 Prompt Response w/o Talaria Response w/ Talaria 
+
+In the United States, common star-lings are exempt from the Migra-tory Bird Treaty Act, which pro-hibits the taking or killing of mi-gratory birds. No permit is re-quired to remove nests and eggs or kill juveniles or adults. Research was undertaken in 1966 to identify a suitable avicide that would both kill common starlings and would readily be eaten by them... First, the text says that common starlings are exempt from the Mi-gratory Bird Treaty Act. I know that this act is a law that protects migratory birds, so if starlings are exempt, that means they aren’t protected under this law. That probably means people can kill them without a permit. The text mentions that no permit is needed to remove nests, eggs, or kill both juveniles and adults. So, even though other migratory birds are protected, starlings aren’t, which is why they can be targeted... First, the text says that common starlings are exempt from the Mi-gratory Bird Treaty Act. I know that this act is a law that protects migratory birds, so if starlings are exempt, that means they aren’t protected under this law. That probably means people can kill them without a permit. The text mentions that no permit is needed to remove nests, eggs, or kill both juveniles and adults. So, even though other migratory birds are protected, starlings aren’t, which is why they can be targeted... Mozart had a pet common starling which could sing part of his Piano Concerto in G Major (KV. 453). He had bought it from a shop af-ter hearing it sing a phrase from a work he wrote six weeks pre-viously, which had not yet been performed in public. He became very attached to the bird and ar-ranged an elaborate funeral for it when it died three years later... So, Mozart had a starling that could sing part of his Piano Con-certo in G Major (KV 453). He bought it after hearing it mimic a phrase from a piece he hadn’t per-formed yet. The bird was a pet he was very attached to, and he had a funeral for it. There’s a sugges-tion that his A Musical Joke (K. 522) might reflect the starling’s style. Also, other starling owners note their mimicry skills, mixing phrases inappropriately, and even strangers thinking they heard a hu-man speak. So, Mozart had a starling that could sing part of his Piano Con-certo in G Major (KV 453). He bought it after hearing it mimic a phrase from a piece he hadn’t per-formed yet. The bird was a pet he was very attached to, and he had a funeral for it. There’s a sugges-tion that his A Musical Joke (K. 522) might reflect the starling’s style. Also, other starling owners note their mimicry skills, mixing phrases inappropriately, and even strangers thinking they heard a hu-man speak. Stephanie Madden, a 20-year-old female, has come to the doctor’s office complaining of a headache. sHE REPORTS THAT SHE HAS AHD A STIFF NECK AND ha FOR PAST DAY - SHE reports that bright lights hurt her head -with general pain all over - she denies any aura preceding the headache and reports that nothing like this has happened before - she has vommitted 3+ times over the past day... Okay, let me try to work through this case. So Stephanie is a 20-year-old female with a headache that’s been going on for a day. She has a stiff neck, sensitivity to bright lights, generalized pain, and she’s vomited three times. Tylenol hasn’t helped. She denies any aura, which is interesting be-cause that’s a common feature in migraines. Her family history in-cludes migraines on her mother’s side and her father has HD, which I think is Huntington’s disease. She’s sexually active, uses con-doms, and has some substance use: some alcohol and marijuana. She’s not up to date on immu-nizations, especially the meningi-tis vaccine... Okay, let me try to work through this case. So Stephanie is a 20-year-old female with a headache that’s been going on for a day. She has a stiff neck, sensitivity to bright lights, generalized pain, and she’s vomited three times. Tylenol hasn’t helped. She denies any aura, which is interesting be-cause that’s a common feature in migraines. Her family history in-cludes migraines on her mother’s side and her father has HD, which I think is Huntington’s disease. She’s sexually active, uses con-doms, and has some substance use: some alcohol and marijuana. She’s not up to date on immu-nizations, especially the meningi-tis vaccine. 
+
+> Table 10: Output of LLMs inference after using Talaria (green indicates text consistency).
+
+19
