@@ -6,112 +6,79 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-02-15 ~ 2026-03-16
-- 运行时间：2026-03-16 01:30:39 UTC
+- 最新运行日期：2026-02-16 ~ 2026-03-17
+- 运行时间：2026-03-17 08:18:06 UTC
 - 运行状态：成功
-- 本次总论文数：30
-- 精读区：18
+- 本次总论文数：19
+- 精读区：7
 - 速读区：12
 
 ### 今日简报（AI）
-精选 30 篇前沿论文，深度解析低秩分解加速 MPC 推理与分数阶联邦学习的最新理论突破。
-重点关注 LRD-MPC 如何通过低秩分解实现高效安全计算，以及联邦学习在医疗临床预测与智能电网防窃电中的落地实践。
-建议优先研读高分论文以掌握隐私计算性能优化的核心逻辑，并关注大模型在联邦环境下的实时推理演进。
-- 详情：[/20260215-20260316/README](/20260215-20260316/README)
+今日精选 19 篇前沿论文，深度聚焦联邦学习在金融反欺诈及隐私贡献评估中的关键突破。
+重点推荐 HybridFL 框架提升金融犯罪检测效能，并关注如何在保证隐私的前提下实现鲁棒的联邦贡献度评估。
+建议关注成员推理攻击（MIA）的防御策略及数据清洗环节的隐私泄露风险，以构建更安全的机器学习系统。
+- 详情：[/20260216-20260317/README](/20260216-20260317/README)
 
 ### 精读区论文标签
-1. [LRD-MPC: Efficient MPC Inference through Low-rank Decomposition](/20260215-20260316/2602.14397v1-lrd-mpc-efficient-mpc-inference-through-low-rank-decomposition)  
+1. [HybridFL: A Federated Learning Approach for Financial Crime Detection](/20260216-20260317/2602.19207v1-hybridfl-a-federated-learning-approach-for-financial-crime-detection)  
    标签：评分：9.0/10、query:ppml
-   evidence：使用秘密共享的深度神经网络MPC推理
-2. [Fractional-Order Federated Learning](/20260215-20260316/2602.15380v1-fractional-order-federated-learning)  
+   evidence：针对混合数据分布的隐私保护联邦学习
+2. [Private and Robust Contribution Evaluation in Federated Learning](/20260216-20260317/2602.21721v1-private-and-robust-contribution-evaluation-in-federated-learning)  
    标签：评分：9.0/10、query:ppml
-   evidence：隐私保护联邦学习架构
-3. [SRFed: Mitigating Poisoning Attacks in Privacy-Preserving Federated Learning with Heterogeneous Data](/20260215-20260316/2602.16480v1-srfed-mitigating-poisoning-attacks-in-privacy-preserving-federated-learning-with-heterogeneous-data)  
+   evidence：与安全聚合兼容的联邦学习隐私稳健贡献评估
+3. [Building Privacy-and-Security-Focused Federated Learning Infrastructure for Global Multi-Centre Healthcare Research](/20260216-20260317/2603.10063v1-building-privacy-and-security-focused-federated-learning-infrastructure-for-global-multi-centre-healthcare-research)  
    标签：评分：9.0/10、query:ppml
-   evidence：具有防御性聚合的隐私保护联邦学习
-4. [Privacy-Preserving Mechanisms Enable Cheap Verifiable Inference of LLMs](/20260215-20260316/2602.17223v1-privacy-preserving-mechanisms-enable-cheap-verifiable-inference-of-llms)  
-   标签：评分：9.0/10、query:fss-llm
-   evidence：利用隐私保护机制实现大模型的可验证推理
-5. [Guarding the Middle: Protecting Intermediate Representations in Federated Split Learning](/20260215-20260316/2602.17614v1-guarding-the-middle-protecting-intermediate-representations-in-federated-split-learning)  
+   evidence：医疗领域隐私保护联邦学习基础设施
+4. [Almost-Free Queue Jumping for Prior Inputs in Private Neural Inference](/20260216-20260317/2603.12946v1-almost-free-queue-jumping-for-prior-inputs-in-private-neural-inference)  
    标签：评分：9.0/10、query:ppml
-   evidence：隐私保护学习方法和联邦拆分学习
-6. [UFO: Unlocking Ultra-Efficient Quantized Private Inference with Protocol and Algorithm Co-Optimization](/20260215-20260316/2602.18758v1-ufo-unlocking-ultra-efficient-quantized-private-inference-with-protocol-and-algorithm-co-optimization)  
-   标签：评分：9.0/10、query:ppml
-   evidence：基于安全两方计算的量化隐私推理
-7. [PrivacyBench: Privacy Isn't Free in Hybrid Privacy-Preserving Vision Systems](/20260215-20260316/2602.18900v1-privacybench-privacy-isnt-free-in-hybrid-privacy-preserving-vision-systems)  
-   标签：评分：9.0/10、query:ppml
-   evidence：混合隐私保护视觉系统（联邦学习+差分隐私）的基准测试
-8. [Efficient Multi-Party Secure Comparison over Different Domains with Preprocessing Assistance](/20260215-20260316/2602.19604v1-efficient-multi-party-secure-comparison-over-different-domains-with-preprocessing-assistance)  
-   标签：评分：9.0/10、query:ppml
-   evidence：用于机器学习和数据分析的多方安全比较
-9. [RobPI: Robust Private Inference against Malicious Client](/20260215-20260316/2602.19918v1-robpi-robust-private-inference-against-malicious-client)  
-   标签：评分：9.0/10、query:ppml
-   evidence：针对恶意客户端的鲁棒隐私推理
-10. [Rethinking LoRA for Privacy-Preserving Federated Learning in Large Models](/20260215-20260316/2602.19926v1-rethinking-lora-for-privacy-preserving-federated-learning-in-large-models)  
-   标签：评分：9.0/10、query:ppml
-   evidence：大模型中的隐私保护联邦学习
-11. [A Critical Look into Threshold Homomorphic Encryption for Private Average Aggregation](/20260215-20260316/2602.22037v1-a-critical-look-into-threshold-homomorphic-encryption-for-private-average-aggregation)  
-   标签：评分：9.0/10、query:ppml
-   evidence：用于隐私聚合的门限同态加密
-12. [Your Inference Request Will Become a Black Box: Confidential Inference for Cloud-based Large Language Models](/20260215-20260316/2603.00196v1-your-inference-request-will-become-a-black-box-confidential-inference-for-cloud-based-large-language-models)  
-   标签：评分：9.0/10、query:fss-llm
-   evidence：基于机密虚拟机(CVM)的云端大模型机密推理
-13. [Towards Privacy-Preserving LLM Inference via Collaborative Obfuscation (Technical Report)](/20260215-20260316/2603.01499v1-towards-privacy-preserving-llm-inference-via-collaborative-obfuscation-technical-report)  
-   标签：评分：9.0/10、query:fss-llm
-   evidence：通过协作混淆实现隐私保护的LLM推理
-14. [Integrating Homomorphic Encryption and Synthetic Data in FL for Privacy and Learning Quality](/20260215-20260316/2603.02969v1-integrating-homomorphic-encryption-and-synthetic-data-in-fl-for-privacy-and-learning-quality)  
-   标签：评分：9.0/10、query:ppml
-   evidence：联邦学习中的同态加密与合成数据
-15. [LDP-Slicing: Local Differential Privacy for Images via Randomized Bit-Plane Slicing](/20260215-20260316/2603.03711v1-ldp-slicing-local-differential-privacy-for-images-via-randomized-bit-plane-slicing)  
-   标签：评分：9.0/10、query:ppml
-   evidence：用于图像隐私保护机器学习的本地差分隐私
-16. [Efficient Privacy-Preserving Sparse Matrix-Vector Multiplication Using Homomorphic Encryption](/20260215-20260316/2603.04742v1-efficient-privacy-preserving-sparse-matrix-vector-multiplication-using-homomorphic-encryption)  
-   标签：评分：9.0/10、query:ppml
-   evidence：使用同态加密的隐私保护稀疏矩阵向量乘法
-17. [Differentially Private Multimodal In-Context Learning](/20260215-20260316/2603.04894v1-differentially-private-multimodal-in-context-learning)  
-   标签：评分：9.0/10、query:ppml
-   evidence：差分隐私多模态上下文学习
-18. [Balancing Privacy-Quality-Efficiency in Federated Learning through Round-Based Interleaving of Protection Techniques](/20260215-20260316/2603.05158v1-balancing-privacy-quality-efficiency-in-federated-learning-through-round-based-interleaving-of-protection-techniques)  
-   标签：评分：9.0/10、query:ppml
-   evidence：在联邦学习中平衡隐私、质量和效率
+   evidence：使用同态加密和多方计算的神经网络安全推理
+5. [DP-FedAdamW: An Efficient Optimizer for Differentially Private Federated Large Models](/20260216-20260317/2602.19945v1-dp-fedadamw-an-efficient-optimizer-for-differentially-private-federated-large-models)  
+   标签：评分：8.0/10、query:ppml
+   evidence：差分隐私联邦大模型
+6. [Resilient Federated Chain: Transforming Blockchain Consensus into an Active Defense Layer for Federated Learning](/20260216-20260317/2602.21841v1-resilient-federated-chain-transforming-blockchain-consensus-into-an-active-defense-layer-for-federated-learning)  
+   标签：评分：8.0/10、query:ppml
+   evidence：基于区块链的联邦学习用于隐私保护去中心化训练
+7. [JSAM: Privacy Straggler-Resilient Joint Client Selection and Incentive Mechanism Design in Differentially Private Federated Learning](/20260216-20260317/2602.21844v1-jsam-privacy-straggler-resilient-joint-client-selection-and-incentive-mechanism-design-in-differentially-private-federated-learning)  
+   标签：评分：8.0/10、query:ppml
+   evidence：差分隐私联邦学习中的激励机制
 
 ### 速读区论文标签
-1. [Floe: Federated Specialization for Real-Time LLM-SLM Inference](/20260215-20260316/2602.14302v1-floe-federated-specialization-for-real-time-llm-slm-inference)  
+1. [Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD](/20260216-20260317/2602.22611v1-mitigating-membership-inference-in-intermediate-representations-via-layer-wise-mia-risk-aware-dp-sgd)  
    标签：评分：8.0/10、query:ppml
-   evidence：边缘设备上的隐私保护大模型推理
-2. [Hybrid Federated and Split Learning for Privacy Preserving Clinical Prediction and Treatment Optimization](/20260215-20260316/2602.15304v1-hybrid-federated-and-split-learning-for-privacy-preserving-clinical-prediction-and-treatment-optimization)  
+   evidence：使用 DP-SGD 减轻预训练模型表示中的成员推理攻击
+2. [Tackling Privacy Heterogeneity in Differentially Private Federated Learning](/20260216-20260317/2602.22633v1-tackling-privacy-heterogeneity-in-differentially-private-federated-learning)  
    标签：评分：8.0/10、query:ppml
-   evidence：用于隐私保护临床预测的混合联邦与拆分学习
-3. [Towards Secure and Scalable Energy Theft Detection: A Federated Learning Approach for Resource-Constrained Smart Meters](/20260215-20260316/2602.16181v1-towards-secure-and-scalable-energy-theft-detection-a-federated-learning-approach-for-resource-constrained-smart-meters)  
+   evidence：差分隐私联邦学习
+3. [Curation Leaks: Membership Inference Attacks against Data Curation for Machine Learning](/20260216-20260317/2603.00811v1-curation-leaks-membership-inference-attacks-against-data-curation-for-machine-learning)  
    标签：评分：8.0/10、query:ppml
-   evidence：智能电表的隐私保护联邦学习
-4. [PenTiDef: Enhancing Privacy and Robustness in Decentralized Federated Intrusion Detection Systems against Poisoning Attacks](/20260215-20260316/2602.17973v1-pentidef-enhancing-privacy-and-robustness-in-decentralized-federated-intrusion-detection-systems-against-poisoning-attacks)  
+   evidence：针对隐私机器学习数据清洗的成员推理攻击
+4. [Protection against Source Inference Attacks in Federated Learning](/20260216-20260317/2603.02017v1-protection-against-source-inference-attacks-in-federated-learning)  
    标签：评分：8.0/10、query:ppml
-   evidence：隐私保护去中心化联邦学习框架
-5. [FedPSA: Modeling Behavioral Staleness in Asynchronous Federated Learning](/20260215-20260316/2602.15337v1-fedpsa-modeling-behavioral-staleness-in-asynchronous-federated-learning)  
+   evidence：联邦学习中针对源推理攻击的防御
+5. [A Hybrid Federated Learning Based Ensemble Approach for Lung Disease Diagnosis Leveraging Fusion of SWIN Transformer and CNN](/20260216-20260317/2602.17566v1-a-hybrid-federated-learning-based-ensemble-approach-for-lung-disease-diagnosis-leveraging-fusion-of-swin-transformer-and-cnn)  
    标签：评分：7.0/10、query:ppml
-   evidence：细粒度异步联邦学习框架
-6. [PRISM-FCP: Byzantine-Resilient Federated Conformal Prediction via Partial Sharing](/20260215-20260316/2602.18396v1-prism-fcp-byzantine-resilient-federated-conformal-prediction-via-partial-sharing)  
+   evidence：用于安全医疗数据处理的混合联邦学习
+6. [FeatureBleed: Inferring Private Enriched Attributes From Sparsity-Optimized AI Accelerators](/20260216-20260317/2602.18304v1-featurebleed-inferring-private-enriched-attributes-from-sparsity-optimized-ai-accelerators)  
    标签：评分：7.0/10、query:ppml
-   evidence：具有部分共享机制的拜占庭容错联邦框架
-7. [EMS-FL: Federated Tuning of Mixture-of-Experts in Satellite-Terrestrial Networks via Expert-Driven Model Splitting](/20260215-20260316/2602.19485v1-ems-fl-federated-tuning-of-mixture-of-experts-in-satellite-terrestrial-networks-via-expert-driven-model-splitting)  
+   evidence：针对AI加速器中私有属性的推理侧信道攻击
+7. [LoMime: Query-Efficient Membership Inference using Model Extraction in Label-Only Settings](/20260216-20260317/2602.18934v1-lomime-query-efficient-membership-inference-using-model-extraction-in-label-only-settings)  
    标签：评分：7.0/10、query:ppml
-   evidence：卫星网络中混合专家模型的联邦微调
-8. [A Secure and Private Distributed Bayesian Federated Learning Design](/20260215-20260316/2602.20003v1-a-secure-and-private-distributed-bayesian-federated-learning-design)  
+   evidence：针对机器学习模型的成员推理攻击
+8. [Heterogeneity-Aware Client Selection Methodology For Efficient Federated Learning](/20260216-20260317/2602.20450v1-heterogeneity-aware-client-selection-methodology-for-efficient-federated-learning)  
    标签：评分：7.0/10、query:ppml
-   evidence：具有隐私保护的分布式贝叶斯联邦学习
-9. [Exploiting Layer-Specific Vulnerabilities to Backdoor Attack in Federated Learning](/20260215-20260316/2602.15161v1-exploiting-layer-specific-vulnerabilities-to-backdoor-attack-in-federated-learning)  
+   evidence：隐私保护联邦学习中的客户端选择方法
+9. [MANATEE: Inference-Time Lightweight Diffusion Based Safety Defense for LLMs](/20260216-20260317/2602.18782v1-manatee-inference-time-lightweight-diffusion-based-safety-defense-for-llms)  
    标签：评分：6.0/10、query:ppml
-   evidence：联邦学习中利用层漏洞的后门攻击
-10. [FedPSA: Modeling Behavioral Staleness in Asynchronous Federated Learning](/20260215-20260316/2602.15337v2-fedpsa-modeling-behavioral-staleness-in-asynchronous-federated-learning)  
+   evidence：大语言模型的推理阶段安全防御
+10. [SLDP: Semi-Local Differential Privacy for Density-Adaptive Analytics](/20260216-20260317/2602.18910v1-sldp-semi-local-differential-privacy-for-density-adaptive-analytics)  
    标签：评分：6.0/10、query:ppml
-   evidence：异步联邦学习框架
-11. [Local Node Differential Privacy](/20260215-20260316/2602.15802v1-local-node-differential-privacy)  
+   evidence：用于密度自适应分析的半本地差分隐私
+11. [Is the Trigger Essential? A Feature-Based Triggerless Backdoor Attack in Vertical Federated Learning](/20260216-20260317/2602.20593v1-is-the-trigger-essential-a-feature-based-triggerless-backdoor-attack-in-vertical-federated-learning)  
    标签：评分：6.0/10、query:ppml
-   evidence：图数据的本地节点差分隐私
-12. [LLM-Driven Intent-Based Privacy-Aware Orchestration Across the Cloud-Edge Continuum](/20260215-20260316/2602.16100v1-llm-driven-intent-based-privacy-aware-orchestration-across-the-cloud-edge-continuum)  
+   evidence：隐私保护纵向联邦学习中的后门攻击
+12. [Beyond performance-wise Contribution Evaluation in Federated Learning](/20260216-20260317/2602.22470v1-beyond-performance-wise-contribution-evaluation-in-federated-learning)  
    标签：评分：6.0/10、query:ppml
-   evidence：大模型推理的隐私感知编排
+   evidence：联邦学习中的可信度与隐私
 
 
 <div class="dpr-home-promo-card">

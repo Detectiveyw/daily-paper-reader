@@ -1,0 +1,2328 @@
+Title: Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD
+
+URL Source: https://arxiv.org/pdf/2602.22611v1
+
+Published Time: Fri, 27 Feb 2026 01:27:19 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+Jiayang Meng 1 Tao Huang 2 Chen Hou 2 Guolong Zheng 2 Hong Chen 1
+
+## Abstract 
+
+In Embedding-as-an-Interface (EaaI) settings, pre-trained models are queried for Intermediate Representations (IRs). The distributional prop-erties of IRs can leak training-set membership signals, enabling Membership Inference Attacks (MIAs) whose strength varies across layers. Al-though Differentially Private Stochastic Gradi-ent Descent (DP-SGD) mitigates such leakage, existing implementations employ per-example gradient clipping and a uniform, layer-agnostic noise multiplier, ignoring heterogeneous layer-wise MIA vulnerability. This paper introduces Layer-wise MIA-risk-aware DP-SGD (LM-DP-SGD), which adaptively allocates privacy pro-tection across layers in proportion to their MIA risk. Specifically, LM-DP-SGD trains a shadow model on a public shadow dataset, extracts per-layer IRs from its train/test splits, and fits layer-specific MIA adversaries, using their attack er-ror rates as MIA-risk estimates. Leveraging the cross-dataset transferability of MIAs, these esti-mates are then used to reweight each layer’s con-tribution to the globally clipped gradient during private training, providing layer-appropriate pro-tection under a fixed noise magnitude. We further establish theoretical guarantees on both privacy and convergence of LM-DP-SGD. Extensive ex-periments show that, under the same privacy bud-get, LM-DP-SGD reduces the peak IR-level MIA risk while preserving utility, yielding a superior privacy-utility trade-off. 
+
+## 1. Introduction 
+
+In Embedding-as-an-Interface (EaaI) settings, pre-trained models are exposed as APIs that transform inputs into Intermediate Representations (IRs), which are then con-
+
+> 1
+
+School of Information, Renmin University of China, Beijing, China 2School of Computer Science and Big Data, Minjiang Uni-versity, Fuzhou, Fujian, China. 
+
+sumed by downstream services. This paradigm appears in multiple deployment modes: (i) knowledge distillation (Heo et al., 2019; Liu et al., 2023; Gong et al., 2025), where a high-capacity, typically frozen teacher model is queried with student’s inputs to produce intermediate embeddings that serve as “hints” for student learning; (ii) Embedding-as-a-Service (Thakur et al., 2021; Muennighoff et al., 2022), where cloud-hosted embedding APIs return IRs that downstream modules for retrieval, classification, or clus-tering directly consume, without exposing model internals; and (iii) modular system design (Houlsby et al., 2019; Wu et al., 2024b), where a frozen encoder generates IRs that are processed by lightweight adapters or task-specific heads, enabling rapid task adaptation and scalable deployment. However, exposing IRs from pre-trained models can inadvertently leak training-set membership information. Model optimization tends to concentrate training exam-ples (’members’) into high-density regions of the hidden-state manifold, producing systematic separations from non-training examples (’non-members’) (Zhu et al., 2021; Wu et al., 2024a). As a result, an adversary with query access to IRs can exploit these separations to launch Membership Inference Attacks (MIAs) (Shokri et al., 2017; Nasr et al., 2019; Hu et al., 2022), threatening data confidentiality. Notably, prior work indicates that the susceptibility of IRs to MIAs is inherently layer-dependent, with deeper layers typically encoding stronger membership signals (Rezaei & Liu, 2021; Maini et al., 2023; Wang et al., 2024). This behavior arises from the hierarchical nature of feature ex-traction: shallow layers tend to capture generic, low-level features with weaker membership signals, whereas deeper layers encode task-specific semantics that amplify the sepa-ration between members and non-members. Consequently, MIA risk varies across layers, and a model’s overall vulner-ability to MIAs is governed by the most susceptible layer. The predominant defense, Differentially Private Stochastic Gradient Descent (DP-SGD) (Abadi et al., 2016), ignores layer-wise heterogeneity in MIA risk. Current DP-SGD methods enforce (ε, δ )-Differential Privacy (DP) (Dwork et al., 2006; Dwork, 2008) by clipping per-example gra-dients and adding Gaussian noise uniformly across layers. Such uniform perturbation can over-noise less vulnerable 1
+
+> arXiv:2602.22611v1 [cs.LG] 26 Feb 2026
+
+Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD …
+
+> Layer 1
+> Loss
+> Layer l
+
+Sec 4.1 Layer -wise MIA -Risk Estimation 
+
+> Shadow Dataset
+
+…  
+
+> Layer L
+> Shadow
+> Training Set
+> Shadow
+> Test Set
+> Trained
+> Shadow
+> Model
+> Shadow
+> Training Set
+> Shadow
+> Test Set
+> "#$
+> (&)
+> "()*
+> (&)
+> "#$
+> (+)
+> "()*
+> (+)
+> "#$
+> (,)
+> "()*
+> (,)
+
+… …
+
+… … 
+
+> -./0
+> (&)
+
+… …-./0   
+
+> (+)
+> Train Train Train
+
+… Loss 
+
+…  
+
+> Private
+> Training Set
+> …
+> Sampled
+> Batch
+> Heterogeneity
+> Emphasis
+> 1*,&
+> (&)1*,&
+> (+)1*,&
+> (,)
+
+… …
+
+… …1*,$  
+
+> (&)1*,$
+> (+)1*,$
+> (,)
+> Sum
+> Avg.
+> Update Model
+> Noise
+> Addition
+
+Sec 4.3 Private Training via LM -DP -SGD      
+
+> Shadow Model (L Layers) Target Model (L Layers)
+> Layer 1 Layer l Layer L
+> Layer -specific
+> Adversarie s
+> Layer 1 Layer l Layer L
+> -./0
+> (,)
+
+…     
+
+> 34*
+> &∗34*
+> +∗34*
+> ,∗
+
+… …            
+
+> Per -Ex ample
+> Gradients
+> (Iteration t)
+> Normalize
+> Estimate Estimate Estimate
+> 67 (&)67 (+)67 (,)
+> Layer -wise
+> Error Rate s(67 (&))8(67 (+))8(67 (,))8
+> Eliminate Gradient Bias
+> Unbiased
+> Coefficients 4*
+> &4*
+> +4*
+> ,
+
+… …  
+
+> MIA -Risk Calibration
+> 91*,&
+> (&)91*,&
+> (+)91*,&
+> (,)
+
+… …
+
+… …91*,$  
+
+> (&)91*,$
+> (+)91*,$
+> (,)
+
+…
+
+> Reweighted
+> Clipping
+> MIA -Risk Estimates
+> Reweighting
+> Coefficients
+> Reweighted
+> Clipping
+
+Figure 1. An overview of LM-DP-SGD, which comprises two components: (i) Layer-wise MIA-risk estimation (Section 4.1), which trains layer-specific adversaries on a public shadow dataset to assess MIA risk of each layer; and (ii) Private training via LM-DP-SGD (Section 4.3), a differentially private optimization procedure that leverages these estimated risks to perform layer-wise reweighted clipping to per-example gradients before noise injection, allocating protection proportionally to layer vulnerability. 
+
+layers while under-protecting more sensitive ones, lead-ing to a suboptimal privacy–utility trade-off (Bagdasaryan et al., 2019). A natural layer-wise variant is to privatize each layer independently; however, composition theorems (Kairouz et al., 2015) incur substantial privacy budget over-head, making such methods impractical for deep models. To address these limitations, we propose Layer-wise MIA-risk-aware DP-SGD (LM-DP-SGD), a novel DP-SGD vari-ant that adaptively tailors privacy protection across layers in proportion to their MIA risks, as shown in Figure 1. Our contributions can be summarized as follows. • We introduce LM-DP-SGD, a differentially private training framework that (i) trains layer-specific adver-saries on a public shadow dataset to estimate per-layer MIA risk; and (ii) uses these estimates to guide layer-wise reweighted clipping of per-example gradients be-fore noise addition, thus modulating the protective ef-fect of fixed-magnitude noise across layers. • We theoretically analyze the privacy and convergence properties of LM-DP-SGD. We prove that it preserves the same DP guarantees as DP-SGD. We also charac-terize its convergence behavior and quantify the bias induced by layer-wise reweighted clipping. • Extensive experiments demonstrate that, compared to the baselines, LM-DP-SGD markedly reduces the peak IR-level MIA risk while preserving model utility, thus achieving an improved privacy–utility trade-off. 
+
+## 2. Related Work 
+
+2.1. Gradient Clipping Strategies in DP-SGD 
+
+DP-SGD (Abadi et al., 2016), a cornerstone of privacy-preserving deep learning, modifies the mini-batch Stochas-tic Gradient Descent (SGD) with per-example gradient clipping and calibrated Gaussian noise injection to ensure formal DP guarantees. Given a per-example gradient g,clipping is defined as Clip (g, C ) = g · min(1 , C 
+
+> ∥g∥2
+
+), which bounds the per-example gradient ℓ2-norm by a pre-defined threshold C, thus constraining the influence of any individ-ual data point on the model update. However, the effec-tiveness of DP-SGD is critically dependent on the selec-tion of C (Andrew et al., 2021; Golatkar et al., 2022; He et al., 2022; Pichapati et al., 2019). An overly large C de-creases the effect of clipping and requires injecting more noise (proportional to C), potentially degrading utility. In contrast, an excessively small C distorts gradient signals, hindering convergence. To mitigate this sensitivity, adaptive clipping strategies have emerged. Auto-S (Bu et al., 2023) and NSGD (Yang et al., 2022) normalize gradients by implicitly absorbing 
+
+C into the effective learning rate of non-adaptive optimiz-ers, driving gradients toward unit norm with a stabilizer 
+
+r: Clip (g, C = 1) = g 
+
+> ∥g∥2+r
+
+. DP-PSAC (Xia et al., 2023) further introduces a non-monotonic clipping func-tion: Clip (g, C ) = C 
+
+> ∥g∥2+r/ (∥g∥2+r)
+
+, which preserves the clipping bound ( ≤ C) required for privacy while reducing deviation from the true mini-batch-averaged gradients. By avoiding over-emphasis on small-norm gradients and lim-iting the effect of large-norm gradients, DP-PSAC effec-tively balances gradient distortion and noise magnitude. 
+
+2.2. DP-SGD Limitations for Layer-wise Privacy 
+
+In EaaI settings, privacy of IRs is the concern. Yet standard DP-SGD and its adaptive clipping variants over-look heterogeneity in layer-wise MIA risk. By clipping the entire gradient to a bound C and adding calibrated Gaussian noise, they neglect per-layer MIA-risk varia-2Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+Figure 2. MIA accuracy using intermediate representations from different convolutional layers. 
+
+tions. Consequently, deeper layers—often more vulnerable to MIAs—receive insufficient protection, while shallower, less sensitive layers are over-perturbed, ultimately degrad-ing the privacy–utility trade-off. An intuitive approach to implement layer-wise DP-SGD is to enforce DP at the granularity of individual layers, as-signing each layer l a distinct budget (εl, δ l). However, by DP composition theorems (Kairouz et al., 2015), the cumu-lative privacy cost (ε, δ ) scales approximately linearly with model depth, i.e., ε ≈ ∑ 
+
+> l
+
+εl. This rapid privacy budget ac-cumulation makes naive per-layer privatization costly and impractical for deep models. 
+
+## 3. Preliminaries 
+
+3.1. DP-SGD 
+
+Standard Differentially Private Stochastic Gradient De-scent (DP-SGD) enforces (ε, δ )-DP by bounding each in-dividual example’s contribution to the gradient update. At iteration t ∈ {0, ..., T − 1}, a mini-batch Bt is sam-pled from the private training set D = {(xn, yn)}Nn=1 
+
+with probability q ≈ |B t| 
+
+> N
+
+. Subsequently, for each sam-ple xi ∈ B t, its gradient Gt,i = ∇F (xi, W t) is clipped as ˜Gt,i = Gt,i · Ct,i  
+
+> ∥Gt,i ∥2
+
+, where Ct,i = min( C, ∥Gt,i ∥2)
+
+is the clipped ℓ2-norm, satisfying Ct,i ≤ C. The model parameters are then updated as Wt+1 ← Wt −
+
+> ηt
+> |B t|
+
+(∑ 
+
+> xi∈B t
+
+˜Gt,i + N (0 , C 2σ2I)), where ηt is the learn-ing rate and σ is the noise multiplier, calibrated via ac-counting methods such as the moments accountant (Wang et al., 2019) to ensure (ε, δ )-DP. 
+
+3.2. Layer-wise Heterogeneity of MIA Risk 
+
+Intermediate Representations (IRs)—outputs of hidden layers in models—are vulnerable to Membership Inference Attacks (MIAs), which aim to determine whether a spe-cific example was used for model training. Previous work (Shokri et al., 2017; Nasr et al., 2019; Song & Mittal, 2021) indicates that this vulnerability is layer-dependent, with deeper IRs typically leaking more membership infor-mation. Our empirical results in Figure 2 further corrobo-rate this trend: IRs from deeper layers consistently exhibit higher attack accuracy, indicating elevated MIA risk. 
+
+## 4. Proposed Method: LM-DP-SGD 
+
+This section introduces Layer-wise MIA-risk-aware DP-SGD (LM-DP-SGD), depicted in Figure 1. Key symbols and definitions are summarized in Appendix A. 
+
+4.1. Layer-wise MIA-Risk Estimation 
+
+Prior to private training, we assess per-layer MIA risk through attack simulation. Given white-box access to the target model F , we (model trainers) instantiate a shadow model Fshadow with an identical architecture. Build-ing on the prior evidence that MIAs can transfer across datasets—i.e., adversaries trained on one dataset can gen-eralize to another (Salem et al., 2018)—we train layer-specific MIA adversaries using a public shadow dataset 
+
+Dshadow = {(xn, yn)}Ns
+
+> n=1
+
+. The resulting MIA risk es-timates derived from Dshadow serve as reliable proxies for those on the private training set D, incurring no additional privacy cost. Specifically, we first partition 
+
+Dshadow into disjoint training and test subsets: Dtrain shadow =
+
+{(x′in ′ 
+
+> n
+
+, y′in ′ 
+
+> n
+
+)}Nin  
+
+> n=1
+
+and Dtest shadow = {(x′out ′ 
+
+> n
+
+, y′out ′ 
+
+> n
+
+)}Nout 
+
+> n=1
+
+, and train Fshadow on Dtrain shadow . Subsequently, we initialize per-layer IR sets for members and non-members, {I(l) 
+
+> in
+
+=
+
+∅}Ll=1 , {I(l) 
+
+> out
+
+= ∅}Ll=1 . All examples from Dtrain shadow 
+
+(members) and Dtest shadow (non-members) are then forwarded through Fshadow to populate these sets, yielding {I(l)
+
+> in/out
+
+}Ll=1 ,where I(l) 
+
+> in/out
+
+= {I(l)(x) | x ∈ Dtrain/test shadow }, and I(l)(x) de-notes the IR of example x at layer l. For each layer l, we construct an adversary dataset D(l) 
+
+> adv
+
+by pairing IRs in I(l)
+
+with their corresponding membership labels (1 for mem-bers, 0 for non-members), and use it to train a layer-specific adversary F (l)
+
+> adv
+
+(I(l)(x); W (l)). Each adversary is then eval-uated on its full training set to obtain an Error Rate (ER), producing {ER (l)}Ll=1 . These per-layer ERs serve as MIA-risk estimates to guide layer-wise privacy budget alloca-tion during target model training. The complete algorith-mic procedure is detailed in Appendix B. 3Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+4.2. Design of Layer-wise DP-SGD 
+
+To account for the heterogeneous vulnerability of IRs across layers to MIAs, we extend the standard DP-SGD (Section 3.1) to a layer-wise formulation. At iteration t,we introduce a reweighting vector wt = [ w(1)  
+
+> t
+
+, . . . , w (L) 
+
+> t
+
+]
+
+constrained by ∑Ll=1 (w(l) 
+
+> t
+
+)2 = 1 . Each component w(l)
+
+> t
+
+rescales the contribution of layer l’s ℓ2-norm relative to the overall gradient norm. Rather than clipping the entire gra-dient for each xi ∈ B t, we apply layer-wise reweighted clipping mechanism, yielding ˆGt,i = [ˆ g(1)  
+
+> t,i
+
+, ..., ˆg(L) 
+
+> t,i
+
+]. Con-cretely, each Gt,i is decomposed into layer-wise compo-nents Gt,i = [ g(1)  
+
+> t,i
+
+, . . . , g (L) 
+
+> t,i
+
+]. For each layer l, we define the normalized direction d(l) 
+
+> t,i
+
+= g(l) 
+
+> t,i
+> ∥g(l)
+> t,i ∥2
+
+(or 0 if ∥g(l) 
+
+> t,i
+
+∥2 = 0 )and compute the reweighted clipped gradient: 
+
+ˆg(l) 
+
+> t,i
+
+= Ct,i · w(l) 
+
+> t
+
+· d(l) 
+
+> t,i
+
+= Ct,i · w(l) 
+
+> t
+
+· g(l)
+
+> t,i
+
+∥g(l) 
+
+> t,i
+
+∥2
+
+, (1) where Ct,i = min( C, ∥Gt,i ∥2) enforces gradient clip-ping and wt reweights layer contributions. The squared 
+
+ℓ2-norm of the layer-wise reweighted-and-clipped gradient is ∥ ˆGt,i ∥22 = ∑Ll=1 ∥ˆg(l) 
+
+> t,i
+
+∥22 = ∑Ll=1 C2
+
+> t,i
+
+(w(l) 
+
+> t
+
+)2∥d(l) 
+
+> t,i
+
+∥22.Since each normalized direction satisfies ∥d(l) 
+
+> t,i
+
+∥22 = 1 (or 0
+
+when ∥g(l) 
+
+> t,i
+
+∥2 = 0 ), this expression simplifies to ∥ ˆGt,i ∥22 =
+
+C2
+
+> t,i
+
+∑Ll=1 (w(l) 
+
+> t
+
+)2. Under the constraint ∑Ll=1 (w(l) 
+
+> t
+
+)2 = 1 ,the global ℓ2-norm of ˆGt,i is identical to that of the clipped gradient in standard DP-SGD, satisfying 
+
+∥ ˆGt,i ∥2 = Ct,i = min( C, ∥Gt,i ∥2) ≤ C. (2) Thus, layer-wise reweighted clipping redistributes gradient magnitudes across layers while preserving the global ℓ2-norm bound C required for privacy accounting. This en-ables layer-specific privacy allocation without increasing privacy budget. Accordingly, the model update is given by 
+
+Wt+1 ← Wt − ηt
+
+|B t|
+
+( ∑
+
+> xi∈B t
+
+ˆGt,i + N (0 , C 2σ2I)
+
+)
+
+. (3) 
+
+4.3. Private Training via LM-DP-SGD 
+
+Using the per-layer MIA risk estimates from Section 4.1, we train the target model F using LM-DP-SGD. Within the layer-wise DP-SGD framework described in Section 4.2, at each iteration t, we optimize a layer-wise reweight-ing vector wt to balance two competing objectives: utility and privacy. On the utility side, our objective is to min-imize the gradient bias induced by layer-wise reweighted clipping. Let ¯Gt = 1
+
+> |B t|
+
+∑
+
+> xi∈B t
+
+ˆGt,i denote the mini-batch-averaged layer-wise reweighted-and-clipped gradi-ent, and let ∇F (Wt) = Exi∼D [∇F (xi; W )] be the ex-pected true gradient. Their discrepancy can be decomposed into a layer-wise reweighted clipping bias ( bt = E[ ˆGt,i ] −∇F (Wt) and sampling stochasticity ( Vt = ¯Gt − E[ ˆGt,i ]), such that ¯Gt = ∇F (Wt) + bt + Vt. In practice, Vt is typically negligible, while bt dominates the bias and can distort parameter updates, slow convergence, and degrade final utility. To alleviate these effects, we optimize wt by solving min wt ∥bt∥22 s.t. ∑Ll=1 (w(l) 
+
+> t
+
+)2 = 1 , which admits a closed-form solution via Lagrange multipliers (see Ap-pendix D.2). On the privacy side, as shown in Section 3.2, the vulnerability of IRs to MIAs is layer-dependent and generally increases with network depth. Accordingly, we calibrate wt to assign stronger protection to more vulner-able (typically deeper) layers, yielding a MIA-risk-aware reweighting scheme that accounts for layer-wise member-ship exposure. To balance the two objectives, we assign the layer-wise reweighting coefficients through the following steps. 1. Initialization to eliminate layer-wise clipping bias . For optimal convergence, we initialize 
+
+wt to eliminate the bias between E[ ˆGt,i ] and 
+
+∇F (W ), enforcing the unbiasedness condition 
+
+E[ ˆGt,i ] − ∇ F (W ) = 0. In practice, sampling-induced randomness is typically negligible; thus, to reduce computational overhead, we approximate 
+
+E[ ˆGt,i ] ≃ ¯Gt and ∇F (W ) ≃ Exi∼B t [∇F (xi; W )] .From Eq.(1), the layer-l component of ¯Gt is 
+
+w(l) 
+
+> t1
+> |B t|
+
+∑
+
+> xt∈B t
+
+[
+
+Ct,i g(l) 
+
+> t,i
+> ∥g(l)
+> t,i ∥2
+
+]
+
+, and the corre-sponding component of Exi∼B t [∇F (xi; W )] is 
+
+Exi∼B t
+
+[
+
+g(l)
+
+> t,i
+
+]
+
+. Equating these two expressions yields the initialization: ˆw(l)∗ 
+
+> t
+
+= 1
+
+> |B t|
+
+∑  
+
+> xi∈B t
+> ∥g(l)
+> t,i ∥2
+> Ct,i
+
+.2. Layer-wise MIA-risk calibration. We then calibrate the initialized coefficients using per-layer MIA risk estimates from Section 4.1. For each layer l, a lower ER (l) indicates that the layer retains stronger mem-bership signals and is more susceptible to MIAs. To mitigate this vulnerability, we downweight its initial-ized coefficient w(l)∗ 
+
+> t
+
+to enhance the relative protec-tion afforded by the fixed-magnitude noise applied uniformly across layers. To control the emphasis on layer-wise MIA-risk heterogeneity, we introduce an emphasis factor r ≥ 1, yielding adjusted risks 
+
+(ER (l))r and calibrated coefficients ˜w(l)∗ 
+
+> t
+
+= w(l)∗ 
+
+> t
+
+·
+
+(ER (l))r . A larger r concentrates stronger protection on high-risk layers at the expense of less vulnerable ones, potentially degrading utility. In practice, r is tuned to balance privacy and utility. 3. ℓ2-normalization. Finally, the unit-norm constraint is enforced via normalization: w(l) 
+
+> t
+
+= ˜w(l)∗
+
+> t
+
+√∑Lm=1 ( ˜ w(m)∗ 
+
+> t)2
+
+.4Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+Algorithm 1 Private Training via LM-DP-SGD. 
+
+Inputs : target model F (x; W0) with L layers and randomly initialized W0, training set D of N samples, estimated per-layer MIA risks (quantified by error rates) {ER (l)}Ll=1 .
+
+Parameters : sampling probability q, clipping threshold C, learning rate {ηt}T −1 
+
+> t=0
+
+, privacy budget (ε, δ ), training iteration 
+
+T , layer-wise MIA-risk emphasis factor r.
+
+1: Compute noise multiplier σ s.t. εAccountant (δ, σ, q, T ) ≤ ε (e.g., via moments accountant). 
+
+2: for Iteration t = 0 to T − 1 do 
+
+3: Sample a mini-batch: Bt ∼ Poisson (q; D).
+
+4: for Each example xi ∈ B t do 
+
+5: Compute the corresponding per-example gradient: Gt,i = ∇F (xi, W t) = [ g(1)  
+
+> t,i
+
+, ..., g (L) 
+
+> t,i
+
+].
+
+6: Compute the ℓ2-norm of the clipped gradient in standard DP-SGD: Ct,i = min( C, ∥Gt,i ∥2).
+
+7: end for 
+
+8: for Layer l = 1 to L do 
+
+9: Calculate MIA-risk-aware reweighting coefficient for layer l:
+
+ˆw(l)∗ 
+
+> t
+
+= 1
+
+> |B t|
+
+∑  
+
+> xi∈B t
+> ∥g(l)
+> t,i ∥2
+> Ct,i
+
+, ˜w(l)∗ 
+
+> t
+
+= ˆ w(l) 
+
+> t
+
+· (ER (l))r , w(l) 
+
+> t
+
+= ˜w(l)∗
+
+> t
+
+√∑Lm=1 ( ˜ w(m)∗ 
+
+> t)2
+
+.
+
+10: end for 
+
+11: Initialize per-example layer-wise reweighted-and-clipped gradients: { ˆGt,i = 0}xi∈B t .
+
+12: for Each example xi ∈ B t do 
+
+13: for Layer l = 1 to L do 
+
+14: Compute unit direction: d(l) 
+
+> t,i
+
+= g(l) 
+
+> t,i
+> ∥g(l)
+> t,i ∥2
+
+(or 0 if ∥g(l) 
+
+> t,i
+
+∥2 = 0 ). 
+
+15: Compute layer-l component of ˆGt,i and assign it accordingly: ˆg(l) 
+
+> t,i
+
+= Ct,i · w(l) 
+
+> t
+
+· d(l) 
+
+> t,i
+
+.
+
+16: end for 
+
+17: end for 
+
+18: Compute the differential private update gradient: ˆGt = 1
+
+> |B t|
+
+[∑
+
+> xi∈B t
+
+ˆGt,i + N (0 , C 2σ2I)
+
+]
+
+.
+
+19: Update model parameters: Wt+1 = Wt − ηt · ˆGt.
+
+20: end for 
+
+21: return Trained differentially private model F (x; WT ).With wt = [ w(1)  
+
+> t
+
+, ..., w (L) 
+
+> t
+
+], for each example xi ∈ B t and layer l = {1, . . . , L }, we apply layer-wise reweighting and clipping to obtain ˆg(l) 
+
+> t,i
+
+= Ct,i · w(l) 
+
+> t
+
+· d(l) 
+
+> t,i
+
+, where d(l) 
+
+> t,i
+
+= 
+
+> g(l)
+> t,i
+> ∥g(l)
+> t,i ∥2
+
+, and assign it to the layer-l component of ˆGt,i . The model parameters are then updated as Wt+1 = Wt − ηt ·
+
+> 1
+> |B t|
+
+[ ∑ 
+
+> xi∈B t
+
+ˆGt,i +N (0 , C 2σ2I)]. The complete training procedure via LM-DP-SGD is presented in Algorithm 1. 
+
+## 5. Theoretical Analysis 
+
+5.1. Privacy Guarantee 
+
+LM-DP-SGD offers rigorous privacy guarantees, as for-malized in Theorem 5.1, by bounding the ℓ2-sensitivity of the aggregated gradients before noise injection. The con-sistent ℓ2-norm of layer-wise reweighted-and-clipped gra-dients with standard DP-SGD allows for direct application of DP-SGD’s established moments accountant framework. The proof of Theorem 5.1 is detailed in Appendix C.1. 
+
+Theorem 5.1 (Privacy guarantee of LM-DP-SGD) . Algo-rithm 1, which applies a layer-wise reweighting vector 
+
+wt = [ w(1)  
+
+> t
+
+, ..., w (L) 
+
+> t
+
+] constrained by ∑Ll=1 (w(l) 
+
+> t
+
+)2 = 1 and adds noise N (0 , C 2σ2I) to the aggregated reweighted-and-clipped gradients ∑
+
+> xi∈B t
+
+ˆGt,i at each iteration t,guarantees (ε, δ )-differential privacy under the same con-ditions as standard DP-SGD, with identical clipping threshold C, sampling probability q, and noise multiplier 
+
+σ. In particular, by the moments accountant, there exist constants c1, c 2 such that for any ε ≤ c1q2T and δ > 0,choosing 
+
+σ ≥ c2
+
+q√T log(1 /δ )
+
+ε (4) 
+
+ensures (ε, δ )-differential privacy after T iterations. 
+
+5.2. Convergence Properties 
+
+The convergence of LM-DP-SGD for non-convex objec-tives, a common assumption in deep learning, is established in Theorem 5.2, with the proof provided in Appendix C.2. 
+
+Theorem 5.2 (Convergence of LM-DP-SGD) . Let F :
+
+Rd → R be an L-smooth differentiable objective function 
+
+5Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+with bounded expected true gradient, i.e., ∥∇ F (W )∥2 ≤
+
+M for all W . Consider Algorithm 1 executed for T itera-tions from initialization W0 on a dataset D of size N , us-ing a fixed learning rate ηt = η/ √T for some constant 
+
+η > 0 (e.g., η = 1 /L ), Poisson sampling probability q,clipping threshold C, and a layer-wise reweighting vec-tor wt = [ w(1)  
+
+> t
+
+, ..., w (L) 
+
+> t
+
+] satisfying ∑
+
+> l
+
+(w(l) 
+
+> t
+
+)2 = 1 . De-fine the mini-batch averaged, layer-wise reweighted-and-clipped gradient as ¯Gt = 1
+
+> |B t|
+
+∑
+
+> xi∈B t
+
+ˆGt,i with expecta-tion E[ ¯Gt] = E[ ˆGt,i ]. Assume that the biases introduced by layer-wise reweighted clipping and mini-batch sampling are uniformly bounded, i.e., for all t = {0, . . . , T − 1},
+
+∥E[ ¯Gt] − ∇ F (Wt)∥2 = ∥bt∥2 ≤ ξ, and ∥ ¯Gt − E[ ¯Gt]∥2 ≤
+
+V . Let σ denote the noise multiplier required for (ε, δ )-differential privacy (cf. Eq.(4)). Then, the time-averaged squared ℓ2-norm of the expected true gradient admits: 
+
+1
+
+T 
+
+> T−1
+
+∑
+
+> t=0
+
+∥∇ F (Wt)∥22 ≤ O
+
+( L(F (W0) − F ∗)
+
+√T
+
+)
+
++ O(M ξ )+O
+
+( (M + ξ)2 + V 2 + C2σ2dq2N 2
+
+√T
+
+)
+
+,
+
+(5) 
+
+where d denotes the dimensionality of W . The expected ob-jective function is defined as F (W ) = Exi∼D [F (xi; W )] 
+
+and F ∗ is a lower bound on the attainable objective value under WT such that F (WT ) ≥ F ∗. The term V 2, induced by mini-batch sampling, is typically negligible in practice. Analysis. LM-DP-SGD achieves a convergence rate com-parable to standard DP-SGD, converging to a neighbor-hood around a stationary point with radius O(M ξ ). Here, 
+
+M upper-bounds ∥∇ F (W )∥2, determined by intrinsic fac-tors such as the model architecture, loss function, train-ing data, and applied constraints or regularization. We thus focus on ξ = sup t ∥bt∥2, which captures the bias in-troduced by layer-wise reweighted clipping. Specifically, this bias quantifies the discrepancy between the expected layer-wise reweighted-and-clipped gradient E[ ¯Gt] =[
+
+E[ ¯G(1)  
+
+> t
+
+], ..., E[ ¯G(L) 
+
+> t
+
+]
+
+]
+
+and the expected true gradient 
+
+∇F (Wt) = [ ∇F (1) (Wt), ..., ∇F (L)(Wt)] . For each layer 
+
+l, E[ ¯G(l) 
+
+> t
+
+] = Exi∼D
+
+[
+
+Ct,i w(l) 
+
+> tg(l)
+> t,i
+> ∥g(l)
+> t,i ∥2
+
+]
+
+= w(l) 
+
+> t
+
+ut, where 
+
+u(l) 
+
+> t
+
+= Exi∼D
+
+[
+
+Ct,i g(l) 
+
+> t,i
+> ∥g(l)
+> t,i ∥2
+
+]
+
+. The resulting bias is bt =[w(1)  
+
+> t
+
+u(1)  
+
+> t
+
+− ∇ F (1) (Wt), . . . , w (L) 
+
+> t
+
+u(L) 
+
+> t
+
+− ∇ F (L)(Wt)] . In practice, as mini-batch sampling bias is typically negli-gible, expectations can be approximated by mini-batch averages to reduce computational cost: ∇F (l)(Wt) ≃
+
+> 1
+> |B t|
+
+∑ 
+
+> xi∈B t
+
+g(l) 
+
+> t,i
+
+, u(l) 
+
+> t
+
+≃ 1
+
+> |B t|
+
+∑
+
+> xi∈B t
+
+[
+
+Ct,i g(l) 
+
+> t,i
+> ∥g(l)
+> t,i ∥2
+
+]
+
+.Table 1 presents a conceptual comparison of the origins of the bias term bt, whose ℓ2-norm is upper bounded by ξ,across LM-DP-SGD and other baselines. In deep learn-ing, the non-convex and data-dependent nature of opti-mization, combined with the intricate interactions of pri-vacy mechanisms, makes the theoretical characterization of bt challenging; consequently, prior work has largely re-lied on empirical analysis (Yang et al., 2022; Bu et al., 2023; Xia et al., 2023). DP-SGD (Abadi et al., 2016), which employs a fixed clipping threshold C, introduces bias only through gradient clipping—often omitted or sepa-rately bounded—and empirically exhibits the smallest bias. Adaptive methods such as Auto-S/NSGD (Yang et al., 2022; Bu et al., 2023) and DP-PSAC (Xia et al., 2023) in-cur additional bias due to adaptive clipping or normaliza-tion, which is empirically larger than that of DP-SGD but remains of the same order. LM-DP-SGD introduces bias through layer-wise reweighted clipping, arising both from the reweighting of per-layer contributions to the global gra-dient norm (an additional source of bias) and from the clip-ping of these norms. We empirically evaluate and compare the magnitudes of these biases in Section 7.3, and provide a detailed analysis of the layer-wise reweighted clipping bias in LM-DP-SGD in Appendix D. 
+
+Table 1. Conceptual comparison of gradient norm constraint mechanisms across DP-SGD methods. bt captures the expected deviation between the constrained and true gradients.      
+
+> DP-SGD Method Gradient Norm Constraint Mechanism DP-SGD Fixed clipping Auto-S/NSGD Adaptive clipping/Normalization DP-PSAC Adaptive clipping/Normalization LM-DP-SGD (Ours) Layer-wise reweighted clipping
+
+## 6. Experimental Setup 
+
+We comprehensively evaluate LM-DP-SGD against stan-dard DP-SGD (Abadi et al., 2016), Auto-S/NSGD (Yang et al., 2022; Bu et al., 2023), and DP-PSAC (Xia et al., 2023) on four real-world datasets: MNIST (Le-Cun et al., 1998), CIFAR10 (Krizhevsky et al., 2009), CIFAR100(Krizhevsky et al., 2009), and CelebA (Karras et al., 2017). Public shadow datasets approximate the private data distribution, with ablations in Appendix E.1 demonstrating robustness to distributional mismatch. Hy-perparameters are summarized in Table 2. All experiments are conducted on a server with two Intel(R) Xeon(R) Sil-ver 4310 CPUs @2.10GHz and one NVIDIA A100 GPU, running Ubuntu 22.04 with CUDA Toolkit 12.4. 
+
+## 7. Experimental Results 
+
+Our evaluation focuses on: (i) resilience to MIAs (Nasr et al., 2019) targeting IRs, quantified by the maximum 6Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+Table 2. Hyperparameter settings. Specifically, for MNIST, we follow the setup in (Shamsabadi & Papernot, 2023), employing a 6-layer Shallow-CNN (S-CNN). For CIFAR10, we adopt the configuration from (Papernot et al., 2021), using a 12-layer Deep-CNN (D-CNN).                                                               
+
+> Training Target Shadow Privacy Sampling Learning Clipping Layer-wise MIA-Risk Heterogeneity Dataset DModel FDataset Dshadow Budget (ε, δ )Probability qRate ηtThreshold CEmphasis Factor r
+> MNIST S-CNN FashionMNIST (5 .0,1×10 −5)0.01 0.08 1.0 5.0 CIFAR10 D-CNN ImageNet (8 .0,1×10 −5)0.01 0.10 2.0 3.0 CIFAR100 ResNet-18 ImageNet (8 .0,1×10 −5)0.01 0.10 3.0 2.0 CelebA VGG-16 FFHQ (8 .0,1×10 −5)0.01 0.08 3.0 2.0
+
+Table 3. Evaluation of MIA accuracy on partial intermediate convolutional-layer representations. The maximum MIA accuracy across layers indicates the maximum IR-level MIA risk, reflecting the overall vulnerability to MIAs at the IR level. Bolded values highlight the lowest peak MIA accuracy across layers among all methods, identifying the most effective method for mitigating IR-level MIA risk.                                                   
+
+> Model DP-SGD Index of Intermediate MIA Accuracy MIA Accuracy Maximum MIA Accuracy across (Dataset) Method Convolutional-Layer under SGD (%) under DP-SGD (%) Layers under DP-SGD (%) DP-SGD 1, 2 72.5, 75.0 67.2, 70.9 70.9 S-CNN Auto-S/NSGD 66.6, 70.0 70.0 (MNIST) DP-PSAC 67.7, 71.8 71.8 LM-DP-SGD (Ours) 68.3, 69.2 69.2
+> DP-SGD 1, 3, 5, 7, 8 59.6, 64.9, 68.3, 71.6, 73.1 57.0, 63.2, 65.5, 67.3, 69.8 69.8 D-CNN Auto-S/NSGD 58.2, 63.1, 66.4, 68.2, 70.7 70.7 (CIFAR10) DP-PSAC 57.7, 62.8, 65.1, 68.0, 69.4 69.4 LM-DP-SGD (Ours) 59.0, 64.3, 65.2, 66.5, 67.9 67.9
+> DP-SGD 1, 5, 10, 15, 17 52.1, 57.2, 61.5, 64.8, 66.1 49.7, 54.5, 59.8, 62.7, 64.7 64.7 ResNet-18 Auto-S/NSGD 49.9, 54.7, 59.0, 61.9, 63.9 63.9 (CIFAR100) DP-PSAC 49.0, 53.8, 58.1, 61.0, 63.1 63.1 LM-DP-SGD (Ours) 52.5, 55.9, 59.3, 60.2, 61.8 61.8
+> DP-SGD 1, 5, 10, 12, 13 63.3, 67.1, 70.9, 71.7, 72.4 57.1, 61.6, 65.2, 67.9, 68.5 68.5 VGG-16 Auto-S/NSGD 57.3, 62.1, 66.4, 68.3, 69.9 69.9 (CelebA) DP-PSAC 56.8, 61.2, 64.9, 66.7, 68.2 68.2 LM-DP-SGD (Ours) 60.6, 63.4, 64.1, 64.5, 65.6 65.6
+
+MIA accuracy across all layers; (ii) model utility, mea-sured by test accuracy; (iii) convergence behavior, char-acterized by the evolution of the ℓ2-norm of the gradi-ent bias induced by layer-wise reweighted clipping (clip-ping in DP-SGD, adaptive clipping/normalization in Auto-S/NSGD and DP-PSAC) during training. Ablations are de-tailed in Appendix E. 
+
+7.1. Enhanced Resilience against MIAs on IRs 
+
+This section demonstrates that LM-DP-SGD substantially improves resilience against MIAs targeting intermediate-layer representations. As reported in Table 3, LM-DP-SGD adaptively allocates privacy protection across layers, applying stronger safeguards to empirically more vulner-able deeper layers while incurring limited privacy loss in less vulnerable shallow layers. This layer-wise MIA-risk-aware protection allocation effectively reduces the maxi-mum MIA accuracy observed across layers, achieving the lowest peak IR-level MIA risk among all baselines. The observed privacy gains arise from LM-DP-SGD’s layer-wise reweighted clipping: by down-weighting the norm contributions of empirically susceptible layers, the method amplifies the effectiveness of fixed-magnitude noise on those layers, thereby providing stronger and more targeted privacy protection. Crucially, reducing the peak IR-level MIA risk directly lim-its the adversary’s maximal success probability of inferring membership from IRs without increasing the privacy bud-get. Since overall privacy leakage is ultimately dominated by the most vulnerable layer, suppressing the maximum layer-wise MIA accuracy prevents any single layer from becoming the bottleneck. Consequently, while shallow lay-ers remain comparatively less sensitive, strengthened pro-tection of deeper layers mitigates catastrophic worst-case leakage and improves end-to-end privacy robustness. 
+
+7.2. Preserved Model Utility 
+
+As depicted in Figure 3: (i) LM-DP-SGD consistently achieves competitive—and in some cases superior—model utility, as measured by test accuracy, relative to all base-line methods. Since all curves are smoothed, minor devi-ations and fluctuations should be interpreted as the noise introduced by smoothing rather than as meaningful differ-ences in model utility. To facilitate comparison, we high-light a shaded region corresponding to performance within 2% below the maximum final test accuracy attained by any baseline, methods whose curves fall within this region are considered to have equivalent utility. We observe that LM-DP-SGD is consistently encompassed by the shaded re-gion and is never the worst-performing method among the 7Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD        
+
+> (a) S-CNN (MNIST) (b) D-CNN (CIFAR10)
+> (c) ResNet-18 (CIFAR100) (d) VGG-16 (CelebA)
+> Figure 3. Evolution of test accuracy during training. The optimal layer-wise reweighting coefficients for convergence, {w(l)∗
+> t}Ll=1 , are derived via Lagrange multipliers (see Appendix D.2). For clarity, all curves are smoothed using a Savitzky-Golay filter. The shaded regions denote performance within 2% below the test accuracy of the baseline which achieves the maximum final accuracy. The results show that our method preserves model utility relative to the baselines. Importantly, this does not imply superior test accuracy; rather, performance remains comparable. This conclusion is supported by two observations. First, due to curve smoothing, minor deviations should be interpreted as smoothing artifacts rather than as meaningful performance differences; Second, once training converges, LM-DP-SGD’s performance consistently lies within the shaded regions. Overall, these results indicate that our method preserves utility.
+
+baselines. These results indicate that LM-DP-SGD effec-tively preserves model utility. When combined with the results in Section 7.1, which demonstrate LM-DP-SGD’s superior resilience against MIAs targeting IRs, these find-ings provide strong evidence that LM-DP-SGD achieves an improved privacy–utility trade-off; (ii) The final utili-ties attained by different DP-SGD approaches are highly comparable, suggesting that diverse gradient norm con-straint mechanisms can effectively optimize model param-eters and achieve similar levels of utility. Furthermore, we analyze an LM-DP-SGD variant in which the layer-wise reweighting coefficients {w(l)∗ 
+
+> t
+
+}Ll=1 are opti-mized solely for convergence via Lagrange multipliers (see Appendix D.2). Across all evaluated datasets, this vari-ant converges faster and attains slightly higher final utility than the best-performing baselines. The reason is straight-forward: baselines with global per-example clipping can be viewed as layer-wise DP-SGD without explicit layer-wise reweighting, where the corresponding coefficients are implicitly determined by each layer’s gradient norm. In contrast, explicit layer-wise reweighting in LM-DP-SGD ({w(l)∗ 
+
+> t
+
+}Ll=1 ) aligns updates more closely with the true (un-clipped) gradient, leading to more effective optimization, faster convergence, and often improved final performance. 
+
+7.3. Training Convergence Behavior 
+
+To further analyze training convergence behavior, we ex-amine the evolution of the ℓ2-norm of the bias term bt,
+
+∥bt∥2, as illustrated in Figure 4. We highlight four key ob-servations: (i) Across all evaluated datasets, the LM-DP-SGD variant with {w(l)∗ 
+
+> t
+
+}Ll=1 induces the smallest bias, as its layer-wise reweighted and clipped gradients are more closely aligned with the true gradients; (ii) Among the baselines, standard DP-SGD exhibits the smallest bias, whereas adaptive clipping approaches (Auto-S/NSGD, DP-PSAC) generally incur higher bias, albeit of the same order of magnitude. Notably, despite being explicitly designed to balance heterogeneous layer-wise MIA risk with opti-mization dynamics, LM-DP-SGD achieves bias compara-ble to, or even smaller than, that of standard DP-SGD. On CelebA, in particular, LM-DP-SGD significantly outper-forms standard DP-SGD in terms of gradient bias reduc-tion; (iii) As training progresses, ∥bt∥2 decreases mono-tonically, which is expected since convergence toward bet-8Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD          
+
+> (a) S-CNN (MNIST) (b) D-CNN (CIFAR10)
+> (c) ResNet-18 (CIFAR100) (d) VGG-16 (CelebA)
+> Figure 4. Evolution of the ℓ2-norm of the bias term bt,∥bt∥2.For visual clarity, all curves are smoothed using a Savitzky-Golay filter. We observe that the magnitude of ∥bt∥2remains within the same order across all methods throughout training. Compared to the baselines, our method does not introduce excessive bias; in fact, it yields a relatively lower gradient bias over the majority of training.
+
+ter optima yields smaller gradient norms and thus reduces the absolute distortion introduced by gradient norm con-straints; (iv) Smaller ∥bt∥2 indicates updates that are bet-ter aligned with the true gradients, leading to faster con-vergence. On CelebA, LM-DP-SGD and its variant with 
+
+{w(l)∗ 
+
+> t
+
+}Ll=1 achieve both the smallest bias and markedly faster convergence than competing baselines, consistent with the test accuracy trends in Figure 3. Overall, across different gradient norm constraint mecha-nisms, ∥bt∥2 remains within the same order of magnitude. This indicates that the specific constraint design has only a marginal impact on training dynamics, underscoring the ro-bustness of our layer-wise reweighted clipping strategy in meeting privacy guarantees and preserving model utility. Additional details on running time and computational re-sources are provided in Appendix F. 
+
+## 8. Conclusion 
+
+This work investigates the empirically validated hetero-geneity in vulnerability to Membership Inference Attacks (MIAs) across network layers, where Intermediate Rep-resentations (IRs) from deeper layers are typically more susceptible. To address the limitation of existing DP-SGD methods—which injects uniform noise into the glob-ally clipped gradients and ignores layer-wise MIA-risk het-erogeneity—we propose Layer-wise MIA-risk-aware DP-SGD (LM-DP-SGD). LM-DP-SGD adaptively calibrates the privacy protection strength of each layer based on its estimated MIA risk by performing layer-wise reweighted gradient clipping before noise injection. We also provide rigorous theoretical guarantees on both the privacy and convergence properties of LM-DP-SGD. Extensive exper-iments demonstrate that LM-DP-SGD markedly reduces peak MIA risks on IRs without increasing the overall pri-vacy budget or degrading model utility, showcasing an im-proved privacy-utility trade-off. 
+
+## References 
+
+Abadi, M., Chu, A., Goodfellow, I., McMahan, H. B., Mironov, I., Talwar, K., and Zhang, L. Deep learning with differential privacy. In Proceedings of the 2016 ACM SIGSAC conference on computer and communica-tions security , pp. 308–318, 2016. Andrew, G., Thakkar, O., McMahan, B., and Ramaswamy, S. Differentially private learning with adaptive clipping. 
+
+Advances in Neural Information Processing Systems , 34: 17455–17466, 2021. Bagdasaryan, E., Poursaeed, O., and Shmatikov, V. Differ-9Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+ential privacy has disparate impact on model accuracy. 
+
+Advances in neural information processing systems , 32, 2019. Bu, Z., Wang, Y.-X., Zha, S., and Karypis, G. Automatic clipping: Differentially private deep learning made eas-ier and stronger. Advances in Neural Information Pro-cessing Systems , 36:41727–41764, 2023. Dwork, C. Differential privacy: A survey of results. In 
+
+International conference on theory and applications of models of computation , pp. 1–19. Springer, 2008. Dwork, C., McSherry, F., Nissim, K., and Smith, A. Cal-ibrating noise to sensitivity in private data analysis. In 
+
+Theory of Cryptography: Third Theory of Cryptography Conference, TCC 2006, New York, NY, USA, March 4-7, 2006. Proceedings 3 , pp. 265–284. Springer, 2006. Golatkar, A., Achille, A., Wang, Y.-X., Roth, A., Kearns, M., and Soatto, S. Mixed differential privacy in com-puter vision. In Proceedings of the IEEE/CVF Confer-ence on Computer Vision and Pattern Recognition , pp. 8376–8386, 2022. Gong, G., Wang, J., Xu, J., Xiang, D., Zhang, Z., Shen, L., Zhang, Y., JunhuaShu, J., ZhaolongXing, Z., Chen, Z., et al. Beyond logits: Aligning feature dynamics for effective knowledge distillation. In Proceedings of the 63rd Annual Meeting of the Association for Computa-tional Linguistics (Volume 1: Long Papers) , pp. 23067– 23077, 2025. He, J., Li, X., Yu, D., Zhang, H., Kulkarni, J., Lee, Y. T., Backurs, A., Yu, N., and Bian, J. Exploring the limits of differentially private deep learning with group-wise clipping. arXiv preprint arXiv:2212.01539 , 2022. Heo, B., Kim, J., Yun, S., Park, H., Kwak, N., and Choi, J. Y. A comprehensive overhaul of feature distillation. In 
+
+Proceedings of the IEEE/CVF international conference on computer vision , pp. 1921–1930, 2019. Houlsby, N., Giurgiu, A., Jastrzebski, S., Morrone, B., De Laroussilhe, Q., Gesmundo, A., Attariyan, M., and Gelly, S. Parameter-efficient transfer learning for nlp. In International conference on machine learning , pp. 2790–2799. PMLR, 2019. Hu, H., Salcic, Z., Sun, L., Dobbie, G., Yu, P. S., and Zhang, X. Membership inference attacks on machine learning: A survey. ACM Computing Surveys (CSUR) ,54(11s):1–37, 2022. Kairouz, P., Oh, S., and Viswanath, P. The composition the-orem for differential privacy. In International conference on machine learning , pp. 1376–1385. PMLR, 2015. Karras, T., Aila, T., Laine, S., and Lehtinen, J. Progres-sive growing of gans for improved quality, stability, and variation. arXiv preprint arXiv:1710.10196 , 2017. Krizhevsky, A., Hinton, G., et al. Learning multiple lay-ers of features from tiny images. Toronto, ON, Canada ,2009. LeCun, Y., Bottou, L., Bengio, Y., and Haffner, P. Gradient-based learning applied to document recognition. Pro-ceedings of the IEEE , 86(11):2278–2324, 1998. Liu, D., Kan, M., Shan, S., and Chen, X. Function-consistent feature distillation. arXiv preprint arXiv:2304.11832 , 2023. Maini, P., Mozer, M. C., Sedghi, H., Lipton, Z. C., Kolter, J. Z., and Zhang, C. Can neural network memorization be localized? arXiv preprint arXiv:2307.09542 , 2023. Muennighoff, N., Tazi, N., Magne, L., and Reimers, N. Mteb: Massive text embedding benchmark. arXiv preprint arXiv:2210.07316 , 2022. Nasr, M., Shokri, R., and Houmansadr, A. Comprehen-sive privacy analysis of deep learning: Passive and ac-tive white-box inference attacks against centralized and federated learning. In 2019 IEEE symposium on security and privacy (SP) , pp. 739–753. IEEE, 2019. Papernot, N., Thakurta, A., Song, S., Chien, S., and Er-lingsson, ´U. Tempered sigmoid activations for deep learning with differential privacy. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 35, pp. 9312–9321, 2021. Pichapati, V., Suresh, A. T., Yu, F. X., Reddi, S. J., and Kumar, S. Adaclip: Adaptive clipping for private sgd. 
+
+arXiv preprint arXiv:1908.07643 , 2019. Rezaei, S. and Liu, X. On the difficulty of membership inference attacks. In Proceedings of the IEEE/CVF Con-ference on Computer Vision and Pattern Recognition , pp. 7892–7900, 2021. Salem, A., Zhang, Y., Humbert, M., Berrang, P., Fritz, M., and Backes, M. Ml-leaks: Model and data independent membership inference attacks and defenses on machine learning models. arXiv preprint arXiv:1806.01246 ,2018. Shamsabadi, A. S. and Papernot, N. Losing less: A loss for differentially private deep learning. Proceedings on Privacy Enhancing Technologies , 2023. Shokri, R., Stronati, M., Song, C., and Shmatikov, V. Mem-bership inference attacks against machine learning mod-els. In 2017 IEEE symposium on security and privacy (SP) , pp. 3–18. IEEE, 2017. 10 Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+Song, L. and Mittal, P. Systematic evaluation of privacy risks of machine learning models. In 30th USENIX Secu-rity Symposium (USENIX Security 21) , pp. 2615–2632, 2021. Thakur, N., Reimers, N., R¨ uckl´ e, A., Srivastava, A., and Gurevych, I. Beir: A heterogenous benchmark for zero-shot evaluation of information retrieval models. arXiv preprint arXiv:2104.08663 , 2021. Wang, W., Dziedzic, A., Backes, M., and Boenisch, F. Lo-calizing memorization in ssl vision encoders. Advances in Neural Information Processing Systems , 37:60475– 60516, 2024. Wang, Y.-X., Balle, B., and Kasiviswanathan, S. P. Sub-sampled r´ enyi differential privacy and analytical mo-ments accountant. In The 22nd international conference on artificial intelligence and statistics , pp. 1226–1235. PMLR, 2019. Wu, Y., Qiu, H., Guo, S., Li, J., and Zhang, T. You only query once: An efficient label-only membership infer-ence attack. In The Twelfth International Conference on Learning Representations , 2024a. Wu, Z., Arora, A., Wang, Z., Geiger, A., Jurafsky, D., Man-ning, C. D., and Potts, C. Reft: Representation finetun-ing for language models. Advances in Neural Informa-tion Processing Systems , 37:63908–63962, 2024b. Xia, T., Shen, S., Yao, S., Fu, X., Xu, K., Xu, X., and Fu, X. Differentially private learning with per-sample adap-tive clipping. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 37, pp. 10444–10452, 2023. Yang, X., Zhang, H., Chen, W., and Liu, T.-Y. Nor-malized/clipped sgd with perturbation for differen-tially private non-convex optimization. arXiv preprint arXiv:2206.13033 , 2022. Zhu, Z., Ding, T., Zhou, J., Li, X., You, C., Sulam, J., and Qu, Q. A geometric analysis of neural collapse with un-constrained features. Advances in Neural Information Processing Systems , 34:29820–29834, 2021. 11 Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+## A. Notations 
+
+For clarity and consistency, Table 4 provides a summary of key symbols and their corresponding descriptions. 
+
+Table 4. Key symbols and descriptions used in LM-DP-SGD. 
+
+Symbol Description 
+
+F (x; W ) Target model with input x and parameters W .
+
+Fshadow (x; W ) Shadow model with input x and parameters W .
+
+I(l)(x) Intermediate representation of input x at layer l of the trained shadow model. 
+
+F (l)
+
+> adv
+
+(I(l)(x); W (l)) Adversarial model targeting layer-l representations for membership inference attacks. 
+
+D Private training set with N examples. 
+
+Dshadow Shadow dataset with Ns examples. 
+
+{ER (l)}Ll=1 Per-layer MIA risks estimated by trained layer-specific adversaries, qualified by error rates. 
+
+Gt,i = [ g(1)  
+
+> t,i
+
+, ..., g (L) 
+
+> t,i
+
+] Gradient of the i-th example in Bt: Gt,i = ∇F (xi, W t), with g(l) 
+
+> t,i
+
+the layer-l component. 
+
+Ct,i = min( C, ∥Gt,i ∥2) ℓ2-norm of the clipped gradient of example xi at iteration t of standard DP-SGD. 
+
+˜G = [˜ g(1) , ..., ˜g(L)] Resulting gradient obtained by applying clipping to G in standard DP-SGD, with ˜g(l) denot-ing the layer-l component. 
+
+wt = [ w(1)  
+
+> t
+
+, ..., w (L) 
+
+> t
+
+] Layer-wise reweighting vector at iteration t in LM-DP-SGD, with w(l) 
+
+> t
+
+for layer l.
+
+ˆG = [ˆ g(1) , ..., ˆg(L)] Resulting gradient obtained by applying layer-wise reweighted clipping to G in LM-DP-SGD, with ˆg(l) denoting the layer-l component. 
+
+¯Gt = 1
+
+> |B t|
+
+∑ 
+
+> xi∈B t
+
+[ ˆGt,i ] Mini-batch-averaged layer-wise reweighted-and-clipped gradient at iteration t.
+
+∇F (Wt) = Exi∼D [Gt,i ] Expected true gradient at iteration t, which can be approximated by the mini-batch average in practice: 1
+
+> |B t|
+
+∑ 
+
+> xi∈B t
+
+Gt,i .
+
+## B. Layer-wise MIA-Risk Estimation Algorithm 
+
+The layer-wise estimation of MIA risk is conducted via the algorithmic procedure outlined in Algorithm 2, which is performed prior to differentially private training. 
+
+## C. Theoretical Proofs 
+
+C.1. Proof of Theorem 5.1 
+
+Proof. The core requirement for applying the Gaussian mechanism in DP-SGD is to bound the ℓ2-sensitivity of the function evaluated on the dataset-in this case, the sum of layer-wise reweighted-and-clipped gradients ∑
+
+> i∈B t
+
+ˆGt,i . The sensitivity quantifies the maximum change in this sum induced by modifying a single data point in D. Under Poisson sampling, this is bounded by the maximum ℓ2-norm of the individual contributions (Abadi et al., 2016). Each per-sample gradient 
+
+Gt,i = [ g(1)  
+
+> t,i
+
+, . . . , g (L) 
+
+> t,i
+
+] is layer-wise reweighted-and-clipped as ˆg(l) 
+
+> t,i
+
+= Ct,i · w(l) 
+
+> t
+
+· g(l) 
+
+> t,i
+> ∥g(l)
+> t,i ∥2
+
+, where the layer-wise reweighting coefficients w(l) 
+
+> t
+
+satisfy ∑Ll=1 (w(l) 
+
+> t
+
+)2 = 1 . Thus, ∥ ˆGt,i ∥2 = Ct,i ≤ C, ensuring that the ℓ2-sensitivity of the sum is bounded by C. Crucially, the coefficients w(l) 
+
+> t
+
+are derived solely from the gradients themselves and from estimates of each layer’s susceptibility to MIAs, obtained using a public shadow dataset. Their computation therefore incurs no additional privacy cost. Consequently, adding Gaussian noise N (0 , C 2σ2I) calibrated to sensitivity C guarantees the pre-defined 
+
+(ε, δ )-differential privacy, and the standard moments accountant analysis for DP-SGD applies without modification. 
+
+C.2. Proof of Theorem 5.2 
+
+C.2.1. A SSUMPTIONS 
+
+Theorem 5.2 sketches the convergence analysis of LM-DP-SGD under standard non-convex settings. To this end, we begin by making the following standard assumptions. 
+
+Assumption C.1 (Smoothness) . The objective function F : Rd → R is differentiable and L-smooth; that is, for all 12 Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+Algorithm 2 Layer-wise MIA-Risk Estimation. 
+
+Inputs : shadow model Fshadow (x; W ) with L layers and randomly initialized W , shadow dataset Dshadow , layer-specific MIA adversaries {F (l)
+
+> adv
+
+(I(l)(x), W (l))}Ll=1 with randomly initialized {W (l)}Ll=1 .
+
+Parameters : During shadow model training— train-test split ratio r, training epoch Eshadow , batch size Bshadow , learning rate ηshadow , and loss function ℓs; During adversaries training— training epochs {E(l)
+
+> adv
+
+}Ll=1 , batch sizes {B(l)
+
+> adv
+
+}Ll=1 ,learning rates {η(l)
+
+> adv
+
+}Ll=1 , and loss function ℓa.
+
+1: Split Dshadow into disjoint Dtrain shadow = {(x′in ′ 
+
+> n
+
+, y′in ′ 
+
+> n
+
+)}Nin  
+
+> n=1
+
+and Dtest shadow = {(x′out ′ 
+
+> n
+
+, y′out ′ 
+
+> n
+
+)}Nout  
+
+> n=1
+
+with Nin = ⌊r · Ns⌋.
+
+2: for Epoch e = 0 to Eshadow − 1 do 
+
+3: for Each mini-batch B ⊂ Dtrain shadow with |B| = Bshadow do 
+
+4: Calculate ˆyj = Fshadow (xj ; W ) for (xj , yj ) ∈ B .
+
+5: Calculate training loss: L ← 1
+
+> |B|
+
+∑   
+
+> (xj,yj)∈B
+
+ℓs(ˆ yj , yj ).
+
+6: Update shadow model: W ← W − ηshadow · ∇ W L.
+
+7: end for 
+
+8: end for 
+
+9: Initialize empty per-layer IR sets: {I(l) 
+
+> in
+
+= ∅}Ll=1 , {I(l) 
+
+> out
+
+= ∅}Ll=1 .
+
+10: for Each example (x, y) ∈ Dtrain shadow do 
+
+11: Forward x through Fshadow and append the corresponding IR, I(l)(x), to I(l) 
+
+> in
+
+for each layer l = {1, ..., L }.
+
+12: end for 
+
+13: for Each example (x, y) ∈ Dtest shadow do 
+
+14: Forward x through Fshadow and append the corresponding IR, I(l)(x), to I(l) 
+
+> out
+
+for each layer l = {1, ..., L }.. 
+
+15: end for 
+
+16: for Layer l = 1 to L do 
+
+17: Initialize training set of F (l)
+
+> adv
+
+: D(l) 
+
+> adv
+
+= ∅.
+
+18: for Each IR I(l)(x) in I(l) 
+
+> in
+
+do 
+
+19: Append (I(l)(x), z = 1) to D(l)
+
+> adv
+
+.
+
+20: end for 
+
+21: for Each IR I(l)(x) in I(l) 
+
+> out
+
+do 
+
+22: Append (I(l)(x), z = 0) to D(l)
+
+> adv
+
+.
+
+23: end for 
+
+24: for Epoch e = 0 to E(l) 
+
+> adv
+
+− 1 do 
+
+25: for Each mini-batch B ⊂ D(l) 
+
+> adv
+
+with |B| = B(l) 
+
+> adv
+
+do 
+
+26: Calculate ˆzj = F (l)
+
+> adv
+
+(I(l) 
+
+> j
+
+(x); W (l)) for (I(l) 
+
+> j
+
+(x), zj ) ∈ B .
+
+27: Calculate training loss: L ← 1
+
+> |B|
+
+∑   
+
+> (xj,zj)∈B
+
+ℓa(ˆ zj , zj ).
+
+28: Update adversary: W (l) ← W (l) − η(l) 
+
+> adv
+
+· ∇ W (l) L.
+
+29: end for 
+
+30: end for 
+
+31: Evaluate F (l) 
+
+> adv
+
+on full D(l) 
+
+> adv
+
+to obtain error rate ER (l).
+
+32: end for 
+
+33: return Estimated per-layer MIA risks {ER (l)}Ll=1 .
+
+W, W ′ ∈ Rd,
+
+F (W ′) ≤ F (W ) + ⟨∇ F (W ), W ′ − W ⟩ + L
+
+2 ∥W ′ − W ∥22.
+
+Assumption C.2 (Bounded Bias and Variance) . Let ∇F (Wt) = Exi∼D [∇F (xi; Wt)] denote the expected true gradient of the objective at iteration t under the data distribution D. We assume the expected mini-batch-averaged layer-wise reweighted-and-clipped gradient E[ ¯Gt] incurs a bounded bias bt relative to ∇F (Wt):
+
+E[ ¯Gt] = Exi∼D [ ˆGt,i ] = ∇F (Wt) + bt, with ∥bt∥2 ≤ ξ, 
+
+where bt captures the bias induced by layer-wise reweighted clipping, upper bounded by ξ. In addition, stochastic mini-13 Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+batch sampling contributes an additional bounded sampling error Vt, so that 
+
+¯Gt = Exi∼D [ ˆGt,i ] + Vt = E[ ¯Gt] + Vt, with ∥Vt∥2 ≤ V, 
+
+where V bounds the sampling deviation and is typically negligible in practice. Thus, the mini-batch-averaged layer-wise reweighted-and-clipped gradient decomposes as ¯Gt = ∇F (Wt) + bt + Vt. Moreover, for the differentially private update, let Zt = N (0 , C 2σ2I) denote the added Gaussian noise, then the update gradient is ˆGt = ¯Gt + 1 
+
+> |B t|
+
+Zt. We bound the variance of ˆGt by separating the contribution of sampling variability and the explicit Gaussian perturbation: 
+
+E∥ ˆGt − E[ ˆGt]∥22 = E∥ ¯Gt + 1
+
+|B t| Zt − E[ ¯Gt]∥22
+
+≤ E∥ ¯Gt − E[ ¯Gt]∥22 + E∥ 1 
+
+> |B t|
+
+Zt∥22 = E∥Vt∥22 + C2σ2d
+
+|B t|2
+
+≈ E∥Vt∥22 + C2σ2dq2N 2 ≤ V 2 + C2σ2dq2N 2 ,
+
+where d is the dimensionality of the parameter space W . Since Bt is Poisson-sampled from D, |B t| ≈ qN holds. 
+
+Assumption C.3 (Bounded Gradients) . We assume that the ℓ2-norm of ∇F (Wt) is bounded, ∥∇ F (Wt)∥2 ≤ M . And ¯Gt
+
+admits ∥ ¯Gt∥2 ≤ C, which follows from ∥ ¯Gt∥2 =
+
+∥∥∥ 1
+
+> |B t|
+
+∑
+
+> xi∈B t
+
+ˆGt,i 
+
+∥∥∥2
+
+≤ 1
+
+> |B t|
+
+∑ 
+
+> xi∈B t
+
+∥ ˆGt,i ∥2 = 1
+
+> |B t|
+
+∑ 
+
+> xi∈B t
+
+Ct,i ≤ C.C.2.2. D ETAILED PROOF 
+
+Proof. One-Step Progress . Leveraging the L-smoothness property (Assumption C.1), the following inequality holds: 
+
+F (Wt+1 ) ≤ F (Wt) + ⟨∇ F (Wt), W t+1 − Wt⟩ + L
+
+2 ∥Wt+1 − Wt∥22
+
+= F (Wt) − ηt⟨∇ F (Wt), ˆGt⟩ + Lη 2
+
+> t
+
+2 ∥ ˆGt∥22.
+
+Conditioning on Wt and taking expectation over the stochasticity in ˆGt (from mini-batch sampling and noise perturbation), 
+
+E[F (Wt+1 )|Wt] ≤ F (Wt) − ηt⟨∇ F (Wt), E[ ˆGt|Wt]⟩ + Lη 2
+
+> t
+
+2 E[∥ ˆGt∥22|Wt].
+
+From Assumption C.2, we know that E[ ˆGt|Wt] = E[ ¯Gt|Wt] = ∇F (Wt) + bt. Substituting this into the inequality: 
+
+E[F (Wt+1 )|Wt] ≤ F (Wt) − ηt⟨∇ F (Wt), ∇F (Wt) + bt⟩ + Lη 2
+
+> t
+
+2 E[∥ ˆGt∥22|Wt].
+
+The second moment of the stochastic gradient estimator, E[∥ ˆGt∥22], can be decomposed into the squared norm of its mean and its variance: E[∥ ˆGt∥22] = ∥E[ ˆGt]∥22 + Var ( ˆGt), where ∥E[ ˆGt]∥22 = ∥E[ ¯Gt]∥22 = ∥∇ F (Wt) + bt∥22 and Var ( ˆGt) = 
+
+E∥ ˆGt − E[ ˆGt]∥22 = E∥ ˆGt − E[ ¯Gt]|22 ≤ V 2 + C2σ2d 
+
+> |B t|2
+
+(Assumption C.2). Combining these elements, we obtain the overall bound: E[∥ ˆGt∥22] ≤ ∥∇ F (Wt) + bt∥22 + V 2 + C2σ2d 
+
+> |B t|2
+
+. Substituting back into the inequality for E[F (Wt+1 )|Wt]:
+
+E[F (Wt+1 )|Wt] ≤ F (Wt) − ηt∥∇ F (Wt)∥22 − ηt⟨∇ F (Wt), b t⟩ + Lη 2
+
+> t
+
+2
+
+(
+
+∥∇ F (Wt) + bt∥22 + V 2 + C2σ2d
+
+|B t|2
+
+)
+
+.
+
+As ⟨∇ F (Wt), b t⟩ ≥ −∥∇ F (Wt)∥2∥bt∥2 ≥ − M ξ and ∥∇ F (Wt) + bt∥22 = ∥∇ F (Wt)∥22 + ∥bt∥22 + 2 ⟨∇ F (Wt), b t⟩ ≤ 
+
+M 2 + ξ2 + 2 M ξ ,
+
+E[F (Wt+1 )|Wt] ≤ F (Wt) − ηt∥∇ F (Wt)∥22 + ηtM ξ + Lη 2
+
+> t
+
+2
+
+(
+
+M 2 + ξ2 + 2 M ξ + V 2 + C2σ2dq2N 2
+
+)
+
+,
+
+where |B t| ≈ qN . Rearranging terms to isolate gradient norm: 
+
+ηt∥∇ F (Wt)∥22 ≤ F (Wt) − E[F (Wt+1 )|Wt] + ηtM ξ + Lη 2
+
+> t
+
+2
+
+(
+
+(M + ξ)2 + V 2 + C2σ2dq2N 2
+
+)
+
+14 Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+Telescoping and Convergence Rate. Taking the total expectation and summing the inequality over t = {0, . . . , T − 1}
+
+,and for simplicity, assuming a constant learning rate ηt: 
+
+> T−1
+
+∑
+
+> t=0
+
+ηt∥∇ F (Wt)∥22
+
+≤ 
+
+> T−1
+
+∑
+
+> t=0
+
+(F (Wt) − F (Wt+1 )) +  
+
+> T−1
+
+∑
+
+> t=0
+
+ηtM ξ + 
+
+> T−1
+
+∑
+
+> t=0
+
+Lη 2
+
+> t
+
+2
+
+(
+
+(M + ξ)2 + V 2 + C2σ2dq2N 2
+
+)
+
+= F (W0) − F (WT ) + T η tM ξ + T Lη 2
+
+> t
+
+2
+
+(
+
+(M + ξ)2 + V 2 + C2σ2dq2N 2
+
+)
+
+.
+
+Let F ∗ be the optimal function value such that F (WT ) ≥ F ∗, then, 
+
+ηtT −1∑
+
+> t=0
+
+∥∇ F (Wt)∥22 ≤ F (W0) − F ∗ + T η tM ξ + T Lη 2
+
+> t
+
+2
+
+(
+
+(M + ξ)2 + V 2 + C2σ2dq2N 2
+
+)
+
+.
+
+Dividing by T η t:
+
+1
+
+T 
+
+> T−1
+
+∑
+
+> t=0
+
+∥∇ F (Wt)∥22 ≤ F (W0) − F ∗
+
+T η t
+
++ M ξ + Lη t
+
+2
+
+(
+
+(M + ξ)2 + V 2 + C2σ2dq2N 2
+
+)
+
+.
+
+Setting the learning rate ηt = η/ √T , and choosing η = Θ(1 /L ) (i.e., η ∝ 1/L ), the convergence guarantee is: 
+
+1
+
+T 
+
+> T−1
+
+∑
+
+> t=0
+
+∥∇ F (Wt)∥22 ≤ O
+
+( L(F (W0) − F ∗)
+
+√T
+
+)
+
++ O(M ξ ) + O
+
+( (M + ξ)2 + V 2 + C2σ2dq2N 2
+
+√T
+
+)
+
+.
+
+This result aligns with the convergence guarantee presented in Theorem 5.2. For sufficiently large T , the terms scaling with 1√T diminish, leaving the bias term O(M ξ ) as a potential bottleneck for convergence to a true zero gradient. 
+
+## D. Detailed Analysis of Bias Term bt
+
+In Stochastic Gradient Descent (SGD), the gradient for xi in D at iteration t is denoted by Gt,i = [ g(1)  
+
+> t,i
+
+, . . . , g (L) 
+
+> t,i
+
+], where 
+
+L is the total number of layers and g(l) 
+
+> t,i
+
+denotes the gradient with respect to the parameters of the l-th layer. LM-DP-SGD extends this formulation by introducing the expected layer-wise reweighted-and-clipped gradient for each layer l:
+
+E[ˆ g(l) 
+
+> t,i
+
+] = 1
+
+N
+
+∑
+
+> xi∈D
+
+Ct,i 
+
+w(l) 
+
+> t
+
+g(l)
+
+> t,i
+
+∥g(l) 
+
+> t,i
+
+∥2
+
+, (6) where Ct,i = min( C, ∥Gt,i ∥2) is the ℓ2-norm of the clipped gradient of xi in standard DP-SGD, and w(l) 
+
+> t
+
+is the reweighting coefficient for layer l at iteration t. Then E[ ˆGt,i ] = 
+
+[
+
+E[ˆ g(1)  
+
+> t,i
+
+], . . . , E[ˆ g(L) 
+
+> t,i
+
+]
+
+]
+
+, with the layer-wise reweighting coefficients constrained by ∑Ll=1 (w(l) 
+
+> t
+
+)2 = 1 .The convergence analysis relies on the assumption that E[ ˆGt,i ] = ∇F (Wt) + bt, where ∇F (Wt) = Exi∼D [∇F (xi; Wt)] 
+
+is the expected true gradient, bt is the bias induced by layer-wise reweighted clipping and is assumed to be bounded as 
+
+∥bt∥2 ≤ ξ for all t. This section explores the structure of bt and how the layer-specific reweighting coefficients w(l)
+
+> t
+
+influence it, with the goal of minimizing the bias upper bound ξ.
+
+D.1. Optimization Problem 
+
+We compute E[ˆ g(l) 
+
+> t,i
+
+] with respect to the private training set D as: 
+
+E[ˆ g(l) 
+
+> t,i
+
+] = Exi∼D
+
+[
+
+Ct,i 
+
+w(l) 
+
+> t
+
+g(l)
+
+> t,i
+
+∥g(l) 
+
+> t,i
+
+∥2
+
+]
+
+= w(l) 
+
+> t
+
+·
+
+[
+
+1
+
+N
+
+∑
+
+> xi∈D
+
+Ct,i 
+
+g(l)
+
+> t,i
+
+∥g(l) 
+
+> t,i
+
+∥2
+
+]
+
+.
+
+15 Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+We define: 
+
+u(l) 
+
+> t
+
+= Exi∼D
+
+[
+
+Ct,i 
+
+g(l)
+
+> t,i
+
+∥g(l) 
+
+> t,i
+
+∥2
+
+]
+
+=
+
+[
+
+1
+
+N
+
+∑
+
+> xi∈D
+
+Ct,i 
+
+g(l)
+
+> t,i
+
+∥g(l) 
+
+> t,i
+
+∥2
+
+]
+
+, (7) whose norm can be bounded using Jensen’s inequality: 
+
+∥u(l) 
+
+> t
+
+∥2 =
+
+∥∥∥∥∥Exi∼D
+
+[
+
+Ct,i 
+
+g(l)
+
+> t,i
+
+∥g(l) 
+
+> t,i
+
+∥2
+
+]∥ ∥∥∥∥2
+
+≤ Exi∼D
+
+∥∥∥∥∥Ct,i 
+
+g(l)
+
+> t,i
+
+∥g(l) 
+
+> t,i
+
+∥2
+
+∥∥∥∥∥2
+
+= Exi∼D
+
+[
+
+Ct,i 
+
+∥∥∥∥∥
+
+g(l)
+
+> t,i
+
+∥g(l) 
+
+> t,i
+
+∥2
+
+∥∥∥∥∥2
+
+]
+
+= Exi∼D [Ct,i ] ≤ C. 
+
+So the expected layer-wise reweighted-and-clipped gradient is: 
+
+E[ ˆGt,i ] = [ w(1)  
+
+> t
+
+u(1)  
+
+> t
+
+, . . . , w (L) 
+
+> t
+
+u(L) 
+
+> t
+
+].
+
+The bias term bt = E[ ˆGt,i ] − ∇ F (Wt) can be expressed layer-wise. We decompose ∇F (Wt) as ∇F (Wt) =[∇F (1) (Wt), . . . , ∇F (L)(Wt)] with ∇F (l)(Wt) = Exi∼D [g(l) 
+
+> t,i
+
+] the layer-l component. Then: 
+
+bt = [ w(1)  
+
+> t
+
+u(1)  
+
+> t
+
+− ∇ F (1) (Wt), . . . , w (L) 
+
+> t
+
+u(L) 
+
+> t
+
+− ∇ F (L)(Wt)] .
+
+The squared Euclidean norm of the bias is then: 
+
+∥bt∥22 =
+
+> L
+
+∑
+
+> l=1
+
+∥∥∥w(l) 
+
+> t
+
+u(l) 
+
+> t
+
+− ∇ F (l)(Wt)
+
+∥∥∥22
+
+. (8) The objective is to determine the layer-wise reweighting vector wt = [ w(1)  
+
+> t
+
+, . . . , w (L) 
+
+> t
+
+] subject to ∑
+
+> l
+
+(w(l) 
+
+> t
+
+)2 = 1 , that minimizes the bias norm ∥bt∥2 and thus its upper bound ξ. Formally, we solve: 
+
+min 
+
+> wt∈RL
+
+∥bt∥2, s.t. ∑
+
+> l
+
+(w(l) 
+
+> t
+
+)2 = 1 . (9) 
+
+D.2. Optimal Reweighting for Bias Minimization 
+
+Expanding Eq.(9), we obtain: 
+
+∥bt∥22 =
+
+> L
+
+∑
+
+> l=1
+
+(
+
+(w(l) 
+
+> t
+
+)2∥u(l) 
+
+> t
+
+∥22 − 2w(l) 
+
+> t
+
+(u(l) 
+
+> t
+
+∇F (l)(Wt)) + ∥∇ F (l)(Wt)∥22
+
+)
+
+.
+
+Let Al = ∥u(l) 
+
+> t
+
+∥22 and Bl = u(l) 
+
+> t
+
+· ∇ F (l)(Wt). Disregarding the constant term ∑ 
+
+> l
+
+∥∇ F (l)(Wt)∥22, we aim to minimize: 
+
+g(wt) = 
+
+> L
+
+∑
+
+> l=1
+
+(
+
+(w(l) 
+
+> t
+
+)2Al − 2w(l) 
+
+> t
+
+Bl
+
+)
+
+subject to the constraint h(wt) = ∑Ll=1 (w(l) 
+
+> t
+
+)2 − 1 = 0 .Applying the method of Lagrange multipliers, we define 
+
+L(wt, λ ) = 
+
+> L
+
+∑
+
+> l=1
+
+(
+
+(w(l) 
+
+> t
+
+)2Al − 2w(l) 
+
+> t
+
+Bl
+
+)
+
+− λ
+
+( L∑
+
+> l=1
+
+(w(l) 
+
+> t
+
+)2 − 1
+
+)
+
+.
+
+Taking the partial derivative with respect to w(l) 
+
+> t
+
+and enforcing stationarity yields ∂L
+
+> ∂w (l)
+> t
+
+= 2 w(l) 
+
+> t
+
+Al − 2Bl − 2λw (l) 
+
+> t
+
+= 0 .Hence, the optimal solution for each layer is 
+
+w(l) 
+
+> t
+
+= Bl
+
+Al − λ = u(l) 
+
+> t
+
+· ∇ F (l)(Wt)
+
+∥u(l) 
+
+> t
+
+∥22 − λ . (10) 16 Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+Substituting Eq.(10) into the constraint ∑Ll=1 (w(l) 
+
+> t
+
+)2 = 1 :
+
+> L
+
+∑
+
+> l=1
+
+(
+
+u(l) 
+
+> t
+
+· ∇ F (l)(Wt)
+
+∥u(l) 
+
+> t
+
+∥22 − λ
+
+)2
+
+= 1 . (11) The Lagrange multiplier λ is thus determined by solving Eq.((11)), which uniquely specifies the optimal weights w(l) 
+
+> t
+
+that minimize the bias ∥bt∥22 under the unit-norm constraint. Mathematically, solving Eq.(11) for λ is intricate, as it potentially requires the identification of roots of a high-degree polynomial. In practice, an efficient bisection search can be used to obtain λ. The resulting λ determines the optimal coef-ficients w(l) 
+
+> t
+
+, which minimize ∥bt∥2 under the unit-norm constraint. In our experiments, we benchmark this LM-DP-SGD variant against other DP-SGD methods. To reduce computational overhead, we omit the bias from mini-batch sampling, which is typically negligible in practice. Under this simplification, the expected true gradient of layer l at iteration t can be approximated by the mini-batch average ∇F (l)(Wt) ≃ 1
+
+> |B t|
+
+∑ 
+
+> xt∈B t
+
+g(l) 
+
+> t,i
+
+, and similarly u(l) 
+
+> t
+
+≃ 1
+
+> |B t|
+
+∑
+
+> xt∈B t
+
+[
+
+Ct,i g(l) 
+
+> t,i
+> ∥g(l)
+> t,i ∥2
+
+]
+
+.
+
+## E. Ablation Studies 
+
+We perform ablation studies of LM-DP-SGD on D-CNN trained with CIFAR10. Specifically, for layer-wise MIA risk estimation, we evaluate the robustness of the assessment under varying shadow dataset distributions. For private training, we analyze the effects of the privacy budget ε, the clipping threshold C and the heterogeneity emphasis factor r on model utility. 
+
+E.1. Impact of Shadow Dataset Distribution 
+
+In this section, we select shadow datasets whose distributions are either similar to the private training set (ImageNet) or dissimilar (SVHN, MNIST, VGGFace2) to evaluate MIA risk of IRs. For MNIST, each 28 × 28 grayscale image is resized to 32 × 32 using bilinear interpolation and converting it to 3-channel RGB via channel replication to match the CIFAR10 input format. For VGGFace2, faces are detected and aligned using a standard five-point similarity transform. From the aligned image, we extract a square center crop with a 10% margin around the face bounding box to preserve facial structure, then downsample to 32 × 32 using bicubic interpolation. To match CIFAR10’s number of classes, we construct an identity-classification shadow task using the ten identities with the largest number of samples. As reported in Table 5, across different shadow datasets, MIA error rates at different layers remain comparable and consistently decrease with increasing layer depth, indicating that layer-wise MIA risk estimation is robust to shadow dataset distribution. Since subsequent training further amplify layer-wise heterogeneity to highlight differences in layer risk, the influence of shadow-dataset selection on the private training can be safely disregarded.       
+
+> Table 5. Layer-wise MIA error rates across shadow datasets. Shadow Dataset Index of Intermediate Convolutional-Layer Layer-wise MIA Error Rates (%) ImageNet 1, 3, 5, 7, 8 40.4, 35.1, 31.7, 28.4, 26.9 SVHN 40.2, 35.0, 31.4, 28.1, 26.7 MNIST 39.9, 34.8, 31.4, 28.1, 26.5 VGGFace2 40.8, 35.5, 31.9, 28.7, 27.2
+
+E.2. Impact of Privacy Budget 
+
+A smaller ε signifies stronger privacy guarantees, and thus a larger noise scale, which degrades utility and training stability. As shown in Fig. 5(a), test accuracy consistently declines at small ε values, as heavier perturbations obscure true gradient directions and hinder effective model convergence; excessively small ε can even induce numerical instability, leading to substantial drops in test accuracy (e.g., ε = 3 .0). Conversely, increasing ε reduces the noise magnitude, leading to significant improvements in test accuracy. Notably, beyond a certain threshold (e.g., ε ≥ 8.0), test accuracy plateaus with no further substantive utility improvements. Correspondingly, the ℓ2-norm of the bias bt increases as ε decreases: larger noise results in more gradients with ℓ2-norms exceeding the fixed clipping threshold, amplifying clipping bias, and, under extreme noise, propagating instabilities that produce invalid (NaN) gradients and model collapse (e.g., ε = 3 .0). Increasing 17 Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+ε mitigates these effects by lowering the noise scale, reducing layer-wise reweighted clipping bias, and enhancing gradient fidelity—culminating in marked accuracy gains.      
+
+> (a) Test accuracy. (b) ℓ2-norm of bt.
+> Figure 5. Impact of privacy budget ε.
+
+E.3. Impact of Clipping Threshold 
+
+This section presents an ablation study on the clipping threshold C. As shown in Figure 6(a), small values of C impose overly restrictive constraints on gradient norms, reducing update magnitudes and slowing optimization. Such behavior may trap the optimizer in suboptimal minima, resulting in degraded test accuracy. In contrast, larger C values relax gradient constraints; after layer-wise reweighted clipping, gradients with smaller norms better retain their global magnitudes, im-proving gradient fidelity and enabling faster convergence to higher test accuracy. Figure 6(b) further illustrates a negative correlation between C and ℓ2-norm of bt. The pronounced bias observed at small C stems from two sources: (i) a higher proportion of gradients exceeding the threshold, which leads to more frequent clipping; and (ii) a stronger per-gradient 
+
+ℓ2-norm reduction.      
+
+> (a) Test accuracy. (b) ℓ2-norm of bt.
+> Figure 6. Impact of clipping threshold C.
+
+E.4. Impact of Layer-wise MIA-Risk Heterogeneity Emphasis Factor 
+
+This section examines how the layer-wise MIA-risk heterogeneity emphasis factor r affects model learning dynamics and resilience of IRs against MIAs. As depicted in Figure 7, a larger r accentuates the heterogeneity in layer-wise vulnerability to MIAs. This results in reduced model utility, primarily because higher r values intensify the protection of more sensitive layers by shrinking their ℓ2-norms. These layers are typically closer to the output, thus diminishing the model’s predictive accuracy. Additionally, increasing r enlarges ∥bt∥2, since stronger layer-wise reweighting accentuates gradient-norm dis-parities, introducing greater bias through layer-wise reweighted clipping. Furthermore, Table 6 quantitatively confirms that increasing r strengthens privacy protection in deeper, more sensitive layers, evidenced by lower MIA accuracy. However, this improvement comes at the cost of weaker privacy in shallower layers, which exhibit heightened vulnerability to MIAs. In summary, while a larger r bolsters the privacy of highly sensitive layers, it simultaneously compromises model utility. Thus, practical deployment requires careful tuning of r to balance privacy preservation and model performance. 18 Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD 
+
+(a) Test accuracy. (b) ℓ2-norm of bt.
+
+Figure 7. Impact of heterogeneity emphasis factor r.
+
+Table 6. MIA accuracy under varying r values. Heterogeneity Emphasis Factor r Index of Intermediate Convolutional-Layer MIA Accuracy under LM-DP-SGD (%) 1.0 1, 3, 5, 7, 8 57.4, 63.7, 65.5, 67.5, 69.4 2.0 57.8, 63.9, 65.4, 67.2, 69.1 3.0 59.0, 64.3, 65.2, 66.5, 67.9 4.0 60.3, 64.8, 64.9, 65.8, 67.2 5.0 60.9, 65.2, 64.6, 65.4, 66.9 
+
+## F. Running Time and Resources 
+
+Tables 7 and 8 present the average per-iteration runtime (in seconds) and the peak GPU memory utilization (in MiB) of different DP-SGD frameworks during private training. Compared to baselines that perform direct clipping of global per-example gradients, LM-DP-SGD incurs additional overhead from layer-wise reweighted clipping in both computation and memory. Empirically, the runtime remains comparable to baselines, and the modest increase in GPU utilization is limited and remains practically acceptable. 
+
+Table 7. Average running time (seconds) per iteration. 
+
+Dataset Model DP-SGD Auto-S/NSGD DP-PSAC LM-DP-SGD MNIST S-CNN 0.0984 0.1071 0.1049 0.1078 CIFAR10 D-CNN 0.1516 0.1569 0.1536 0.1632 CIFAR100 ResNet-18 0.2735 0.2845 0.2857 0.2860 CelebA VGG-16 0.2557 0.2593 0.2615 0.2654 
+
+Table 8. Peak GPU memory utilization (MiB). 
+
+Dataset Model DP-SGD Auto-S/NSGD DP-PSAC LM-DP-SGD MNIST S-CNN 2342 3360 3526 3734 CIFAR10 D-CNN 14524 15498 15926 19918 CIFAR100 ResNet-18 40378 41295 413452 46578 CelebA VGG-16 36304 37459 37857 40352 
+
+19

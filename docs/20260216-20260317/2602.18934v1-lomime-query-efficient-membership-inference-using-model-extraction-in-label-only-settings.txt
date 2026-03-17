@@ -1,0 +1,472 @@
+Title: LoMime: Query-Efficient Membership Inference using Model Extraction in Label-Only Settings
+
+URL Source: https://arxiv.org/pdf/2602.18934v1
+
+Published Time: Tue, 24 Feb 2026 01:39:04 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# LoMime: Query-Efficient Membership Inference using Model Extraction in Label-Only Settings 
+
+Abdullah Caglar Oksuz 1 Anisa Halimi 2 Erman Ayday 1
+
+> 1
+
+Department of Computer and Data Sciences, Case Western Reserve University (CWRU) 
+
+> 2
+
+IBM Research Lab in Dublin 
+
+abdullahcaglar.oksuz@case.edu, anisa.halimi@ibm.com, erman.ayday@case.edu 
+
+## Abstract 
+
+Membership inference attacks (MIAs) threaten the privacy of machine learning models by revealing whether a specific data point was used during training. Ex-isting MIAs often rely on impractical assumptions—such as access to public datasets, shadow models, confidence scores, or training data distribution knowl-edge—making them vulnerable to defenses like confidence masking and adversarial regularization. Label-only MIAs, even under strict constraints suffer from high query requirements per sample. We propose a cost-effective label-only MIA frame-work based on transferability and model extraction. By querying the target model 
+
+M using active sampling, perturbation-based selection, and synthetic data, we extract a functionally similar surrogate S on which membership inference is per-formed. This shifts query overhead to a one-time extraction phase, eliminating repeated queries to M . Operating under strict black-box constraints, our method matches the performance of state-of-the-art label-only MIAs while significantly reducing query costs. On benchmarks including Purchase, Location, and Texas Hospital, we show that a query budget equivalent to testing ≈ 1% of training samples suffices to extract S and achieve membership inference accuracy within 
+
+±1% of M . We also evaluate the effectiveness of standard defenses proposed for label-only MIAs against our attack. 
+
+## 1 Introduction 
+
+The widespread deployment of machine learning (ML) models in sensitive domains (e.g., health-care [ 1], finance [ 2]) raises critical concerns about privacy and model security. These models are often trained on data containing personal medical records, financial transactions, or behavioral patterns. When exposed via public APIs, they can become prime targets for adversaries seeking to exploit privacy vulnerabilities through black-box interactions. A prominent threat in this context is the membership inference attack (MIA), where an adversary aims to determine whether a specific sample was part of a model’s training set [ 3]. Even without direct data reconstruction, such inferences can lead to harmful disclosures, such as a patient’s participation in a disease-specific clinical trial. 
+
+Related work in membership inference attacks. Early MIAs [ 3, 4, 5 , 6 , 7, 8, 9, 10 , 11 , 12 , 13 ,14 , 15 , 16 ] consider white-box or confidence-based settings, assuming access to confidence scores, auxiliary datasets, or shadow models. These assumptions are often unrealistic in practice and can be mitigated by defenses such as confidence masking [ 3, 4, 6 , 15 , 16 ], adversarial regularization [ 14 ] or generalization enhancement [ 3, 4, 6 , 17 , 18 ]. Recent MIA studies focus on various research directions such as conducting attacks with lower costs [ 19 ], designing attacks against large language models [ 20 ,21 , 22 ], utilizing AI explainability [ 23 ], using MIAs for auditing models [ 24 ], proposing attacks with high accuracy in low FPR-regimes [ 25 ], or developing attacks under label-only settings [ 26 , 27 ]. In this work, we focus on the restrictive and realistic label-only MIAs. Yeom et al. [ 28 ] introduced a naive 
+
+Preprint. Under review. 
+
+> arXiv:2602.18934v1 [cs.LG] 21 Feb 2026
+
+baseline for label-only membership inferences such that correctly labeled samples are considered as members. Choquette-Choo et al. [ 26 ] introduced a method that infers membership by evaluating the robustness of predicted labels under input perturbations, showing that significant leakage is possible even in highly restricted settings. However, their method requires a source model trained on labeled data to calibrate the membership threshold τ , which may not align with the target model’s training distribution. Li et al. [ 27 ] proposed a more constrained approach that calibrates τ on adversarial synthetic samples, removing the need for external labels but increasing the query overhead. While these techniques reduce assumptions of early MIAs, they remain highly query-intensive. Determining membership for a single sample may require thousands of queries, and threshold calibration adds further cost. These inefficiencies limit scalability, particularly in real-world systems constrained by API rate limits or adversarial query detection. 
+
+Related work in model extraction attacks. The constraints in the transfer attack variant of label-only MIAs [ 26 , 27 ] can be re-formulated using another common privacy attack in the literature. Model extraction attacks [ 29 , 30 , 31 , 32 , 33 , 34 , 35 , 36 ] aim to replicate the functionality of a target model by strategically querying it and training a surrogate model to approximate its decision boundaries. These attacks pose a serious risk in machine learning-as-a-service (MLaaS) settings, where deployed models are exposed via public APIs. Depending on the level of feedback available—probabilities, logits, or just predicted labels—attackers can adapt their strategies to recover models with varying fidelity. In scenarios where only hard-label outputs are exposed, model extraction becomes more challenging but remains feasible, particularly with active sampling or data-free approaches [36]. 
+
+The proposed framework. In this paper, we propose a unified framework that is influenced by the transfer attack [ 26 , 27 ] variant of label-only MIAs, combining it with model extraction. Rather than querying the target model M for each membership decision, we first extract a high-fidelity surrogate model S using a query-efficient sampling strategy, and then perform all membership inference offline. This shifts the query burden into a one-time extraction phase and enables unrestricted inference on any number of samples without further access to M . While this may incur a higher initial cost than querying a few samples directly, the approach becomes highly efficient when membership inference is needed at scale. Our method builds upon the MARICH extraction attack [ 36 ], which uses active-learning based sampling techniques and mutual information maximization to enable label-only model extraction. Unlike MARICH, our framework removes the dependency on public datasets by adversarial synthetic sample generation and perturbation from another label-only extraction attack AUTOLYCUS [ 37 ]. This yields a fully self-contained extraction strategy consistent with black-box, data-free assumptions. Once S is trained, the adversary can conduct unrestricted membership inference offline, with no additional queries to M . Our experiments show that surrogate models extracted from hard-label predictions can replicate not only a model’s predictions but also its underlying membership leakage behavior, which is in accordance with the model’s transferability property from prior studies [38, 39, 40, 41]. 
+
+Our key contributions in this work are as follows: 
+
+• We propose a method that provides a cost-efficient alternative to label-only membership inference attacks by enabling offline membership inference across unlimited samples, once the model is extracted. This is particularly advantageous when evaluating membership at scale, while traditional label-only MIAs may remain preferable for small query budgets. • The proposed method matches the inference performance of prior label-only attacks closely using the query budget required to evaluate just ≈ 1% of the training set. • We design a fully self-contained extraction strategy that eliminates or minimizes the need for public datasets and completely negates confidence scores. • We demonstrate that extracted models retain sufficient membership leakage signals for effective inference. Across benchmark datasets, our approach achieves membership accuracy and AUC within 1–5% of the target model—and in many cases, with no observable degradation—despite operating under strict black-box constraints. • We assess the robustness of our attack against defenses suggested to be effective against label-only MIAs, including dropout [ 18 ], L2 regularization [ 42 , 43 ], and DP-SGD [ 17 ], and show that defenses other than strong differential privacy have limited effect when applied. 2The rest of this paper is organized as follows. Section 2 describes our system/threat model. Section 3 presents our proposed framework. Section 4 details experimental results. Section 5 evaluates the impact of defenses. Section 6 concludes the paper and suggests potential future directions. 
+
+## 2 System and Threat Model 
+
+We consider a machine learning-as-a-service (MLaaS) setting in which a target model M is deployed behind a query interface. This model is trained on a private dataset DM and accepts input samples 
+
+xi, returning only the predicted class label yi = M (xi). The adversary has black-box access to M :they can query the model with arbitrary inputs and observe the predicted labels, but have no access to its internal parameters, architecture, training data, or confidence scores. The adversary is assumed to know the model type (e.g., neural network, decision tree), the number of input features nj , the number of output classes nc, and the value domains of both features and labels. For categorical features, the domain is Rj = {0, 1, . . . , j max }, while for continuous features it is Rj = [ jmin , j max ].The class label range is Rc = {0, 1, . . . , n c − 1}.Our attack proceeds in two phases. In the first phase, the adversary performs model extraction to train a surrogate model S that approximates M . The extraction process is initialized with a minimal auxiliary dataset DA and proceeds by generating diverse, informative queries using perturbation-based augmentation and active learning strategies. These queries are labeled by M and added to a growing synthetic dataset DS . Once the training is complete, the fidelity of S to M is evaluated using a neutral dataset DN . In the second phase, the adversary conducts a label-only membership inference attack on S. For a target sample xi, adversary generates its minimally perturbed adversarial counterpart ˆxi using only the surrogate model and compute the ℓ2 distance between them. Samples are classified as members of M ’s training set if this distance is below a calibrated threshold τ , i.e., Member if ∥xi − ˆxi∥2 < τ , and non-members otherwise. This threshold is then calibrated in an unsupervised manner using synthetic samples evaluated on S or manually set by the adversary, without requiring labels or training data from M . A neutral dataset DN is also used to assess the attack’s performance and to evaluate the fidelity of S relative to M . For further details about the commonly used symbols and notations in this paper, refer to Section A in Appendix. 
+
+## 3 Methodology 
+
+As outlined in the system description, the first stage of our attack involves model extraction. Since the target model M only provides labels, we require a technique that is both query-efficient and capable of producing surrogate models that are equivalent to the target model in terms of their distributions. In label-only scenarios, the extraction technique we adopt is MARICH [ 36 ], a query-efficient, label-only, multi-stage extraction method based on active-learning and, primarily focused on stealing image classifiers by leveraging public datasets as auxiliary resources. These public datasets may or may not be derived from the same distribution as the target model’s training data DM . These datasets are then selectively utilized in optimized sample selection for the active learning of the surrogates. While MARICH is tailored for image data and, to a degree, text data, applying similar techniques to tabular datasets presents additional challenges due to the absence of spatial relationships and the reliance solely on feature-level attributions. To address these challenges and represent a more realistic scenario where public datasets may not be available, we incorporate a synthetic data generation scheme from another label-only extraction framework, AUTOLYCUS [ 37 ]. AUTOLYCUS generates synthetic datasets through dynamic augmentation and perturbation, which are used in optimal sample selection. AUTOLYCUS optimizes data generation by applying perturbations only to the most important k features, as identified via AI explanations (XAI). Since we consider a scenario where XAI is unavailable, we only adopt its sample-wise perturbation strategy. Specifically, our attack combines the synthetic data generation of AUTOLYCUS with MARICH’s gradient-based active learning methodology to construct surrogates S. Technical overview of our attack is provided below. 
+
+3.1 Model Extraction Attack 
+
+MARICH is a black-box, query-efficient model extraction attack that operates within a variational optimization framework, balancing information maximization and label agreement between the target model M and the extracted model S. The extraction process is framed as an optimization problem 3aimed at maximizing mutual information between M and S. In each tth iteration of active learning, let DtQ denote the query dataset used for optimization, obtained by augmenting and perturbing DA.The optimization objective is defined as: 
+
+max 
+
+> ω,D tQ
+
+I  Pr( M (Q), Q ) ∥ Pr( S(Q), Q ), (1) where I(·) represents mutual information, Q ∼ DtQ indicates input features from the query distribu-tion, and ω denotes the parameters of S. The goal is to reduce the mismatch between the distributions while enhancing the informativeness of the extracted model. The extraction process in our framework consists of five iterative steps: aggregating and perturbing 
+
+DA using AUTOLYCUS, followed by entropy sampling, entropy gradient sampling, and loss-based sampling techniques from active learning, as implemented in MARICH, and finally re-training S
+
+with the newly acquired samples DtS .The extraction begins by training an initial surrogate model S0 using DA labeled by M . For any iteration t, DA is augmented by a factor of α, which represents the augmentation factor, creating a query dataset DtQ where DA is repeated α times, with |DQ| = |DA| ∗ α. Then, each sample in DtQ
+
+is assigned a unique perturbation mask. This mask alters the features with a probability ρ. For binary features, the mask applies Bernoulli noise to flip the features, while for continuous features, the mask applies noise based on the standard deviation σj of each feature or a user-set arbitrary noise value, while ensuring that the feature remains within its range Rj . Once each sample in DtQ is ensured to be unique and not already part of the surrogate training set from previous iterations ( Dt−1 
+
+> S
+
+), DtQ is sent for entropy sampling. In MARICH, DtQ is directly obtained from a larger public dataset DP where 
+
+|DP | ≫ | DM | and DtQ = DP \ Dt−1 
+
+> S
+
+without any augmentation or perturbation. In the entropy sampling stage, a subset Qt 
+
+> entropy
+
+of size |Qt
+
+> entropy
+
+| = B is selected from DtQ by maximizing the entropy of predictions from the extracted model St−1:
+
+Qt 
+
+> entropy
+
+= arg max 
+
+> Q⊆DtQ,|Q|=B
+
+H St−1(Q), (2) where H(·) denotes the entropy function. This procedure selects the subset Qt 
+
+> entropy
+
+of size B from 
+
+DtQ where St−1 is least certain. In the entropy gradient sampling stage, Qt 
+
+> entropy
+
+is further refined by clustering the entropy gradients 
+
+∇QH(St−1(Q)) of the selected queries using k-means clustering. The number of clusters k typically corresponds to the number of possible labels nc. The objective is to ensure that a sufficiently diverse subset of selected queries Qt 
+
+> entropy
+
+from each label is used during the extraction process. From the clustered queries, the most diverse subset Qt
+
+> grad
+
+, of size γ1B, is selected to maximize input-space variability coverage: 
+
+Qt 
+
+> grad
+
+= arg min 
+
+> Q⊆Qt
+> entropy ,|Q|=γ1B
+
+X
+
+> q∈Q
+
+X
+
+> c∈C
+
+∥∇ q H(St−1(q)) − c∥2, (3) where C represents the cluster centers. This stage enhances the robustness and diversity of the extraction process by ensuring balanced label representation and broad input-space variability. In the loss sampling stage, Qt 
+
+> grad
+
+is further refined by selecting γ1γ2B queries, denoted as Qt
+
+> loss
+
+.These are the samples from Qt 
+
+> grad
+
+that are closest to the surrogate training samples, with the greatest loss between the target model M and the extracted model St−1. The loss between M and St−1 is calculated for each sample in Dt−1 
+
+> S
+
+:
+
+l(M (x), S t−1(x)) , x ∈ Dt−1 
+
+> S
+
+. (4) The top k samples from Dt−1 
+
+> S
+
+with the highest loss are selected as Dt−1
+
+> S_topk _loss
+
+. Then, γ1γ2B
+
+samples from Qt 
+
+> grad
+
+closest to Dt−1 
+
+> S_topk _loss
+
+are selected as Qt
+
+> loss
+
+:
+
+Qt 
+
+> loss
+
+= arg min 
+
+> Q⊆Qt
+> grad ,|Q|=γ1γ2B
+
+X
+
+> q∈Q
+
+X
+
+> s∈Dt−1
+> S_topk _loss
+
+∥q − s∥2. (5) 4Once Qt 
+
+> loss
+
+is selected, it is sent to M to obtain the predicted labels Y t 
+
+> loss
+
+= M (Qt
+
+> loss
+
+). These labeled samples are added to the training set as follows: 
+
+DtS = Dt−1 
+
+> S
+
+∪ Qt
+
+> loss
+
+, Y tS = Y t−1 
+
+> S
+
+∪ Y t
+
+> loss
+
+. (6) The extracted model St−1 is then updated to St by training it on the extended dataset: 
+
+St = train (DtS , Y tS ) (7) using standard optimization techniques such as stochastic gradient descent or Adam [ 44 ]. This query selection and model training process is repeated iteratively until the total query budget is exhausted or the desired level of fidelity F MS between the target and extracted model is achieved. At the end of the process, the final extracted model S (or Sfinal ) approximates M in terms of predictive distribution. This approach ensures high fidelity, informativeness, and diversity while maintaining query efficiency. 
+
+3.2 Membership Inference Attack 
+
+Extracting functionally equivalent surrogate model S from the target model M allows adversaries to perform membership inference attacks (MIAs) on a dataset Dmem (whose membership is aiming to determine) offline, circumventing the high query costs per sample associated with label-only attacks. This also eliminates the need for unrealistic assumptions, such as the use of shadow datasets and an excessive number of online adversarial membership queries, which are typically required by both traditional and label-only MIAs. Label-only MIAs can achieve performance comparable to traditional MIAs when query budgets are not constrained [ 26 ]. To simulate a scenario where S may originate from an external resource or be deployed in an open repository with no access to DS , and to account for the assumption that no data from the training distribution of the target model M is available, we conduct an unsupervised label-only MIA on S in the second stage of our attack. For each sample xi ∈ Dmem , the unsupervised label-only membership inference attack is based solely on the hard-label prediction ˆyi = S(xi). The goal is to infer whether the sample xi was part of the training set of the target model M based on its proximity to the decision boundary of the surrogate model S. To perform this inference, we calculate the decision boundary distance dboundary (xi) for each sample xi ∈ Dmem using the formula: 
+
+dboundary (xi) = min 
+
+> δi∈Rd
+
+∥xi + δi∥2 subject to S(xi + δi)̸ = S(xi). (8) This distance measures how far the sample xi is from the decision boundary of the model S. Then, we use the calibrated threshold τ from the previous step to classify the sample as either a member or non-member. Specifically, we classify xi as a member if its distance from the decision boundary is less than or equal to the threshold τ :
+
+ˆmi =
+
+1 if dboundary (xi) ≤ τ
+
+0 if dboundary (xi) > τ, (9) where ˆmi denotes the predicted membership label for the sample xi.MIA begins with the calibration of the decision boundary distance threshold τ . To calibrate τ , we first generate a set of random samples Xrandom = {xi ∈ Rd \ DS }, where each sample xi is randomly distributed in the feature space of the target model’s training data. These samples serve as surrogate inputs for calibrating the decision boundary distance. For each generated sample xi, the goal is to determine the minimal perturbation δi ∈ Rd that causes a change in the model’s prediction. This is achieved by solving the following optimization problem: 
+
+dboundary (xi) = min 
+
+> δi∈Rd
+
+∥δi∥2 subject to S(xi + δi)̸ = S(xi). (10) Note that δi must be an integer for encoded categorical data when the model does not allow invalid queries (e.g., API access), which may hinder the efficiency of adversarial query generation. After computing the decision boundary distance dboundary (xi) for each sample xi, the threshold τ is set to the maximum of these distances: 
+
+τ = max 
+
+> xi∈Xrandom
+
+dboundary (xi). (11) This threshold τ represents the critical distance at which the model’s classification is expected to change and is used as the decision boundary for determining the membership status of other samples. 53.3 Performance Evaluation 
+
+The effectiveness of the label-only membership inference attack is evaluated by comparing the attack performance on both the target model M and the surrogate model S. The accuracy of the membership inference attack is computed by comparing the predicted membership labels ˆmi to the true membership labels mi for each sample xi in the membership dataset Dmem :Acc (model , D mem ) = 1
+
+|Dmem |
+
+> |Dmem |
+
+X
+
+> i=1
+
+1( ˆ mi = mi), (12) where 1( ˆ mi = mi) is the indicator function that is 1 if the predicted membership label matches the true membership label, and 0 otherwise. The goal is to compare the membership inference accuracy for S against M and assess how effectively the surrogates S mimics the target model M in terms of membership leakage. A lower accuracy on S compared to M suggests that the surrogate does not fully capture the membership leakage characteristics of the target model, potentially due to overfitting or underfitting during the extraction process. By conducting this analysis, we can quantify the effectiveness of the label-only membership inference attack in both the surrogate model and the target model. 
+
+## 4 Evaluation 
+
+In this section, we describe the datasets, experimental setup, metrics and the obtained results. Table 1: Dataset statistics, training configurations, and target model performance.                             
+
+> Dataset # of Total Samples (|D|)
+> # of Features
+> (nj)
+> # of Classes
+> (nc)
+> # of Training Samples (|DM|)
+> # of Auxiliary Samples (|DA|)ρM′sTesting Accuracy
+> Location 5,010 446 30 1,600 150 0.10 0.5984 Purchase 197,324 600 100 10,000 1,000 0.08 0.6565 Texas Hospital 67,330 6,170 100 10,000 1,000 0.005 0.5354
+
+4.1 Datasets 
+
+We evaluate our framework using three benchmark datasets widely adopted in privacy and security research: Location [ 3], Purchase [3], and Texas Hospital [ 3]. The key statistics of the datasets, training configurations, selected perturbation factors, and target model performance are summarized in Table 1. Note that all target models achieve close to perfect training accuracy ( ≈ 100% ), reflecting intentional overfitting to simulate realistic privacy risks in deployed machine learning systems. 
+
+4.2 Experimental Setup 
+
+In our experiments, both target M and surrogate models S are implemented and trained using 
+
+PyTorch . Following the setup of Shokri et al. [ 3], M are configured as feedforward neural networks with a single hidden layer of 128 nodes and the tanh activation function. Models are trained for up to 200 epochs using the AdamW [ 45 ] optimizer, with a learning rate of 0.001 and a weight decay coefficient of λ = 1e -7. Batch shuffling is applied at each epoch, with batch sizes of 100 for the Location dataset and 200 for the Purchase and Texas Hospital datasets. To simulate the adversary’s limited knowledge of dataset characteristics, augmentation and perturbation parameters used across all datasets during model extraction are set to ρ = σ(|xi > 0|), x i ∈ DA (σ is standard deviation), 
+
+k = nj (uniform binary flipping), α = 4, and γ1 = γ2 = 0.5. For further details of variability and computational resources used in our experimental setup, refer to Section B in Appendix. In the model extraction phase, the process is initialized using a small auxiliary dataset DA, followed by binary perturbations to generate informative queries. A key parameter in this stage is the perturbation factor ρ, which defines the probability of flipping each binary feature. To ensure that the generated queries remain realistic while effectively exploring the feature space, ρ is selected based on the distribution of active features within each dataset. Setting ρ too low can result in limited exploration beyond DA, whereas excessively high values lead to unrealistic and non-informative samples. As 60.0 0.2 0.4 0.6 0.8 1.0     
+
+> False Positive Rate
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> True Positive Rate
+> Model Comparison
+> AUC: 0.8919 -M
+> AUC: 0.8964 -S100 K
+> AUC: 0.8355 -S10 K
+> AUC: 0.5900 -S1K
+
+(a) Location 0.0 0.2 0.4 0.6 0.8 1.0      
+
+> False Positive Rate
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> True Positive Rate
+> Model Comparison
+> AUC: 0.8731 -M
+> AUC: 0.8652 -S1M
+> AUC: 0.7153 -S100 K
+> AUC: 0.5659 -S10 K
+
+(b) Purchase 0.0 0.2 0.4 0.6 0.8 1.0      
+
+> False Positive Rate
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> True Positive Rate
+> Model Comparison
+> AUC: 0.8415 -M
+> AUC: 0.8112 -S1M
+> AUC: 0.7163 -S100 K
+> AUC: 0.5212 -S10 K
+
+(c) Texas 
+
+Figure 1: ROC curves for membership inference attack on surrogate and target models across datasets. such, ρ is a critical hyperparameter that should be tuned to dataset characteristics, adversarial constraints, and the extent of available knowledge. Membership inference attacks are conducted in a strict label-only setting , leveraging the extracted surrogate models to minimize query overhead. We use the Adversarial Robustness Toolbox (ART) [46] to implement standardized label-only membership inference attacks. 
+
+4.3 Experiments 
+
+We assess the effectiveness of our attacks using four key metrics, grouped into two categories: model extraction metrics and membership inference metrics . The first two— fidelity of the extracted model and test accuracy —primarily evaluate the model extraction stage. Fidelity is quantifies the label agreement ( F MS ) over a neutral dataset ( DN ), which measures the percentage of predictions where S and M produce identical outputs, indicating how accurately S replicates M ’s decision boundaries. Test accuracy reflects the classification performance of both the surrogate model ( S) and the target model ( M ) on DN , providing a standardized evaluation of their generalization capabilities. The remaining two metrics— attack accuracy and the area under the ROC curve ( AUC )—are used to assess membership inference effectiveness, based on false positive rates (FPR) and true positive rates (TPR). While each metric primarily supports its corresponding attack component, they also offer insight into the relationship between extraction fidelity and membership leakage. We further evaluate the model extraction process by measuring how well the surrogate model S
+
+replicates the membership inference performance of the target model M in a black-box, label-only setting. We evaluate the attack across models extracted using different query budgets nq . For the Location dataset, we use nq ∈ { 1K, 10 K, 100 K}, and for the Purchase and Texas datasets, 
+
+nq ∈ { 10 K, 100 K, 1M}. Accordingly, a model denoted as S100K represents a surrogate trained by querying the target model 100,000 times. Our extraction and inference performances across different datasets and nq are provided in Table 2, and ROC curves are shown in Figure 1. Table 2: Performance summary of surrogate models and target model under varying query budgets. 
+
+Dataset Model Extraction Metrics Membership Inference Metrics 
+
+FSM Test Acc Attack Acc AUC 
+
+S1K S10K S100K S1K S10K S100K M S1K S10K S100K M S1K S10K S100K M
+
+Location 0.474 0.769 0.913 0.425 0.576 0.600 0.608 0.597 0.783 0.883 0.887 0.590 0.836 0.896 0.892 
+
+S10K S100K S1M S10K S100K S1M M S10K S100K S1M M S10K S100K S1M M
+
+Purchase 0.592 0.727 0.962 0.576 0.620 0.651 0.651 0.563 0.680 0.850 0.849 0.566 0.715 0.865 0.873 Texas 0.548 0.780 0.886 0.423 0.506 0.512 0.513 0.529 0.709 0.766 0.810 0.521 0.716 0.811 0.842 
+
+Across all datasets, we observe that increasing the query budget leads to consistent and often non-linear improvements in both model fidelity and membership inference performance. On the Location dataset, S1K achieves a fidelity of 0.474 and an AUC of 0.590 , which rise to 0.913 and 0.896 at S100 K.This near-target-level AUC highlights that once the surrogate approximates decision boundaries 7well enough, further fidelity gains offer diminishing privacy returns—suggesting a ceiling effect in membership inference performance once core boundary structure is captured. On the Purchase dataset, the surrogate’s fidelity reaches 0.962 and AUC reaches 0.865 at S1M,nearly matching the target model’s AUC of 0.873 . Interestingly, S100 K already achieves 0.850 
+
+attack accuracy and 0.865 AUC, indicating that most of the leakage is recoverable with substantially fewer queries. This is likely due to the Purchase dataset’s feature redundancy and more structured label–feature relationships, which allow decision boundary recovery with lower query complexity compared to higher-dimensional or noisier datasets. In contrast, the Texas dataset shows a more gradual trajectory. At S1M, the surrogate achieves 0.886 
+
+fidelity and 0.811 AUC, still below the target’s 0.842 AUC. The slower convergence suggests that high-dimensional, sparse, or less structured datasets require more extensive exploration to accurately approximate membership-sensitive regions. Furthermore, the ROC curves of the surrogate in Texas demonstrate a persistent gap in the low-FPR region, even at high query budgets. This emphasizes that decision boundary alignment in areas critical to high-precision privacy attacks is more difficult to replicate in complex feature spaces, even if the global prediction agreement (fidelity) is high. Overall, the results demonstrate that high surrogate fidelity is critical for strong membership inference performance, though the required threshold varies across datasets. On Location, S10 K achieves an AUC of 0.836 with only 0.769 fidelity, suggesting that partial boundary recovery may suffice in lower-dimensional or well-generalized settings. In contrast, for Purchase and Texas, meaningful replication of membership leakage only emerges once fidelity exceeds 0.85 , indicating that more complex or sparse feature spaces require tighter alignment with the target’s decision boundaries. These findings highlight the potential need for further querying or targeted optimization over underrepresented classes or feature regions. 
+
+Cost-Effectiveness and Comparison to Prior Work. 
+
+Label-only membership inference attacks such as the one proposed by Choquette-Choo et al. [ 26 ]achieve strong MIA performance, but they incur significant query costs—approximately 10,000 queries per victim sample. In their reported experiments, they achieve membership accuracies of 
+
+0.8920 , 0.8740 , and 0.8030 on Location, Purchase, and Texas, respectively. However, conducting the attack for 100 victim samples would require 1 million queries in total with their given query budget. Our approach reallocates query budgets of membership inference to extract a surrogate model S
+
+from the target model M , which can then be queried offline to perform membership inference on an arbitrary number of samples at no additional cost. This amortization makes our attack significantly more cost-effective when the goal is to evaluate membership across many samples. Once S is trained, inference is performed entirely offline, without incurring further query overhead with adversarial perturbations, and without requiring confidence scores or shadow models. Our method may not always be the preferable option: if the number of samples to be evaluated is small, direct label-only membership inference—despite its high per-sample cost—may remain the more efficient route. Our approach is more appropriate for adversaries seeking to audit or infer membership for large populations, where the one-time cost of surrogate extraction can be justified. To initiate model extraction, we rely on a small auxiliary dataset, typically constrained to 10% of the size of the target model’s training set. While full synthetic initialization is possible in principle, doing so would likely require more queries and risk generating unrealistic samples in structured domains—hence we maintain minimal auxiliary data as a practical compromise in our experiments. Overall, our results demonstrate that with a fixed query budget, attackers can trade per-sample overhead for one-time extraction cost, achieving scalable and reusable membership inference. The surrogates not only approximate the prediction function of the target model, but also reproduces its decision boundary vulnerabilities, highlighting a viable and generalizable pathway for privacy leakage in label-only black-box settings. 
+
+## 5 Countermeasures 
+
+We evaluate the impact of three defense mechanisms—DP-SGD [ 17 ], Dropout [ 18 ], and L2 regulariza-tion [ 42 , 43 ] on the performance of our attack. These techniques are selected based on their reported 8effectiveness against label-only membership inference attacks, as demonstrated by Choquette-Choo et al. [ 26 ]. All models are trained on the same training split of the Location dataset, with only the applied defense varying. The results are summarized in Table 3. Table 3: Effect of countermeasures on attack and model performance in the Location dataset.                                                                                                                                                      
+
+> Defensive Strategy Setting M′Metrics SMetrics
+> FM′
+> MTest Acc Attack Acc AUC FSMFSM′Test Acc Attack Acc AUC DP-SGD
+> ϵ= 20 0.6598 0.5996 0.7367 0.7636 0.6621 0.8541 0.6002 0.7200 0.7351
+> ϵ= 50 0.7044 0.6005 0.8233 0.8383 0.7021 0.8605 0.6121 0.7900 0.8178
+> ϵ= 100 0.7060 0.6116 0.8433 0.8488 0.7076 0.8612 0.6076 0.7800 0.7916
+> ϵ= 200 0.7169 0.6087 0.8400 0.8327 0.7012 0.8500 0.5999 0.8133 0.8305 Dropout
+> p= 0 .20.8682 0.6189 0.8767 0.8546 0.8480 0.9080 0.6140 0.8567 0.8442
+> p= 0 .40.8548 0.6028 0.8800 0.8674 0.8391 0.9077 0.6040 0.8400 0.8636
+> p= 0 .60.8423 0.6013 0.8700 0.8879 0.8275 0.9157 0.5915 0.8300 0.8448
+> p= 0 .80.8028 0.6128 0.8467 0.8500 0.7932 0.9272 0.6143 0.8200 0.8415 L2 Reg.
+> λ= 0 .0001 0.8535 0.6291 0.8667 0.8581 0.8346 0.9160 0.6140 0.8567 0.8548
+> λ= 0 .0005 0.8378 0.6323 0.8667 0.8532 0.8195 0.9182 0.6236 0.8433 0.8461
+> λ= 0 .001 0.8269 0.6379 0.8467 0.8572 0.8086 0.9186 0.6326 0.8400 0.8614
+> λ= 0 .005 0.8102 0.6660 0.8167 0.8312 0.7967 0.9160 0.6640 0.8200 0.8300 Undefended (M) ––0.6078 0.8867 0.8919 0.9128 –0.5999 0.8833 0.8964
+
+In our experiments, the target model with applied defenses is denoted as M ′, while the undefended model is denoted as M . As expected, the undefended model M exhibits the highest vulnerability, yielding AUC scores of 0.8919 and 0.8964 when attacked directly and through its surrogate model S,respectively. These results indicate substantial membership leakage in both the target and surrogate models, confirming that, in the absence of defense mechanisms, our attack remains highly effective. Among the evaluated defenses, DP-SGD demonstrates the strongest reduction in attack success. Particularly at ϵ = 20 , where the privacy guarantee is strongest due to the highest level of noise injection, we observe a substantial drop in AUC on M ′ (0.7636 ) and S (0.7351 ), relative to the undefended model. However, this comes at a notable cost to model utility and extraction fidelity, as evidenced by reduced test accuracy and FM scores. As ϵ increases, both utility and vulnerability begin to rise, illustrating the privacy-utility trade-off inherent in DP-SGD. Dropout, while less disruptive to utility, proves less effective at reducing membership leakage. Even at a high dropout rate ( p = 0 .8), AUC values on M ′ and S remain elevated, and the surrogate model continues to closely approximate the target. This suggests that Dropout alone is insufficient to significantly hinder our attack pipeline, particularly the membership inference stage, despite its role in reducing overfitting. L2 regularization exhibits the most consistent and practical trade-off. Increasing the regularization parameter λ gradually reduces extraction fidelity and membership inference success, while preserving or slightly improving generalization accuracy. At λ = 0 .005 , we observe a 6–7% reduction in AUC on both M ′ and S relative to the undefended case, without sacrificing model performance. This indicates that L2 regularization can effectively mitigate overfitting-based leakage with minimal architectural or training modifications. Overall, our findings highlight that while DP-SGD provides the most substantial privacy gains, it does so at the cost of utility. In contrast, L2 regularization presents a viable middle ground, offering privacy improvements with minimal performance degradation. 
+
+## 6 Conclusion and Future Directions 
+
+We present a label-only membership inference attack that operates under minimal auxiliary knowl-edge by first extracting a surrogate model using a query-efficient model extraction strategy. This enables offline inference without further queries to the target. On benchmark tabular datasets, our method matches the performance of prior label-only attacks while requiring significantly fewer queries—achieving comparable accuracy and AUC using a query budget equivalent to inferring membership of only 1% of the target’s training data. As the number of evaluated samples increases, our attack gets more cost-effective. We assess the robustness of our approach under standard defenses 9dropout, L2 regularization, and DP-SGD. While these defenses reduce leakage to some extent, they often degrade utility (e.g., 15% ≤ fidelity loss) and result in only minor reductions in membership accuracy and AUC ( ≤ 5% ). Our findings show that even under the strictest constraints, label-only interfaces remain susceptible to increasingly efficient attacks, while the protection offered by standard defenses continues to diminish. As future work, we aim to improve the efficiency and generality of our method for complex models and high-dimensional data types such as images and sequences. 
+
+## References 
+
+[1] A. Guerra-Manzanares, L. J. L. Lopez, M. Maniatakos, and F. E. Shamout, “Privacy-preserving machine learning for healthcare: open challenges and future perspectives,” in International Workshop on Trustworthy Machine Learning for Healthcare , pp. 25–40, Springer, 2023. [2] I. Grigoriadis, E. Vrochidou, I. Tsiatsiou, and G. A. Papakostas, “Machine learning as a service (mlaas)—an enterprise perspective,” in Proceedings of International Conference on Data Science and Applications: ICDSA 2022, Volume 2 , pp. 261–273, Springer, 2023. [3] R. Shokri, M. Stronati, C. Song, and V. Shmatikov, “Membership inference attacks against machine learning models,” in 2017 IEEE Symposium on Security and Privacy, SP 2017, San Jose, CA, USA, May 22-26, 2017 , (USA), pp. 3–18, IEEE Computer Society, 2017. [4] A. Salem, Y. Zhang, M. Humbert, P. Berrang, M. Fritz, and M. Backes, “Ml-leaks: Model and data independent membership inference attacks and defenses on machine learning models,” in 26th Annual Network and Distributed System Security Symposium, NDSS 2019, San Diego, California, USA, February 24-27, 2019 , (USA), The Internet Society, 2019. [5] A. Pyrgelis, C. Troncoso, and E. D. Cristofaro, “Knock knock, who’s there? membership inference on aggregate location data,” in 25th Annual Network and Distributed System Security Symposium, NDSS 2018, San Diego, California, USA, February 18-21, 2018 , The Internet Society, 2018. [6] S. Truex, L. Liu, M. E. Gursoy, L. Yu, and W. Wei, “Demystifying membership inference attacks in machine learning as a service,” IEEE Trans. Serv. Comput. , vol. 14, no. 6, pp. 2073–2089, 2021. [7] J. Hayes, L. Melis, G. Danezis, and E. D. Cristofaro, “LOGAN: membership inference attacks against generative models,” Proc. Priv. Enhancing Technol. , vol. 2019, no. 1, pp. 133–152, 2019. [8] B. Hilprecht, M. Härterich, and D. Bernau, “Monte carlo and reconstruction membership inference attacks against generative models,” Proc. Priv. Enhancing Technol. , vol. 2019, no. 4, pp. 232–249, 2019. [9] L. Song, R. Shokri, and P. Mittal, “Privacy risks of securing machine learning models against adversarial examples,” in Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security, CCS 2019, London, UK, November 11-15, 2019 (L. Cavallaro, J. Kinder, X. Wang, and J. Katz, eds.), pp. 241–257, ACM, 2019. [10] A. Sablayrolles, M. Douze, C. Schmid, Y. Ollivier, and H. Jégou, “White-box vs black-box: Bayes optimal strategies for membership inference,” in Proceedings of the 36th International Conference on Machine Learning, ICML 2019, 9-15 June 2019, Long Beach, California, USA (K. Chaudhuri and R. Salakhutdinov, eds.), vol. 97 of Proceedings of Machine Learning Research , pp. 5558–5567, PMLR, 2019. [11] Y. Long, L. Wang, D. Bu, V. Bindschaedler, X. Wang, H. Tang, C. A. Gunter, and K. Chen, “A pragmatic approach to membership inferences on machine learning models,” in IEEE European Symposium on Security and Privacy, EuroS&P 2020, Genoa, Italy, September 7-11, 2020 , pp. 521–534, IEEE, 2020. [12] J. Li, N. Li, and B. Ribeiro, “Membership inference attacks and defenses in classification models,” in 
+
+Proceedings of the Eleventh ACM Conference on Data and Application Security and Privacy , CODASPY ’21, (New York, NY, USA), p. 5–16, Association for Computing Machinery, 2021. [13] B. Hui, Y. Yang, H. Yuan, P. Burlina, N. Z. Gong, and Y. Cao, “Practical blind membership inference attack via differential comparisons,” in 28th Annual Network and Distributed System Security Symposium, NDSS 2021, virtually, February 21-25, 2021 , The Internet Society, 2021. [14] M. Nasr, R. Shokri, and A. Houmansadr, “Comprehensive privacy analysis of deep learning: Passive and active white-box inference attacks against centralized and federated learning,” in 2019 IEEE Symposium on Security and Privacy, SP 2019, San Francisco, CA, USA, May 19-23, 2019 , pp. 739–753, IEEE, 2019. [15] J. Jia, A. Salem, M. Backes, Y. Zhang, and N. Z. Gong, “Memguard: Defending against black-box membership inference attacks via adversarial examples,” in Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security , CCS ’19, (New York, NY, USA), p. 259–274, Association for Computing Machinery, 2019. [16] Z. Yang, B. Shao, B. Xuan, E. Chang, and F. Zhang, “Defending model inversion and membership inference attacks via prediction purification,” CoRR , vol. abs/2005.03915, 2020. 
+
+10 [17] M. Abadi, A. Chu, I. Goodfellow, H. B. McMahan, I. Mironov, K. Talwar, and L. Zhang, “Deep learning with differential privacy,” in Proceedings of the 2016 ACM SIGSAC Conference on Computer and Commu-nications Security , CCS ’16, (New York, NY, USA), p. 308–318, Association for Computing Machinery, 2016. [18] N. Srivastava, G. E. Hinton, A. Krizhevsky, I. Sutskever, and R. Salakhutdinov, “Dropout: a simple way to prevent neural networks from overfitting,” J. Mach. Learn. Res. , vol. 15, no. 1, pp. 1929–1958, 2014. [19] S. Zarifzadeh, P. Liu, and R. Shokri, “Low-cost high-power membership inference attacks,” in Forty-first International Conference on Machine Learning, ICML 2024, Vienna, Austria, July 21-27, 2024 ,OpenReview.net, 2024. [20] M. Duan, A. Suri, N. Mireshghallah, S. Min, W. Shi, L. Zettlemoyer, Y. Tsvetkov, Y. Choi, D. Evans, and H. Hajishirzi, “Do membership inference attacks work on large language models?,” CoRR ,vol. abs/2402.07841, 2024. [21] F. Mireshghallah, K. Goyal, A. Uniyal, T. Berg-Kirkpatrick, and R. Shokri, “Quantifying privacy risks of masked language models using membership inference attacks,” in Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing, EMNLP 2022, Abu Dhabi, United Arab Emirates, December 7-11, 2022 (Y. Goldberg, Z. Kozareva, and Y. Zhang, eds.), pp. 8332–8347, Association for Computational Linguistics, 2022. [22] J. Mattern, F. Mireshghallah, Z. Jin, B. Schölkopf, M. Sachan, and T. Berg-Kirkpatrick, “Membership inference attacks against language models via neighbourhood comparison,” in Findings of the Association for Computational Linguistics: ACL 2023, Toronto, Canada, July 9-14, 2023 (A. Rogers, J. L. Boyd-Graber, and N. Okazaki, eds.), pp. 11330–11343, Association for Computational Linguistics, 2023. [23] H. Liu, Y. Wu, Z. Yu, and N. Zhang, “ Please Tell Me More: Privacy Impact of Explainability through the Lens of Membership Inference Attack ,” in 2024 IEEE Symposium on Security and Privacy (SP) , (Los Alamitos, CA, USA), pp. 4791–4809, IEEE Computer Society, May 2024. [24] J. Ye, A. Maddi, S. K. Murakonda, V. Bindschaedler, and R. Shokri, “Enhanced membership inference attacks against machine learning models,” in Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security , CCS ’22, (New York, NY, USA), p. 3093–3106, Association for Computing Machinery, 2022. [25] N. Carlini, S. Chien, M. Nasr, S. Song, A. Terzis, and F. Tramèr, “Membership inference attacks from first principles,” in 2022 IEEE Symposium on Security and Privacy (SP) , pp. 1897–1914, 2022. [26] C. A. Choquette-Choo, F. Tramèr, N. Carlini, and N. Papernot, “Label-only membership inference attacks,” in Proceedings of the 38th International Conference on Machine Learning, ICML 2021, 18-24 July 2021, Virtual Event (M. Meila and T. Zhang, eds.), vol. 139 of Proceedings of Machine Learning Research ,(USA), pp. 1964–1974, PMLR, 2021. [27] Z. Li and Y. Zhang, “Membership leakage in label-only exposures,” in Proceedings of the 2021 ACM SIGSAC Conference on Computer and Communications Security , CCS ’21, (New York, NY, USA), p. 880–895, Association for Computing Machinery, 2021. [28] S. Yeom, I. Giacomelli, M. Fredrikson, and S. Jha, “Privacy risk in machine learning: Analyzing the connection to overfitting,” in 31st IEEE Computer Security Foundations Symposium, CSF 2018, Oxford, United Kingdom, July 9-12, 2018 , pp. 268–282, IEEE Computer Society, 2018. [29] F. Tramèr, F. Zhang, A. Juels, M. K. Reiter, and T. Ristenpart, “Stealing machine learning models via prediction apis,” in Proceedings of the 25th USENIX Conference on Security Symposium , SEC’16, (USA), p. 601–618, USENIX Association, 2016. [30] T. Orekondy, B. Schiele, and M. Fritz, “Knockoff nets: Stealing functionality of black-box models,” in 
+
+IEEE Conference on Computer Vision and Pattern Recognition, CVPR 2019, Long Beach, CA, USA, June 16-20, 2019 , (USA), pp. 4954–4963, Computer Vision Foundation / IEEE, 2019. [31] M. Juuti, S. Szyller, S. Marchal, and N. Asokan, “PRADA: protecting against DNN model stealing attacks,” in IEEE European Symposium on Security and Privacy, EuroS&P 2019, Stockholm, Sweden, June 17-19, 2019 , (USA), pp. 512–527, IEEE, 2019. [32] N. Papernot, P. McDaniel, I. Goodfellow, S. Jha, Z. B. Celik, and A. Swami, “Practical black-box attacks against machine learning,” in Proceedings of the 2017 ACM on Asia Conference on Computer and Communications Security , ASIA CCS ’17, (New York, NY, USA), p. 506–519, Association for Computing Machinery, 2017. [33] M. Jagielski, N. Carlini, D. Berthelot, A. Kurakin, and N. Papernot, “High accuracy and high fidelity extraction of neural networks,” in 29th USENIX Security Symposium, USENIX Security 2020, August 12-14, 2020 (S. Capkun and F. Roesner, eds.), (USA), pp. 1345–1362, USENIX Association, 2020. [34] J. Truong, P. Maini, R. J. Walls, and N. Papernot, “Data-free model extraction,” in IEEE Conference on Computer Vision and Pattern Recognition, CVPR 2021, virtual, June 19-25, 2021 , (USA), pp. 4771–4780, Computer Vision Foundation / IEEE, 2021. 
+
+11 [35] K. Krishna, G. S. Tomar, A. P. Parikh, N. Papernot, and M. Iyyer, “Thieves on sesame street! model extraction of bert-based apis,” in 8th International Conference on Learning Representations, ICLR 2020, Addis Ababa, Ethiopia, April 26-30, 2020 , OpenReview.net, 2020. [36] P. Karmakar and D. Basu, “Marich: A query-efficient distributionally equivalent model extraction attack,” in Advances in Neural Information Processing Systems 36: Annual Conference on Neural Information Processing Systems 2023, NeurIPS 2023, New Orleans, LA, USA, December 10 - 16, 2023 (A. Oh, T. Naumann, A. Globerson, K. Saenko, M. Hardt, and S. Levine, eds.), 2023. [37] A. C. Oksuz, A. Halimi, and E. Ayday, “AUTOLYCUS: exploiting explainable artificial intelligence (XAI) for model extraction attacks against interpretable models,” Proc. Priv. Enhancing Technol. , vol. 2024, no. 4, pp. 684–699, 2024. [38] N. Papernot, P. D. McDaniel, and I. J. Goodfellow, “Transferability in machine learning: from phenomena to black-box attacks using adversarial samples,” 2016. [39] Y. Liu, X. Chen, C. Liu, and D. Song, “Delving into transferable adversarial examples and black-box attacks,” in 5th International Conference on Learning Representations, ICLR 2017, Toulon, France, April 24-26, 2017, Conference Track Proceedings , OpenReview.net, 2017. [40] M. Naseer, S. H. Khan, M. H. Khan, F. S. Khan, and F. Porikli, “Cross-domain transferability of adversarial perturbations,” in Advances in Neural Information Processing Systems 32: Annual Conference on Neural Information Processing Systems 2019, NeurIPS 2019, December 8-14, 2019, Vancouver, BC, Canada (H. M. Wallach, H. Larochelle, A. Beygelzimer, F. d’Alché-Buc, E. B. Fox, and R. Garnett, eds.), pp. 12885–12895, 2019. [41] A. Demontis, M. Melis, M. Pintor, M. Jagielski, B. Biggio, A. Oprea, C. Nita-Rotaru, and F. Roli, “Why do adversarial attacks transfer? explaining transferability of evasion and poisoning attacks,” in Proceedings of the 28th USENIX Conference on Security Symposium , SEC’19, (USA), p. 321–338, USENIX Association, 2019. [42] A. Y. Ng, “Feature selection, l1 vs. l2 regularization, and rotational invariance,” in Proceedings of the Twenty-First International Conference on Machine Learning , ICML ’04, (New York, NY, USA), p. 78, Association for Computing Machinery, 2004. [43] A. Krogh and J. A. Hertz, “A simple weight decay can improve generalization,” in Proceedings of the 5th International Conference on Neural Information Processing Systems , NIPS’91, (San Francisco, CA, USA), p. 950–957, Morgan Kaufmann Publishers Inc., 1991. [44] D. P. Kingma and J. Ba, “Adam: A method for stochastic optimization,” in 3rd International Conference on Learning Representations, ICLR 2015, San Diego, CA, USA, May 7-9, 2015, Conference Track Proceedings 
+
+(Y. Bengio and Y. LeCun, eds.), 2015. [45] I. Loshchilov and F. Hutter, “Decoupled weight decay regularization,” in International Conference on Learning Representations , 2019. [46] M.-I. Nicolae, M. Sinn, M. N. Tran, B. Buesser, A. Rawat, M. Wistuba, V. Zantedeschi, N. Baracaldo, B. Chen, H. Ludwig, I. M. Molloy, and B. Edwards, “Adversarial robustness toolbox v1.0.0,” 2019. 
+
+12 A Commonly Used Symbols and Notations 
+
+The following table summarizes the commonly used symbols and notations in this paper: Table 4: Commonly Used Symbols and Notations 
+
+Symbol Description 
+
+M Target (victim) model 
+
+S Surrogate (a.k.a extracted or stolen) model 
+
+DM Dataset used to train the target model 
+
+DS Dataset used to train the surrogate model 
+
+DA Auxiliary dataset used for training S0 and synthesizing samples 
+
+DQ Augmented and perturbed query dataset used in active learning for training S
+
+DN Neutral dataset used for evaluating model fidelity 
+
+Dmem Membership dataset used for evaluating membership inference attack performance 
+
+xi Input sample to the model 
+
+yi Predicted class (label) for the sample xi
+
+nj Number of features in the input 
+
+nc Number of output classes 
+
+Rj Range of possible values for feature jRc Range of possible values for classes (labels) 
+
+τ Decision boundary distance threshold 
+
+L Loss function 
+
+∇θ L Gradient of the loss with respect to model parameters 
+
+F MS Fidelity of the surrogate model S relative to the target model Mnq Query budget for the adversary 
+
+## B Experimental Setup - Variability and Computational Settings 
+
+In the regular and countermeasure experiments, we ran each experiment multiple times to ensure result stability. The reported results are representative runs that do not reflect outlier variance, which was negligible across trials. Across different datasets and configurations, we observed consistent trends with minimal variation, making additional statistical indicators redundant for our setup. Thus, we report single-run outcomes for clarity, while internally verifying their reliability through repeated trials. All experiments were conducted on an Apple M2 Pro Mac Mini (A2816) with a 10-core CPU, 16-core GPU, 16-core Neural Engine, 16 GB of unified memory, and 1 TB of disk space. All machine learning models were trained using the CPU. The overall compute cost was modest, with each experiment completing in under a few hours. However, it is important to note that increasing the query budgets or the internal parameters of the membership inference attack (e.g., the number of adversarial samples generated) may lead to higher runtime and memory consumption. The total compute usage for the project, including preliminary and discarded trials, remained within the limits of a single-CPU setup and is reproducible on commodity hardware. 13

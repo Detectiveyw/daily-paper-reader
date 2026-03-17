@@ -1,0 +1,3626 @@
+Title: Tackling Privacy Heterogeneity in Differentially Private Federated Learning
+
+URL Source: https://arxiv.org/pdf/2602.22633v1
+
+Published Time: Fri, 27 Feb 2026 01:40:09 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+> 1
+
+# Tackling Privacy Heterogeneity in Differentially Private Federated Learning 
+
+Ruichen Xu, Ying-Jun Angela Zhang, Fellow, IEEE , Jianwei Huang, Fellow, IEEE 
+
+Abstract —Differentially private federated learning (DP-FL) enables clients to collaboratively train machine learning models while preserving the privacy of their local data. However, most existing DP-FL approaches assume that all clients share auniform privacy budget, an assumption that does not hold in real-world scenarios where privacy requirements vary widely. This privacy heterogeneity poses a significant challenge: conventional client selection strategies, which typically rely on data quantity, cannot distinguish between clients providing high-quality updates and those introducing substantial noise due to strict privacy constraints. To address this gap, we present the first systematic study of privacy-aware client selection in DP-FL. We establish a theoretical foundation by deriving a convergence analysis that quantifies the impact of privacy heterogeneity on training error. Building on this analysis, we propose a privacy-aware client selec-tion strategy, formulated as a convex optimization problem, that adaptively adjusts selection probabilities to minimize training error. Extensive experiments on benchmark datasets demonstrate that our approach achieves up to a 10% improvement in test accuracy on CIFAR-10 compared to existing baselines under heterogeneous privacy budgets. These results highlight the impor-tance of incorporating privacy heterogeneity into client selection for practical and effective federated learning. 
+
+Index Terms —Differential privacy, federated learning, client selection, privacy heterogeneity. 
+
+I. I NTRODUCTION 
+
+Federated learning (FL) is an emerging distributed ma-chine learning paradigm that enables clientssuch as mobile devices, hospitals, or financial institutions to collaboratively train models while retaining their data locally. By exchang-ing only model updates with a central server, FL offers a decentralized approach that helps safeguard client privacy and reduce data transfer costs. However, sharing gradients or model updates alone does not guarantee privacy. Recent studies have demonstrated that adversaries can reconstruct sensitive information from shared gradients, exposing clients to inference attacks [2]. To address these vulnerabilities, differential privacy (DP) has been widely adopted as a rigorous framework for privacy protection in FL. In Differentially private federated learning 
+
+An earlier version of this paper was presented in part at the IEEE WiOpt 2023 [1]. Ruichen Xu and Ying-Jun Angela Zhang are with the Department of Information Engineering, The Chinese University of Hong Kong, Hong Kong (e-mail: xr021@ie.cuhk.edu.hk; co-corresponding au-thor, email: yjzhang@ie.cuhk.edu.hk). Jianwei Huang is with the School of Science and Engineering, Shenzhen Institute of Artificial Intelligence and Robotics for Society, Shenzhen Key Laboratory of Crowd Intelligence Empowered Low-Carbon Energy Network, and CSIJRI Joint Research Centre on Smart Energy Storage, The Chinese University of Hong Kong, Shenzhen, Guangdong, 518172, P.R. China (co-corresponding author, email: jianwei-huang@cuhk.edu.cn). 
+
+Fig. 1: Illustration of differentially private federated learning. (DP-FL), clients inject random noise into their model up-dates before uploading them to the server, thereby providing quantifiable privacy guarantees [3]. The strength of privacy protection is controlled by each client’s privacy budget: a smaller budget offers stronger privacy but requires more noise, which can degrade model utility. Thus, DP-FL systems must carefully manage the trade-off between privacy and learning performance. This challenge is further compounded by the inherent het-erogeneity among clients in practical FL deployments. Beyond the well-studied differences in data size and distribution, clients’ contributions in DP-FL are fundamentally constrained by their individual privacy budgets. In real-world applications, privacy requirements can vary significantly: some clients may demand strict privacy due to regulatory, ethical, or personal concerns, while others may accept looser privacy settings to maximize their utility. This privacy heterogeneity introduces a new dimension of complexity that directly impacts the quality and usefulness of aggregated model updates. To illustrate the impact of privacy heterogeneity, consider a FL system for medical data analysis. A client with a sensitive pre-existing condition may opt for a strict privacy setting (a small privacy budget), introducing substantial noise to their updates to minimize information leakage. In contrast, another client participating as a volunteer in a low-risk study may be comfortable with a more lenient setting (a larger privacy bud-get), thus contributing higher-quality updates. This diversity in privacy preferences is not hypothetical; it is a practical and crucial consideration in domains such as healthcare, finance, and smart devices. The presence of privacy heterogeneity exposes a critical 
+
+> arXiv:2602.22633v1 [cs.LG] 26 Feb 2026 2
+
+flaw in conventional client selection strategies. Most existing approaches select clients based on data quantity or partici-pation frequency, without considering the varying quality of updates caused by different privacy budgets. As a result, clients adding high-magnitude noise due to strict privacy constraints are treated equivalently to those providing informative updates. Indiscriminate selection of high-noise clients can significantly impair model convergence and accuracy, and may even am-plify the negative effects of privacy-preserving mechanisms such as gradient clipping and noise addition. Therefore, it is essential to design client selection strategies that are privacy-aware -that is, strategies that account for both data and privacy heterogeneity to optimize learning performance. Designing such privacy-aware client selection strategies is nontrivial. Client data are often not independent and identi-cally distributed (non-IID), and the introduction of privacy-preserving noise further complicates the aggregation process. The selection of clients influences both the bias in the ag-gregated gradients and the overall error induced by privacy mechanisms. Achieving an optimal balance between data util-ity and privacy protection requires a principled and systematic approach. These challenges motivate us to investigate the following research questions:  
+
+> •
+
+How does client selection fundamentally affect the convergence and accuracy of DP-FL in the presence of privacy heterogeneity?  
+
+> •
+
+What is the optimal client selection policy to minimize training loss when both data and privacy heterogene-ity are present? 
+
+In this paper, we present the first systematic study of privacy-aware client selection in DP-FL, explicitly addressing the challenges introduced by heterogeneous privacy budgets. 
+
+Our main contributions are summarized as follows:  
+
+> •
+
+Significance: We identify and rigorously formulate the problem of privacy heterogeneity in DP-FL, demonstrat-ing that diverse client privacy requirements are a funda-mental obstacle to achieving both privacy and accuracy in real-world federated learning systems.  
+
+> •
+
+Challenge-Quantifying the impact of privacy hetero-geneity: We show that existing client selection strategies fail under heterogeneous privacy budgets, as the interplay between privacy levels and data distributions introduces complex noise-utility trade-offs. To address this, we pro-vide the first theoretical convergence analysis of DP-FL under privacy-aware client selection, quantifying how privacy heterogeneity affects model performance.  
+
+> •
+
+Challenge-Designing optimal client selection under heterogeneity: Selecting clients to maximize model util-ity is non-trivial when each client contributes updates with different noise levels. We overcome this challenge by proposing a convex optimization-based selection strategy that adaptively balances privacy and utility, ensuring that clients with higher privacy budgets are prioritized without excluding others.  
+
+> •
+
+Key insight: Our analysis reveals that carefully de-signed privacy-aware selection can substantially mitigate TABLE I: Comparison of related works.                         
+
+> Ref. Client Selection Method DP
+> [4] Unbiased selection !
+> [5] Unbiased selection !
+> [6] Unbiased selection !
+> [7] Unbiased selection !
+> [8] Importance sampling based selection %
+> UCB-CS [9] Bandit based selection %
+> ClusterFL [10] Clustering based selection %
+> PyramidFL [11] Utility based selection %
+> Hybrid-FL [12] Data generation based selection %
+> Power-of-choice [13] Local loss based selection %
+> Our paper Privacy-aware selection !
+
+the negative effects of strict privacy constraints, leading to significant improvements in model accuracy-up to 10% on CIFAR-10 and 40% on MNIST/FashionMNIST-compared to conventional selection methods. The rest of the paper is organized as follows. Section II introduces related works on DP-FL and client selection methods. Section III introduces the preliminaries of DP, FL, and the DP-federated averaging (FedAvg) algorithm. Section IV presents our convergence analysis under flexible client selection and discusses the resulting insights. Section V de-scribes our proposed privacy-aware client selection strategy. Section VI evaluates the performance of the proposed client selection strategy. Section VII concludes the paper. II. R ELATED WORK 
+
+In this section, we review related work on DP-FL and client selection approaches in FL. A comparison is shown in Table I. 
+
+A. Differentially Private Federated Learning 
+
+Recent studies have analyzed the convergence and privacy-utility trade-offs in DP-FL algorithms from various perspec-tives, including gradient clipping, shuffling, and information-theoretic bounds [4]–[7]. These works generally adopt an unbiased client selection strategy, where each client’s selection probability is proportional to its local dataset size. This ap-proach ensures unbiased gradient estimation but overlooks the impact of privacy-preserving noise, particularly when clients have heterogeneous privacy budgets. As a result, frequently selecting clients with strict privacy requirements (and thus high noise) can significantly degrade overall model performance. This limitation highlights the need for privacy-aware client selection strategies that explicitly account for heterogeneous privacy preferences. Another line of research has focused on developing practical DP-FL algorithms to improve learning accuracy under fixed privacy constraints [14]–[16]. These works introduce advanced techniques for gradient clipping, aggregation, and knowledge transfer. However, they typically assume uniform privacy budgets across clients, which is unrealistic in many real-world applications. The challenge of heterogeneous privacy budgets, where clients may inject vastly different noise levels, remains largely unaddressed. 3
+
+B. Client Selection in Federated Learning 
+
+Client selection is a fundamental problem in FL, aiming to address various sources of heterogeneity among clients. Several strategies have been proposed in the literature. For example, UCB-CS [9] uses a bandit-based approach to select clients without incurring extra communication overhead, while Luo et al. [8] employ importance sampling to minimize communication costs. Utility-based methods, such as Pyra-midFL [11], define utility functions to enhance both statistical and system efficiency. To tackle data heterogeneity, Hybrid-FL [12] generates synthetic data for improved client selection, and Power-of-choice [13] selects clients with the highest local loss to accelerate convergence. Despite their effectiveness in addressing data and system heterogeneity, these methods do not consider DP constraints. As such, they are not designed to cope with the additional noise introduced by privacy-preserving mechanisms, nor do they address the complexities arising from clients with diverse privacy budgets. III. S YSTEM MODEL 
+
+In this section, we present the system model, including the threat model, preliminaries of FL and DP, and the implemen-tation details of the DP-FedAvg algorithm, depicted in Fig. 1, that forms the basis for our convergence analysis. 
+
+A. Threat Model 
+
+We assume the FL server operates as an honest-but-curious entity: it faithfully follows the FL protocol by aggregating model updates from clients and coordinating the learning process, but may attempt to infer sensitive information from received updates. Such inference could potentially result in privacy breaches, including identity theft or financial harm to individuals. 
+
+B. Preliminaries 1) Differential Privacy: DP provides strong guarantees against information leakage by ensuring that the output of a randomized algorithm does not significantly change when a single data point in the input is modified [17]. This property makes DP highly suitable for privacy-preserving machine learning. 
+
+Definition 1 (Differential privacy) . A randomized algorithm 
+
+M : X → R is said to be ( ϵ, δ )-DP if for every pair of neighboring datasets X, X ′ ∈ X that differ in one entry and for any subset of output S ⊆ R ,
+
+Pr [ M(X) ∈ S ] ≤ eϵ Pr [ M(X′) ∈ S ] + δ. (1) An (ϵ, δ )-DP mechanism guarantees that the privacy loss is bounded by ϵ with a probability of at least 1 − δ [18]. Here, 
+
+(ϵ, δ ) is called the privacy budget; smaller values correspond to stronger privacy guarantees. A common mechanism to achieve (ϵ, δ )-DP is the Gaussian mechanism, which adds noise to the output proportional to the sensitivity of the function: 
+
+MGaussian (X) = f (X) + N (0 , σ 2(ϵ, δ, ∆f )) , (2) where σ2 = 2(∆ f )2 log(1 .25 /δ )/ϵ 2 and ∆f is the sensitivity, the maximum change in function f by altering a single data point [18]. 
+
+2) Federated Learning: FL aims to learn a global model from local data held by a set of clients, denoted by N =
+
+{1, · · · , N } [19]. Each client holds a local dataset Mk =
+
+{(xk,i , y k,i )}Nk 
+
+> i=1
+
+consisting of Nk examples. The local objec-tive function of client k, fk(w), is defined as the average loss over its dataset: 
+
+fk(w) = 1
+
+NkNk∑
+
+> i=1
+
+L(w, x k,i , y k,i ), (3) where L(w, x k,i , y k,i ) is the loss for model w ∈ RD on the data pair ( xk,i , yk,i ) [20]. The global objective is to minimize the weighted sum of local objectives: 
+
+min  
+
+> w
+
+F (w) = 
+
+> N
+
+∑
+
+> k=1
+
+|M k|
+
+∑Ni=1 |M i| fk(w), (4) which is a weighted sum of N clients’ local objective func-tions, proportional to the sizes of the clients’ datasets [20]. 
+
+C. Federated Learning with Differential Privacy 
+
+We now describe the canonical DP-FedAvg algorithm, which combines FedAvg [20] with DP-SGD [17]. We also present our general client selection strategy and noise compu-tation process. 
+
+1) Workflow of DP-FedAvg: Algorithm 1 outlines the DP-FedAvg procedure. At each global iteration tg , the server selects clients according to a pre-defined selection strategy π
+
+(Line 3), and records how many times each client is selected (Line 4). The server then distributes the current global model to the selected clients. Each selected client performs Tl local SGD steps on a random subset of its data (Lines 12-17). During each step, the client clips the norm of its computed gradient (Line 15), adds Gaussian noise calibrated to its privacy budget (Line 17), and uploads the noisy update to the server (Line 19). The server then aggregates these updates to refine the global model (Line 8). The clipping threshold C and the selection count Tk are critical in determining the noise variance for each client. 
+
+2) Client Selection Strategy: The client selection strategy, defined in Line 3 of Algorithm 1, plays a pivotal role in DP-FL. The server sets the selection probability vector ps =[ps
+
+> 1
+
+, · · · , p s 
+
+> N
+
+] before training, where ps 
+
+> k
+
+is the probability of selecting client k. In each round, N select clients are sampled (with replacement) according to ps. If a client is sampled multiple times in a round, it acts as multiple virtual clients, each with independently sampled data and independently added noise. The expected objective under this strategy is: 
+
+F b(w) = 
+
+> N
+
+∑
+
+> k=1
+
+ps
+
+> k
+
+fk(w). (5) The commonly used unbiased selection probability is pu 
+
+> k
+
+=
+
+|M k|/ ∑Ni=1 |M i|, aligning F b(w), which aligns F b(w) with the global objective F (w). However, when clients have het-erogeneous privacy budgets, deviating from pu may reduce training error and improve performance. 4
+
+Algorithm 1: DP-FedAvg 
+
+Input: Client selection strategy π, stepsize αtg ,t l ,gradient clipping threshold C, clients’ datasets 
+
+Mk, ∀k, privacy budgets (ϵk, δ k), ∀k, number of global rounds T g , number of local rounds 
+
+T l, loss function L
+
+Output: Final global model wT 
+
+> 1
+
+Server executes:  
+
+> 2
+
+Initialize w0,0 
+
+> 3
+
+Preselect client sets S1, · · · , ST g , that participate in the T g rounds according to strategy π 
+
+> 4
+
+For each client k, compute the selection count Tk. 
+
+> 5
+
+for each global round tg = 0 , 1, · · · , T g − 1 do  
+
+> 6
+
+for each client k ∈ S tg in parallel do  
+
+> 7
+
+compute noisy update ˜gk(wtg ,0) ←
+
+ClientUpdate (Mk, wtg ,0, ϵ k, δ k, r k, T k, T l, C ) 
+
+> 8
+
+Update the global model: 
+
+wtg +1 ,0 ← wtg ,0 − αtg ,0 1 
+
+> |S tg|
+
+∑ 
+
+> k∈S tg
+
+˜gk(wtg )
+
+/* The ClientUpdate function */  
+
+> 9
+
+ClientUpdate (Mk, L, wtg ,0, ϵ k, δ k, r k, T k, T l, C ):
+
+// Run on client k 
+
+> 10
+
+Initialize local model ¯wk, 0 ← wtg ,0 
+
+> 11
+
+Compute noise variance 
+
+σ2 
+
+> k
+
+← NoiseComputation (ϵk, δ k, r k, T k, T l) 
+
+> 12
+
+for each local iteration tl = 0 , 1, · · · , T l − 1 do  
+
+> 13
+
+Uniformly sample a subset of local data Dk,t l from 
+
+Mk 
+
+> 14
+
+for each data d ∈ D k,t l do  
+
+> 15
+
+Compute clipped gradient: gk( ¯ wk,t l , d ) ←∇¯wk,t lL( ¯ wk,t l ,d )/max 
+
+{
+
+1,
+
+∥∥∥∇¯wk,t lL( ¯ wk,t l , d )
+
+∥∥∥2/C 
+
+} 
+
+> 16
+
+Compute average gradient: 
+
+¯gk( ¯ wk,t l ) ← 1 
+
+> |D k,t l|
+
+∑ 
+
+> d∈D k,t l
+
+gk( ¯ wk,t l , d ) 
+
+> 17
+
+Update local model: 
+
+¯wk,t l+1 ← ¯wk,t l −αtg ,t l
+
+(¯gk( ¯ wk,t l ) + N (0 , σ 2
+
+> k
+
+I)) 
+
+> 18
+
+Compute noisy update: ˜gk,t ← ¯wk, 0 − ¯wk,T l 
+
+> 19
+
+return ˜gk,t to the server  
+
+> 20
+
+NoiseComputation( ϵk, δ k, r k, T k, T l):  
+
+> 21
+
+Compute noise variance: 
+
+σ2 
+
+> k
+
+← 8T lTkC2log            
+
+> e+
+> rklog
+> (
+> 1+ 1
+> rk(eϵk−1)
+> )
+> δk
+> 
+> |M k|2r2
+> klog
+> (
+> 1+ 1
+> rk(eϵk−1)
+> )2
+> 22
+
+return σ2
+
+> k
+
+3) Noise Computation: The noise variance for each client depends on its privacy budget and the number of times it is selected, taking into account privacy composition across iterations. Specifically, the variance is computed to ensure that the cumulative privacy loss over all rounds does not exceed 
+
+(ϵk, δ k). Formal privacy composition results are provided in Lemma 1 and Lemma 2. 
+
+Lemma 1 (Inverse version of subsampling Lemma [21]) .
+
+Suppose a mechanism M satisfies (log(( eϵ − 1) /r + 1) , δ/r )-DP. If data is subsampled by a ratio r without replacement, the mechanism under subsampling satisfies (ϵ, δ )-DP. 
+
+Lemma 2 (Gaussian mechanism with strong composi-tion theorem [22]) . For real-valued queries with sensitiv-ity S > 0, the Gaussian mechanism with noise variance 
+
+8T S 2 log ( e + ( ϵ/δ )) /ϵ 2 satisfies (ϵ, δ )-DP under T iterative usages, for any ϵ > 0 and δ ∈ (0 , 1] .
+
+The strong composition result in Lemma 2 provides a closed-form expression for the required noise variance, which scales as Θ( T ). For clients with varying dataset sizes 
+
+{|M k|} Nk=1 , privacy budgets {(ϵk, δ k)}Nk=1 and subsampling ratio rk, if client k is selected Tk times in the entire training process, the required noise variance per gradient dimension is: 
+
+σ2 
+
+> k
+
+= VkTkTlC2, (6) where 
+
+Vk =8 log 
+
+(
+
+e +
+
+( rk log    
+
+> (
+> 1+ 1
+> rk(eϵk−1)
+> )
+> δk
+
+)) 
+
+|M k|2r2 
+
+> k
+
+log 
+
+(
+
+1 + 1 
+
+> rk
+
+(eϵk − 1) 
+
+)2 , (7) and C is the clipping threshold. This variance, derived from Lemmas 1 and 2, ensures the noise-adding mechanism meets the (ϵk, δ k)-DP requirements for each client k ∈ N .It is important to note that the client sampling probability ps
+
+> k
+
+affects both the aggregation weight and the selection count Tk,which in turn impacts σ2
+
+> k
+
+. A smaller ps 
+
+> k
+
+typically reduces Tk,lowering the noise variance for client k. Therefore, the client selection strategy plays a crucial role in the convergence of the learning algorithm. IV. C ONVERGENCE ANALYSIS OF DP-F ED AVG 
+
+In this section, we establish the theoretical foundation for privacy-aware client selection by analyzing how client selec-tion fundamentally affects the convergence of DP-FedAvg. Our analysis is organized as follows: we first introduce key as-sumptions that enable tractable and relevant analysis; we then derive convergence results for both strongly convex and non-convex objectives; finally, we provide intuitive interpretations of the results, highlighting the interplay between privacy and client selection. 
+
+A. Notations 
+
+To facilitate the analysis, we define the following nota-tions with a slight abuse of notation for clarity. Let T g
+
+and T l represent the numbers of global rounds and local rounds, respectively, with a total number of stochastic gradient descent (SGD) iterations as T = T g T l. For any iteration 
+
+t ∈ [0 , · · · , T ], we denote the local model of client k
+
+at iteration t as ¯wk,t . Additionally, we introduce a virtual aggregation sequence, ˜wt = ∑Nk=1 ps 
+
+> k
+
+¯wk,t , motivated by [23]. We summarize the notations in Table II. 
+
+B. Assumptions 
+
+We introduce the following assumptions for our conver-gence analysis. The assumptions are standard in FL conver-gence analyses ( e.g. , [23]–[25]). 5
+
+TABLE II: Summary of important symbols.                                          
+
+> Symbol Meaning
+> ps
+> kSelection probability of client kpu
+> kUnbiased selection probability of client kϵkPrivacy budget of client kσ2
+> kNoise variance of client k
+> MkLocal dataset of client krkSubsampling ratio of client kNselect Number of selected clients per round
+> fkLoss function of client kCClipping threshold
+> DModel dimension
+> TgNumber of global rounds
+> TlNumber of local rounds
+> TTotal number of iterations ( TgTl)
+> TkSelected times of client k
+> wtGlobal model
+> ¯wtLocal model of client kat iteration t
+> ˜wtVirtual aggregation sequence ∑Nk=1 ps
+> k¯wk,t
+> Gselect,clip ,Gb,clip Training loss by client selection and gradient clipping
+> GDP The training loss due to privacy preservation
+
+Assumption 1 (Lipschitz-continuous objective gradients (L-smoothness)) . Each local objective function fk is con-tinuously differentiable, and its gradient ∇fk is Lipschitz continuous with a Lipschitz constant L > 0. Formally, for all w, v ∈ RD and k ∈ N ,
+
+fk (w) ≤ fk (v) + ∇fk (v)⊤ (w − v) + L
+
+2 ∥w − v∥22 . (8) 
+
+Assumption 2 (μ-strong convexity) . Each local objective function fk is strongly convex, i.e., there exists a constant 
+
+μ > 0 such that for all w, v ∈ RD and k ∈ N ,
+
+fk (w) ≥ fk (v) + ∇fk (v)⊤ (w − v) + μ
+
+2 ∥w − v∥22 . (9) 
+
+Assumption 3 (Bounded norm) . The squared norm of gradi-ents is bounded. Specifically, for all w ∈ RD and k ∈ N ,
+
+∥∇ fk (w)∥22 ≤ B21 . (10) 
+
+Assumption 4 (Bounded gradient dissimilarity) . The norm of the difference between the aggregated gradients at local steps and virtual steps is bounded. Formally, for all t ≤ T ,
+
+∥∥∥∥∥
+
+1
+
+N
+
+> N
+
+∑
+
+> k=1
+
+∇fk( ˜ wt) − 1
+
+N
+
+> N
+
+∑
+
+> k=1
+
+∇fk( ¯ wk,t )
+
+∥∥∥∥∥2
+
+≤ B2. (11) 
+
+C. Side Effect of Gradient Clipping 
+
+Although gradient clipping (Line 15 in Algorithm 1) effec-tively limits the sensitivity (as shown in Lemma 2) and reduces the required noise variance [17], it may introduce additional training error. In DP-FL, clients clip their gradients locally without access to the global gradient information, which can alter the direction of the aggregated gradient. Specifically, the expected virtual aggregation of clipped gradients under unbiased client selection is given by: 
+
+gclip,unbiased ( ˜ wt) = 
+
+> N
+
+∑
+
+> k=1
+
+|M k|
+
+∑Ni=1 |M i|
+
+EDk,t 
+
+ 1
+
+|D k,t |
+
+∑
+
+> d∈D k,t
+
+1max {1, ∥gk( ˜ wt, d )∥2 /C } gk( ˜ wt, d )
+
+.
+
+(12) where gk( ˜ wt, d ) denotes the local gradient of client k at virtual model ˜wt for data sample d.In contrast, the clipped aggregated gradient under general (possibly biased) client selection is given as: 
+
+∇F clip ( ˜ wt) = 
+
+> N
+
+∑
+
+> k=1
+
+|M k|
+
+∑Ni=1 |M i|
+
+EDk,t 
+
+ 1
+
+|D k,t |
+
+∑
+
+> d∈D k,t
+
+qk,t (d)max {1, ∥gk( ˜ wt, d )∥2 /C } gk( ˜ wt, d )
+
+ ,
+
+(13) where the weighting factor qk,t (d) is defined as: 
+
+qk,t (d) = max {1, ∥gk( ˜ wt, d )∥2 /C }
+
+max {1, ∥∇ F ( ˜ wt)∥2 /C } , ∀k ∈ N . (14) The discrepancy between gclip,unbiased ( ˜ wt) and ∇F clip ( ˜ wt)
+
+introduces a clipping error, which can impact the convergence of the training process. 
+
+D. Main Result 
+
+The main results of our convergence analysis are presented in Theorems 1 and 2. To facilitate the discussion, we first define Gselect, clip , which captures the training loss resulting from client selection and gradient clipping: 
+
+Gselect,clip = ∥ps −pu∥1
+
+︸ ︷︷ ︸
+
+> selection gap
+
++ max  
+
+> t
+
+{∥ ∆t∥1}
+
+︸ ︷︷ ︸
+
+> clipping gap
+
++ B2
+
+C , (15) where pu is the unbiased selection probability vector with entries |M k|/ ∑Ni=1 |M i|, and ∆t is a vector whose kth entry is |M k |    
+
+> ∑Ni=1 |M i|
+> ∑
+> d∈M k|qk,t (d)−1||M k|
+
+.Similarly, the training loss due to privacy preservation is given by 
+
+GDP =
+
+> N
+
+∑
+
+> k=1
+
+(ps
+
+> k
+
+)2DV k, (16) where Vk is defined in Equation (7). Additionally, the clipping gap is characterized by 
+
+Gb,clip = max  
+
+> t
+
+{∥∥∆b
+
+> t
+
+∥∥1} + B2
+
+C , (17) which captures the loss introduced by gradient clip-ping, with ∆b 
+
+> t
+
+being a vector whose kth entry is (∑  
+
+> d∈M k
+
+|qk,t (d) − 1|/|M k|) ps
+
+> k
+
+.
+
+1) Strongly convex objective functions: The following the-orem establishes the convergence result for DP-FedAvg with strongly convex objective functions. 
+
+Theorem 1. Suppose that Assumptions 1-3 hold. Choose a stepsize αt = βγ+t with β > B1 
+
+> Cμ
+
+and γ ≥ 1. Then, for any 
+
+Γ > 0, the expected training loss of DP-FedAvg satisfies: 
+
+√E [F (wT +1 ) − F ∗] ≤
+
+Z
+
+√γ + T
+
+︸ ︷︷ ︸
+
+> vanishing error
+
++
+
+√
+
+18Γ βT L γ +TB1Cμ Gb,clip +
+
+√2LβT C 
+
+2( γ + T )
+
+[
+
+Gselect,clip +
+
+√
+
+(1+ 1Γ )( Gselect,clip )2 +(1+9Γ) GDP 
+
+]
+
+,
+
+(18) 6
+
+where 
+
+Z =
+
+√
+
+92 LΓγ ∥w1 − wb,∗∥22 + 1 + 9Γ 2
+
+β2T L γ + T C2 +γ (F (w1)−F ∗),
+
+(19) 
+
+F ∗ is the optimal value of the global objective F in Equation (4), and wb,∗ is the optimal solution of the biased objective 
+
+F b in Equation (5). 
+
+We defer the proof of Theorem 1 to Appendix A. Theorem 1 demonstrates that the square root of the expected training error is upper bounded by two components: a vanish-ing error and a non-vanishing error. The vanishing error, which is influenced by initialization and stochastic gradient variance, decreases at a rate of O(1 /√T ) and diminishes as T → ∞ .The non-vanishing error increases with the total number of iterations T but converges to a constant as T → ∞ .This theorem reveals a fundamental trade-off in DP-FL systems. The convergence error decomposes into three in-terpretable components: clipping error (which is unavoidable when bounding gradient sensitivity), the selection and pri-vacy error (the central challenge addressed in this work), and the vanishing error (which diminishes with more itera-tions). Particularly, the privacy error, GDP = ∑Nk=1 (ps
+
+> k
+
+)2DV k,grows quadratically with the client selection probabilities. This indicates that frequently selecting high-noise clients can significantly degrade performance. 
+
+Remark 1. The assumption of strong convexity (Assumption 2) enables the analysis of convergence under a stepsize of 
+
+Θ (1 /t ), which effectively mitigates the impact of noise in later iterations. 2) Non-convex objective functions: We now characterize the convergence behavior of DP-FedAvg on non-convex ob-jective functions. 
+
+Theorem 2. Suppose that Assumptions 1 and 3 hold. Choose a stepsize αt = B1 
+
+> C
+> 1√T
+
+. Then, DP-FedAvg satisfies: 
+
+√√√√ 1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+E
+
+[
+
+∥∇ F ( ˜ wt)∥22
+
+]
+
+≤
+
+B1
+
+2
+
+Gselect,clip +
+
+√√√√(Gselect,clip )2+2 
+
+> N
+
+∑
+
+> k=1
+
+(ps
+
+> k
+
+)2D√T LV k
+
+︸ ︷︷ ︸
+
+> non-vanishing error
+
++
+
+√
+
+F (w1)−F (w∗)
+
+√T + 121
+
+√T LB 21
+
+︸ ︷︷ ︸
+
+> vanishing error
+
+.
+
+(20) We defer the proof of Theorem 2 to Appendix B. Similar to Theorem 1, the upper bound on the square root of the expected training error consists of a non-vanishing error and a vanishing error. However, unlike the error bound for strongly convex objectives in Theorem 1, the error due to noise insertion increases with the number of iterations as O(T 1/4), and the vanishing error decreases as O(T −1/4).
+
+E. Insights and Corollaries 
+
+The following corollaries, derived from Theorems 1 and 2, show that DP-FedAvg converges in expectation to an irreducible training error which is caused by client selection, gradient clipping, and the noise from DP protection. 
+
+Corollary 1. When Assumptions 1-3 hold, the asymptotic square root of training error is upper bounded as follows: 
+
+lim  
+
+> T→∞
+
+√E{F (wT )−F ∗} ≤ 
+
+√
+
+18Γ βL BC μ Gb,clip +
+
+√LβC 
+
+√2
+
+[
+
+Gselect,clip +
+
+√
+
+(1+ 1Γ )( Gselect,clip )2+(1+9Γ) GDP 
+
+]
+
+.
+
+(21) 
+
+Remark 2. In classical optimization with Assumptions 1-3 holding (without DP), the training error upper bound is 
+
+O(1 /√T ), implying convergence to 0 as T → ∞ [26]. How-ever, as shown in Corollary 1, the optimality gap converges to a non-zero error due to DP considerations. 
+
+Corollary 2. When Assumptions 1 and 3 hold, the square root of the error upper bound does not monotonically decrease with 
+
+T .Proof. The upper bound in Theorem 2 can be expressed as: 
+
+B1
+
+2
+
+Gselect,clip +
+
+√√√√(Gselect,clip )2+2 
+
+> N
+
+∑
+
+> k=1
+
+(ps
+
+> k
+
+)2D√T LV k
+
+
+
+= B1
+
+2 Gselect,clip + f (T ),
+
+(22) where 
+
+f (T ) = B1
+
+2
+
+√
+
+A + Q√T +
+
+√
+
+R 1
+
+√T , (23) with 
+
+A = ( Gselect,clip )2, Q = 2 
+
+> N
+
+∑
+
+> k=1
+
+(ps
+
+> k
+
+)2DLV k,R = F (w1) − F (w∗) + 12 LB 21 .
+
+(24) The derivative of f (T ) is 
+
+df (T )
+
+dT = B1
+
+8
+
+Q
+
+√
+
+A + Q√T
+
+1
+
+√T
+
+︸ ︷︷ ︸ 
+
+> Θ( T−3/4)
+
+−√R
+
+41
+
+T 5/4
+
+︸ ︷︷ ︸ 
+
+> Θ( T−5/4)
+
+. (25) Since the first term is Θ( T −3/4) while the second term is 
+
+Θ( T −5/4), the first term dominates for sufficiently large T ,making df (T )/dT > 0. Thus, if the derivative f ′(2) =   
+
+> df (T)
+> dT
+
+|T =2 ≥ 0, the error bound increases monotonically; if 
+
+f ′(2) < 0, the error bound initially decreases, but eventually increases as T grows. 
+
+Remark 3. Suppose Assumptions 1 and 3 hold. Classical optimization (without DP) yields a training error upper bound the decreases as O(T −1/4). In contrast, DP introduces an additional non-vanishing error term that grows as O(T 1/4),resulting in non-monotonic error behavior. 7
+
+Fig. 2: Workflow of the privacy-aware client selection. Squaring both sides of the error bounds in Theorems 1 and 2 reveals cross-product terms involving client selection, gradient clipping, and DP errors. This suggests that privacy protection can amplify the training loss due to client selection and clipping, offering a theoretical explanation for empirical observations in the recent literature [27]. V. P RIVACY -A WARE CLIENT SELECTION STRATEGY 
+
+Based on the convergence analysis of DP-FedAvg in Section IV, we now propose a privacy-aware client selection strategy to optimize performance in DP-FL. The strategy operates as shown in Fig. 2. 
+
+A. Derivation of the Privacy-Aware Client Selection Problem 
+
+We formulate the privacy-aware client selection optimiza-tion problem based on the convergence analysis presented in Section IV. This analysis shows that three main factors-client selection, gradient clipping, and DP noise-fundamentally influence the training error in DP-FedAvg. Given a fixed gradient clipping threshold C, we aim to optimize client selection to minimize the persistent error term described in equation (20). To simplify the optimization, we ignore the clipping gap and define the selection error as ℓ1-norm between the selection probability vectors, i.e. , Gselect, clip = ∥ps − pu∥1. Since we do not know the smoothness constant L of the objective function in advance, we introduce a tunable hyperparameter 
+
+η = D√T L and adjust it during training. In summary, we solve the following optimization problem: 
+
+Problem 1. Privacy-aware client selection. 
+
+min  
+
+> ps
+
+∥ps − pu∥1 +
+
+√√√√∥ps − pu∥21 + η
+
+> N
+
+∑
+
+> k=1
+
+(ps
+
+> k
+
+)2DV k
+
+s.t. 
+
+> N
+
+∑
+
+> k=1
+
+ps 
+
+> k
+
+= 1 , p s 
+
+> k
+
+≥ 0, ∀k ∈ N .
+
+B. Characterization of Problem 1 
+
+Proposition 1. Problem 1 is a convex optimization problem. 
+
+The proof of Proposition 1 is deferred to the Appendix C. Because the objective is convex and the constraints are linear, we can efficiently find the global optimum of Problem 1 using standard convex optimization solvers. Next, we characterize the optimal solution of Problem 1. 
+
+Proposition 2 (Full-participation) . At the optimal solution of Problem 1, the sever assigns positive selection probabilities to all clients, i.e., ps 
+
+> k
+
+> 0, for all k ∈ N .
+
+We defer the proof of Proposition 2 to the Appendix D. 
+
+Remark 4. Proposition 2 implies that, to minimize training loss, the server should include all clients in the selection process, regardless of their privacy budgets. However, in practice, other constraints such as communication costs or system limitations may require selecting only a subset of clients. 
+
+The proposed privacy-aware client selection strategy also applies to scenarios with non-IID public datasets. In these cases, we can model public datasets as clients with infinite privacy budgets, allowing them to be seamlessly integrated into the optimization framework without any additional mod-ifications. VI. N UMERICAL RESULTS 
+
+In this section, we evaluate our proposed privacy-aware client selection strategy in DP-FL under heterogeneous privacy budgets. We compare its performance with existing baseline methods on MNIST, Fashion-MNIST, and CIFAR-10 datasets, and analyze the effects of key parameters such as subsampling ratio and privacy budgets. It is worth noting that single-machine simulations of DP-FL face two critical performances bottlenecks that limit their scale:  
+
+> •
+
+A memory bottleneck, where serially loading data for numerous clients causes severe cache thrashing, making the process memory- rather than compute-bound.  
+
+> •
+
+A compute bottleneck, stemming from the large overhead of the per-example gradient clipping needed to satisfy DP requirements. Consequently, numerical experiments are often restricted to smaller-scale benchmarks such as MNIST and CIFAR-10 [28]–[30]. 8      #                 
+
+> 
+> 
+> 
+> 
+> 
+>    "   ε
+>  "!   =
+>       #
+>  "!   =  
+>       #
+>    =
+> 
+> 
+> 
+> 
+> 
+>   "
+
+Fig. 3: Selection probability of 100 clients with heterogeneous dataset sizes and privacy budgets ( ϵ). Subsampling ratio r is fixed to 0.1 for all clients. 
+
+A. Setup 
+
+To simulate realistic federated learning scenarios, we in-troduce heterogeneity both in client dataset sizes and data distributions. 
+
+Client Dataset Sizes: The size of each client’s local dataset 
+
+|M k| is determined by |M k| = |S| vk/ ∑Ni=1 vi, where each 
+
+vk is sampled independently from U(0 .5, 1.5) 12 . This ensures that clients have varying amounts of data, reflecting practical FL deployments. 
+
+Data Distribution (Non-IID): We control the level of data heterogeneity using a mixing parameter s. For each client, s% of their local data is drawn IID from the global training set, while the remaining (100 − s)% is assigned in a non-IID manner by sorting data according to class labels, following [31]. This partitioning is applied to MNIST [32], FashionMNIST [33], and CIFAR-10 [34]. 
+
+B. Baselines 
+
+We compare our privacy-aware client selection strategy with two widely studied categories of baseline mechanisms: 
+
+• Unbiased client selection: These methods select clients with probabilities proportional to their local dataset sizes, i.e., ps = pu [35], [36]. Unbiased client selection meth-ods also include importance compensation approaches, which weight each client’s update using a compensation parameter to maintain an unbiased learning objective [8]. 
+
+• Biased client selection: These methods select clients based on criteria unrelated to dataset size, so selection probabilities do not match data volume. Since most biased selection methods ignore privacy considerations, we adopt a widely used approach that selects clients with the largest local training losses [13]. 
+
+C. Optimal Solution and the Learning Performance 
+
+We begin by visualizing how local dataset sizes and privacy budgets influence the optimal client selection. By solving the 
+
+> 1
+
+Here U(x, y ) refers to a uniform distribution whose interval is (x, y ).
+
+> 2
+
+The argument (x, y ) in U(x, y ) can be any value. We choose (x, y ) = (0 .5, 1.5) here for simplicity. 
+
+TABLE III: Test accuracy performance (MNIST). 
+
+Mechanism Non-IID Degree Test Accuracy 
+
+Privacy-aware 
+
+s = 100 (IID) 68.71% 
+
+s = 70 65.12% 
+
+s = 30 68.50% 
+
+s = 0 67.63% 
+
+Unbiased 
+
+s = 100 (IID) 28.02% 
+
+s = 70 14.69% 
+
+s = 30 17.94% 
+
+s = 0 14.92% Biased 
+
+s = 100 (IID) 32.73% 
+
+s = 70 35.42% 
+
+s = 30 16.98% 
+
+s = 0 18.55% TABLE IV: Test accuracy performance (FashionMNIST). 
+
+Mechanism Non-IID Degree Test Accuracy 
+
+Privacy-aware 
+
+s = 100 (IID) 53.53% 
+
+s = 70 55.26% 
+
+s = 30 54.80% 
+
+s = 0 48.94% 
+
+Unbiased 
+
+s = 100 (IID) 14.68% 
+
+s = 70 16.47% 
+
+s = 30 16.27% 
+
+s = 0 10.69% Biased 
+
+s = 100 (IID) 23.63% 
+
+s = 70 20.95% 
+
+s = 30 15.39% 
+
+s = 0 20.37% optimization problem (Problem 1) using CVXPY 3 [37], we obtain the optimal selection probabilities for 100 clients, as shown in Fig. 3. In this figure, each client is represented by a point, with its dataset size on the horizontal axis, privacy budget ϵk on the vertical axis, and selection probability indicated by color. Notably, clients with larger datasets and 
+
+> 3
+
+The license of CVXPY: https://www.cvxpy.org/license/index.html. 9      
+
+> 
+>  
+>  
+>  
+>  
+>  
+> 
+> 
+> 
+> 
+
+(a) CIFAR-10, Similarity: s = 100        
+
+> 
+>  
+>  
+>  
+>  
+>  
+> 
+> 
+> 
+> 
+
+(b) CIFAR-10, Similarity: s = 70       
+
+> 
+>  
+>  
+>  
+>  
+>  
+> 
+> 
+> 
+> 
+
+(c) CIFAR-10, Similarity: s = 30        
+
+> 
+>  
+>  
+>  
+>  
+>  
+> 
+> 
+> 
+> 
+
+(d) CIFAR-10, Similarity: s = 0 
+
+Fig. 4: Test accuracy on CIFAR-10. higher privacy budgets are more likely to be selected by the server—this is reflected by a shift in color from red to blue. The parameter η in Problem 1, which controls the weight on DP error, directly affects the deviation of the client selec-tion probabilities from the unbiased baseline. This effect is illustrated in Fig. 3: the left and center subfigures demonstrate how increasing η leads to greater deviation from the unbiased selection depicted in the right subfigure. To empirically evaluate our approach, we conducted simu-lations on both MNIST and FashionMNIST datasets using a convolutional neural network (CNN) architecture in Tables III and IV. The CNN consists of two convolutional layers (with 16 and 32 channels, each followed by 2×2 max pooling) and two fully connected layers (with 512 and 32 units, respectively), all using ReLU activation. In each training round, we select 
+
+N select = 10 clients, assign privacy budgets ϵk sampled from 
+
+U(0 , 1) , fix δk to 10 −5, and use a batch size Bk = 128 for each client. The data similarity parameter s is varied from 
+
+0% to 100% to assess performance under different degrees of non-IID data. Figure 4 presents a comparison of test accuracy for the proposed privacy-aware selection strategy against unbiased and biased client selection baselines. In these experiments, clients’ privacy budgets are also sampled from a Gaussian mixture distribution, 0.3N (0 .5, 0.04) + 0 .7N (10 , 1) , with any negative values discarded. The CNN architecture follows the well-tuned design from [38]. Our results, summarized in Tables III and IV, as well as Figure 4, clearly demonstrate that the privacy-aware client selection strategy achieves superior performance across all datasets—MNIST, FashionMNIST, and CIFAR-10. For in-stance, on CIFAR-10 with 30% data similarity, our method achieves a test accuracy of 32 .35% , whereas the baselines remain below 23% . This notable improvement is primarily due to the reduced noise variance resulting from our optimal selection policy. Furthermore, we observe that test accuracy becomes more volatile as data similarity decreases, which is expected since lower data similarity amplifies the stochastic gradient variance in FL. 
+
+D. Effects of Parameters 
+
+Next we investigate how key parameters—the subsampling ratio and privacy budgets (ϵ)—affect model performance. Throughout these experiments, we fix the data similarity at 30%, while all other settings follow those described in Section VI-C. 10        
+
+>  
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+>   
+> 
+>  
+> 
+
+Fig. 5: Test accuracy versus batch size.       
+
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+>   
+>   
+>   
+>   
+>   
+>   
+
+Fig. 6: Test accuracy versus privacy budget distributions. "P-
+
+i-j", "U-i-j", and "B-i-j" refer to the proposed, unbiased and biased client selection approaches with privacy budgets follow-ing Gaussian mixture distribution 0.3N (i, 0.04) + 0 .7N (j, 1) .
+
+1) Subsampling: Figure 5 illustrates the effect of varying the subsampling ratio, controlled via the batch size Bk ∈{32 , 64 , 128 , 256 }, on the test accuracy. As expected, increas-ing the batch size reduces the added noise per iteration, result-ing in higher test accuracy. Importantly, across all batch sizes, our privacy-aware selection strategy consistently outperforms the baseline methods. 2) Privacy Budgets: Figure 6 examines how the distribution of client privacy budgets influences performance on CIFAR-10. We consider two scenarios, where privacy budgets ( ϵ) are sampled from different truncated Gaussian mixture distribu-tions:  
+
+> •
+
+Case 1: Small and Dispersed Budgets 
+
+0.3 · N (0 .5, 0.04) + 0 .7 · N (10 , 1)  
+
+> •
+
+Case 2: Large and Concentrated Budgets 
+
+0.3 · N (2 , 0.04) + 0 .7 · N (8 , 1) 
+
+The results demonstrate that the performance improvement from our strategy is strongly influenced by the distribution of privacy budgets. When many clients have small privacy budgets (Case 1), privacy-aware client selection yields a sub-stantial performance gain of approximately 10%. In contrast, when privacy budgets are generally larger and more concen-trated (Case 2), the improvement is more modest (about 4%). VII. C ONCLUSIONS 
+
+In this work, we addressed the challenge of client selection in DP-FL under heterogeneous privacy budgets and non-IID data. We proposed a novel privacy-aware client selection strategy, supported by a rigorous convergence analysis and a closed-form expression for the irreducible training loss. Our convex optimization approach effectively mitigates the amplified training loss caused by privacy and data hetero-geneity, leading to substantial improvements in test accuracy over existing baselines particularly when privacy budgets are limited and highly diverse. Future research will focus on designing adaptive client selection strategies that respond to real-time changes in client privacy requirements and data distributions. We also aim to extend our framework to support more complex federated learning scenarios, such as personalized models and multi-modal applications, and to explore integration with advanced privacy accounting and resource-aware optimization methods. REFERENCES [1] R. Xu, Y. Zhang, and J. Huang, “Tackling privacy heterogeneity in federated learning,” in WiOpt , 2023. [2] L. Zhu, Z. Liu, and S. Han, “Deep leakage from gradients,” NeurIPS ,2019. [3] K. Bonawitz, P. Kairouz, B. McMahan, and D. Ramage, “Federated learning and privacy: Building privacy-preserving systems for machine learning and data science on decentralized data,” Queue , vol. 19, no. 5, pp. 87–114, 2021. [4] S. Asoodeh, W.-N. Chen, F. P. Calmon, and A. Özgür, “Differentially private federated learning: An information-theoretic perspective,” in 
+
+IEEE ISIT , 2021. [5] K. Wei, J. Li, M. Ding, C. Ma, H. Su, B. Zhang, and H. V. Poor, “User-level privacy-preserving federated learning: Analysis and performance optimization,” IEEE Trans. Mobile Comput. , vol. 21, no. 9, pp. 3388– 3401, 2021. [6] A. Girgis, D. Data, S. Diggavi, P. Kairouz, and A. T. Suresh, “Shuffled model of differential privacy in federated learning,” in AISTATS , 2021. [7] X. Zhang, X. Chen, M. Hong, Z. S. Wu, and J. Yi, “Understanding clipping for federated learning: Convergence and client-level differential privacy,” arXiv preprint arXiv:2106.13673 , 2021. [8] B. Luo, W. Xiao, S. Wang, J. Huang, and L. Tassiulas, “Adaptive heterogeneous client sampling for federated learning over wireless networks,” IEEE Trans. Mobile Comput. , 2024. [9] Y. J. Cho, S. Gupta, G. Joshi, and O. Ya˘ gan, “Bandit-based communication-efficient client selection strategies for federated learn-ing,” in ACSCC , 2020. [10] X. Ouyang, Z. Xie, J. Zhou, J. Huang, and G. Xing, “Clusterfl: a similarity-aware federated learning system for human activity recogni-tion,” in ACM MobiSys , 2021. [11] C. Li, X. Zeng, M. Zhang, and Z. Cao, “Pyramidfl: A fine-grained client selection framework for efficient federated learning,” in ACM MobiCom ,2022. [12] N. Yoshida, T. Nishio, M. Morikura, K. Yamamoto, and R. Yonetani, “Hybrid-fl for wireless networks: Cooperative learning mechanism using non-iid data,” in IEEE ICC , 2020. [13] Y. J. Cho, J. Wang, and G. Joshi, “Towards understanding biased client selection in federated learning,” in AISTATS , 2022. [14] Y. Zhu, X. Yu, Y.-H. Tsai, F. Pittaluga, M. Faraki, Y.-X. Wang et al. ,“Voting-based approaches for differentially private federated learning,” 
+
+arXiv preprint arXiv:2010.04851 , 2020. [15] L. Sun, J. Qian, and X. Chen, “LDP-FL: Practical private aggregation in federated learning with local differential privacy,” in IJCAI , 2021. 11 
+
+[16] Z. Bu, Y.-X. Wang, S. Zha, and G. Karypis, “Automatic clipping: Differentially private deep learning made easier and stronger,” arXiv preprint arXiv:2206.07136 , 2022. [17] M. Abadi, A. Chu, I. Goodfellow, H. B. McMahan, I. Mironov, K. Tal-war, and L. Zhang, “Deep learning with differential privacy,” in ACM CCS , 2016. [18] C. Dwork and A. Roth, “The algorithmic foundations of differential privacy,” Foundations and Trends in Theoretical Computer Science ,vol. 9, no. 34, pp. 211–407, 2014. [19] T. Li, A. K. Sahu, A. Talwalkar, and V. Smith, “Federated learning: Challenges, methods, and future directions,” IEEE Signal Process. Mag. ,vol. 37, no. 3, pp. 50–60, 2020. [20] B. McMahan, E. Moore, D. Ramage, S. Hampson, and B. A. y Arcas, “Communication-efficient learning of deep networks from decentralized data,” in AISTATS , 2017. [21] B. Balle, G. Barthe, and M. Gaboardi, “Privacy amplification by sub-sampling: Tight analyses via couplings and divergences,” in NeurIPS ,2018. [22] P. Kairouz, S. Oh, and P. Viswanath, “The composition theorem for differential privacy,” in ICML , 2015. [23] X. Li, K. Huang, W. Yang, S. Wang, and Z. Zhang, “On the convergence of fedavg on non-iid data,” in ICLR , 2020. [24] E. Gorbunov, F. Hanzely, and P. Richtárik, “Local sgd: Unified theory and new efficient methods,” in AISTATS , 2021. [25] S. U. Stich, “Local SGD converges fast and communicates little,” in 
+
+ICLR , 2019. [26] L. Bottou, F. E. Curtis, and J. Nocedal, “Optimization methods for large-scale machine learning,” SIAM review , vol. 60, no. 2, 2018. [27] E. Bagdasaryan, O. Poursaeed, and V. Shmatikov, “Differential privacy has disparate impact on model accuracy,” in NeurIPS , 2019. [28] J. Zhang, L. Zhu, D. Fay, and M. Johansson, “Locally differentially pri-vate online federated learning with correlated noise,” IEEE Transactions on Signal Processing , vol. 73, pp. 1518–1531, 2025. [29] W. Zhu, L. Shi, K. Wei, Y. Zhou, Z. Wang, Z. Xiong, and J. Li, “Randomized dp-dfl: towards differentially private decentralized feder-ated learning via randomized model interaction,” IEEE Transactions on Mobile Computing , pp. 1–16, 2025. [30] R. Wang, Y. Zhou, J. Liu, X. Liu, M. Hu, D. Wu, Q. Z. Sheng, and S. Guo, “Codp: Improving differentially private federated learning by cascading and offsetting noises between iterations,” IEEE Transactions on Dependable and Secure Computing , pp. 1–13, 2025. [31] S. P. Karimireddy, S. Kale, M. Mohri, S. Reddi, S. Stich, and A. T. Suresh, “Scaffold Stochastic controlled averaging for federated learn-ing,” in ICML , 2020. [32] Y. LeCun, L. Bottou, Y. Bengio, and P. Haffner, “Gradient-based learning applied to document recognition,” Proc. of the IEEE , vol. 86, no. 11, pp. 2278–2324, 1998. [33] H. Xiao, K. Rasul, and R. Vollgraf, “Fashion-mnist: a novel image dataset for benchmarking machine learning algorithms,” arXiv preprint arXiv:1708.07747 , 2017. [34] A. Krizhevsky, G. Hinton et al. , “Learning multiple layers of features from tiny images,” 2009. [35] X. Zhang, X. Chen, M. Hong, Z. S. Wu, and J. Yi, “Understanding clipping for federated learning: Convergence and client-level differential privacy,” in ICML , 2022. [36] A. Bietti, C.-Y. Wei, M. Dudik, J. Langford, and S. Wu, “Personalization improves privacy-accuracy tradeoffs in federated learning,” in ICML ,2022. [37] S. Diamond and S. Boyd, “CVXPY: A Python-embedded modeling lan-guage for convex optimization,” Journal of Machine Learning Research ,vol. 17, no. 1, pp. 2909–2913, 2016. [38] F. Tramer and D. Boneh, “Differentially private learning needs better features (or much more data),” in ICLR , 2021. 12 
+
+APPENDIX 
+
+A. Proof of Theorem 1 
+
+We first introduce the preliminary key lemmas for proving Theorem 1 in Appendix A1. We provide the complete proof of Theorem 1 in Appendix A2, and defer the proof of the Lemmas 3, 4, 5 to Appendix A3, A4, A5. 
+
+1) Key lemmas: We present the key lemmas here and prove them later. 
+
+Lemma 3. Suppose that Assumptions 1-3 hold. Choose an 
+
+Θ(1 /t ) stepsize βγ+t (β > B1 
+
+> Cμ
+
+, γ > 1) . We have 
+
+E [F (wT )−F ∗] ≤ γγ + T (F (w1) − F ∗)+ 12
+
+β2
+
+(γ + T )2 L
+
+> T
+
+∑
+
+> t=1
+
+( N∑
+
+> k=1
+
+(ps
+
+> k
+
+)2DT V kC2 + C2
+
+)
+
++ βγ + T
+
+> T
+
+∑
+
+> t=1
+
+E
+
+[
+
+|∇ F ( ˜ wt)⊤ (
+
+gclip  
+
+> t
+
+−∇ F clip ( ˜ wt)
+
+)
+
+|
+
+]︸ ︷︷ ︸
+
+> A1
+
+.
+
+(26) 
+
+Lemma 4. Suppose that Assumptions 1, 3 hold. We have 
+
+A1 =
+
+> T
+
+∑
+
+> t=1
+
+E
+
+[
+
+|∇ F ( ˜ wt)⊤ (
+
+gclip  
+
+> t
+
+−∇ F clip ( ˜ wt)
+
+)
+
+|
+
+]
+
+≤T LA 2Gselect,clip C +T E [∥∇ F (wT +1 )∥2]Gselect,clip C, 
+
+(27) 
+
+where 
+
+A2 =
+
+(
+
+1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+E[∥ ∥wt − wb,∗∥∥2
+
+]+ T −1
+
+T E∥∥wT +1 −wb,∗∥∥2
+
+)
+
+(28) 
+
+Lemma 5. Suppose that Assumptions 1-3 hold. Choose an 
+
+Θ(1 /t ) stepsize βγ+t (β > B1 
+
+> Cμ
+
+, γ > 1) . We have 
+
+A2 ≤ 3
+
+√γ + T
+
+√
+
+γ∥w1−wb,∗∥22+β2T 2
+
+γ +T
+
+(
+
+GDP + 1
+
+T
+
+)
+
+C2 +2βTB 1
+
+μ Gb,clip C. 
+
+(29) 
+
+2) Complete Proof of Theorem 1: We prove Theorem 1 based on the above key lemmas (Lemmas 3, 4, and 5). At first, we bound A2Gselect, clip C based on Lemma 5. Then, we substitute the bound of A2Gselect, clip C into Lemmas 3 and 4 to obtain a complete inequality of the optimality gap. Finally, solving the inequality yields Theorem 1. 
+
+Proof. Based on Lemma 5, we can bound A2Gselect,clip C by the arithmetic mean-geometric mean inequality. That is, for every Γ > 0,
+
+A2Gselect,clip C ≤ 12
+
+βT γ +T
+
+[
+
+Γ (γ + T )2
+
+β2T 2 A22 + 1Γ (Gselect,clip )2C2
+
+]
+
+≤ 12
+
+βT γ + T 9Γ 
+
+( γ + Tβ2T 2 γ ∥∥w1 − wb,∗∥∥22 + GDP C2 + C2
+
+T
+
++ 2B1(γ + T )
+
+βT μ Gb,clip C
+
+)
+
++ 12
+
+βT γ + T
+
+1Γ (Gselect,clip )2C2.
+
+(30) Substituting (30) and (27) to (26), we have 
+
+E [F (wT +1 ) − F ∗] ≤ γγ + T (F (w1) − F ∗)+ βT γ + T
+
+√2L√E [F (wT +1 ) − F ∗]Gselect,clip C
+
++ 12
+
+β2T 2L
+
+(γ + T )2 9Γ 
+
+( γ + Tβ2T 2 γ ∥∥w1 − wb,∗∥∥22 + GDP C2
+
++ C2
+
+T + 2B1(γ + T )
+
+βT μ Gb,clip C
+
+)
+
++ 12
+
+β2T 2L
+
+(γ + T )2 GDP C2
+
++ 12
+
+β2T
+
+(γ + T )2 LC 2 + 12
+
+β2T 2L
+
+(γ + T )2
+
+1Γ (Gselect,clip )2C2.
+
+(31) This inequality (31) is an quadratic inequality of √E [F (wT +1 ) − F ∗]. Through solving (31), we obtain the following upper bound of √E [F (wT +1 ) − F ∗] as in (32). 
+
+3) Proof of Lemma 3: Proof. By the property of strong convexity (Assumption 2), 
+
+i.e. , 2μ(F (w) − F ∗) ≤ ||∇ F (w)|| 22 and (60) , we have 
+
+E [F ( ˜ wt+1 )] − F ( ˜ wt) ≤ − αt
+
+2Cμ B1
+
+(F ( ˜ wt) − F ∗)
+
+− αt∇F ( ˜ wt)⊤ (
+
+gclip  
+
+> t
+
+− ∇ F clip ( ˜ wt)
+
+)
+
++ 12 α2 
+
+> t
+
+L
+
+(
+
+E
+
+[
+
+∥nt∥22
+
+]
+
++ C2)
+
+.
+
+(33) Adding F ( ˜ wt) − F ∗ on both sides of (33), we have 
+
+E [F (wt+1 )] −F ∗ ≤
+
+(
+
+1−αt
+
+2Cμ B1
+
+)
+
+(F ( ˜ wt) − F ∗)
+
+−αt∇F ( ˜ wt)⊤ (
+
+gclip  
+
+> t
+
+− ∇ F clip ( ˜ wt)
+
+)
+
++ 12 α2 
+
+> t
+
+L
+
+(
+
+E
+
+[
+
+∥nt∥22
+
+]
+
++ C2)
+
+.
+
+(34) Setting the stepsize as αt = βγ+t , we have 
+
+E [F (wt+1 )] −F ∗ ≤
+
+(
+
+1− βγ + t
+
+2Cμ B1
+
+)
+
+(F ( ˜ wt) − F ∗)
+
+− βγ + t ∇F ( ˜ wt)⊤ (
+
+gclip  
+
+> t
+
+− ∇ F clip ( ˜ wt)
+
+)
+
++ 12
+
+β2
+
+(γ + t)2 L
+
+(
+
+E
+
+[
+
+∥nt∥22
+
+]
+
++ C2)
+
+.
+
+(35) When β ≥ B1 
+
+> Cμ
+
+, we have the following inequalities, 
+
+(
+
+1− βγ + t
+
+2Cμ B1
+
+) ( βγ + t − 1
+
+)
+
+=
+
+(
+
+1 − 1
+
+γ + ˜ t + 1 − 2βCμ B1
+
+γ + t
+
+) ( βγ + t − 1
+
+)
+
+= βγ + t +
+
+β
+
+(
+
+1 − 2βCμ B1
+
+)
+
+(γ + t)( γ + t − 1) 
+
+≤ βγ + t ,
+
+(36) 13 
+
+√E [F (wT +1 )−F ∗] ≤ 12
+
+[ βT γ + T
+
+√2LG select,clip C
+
+]
+
++
+
+√22 C
+
+√
+
+β2T 2L
+
+(γ +T )2 (1+ 1Γ )( Gselect,clip )2+ β2T 2L
+
+(γ +T )2 (9Γ+1) GDP 
+
++
+
+√ 1
+
+γ + T
+
+√
+
+92LΓγ∥w1−wb,∗∥22+9Γ+1 2
+
+β2TL γ +T C2 +18Γ βT L B1
+
+μ Gb,clip C +γ(F (w1)−F ∗)
+
+≤ 12
+
+√2LβT C γ + T
+
+[
+
+Gselect,clip +
+
+√(
+
+1+ 1Γ
+
+)
+
+(Gselect,clip )2+(9Γ + 1) GDP 
+
+]
+
++
+
+√
+
+18Γ βT L γ + TB1
+
+μ Gb,clip C
+
++
+
+√
+
+129LΓ
+
+γ +T γ ∥w1 −wb,∗∥22 + 9Γ + 1 2
+
+β2T L 
+
+(γ +T )2 C2 + γγ + T (F (w1) − F ∗).
+
+(32) and 
+
+(
+
+1− βγ + t
+
+2Cμ B1
+
+) ( βγ + t − 1
+
+)2
+
+=
+
+(
+
+1 − 1
+
+γ + t + 1 − 2βCμ/B 1
+
+γ + t
+
+) ( βγ + t − 1
+
+)2
+
+= β2
+
+(γ + t)( γ + t − 1) + β2(1 − 2βCμ/B 1)(γ + t)( γ + t − 1) 2
+
+= β2
+
+(γ + t)2 + β2
+
+(γ + t)2(γ + t − 1) + β2(1 − 2βCμ/B 1)(γ + t)( γ + t − 1) 2
+
+≤ β2
+
+(γ + t)2 .
+
+(37) Taking expectations over all iterations of (35) yields 
+
+E [F (wT +1 )−F ∗] ≤
+
+> T
+
+∏
+
+> t=1
+
+(
+
+1− βγ + t
+
+2Cμ B1
+
+)
+
+(F (w1) − F ∗) +  
+
+> T−1
+
+∑
+
+> t=0
+
+βγ +t 
+
+> T−t−1
+
+∏
+
+> i=0
+
+(1 − βγ +T −i
+
+2Cμ B1
+
+)E
+
+[
+
+|∇ F ( ˜ wt)⊤(
+
+gclip  
+
+> t
+
+−∇ F clip ( ˜ wt)
+
+)
+
+|
+
+]
+
++ 12
+
+> T
+
+∑
+
+> t=1
+
+β2
+
+(γ + t)2 
+
+> T−t−1
+
+∏
+
+> i=0
+
+(
+
+1− βγ +T −i
+
+2Cμ B1
+
+)
+
+L
+
+(
+
+E
+
+[
+
+∥nt∥22
+
+]
+
++C2)
+
+.
+
+(38) Substituting (36) and (37) to (38), we have 
+
+E [F (wT +1 )−F ∗] ≤ γγ + T (F (w1) − F ∗)+ βγ + T
+
+> T
+
+∑
+
+> t=1
+
+E
+
+[∣ ∣∣∇F ( ˜ wt)⊤ (
+
+gclip  
+
+> t
+
+−∇ F clip ( ˜ wt)
+
+)∣ ∣∣]︸ ︷︷ ︸
+
+> A1
+
++ 12
+
+β2
+
+(γ + T )2 L
+
+> T
+
+∑
+
+> t=1
+
+(
+
+E
+
+[
+
+∥nt∥22
+
+]
+
++ C2)
+
+.
+
+(39) Recall that when the clients have diverse dataset sizes 
+
+{|M k|} k∈N , privacy budgets {(ϵk, δ k)}k∈N , and sampling rates {rk}k∈N , the noise variance is 
+
+E
+
+[
+
+∥nt∥22
+
+]
+
+= V [nt] = 1
+
+N select 
+
+> N
+
+∑
+
+> k=1
+
+(ps
+
+> k
+
+)2DT N select VkC2
+
+=
+
+> N
+
+∑
+
+> k=1
+
+(ps
+
+> k
+
+)2T D 
+
+8 log 
+
+(
+
+e+
+
+( rk log    
+
+> (
+> 1+ 1
+> rk(eϵk−1)
+> )
+> δk
+
+)) 
+
+|M k|2r2 
+
+> k
+
+log 
+
+(
+
+1 + 1 
+
+> rk
+
+(eϵk − 1) 
+
+)2 C2.
+
+(40) It follows that 
+
+E [F (wT +1 )−F ∗] ≤ γγ + T (F (w1) − F ∗)+ βγ + T
+
+> T
+
+∑
+
+> t=1
+
+E
+
+[
+
+|∇ F ( ˜ wt)⊤ (
+
+gclip  
+
+> t
+
+−∇ F clip ( ˜ wt)
+
+)
+
+|
+
+]︸ ︷︷ ︸
+
+> A1
+
++ 12
+
+β2
+
+(γ + T )2 L
+
+> T
+
+∑
+
+> t=1
+
+( N∑
+
+> k=1
+
+(ps
+
+> k
+
+)2DT V kC2 + C2
+
+)
+
+.
+
+(41) 
+
+4) Proof of Lemma 4: Proof. Based on CauchySchwarz inequality, we have 
+
+A1 =
+
+> T
+
+∑
+
+> t=1
+
+E
+
+[
+
+|∇ F ( ˜ wt)⊤ (
+
+gclip  
+
+> t
+
+−∇ F clip ( ˜ wt)
+
+)
+
+|
+
+]
+
+≤
+
+> T
+
+∑
+
+> t=1
+
+E
+
+[
+
+∥∇ F ( ˜ wt)∥2
+
+∥∥∥gclip  
+
+> t
+
+− ∇ F clip ( ˜ wt)
+
+∥∥∥2
+
+]
+
+.
+
+(42) We can bound 
+
+∥∥∥gclip  
+
+> ˜t
+
+− ∇ F clip ( ˜ w˜t)
+
+∥∥∥2
+
+by 
+
+∥∥∥gclip  
+
+> t
+
+− ∇ F clip ( ˜ wt)
+
+∥∥∥2
+
+≤ ∥∥gclip ( ˜ wt)−∇ F clip ( ˜ wt)∥∥2 +
+
+∥∥∥gclip  
+
+> t
+
+− gclip ( ˜ wt)
+
+∥∥∥2
+
+≤ ∥∥gclip ( ˜ wt)−gclip,unbiased ( ˜ wt)∥∥2 + B2
+
++ ∥∥gclip,unbiased ( ˜ wt)−∇ F clip ( ˜ wt)∥∥2
+
+≤ ∥ ps − pu∥1 C + ∆ tC + B2.
+
+(43) 14 
+
+Then, substituting (63) into (42), we have 
+
+A1 ≤
+
+> T
+
+∑
+
+> t=1
+
+E [∥∇ F ( ˜ wt)∥2]
+
+(
+
+∥ps −pu∥1 +max  
+
+> t
+
+{∥ ∆t∥1}+ B2
+
+C
+
+)︸ ︷︷ ︸
+
+> Gselect,clip
+
+C
+
+=T
+
+(
+
+E
+
+[
+
+1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+∥∇ F ( ˜ wt)∥2 −∥∇ F (wT +1 )∥2
+
+]) 
+
+Gselect,clip C +T E [∥∇ F (wT +1 )∥2] Gselect,clip C
+
+≤T
+
+(
+
+E
+
+[
+
+1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+∥∇ F ( ˜ wt)−∇ F (wT +1 )∥2
+
+]) 
+
+Gselect,clip C + T E [∥∇ F (wT +1 )∥2] Gselect,clip C
+
+≤T
+
+(
+
+1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+LE [∥ ˜wt − wT +1 ∥2]
+
+)
+
+Gselect,clip C
+
++T E [∥∇ F (wT +1 )∥2] Gselect,clip C
+
+≤TL 
+
+
+
+1
+
+T
+
+> T
+
+∑
+
+> ˜t=1
+
+E[∥ ∥ ˜w˜t −wb,∗∥∥2
+
+]+ T −1
+
+T E [∥ ∥wT +1 −wb,∗∥∥]︸ ︷︷ ︸
+
+> A2
+
+
+
+Gselect,clip C +T E [∥∇ F (wT +1 )∥2]Gselect,clip C. 
+
+(44) 
+
+5) Proof of Lemma 5: Proof. To bound A2, we need to bound E
+
+[∥∥ ˜wt+1 − wb,∗∥∥22
+
+]
+
+first. Taking expectation over batch, selection, and noise in iteration t, we have 
+
+E
+
+[∥∥ ˜wt+1 − wb,∗∥∥22
+
+]
+
+=E
+
+[∥∥∥ ˜wt − αtgclip  
+
+> t
+
+− wb,∗ − αtnt
+
+∥∥∥22
+
+]
+
+= ∥∥ ˜wt − wb,∗∥∥22 − 2αtE
+
+[
+
+⟨ ˜wt − wb,∗, ˜gclip  
+
+> t
+
+⟩
+
+]
+
++ α2 
+
+> t
+
+E
+
+[∥∥∥˜gclip  
+
+> t
+
++ nt
+
+∥∥∥22
+
+]
+
+= ∥∥ ˜wt − wb,∗∥∥22 − 2αt⟨ ˜wt − wb, ∗, gclip  
+
+> t
+
+− gclip ( ˜ wt)⟩− 2αt
+
+〈 ˜wt −wb,∗, gclip (wt)−∇ F b,clip (wt)〉
+
+− 2αt⟨wt − wb,∗, ∇F b,clip (wt)⟩ + α2 
+
+> t
+
+E
+
+[∥∥˜gclip (wt)∥∥22
+
+]
+
++ α2 
+
+> t
+
+E
+
+[
+
+∥nt∥22
+
+]
+
+≤ ∥∥ ˜wt − wb,∗∥∥22 − 2 CB1
+
+αtμ ∥∥ ˜wt − wb,∗∥∥22 + α2 
+
+> t
+
+C2
+
++ α2 
+
+> t
+
+E
+
+[
+
+∥nt∥22
+
+]
+
+−2αt
+
+〈˜wt −wb,∗, gclip ( ˜ wt)−∇ F b,clip ( ˜ wt)〉
+
+− 2αt⟨ ˜wt −wb,∗, gclip  
+
+> t
+
+− gclip ( ˜ wt)⟩
+
+=
+
+(
+
+1 − 2Cμ B1
+
+αt
+
+) ∥∥ ˜wt − wb,∗∥∥22 + α2 
+
+> t
+
+C2 + α2 
+
+> t
+
+E
+
+[
+
+∥nt∥22
+
+]
+
+−2αt
+
+〈˜wt −wb,∗, gclip ( ˜ wt)−∇ F b,clip ( ˜ wt)〉
+
+− 2αt⟨ ˜wt −wb,∗, gclip  
+
+> t
+
+− gclip ( ˜ wt)⟩≤
+
+(
+
+1 − 2Cμ B1
+
+αt
+
+) ∥∥ ˜wt − wb,∗∥∥22 + α2 
+
+> t
+
+C2 + α2 
+
+> t
+
+E
+
+[
+
+∥nt∥22
+
+]
+
++ 2 αt
+
+B1
+
+μ
+
+(
+
+max  
+
+> t
+
+{∥∥∆bt
+
+∥∥1} + B2
+
+C
+
+)︸ ︷︷ ︸
+
+> Gb,clip
+
+C, 
+
+(45) where ∇F b,clip ( ˜ wt) is the clipped version of ∇F b( ˜ wt). Taking expectation over all iterations and applying (36) and (37), we have 
+
+E
+
+[∥∥ ˜wt+1 −wb,∗∥∥22
+
+]
+
+≤ γγ + t
+
+∥∥w1 −wb,∗∥∥22
+
++ β2t
+
+(γ + t)2
+
+(T G DP C2 + C2)
+
++ 2 βt γ + tB1
+
+μ Gb,clip C. 
+
+(46) Taking the square roots on both sides of (46), we have 
+
+√
+
+E
+
+[
+
+∥ ˜wt+1 −wb,∗∥22
+
+]
+
+≤
+
+√ 1
+
+γ + t
+
+√
+
+γ∥w1−wb,∗∥22+β2tT γ + t
+
+(
+
+GDP + 1
+
+T
+
+)
+
+C2 +2βtB 1
+
+μ Gb,clip C. 
+
+(47) Because t/ (γ + t) increases with t, we have 
+
+√
+
+E
+
+[
+
+∥ ˜wt+1 −wb,∗∥22
+
+]
+
+≤
+
+√ 1
+
+γ +t
+
+√
+
+γ∥w1−wb,∗∥22+(βT )2
+
+γ+T
+
+(
+
+GDP + 1
+
+T
+
+)
+
+C2 +E1,
+
+(48) 15 
+
+where E1 = (2 βTB 1/μ )Gb,clip C. In addition, we have the following inequality for the time average, 
+
+1
+
+T 
+
+> T+1
+
+∑
+
+> t=1
+
+√ 1
+
+γ + t − 1
+
+≤ 2
+
+T
+
+(√ γ + T − √γ − 1
+
+)
+
++ 1
+
+T
+
+≤ 2
+
+TT
+
+√γ + T + √γ − 1
+
+≤ 2
+
+√γ + T .
+
+(49) Taking the average of all iterations on (48) yields 
+
+1
+
+T 
+
+> T+1
+
+∑
+
+> t=1
+
+√
+
+E
+
+[
+
+∥ ˜wt − wb,∗∥22
+
+]
+
+≤ 
+
+> T+1
+
+∑
+
+> t=1
+
+√ 1
+
+γ +t − 1
+
+√
+
+γ∥w1 −wb,∗∥22 +β2(T )2
+
+γ +T
+
+(
+
+GDP + 1
+
+T
+
+)
+
+C2 +E1.
+
+(50) Substituting (49) to (50), it follows that 
+
+1
+
+T 
+
+> T+1
+
+∑
+
+> t=1
+
+√
+
+E
+
+[
+
+∥ ˜wt − wb,∗∥22
+
+]
+
+≤ 2
+
+√γ +T
+
+√
+
+γ∥w1−wb,∗∥22+β2(T )2
+
+γ +T
+
+(
+
+GDP + 1
+
+T
+
+)
+
+C2+E1.
+
+(51) Therefore, based on (48) and (51), we can bound A2 as 
+
+A2 ≤ 2
+
+√γ + T
+
+√
+
+γ∥w1 −wb,∗∥22+β2(T )2
+
+γ +T
+
+(
+
+GDP + 1
+
+T
+
+)
+
+C2 +E1
+
++ T − 1
+
+T
+
+1
+
+√γ + T
+
+√
+
+γ∥w1−wb,∗∥22+ β2Tγ +T (T G DP +1) C2 + E1
+
+≤ 3
+
+√γ + T
+
+√
+
+γ∥w1 −wb,∗∥22+β2(T )2
+
+γ +T
+
+(
+
+GDP + 1
+
+T
+
+)
+
+C2 + E1.
+
+(52) Substituting E1 back to (52) yields Lemma 5. 
+
+B. Proof of Theorem 2 Proof. First, we introduce notations for the updates in each iteration. The reported gradient of the client k on model w
+
+with dataset D is 
+
+gclip  
+
+> k
+
+(w,D) = 1
+
+|D| 
+
+∑
+
+> d∈D
+
+gk(w, d )max {1, ∥gk (w,d )∥2 
+
+> C
+
+} . (53) The aggregated gradient (including virtual steps) at the server is ˆgclip  
+
+> t
+
+= ˜ gclip  
+
+> t
+
++ nt, where 
+
+˜gclip  
+
+> t
+
+= 1
+
+|S t|
+
+∑
+
+> k∈S t
+
+gclip  
+
+> k
+
+(wk,t ,Dk,t ), (54) 
+
+nt = 1
+
+|S t|
+
+∑
+
+> k∈S t
+
+nk,t . (55) Here nk,t is the added noise of client k at iteration t, and 
+
+St is the set of selected clients at iteration t (see Algorithm 1 Line 3). In addition, we represent the expectation of the virtual aggregation of clipped gradients as 
+
+gclip  
+
+> t
+
+= E
+
+[
+
+˜gclip 
+
+> t
+
+]
+
+. (56) To facilitate the analysis, we further define the following notations. When the selection strategy is unbiased selection without clipping, the expected aggregated gradient at w is 
+
+∇F (w) = 
+
+> N
+
+∑
+
+> k=1
+
+|M k|
+
+∑Ni=1 |M i| E [gk(w, Dk)] , (57) where F (·) is the global objective function as in equation (4). We use ∇F clip (w) to denote the clipped version of ∇F (w),
+
+i.e. ,
+
+∇F clip (w) = 1max {1, ∥∇ F (w)∥2/C } ∇F (w). (58) Then, we begin to prove Theorem 2. Based on Assumption 1, we have 
+
+F ( ˜ wt+1 ) − F ( ˜ wt) ≤ − αt∇F ( ˜ wt)⊤ ˆgclip  
+
+> t
+
++ 12 α2 
+
+> t
+
+L
+
+∥∥∥ˆgclip 
+
+> t
+
+∥∥∥22 .
+
+(59) Taking an expectation over batch, selection, and noise, we have 
+
+E [F ( ˜ wt+1 )] − F ( ˜ wt)
+
+≤ − αt∇F ( ˜ wt)⊤E
+
+[
+
+ˆgclip 
+
+> t
+
+]
+
++ 12 α2 
+
+> t
+
+LE
+
+[∥∥∥ˆgclip 
+
+> t
+
+∥∥∥22
+
+]
+
+=−αt∇F ( ˜ wt)⊤(
+
+∇F clip ( ˜ wt)+ gclip  
+
+> t
+
+−∇ F clip ( ˜ wt)
+
+)
+
++ 12 α2 
+
+> t
+
+LE
+
+[∥∥∥˜gclip  
+
+> t
+
++ nt
+
+∥∥∥22
+
+]
+
+≤− αt
+
+CB1
+
+∥∇ F ( ˜ wt)∥22 + 12 α2 
+
+> t
+
+L
+
+(
+
+C2 + E
+
+[
+
+∥nt∥22
+
+]) 
+
+−αt∇F ( ˜ wt)⊤(
+
+gclip  
+
+> t
+
+−∇ F clip ( ˜ wt)
+
+)
+
+.
+
+(60) By rearranging (60), we have 
+
+αt
+
+CB1
+
+∥∇ F ( ˜ wt)∥22 ≤F ( ˜ wt) − E [F ( ˜ wt+1 )] 
+
+− αt∇F ( ˜ wt)⊤ (
+
+gclip  
+
+> t
+
+− ∇ F clip ( ˜ wt)
+
+)
+
++ 12 α2 
+
+> t
+
+L
+
+(
+
+C2 + E
+
+[
+
+∥nt∥22
+
+]) 
+
+(61) Then, applying CauchySchwarz inequality, we have 
+
+αt
+
+CB1
+
+∥∇ F ( ˜ wt)∥22 ≤αt ∥∇ F ( ˜ wt)∥2
+
+∥∥∥gclip  
+
+> t
+
+−∇ F clip ( ˜ wt)
+
+∥∥∥2
+
++ 12 α2 
+
+> t
+
+L
+
+(
+
+C2 + E
+
+[
+
+∥nt∥22
+
+]) 
+
+.
+
+(62) 16 
+
+We bound the term ∥∥gclip ( ˜ wt) − ∇ F clip ( ˜ wt)∥∥2 in (62) by 
+
+∥∥∥gclip  
+
+> t
+
+− ∇ F clip ( ˜ wt)
+
+∥∥∥2
+
+≤∥∥gclip ( ˜ wt)−∇ F clip ( ˜ wt)∥∥2 +
+
+∥∥∥gclip  
+
+> t
+
+−gclip ( ˜ wt)
+
+∥∥∥2
+
+≤
+
+∥∥∥∥∥
+
+> N
+
+∑
+
+> k=1
+
+(ps 
+
+> k
+
+−pu
+
+> k
+
+)gclip ( ˜ wt)
+
+∥∥∥∥∥2
+
++∥∥gclip,unbiased ( ˜ wt)−∇ F clip ( ˜ wt)∥∥2
+
++ B2
+
+≤ ∥ ps − pu∥1 C + ∥∆t∥1 C + B2
+
+≤Gselect, clip C. 
+
+(63) Substitute (63) into (62) yields 
+
+αt
+
+CB1
+
+∥∇ F ( ˜ wt)∥22 ≤F ( ˜ wt) − E [F ( ˜ wt+1 )] + αt ∥∇ F ( ˜ wt)∥2 Gselect,clip C
+
++ 12 α2 
+
+> t
+
+L
+
+(
+
+C2 +E
+
+[
+
+∥nt∥22
+
+]) 
+
+.
+
+(64) Taking expectation over all iterations and considering 
+
+E [F (wT +1 )] ≥ F (w∗), we have 
+
+1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+αt
+
+CB1
+
+E
+
+[
+
+∥∇ F ( ˜ wt)∥22
+
+]
+
+≤ F (w1)−F (w∗)
+
+T + 1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+αtE [∥∇ F ( ˜ wt)∥2] Gselect,clip C
+
++ 1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+12 α2 
+
+> t
+
+L
+
+(
+
+C2 + E
+
+[
+
+∥nt∥22
+
+]) 
+
+.
+
+(65) Setting the learning rate αt = B1 
+
+> C
+> 1√T
+
+yields 
+
+1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+E
+
+[
+
+∥∇ F ( ˜ wt)∥22
+
+]
+
+≤ F (w1) − F (w∗)
+
+√T + 1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+E [∥∇ F ( ˜ wt)∥2] Gselect,clip B1
+
++ 1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+12
+
+B1
+
+C
+
+1
+
+√T L
+
+(
+
+C2 + E
+
+[
+
+∥nt∥22
+
+]) 
+
+≤ F (w1)−F (w∗)
+
+√T +
+
+√√√√ 1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+E
+
+[
+
+∥∇ F ( ˜ wt)∥22
+
+]
+
+Gselect,clip B1
+
++ 1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+12
+
+B21
+
+C2
+
+1
+
+√T L
+
+(
+
+C2 + E
+
+[
+
+∥nt∥22
+
+]) 
+
+.
+
+(66) Inequality (66) is an quadratic inequality with respect to √
+
+1/T ∑Tt=1 E
+
+[
+
+∥∇ F ( ˜ wt)∥22
+
+]
+
+. Substituting the noise expres-sion and solving the inequality, we have 
+
+√√√√ 1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+E
+
+[
+
+∥∇ F ( ˜ wt)∥22
+
+]
+
+≤ B1
+
+2
+
+Gselect,clip +
+
+√√√√(Gselect,clip )2 +2 
+
+> N
+
+∑
+
+> k=1
+
+(ps
+
+> k
+
+)2D√T LV k
+
+
+
++
+
+√
+
+F (w1) − F (w∗)
+
+√T + 121
+
+√T LB 21 .
+
+(67) This completes the proof. 
+
+C. Proof of Proposition 1 
+
+The constraints in Problem 1 are linear, so it suffices to demonstrate that the objective function is convex. We will prove the convexity based on the following lemma. 
+
+Lemma 6. The square root of the sum of two squared convex and non-negative functions f1 and f2 is a convex function. Proof. Suppose we have a function 
+
+f (X) = 
+
+√
+
+f 21 (X) + f 22 (X), (68) which is the square root of the sum of two squared convex and non-negative functions f1(X) and f2(X). We will prove the convexity by proving 
+
+f (αX 1 + (1 − α)X2) ≤ αf (X1) + (1 − α)f (X2). (69) First, for the left-hand side of (69), we have 
+
+f (αX 1 + (1 − α)X2)=
+
+√
+
+f 21 (αX 1 + (1 − α)X2) + f 22 (αX 1 + (1 − α)X2). (70) Taking square power of both sizes of (70) yields 
+
+f (αX 1 + (1 − α)X2)2 =
+
+f 21 (αX 1 + (1 − α)X2) + f 22 (αX 1 + (1 − α)X2). (71) By convexity of f1 and f2, we have 
+
+f (αX 1 + (1 − α)X2)2 ≤
+
+[αf 1(X1) + (1 − α)f1(X2)] 2 +[ αf 2(X1)+(1 − α)f2(X2)] 2.
+
+(72) Furthermore, for the right-hand side of (69), we have 
+
+αf (X1) + (1 − α)f (X2) = 
+
+α
+
+√
+
+f 21 (X1) + f 22 (X1) + (1 − α)
+
+√
+
+f 21 (X2) + f 22 (X2). (73) Taking square power of both sizes of (73), we have 
+
+[αf (X1) + (1 − α)f (X2)] 2
+
+= α2f 21 (X1)+ α2f 22 (X1)+(1 −α)2f 21 (X2)+(1 −α)2f 22 (X2)+ 2 α(1 − α)
+
+√
+
+f 21 (X1) + f 22 (X1)
+
+√
+
+f 21 (X2) + f 22 (X2).
+
+(74) 17 
+
+Then, we can express the difference of the left-hand sides of (72) and (74) as 
+
+f (αX 1 + (1 − α)X2)2 − [αf (X1) + (1 − α)f (X2)] 2
+
+≤ 2α(1 − α) [ f1(X1)f1(X2) + f2(X1)f2(X2)
+
+−
+
+√
+
+f 21 (X1) + f 22 (X1)
+
+√
+
+f 21 (X2) + f 22 (X2)
+
+]
+
+.
+
+(75) Let 
+
+A =f1(X1)f1(X2) + f2(X1)f2(X2), (76) 
+
+B =
+
+√
+
+f 21 (X1) + f 22 (X1)
+
+√
+
+f 21 (X2) + f 22 (X2). (77) For A2 and B2, we have 
+
+A2 =f 21 (X1)f 21 (X2) + f 22 (X1)f 22 (X2)+ 2 f1(X1)f2(X1)f1(X2)f2(X2), (78) 
+
+B2 =f 21 (X1)f 21 (X2) + f 21 (X1)f 22 (X2) + f 22 (X1)f 21 (X2)+ f 22 (X1)f 22 (X2).
+
+(79) So, by inequality of arithmetic and geometric means, we can conclude that A2 ≤ B2. Because f1 and f2 are both non-negative, we have A ≤ B. Finally, f (αX 1 + (1 − α)X2) ≤
+
+αf (X1) + (1 − α)f (X2) holds. With Lemma 6, we can prove Proposition 1 with the following. 
+
+Proof. For the objective in Problem 1, define: 
+
+f1 = ∥ps − pu∥1 , (80) 
+
+f2 =
+
+√√√√η
+
+> N
+
+∑
+
+> k=1
+
+(ps
+
+> k
+
+)2DV k. (81) It can be verified that f1 is a 1-norm and f2 is a 2-norm of a linearly transformed probability vector. They are both convex and non-negative. Therefore, √f 21 + f 22 is still convex by Lemma 6. As f1 is convex and the sum of convex functions are still a convex function. We conclude that f1 + √f 21 + f 22
+
+is convex. This completes the proof of Proposition 1. 
+
+D. Proof of Proposition 2 Proof. The KKT conditions of Problem 1 require that 
+
+∂F obj 
+
+∂p s
+
+> k
+
++ λ − μk = 0 , (82) 
+
+μk ≥ 0, (83) 
+
+μkps 
+
+> k
+
+= 0 , (84) 
+
+> N
+
+∑
+
+> k=1
+
+ps 
+
+> k
+
+= 1 , (85) 
+
+ps 
+
+> k
+
+≥ 0, (86) where F obj is the objective function, λ is the Lagrange multiplier for the equality constraint, and μk are the multipliers for the non-negativity constraints. Expanding the left hand side of (82) for a given user k
+
+yields 
+
+∂F obj 
+
+∂p s
+
+> k
+
++ λ − μk = d|ps 
+
+> k
+
+−pu
+
+> k
+
+|
+
+dp s
+
+> k
+
++ 2 ∥ps − pu∥1 d|ps 
+
+> k
+
+− pu
+
+> k
+
+|/dp s 
+
+> k
+
++ 2 ηp s
+
+> k
+
+DV k
+
+2
+
+√
+
+∥ps − pu∥21 + η ∑Ni=1 (ps
+
+> i
+
+)2DV i
+
++λ − μk = 0 .
+
+(87) We next prove Proposition 2 by contradiction. Suppose that 
+
+ps 
+
+> k
+
+= 0 for some k ∈ N . The partial derivative at ps 
+
+> k
+
+= 0 
+
+yields 
+
+d|ps 
+
+> k
+
+− pu
+
+> k
+
+|
+
+dp s
+
+> k
+
+= −1, (88) leading to 
+
+−1 + −2 ∥ps − pu∥1
+
+2
+
+√
+
+∥ps − pu∥21 + η ∑Ni=1 (ps
+
+> i
+
+)2DV i
+
+− μk = −λ < 0.
+
+(89) Since ∑Ni=1 ps 
+
+> i
+
+= ∑Ni=1 pu 
+
+> i
+
+= 1 , there must exist some j̸ = k
+
+such that ps 
+
+> j
+
+> p u 
+
+> j
+
+.For this j, we have 
+
+1 + 2 ∥ps − pu∥1 + 2 ηp s 
+
+> j
+
+DV j
+
+2
+
+√
+
+∥ps − pu∥21 + η ∑Ni=1 (ps
+
+> i
+
+)2DV i
+
+= −λ > 0, (90) which contradicts −λ < 0. Thus, ps 
+
+> k
+
+> 0, for all k ∈ N . This completes the proof.

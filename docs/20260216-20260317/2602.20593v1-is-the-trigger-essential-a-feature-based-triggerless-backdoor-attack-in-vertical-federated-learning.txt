@@ -1,0 +1,1023 @@
+Title: Is the Trigger Essential? A Feature-Based Triggerless Backdoor Attack in Vertical Federated Learning
+
+URL Source: https://arxiv.org/pdf/2602.20593v1
+
+Published Time: Wed, 25 Feb 2026 01:35:43 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+> 1
+
+# Is the Trigger Essential? A Feature-Based Triggerless Backdoor Attack in Vertical Federated Learning 
+
+Yige Liu, Yiwei Lou, Che Wang, Yongzhi Cao, Senior Member, IEEE , and Hanpin Wang 
+
+Abstract —As a distributed collaborative machine learning paradigm, vertical federated learning (VFL) allows multiple passive parties with distinct features and one active party with labels to collaboratively train a model. Although it is known for the privacy-preserving capabilities, VFL still faces significant privacy and security threats from backdoor attacks. Existing backdoor attacks typically involve an attacker implanting atrigger into the model during the training phase and executing the attack by adding the trigger to the samples during the inference phase. However, in this paper, we find that triggers are not essential for backdoor attacks in VFL. In light of this, we disclose a new backdoor attack pathway in VFL by introducing a feature-based triggerless backdoor attack. This attack operates under a more stringent security assumption, where the attacker is honest-but-curious rather than malicious during the training phase. It comprises three modules: label inference for the tar-geted backdoor attack, poison generation with amplification and perturbation mechanisms, and backdoor execution to implement the attack. Extensive experiments on five benchmark datasets demonstrate that our attack outperforms three baseline backdoor attacks by 2 to 50 times while minimally impacting the main task. Even in VFL scenarios with 32 passive parties and only one set of auxiliary data, our attack maintains high performance. Moreover, when confronted with distinct defense strategies, our attack remains largely unaffected and exhibits strong robustness. We hope that the disclosure of this triggerless backdoor attack pathway will encourage the community to revisit security threats in VFL scenarios and inspire researchers to develop more robust and practical defense strategies. 
+
+Index Terms —Vertical Federated Learning, Backdoor Attack, Triggerless, Label Inference, Privacy 
+
+I. I NTRODUCTION 
+
+# VERTICAL federated learning (VFL) is a collaborative machine learning paradigm that involves multiple passive parties and one active party to train a model. It originates from federated learning [1] and split learning [2], and is juxtaposed with the federated learning classifications of horizontal feder-ated learning (HFL) and federated transfer learning categorized by Yang et al. [3] based on the different data divisions. Among them, VFL is distinguished by its data distribution among participants: passive parties possess distinct features, while the active party holds the labels. During training, each passive party converts its features into embeddings using 
+
+Yige Liu, Yiwei Lou, Che Wang, Yongzhi Cao, and Hanpin Wang are with the Key Laboratory of High Confidence Software Technologies (Peking Uni-versity), Ministry of Education; School of Computer Science, Peking Univer-sity, Beijing, China. (e-mail: yige.liu@stu.pku.edu.cn; cyfqylyw@gmail.com; wangche02@gmail.com; caoyz@pku.edu.cn; whpxhy@pku.edu.cn) Yongzhi Cao is also with the Zhongguancun Laboratory, Beijing, China. Corresponding author: Yongzhi Cao 
+
+the bottom model and sends them to the active party. After receiving embeddings from all passive parties, the active party aggregates them and employs the top model to predict labels. Subsequently, the VFL model training is guided by comparing the predicted labels with the ground-truth labels. Driven by advancements in machine learning and the increasing need for privacy preservation, VFL has been widely studied and applied. For example, in academic research, Qiu et al. [4], He et al. [5] and Qiu et al. [6] study attacks and defenses in VFL, and Gong et al. [7] and Yang et al. [8] aim to propose a secure VFL framework. Furthermore, in the financial sector, WeBank utilizes VFL to implement federated risk control for small and microenterprise loans [9]. While VFL can offer privacy preservation through data localization and model separation, it remains vulnerable to some privacy and security threats, including label inference attacks [10, 11], feature reconstruction attacks [6, 12], and backdoor attacks [13, 14, 15]. Notably, backdoor attacks are typically initiated by a malicious passive party adding a trigger to the sample for misclassifying its prediction during the in-ference phase. Inspired by backdoor attacks in HFL scenarios, Bai et al. [16] adapted this concept of implanting triggers into models for VFL scenarios and conducted the first study of backdoor attacks in VFL. Following their work, numerous existing VFL backdoor attacks primarily focus on generating new triggers to efficiently implement attacks [13, 14, 15]. However, we find that backdoor attacks in VFL do not face the same practical scenarios as backdoor attacks in HFL. In HFL, clients collaboratively train the same model during the training phase and use this model separately during the inference phase. This necessitates attackers to implant a trigger into the model for a backdoor attack. Conversely, in VFL, the distributed ownership of the model across participants requires the involvement of passive parties during the inference phase, allowing an attacker to directly alter the embeddings sent to the active party for backdoor attacks. This distinction prompts us to explore the following question. 
+
+Is the trigger essential in VFL? 
+
+To answer this, we propose a feature-based triggerless backdoor attack and disclose a new attack pathway in VFL. This attack leverages the label characterization capability of a well-trained bottom model. Instead of implanting triggers during the training phase, the attacker manipulates model predictions by replacing benign embeddings with malicious ones exclusively during the inference phase. Specifically, our 
+
+> arXiv:2602.20593v1 [cs.LG] 24 Feb 2026 2
+
+novel attack comprises three modules: label inference, poison generation, and backdoor execution. During the training phase, the attacker simply records the embeddings generated by the bottom model at each epoch, without engaging in any actions that breach the VFL protocol. This ensures that the attack is 
+
+honest-but-curious rather than malicious . During the inference phase, the malicious attacker first infers sample labels from the recorded embeddings using a clustering algorithm. Next, the attacker calculates the embedding density centers for different labels and generates a set of malicious embeddings as poisons using amplification and perturbation mechanisms. After completing these preparations, the attacker identifies the target samples and replaces their embeddings with malicious ones to execute the backdoor attack. Without implanting the trigger during the training, our attack can be implemented under a more stringent security assumption and is difficult to detect by defenses. Additionally, since our attack depends on the label characterization capability of embeddings, existing research on enhancing the latent representation of passive par-ties [17, 18, 19] may further improve our attack performance. The success of this new attack pathway across extensive experiments demonstrates that triggers are not essential for backdoor attacks in VFL scenarios. Specifically, we conduct evaluations on five benchmark datasets in the multi-party VFL scenario. Compared to three existing baseline backdoor attacks, it achieves a success rate that is 2 to 50 times higher in terms of overall performance. In addition, we evaluate the im-pact of some potential factors introduced by our attack on the performance. The results demonstrate that our attack maintains high accuracy even in a VFL scenario with 32 passive parties and with only one set of auxiliary data. We also investigate the impact of hyperparameters including learning rate, batch size, training epochs, and models. Furthermore, the attack per-formance under defense strategies is also taken into account. We first assess it under eight existing defenses across three perspectives: general defense, defense against label inference, and defense against backdoor attacks. The results show that our attack remains largely unaffected and demonstrates strong robustness. Since existing defenses mainly target the training phase, we further propose a novel defense strategy specifically designed for the inference phase and evaluate our attack’s performance against it. Notably, even this targeted defense struggles to counter our attack on complex datasets. Moreover, to provide a comprehensive research, we additionally discuss the impact of embedding layer and learning rate adjustment on the performance of our attack. The main contributions are summarized as follows:  
+
+> •
+
+We present the first observation that triggers are not essential in VFL scenarios and disclose a new backdoor attack pathway in VFL by proposing a novel feature-based triggerless backdoor attack. This attack comprises three modules: label inference, poison generation, and backdoor execution, and can be carried out under more stringent security assumptions.  
+
+> •
+
+We compare the performance of our attack with three existing baseline attacks on five datasets, evaluate poten-tial influencing factors, investigate the impact of hyperpa-rameters on attack performance, and assess our attack’s robustness under four different types of defense strategies. The results demonstrate that our triggerless backdoor attack exhibits strong performance and robustness in multi-party VFL scenarios.  
+
+> •
+
+Our disclosure of this simple yet effective triggerless backdoor attack pathway may encourage the community to reassess security in VFL scenarios, as it is easy to implement, challenging to detect, and delivers great value at minimal cost. Additionally, it can inspire researchers to develop more robust and practical defense strategies. II. P RELIMINARIES 
+
+In this section, we present the VFL formalization and summarize related works on backdoor attacks in VFL. 
+
+A. Vertical Federated Learning 
+
+As a distributed machine learning paradigm, VFL allows multiple participants to collaboratively train a model. In VFL, the participants share the same user or sample space but hold different feature spaces. Specifically, the passive parties hold distinct raw feature data, while the active party holds the labels. Based on whether the active party possesses additional features, Liu et al. [20] categorized VFL into two types: aggVFL and splitVFL. In aggVFL, the active party holds only labels, while in splitVFL, the active party holds both labels and features. In the paper, we concentrate on aggVFL and formalize its training process as follows. As illustrated in Fig. 1, the VFL model is collaboratively trained with N samples by K passive parties, each holding distinct features, and one active party holding the labels [20]. The training process is divided into two phases: forward propagation and backpropagation. During forward propagation, each passive party k utilizes its local embedding model (bottom model) fk (·) parameter-ized by θk and its local data xki from datasets xki 
+
+> Ni=1
+
+to compute embeddings emb ki = fk
+
+ θk; xki
+
+, which are then sent to the active party. The active party first aggregates the embeddings from all passive parties into a single embedding 
+
+emb i = agg(emb 1 
+
+> i
+
+, . . . , emb Ki ) by a certain aggregation algorithm. Subsequently, it trains the prediction model (top model) pred ( ·) parameterized by φ through the aggregated embedding {emb i}Ni=1 and ground-truth labels {yi}Ni=1 using the loss function 
+
+L (θ, φ ; x, y ) = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+ℓ (pred ( φ; emb i) , y i) , (1) where ℓ (·) denotes the sample loss such as cross-entropy loss or mean squared error loss. During backpropagation, the active party sends gradients 
+
+∇φL to update the prediction model and gradients ∇emb ki L =
+
+> ∂L
+> ∂emb ki
+
+to each passive party. Employing the chain rule, each passive party updates its bottom model with these gradients. The training process iterates until the model converges. 3               
+
+Fig. 1: An illustration of the backdoor attack in VFL. During the training phase, the attacker can implant triggers into the model in two ways: by adding the trigger to the raw data (blue background) or the embeddings (yellow background). Forward propagation is represented by the solid arrow and backpropa-gation by the dashed arrow. 
+
+B. Backdoor Attacks 
+
+The backdoor attack aims at making the model get mis-classified predictions by implanting backdoor triggers into the model. If these misclassified predictions do not consistently correspond to a specific label, the attack is classified as an 
+
+untargeted backdoor attack. In contrast, if the model consis-tently misclassifies predictions as a specific label, the attack is identified as a targeted backdoor attack. In VFL scenarios, untargeted backdoor attacks are typically implemented as adversarial attacks. Pang et al. [21] discovered that certain inputs from the passive party may dominate the training of the VFL model, steering its predictions toward the attacker’s intended outcome. They first proved the existence of these adversarial dominating inputs (ADIs) in two-party VFL, and then proposed a gradient-based adversarial sample generation method for untargeted backdoor attacks. Further-more, Chen et al. [22] introduced an adversarial attack on graph neural networks by privacy leakage and the gradients of pairwise nodes, which generates adversarial samples based on the addition of noisy embedding of global nodes. Since the features and labels in VFL are held by the passive parties and the active party, respectively, a targeted backdoor attack typically consists of two phases: label inference and backdoor implantation. The label inference phase aims to identify samples with the source label, ensuring that the backdoor can be implanted into the correct sample. During the backdoor implantation phase, the attacker implants the backdoor into the VFL model by adding triggers to the raw data or the embedding. Bai et al. [16] were the first to focus on targeted backdoor attacks in VFL. They proposed a backdoor attack method named VILLAIN and utilized a new trigger inspired by the strip-based backdoor [23], which is a pattern of two positive values followed by two negative values. Naseri et al. [13] proposed BadVFL, which analyzes the backpropagated gra-dients to identify the most influential parts of the raw data, subsequently implanting cross triggers into these identified areas. Meanwhile, He et al. [14] designed a trigger by calcu-lating the density center of similar embeddings via the mean-shift algorithm, and introduced a scaling factor to enhance the impact of the backdoor vectors on the entire VFL model in backdoor attacks. Beyond fixed triggers, optimization-based triggers are also used in existing works. Chen et al. [24] proposed the TECB method to train the trigger with a minimal set of labeled samples. They addressed the issue of trigger differences be-tween the training and inference phases by employing gradient replacement to refine the model. Inspired by the model com-pletion technique [10], Gu and Bai [25] developed the LR-BA method, which generates triggers through the reconstructed surrogate model, ensuring the successful activation of triggers in backdoor tasks. Moreover, Chen et al. [15] introduced a universal backdoor attack method for binary classification tasks. It divides the training task into two parts, the model task and the backdoor task, facilitating the acquisition of an effective trigger during the backdoor implantation phase. III. M ETHODOLOGY 
+
+In this section, we elaborate on our proposed feature-based triggerless backdoor attack. As shown in Fig. 2, in our attack, the attacker only records the embeddings generated by the bottom model during the training phase without violating any protocol, while the backdoor attack is launched exclusively during the inference phase. This attack comprises three main modules: label inference, poison generation, and backdoor execution. The first two modules prepare the backdoor poison necessary for the attack, while the third module executes the attack. Specifically, during the inference phase, the attacker first infers the sample labels and records the embeddings cor-responding to different labels using the label inference module. Next, the recorded embeddings are utilized to generate a valid set of malicious embeddings in the poison generation module. Finally, the attacker identifies the target samples and replaces their embeddings with the malicious embeddings to execute the backdoor attack. The full algorithm is provided in Appendix A. 
+
+A. Threat Model 
+
+We define the threat model for our triggerless backdoor attack in VFL, which includes the attacker’s goals, knowledge and capabilities. Since our attack does not require the implan-tation of triggers into the model, without loss of generality, we assume that all passive parties train the model following the protocol during the training phase. However, they are 
+
+honest-but-curious to collect and analyze any data they can legitimately obtain. During the inference phase, any passive party may launch a backdoor attack as a malicious attacker, but they do not collude with each other to perform a collusive attack. Unlike traditional backdoor attacks, where the attacker is malicious in both the training and inference phases, our 4Cluster Labels Auxiliary Data   
+
+> +
+> Noise
+> cat bird dog
+> Source Label
+> dog bird
+> ×
+> Label Inference Poison Generation
+> Cluster
+> Replaced with Target
+> Backdoor Execution
+> Target Label
+> cat
+> Attacker Attacker
+> Record
+> Preparation
+> Execution
+
+Fig. 2: An illustration of the feature-based triggerless backdoor attack in VFL. The attack consists of three modules: label inference, poison generation, and backdoor execution. The first two modules prepare the necessary poison for the attack, while the third module execute the attack. Left is the training phase, and right is the inference phase. proposed backdoor attack operates under a more stringent security assumption: the attacker is honest-but-curious during the training phase and malicious only during the inference phase. 
+
+1) Attacker’s Goal: The attacker aims to implement the targeted backdoor attack. Similar to traditional trigger-based targeted backdoor attacks, our proposed triggerless targeted backdoor attack aims to achieve the following: during the inference phase, sending the original benign embeddings of samples from any label category to the top model yields the correct label, while sending malicious embeddings causes the top model to incorrectly predict the target label lt.
+
+2) Attacker’s Knowledge: The attacker possesses a local dataset along with immutable indexes. During the training phase, the attacker adheres to the protocol for participating in the VFL model training, gaining all details related to the bottom model fa (·), such as parameters and output embed-dings for each epoch. Additionally, the attacker can obtain gradients backpropagated by the active party. The attacker also has a limited small quantity of labeled auxiliary data 
+
+Aux = {Xu, Y u}, which can be acquired through purchase or is publicly accessible. This assumption is consistent with those made in existing related works [13, 14, 16, 24]. Given that all parties involved in VFL collaborate on training objectives and typically share a small amount of training data examples before training, it is realistic and reasonable for attackers to obtain limited labeled auxiliary data. However, the attacker lacks any information regarding the active party, including its model structures, parameters and labels. 
+
+3) Attacker’s Capability: During the training phase, the attacker trains a bottom model following the protocol, which involves sending embeddings to the active party and receiving backpropagated gradients. The attacker may attempt to infer the labels of the training samples using legitimately obtained data and record the embeddings corresponding to these labels. During the inference phase, the attacker can choose particular source samples for sending malicious embeddings to the active party to facilitate a backdoor attack. 
+
+B. Label Inference 
+
+Differing from HFL scenarios, where each participant pos-sesses both features and labels, in VFL scenarios, the passive party only holds features and lacks access to labels. Therefore, inferring the labels is a prerequisite for executing targeted backdoor attacks. To address this, we design the following label inference module. We observe that the active party trains the top model using embeddings provided by the passive parties, and these embed-dings from a well-trained VFL model effectively capture the corresponding labels. As shown in Fig. 3, embeddings asso-ciated with distinct labels naturally form clusters. Therefore, we employ a clustering algorithm to infer the labels using auxiliary data. Specifically, the attacker begins by selecting a set of embeddings {emb ai }Ni=1 recorded during a specific epoch of the training phase. Typically, the attacker prefers to use embeddings from the final epoch, as embeddings closer to the end of training are more effective at characterizing labels. Next, the attacker uses the bottom model fa (·) to compute embeddings Emb u = fa (Xu) for the auxiliary data features Xu and calculates the embedding center aux i for each label category li based on the auxiliary data labels Y u.The set of embedding centers derived from auxiliary data for different labels is denoted as {aux i}|l|
+
+> i=1
+
+, where |l| represents the number of label categories. Finally, the attacker applies equation 
+
+{ˆyi}Ni=1 = Infer 
+
+
+
+{emb ai }Ni=1 , {aux i}|l| 
+
+> i=1
+
+, |l|
+
+
+
+(2) to perform clustering analysis and infer the labels. It is worth noting that since both the VFL training task and our label inference approach focus on maximizing the label representation ability of embeddings, the attacker has a high probability of achieving a well-trained model. Therefore, the output embeddings from the bottom model exhibit strong 5  
+
+> (a) MNIST (b) CIFAR-10
+> (c) FashionMNIST (d) CINIC-10
+
+Fig. 3: Distribution of embeddings across the MNIST, Fash-ionMNIST, CIFAR-10, and CINIC-10 datasets, generated as outputs from the passive party’s bottom model. clustering characteristics, rendering the choice of clustering algorithm (e.g., K-means or mean-shift) relatively inconse-quential to label inference accuracy. 
+
+C. Poison Generation 
+
+Since the VFL model is distributed among participants, the active party, possessing only a part of the entire model, cannot independently complete the main task during the inference phase. This obviates the need for trigger implantation. Our in-tuition for implementing backdoor attacks in VFL is to directly replace the original embeddings with those corresponding to the target label. So that the top model of the active party can be misled to make wrong predictions. To implement this feature-based triggerless backdoor attack, we initially divide the sample embeddings based on the labels inferred in label inference module. Then we calculate the density center emb i of these embeddings corresponding to each label li and denote Emb = emb i 
+
+> |l|
+> i=1
+
+as the set of embedding centers, where emb t represents the embedding center for the target label lt. However, employing only emb t
+
+for backdoor attacks is not sufficient due to the following two significant challenges. First, in multi-party VFL scenarios with only one attacker, the number of benign participants over attackers renders a single malicious embedding insufficient to mislead the top model. This presents a challenge in amplifying the attacker’s malicious embedding to ensure the success of the backdoor attack. To overcome this, we introduce an amplification factor 
+
+η to enhance the malicious embedding 
+
+demb = η · emb t. (3) This factor η adjusts the contribution of emb t based on the percentage of attackers among total participants, thereby augmenting the influence of the malicious embedding on the top model to the backdoor attack. Second, the active party’s defense strategy for dynamic detection of sent embeddings is also a challenge. A fixed em-bedding could be easily identified and eliminated by the active party. To counter this, enhancing the diversity of malicious target embeddings becomes crucial. We address this by adding a perturbation vector that satisfies the Gaussian distribution to 
+
+demb and generating a set of malicious embeddings ]Emb that satisfy 
+
+gemb i = demb + δ, δ ∼ N  μ, σ 2 (4) for each gemb i ∈ ]Emb . The suitable Gaussian distribution helps ensure that malicious embeddings remain within accept-able prediction boundaries, thus introducing diversity to the embeddings while minimizing the likelihood of failure due to extreme deviations. Therefore, this variation allows us to use the perturbed malicious embeddings to successfully implement the backdoor attack. 
+
+D. Backdoor Execution 
+
+Our backdoor attack is implemented during the inference phase, bypassing the need for trigger implantation in the training phase. This triggerless method renders detection-based defenses ineffective, as it does not alter raw features or embeddings during the training phase, and fully complies with the VFL protocol. Furthermore, since the attacker and other participants have the same training objective (i.e., they all want a well-trained model), a superior model typically results in a more effective backdoor attack. We design two execution approaches for our triggerless backdoor attack: dirty-label attack and clean-label attack. The dirty-label approach is relatively straightforward: attackers di-rectly replace benign embeddings with malicious embeddings 
+
+]Emb generated in the poison generation module to mislead the top model. This approach is similar to traditional trigger-based backdoor attacks, but we replace triggers with malicious embeddings to achieve attacks on any sample. However, in more practical VFL scenarios, where attackers typically aim to induce prediction errors for samples of a specific label (source label ls) toward a target label—achieving a more precise rather than broad attack objective—we propose a more sophisticated clean-label approach. To execute the attack, the attacker initially calculates the embeddings of the samples and infers their labels based on the similarity to the recorded density centers of embeddings Emb corresponding to the different labels. For each sample, based on its corresponding embedding emb ai , calculate 
+
+ˆyai = argmax  sim  Emb , emb ai
+
+ (5) to infer its label. This process helps the attacker to identify whether the samples qualify as source samples. For samples where ˆyai equals ls, the attacker replaces their original embed-dings with gemb i from the set of malicious embeddings ]Emb 
+
+generated in the second module and sends them to the active party, thereby executing the backdoor attack. 6
+
+IV. E VALUATION 
+
+In this section, we evaluate the attack performance and robustness of our proposed backdoor attack. This includes comparing its attack success rate with three existing baseline attacks, evaluating potential influencing factors, investigating the impact of hyperparameters, and assessing its robustness under various popular defense strategies. 
+
+A. Experimental Setup 
+
+We elaborate on our experimental setup, including datasets, models, baselines, and evaluation metrics. 
+
+1) Datasets: The experiments are conducted on five benchmark datasets: MNIST (MN) [26], Fashion-MNIST (FM) [27], CIFAR-10 (CF) [28], CINIC-10 (CN) [29], and Criteo (CT) [30], where the first four are image datasets and the last is a tabular dataset. We use random sampling along columns to divide features, simulating how passive parties in VFL share the sample space while retaining distinct feature spaces. 
+
+2) Models: We follow the VFL framework illustrated in Fig. 1 and conduct experiments in the multi-party VFL scenar-ios. For the passive party’s bottom model, distinct embedding models are set for various datasets. Specifically, a single-layer fully connected network is employed for both MNIST and FashionMNIST datasets. In contrast, a four-layer convolutional neural network is utilized for the CIFAR-10 and CINIC-10 datasets. For the Criteo dataset, the DeepFM model [31] is adopted. Regarding the active party, its top model initially aggregates the embeddings forwarded by the passive parties according to their dimensional attributes, and subsequently performs label prediction through a fully connected layer network. 
+
+3) Baselines: To explore whether triggers are essential in VFL, we compare our backdoor attack with three estab-lished methods, each utilizing distinct triggers: VILLAIN [16], BadVFL [13], and BASL [14]. Among these methods, VIL-LAIN employs strip-based triggers with positive and negative crosses. BadVFL identifies the most contributing features and implants cross triggers in them. BASL uses embedding-based triggers to misdirect embedding predictions. We implement these baselines in the multi-party VFL scenario and evaluate their performance. 
+
+4) Evaluation Metrics: We introduce the backdoor implan-tation rate (BIR) to evaluate whether the triggers of traditional backdoor attacks (baselines) are successfully implanted into the VFL model. Since trigger implantation is limited to the training phase, the BIR metric is exclusively applicable during this phase. As for the inference phase, we use the attack success rate (ASR) to assess the performance of backdoor at-tacks on the test dataset. Moreover, considering that backdoor implantation and attacks involve label inference, evaluated by the label inference success rate (LISR), the samples the attacker attempts to manipulate and the samples actually manipulated may differ. Therefore, we refine the above two metrics as follows:  
+
+> •
+
+Target BIR (tBIR): The proportion of samples with target labels correctly predicted as such.  
+
+> •
+
+Manipulated BIR (mBIR): The proportion of samples manipulated by the attacker that are correctly predicted as target labels.  
+
+> •
+
+Real BIR (rBIR): The proportion of manipulated samples, whose real label is the target label, correctly predicted as the target label.  
+
+> •
+
+Manipulated ASR (mASR): The success rate of the backdoor attack on samples manipulated by the attacker.  
+
+> •
+
+Real ASR (rASR): The success rate of the backdoor attack on manipulated samples whose true label is the source label. Given that we have designed two attack execution approaches, we introduce distinct metrics to evaluate their performance. Specifically, dirty-label attacks can be initiated on samples with any label, so the proportion of successfully misclas-sified samples among all samples manipulated by the at-tacker represents the backdoor attack performance. To measure this, we introduce mASR as the evaluation metric for dirty-label attacks, aligning with the “attack success rate” metric commonly used in existing related works [13, 14, 16]. In contrast, clean-label attacks require simultaneous evaluation of the identification accuracy of source samples and the backdoor attack performance on these samples. Therefore, we introduce the LISR and rASR metrics for a comprehensive evaluation. In addition, we use the main task accuracy (MTA) to evaluate the impact of the backdoor attack on model training. For all the evaluation metrics described above, higher values represent better performance. 
+
+B. Overall Performance 
+
+We evaluate our attack in a more challenging multi-party VFL scenario rather than the two-party scenario (results for the two-party scenario are provided in Appendix B). This scenario contains one active party and multiple passive parties: three passive parties for the Criteo dataset and four passive parties for the other datasets. We compare it with three existing backdoor attacks across five datasets. In the experiments, the batch size is set to 128 for all datasets except CIFAR-10, which is set to 64. Importantly, all experiments use only one set of auxiliary dataset, meaning the attacker knows only one sample in each class. As shown in Table I, our proposed feature-based triggerless backdoor attack outperforms in attack success rate while minimally impacting the main task. This result indicates that triggers, traditionally considered crucial in backdoor attacks, may not be indispensable within VFL contexts. Moreover, the evaluation results on LISR show that our attack maintains outstanding backdoor attack performance even with general label inference capabilities. This is primarily because, unlike traditional attacks that rely on the backdoor implantation process, our attack performance is driven by the inherent capability of embeddings to represent labels rather than by label inference accuracy. Specifically, in VFL scenar-ios where attackers lack label knowledge, traditional attacks require label inference to identify target samples and implant triggers within them to execute targeted backdoor attacks. However, due to the limitations of label inference accuracy, 7
+
+TABLE I ATTACK PERFORMANCE OF OUR FEATURE -BASED TRIGGERLESS METHOD WITH BASELINES IN THE MULTI -PARTY VFL                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+
+> SCENARIO Dataset Method BIR LISR ASR MTA tBIR mBIR rBIR mASR rASR MNIST VILLAIN 98 .02 ±0.03% 75 .21 ±4.89% 99 .50 ±0.06% 54 .71 ±8.11% 1.89 ±1.34% 0.00 ±0.00% 96 .37 ±0.04%
+> BadVFL 98 .23 ±0.05% 75 .47 ±5.82% 99 .46 ±0.12% 54 .63 ±7.81% 2.05 ±0.85% 0.00 ±0.00% 96 .44 ±0.00%
+> BASL 98 .16 ±0.07% 67 .51 ±23 .14% 99 .51 ±0.09% 54 .49 ±7.72% 1.97 ±0.93% 0.07 ±0.10% 96 .43 ±0.03%
+> Our ///55 .17 ±7.37% 93 .97 ±3.97% 93 .97 ±3.97% 93 .97 ±3.97% 94 .47 ±7.17% 94 .47 ±7.17% 94 .47 ±7.17% 96 .48 ±0.06% 96 .48 ±0.06% 96 .48 ±0.06%
+> Fashion MNIST VILLAIN 87 .01 ±0.20% 81 .27 ±2.82% 95 .97 ±0.84% 51 .46 ±4.79% 11 .57 ±8.34% 0.12 ±0.09% 86 .43 ±0.04%
+> BadVFL 86 .41 ±0.40% 57 .11 ±35 .43% 79 .34 ±23 .96% 51 .66 ±4.95% 7.00 ±1.75% 0.32 ±0.17% 86 .25 ±0.15%
+> BASL 86 .27 ±0.12% 64 .97 ±3.18% 93 .03 ±0.56% 51 .29 ±5.12% 7.11 ±0.60% 0.21 ±0.17% 86 .45 ±0.08%
+> Our ///51 .39 ±4.92% 86 .06 ±8.83% 86 .06 ±8.83% 86 .06 ±8.83% 81 .22 ±11 .64% 81 .22 ±11 .64% 81 .22 ±11 .64% 86 .48 ±0.08% 86 .48 ±0.08% 86 .48 ±0.08%
+> CIFAR-10 VILLAIN 78 .64 ±1.16% 20 .49 ±14 .62% 72 .06 ±14 .81% 21 .34 ±0.64% 7.85 ±1.40% 2.73 ±1.94% 65 .04 ±1.33%
+> BadVFL 73 .89 ±1.09% 39 .31 ±2.70% 85 .23 ±3.29% 20 .46 ±2.59% 9.19 ±11 .23% 0.00 ±0.00% 64 .76 ±1.57%
+> BASL 78 .01 ±1.45% 13 .69 ±13 .13% 94 .28 ±8.09% 21 .38 ±1.52% 9.14 ±5.60% 0.00 ±0.00% 64 .75 ±1.54%
+> Our ///20 .72 ±0.97% 85 .08 ±11 .38% 85 .08 ±11 .38% 85 .08 ±11 .38% 83 .99 ±12 .81% 83 .99 ±12 .81% 83 .99 ±12 .81% 65 .15 ±1.16% 65 .15 ±1.16% 65 .15 ±1.16%
+> CINIC-10 VILLAIN 77 .23 ±0.30% 37 .80 ±8.39% 85 .99 ±2.81% 20 .65 ±2.55% 0.00 ±0.00% 0.00 ±0.00% 56 .12 ±0.90%
+> BadVFL 76 .27 ±0.42% 45 .93 ±7.26% 89 .06 ±1.48% 19 .77 ±3.60% 1.20 ±1.70% 0.00 ±0.00% 53 .93 ±0.95%
+> BASL 78 .52 ±0.45% 20 .21 ±20 .83% 57 .61 ±41 .05% 20 .94 ±1.22% 4.88 ±4.12% 2.74 ±2.77% 56 .47 ±0.65%
+> Our ///20 .98 ±0.95% 88 .54 ±13 .22% 88 .54 ±13 .22% 88 .54 ±13 .22% 92 .72 ±6.86% 92 .72 ±6.86% 92 .72 ±6.86% 56 .53 ±0.17% 56 .53 ±0.17% 56 .53 ±0.17%
+> Criteo VILLAIN 99 .81 ±0.05% 99 .77 ±0.08% 99 .83 ±0.05% 64 .41 ±2.94% 99 .96 ±0.05% 99 .95 ±0.08% 77 .54 ±0.01%
+> BadVFL 99 .72 ±0.26% 99 .64 ±0.32% 99 .73 ±0.24% 65 .09 ±2.22% 99 .92 ±0.11% 99 .90 ±0.13% 77 .51 ±0.03%
+> BASL 99 .74 ±0.02% 99 .67 ±0.03% 99 .76 ±0.03% 64 .92 ±1.84% 99 .90 ±0.04% 99 .86 ±0.04% 77 .53 ±0.00%
+> Our ///65 .48 ±2.66% 100 .00 ±0.00% 100 .00 ±0.00% 100 .00 ±0.00% 100 .00 ±0.00% 100 .00 ±0.00% 100 .00 ±0.00% 77 .55 ±0.00% 77 .55 ±0.00% 77 .55 ±0.00%
+> The bold data indicate the best performance.
+
+attackers inevitably implant triggers into non-target samples, which degrades the overall backdoor attack performance. In contrast, our triggerless attack directly replaces original embeddings with malicious embeddings during the inference phase. The generation of these malicious embeddings relies primarily on the natural correlation between embeddings and labels. Guided by labeled auxiliary data, malicious embed-dings are created by calculating cluster centers based on the natural clustering of embeddings. As a result, our attack is minimally influenced by the performance of label inference. In addition, while conventional baseline attacks perform well in two-party VFL scenarios, they perform significantly worse than our attack in multi-party VFL scenarios. Typically, the ASR disparity between our attack and other backdoor attacks can reach up to 50 times. We attribute this significant disparity to the following reasons. First, due to the limited label inference ability, triggers are poorly implanted in the target labeled samples. For instance, in the MNIST dataset, the tBIR exceeding 98% signifies accurate prediction for most target samples, and the rBIR above 99% confirms successful backdoor implantation. However, the mBIR being around 75% reveals that many backdoor-implanted samples do not match target samples. Second, conventional backdoor attacks implant triggers only in the training set. Distributional differences between training and test sets cause poor performance on the test set. Third, conventional attacks need to evade the active party’s defense detection during training, resulting in limited changes to the embeddings with triggers. The distributional disparity between test and training sets may cause larger embedding differences than those caused by triggers, leading to attack failure. Fourth, in multi-party scenarios, benign passive parties dilute the attacker’s malicious embeddings, reducing the impact of backdoor triggers on the overall VFL model and amplifying attack failure. We also observe that our proposed triggerless backdoor attack achieves the best MTA across all five datasets compared to traditional backdoor attacks, with minimal impact on the model’s decision boundaries. This is primarily because our backdoor attack does not perform any operations that violate the training protocol during the training phase, except for recording the training data. In other words, the decision boundaries of the models obtained through our attack during the training phase remain identical to those from benign training, unaffected by poisoned data, thereby preserving the model’s predictive performance. In contrast, traditional backdoor attacks that involve trigger implantation use poi-soned data to mislead the training process, causing the model to learn incorrect distributional information. This alters the model’s decision boundaries and compromises its predictive performance. Additionally, since the accuracy of our attack heavily depends on the performance of the bottom model, the attacker’s training goal aligns with that of other benign participants—namely, achieving a well-trained bottom model. This shared goal further incentivizes our backdoor attack to maintain the model’s strong predictive ability during the training phase. We believe that these findings further highlight the advantages of our proposed triggerless backdoor attack compared to traditional backdoor attacks. 
+
+1) Impact of the Number of Passive Parties: To demonstrate that our triggerless backdoor attack can handle complex multi-party VFL scenarios, we evaluate the impact of the number of passive parties on our attack. As shown in Table II, the ASR of our attack does not decrease proportionally with the increase in the number of passive parties but largely maintains 8
+
+TABLE II ATTACK PERFORMANCE WITH DIFFERENT NUMBERS OF PASSIVE PARTIES Dataset #PP ∗ mASR rASR MNIST 1 100 .00 ± 0.00% 100 .00 ± 0.00%                                                                       
+
+> 297 .23 ±2.67% 98 .02 ±1.84%
+> 493 .97 ±3.97% 94 .47 ±7.17%
+> 784 .11 ±8.12% 88 .45 ±8.94%
+> 14 77 .66 ±17 .78% 80 .77 ±16 .22%
+> 28 70 .78 ±14 .20% 81 .62 ±14 .88%
+> CINIC-10 1100 .00 ±0.00% 100 .00 ±0.00%
+> 294 .29 ±1.18% 92 .26 ±1.12%
+> 491 .87 ±8.58% 92 .72 ±6.86%
+> 877 .92 ±13 .08% 81 .42 ±16 .22%
+> 16 75 .14 ±10 .04% 73 .32 ±17 .00%
+> 32 54 .25 ±4.25% 65 .38 ±15 .38%
+> ∗#PP denotes the number of passive parties. MNIST CINIC-10 0%
+> 12.5%
+> 25%
+> 37.5%
+> 50%
+> 62.5%
+> 75%
+> 87.5%
+> Ratio of Auxiliary Data
+> 60%
+> 80%
+> 100% mASR
+> (a) mASR 0%
+> 12.5%
+> 25%
+> 37.5%
+> 50%
+> 62.5%
+> 75%
+> 87.5%
+> Ratio of Auxiliary Data
+> 60%
+> 80%
+> 100% rASR (b) rASR
+
+Fig. 4: Impact of the ratio of the auxiliary data on the ASR. The polar radius represents the attack success rate (mASR or rASR), while the polar angle represents the percentage of auxiliary data relative to the training data. high performance, even though its variance may increase. We believe the main reason for this sustained performance is the introduction of the amplification factor. This factor tunes the embeddings, allowing the aggregated embeddings to maintain the characteristics of the target label while avoiding dilution by the benign embeddings of other passive parties. This result demonstrates the robustness of our attack in multi-party VFL. 
+
+2) Impact of Auxiliary Data: Our attack uses auxiliary data to identify source and target labels and obtain their clustering features, making it important to evaluate the impact of the amount of auxiliary data on our attack. Therefore, we assess auxiliary data of different sizes on the MNIST and CINIC-10 datasets with four passive parties. We define a set of auxiliary data as one instance of each class. We test the impact on backdoor attacks with 1, 6, 60, 300, and 450 sets of auxiliary data, which account for 0.017%, 0.167%, 1.667%, 5%, and 7.5% of the entire dataset, respectively. As shown in Fig. 4, we find that the amount of auxiliary data has a limited impact on the performance of backdoor attacks, although more auxiliary data typically results in better attack performance. Additionally, the experimental results show that even with only one set of auxiliary data, our attack maintains a good MNIST FashionMNIST CIFAR-10 CINIC-10 Criteo 1 2 3 4 5 6 9 12         
+
+> Amplification Factor
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> mASR (%)
+> (a) mASR 123456912
+> Amplification Factor
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> rASR (%) (b) rASR
+
+Fig. 5: Impact of the amplification factor on the ASR. In this experiment, there are four passive parties: three benign and one attacker. With Perturbation Without Perturbation MN FM CF CN CT      
+
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> mASR (%)
+> (a) mASR MN FM CF CN CT
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> rASR (%) (b) rASR
+
+Fig. 6: Impact of the perturbation on the ASR. attack success rate, which reflects the robustness of our attack. We attribute this to the label characterization ability of the attacker’s bottom model. The shared goal between the attacker and other participants (obtaining a model with good predictive power) enables the attacker to likely obtain a bottom model with strong label characterization ability, thereby facilitating the triggerless backdoor attack. 
+
+3) Impact of Amplification Factor: We investigate the im-pact of the amplification factor η on attack performance. The experiment is conducted in a VFL scenario with three benign passive parties and one attacker. As shown in Fig. 5, the attack success rate increases with the amplification factor. However, when the amplification factor exceeds a certain threshold, the ASR reaches a high point and slows down its growth rate, suggesting that the effect of the amplification factor on the ASR remains constant beyond this point. We investigate this turning point in attack performance by assuming that η0
+
+represents the ratio of benign passive parties to malicious passive parties, and we find that the performance turning point mostly occurs after η0. We attribute this phenomenon to the influence of the amplification factor on the contribution of the malicious embedding to the top model. In addition, a larger amplification factor is not always better. We observe that the performance of an attack typically decreases signifi-cantly when the magnification factor exceeds 2η0. This occurs because an excessively large amplification factor increases the likelihood of being detected by defense strategies during the prediction phase and may cause the backdoor attack to produce non-targeted incorrect results. Therefore, we suggest choosing an amplification factor slightly larger than η0 for the attack. 
+
+4) Impact of Perturbation: We evaluate the impact of the perturbation mechanism on attack performance on five 90 0.25 0.5 0.75 1                                             
+
+> scaling
+> 10.75 0.5 0.25 0
+> scaling
+> 0.54 0.55 0.36 0.36 0.2 0.52 0.57 0.43 0.46 0.25 0.7 0.67 0.48 0.49 0.41 0.68 0.71 0.75 0.67 0.62 0.67 0.79 0.97 0.71 0.66
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> (a) MNIST 00.25 0.5 0.75 1
+> scaling
+> 10.75 0.5 0.25 0
+> scaling
+> 0.65 0.48 0.4 0.35 0.25 0.69 0.53 0.44 0.36 0.21 0.76 0.56 0.47 0.43 0.37 0.65 0.67 0.71 0.59 0.4 0.61 0.69 0.8 0.71 0.64
+> 0.0 0.2 0.4 0.6 0.8 1.0 (b) CIFAR-10
+
+Fig. 7: Impact of the Gaussian distribution on the ASR. datasets, as shown in Fig. 6. Our experimental results on the perturbation mechanism demonstrate that it not only reduces the probability of the attack being detected by the active party but also significantly increases the attack success rate. We believe the primary reason for this increase is that the moderate introduction of perturbation enhances the diversity of malicious embeddings while partially correcting errors caused by non-targeted labeled embeddings. However, excessive per-turbation may lead to a decrease in attack success rate. This is because the perturbation mechanism may introduce noise that affects the clustering of embeddings, thereby reducing the attack performance. To determine the optimal magnitude of Gaussian perturbation, we evaluate the impact of perturbations with varying Gaussian distributions on the success rate of our attacks across MNIST and CIFAR-10 datasets. The results are presented in Fig. 7. The terms “ μ scaling” and “ σ scaling” refer to the scaling of the expectation (μ) and standard deviation ( σ) of the Gaussian noise relative to the embedding mean and standard deviation derived from the auxiliary data, respectively. Fig. 7 shows the results using mASR as the met-ric, while the results using rASR are provided in Appendix B. We observe that when the expectation of the Gaussian dis-tribution for the added perturbation is 0, the perturbation consistently yields a positive impact, achieving the best attack performance at a σ scaling of 0.5. This occurs because the added perturbation minimally alters the embedding center, allowing the small amount of noise introduced to compensate for errors caused by the auxiliary data and enhance the attack’s success rate. Conversely, as μ scaling increases, the Gaussian perturbation begins to resemble the effect of increasing the amplification factor, resulting in reduced attack performance. Similarly, higher σ scaling introduces more outliers, causing a shift in the malicious embeddings and negatively affecting attack performance. Based on these findings, we recommend adding Gaussian perturbation with a expectation of 0 and a standard deviation equal to half the standard deviation of the corresponding embedding distribution derived from the aux-iliary data to enhance the diversity of malicious embeddings and improve the attack success rate. 
+
+5) Impact of Label Categories: Fig. 8 shows the perfor-mance of our attack when it is implemented using different source and target label categories, respectively. The evaluation is conducted on the MNIST dataset in a two-party VFL scenario. To analyze the impact of different source labels on the attack success rate, the target label is fixed at 0. mASR rASR Label 1 Label 2 Label 3 Label 4 Label 5 Label 6 Label 7 Label 8 Label 9    
+
+> 20% 40% 60% 80% 100%
+> 99.97% 100.0% 97.77% 100.0% 99.38% 98.85% 99.91% 97.1% 99.36% 100.0% 100.0% 99.43% 100.0% 99.55% 99.89% 100.0% 99.91% 100.0%
+> (a) Source Label Label 1 Label 2 Label 3 Label 4 Label 5 Label 6 Label 7 Label 8 Label 9
+> 20% 40% 60% 80% 100%
+> 98.68% 99.95% 96.46% 99.95% 96.69% 98.46% 98.58% 95.33% 97.01% 99.43% 100.0% 96.84% 100.0% 96.26% 99.42% 99.16% 97.63% 97.49% (b) Target Label
+
+Fig. 8: Attack performance under different source and target label categories. Similarly, to examine the effect of different target labels on the attack success rate, the source label is fixed at 0. The results demonstrate that our attack is largely independent of the label categories. 
+
+C. Hyperparameter Analysis 
+
+To comprehensively evaluate our triggerless backdoor at-tack, we investigate and analyze the impact of various hy-perparameters on attack performance in detail below. Their combined impact is presented in Appendix B. 
+
+1) Impact of Learning Rate: We evaluate the impact of the learning rate on our attack across four datasets. The results are shown in Fig. 9. We observe that for the same number of training epochs, the MTA increases with the learning rate. Since the effectiveness of our backdoor attack relies heavily on the label characterization ability of the bottom model, a higher MTA typically indicates a better model. Consequently, the accuracy of our attack increases with the learning rate. However, a higher learning rate is not always better, as it does not always lead to a better model. Additionally, an excessively high learning rate may introduce additional computational and communication overhead. 
+
+2) Impact of Batch Size: The batch size setting during the training phase is also an important factor. We evaluate the performance of our backdoor attack on four datasets. As shown in Fig. 10, the experimental results indicate that batch size does not have a significant trending effect on attack accuracy, causing the ASR to fluctuate within a certain range. With the same training epochs, the MTA shows a decreasing trend as batch size increases, but the attack performance does not change significantly. Therefore, we conclude that batch size is not a major factor affecting the performance of our triggerless backdoor attack. 
+
+3) Impact of Training Epochs: The impact of training epochs on the accuracy of our backdoor attack is evaluated on CIFAR-10 and CINIC-10, as the MTA of these datasets is more sensitive to changes in epochs, better reflecting the impact of different model performances on the triggerless backdoor attack. As shown in Fig. 11, the MTA of the VFL model gradually increases and then plateaus with the increase in training epochs. Simultaneously, the ASR of our attacks also shows a significant growth trend. This finding further 10 mASR rASR 90                        
+
+> 95
+> MTA (%)
+> 1e-5 1e-4 0.001 0.01 0.1 1.0
+> Learning Rate
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> ASR (%)
+> (a) MNIST 80
+> 85
+> MTA (%)
+> 1e-5 1e-4 0.001 0.01 0.1 1.0
+> Learning Rate
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> ASR (%) (b) FashionMNIST 55
+> 60
+> MTA (%)
+> 1e-5 1e-4 0.001 0.01 0.1 1.0
+> Learning Rate
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> ASR (%) (c) CIFAR-10 45
+> 50
+> MTA (%)
+> 1e-5 1e-4 0.001 0.01 0.1 1.0
+> Learning Rate
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> ASR (%) (d) CINIC-10
+
+Fig. 9: Impact of learning rate on attack performance. mASR rASR 90                    
+
+> 95
+> MTA (%)
+> 100 200 300 400 500
+> Batch Size
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> ASR (%)
+> (a) MNIST 80
+> 85
+> MTA (%)
+> 100 200 300 400 500
+> Batch Size
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> ASR (%) (b) FashionMNIST 50
+> 60
+> MTA (%)
+> 100 200 300 400 500
+> Batch Size
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> ASR (%) (c) CIFAR-10 54
+> 56
+> MTA (%)
+> 100 200 300 400 500
+> Batch Size
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> ASR (%) (d) CINIC-10
+
+Fig. 10: Impact of batch size on attack performance. mASR rASR 60          
+
+> 65
+> MTA (%)
+> 10 20 30 40 50
+> Epochs
+> 20
+> 40
+> 60
+> ASR (%)
+> (a) CIFAR-10 50
+> 53
+> MTA (%)
+> 10 20 30 40 50
+> Epochs
+> 20
+> 40
+> 60
+> ASR (%) (b) CINIC-10
+
+Fig. 11: Impact of training epochs on attack performance. MNIST FashionMNIST CIFAR-10 CINIC-10 0.25 0.5 1 2 4     
+
+> Dimensionality Ratio
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> mASR (%)
+> (a) mASR 0.25 0.5 124
+> Dimensionality Ratio
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> rASR (%) (b) rASR
+
+Fig. 12: Impact of embedding dimensionality on attack per-formance. demonstrates the alignment of goals between the attackers of our triggerless backdoor attack and the participants of the overall VFL model, i.e., better model prediction capability typically implies better backdoor attack capability. 
+
+4) Impact of Embedding Dimensionality: To evaluate the impact of embedding dimensionality on our attack perfor-mance, we introduce a dimensionality ratio by scaling the embedding dimensions to 0.25, 0.5, 2, and 4 times their original values. The original embedding dimensions for each dataset are as follows: MNIST and FashionMNIST are 196, CIFAR-10 is 1024, and CINIC-10 is 512. Experimental results are presented in Fig. 12. These results demonstrate that our attack performance is largely unaffected by changes in em-bedding dimensionality. We believe this is primarily because differences in embedding dimensionality do not affect the clustering of different label categories within their respective embeddings. Furthermore, under identical training settings, the main task accuracy remains largely unaffected by embedding dimensionality. Consequently, embeddings with varying di-mensions exhibit comparable representational capabilities for labels, resulting in similar attack performance. 
+
+5) Impact of Models: The impact of the passive parties’ and the attacker’s model on the performance of the backdoor attack is also an important factor. We investigate this in detail in the subsequent Section V-A and show the results in Tables V and VI, so we will not repeat them here. 
+
+D. Performance under Defense 
+
+In this section, we evaluate the performance of our pro-posed triggerless backdoor attack under nine different defense strategies from four perspectives. 
+
+1) General Defenses: We first evaluate the performance of our triggerless backdoor attack under three general defense strategies, including gradient clipping, gradient compression and differential privacy. The evaluation consists of three as-pects: (i) the resilience and performance of our attack across various defense strategies, (ii) a comparison between our attack and conventional baseline backdoor attacks under these defenses, and (iii) the impact of varying defense rates on the effectiveness of each backdoor attack strategy. To ensure a fair comparison, we conduct the experiments in a two-party VFL scenario rather than a multi-party VFL scenario. This decision was primarily based on two factors: 11 VILLAIN BadVFL BASL Our 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0                                                            
+
+> Clipping Rate
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> mASR (%)
+> (a) Clipping, MNIST 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+> Compression Rate
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> mASR (%) (b) Compression, MNIST 0.0001 0.001 0.01 0.1 1.0
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> mASR (%) (c) DP, MNIST 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+> Detection Rate
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> mASR (%) (d) Detection, MNIST 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+> Clipping Rate
+> 20
+> 40
+> 60
+> 80
+> 100
+> mASR (%)
+> (e) Clipping, CIFAR-10 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+> Compression Rate
+> 20
+> 40
+> 60
+> 80
+> 100
+> mASR (%) (f) Compression, CIFAR-10 0.0001 0.001 0.01 0.1 1.0
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> mASR (%) (g) DP, CIFAR-10 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+> Detection Rate
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> mASR (%) (h) Detection, CIFAR-10
+
+Fig. 13: Attack performance under different defenses with different defense rates. first, some backdoor attacks are specifically designed for two-party VFLs and are not applicable to multi-party VFLs (the performance of these backdoor attacks in two-party VFLs is detailed in Appendix B). Second, the results in Table I show that these attacks exhibit a low attack success rate in multi-party VFLs, making it less meaningful to evaluate the impact of defense strategies on attacks in the context of such low success rates. 
+
+a) Gradient Clipping: Gradient clipping defends against backdoor attacks by clipping gradients that are excessively large or small [32, 33]. This prevents attackers from pin-pointing and manipulating the most influential features by implanting triggers. Our attack employs a norm-based gradient clipping strategy, where an elevated clipping rate corresponds to a higher proportion of gradients being clipped. As illustrated in Fig. 13, the experimental results show that the ASR of the BASL exhibits a declining pattern with the increase in clipping rate, and the mASR of other baseline attacks experiences variability. Notably, our attack demonstrates resilience against this defense mechanism, maintaining robust attack efficacy despite the gradient clipping. This is because our attack is performed exclusively during the inference phase, without implanting any triggers during the training phase, thereby ensuring full compliance with the VFL protocol. Moreover, while gradient clipping restricts model updates to some extent, it cannot and should not significantly diminish the model’s representation capabilities. As a result, our backdoor attack, which relies on the bottom model’s ability to represent labels, is minimally affected by this defense strategy. 
+
+b) Gradient Compression: As a widely adopted defense strategy in federated learning, gradient compression aims at reducing communication overhead and enhancing privacy by minimizing the size of transmitted gradients [24, 25, 34]. A higher compression rate results in less data being transmit-ted. According to the results depicted in Fig. 13, gradient compression proves to be an effective defense, particularly against the VILLAIN and BASL attacks, although it suggests that a robust defense may require a substantial compression rate. However, gradient compression marginally impacts the prediction accuracy of the final model, allowing attackers to exploit a well-trained bottom model. Consequently, the defense strategy of gradient compression offers limited protection against our triggerless backdoor attack. 
+
+c) Differential Privacy: Noisy gradient is a common defense strategy, where differential privacy (DP) [35, 36, 37] is widely used because it introduces noise and quantifies privacy simultaneously. For DP, the privacy budget ε acts as a privacy metric, with lower ε values indicating stronger privacy preservation. The results in Fig. 13 reflect this. Additionally, we observe that while DP impacts our attack by diminishing the label representation capacity of the bottom model through gradient alteration, this limitation can be mitigated by extend-ing the training epochs. 
+
+2) Defenses against Label Inference: Since all backdoor attacks in VFL scenarios involve label inference processes, adopting a defense strategy against label inference attacks may be effective in limiting the effectiveness of backdoor attacks. Therefore, we choose the current state-of-the-art defense strat-egy against label inference attacks to evaluate the performance of our proposed triggerless backdoor attack. 
+
+a) Marvell: Marvell is a noise perturbation-based de-fense [38]. It prevents label leakage by adding noise to the model gradient and employs an optimizer to get the optimal noise distribution for achieving the trade-off between model performance and privacy preservation. Table III shows the effectiveness of the Marvell defense against our attack. We find that Marvell can provide limited defense. This is primarily because Marvell’s addition of noise to the gradient makes the overall VFL model more dependent on the top model, thereby reducing the bottom model’s ability to characterize labels. However, this limitation on the bottom model’s ability is constrained because the noise added is limited to ensure the model’s predictive performance. Since our attack relies more on the performance of the final bottom model, Marvell’s 12 
+
+TABLE III ATTACK PERFORMANCE UNDER DIFFERENT DEFENSES Dataset Defense mASR rASR MNIST None 93 .97 ± 3.97% 94 .47 ± 7.17%                                                                                                                   
+
+> Marvell 80 .30 ±9.33% 84 .61 ±11 .64%
+> CAE 86 .04 ±6.80% 92 .46 ±7.01%
+> ANP 89 .81 ±4.28% 94 .23 ±4.57%
+> ABL 91 .52 ±6.74% 93 .83 ±6.42%
+> FashionMNIST None 86 .06 ±8.83% 81 .22 ±11 .64%
+> Marvell 81 .49 ±9.19% 88 .45 ±9.32%
+> CAE 78 .69 ±10 .68% 76 .08 ±10 .31%
+> ANP 86 .72 ±7.57% 77 .11 ±13 .83%
+> ABL 84 .27 ±7.71% 82 .70 ±7.47%
+> CIFAR-10 None 85 .08 ±11 .38% 83 .99 ±12 .81%
+> Marvell 77 .51 ±10 .85% 74 .14 ±14 .14%
+> CAE 84 .54 ±11 .06% 80 .57 ±13 .87%
+> ANP 84 .45 ±8.26% 83 .68 ±13 .68%
+> ABL 84 .13 ±13 .65% 83 .87 ±12 .16%
+> CINIC-10 None 88 .54 ±13 .22% 92 .72 ±6.86%
+> Marvell 80 .47 ±19 .00% 86 .61 ±12 .38%
+> CAE 88 .63 ±14 .74% 87 .67 ±15 .08%
+> ANP 90 .62 ±8.40% 89 .61 ±10 .51%
+> ABL 88 .21 ±12 .00% 87 .69 ±13 .05%
+
+defense against our attack is limited. 
+
+b) Confusional Autoencoder (CAE): CAE is a defense strategy aimed at preventing label inference attacks by training VFL models with obfuscated labels [39]. Specifically, CAE maps the original labels into the soft label space via an obfuscated autoencoder such that the labels of each class tend to be similar instead of the original one-hot type. As shown in Table III, our experimental results indicate that CAE has little effect on defending against our attack, especially on complex datasets. We believe this is mainly because, even though obfuscated labels are used to train the VFL model, the goal of the training participants is still to obtain a well-trained model. Consequently, this training objective allows the attacker’s bottom model to retain good label representation. Our triggerless backdoor attack leverages this strong charac-terization, maintaining high attack performance. Additionally, more complex training data typically requires a more complex bottom model, which increases its contribution to the overall VFL model and makes it less susceptible to CAE defenses. 
+
+3) Defenses against Backdoor Attacks: Next, we evaluate the performance of our attack under existing defense strategies against backdoor attacks. 
+
+a) Detection: Dynamic trigger detection is a defense strategy specifically for backdoor attacks [16, 40]. It identifies trigger-implanted models by monitoring and analyzing the embeddings shared by the passive party across epochs. Fig. 13 demonstrates that it is an effective backdoor defense strategy against baseline attacks. However, since our attack bypasses trigger implantation and relies on the label characterization ability of the bottom model, this detection defense is ineffec-tive against our triggerless backdoor attack. 
+
+b) Adversarial Neuron Pruning (ANP): Neurons im-planted with backdoors typically behave differently from be-nign neurons in their reflection of data, so Wu and Wang [41] proposed a neuron pruning-based backdoor defense strategy by pruning out neurons that may contain backdoors. The TABLE IV ATTACK PERFORMANCE UNDER THE SPECIFIC DEFENSE IN THE INFERENCE PHASE Dataset mASR rASR MNIST 0.08 ± 0.06% 0.00 ± 0.00%                   
+
+> FashionMNIST 6.55 ±3.27% 6.62 ±2.96%
+> CIFAR-10 36 .47 ±10 .89% 35 .06 ±11 .28%
+> CINIC-10 62 .78 ±13 .12% 59 .51 ±11 .89%
+
+experimental results in Table III demonstrate that this defense strategy is largely ineffective in VFL scenarios. This is because the active party can only defend by pruning its own top model, which constitutes a small portion of the entire VFL model, and lacks the ability to modify the bottom models owned by the passive parties. Additionally, our triggerless backdoor attack does not generate malicious neurons during the training phase, rendering the pruning of malicious neurons ineffective. 
+
+c) Anti-Backdoor Learning (ABL): ABL is a defense strategy based on backdoor identification and suppression [42]. It avoids backdoor implantation by identifying the poisoned samples during the training process and using unlearning to suppress the influence of poisoned samples on the model. The experimental results in Table III show that this defense strategy is almost ineffective when implementing our attack. This is mainly because that our backdoor attack does not implant any triggers in the training phase, making the backdoor unrecognizable. In addition, we also observe that this defense strategy against conventional backdoor attacks performs worse than the defense strategies against label inference, since our attack relies more on the label inference process. 
+
+4) Specific Defense in the Inference Phase: Given that existing defenses predominantly focus on the training phase while overlooking defense during inference, we propose a novel backdoor attack defense strategy specifically applied in the inference phase. This strategy is tailored to counter our proposed backdoor attack, leveraging the attacker’s reliance on amplification factors to mislead the top model in multi-party VFL scenarios. The defense operates by monitoring the 
+
+L2 norm of embeddings: the active party records the maximum 
+
+L2 norm of each passive party’s embeddings once the model has stabilized during training. During inference, the active party calculates the L2 norm of each receiving embedding and compares it to the previously recorded maximum. If the current embedding’s L2 norm exceeds this threshold, it is flagged as a potential backdoor attack, and the malicious embedding is replaced to neutralize the threat; otherwise, standard inference proceeds. We evaluate the performance of our triggerless backdoor attack against the aforementioned specific defense across four datasets, with results presented in Table IV. We observe that for datasets with relatively simple features, such as MNIST and FashionMNIST, this defense strategy successfully mit-igates our backdoor attack. However, as dataset complexity increases, the defense’s effectiveness diminishes. This decline is primarily attributed to the greater diversity of embeddings generated by complex datasets, which results in a more dispersed embedding distribution. Such loosely clustered and 13 
+
+TABLE V THE IMPACT OF INTRODUCING THE EMBEDDING LAYER TO ALL PASSIVE PARTIES ’ BOTTOM MODELS Dataset Model mASR rASR CIFAR-10 CNN-FC0 85 .08 ± 11 .38% 83 .99 ± 12 .81%                                           
+
+> CNN-FC1 92 .34 ±8.99% 96 .75 ±4.14%
+> CNN-FC2 96 .86 ±3.02% 98 .22 ±1.78%
+> CNN-FC3 98 .54 ±1.12% 97 .99 ±1.22%
+> CINIC-10 CNN-FC0 72 .35 ±16 .36% 71 .57 ±18 .52%
+> CNN-FC1 80 .38 ±8.68% 81 .31 ±10 .87%
+> CNN-FC2 88 .54 ±8.42% 89 .38 ±7.52%
+> CNN-FC3 91 .69 ±1.62% 91 .42 ±2.91%
+
+highly personalized embeddings often exhibit larger L2 norms, making it more challenging for the defense to distinguish and neutralize malicious embeddings. Considering that real-world data typically possesses high feature complexity, we emphasize the imperative for the VFL security community to develop more refined and targeted defense strategies against our triggerless backdoor attack. V. D ISCUSSION 
+
+In this section, we first discuss two additional ways that may affect the performance of our proposed attack—embedding layers and learning rate adjustment. Then we discuss the limitation of our proposed attack and potential future works. 
+
+A. Embedding Layer 
+
+Consider that our proposed triggerless backdoor attack relies on the label representation capability of the bottom model, which may be enhanced by introducing an embedding layer. Therefore, we discuss the impact of the embedding layer on our attack performance. We first evaluate the performance of our attack when all passive parties use the same bottom model and introduce em-bedding layers simultaneously. The experiments are conducted on two datasets, CIFAR-10 and CINIC-10, with all the bottom models of the passive parties utilizing a convolutional neural network structure. Additionally, we introduce an additional fully connected layer after this convolutional neural network as the embedding layer for the bottom model. In the experiments, the number of fully connected layers is increased from 0 to 3. The results are shown in Table V. We observe that adding em-bedding layers enhances the performance of our attacks, with the attack performance gradually improving as the number of embedding layers increases. This improvement is primarily because the embedding layer allows the bottom model to better characterize labels, resulting in more representative embed-dings. Our attack leverages these embeddings to implement the backdoor attack, thereby improving its performance. We then evaluate the performance impact on our attack when introducing embedding layers only to the attacker’s bottom model. In this scenario, we consider a malicious rather than an honest-but-curious attacker during the training phase, who can enhance the performance of their backdoor attack by adding embedding layers to the original bottom model. Similar to the previous experiment, but in this case, we TABLE VI THE IMPACT OF INTRODUCING THE EMBEDDING LAYER ONLY TO THE ATTACKER ’S BOTTOM MODEL Dataset Model mASR rASR CIFAR-10 CNN-FC0 85 .08 ± 11 .38% 83 .99 ± 12 .81%                                           
+
+> CNN-FC1 99 .66 ±0.49% 99 .93 ±0.10%
+> CNN-FC2 99 .96 ±0.06% 100 .00 ±0.00%
+> CNN-FC3 99 .92 ±0.11% 100 .00 ±0.00%
+> CINIC-10 CNN-FC0 72 .35 ±16 .36% 71 .57 ±18 .52%
+> CNN-FC1 97 .68 ±3.29% 99 .29 ±1.00%
+> CNN-FC2 98 .05 ±3.38% 99 .76 ±0.41%
+> CNN-FC3 98 .35 ±2.11% 99 .64 ±0.38%
+
+only add embedding layers to the attacker’s bottom model, increasing the number of layers from 0 to 3. Table VI shows the results of this experiment. We observe that the active and malicious addition of embedding layers by the attacker positively affects the attack performance, consistent with the findings of previous experiments. In summary, the embedding layer can enhance the per-formance of our triggerless backdoor attack by improving the label representation capability of the bottom model. This improvement is particularly significant when the embedding layer is added to the attacker’s bottom model. Therefore, the malicious attacker can add an embedding layer to their bottom model to enhance their attack performance. 
+
+B. Learning Rate Adjustment 
+
+Learning rate adjustment is a technique used to enhance attack performance in VFL scenarios, and it has been em-ployed in several works with good results [10, 16, 43]. The main principle is that the attacker increases the contribution of its own data to the overall model by increasing the learn-ing rate during the training phase, thus enhancing the label representation capability of the bottom model. The attacker can then exploit this well-characterized bottom model to perform more accurate label inference attacks or backdoor attacks. This technique implies that the attacker’s security assumptions during the training phase are typically malicious, consistent with existing security assumptions for backdoor attacks [13, 14, 16]. However, our proposed triggerless back-door attack has a more stringent security assumption that the attacker is honest-but-curious rather than malicious during the training phase. Therefore, when discussing the impact of learning rate adjustment on the performance of our attack, we adjust the security assumptions to be consistent with those of other backdoor attacks. Our evaluation consists of two aspects: the impact of in-creasing the attacker’s learning rate on the performance of the attack and the impact of decreasing the learning rate, as shown in Tables VII and VIII, respectively. We conduct experiments on four datasets and use mASR as the metric, with the batch size of 128 and the training epoch of 10. The experimental results for rASR as a metric are presented in Appendix B. In the experiment of increasing the learning rate, we set the learning rate of the benign passive parties to 0.01 and gradually increase the attacker’s learning rate. According to the 14 
+
+TABLE VII THE M ASR WHEN THE ATTACKER INCREASE THE LEARNING RATE (LR )                                          
+
+> Dataset lr = 0 .01 lr = 0 .1lr = 1
+> MN 70 .61 ±0.82% 94 .79 ±3.17% 98 .08 ±2.03%
+> FM 88 .62 ±12 .04% 95 .31 ±6.26% 98 .12 ±2.66%
+> CF 50 .55 ±22 .26% 78 .26 ±9.48% 97 .96 ±2.89%
+> CN 47 .86 ±22 .84% 86 .07 ±13 .47% 99 .77 ±0.32%
+> The learning rate for other benign passive parties is set to 0.01.
+
+TABLE VIII THE M ASR WHEN THE ATTACKER DECREASE THE LEARNING RATE (LR )                                          
+
+> Dataset lr = 1 lr = 0 .1lr = 0 .01
+> MN 93 .97 ±3.97% 31 .65 ±6.80% 2.96 ±3.05%
+> FM 86 .63 ±8.41% 18 .18 ±4.62% 9.52 ±0.61%
+> CF 85 .08 ±11 .38% 37 .70 ±8.46% 2.51 ±3.54%
+> CN 88 .54 ±13 .22% 48 .87 ±12 .52% 11 .69 ±3.08%
+> The learning rate for other benign passive parties is set to 1.
+
+results in Table VII, we observe that the performance of our attacks increases significantly as the attacker’s learning rate increases. This indicates that increasing the learning rate can effectively improve attack performance. However, the attacker should be cautious when setting the learning rate to avoid excessive values that may lead to overfitting or detection by the active party. In the experiment of decreasing the learning rate, we set the learning rate of the benign passive parties to 1 and gradually decrease the attacker’s learning rate. As shown in Table VIII, the performance of the backdoor attack drops significantly as the learning rate decreases. The degree of this decrease is much greater than the increase in attack performance when the learning rate is raised. This indicates that the negative effect of decreasing the learning rate is much larger than the positive effect of increasing it. Based on the above, learning rate adjustment is an effective technique for enhancing the performance of our proposed at-tack. The attacker can increase the learning rate to improve the attack performance, but should avoid decreasing the learning rate to ensure the best attack performance. 
+
+C. Limitations 
+
+Although our proposed triggerless backdoor attack has demonstrated strong performance across numerous experi-ments, like previous traditional backdoor attack methods, it still has some potential limitations due to the specific charac-teristics of the VFL scenario. One limitation is that, since the passive party in VFL only possesses features but not labels, an attacker aiming to execute a targeted backdoor attack must first infer the labels of the samples. Consequently, the effectiveness of our attack is partially dependent on label inference accuracy. Another limitation is that our backdoor attack directly re-places embeddings during the inference phase with malicious embeddings, making the attack’s success rate heavily reliant on the quality of these embeddings. The construction of malicious embeddings, in turn, depends significantly on the bottom model’s ability to characterize the labels derived from the attacker’s feature data. While realistic VFL scenarios typically ensure that the features held by different passive parties are of comparable importance to balance the costs and benefits of training participants, extreme cases cannot be ruled out. In such scenarios, the attacker may possess the least significant features, resulting in malicious embeddings that degrade the performance of the backdoor attack. Additionally, the number of passive parties involved in VFL training could pose another limitation. As the number of passive parties increases, malicious embeddings may be diluted by benign data from other parties. Furthermore, the introduction of the amplification factor could make the attack more easily detectable in such scenarios. However, we believe the number of passive parties has a limited impact on the performance of our attack. Unlike HFL scenarios, the number of passive parties in VFL scenarios is typically not excessively large, which helps mitigate this issue. 
+
+D. Future Work 
+
+For the triggerless backdoor attack we propose, malicious embeddings play a crucial role. Given the variations in em-bedding details across different VFL tasks, and to maintain a concise paper structure, we leverage statistically robust fea-tures from the embeddings to design our attack methodology and focus on detailing this novel triggerless backdoor pathway. However, the interpretability of the relationship between em-beddings and labels across different VFL tasks could further drive the development of related attacks and defenses. Given the unique characteristics of embeddings in VFL scenarios, these attacks may extend beyond backdoor attacks to include label inference and feature inference attacks. Therefore, in future work, we plan to conduct more systematic and in-depth research on how embedding details influence various attacks in VFL scenarios. Specifically, we aim to investigate how the sparsity of embeddings affect attack performance while exploring methods to enhance embedding representations. Furthermore, we will analyze which dimensions primarily contribute to an embedding’s ability to represent labels and strive to uncover universal patterns in this relationship. In addition, we observe that anomaly detection defense strategies based on embedding magnitude are insufficient to counter our triggerless attacks on complex datasets. We believe these defenses still face several unresolved challenges. For example, directly identifying malicious embeddings by comparing differences between passive parties may not be reasonable: 1) passive parties may collude, making it difficult to assess their trustworthiness; 2) natural variations in feature distributions [44] and bottom model architectures across pas-sive parties result in highly diverse embedding representations, leaving no consistent standard for comparison. Moreover, com-paring embeddings between the training and inference phases offers limited effectiveness, as the distributions of training and test sets may differ, and certain highly distinctive samples may naturally have representations outside the expected range. Therefore, efficiently identifying malicious embeddings with-out affecting benign ones remains a significant challenge. In 15 
+
+summary, our future work will focus on developing defense strategies capable of effectively countering backdoor attacks during the inference phase, particularly in complex real-world VFL scenarios. VI. C ONCLUSION 
+
+In the paper, we have disclosed a new triggerless backdoor attack pathway in VFL scenarios. Unlike existing backdoor at-tacks that implant triggers during the training phase, our attack bypasses trigger implantation and directly misleads the VFL model during the inference phase by replacing embeddings with malicious ones. We extensively evaluate the performance of our proposed attack on five datasets under various settings, demonstrating its effectiveness and robustness. Furthermore, we have assessed the performance of our attack against nine different defense strategies, including our proposed specific defense during the inference phase. The results indicate that existing defenses are largely ineffective against our triggerless backdoor attack. We hope our work will raise awareness in the VFL security community about this new type of back-door attack and inspire further research into effective defense strategies. ACKNOWLEDGMENTS 
+
+This work was supported by the National Natural Science Foundation of China under Grant 62572007. REFERENCES 
+
+[1] H. B. McMahan, E. Moore et al. , “Federated learning of deep networks using model averaging,” arXiv preprint arXiv:1602.05629 , 2016. [2] P. Vepakomma, O. Gupta et al. , “Split learning for health: Distributed deep learning without sharing raw patient data,” 
+
+arXiv preprint arXiv:1812.00564 , 2018. [3] Q. Yang, Y. Liu et al. , “Federated machine learning: Concept and applications,” ACM Trans. Intell. Syst. Technol. , vol. 10, no. 2, pp. 1–19, 2019. [4] P. Qiu, X. Zhang et al. , “Your labels are selling you out: Relation leaks in vertical federated learning,” IEEE Trans. Dependable Secur. Comput. , vol. 20, no. 5, pp. 3653–3668, 2023. [5] Y. He, Z. Shen et al. , “Backdoor attack against split neural network-based vertical federated learning,” IEEE Trans. Inf. Forensic Secur. , vol. 19, pp. 748–763, 2024. [6] P. Qiu, X. Zhang et al. , “HashVFL: Defending against data reconstruction attacks in vertical federated learning,” IEEE Trans. Inf. Forensic Secur. , vol. 19, pp. 3435–3450, 2024. [7] M. Gong, Y. Zhang et al. , “A multi-modal vertical federated learning framework based on homomorphic encryption,” IEEE Trans. Inf. Forensic Secur. , vol. 19, pp. 1826–1839, 2024. [8] Y. Yang, X. Chen et al. , “Openvfl: A vertical federated learning framework with stronger privacy-preserving,” IEEE Trans. Inf. Forensic Secur. , vol. 19, pp. 9670–9681, 2024. [9] Y. Cheng, Y. Liu et al. , “Federated learning for privacy-preserving AI,” Commun. ACM , vol. 63, no. 12, pp. 33–36, 2020. [10] C. Fu, X. Zhang et al. , “Label inference attacks against vertical federated learning,” in 31st USENIX Security Symposium , 2022, pp. 1397–1414. [11] J. Liu, X. Lyu et al. , “Similarity-based label inference attack against training and inference of split learning,” IEEE Trans. Inf. Forensic Secur. , vol. 19, pp. 2881–2895, 2024. [12] M. N. Vu, T. R. Jeter et al. , “Active data reconstruction attacks in vertical federated learning,” in IEEE International Conference on Big Data , 2023, pp. 1374–1379. [13] M. Naseri, Y. Han, and E. De Cristofaro, “BadVFL: Back-door attacks in vertical federated learning,” arXiv preprint arXiv:2304.08847 , 2023. [14] Y. He, Z. Shen et al. , “Backdoor attack against split neural network-based vertical federated learning,” IEEE Trans. Inf. Forensic Secur. , vol. 19, pp. 748–763, 2023. [15] P. Chen, X. Du et al. , “Universal adversarial backdoor attacks to fool vertical federated learning,” Comput. Secur. , vol. 137, p. 103601, 2024. [16] Y. Bai, Y. Chen et al. , “VILLAIN: Backdoor attacks against vertical split learning,” in 32nd USENIX Security Symposium ,2023, pp. 2743–2760. [17] C.-j. Huang, L. Wang, and X. Han, “Vertical federated knowl-edge transfer via representation distillation for healthcare collab-oration networks,” in Proceedings of the ACM Web Conference 2023 , ser. WWW ’23, 2023, pp. 4188–4199. [18] Z. Wu, Q. Li, and B. He, “Practical vertical federated learning with unsupervised representation learning,” IEEE Trans. Big Data , vol. 10, no. 6, pp. 864–878, 2024. [19] M. Rashad, Z. Zhao et al. , “TabVFL: Improving latent representation in vertical federated learning,” arXiv preprint arXiv:2404.17990 , 2024. [20] Y. Liu, Y. Kang et al. , “Vertical federated learning: Concepts, advances, and challenges,” IEEE Trans. Knowl. Data Eng. ,vol. 36, no. 7, pp. 3615–3634, 2024. [21] Q. Pang, Y. Yuan, and S. Wang, “Attacking vertical collaborative learning system using adversarial dominating inputs,” arXiv preprint arXiv:2201.02775 , 2022. [22] J. Chen, G. Huang et al. , “Graph-Fraudster: Adversarial attacks on graph neural network-based vertical federated learning,” 
+
+IEEE Trans. Comput. Soc. Syst. , vol. 10, no. 2, pp. 492–506, 2022. [23] M. Barni, K. Kallas, and B. Tondi, “A new backdoor attack in cnns by training set corruption without label poisoning,” in 2019 IEEE International Conference on Image Processing , 2019, pp. 101–105. [24] P. Chen, J. Yang et al. , “A practical clean-label backdoor attack with limited information in vertical federated learning,” in 2023 IEEE International Conference on Data Mining , 2023, pp. 41– 50. [25] Y. Gu and Y. Bai, “LR-BA: Backdoor attack against vertical federated learning using local latent representations,” Comput. Secur. , vol. 129, p. 103193, 2023. [26] Y. LeCun, L. Bottou et al. , “Gradient-based learning applied to document recognition,” Proc. IEEE , vol. 86, no. 11, pp. 2278– 2324, 1998. [27] H. Xiao, K. Rasul, and R. Vollgraf, “Fashion-MNIST: A novel image dataset for benchmarking machine learning algorithms,” 
+
+arXiv preprint arXiv:1708.07747 , 2017. [28] A. Krizhevsky, “Learning multiple layers of features from tiny images,” 2009. [29] L. N. Darlow, E. J. Crowley et al. , “CINIC-10 is not ImageNet or CIFAR-10,” arXiv preprint arXiv:1810.03505 , 2018. [30] Criteo, “Criteo dataset,” https://labs.criteo.com/2014/02/ download-kaggle-display-advertising-challenge-dataset, 2014. [31] H. Guo, R. Tang et al. , “DeepFM: A factorization-machine based neural network for CTR prediction,” in Proceedings of the 26th International Joint Conference on Artificial Intelligence ,2017, pp. 1725–1731. [32] H. Fang, X. Li et al. , “Improved convergence of differential private SGD with gradient clipping,” in The 11th International Conference on Learning Representations , 2023. [33] Y. Mao, C. Li et al. , “Differential privacy in federated dynamic gradient clipping based on gradient norm,” in International Con-ference on Algorithms and Architectures for Parallel Processing ,vol. 14490, 2023, pp. 24–41. 16 
+
+[34] Y. Xuan, X. Chen et al. , “Practical and general backdoor attacks against vertical federated learning,” in Machine Learning and Knowledge Discovery in Databases: Research Track, Proceed-ings, Part II , vol. 14170, 2023, pp. 402–417. [35] C. Dwork, “Differential privacy,” in International Colloquium on Automata, Languages, and Programming , 2006, pp. 1–12. [36] M. Abadi, A. Chu et al. , “Deep learning with differential privacy,” in Proceedings of the 2016 ACM SIGSAC Conference on Computer and Communications Security , 2016, pp. 308–318. [37] Y. Miao, R. Xie et al. , “Efficient and secure federated learn-ing against backdoor attacks,” IEEE Trans. Dependable Secur. Comput. , vol. 21, no. 5, pp. 4619–4636, 2024. [38] O. Li, J. Sun et al. , “Label leakage and protection in two-party split learning,” in The 10th International Conference on Learning Representations , 2022. [39] T. Zou, Y. Liu et al. , “Defending batch-level label inference and replacement attacks in vertical federated learning,” IEEE Trans. Big Data , vol. 10, no. 6, pp. 1016–1027, 2024. [40] W. Guo, B. Tondi, and M. Barni, “Universal detection of backdoor attacks via density-based clustering and centroids analysis,” IEEE Trans. Inf. Forensic Secur. , vol. 19, pp. 970– 984, 2024. [41] D. Wu and Y. Wang, “Adversarial neuron pruning purifies backdoored deep models,” in Advances in Neural Information Processing Systems , vol. 34, 2021, pp. 16 913–16 925. [42] Y. Li, X. Lyu et al. , “Anti-backdoor learning: training clean models on poisoned data,” in Advances in Neural Information Processing Systems , vol. 34, 2021, pp. 14 900–14 912. [43] E. Bagdasaryan, A. Veit et al. , “How to backdoor federated learning,” in Proceedings of the Twenty Third International Conference on Artificial Intelligence and Statistics , vol. 108, 2020, pp. 2938–2948. [44] Y. Liu, C. Wang et al. , “Attackers are not the same! unveiling the impact of feature distribution on label inference attacks,” 
+
+IEEE Trans. Inf. Forensic and Secur. , vol. 20, pp. 71–86, 2025. 
+
+APPENDIX AALGORITHM 
+
+As shown in Algorithm 1, our backdoor attack contains three key modules: label inference, poison generation, and backdoor execution. The first two modules prepare the backdoor poison necessary for the attack, while the third module executes the attack. During the training phase, the attacker simply records the embeddings generated by the bottom model at each epoch, without engaging in any actions that breach the VFL protocol. During the inference phase, the attacker first infers the sample labels and records the embeddings corresponding to different labels using the label inference module. Next, the recorded embeddings are utilized to generate a valid set of malicious embeddings in the poison generation module. Finally, the attacker identifies the target samples and replaces their embeddings with the malicious embeddings to execute the backdoor attack. 
+
+APPENDIX BADDITIONAL EVALUATION RESULTS 
+
+Table IX compares the performance of our proposed triggerless backdoor attack with existing backdoor attacks using triggers in a two-party VFL scenario. The results show that traditional backdoor attacks can be effectively implemented in two-party VFL. However, when combined with results from multi-party VFL scenarios, it indicates that traditional methods do not cope well with multi-party VFL. In contrast, our proposed triggerless backdoor attack is robust and effective in both two-party and multi-party VFL scenarios. Fig. 14 shows the combined impact of the learning rate, batch size, and training epochs on the attack performance, evaluated using the CIFAR-10 dataset. We observe that the learning rate and training epochs have a significant impact on the attack performance, while the batch size has a limited effect. The results of the interaction 
+
+Algorithm 1 Feature-Based Triggerless Backdoor Attack 
+
+Input: The number of labels |l|, the number of samples N ,target label lt, source label ls, features, and labels.  
+
+> 1:
+
+// Training Phase:  
+
+> 2:
+
+for each epoch do  
+
+> 3:
+
+Forward propagation and backpropagation.  
+
+> 4:
+
+if is last epoch for attacker then  
+
+> 5:
+
+Record the embeddings {emb ai }Ni=1 . 
+
+> 6:
+
+end if  
+
+> 7:
+
+end for  
+
+> 8:
+
+// Inference Phase:  
+
+> 9:
+
+for each passive party do  
+
+> 10:
+
+Forward propagation.  
+
+> 11:
+
+if is attacker then  
+
+> 12:
+
+// Module ➊: Label Inference  
+
+> 13:
+
+Calculate the mean embeddings {aux i}|l| 
+
+> i=1
+
+for the auxiliary data associated with each label li. 
+
+> 14:
+
+{ˆyi}Ni=1 = Infer 
+
+
+
+{emb ai }Ni=1 , {aux i}|l| 
+
+> i=1
+
+, |l|
+
+
+
+. 
+
+> 15:
+
+Calculate the density centers Emb = emb i 
+
+> |l|
+> i=1
+
+for different label categories by {ˆyi}Ni=1 . 
+
+> 16:
+
+// Module ➋: Poison Generation  
+
+> 17:
+
+Amplify demb = η · emb t, where emb t is the density center of the target label lt. 
+
+> 18:
+
+Generate ]Emb , where each gemb i ∈ ]Emb satisfies 
+
+gemb i = demb + δ, δ ∼ N  μ, σ 2. 
+
+> 19:
+
+// Module ➌: Backdoor Execution  
+
+> 20:
+
+for each sample i do  
+
+> 21:
+
+Infer label ˆyai based on the similarity between Emb 
+
+and emb ai . 
+
+> 22:
+
+if ˆyai equals ls then  
+
+> 23:
+
+Replace emb ai with gemb i ∈ ]Emb . 
+
+> 24:
+
+end if  
+
+> 25:
+
+end for  
+
+> 26:
+
+end if  
+
+> 27:
+
+Send embeddings to the active party.  
+
+> 28:
+
+end for  
+
+> 29:
+
+Active party forward propagation and prediction. 
+
+between learning rate and training epochs indicate that VFL models with higher learning rates and more training epochs typically yield better attack performance in our triggerless attacks. Additionally, experiments on the combined impact of batch size and the other two hyperparameters show that using a smaller batch size is more favorable for improving attack performance. Meanwhile, the batch size setting has little effect on the impact of the other two hyperpa-rameters on the attack, i.e., a higher learning rate and more training epochs generally imply a higher ASR. Tables X and XI present the performance of our attack when the attacker uses the learning rate adjustment technique and employs rASR as a metric. The results indicate the same findings as those shown by using mASR as a metric. Fig. 15 illustrates the impact of Gaussian perturbation distribution on the performance of our attack when rASR is used as the metric. The experimental results align with those obtained using mASR as the metric. Table XII summarizes the computational overhead in seconds for our proposed attack compared to traditional attacks across the test sets of five datasets. To ensure fairness and eliminate the influence of GPU and CPU arithmetic, all experiments are conducted on a four-17 
+
+TABLE IX ATTACK PERFORMANCE OF OUR ATTACK WITH BASELINES IN TWO -PARTY VFL SCENARIO Dataset Method BIR LISR ASR MTA tBIR mBIR rBIR mASR rASR MNIST VILLAIN 96 .61 ± 0.12% 99 .73 ± 0.07% 99 .72 ± 0.08% 73 .11 ± 0.52% 98 .66 ± 0.36% 100 .00 ± 0.00% 91 .77 ± 0.46% 
+
+BadVFL 69 .84 ± 27 .76% 70 .21 ± 30 .53% 70 .35 ± 30 .42% 71 .36 ± 0.62% 94 .93 ± 2.41% 97 .44 ± 2.18% 77 .36 ± 0.38% 
+
+BASL 96 .78 ± 0.12% 98 .44 ± 0.31% 99 .77 ± 0.04% 72 .11 ± 0.43% 70 .15 ± 1.47% 76 .31 ± 2.23% 92 .96 ± 0.12% 
+
+Our / / / 73 .23 ± 0.62% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 93 .92 ± 0.09% 93 .92 ± 0.09% 93 .92 ± 0.09% 
+
+Fashion MNIST VILLAIN 89 .11 ± 0.05% 99 .93 ± 0.02% 99 .96 ± 0.02% 59 .66 ± 0.41% 100 .00 ± 0.00% 100 .00 ± 0.00% 83 .80 ± 0.14% 
+
+BadVFL 88 .27 ± 0.23% 99 .32 ± 0.03% 99 .34 ± 0.03% 58 .38 ± 0.32% 100 .00 ± 0.00% 100 .00 ± 0.00% 74 .83 ± 0.04% 
+
+BASL 86 .43 ± 1.80% 89 .93 ± 5.39% 96 .99 ± 1.83% 58 .68 ± 1.01% 62 .19 ± 2.41% 62 .35 ± 2.49% 83 .56 ± 0.77% 
+
+Our / / / 59 .40 ± 0.76% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 84 .12 ± 0.09% 84 .12 ± 0.09% 84 .12 ± 0.09% 
+
+CIFAR-10 VILLAIN 84 .34 ± 0.19% 99 .17 ± 0.04% 99 .31 ± 0.02% 21 .64 ± 0.63% 99 .35 ± 0.10% 99 .73 ± 0.07% 75 .18 ± 0.66% 
+
+BadVFL 82 .04 ± 0.21% 97 .87 ± 0.36% 98 .13 ± 0.34% 20 .97 ± 0.28% 100 .00 ± 0.00% 100 .00 ± 0.00% 50 .02 ± 7.42% 
+
+BASL 83 .33 ± 0.58% 61 .73 ± 4.00% 93 .79 ± 1.45% 21 .59 ± 0.20% 15 .84 ± 1.54% 14 .20 ± 1.32% 75 .31 ± 0.54% 
+
+Our / / / 21 .53 ± 0.45% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 75 .43 ± 0.51% 75 .43 ± 0.51% 75 .43 ± 0.51% 
+
+CINIC-10 VILLAIN 81 .59 ± 1.02% 99 .44 ± 0.03% 99 .46 ± 0.09% 17 .82 ± 0.54% 99 .42 ± 0.22% 99 .75 ± 0.14% 61 .99 ± 1.36% 61 .99 ± 1.36% 61 .99 ± 1.36% 
+
+BadVFL 79 .06 ± 0.64% 99 .55 ± 0.19% 99 .55 ± 0.22% 17 .28 ± 0.42% 98 .11 ± 2.21% 99 .47 ± 0.17% 38 .19 ± 1.69% 
+
+BASL 77 .79 ± 0.42% 54 .11 ± 5.66% 91 .52 ± 1.56% 17 .66 ± 0.52% 9.54 ± 2.21% 6.94 ± 2.97% 61 .62 ± 0.38% 
+
+Our / / / 17 .36 ± 0.33% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 60 .97 ± 2.77% 
+
+Criteo VILLAIN 99 .39 ± 0.05% 99 .81 ± 0.04% 99 .80 ± 0.04% 64 .47 ± 1.15% 99 .97 ± 0.04% 99 .96 ± 0.05% 77 .46 ± 0.02% 
+
+BadVFL 99 .41 ± 0.10% 100 .00 ± 0.00% 100 .00 ± 0.00% 67 .55 ± 2.01% 100 .00 ± 0.00% 100 .00 ± 0.00% 77 .55 ± 0.00% 77 .55 ± 0.00% 77 .55 ± 0.00% 
+
+BASL 99 .56 ± 0.13% 99 .56 ± 0.12% 99 .63 ± 0.10% 66 .22 ± 3.84% 100 .00 ± 0.00% 100 .00 ± 0.00% 77 .51 ± 0.05% 
+
+Our / / / 65 .06 ± 2.33% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 100 .00 ± 0.00% 77 .54 ± 0.01% 
+
+The bold data indicate the best performance. 0.0001 0.001 0.01 0.1 1.0 
+
+> Learning Rate
+> 50 40 30 20 10
+> Epochs
+> 10 20 30 40 50
+
+(a) mASR 0.0001 0.001 0.01 0.1 1.0  
+
+> Learning Rate
+> 50 40 30 20 10
+> Epochs
+> 010 20 30 40 50
+
+(b) rASR 0.0001 0.001 0.01 0.1 1.0 
+
+> Learning Rate
+> 512 256 128 64
+> Batch Size
+> 010 20 30 40 50 60 70
+
+(c) mASR 0.0001 0.001 0.01 0.1 1.0  
+
+> Learning Rate
+> 512 256 128 64
+> Batch Size
+> 010 20 30 40 50 60
+
+(d) rASR 64 128 256 512 
+
+> Batch Size
+> 50 40 30 20 10
+> Epochs
+> 10 20 30 40 50 60 70
+
+(e) mASR 64 128 256 512  
+
+> Batch Size
+> 50 40 30 20 10
+> Epochs
+> 010 20 30 40 50 60 70
+
+(f) rASR 
+
+Fig. 14: Combined impact of hyperparameters on CIFAR-10 dataset. TABLE X THE R ASR WHEN THE ATTACKER INCREASE THE LEARNING RATE (LR )
+
+Dataset lr = 0 .01 lr = 0 .1 lr = 1 
+
+MN 63 .62 ± 11 .18% 96 .36 ± 4.71% 98 .02 ± 2.70% 
+
+FM 84 .63 ± 17 .81% 98 .51 ± 2.11% 99 .60 ± 0.56% 
+
+CF 45 .02 ± 25 .28% 77 .73 ± 5.10% 98 .21 ± 2.53% 
+
+CN 51 .26 ± 34 .98% 87 .10 ± 14 .40% 99 .71 ± 0.42% 
+
+The learning rate for other benign passive parties is set to 0.01. 
+
+TABLE XI THE R ASR WHEN THE ATTACKER DECREASE THE LEARNING RATE (LR )
+
+Dataset lr = 1 lr = 0 .1 lr = 0 .01 
+
+MN 94 .47 ± 7.17% 33 .04 ± 7.54% 0.00 ± 0.00% 
+
+FM 84 .12 ± 9.64% 17 .79 ± 7.26% 6.56 ± 4.34% 
+
+CF 83 .99 ± 12 .81% 35 .16 ± 5.23% 1.55 ± 2.19% 
+
+CN 92 .72 ± 6.86% 44 .94 ± 13 .97% 6.61 ± 4.05% 
+
+The learning rate for other benign passive parties is set to 1. 0 0.25 0.5 0.75 1
+
+scaling                     
+
+> 10.75 0.5 0.25 0
+> scaling
+> 0.53 0.54 0.33 0.31 0.13 0.51 0.55 0.45 0.45 0.19 0.71 0.66 0.51 0.42 0.36 0.7 0.73 0.73 0.64 0.63 0.67 0.83 0.96 0.69 0.65
+> 0.0 0.2 0.4 0.6 0.8 1.0
+
+(a) MNIST 0 0.25 0.5 0.75 1
+
+scaling                      
+
+> 10.75 0.5 0.25 0
+> scaling
+> 0.6 0.47 0.28 0.18 0.11 0.72 0.51 0.26 0.33 0.25 0.78 0.57 0.43 0.43 0.31 0.65 0.68 0.69 0.61 0.39 0.62 0.71 0.8 0.61 0.62
+> 0.0 0.2 0.4 0.6 0.8 1.0
+
+(b) CIFAR-10 
+
+Fig. 15: Impact of the Gaussian distribution on the ASR. 18 
+
+TABLE XII THE COMPUTATIONAL OVERHEAD OF DIFFERENT ATTACKS DS VILLAIN BadVFL BASL Our MN 0.42 ± 0.01 0.46 ± 0.00 0.42 ± 0.00 0.43 ± 0.01 
+
+FM 0.42 ± 0.00 0.45 ± 0.02 0.42 ± 0.00 0.44 ± 0.00 
+
+CF 3.14 ± 0.01 3.67 ± 0.03 3.05 ± 0.00 3.03 ± 0.00 
+
+CN 28 .30 ± 0.33 37 .94 ± 1.29 28 .70 ± 0.07 28 .34 ± 0.01 
+
+CT 0.48 ± 0.02 0.62 ± 0.02 0.51 ± 0.05 0.54 ± 0.05 
+
+We use runtime as a metric in seconds. DS denotes the dataset. 
+
+core Intel(R) Core(TM) i7-7700 CPU. The results demonstrate that our attack requires computational resources comparable to those of other attacks, without introducing additional overhead.

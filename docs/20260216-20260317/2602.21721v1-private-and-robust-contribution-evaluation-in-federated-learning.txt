@@ -1,0 +1,654 @@
+Title: Private and Robust Contribution Evaluation in Federated Learning
+
+URL Source: https://arxiv.org/pdf/2602.21721v1
+
+Published Time: Thu, 26 Feb 2026 01:44:49 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+# Beyond Leave-One-Out : Private and Robust Contribution Evaluation in Federated Learning 
+
+# Delio Jaramillo Velez 
+
+University of La Laguna Tenerife, Spain djaramil@ull.edu.es 
+
+# Gergely Biczok 
+
+HUN-REN Hungarian Research Network Budapest, Hungary biczok@crysys.hu 
+
+# Alexandre Graell i Amat 
+
+Chalmers University Gotheburg, Sweden alexandre.graell@chalmers.se 
+
+# Johan Ostman 
+
+AI Sweden Gotheborg, Sweden johan.ostman@ai.se 
+
+# Balazs Pejo 
+
+Budapest University of Technology and Economics Budapest, Hungary pejo@crysys.hu 
+
+## Abstract 
+
+Cross-silo federated learning allows multiple organizations to col-laboratively train machine learning models without sharing raw data, but client updates can still leak sensitive information through inference attacks. Secure aggregation protects privacy by hiding in-dividual updates, yet it complicates contribution evaluation, which is critical for fair rewards and detecting low-quality or malicious participants. Existing marginal-contribution methods, such as the Shapley value, are incompatible with secure aggregation, and prac-tical alternatives, such as Leave-One-Out, are crude and rely on self-evaluation. We introduce two marginal-difference contribution scores com-patible with secure aggregation. Fair-Private satisfies standard fair-ness axioms, while Everybody-Else eliminates self-evaluation and provides resistance to manipulation, addressing a largely over-looked vulnerability. We provide theoretical guarantees for fairness, privacy, robustness, and computational efficiency, and evaluate our methods on multiple medical image datasets and CIFAR10 in cross-silo settings. Our scores consistently outperform existing baselines, better approximate Shapley-induced client rankings, and improve downstream model performance as well as misbehavior detection. These results demonstrate that fairness, privacy, robustness, and practical utility can be achieved jointly in federated contribution evaluation, offering a principled solution for real-world cross-silo deployments. 
+
+## CCS Concepts 
+
+• Computing methodologies → Machine learning ; • Security and privacy → Privacy-preserving protocols ; • Computer systems organization → Distributed architectures . 
+
+> Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the full citation on the first page. Copyrights for components of this work owned by others than the author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or republish, to post on servers or to redistribute to lists, requires prior specific permission and/or a fee. Request permissions from permissions@acm.org.
+> Conference’17, Washington, DC, USA
+> ©2026 Copyright held by the owner/author(s). Publication rights licensed to ACM. ACM ISBN 978-x-xxxx-xxxx-x/YYYY/MM https://doi.org/XXXXXXX.XXXXXXX
+
+## Keywords 
+
+Federated Learning, Secure Aggregation, Contribution Evaluation, Shapley Value, Fairness, Robustness, Cross-Silo Learning 
+
+ACM Reference Format: 
+
+Delio Jaramillo Velez, Gergely Biczok, Alexandre Graell i Amat, Johan Ostman, and Balazs Pejo. 2026. Beyond Leave-One-Out : Private and Robust Contribution Evaluation in Federated Learning. In . ACM, New York, NY, USA, 11 pages. https://doi.org/XXXXXXX.XXXXXXX 
+
+## 1 Introduction 
+
+Federated learning (FL) [ 16 ] is a distributed machine learning ap-proach in which multiple parties jointly train a machine learning model without exchanging their raw data. Instead of centralizing the training data, FL delegates computation to the clients and com-municates only model updates (e.g., gradients) with a central server. This decentralized approach enhances privacy by design, as sensi-tive data never leaves the clients. In addition to privacy preservation, contribution evaluation (CE) [ 32 ] is a critical component of FL. Fairly assessing client contri-butions is essential for incentivizing honest participation, ensuring equitable reward distribution, and detecting under-performing or malicious actors. CE schemes are specifically designed to assign a 
+
+score to each participant that reflects their importance toward the collaborative process. While FL provides built-in privacy protection by keeping raw data local, individual model updates can still leak sensitive informa-tion through inference attacks [ 37 ]. To mitigate this risk, additional privacy-preserving mechanisms such as differential privacy and se-cure aggregation have been introduced. In particular, secure aggre-gation (SA) [ 46 ] has emerged as a standard technique for concealing individual client updates, making it harder to perform inference attacks. Based on lightweight secure multiparty computation [ 7]and secret sharing [ 27 ], secure aggregation ensures that individual client updates remain hidden from the server while still enabling correct computation of the aggregated global model. SA therefore poses a fundamental tension with CE, as most prior methods de-pend on individual client updates [ 20 , 30 ] and are incompatible with the SA mechanism.  
+
+> arXiv:2602.21721v1 [cs.CR] 25 Feb 2026 Conference’17, July 2017, Washington, DC, USA Delio Jaramillo Velez, Gergely Biczok, Alexandre Graell i Amat, Johan Ostman, and Balazs Pejo
+
+One of the most widely studied CE methods is the Shapley value (SV ) [ 29 ], a marginal-contribution-based metric rooted in cooper-ative game theory. It is uniquely characterized by a set of well-established fairness properties, making it a principled foundation for fair reward allocation. However, despite its theoretical appeal, the SV is computationally intractable for more than a few clients, as it requires training exponentially many models. Moreover, its re-liance on marginal contributions makes it fundamentally incompat-ible with privacy-enhancing mechanisms, such as SA. Well-known approximations inherit this incompatibility. The Leave-One-Out mechanism ( LOO ) [ 3 , 12 ] remains the only practical marginal difference based CE method compatible with SA. However, this approach is severely limited, yielding a crude approximation of the SV . Furthermore, it satisfies only a subset of the desirable fairness properties and requires self evaluation when SA is applied, making it unreliable in the presence of selfish clients who seek to manipulate their own scores. 
+
+Our contribution. In this work, we address the fundamental prob-lem of designing CE methods for cross-silo FL that simultaneously achieve fairness (by satisfying the desired properties), privacy (through compatibility with SA), and robustness against selfish clients. Our contributions are the following. 
+
+• We propose two novel CE scores that are compatible with SA: Fair-Private ( FP ) and Everybody-Else ( EE ). FP satisfies all fairness properties, but still relies on self evaluation. On the contrary, EE deliberately relaxes the null player property to provide robustness against selfish clients. 
+
+• We establish theoretical guarantees for the proposed CE methods, covering fairness, privacy, computational complex-ity, and resistance to manipulation. 
+
+• We empirically evaluate the proposed scores on three medi-cal image datasets and CIFAR10. Our methods consistently outperform LOO and better approximate the client contribu-tions induced by the ground truth SV .
+
+## 2 Related work 
+
+The privacy-utility trade-off in CE is mostly studied in the litera-ture from two angles. The first examines how existing CE methods amplify privacy leakage during learning, while the second focuses on designing CE schemes that yield meaningful and reliable scores while preserving privacy. The former has received considerably more attention. A recent survey [ 19 ] highlights that most exist-ing work at the intersection of CE and privacy focuses on how different CE metrics may increase the risk of inference attacks. In contrast, the latter problem, how to construct CE methods that are intrinsically privacy-preserving, remains mostly neglected. Only a few works have explicitly addressed privacy-preserving CE. The authors of [ 45 ] proposed a multi-server solution based on encryption, which incurs significant computational overhead. Another paper [38] used Differential Privacy by injecting noise to client updates before evaluation, which severely degrades utility. Finally, in [ 21 ], the researchers proposed a blockchain-based frame-work that requires a drastic architectural change. Critically, none of these approaches considers SA, despite its widespread adoption in practical FL systems. 
+
+Table 1: Notation 
+
+Symbol Meaning 
+
+𝑁 Number of clients 
+
+𝑀 0 Initial model before the training round 
+
+𝑀 Aggregated model after the training round 
+
+𝑈 𝑖 Client 𝑖 local update within the round 
+
+𝑣 (·) Evaluation function (loss, accuracy, etc.) To the best of our knowledge, only three prior works have ad-dressed CE under SA: Federated Group Testing (FedGT) [ 41 ], Qual-ity Inference (QI) [ 25 ], and their combination [ 40 ]. However, these operate under different threat models. FedGT relies on an assign-ment matrix that exposes specific sub-coalitions, thereby reducing the anonymity set of the SA protocol. QI relies on the probabilis-tic randomness of client selection in partial-participation (Cross-Device) settings. In contrast, our work addresses strict Cross-Silo FL with full participation and maximal anonymity, where these methods are not directly applicable. Moreover, unlike our work, these methods lack built-in fairness properties. 
+
+## 3 Preliminaries 
+
+Notation. Our notation is summarized in Table 1. We denote by 
+
+𝑀 0 and 𝑀 the global model before and after a training round, re-spectively, and by 𝑀 𝑖 the local model of client 𝑖 ∈ [ 𝑁 ] = {1, . . . , 𝑁 }.The local update of client 𝑖 is defined as the pseudogradient 𝑈 𝑖 = 
+
+> 1
+> 𝑁
+
+(𝑀 𝑖 − 𝑀 0). We assume that aggregation is performed by simple addition, i.e., 𝑀 = 𝑀 0 + Í𝑁 𝑖 =1 𝑈 𝑖 . This setting encompasses the stan-dard aggregation technique Federated Averaging (FedAvg) [16 ]. We assume SA [ 4] is employed, i.e., the individual client updates ( 𝑈 𝑖 )are hidden from the server. Yet, it can still compute the aggregated global model ( 𝑀 ), preserving both model functionality and client privacy. 
+
+## 3.1 Contribution Evaluation 
+
+To establish an objective reference point for contribution assess-ment, most CE schemes employ an external dataset to evaluate the aggregated models. This approach is based on the premise that the value of a dataset correlates with the performance of a model trained on it, thereby creating an intrinsic coupling between data valuation and validation [ 20 , 33 ]. Other methods estimate contri-butions by measuring similarity between the global model and individual client models, e.g., using Cosine Similarity ( COS ) [ 42 ]. However, this approach suffers from fundamental limitations: COS 
+
+captures only directional alignment while ignoring differences in magnitude, feature importance, and decision boundaries [ 8]. Con-sequently, two models may appear highly aligned under this metric while exhibiting drastically different behaviors and generalization performance. Moreover, using the aggregated global model as the baseline introduces additional bias, as it may incorporate malicious or low-quality client updates, rendering it an unreliable anchor [ 31 ]. In this work, in line with the marginal difference based CE literature [ 13 , 33 ], we assume the availability of an external rep-resentative test dataset that reflects the overall population. Such Beyond Leave-One-Out : Private and Robust Contribution Evaluation in Federated Learning Conference’17, July 2017, Washington, DC, USA 
+
+a dataset could be constructed by a Generative Adversarial Net-work (GAN) generating a representative synthetic local test set [ 23 ]. What is more, such a process can be infused with Differential Pri-vacy [ 24 ], making it a suitable approach for our privacy-preserving setting [ 35 , 43 ]. For instance, the synthetic local test sets can then be sent to the server to be combined to create a global test set [ 18 ]. 
+
+Shapley value. In FL, the most widely used CE methods relying on a test set are approximations of the Shapley value (SV ) [ 26 ], a concept rooted in cooperative game theory. The SV of a client is defined as the weighted sum of its marginal contributions to all possible coalitions 𝑆 ⊆ [ 𝑁 ]. It relies on the utility function 𝑣 (·) ,which assigns a value to each coalition of clients. In FL, 𝑣 typically measures model performance (e.g., accuracy or loss). 
+
+Definition 1 (Shapley value [ 28 ]). The Shapley value of client 
+
+𝑖 for a given utility function 𝑣 is formalized below. 
+
+SV (𝑖 ) = 1
+
+𝑁 ∑︁ 𝑆 ⊆ [ 𝑁 ]\{ 𝑖 }
+
+𝑁 − 1
+
+|𝑆 |
+
+
+
+· ( 𝑣 (𝑆 ∪ { 𝑖 }) − 𝑣 (𝑆 )) (1) The SV is the only mechanism satisfying four fundamental prop-erties ( linearity , efficiency , null player , and symmetry ), widely ac-cepted as collectively characterizing fair reward allocation. The linearity property assumes contributions are additive and indepen-dent, an assumption that generally does not hold in FL due to the nonlinear and sequential nature of the client updates. Therefore, linearity has limited practical relevance in FL [ 33 ]. As such, the primary design goal for a fair CE method is to satisfy the following three properties. 
+
+Property 1 (Efficiency). The total value generated by the grand coalition must be fully distributed among all players. 
+
+Property 2 (Null player). If a player does not contribute any additional value to any coalition, its score should be zero. 
+
+Property 3 (Symmetry). If two players contribute equally to every possible coalition, they should receive the same score. 
+
+Exact computation of the SV requires training separate models for every possible subset of clients 𝑆 ⊆ [ 𝑁 ], a process referred to as the retraining game . This approach is computationally infeasible, as it requires training an exponential number of models. To address this limitation, an approximation method has been proposed [ 33 ]that leverages per-round gradient updates during training a single global model. In each round, the method evaluates all possible subsets of gradient updates to compute client scores, which are then averaged across rounds. We refer to this approximation as the multi-round Shapley value ( MR − SV ). A major drawback of these approaches is their incompatibility with SA, as they require access to individual client updates. Under SA, only a limited set of submodels is available for evaluation at each round. The server has access only to 𝑀 0 and 𝑀 , while client 𝑖 can compute two additional coalitions: 𝑀 0+𝑈 𝑖 and 𝑀 −𝑈 𝑖 . Consequently, only clients can compute marginal difference based CE scores using this restricted set of submodels. One approach to approximate the 
+
+SV based on these submodels is Leave-One-Out (LOO ) [ 3, 12 ], which evaluates a client’s contribution by comparing the performance of the model of the grand coalition 𝑆 = [𝑁 ] against that of the model where the local update of the client is omitted, 𝑆 ′ = [𝑁 ] \ { 𝑖 }.
+
+Definition 2 (Leave-One-Out). The Leave-One-Out score of client 𝑖 is defined as LOO (𝑖 ) = 𝑣 (𝑀 ) − 𝑣 (𝑀 − 𝑈 𝑖 ).
+
+Importantly, only client 𝑖 can evaluate both 𝑣 (𝑀 0 + 𝑈 𝑖 ) and 
+
+𝑣 (𝑀 − 𝑈 𝑖 ), since its update 𝑈 𝑖 is hidden from other clients and the server. This requires clients to have access to the global test dataset, which is shared by the server, to perform these evaluations. More problematically, it turns LOO into a self evaluation technique where each client computes and reports its own score to the server, thus becoming sensitive to manipulation by selfish clients. 
+
+## 3.2 Threat Model and Goal 
+
+We study cross-silo federated learning with secure aggregation. Strict compatibility is essential for preventing leakage of sensitive training data via white-box attacks such as Deep Leakage from Gradients (DLG) [ 47 ]. In regulated environments (e.g., GDPR), ex-posing individual gradients is often legally prohibited. While some attacks target aggregated gradients, SA ensures that any potential leakage cannot be traced to specific participants, making it a critical Privacy Enhancing Technology (PET) for cross-silo consortia [15]. Our trust assumptions are summarized in Table 2. The server is honest-but-curious : it executes the training protocol faithfully without malicious behavior, but may attempt to learn additional information from aggregated values. All clients are assumed to be 
+
+selfish , prioritizing their own utility and, thus, reward maximiza-tion. For utility maximization, the best known strategy is honest training on local data to collectively obtain the best possible global model. Therefore, clients adhere to the prescribed update protocol. However, contribution evaluation, which takes place after each training round as a post-processing step, introduces different incen-tives. Clients are motivated to maximize their contribution scores either directly through inflated self reporting or indirectly by un-dermining others’ scores. We exclude malicious behavior such as Sybil attacks, treating clients as independent, selfish actors with-out collusion capabilities. These assumptions are in line with other works, such as [ 2]. Given this, we aim to design CE mechanisms that preserve privacy by ensuring compatibility with SA and prevent manipulation of contribution reports. 
+
+## 4 Private Contribution Evaluation 
+
+We focus on contribution scoring in a cross-silo setting, specifically evaluating contributions within a single training round, similar to [ 33 ]. Under SA, the only models accessible to all clients are the grand coalition 𝑆 = [𝑁 ] and the empty coalition 𝑆 = ∅, i.e., 
+
+𝑀 and 𝑀 0, respectively. However, client 𝑖 individually has access to the model corresponding to the singleton coalition 𝑆 = {𝑖 },given by 𝑀 0 + 𝑈 𝑖 . Moreover, by removing its own update from the global model, client 𝑖 can reconstruct the model corresponding to 
+
+𝑆 = [𝑁 ] \ { 𝑖 }, i.e., 𝑀 − 𝑈 𝑖 .Building on the above, we formalize the additional privacy prop-erty that a CE method must have to be compatible with SA, along-side the three desirable fairness properties. 
+
+Property 4 (SA Compatibility). A CE scheme is compatible with SA if the score assigned to each client depends only on the models corresponding to the coalitions [𝑁 ], ∅, [𝑁 ] \ { 𝑖 }, and {𝑖 } ∀ 𝑖 ∈ [ 𝑁 ].Conference’17, July 2017, Washington, DC, USA Delio Jaramillo Velez, Gergely Biczok, Alexandre Graell i Amat, Johan Ostman, and Balazs Pejo 
+
+## 4.1 Self Evaluation 
+
+In this section, we introduce a novel CE score, termed Fair-Private 
+
+(FP ). The key idea is to leverage the singleton coalition {𝑖 } available to client 𝑖 to construct a CE score more expressive than the standard 
+
+LOO score. 
+
+Definition 3 (Fair-Private). The Fair-Private score of client 𝑖 is defined in (2) where 𝛼 is defined in (3) .
+
+FP (𝑖 ) = 𝛼 (𝑖 )
+
+Í𝑁 𝑗 =1 𝛼 ( 𝑗 )
+
+!
+
+· 𝑣 (𝑀 ) (2) 
+
+𝛼 (𝑖 ) = [𝑣 (𝑀 ) − 𝑣 (𝑀 − 𝑈 𝑖 )] + [ 𝑣 (𝑀 0 + 𝑈 𝑖 ) − 𝑣 (𝑀 0)] 
+
+2 (3) The first term in (3) is the Leave-One-Out score, while the sec-ond is its symmetric counterpart ‘Include-One-In’ ( IOI ): instead of removing 𝑖 from the grand coalition, we add it to the empty set. The combination of these marginal differences mirrors the SV ,where coalitions of complementary sizes receive identical weights. Our construction of the FP score further draws inspiration from the normalized Banzhaf power index [ 10 ]. By applying the same type of normalization in (2) , we can enforce the efficiency property (Property 1) while simultaneously preserving the other fairness and privacy properties, as established in the following theorem. 
+
+Theorem 1 (Properties of FP ). FP satisfies Properties 1, 2, 3, and 4. 
+
+Proof. The proof is given in Appendix A. □
+
+FP can be formalized within the family of semi-values [ 9]. While 
+
+FP mathematically resembles an arithmetic mean of the two semi-values ( LOO and IOI ), its derivation is strictly constraint-driven. Under SA, the space of computable semi-values effectively col-lapses due to the limited observable marginals. Thus, the term 
+
+𝛼 (𝑖 ) (see Equation 2) represents the most expressive semi-value constructible using all available information without violating the privacy constraint. It is also important to note that while LOO (and 
+
+IOI ) satisfies the Linearity axiom, FP loses that due to the rescaling. In fact, it is impossible to compute a score that is simultaneously Linear, Efficient, and SA-compatible. With rescaling, we prioritize Efficiency, which is practically indispensable for incentive mecha-nisms in fixed budget federated environments. We refer the reader to Appendix E where we further elaborate on these aspects. 
+
+## 4.2 Evaluating Others 
+
+Note that all previous schemes (e.g., LOO , FP ) directly used 𝑈 𝑖 to assign a score to client 𝑖 . Thus, those scores can only be computed by the respective client. Such self evaluation scores have an in-herent drawback: a selfish client can misreport or manipulate the performance of its model, thereby gaining an unfair advantage and undermining the integrity of the CE process. To overcome this limi-tation, we introduce an alternative CE score termed Everybody-Else 
+
+(EE ) that, in addition to being compatible with SA, does not rely on self evaluation, thereby providing resistance to direct manipulation. 
+
+Property 5 (Manipulation Resistance). A CE method is manipulation-resistant if no client can directly manipulate their own score. 
+
+To satisfy Property 5, we introduce the idea of having clients evaluate each other, rather than themselves. This ensures that no client can directly influence its own score. 
+
+Definition 4 (Everybody-Else). The Everybody-Else score is defined in (4) where 𝛽 and 𝛾 are defined in (5) .
+
+EE (𝑖 ) =    
+
+> 𝛽 (𝑖 )+ 𝛾 (𝑖 )
+> 2
+
+Í𝑁 𝑗 =1    
+
+> 𝛽 (𝑖 )+ 𝛾 (𝑖 )
+> 2
+
+!
+
+· 𝑣 (𝑀 ) (4)                              
+
+> 𝛽 (𝑖 )=∑︁
+> 𝑗 ≠𝑖
+> [𝑣 (𝑀 ) − 𝑣 (𝑀 0+𝑈 𝑗 ) ] (𝑁 −1)2;𝛾 (𝑖 )=∑︁
+> 𝑗 ≠𝑖
+> [𝑣 (𝑀 −𝑈 𝑗 ) − 𝑣 (𝑀 0) ] (𝑁 −1)2(5)
+
+Equation (4) contains the same rescaling as before, while (5) formalizes our idea of having clients evaluate each other. The score of client 𝑖 is determined collectively by the remaining clients 
+
+𝑗 ∈ [ 𝑁 ] \ { 𝑖 }. Direct computation of client 𝑖 ’s score via marginal difference based evaluation is infeasible, as no other client 𝑗 can compare two coalitions that differ solely in the presence or absence of client 𝑖 . Instead, our key insight is that the contribution of client 𝑖 
+
+can be inferred indirectly by assessing the collective contribution of the other clients. Specifically, each client 𝑗 ≠ 𝑖 computes marginal differences involving itself. 𝛽 (𝑖 ) measures the effect of comparing the grand coalition [𝑁 ] against { 𝑗 }, while 𝛾 (𝑖 ) measures the effect of comparing [𝑁 ] \ { 𝑗 } against ∅. Aggregating these evaluations across all 𝑗 ≠ 𝑖 , we obtain an estimate of client 𝑖 ’s score without requiring self evaluation. Across all 𝑗 ≠ 𝑖 , client 𝑖 is the only participant that appears in every coalition considered in the summations for 𝛽 (𝑖 ) and 𝛾 (𝑖 ),while the other clients appear less frequently. Since client 𝑖 is sys-tematically present, the aggregation of these marginal differences over 𝑗 ≠ 𝑖 yields a quantity that predominantly captures the con-tribution of client 𝑖 . Hence, EE (𝑖 ) can be interpreted as an indirect 
+
+Table 2: Threat model summary Entity Assumptions Capabilities Goals 
+
+Server Honest-but-curious; follows protocol; not malicious Receives masked local updates; aggregates local update; aggregates local scores Coordinate training; learn aggregated model Client (train-ing) Honest-but-curious; follows training protocol; uses true local data Holds local dataset; sends masked local update to server Achieve best possible global model Client (post training) Selfish-but-non-malicious; does not disrupt training Knows local and aggregated update; esti-mates marginal differences Maximize own contribution score or minimize others’ Beyond Leave-One-Out : Private and Robust Contribution Evaluation in Federated Learning Conference’17, July 2017, Washington, DC, USA 
+
+estimate of client 𝑖 ’s contribution, even though it is constructed solely from the evaluations of all other clients. In line with the principles of the SV , each marginal difference in the summations of 𝛽 (𝑖 ) and 𝛾 (𝑖 ) is weighted equally, since all of them are computed over coalitions of the same size. The nor-malization by (𝑁 − 1)2 serves two purposes. First, the summation aggregates contributions from 𝑁 − 1 clients (excluding client 𝑖 ) and dividing by 𝑁 − 1 yields their average. Second, each term corre-sponds to a coalition of 𝑁 − 1 clients (excluding client 𝑗 ), and we distribute its value uniformly across the remaining 𝑁 − 1 clients. This normalization ensures that the resulting scores are on the same scale as the SV , as confirmed in our experiments. For clarity, we next illustrate the definition with an example, followed by our theoretical results. 
+
+Example 1 (Three clients). Consider a scenario with three clients: 
+
+𝐴 , 𝐵 , and 𝐶 . The score of client 𝐴 is determined from the evaluations provided by clients 𝐵 and 𝐶 . Specifically, client 𝐵 computes 𝛾 (𝐴 ) as the marginal difference between the coalition {𝐴, 𝐶 } and the empty set ∅, and computes 𝛽 (𝐴 ) by comparing {𝐵 } with the grand coalition 
+
+{𝐴, 𝐵, 𝐶 }. In this way, client 𝐵 effectively evaluates the set {𝐴, 𝐶 }.Similarly, client 𝐶 performs the same type of evaluations to measure the contribution of {𝐴, 𝐵 }. Combining these results in EE (𝐴 ) produces a score that reflects both {𝐴, 𝐶 } and {𝐴, 𝐵 }. In these coalitions, all clients are included at least once, but only client A appears in every coalition. Because client A is systematically present, aggregating the differences across clients B and C yields a quantity that primarily reflects client A’s contribution. 
+
+Theorem 2 (Properties of EE ). EE satisfies Properties 1, 3, 4, and 5. 
+
+Proof. The proof is given in Appendix B. □
+
+Note that on the contrary, EE does not satisfy the null player axiom (Property 2), as illustrated in the following example. 
+
+Example 2. Consider a scenario with three players where the coalition values are given by 𝑣 (∅) = 0, 𝑣 ({ A}) = 0, 𝑣 ({ B}) = 1,
+
+𝑣 ({ C}) = 2, 𝑣 ({ A, B}) = 1, 𝑣 ({ A, C}) = 2, 𝑣 ({ B, C}) = 3, and 
+
+𝑣 ({ A, B, C}) = 3. Here, client A is clearly a null player, as adding A to any coalition does not increase its value. However, the scores computed by EE are positive, namely EE (A) = 3/4, demonstrating that EE does not satisfy Property 2. 
+
+In a sense, the EE score sacrifices the Null Player property to achieve manipulation resistance. We argue this is a small trade-off in the context of FL. In cooperative game theory, a ‘null player’ con-tributes zero value. However, in FL, ‘free-riders’ are strategic actors who can easily inject noise or random weights rather than submit-ting detectable zero gradients. EE prioritizes robustness (Property 5) over identifying passive contributors, which is more practical for mitigating active selfish behavior in FL environments. 
+
+## 4.3 Overview 
+
+To facilitate understanding of our proposed schemes, their proper-ties, and their interconnections, we provide a summary in Table 3. The table not only indicates which scheme satisfies each axiom but also highlights the underlying building blocks on which each scheme relies. We then analyze the computational complexity of each scoring method. 
+
+Theorem 3 (Complexity). The computational complexity of FP 
+
+and EE is O( 𝑁 ).
+
+Proof. The proof is given in Appendix C. □
+
+## 5 Experiments 
+
+Setup. We evaluate our CE schemes in a cross-silo FL scenario us-ing four image datasets: ISIC2019 [ 5 ], PatchChameleon [ 34 ], Brain-MRI [ 22 ], and CIFAR10 [ 14 ]. We use the ResNet architecture for ISIC2019 and PatchChameleon and a CNN consisting of 4 layers (Conv2d(3,16,3), Conv2d(16, 32, 3), Linear(100352,128), and Lin-ear(128, 4)) for Brain-MRI and CIFAR10 with and without max pooling, respectively. We utilized the Adam optimizer with both learning rate and weight decay of 0.001 . Further details, such as the number of local epochs, are provided in Appendix D. Following prior work, we assume a common test set for CE that contains the same number of samples per class and is available to all clients [ 20 , 33 ]. For each dataset, we construct a non-IID baseline by splitting the data across clients according to a Dirichlet distribution with parameter 𝜇 = 0.5. All results are reported across 10 runs, and we report both mean and variance. The estimation of the privacy-preserving scores follows a star topology, in which clients do not communicate directly with each other. Each client computes the marginal differences for its available coalitions and reports them to the server. The server then aggregates these reported differences to obtain the final scores. To support reproducibility, we have open-sourced our implementation 1.
+
+Evaluation metrics. We compute all scores for a single round (10th by default), yet the baseline CE score is the Multi-Round approximation of the Shapley value ( MR − SV ) as described in [ 33 ,Algorithm 2]. We also compute the cosine similarity ( COS ) accumu-lated over all training rounds. In CE, the relative ranking of clients is often more relevant, particularly for identifying the most and least valuable contributors. We therefore report the Spearman correlation coefficient 𝜙 [44 ], the Kendall rank 𝜅 [ 1], and the Pearson value 𝜌 [6 ]. In our experiments, all three metrics showed consistent results, so we primarily focus on the Spearman coefficient. It measures how closely our schemes’ rankings match the ground truth. A value of 𝜙 = 1 indicates perfect alignment with the baseline ranking, 𝜙 = −1 indicates a perfectly inverted ranking, and values near zero suggest no correlation. 
+
+> 1https://anonymous.4open.science/r/Fair-privacy-Preserving-Contribution-Scoring--8C5B/README.md
+
+Table 3: The building blocks for the scores and the properties they satisfy, e.g., LOO (𝑖 ) = 𝑣 (𝑀 ) − 𝑣 (𝑀 \ 𝑈 𝑖 ), which depends only on 𝑀 and 𝑈 𝑖 .                                     
+
+> Cont. 𝑀 0+𝑈 𝑖 +𝑈 𝑗 −𝑈 𝑗 −𝑈 𝑖 𝑀 Property Eval. 12345
+> LOO (𝑖 )✓✓✓
+> FP (𝑖 )✓✓✓✓
+> EE (𝑖 )✓✓✓✓Conference’17, July 2017, Washington, DC, USA Delio Jaramillo Velez, Gergely Biczok, Alexandre Graell i Amat, Johan Ostman, and Balazs Pejo
+
+Figure 1: Various CE scores for a scenario with 4 clients ( 𝜇 =
+
+0.5) at the 10th communication round using the ISIC2019 dataset.         
+
+> MR −SV LOO FP EE COS
+> 0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1
+> 1.2
+> 1.4
+> 1.6
+> Scores
+> Hospital A Hospital B
+> Hospital C Hospital D
+
+Naturally, the absolute values of the scores are also important. Since CE scores can be arbitrarily scaled and may take negative values, we normalize them in two steps before comparison: (i) sub-tracting the minimum score to ensure non-negativity, and (ii) divid-ing by the mean to account for scale differences. In this normalized space, the 𝐿 2 distance effectively captures the spatial proximity of the scores, which is critical for fair reward allocation. For instance, a score vector of [0.01 , 0.02 , 0.97 ] implies drastically different fi-nancial or resource incentives compared to [0.32 , 0.33 , 0.35 ], even though the two vectors share the same ranking (imagine distribut-ing $10,000 proportional to those scores). 
+
+## 5.1 Comparative Results 
+
+Comparison to the multi-round Shapley value. Figure 1 compares the proposed privacy-preserving CE scores with the MR − SV . Al-though the absolute values differ across schemes, the relative client rankings remain largely consistent. This demonstrates that our linear-time methods, despite considering far fewer coalitions than 
+
+MR − SV (that is incompatible with SA), can still effectively capture the ranking of clients. Table 4 provides a more detailed comparison of the proposed CE scores, using both absolute error ( 𝐿 2) and rank-ing correlation metrics (Spearman, Kendall, and Pearson). Both FP 
+
+and EE yield rankings that closely align with those obtained with the baseline MR − SV , whereas LOO exhibits a noticeably weaker correlation. 
+
+Comparison to cosine similarity. For completeness, we also in-clude a comparison with an alternative privacy-preserving method based on cosine similarity, a widely used approach that does not rely on marginal differences [ 11 , 39 , 42 ]. In this method, each client is as-signed a score based on the similarity between its local gradient and the aggregated global gradient, i.e., COS (𝑖 ) = CosSim (𝑀 0 + 𝑈 𝑖 , 𝑀 ).This method also operates only with the coalitions available with SA. The last column of Table 4 presents the performance of the 
+
+COS score with respect to MR − SV across all evaluation metrics. Both our proposed scoring schemes consistently and significantly outperform COS .
+
+Table 4: The various metrics of the privacy-preserving mar-ginal difference based contribution scores, along with COS for a setting with 9 clients ( 𝜇 = 0.5) at the 10th communication round. 
+
+LOO EE FP COS 
+
+> ISIC
+
+𝐿 2 1.057 ± .432 0.339 ± .159 0.112 ± .168 2.028 ± .807 
+
+𝜙 0.821 ± .042 0.942 ± .054 0.933 ± .045 0.002 ± .667 
+
+𝜌 0.833 ± .051 0.964 ± .019 0.961 ± .034 0.349 ± .398 
+
+𝜅 0.783 ± .082 0.901 ± .024 0.912 ± .022 0.098 ± .235 
+
+> Brain
+
+𝐿 2 0.612 ± .261 0.163 ± .074 0.032 ± .021 0.964 ± .363 
+
+𝜙 0.793 ± .111 0.891 ± .063 0.891 ± .063 0.083 ± .065 
+
+𝜌 0.831 ± .022 0.911 ± .012 0.916 ± .013 0.211 ± .032 
+
+𝜅 0.782 ± .112 0.871 ± .113 0.871 ± .113 0.001 ± .052 
+
+> PCam
+
+𝐿 2 0.667 ± .096 0.422 ± .093 0.396 ± .053 1.690 ± .206 
+
+𝜙 0.546 ± .149 0.946 ± .035 0.944 ± .024 0.211 ± .376 
+
+𝜌 0.645 ± .002 0.965 ± .004 0.968 ± .002 0.308 ± .024 
+
+𝜅 0.476 ± .133 0.901 ± .086 0.901 ± .055 0.148 ± .087 
+
+> CIFAR10
+
+𝐿 2 1.607 ± .533 0.077 ± .045 0.033 ± .014 1.234 ± .106 
+
+𝜙 0.684 ± .203 0.904 ± .042 0.904 ± .055 0.004 ± .322 
+
+𝜌 0.821 ± .114 0.951 ± .024 0.955 ± .022 0.012 ± .303 
+
+𝜅 0.691 ± .082 0.875 ± .043 0.869 ± .046 0.013 ± .273 
+
+Comparison to the true Shapley value. In Table 5, we also compare against the true Shapley value, which is based on the retraining game, where each coalition of clients trains a model from scratch using FL, rather than aggregating gradients at each round. The proposed CE scores exhibit a high correlation ( 𝜙 close to 1) with the true Shapley value, demonstrating that they effectively cap-ture client contributions across diverse settings, including non-IID distributions and varying client counts. This indicates that our approximations preserve the relative importance of clients even when exact Shapley computation would be infeasible, providing a practical yet principled alternative for real-world deployments. 
+
+## 5.2 Ablation Study 
+
+We next analyze the impact of three factors on CE: the training round at which the evaluation is performed, the number of clients, and the distribution of data across clients. Table 6 reports the cor-relation of our proposed scores with MR − SV when the evaluation is carried out five rounds earlier or later than in the default setting. 
+
+Table 5: The 𝐿 2 error and coefficient 𝜙 of our privacy-preserving marginal difference based scores compared to the true Shapley value for a setting with 9 clients ( 𝜇 = 0.5) at the 10th communication round. 
+
+MR − SV LOO EE FP 
+
+> ISIC
+
+𝐿 2 0.024 ± .029 1.384 ± .051 0.649 ± .011 0.459 ± .018 
+
+𝜙 0.990 ± .002 0.741 ± .004 0.867 ± .062 0.861 ± .073 
+
+> Brain
+
+𝐿 2 0.191 ± .053 1.660 ± 0.410 0.775 ± .070 0.205 ± .023 
+
+𝜙 0.982 ± .012 0.517 ± .142 0.971 ± .023 0.975 ± .023 
+
+> PCam
+
+𝐿 2 0.161 ± .028 1.843 ± .079 0.308 ± .049 0.304 ± .061 
+
+𝜙 0.966 ± .038 0.749 ± .051 0.837 ± .013 0.837 ± .013 
+
+> CIFAR10
+
+𝐿 2 0.025 ± .006 1.850 ± .387 0.352 ± .053 0.137 ± .029 
+
+𝜙 0.996 ± .004 0.483 ± .319 0.841 ± .035 0.831 ± .045 Beyond Leave-One-Out : Private and Robust Contribution Evaluation in Federated Learning Conference’17, July 2017, Washington, DC, USA 
+
+Table 7 shows the correlation for varying numbers of clients. Fi-nally, Table 8 presents the performance of scores relative to LOO 
+
+for different values of 𝜇 and the non-IID Dirichlet partitioning of the data. These results indicate that our scoring schemes remain reliable under realistic variations in training dynamics, client pop-ulations, and data heterogeneity, confirming their robustness for practical cross-silo deployments. As expected, performance improves in later rounds for nearly all methods, since contributions are easier to assess once the model has converged. In contrast, increasing the number of clients leads to reduced correlation, reflecting the widening gap between the exponentially complex Shapley value and our linear-time approx-imations. Nevertheless, both FP and EE stay stable, maintaining strong performance even under more challenging conditions such as early-round evaluation or larger client populations. Regarding data distribution, higher values of 𝜇 lead to reduced performance of the scoring schemes. This behavior is expected, since larger 𝜇 
+
+produces distributions closer to IID, making clients harder to dis-tinguish. Nevertheless, FP and EE remain robust across all three aspects studied. 
+
+## 5.3 Robustness 
+
+Next, we analyze the impact of selfish behavior in the post-processing phase, focusing on scenarios where a client misreports its marginal contribution to gain an advantage. While FP and LOO are vulnerable to this type of manipulation, recall that clients cannot influence their own scores in the EE scheme. On the other hand, according to (4) , client 𝑖 can influence the score of others to the extent of  𝑣 (𝑀 ) − 𝑣 (𝑀 0 +𝑈 𝑖 ) +  𝑣 (𝑀 −𝑈 𝑖 ) − 𝑣 (𝑀 0). We present the relative, percentage-wise influence in Table 9. The main diagonal of the table is zero, since no client contributes to its own score. This demonstrates that EE is resistant to selfish behavior. Note that it remains vulnerable to strategic misreporting: a client could artificially deflate its reported value to diminish other clients’ scores. This vulnerability can be mitigated by augmenting the averaging step in EE ’s definition (5) with anomaly detection techniques or by adopting Byzantine-resilient aggregation rules (e.g., substituting the summation with a median operator). A similar attack scenario under analogous trust assumptions was explored in the context of decentralized FL in [2]. 
+
+## 5.4 Downstream tasks 
+
+Performance Gain. To demonstrate practical utility beyond rank-ing alignment, we evaluate global model performance when ag-gregating client updates weighted by their CE scores. Specifically, we assess the effectiveness of our proposed scoring schemes when clients contribute data of varying quality, as in [ 25 ]. We consider IID clients with different levels of label noise: labels in each client’s dataset are randomized with a linearly increasing probability before training. With 9 clients, the label-flipping rates are [0.00, 0.11, 0.22, . . . , 0.89, 1.00] . During aggregation, each update is weighted by the current value of its normalized score, so that top-performing and bottom-performing participants receive weights above and below 1, respectively. In Figure 2, it is visible that both FP and EE are superior to FedAvg (naive uniform aggregation) and to the baselines COS and 
+
+Table 6: The Spearman coefficient of MR − SV with LOO , EE , and 
+
+FP with 9 clients ( 𝜇 = 0.5) at different communication rounds: 5, 10, 15.                                                                                                               
+
+> LOO EE FP
+> ISIC  50.735 ±.022 0.843 ±.080 0.842 ±.074
+> 10 0.821 ±.042 0.942 ±.054 0.933 ±.045
+> 15 0.905 ±.006 0.986 ±.001 0.986 ±.001
+> Brain  50.731 ±.199 0.881 ±.088 0.880 ±.093
+> 10 0.793 ±.111 0.891 ±.063 0.891 ±.063
+> 15 0.900 ±.102 0.986 ±.002 0.983 ±.009
+> PCam  50.311 ±.285 0.866 ±.178 0.869 ±.160
+> 10 0.546 ±.149 0.946 ±.035 0.944 ±.024
+> 15 0.803 ±.011 0.952 ±.004 0.952 ±.004
+> CIFAR10  50.606 ±.034 0.784 ±.147 0.785 ±.137
+> 10 0.684 ±.203 0.904 ±.042 0.904 ±.055
+> 15 0.829 ±.164 0.973 ±.023 0.973 ±.023
+
+Table 7: The Spearman coefficient of MR − SV with LOO , EE , and 
+
+FP when the data is split into 6, 9, 12, and 15 clients ( 𝜇 = 0.5)at the 10th communication round.                                                                                                                                                   
+
+> LOO EE FP
+> ISIC  60.862 ±.001 0.941 ±.015 0.940 ±.013
+> 90.821 ±.042 0.942 ±.054 0.933 ±.045
+> 12 0.733 ±.022 0.882 ±.020 0.890 ±.011
+> 15 0.682 ±.031 0.864 ±.078 0.870 ±.051
+> Brain  60.932 ±.012 0.950 ±.050 0.961 ±.024
+> 90.793 ±.111 0.891 ±.063 0.891 ±.063
+> 12 0.745 ±.083 0.844 ±.103 0.854 ±.141
+> 15 0.612 ±.243 0.841 ±.028 0.841 ±.051
+> PCam  60.737 ±.005 0.980 ±.006 0.981 ±.005
+> 90.546 ±.149 0.946 ±.035 0.944 ±.024
+> 12 0.528 ±.032 0.905 ±.077 0.906 ±.035
+> 15 0.512 ±.006 0.866 ±.033 0.866 ±.054
+> CIFAR10  60.793 ±.151 0.955 ±.023 0.948 ±.021
+> 90.684 ±.203 0.904 ±.042 0.904 ±.055
+> 12 0.601 ±.094 0.892 ±.072 0.892 ±.072
+> 15 0.431 ±.006 0.862 ±.005 0.868 ±.004
+
+Table 8: The Spearman coefficient of MR − SV with EE , and FP 
+
+with 9 clients ( 𝜇 ∈ { 0.1, 0.5, 1.0)} ) at the 10th communication round.                                                                                                               
+
+> LOO EE FP
+> ISIC  0.1 0.868 ±.013 0.981 ±.004 0.980 ±.006
+> 0.5 0.821 ±.042 0.942 ±.054 0.933 ±.045
+> 1.0 0.822 ±.022 0.916 ±.032 0.916 ±.056
+> Brain  0.1 0.801 ±.032 0.945 ±.037 0.935 ±.039
+> 0.5 0.793 ±.111 0.891 ±.063 0.891 ±.063
+> 1.0 0.677 ±.147 0.817 ±.139 0.816 ±.123
+> PCam  0.1 0.757 ±013 0.980 ±.023 0.981 ±.012
+> 0.5 0.546 ±.149 0.946 ±.035 0.944 ±.024
+> 1.0 0.534 ±.076 0.924 ±.038 0.931 ±.021
+> CIFAR10  0.1 0.880 ±.014 0.963 ±.033 0.965 ±.033
+> 0.5 0.684 ±.203 0.904 ±.042 0.904 ±.055
+> 1.0 0.648 ±.021 0.850 ±.042 0.848 ±.046
+
+LOO . In fact, their performance almost reaches that of MR − SV . These results imply that 1) even the limited information available with SA could be used beneficially, and 2) the potential highest gain of Conference’17, July 2017, Washington, DC, USA Delio Jaramillo Velez, Gergely Biczok, Alexandre Graell i Amat, Johan Ostman, and Balazs Pejo 
+
+Figure 2: The negative loss of the global model on the CIFAR10 (left), and ISIC2019 (right) datasets. Training is for 9 clients with 10 communication rounds, and the results of mean and variance are reported for the 10th run. 
+
+0 2 4 6 8
+
+−2.2
+
+−2
+
+−1.8
+
+−1.6
+
+Communication round 
+
+0 2 4 6 8
+
+−2.2
+
+−2
+
+−1.8
+
+Communication round 
+
+MR − SV COS LOO FP EE FedAvg 
+
+Figure 3: Misbehavior detection score (what is the probability that the attacker gets the lowest score) on the CIFAR10 (left), and ISIC2019 (right) datasets. Training is for 9 clients with 10 communication rounds, and results are reported for the 10th run. 
+
+MR − SV COS LOO FP EE 
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+Metrics 
+
+MR − SV COS LOO FP EE 
+
+0
+
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+1
+
+Metrics 
+
+Table 9: The relative influence (e.g., the columns sum up to 1) of a single client on another’s EE score using the Brain dataset with 6 clients ( 𝜇 = 0.5) at the 10th communication round. We only show the mean as the variance is always below 0.01 .
+
+No. clients 1 2 3 4 5 61 0.000 0.145 0.151 0.169 0.150 0.167 
+
+2 0.129 0.000 0.132 0.147 0.131 0.145 
+
+3 0.170 0.167 0.000 0.194 0.172 0.192 
+
+4 0.273 0.268 0.280 0.000 0.278 0.309 
+
+5 0.164 0.161 0.167 0.187 0.000 0.185 
+
+6 0.262 0.257 0.268 0.300 0.266 0.000 
+
+client weighting is almost fully reachable, even with privacy in mind. Hence, both FP and EE successfully identify and upweight high-quality contributors while suppressing noise, translating their valuation information into tangible gains in model performance. 
+
+Misbehavior Detection. Another frequently utilized benchmark-ing downstream task is the identification of dishonest participants. Again, we consider honest IID clients with a single exception: one is a Byzantine client executing an adversarial attack (label flipping). In Figure 3, we measure the detection rate of the scoring schemes by counting how often the attacker received the lowest score (out of ten experiments). It is visible that both FP and EE are superior to LOO 
+
+and COS , almost reaching the upper bound of MR − SV . These results imply that privacy-preserving misbehavior detection is practical. 
+
+## 6 Conclusion 
+
+We study contribution evaluation in cross-silo federated learning under secure aggregation, where individual client updates must remain hidden while reward allocation and accountability still re-quire meaningful per-client scoring. This setting creates a funda-mental mismatch: classical marginal contribution methods (includ-ing Shapley-style approaches) require evaluating many coalitions and accessing individual updates, whereas secure aggregation only Beyond Leave-One-Out : Private and Robust Contribution Evaluation in Federated Learning Conference’17, July 2017, Washington, DC, USA 
+
+exposes the empty and grand coalitions and prevents the server from inspecting client updates. To bridge this gap, we propose two privacy-preserving marginal difference scores fully compatible with secure aggregation: Fair-Private (FP), which leverages the limited coalitions available to each client to satisfy standard fairness axioms, and Everybody-Else (EE), which avoids self evaluation and provides manipulation resistance through indirect cross-scoring. We estab-lish formal guarantees for fairness, privacy, and computational efficiency, and empirically demonstrate across multiple medical im-age datasets and CIFAR10 that FP and EE substantially outperform existing secure-aggregation-compatible baselines, closely approx-imating Shapley-induced rankings while remaining practical at scale. Overall, our results indicate that FP and EE not only preserve Shapley-based fairness principles but also produce stable, inter-pretable client contributions under challenging federated learning conditions, including non-IID data and large client populations. This demonstrates that meaningful client valuations can be obtained efficiently and privately, while also supporting reward allocation and misbehavior detection. Their compatibility with standard feder-ated frameworks enables deployment without costly architectural changes or added overhead. Looking forward, key directions include extending private con-tribution evaluation to settings with client sampling, churn, or asynchronous training, while maintaining secure-aggregation com-patibility, and further strengthening resistance to strategic ma-nipulation by combining EE-style cross-evaluation with robust aggregation or anomaly detection to mitigate adversarial influence. 
+
+## Acknowledgments 
+
+Project no. 145832, implemented with the support provided by the Ministry of Innovation and Technology from the NRDI Fund, financed under the PD_23 funding scheme. 
+
+## References 
+
+[1] H. Abdi. 2007. The Kendall rank correlation coefficient. In Encyclopedia of Measurement and Statistics . Sage, Thousand Oaks, CA. [2] Honoka Anada, Tatsuya Kaneko, and Shinya Takamaeda-Yamazaki. 2025. Mea-suring Participant Contributions in Decentralized Federated Learning. arXiv preprint: 2505.23246 [cs.LG] (2025). [3] E. Black and M. Fredrikson. 2021. Leave-one-out unfairness. In Proc. ACM Conf. Fairness, Accountability, and Transparency (FAccT) .[4] Keith Bonawitz, Vladimir Ivanov, Ben Kreuter, Antonio Marcedone, H Brendan McMahan, Sarvar Patel, Daniel Ramage, Aaron Segal, and Karn Seth. 2017. Prac-tical secure aggregation for privacy-preserving machine learning. In Proc. ACM SIGSAC Conf. Computer and Communications Security .[5] N. C. F. Codella, D. Gutman, M. E. Celebi, B. Helba, M. A. Marchetti, S. W. Dusza, A. Kalloo, K. Liopyris, N. Mishra, H. Kittler, and A. Halpern. 2018. Skin lesion analysis toward melanoma detection: A challenge at the 2017 ISBI, hosted by the International Skin Imaging Collaboration (ISIC). In Proc. IEEE Int. Symp. Biomedical Imaging (ISBI) .[6] I. Cohen, Y. Huang, J. Chen, and J. Benesty. 2009. Pearson correlation coefficient. In Noise Reduction in Speech Processing . Springer. [7] R. Cramer, I. B. Damgård, and J. B. Nielsen. 2015. Secure Multiparty Computation and Secret Sharing . Cambridge University Press. [8] Andrew Draganov, Sharvaree Vadgama, and Erik J Bekkers. 2024. The Hidden Pit-falls of the Cosine Similarity Loss. In ICML workshop: High-dimensional Learning Dynamics 2024: The Emergence of Structure and Reasoning .[9] Pradeep Dubey, Abraham Neyman, and Robert James Weber. 1981. Value Theory without Efficiency. Mathematics of Operations Research 6, 1 (1981), 122–128. [10] P. Dubey and L. S. Shapley. 1979. Mathematical properties of the Banzhaf power index. Math. Oper. Res. 4, 2 (1979), 99–131. [11] N. J. Evans, G. B. Mills, G. Wu, X. Song, and S. McWeeney. 2024. Data valuation with gradient similarity. arXiv preprint: 2405.08217 [cs.LG] (2024). [12] T. Evgeniou, M. Pontil, and A. Elisseeff. 2004. Leave one out error, stability, and generalization of voting combinations of classifiers. Mach. Learn. 55, 1 (2004), 1–30. [13] Amirata Ghorbani and James Zou. 2019. Data Shapley: Equitable Valuation of Data for Machine Learning. In Proc. Int. Conf. on Mach. Learn. (ICML) .[14] K. He, X. Zhang, S. Ren, and J. Sun. 2016. Deep residual learning for image recognition. In Proc. IEEE Conf. Comput. Vision Pattern Recognition (CVPR) .[15] Wouter Heyndrickx, Lewis Mervin, Tobias Morawietz, Noé Sturm, Lukas Friedrich, Adam Zalewski, Anastasia Pentina, Lina Humbeck, Martijn Oldenhof, Ritsuya Niwayama, et al . 2023. Melloddy: Cross-pharma federated learning at unprecedented scale unlocks benefits in qsar without compromising proprietary information. Journal of chemical information and modeling (2023). [16] P. Kairouz, H. B. McMahan, B. Avent, A. Bellet, M. Bennis, A. N. Bhagoji, and et al. 2021. Advances and open problems in federated learning. Found. Trends Mach. Learn. 14 (2021). [17] Yongchan Kwon and James Zou. 2021. Beta Shapley: a Unified and Noise-reduced Data Valuation Framework for Machine Learning. arXiv preprint arXiv:2110.14049 
+
+(2021). [18] Q. Li, X. Li, Z. Liu, and H. Qi. 2024. pFedCE: Personalized Federated Learning Based on Contribution Evaluation. In Proc. Int. Conf. Artif. Intell., Robotics, and Communication (ICAIRC) .[19] H. Lin, S. Wan, Z. Xie, K. Chen, M. Zhang, L. Shou, and G. Chen. 2024. A Com-prehensive Study of Shapley Value in Data Analytics. arXiv preprint: 2412.01460 [cs.DB] (2024). [20] Z. Liu, Y. Chen, H. Yu, Y. Liu, and L. Cui. 2022. GTG-Shapley: Efficient and Accurate Participant Contribution Evaluation in Federated Learning. ACM Trans. Intell. Syst. Technol. 13, 4 (2022), 60:1–60:21. [21] S. Ma, Y. Cao, and L. Xiong. 2021. Transparent Contribution Evaluation for Secure Federated Learning on Blockchain. In Proc. Int. Conf. Data Eng. Workshops (ICDEW) .[22] M. Nickparvar. 2021. Brain Tumor MRI Dataset. https://www.kaggle.com/ datasets/masoudnickparvar/brain-tumor-mri-dataset. Accessed: 2025-04-30. [23] A. Odena, C. Olah, and J. Shlens. 2017. Conditional Image Synthesis with Auxiliary Classifier GANs. In Proc. Int. Conf. Mach. Learn. (ICML) .[24] Balázs Pejó and Damien Desfontaines. 2022. Guide to differential privacy modifi-cations: a taxonomy of variants and extensions . Springer Nature. [25] B. Pejó and G. Biczók. 2023. Quality Inference in Federated Learning with Secure Aggregation. IEEE Trans. Big Data 9, 5 (2023). [26] B. Rozemberczki, L. Watson, P. Bayer, H.-T. Yang, O. Kiss, S. Nilsson, and et al. 2022. The Shapley Value in Machine Learning. In Proc. Int. Joint Conf. Artif. Intell. (IJCAI) .[27] A. Shamir. 1979. How to Share a Secret. Commun. ACM 22, 11 (Nov. 1979), 612–613. [28] L. S. Shapley. 1951. Notes on the N-person Game . Rand Corporation. [29] Lloyd S Shapley. 1953. A value for n-person games. Contributions to the Theory of Games (1953). [30] R. H. L. Sim, X. Xu, and B. K. H. Low. 2022. Data Valuation in Machine Learning: "Ingredients", Strategies, and Open Challenges. In Proc. Int. Joint Conf. Artif. Intell. (IJCAI) .[31] Rachael Hwee Ling Sim, Yehong Zhang, Mun Choon Chan, and Bryan Kian Hsiang Low. 2020. Collaborative Machine Learning with Incentive-Aware Model Rewards. In Proc. Int. Conf. Mach. Learn. (ICML) .[32] V. Siomos and J. Passerat-Palmbach. 2023. Contribution Evaluation in Federated Learning: Examining Current Approaches. arXiv preprint: 2311.09856 [cs.LG] 
+
+(2023). [33] T. Song, Y. Tong, and S. Wei. 2019. Profit Allocation for Federated Learning. In 
+
+Proc. IEEE Int. Conf. Big Data (Big Data) .[34] B. S. Veeling, J. Linmans, J. Winkens, T. Cohen, and M. Welling. 2018. Rotation Equivariant CNNs for Digital Pathology. arXiv preprint: 1806.03962 [cs.CV] (Jun 2018). [35] R. Venugopal, N. Shafqat, I. Venugopal, B. M. J. Tillbury, H. D. Stafford, and A. Bourazeri. 2022. Privacy Preserving Generative Adversarial Networks to Model Electronic Health Records. Neural Networks 153 (2022), 339–348. [36] Jiachen T. Wang and Ruoxi Jia. 2023. Data Banzhaf: A Robust Data Valuation Framework for Machine Learning. In Proceedings of The 26th International Con-ference on Artificial Intelligence and Statistics . PMLR. [37] Zhibo Wang, Mengkai Song, Zhifei Zhang, Yang Song, Qian Wang, and Hairong Qi. 2019. Beyond Inferring Class Representatives: User-Level Privacy Leakage From Federated Learning. In IEEE Conference on Computer Communications (INFOCOM) .[38] L. Watson, R. Andreeva, H.-T. Yang, and R. Sarkar. 2022. Differentially Private Shapley Values for Data Evaluation. arXiv preprint: 2206.00511 [cs.LG] (2022). [39] H. Wu and P. Wang. 2021. Fast-Convergent Federated Learning with Adaptive Weighting. IEEE Trans. Cogn. Commun. Netw. 7, 4 (2021). [40] M. Xhemrishi, A. Graell i Amat, and B. Pejó. 2025. Detect & Score: Privacy-Preserving Misbehaviour Detection and Contribution Evaluation in Federated Learning. arXiv preprint: 2506.23583 [cs.CR] (2025). Conference’17, July 2017, Washington, DC, USA Delio Jaramillo Velez, Gergely Biczok, Alexandre Graell i Amat, Johan Ostman, and Balazs Pejo                
+
+> [41] M. Xhemrishi, J. Östman, A. Wachter-Zeh, and A. Graell i Amat. 2025. FedGT: Identification of Malicious Clients in Federated Learning With Secure Aggrega-tion. IEEE Trans. Inf. Forensics Security 20 (2025). [42] X. Xu, L. Lyu, X. Ma, C. Miao, C. S. Foo, and B. K. H. Low. 2021. Gradient Driven Rewards to Guarantee Fairness in Collaborative Machine Learning. In Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) .[43] A. Yale, S. Dash, R. Dutta, I. Guyon, A. Pavao, and K. P. Bennett. 2020. Generation and Evaluation of Privacy Preserving Synthetic Health Data. Neurocomputing
+> 416 (2020), 244–255. [44] J. H. Zar. 2005. Spearman Rank Correlation. Encyclopedia of Biostatistics (2005). [45] S. Zheng, Y. Cao, and M. Yoshikawa. 2023. Secure Shapley Value for Cross-Silo Federated Learning. In Proc. VLDB Endowment .[46] S. Zhou, M. Liao, B. Qiao, and X. Yang. 2022. A Survey of Security Aggregation. In Proc. Int. Conf. Adv. Commun. Technol. (ICACT) .[47] Ligeng Zhu, Zhijian Liu, and Song Han. 2019. Deep leakage from gradients. In
+> Advances in Neural Information Processing Systems .
+
+## A Proof of Theorem 1 
+
+If client 𝑖 is a null player, meaning it does not contribute to any coalition, then 𝑣 (𝑀 0 +𝑈 𝑖 ) = 𝑣 (𝑀 0) and 𝑣 (𝑀 −𝑈 𝑖 ) = 𝑣 (𝑀 ), implying that the 𝛼 (𝑖 ) = 0, and therefore FP (𝑖 ) = 0. This means FP satisfies property 2. Similarly, if two clients 𝑖 , and 𝑗 contribute equally to all coalitions, then 𝑣 (𝑀 −𝑈 𝑖 ) = 𝑣 (𝑀 −𝑈 𝑗 ), and 𝑣 (𝑀 0 +𝑈 𝑖 ) = 𝑣 (𝑀 0 +𝑈 𝑗 ),which implies the following: 
+
+𝛼 (𝑖 ) = 12( ( 𝑣 (𝑀 ) − 𝑣 (𝑀 − 𝑈 𝑖 ) ) − ( 𝑣 (𝑀 0 + 𝑈 𝑖 ) − 𝑣 (𝑀 0 ) ) ) 
+
+= 12( ( 𝑣 (𝑀 ) − 𝑣 (𝑀 − 𝑈 𝑗 ) ) − ( 𝑣 (𝑀 0 + 𝑈 𝑗 ) − 𝑣 (𝑀 0 ) ) ) 
+
+= 𝛼 ( 𝑗 )
+
+Thus, FP (𝑖 ) = FP ( 𝑗 ), and FP satisfies the symmetry property 3. Finally, Property 1, and 4 follows directly from the definitions of 
+
+FP , and 𝛼 (𝑖 ), since Í𝑁 𝑖 =1 FP (𝑖 ) = 𝑣 (𝑀 ), and the scores of the clients depend only on the models corresponding to the permitted coali-tions. 
+
+Remark 1. While possible, the edge case in which the denominator in (2) is zero is disregarded in our definition. If such a situation arises, we propose to replace 𝛼 (𝑖 ) with either 𝑣 (𝑀 ) − 𝑣 (𝑀 − 𝑈 𝑖 ) or 𝑣 (𝑀 0 +
+
+𝑈 𝑖 ) − 𝑣 (𝑀 0). This way, the score still satisfies the same properties, but it is highly unlikely that both sum to zero. 
+
+## B Proof of Theorem 2 
+
+We focus on the parts of the metric. Property 4 follows directly from the definitions of 𝛽 (𝑖 ) and 𝛾 (𝑖 ), since these terms are composed of the available coalitions. For Property 5, note that the only values a client 𝑖 could potentially misreport are 𝑣 (𝑀 − 𝑈 𝑖 ) and 𝑣 (𝑀 0 + 𝑈 𝑖 ).However, these terms do not appear in 𝛽 (𝑖 ) or 𝛾 (𝑖 ). Therefore, EE 
+
+satisfies Property 5. To prove symmetry, assume that clients 𝑖 and 
+
+𝑗 contribute equally to all possible coalitions, i.e., 𝑣 (𝑀 − 𝑈 𝑖 ) =
+
+𝑣 (𝑀 − 𝑈 𝑗 ) and 𝑣 (𝑀 0 + 𝑈 𝑖 ) = 𝑣 (𝑀 0 + 𝑈 𝑗 ). Then, based on (5): 
+
+𝛽 (𝑖 ) ==
+
+Í 
+
+> 𝑘 ∉{𝑖,𝑗 }
+
+[𝑣 (𝑀 ) − 𝑣 (𝑀 0 + 𝑈 𝑘 ) ] + [ 𝑣 (𝑀 ) − 𝑣 (𝑀 0 + 𝑈 𝑗 ) ] (𝑁 − 1)2
+
+=
+
+Í 
+
+> 𝑘 ∉{𝑖,𝑗 }
+
+[𝑣 (𝑀 ) − 𝑣 (𝑀 0 + 𝑈 𝑘 ) ] + [ 𝑣 (𝑀 ) − 𝑣 (𝑀 0 + 𝑈 𝑖 ) ] (𝑁 − 1)2
+
+= 𝛽 ( 𝑗 )
+
+𝛾 (𝑖 ) ==
+
+Í 
+
+> 𝑘 ∉{𝑖,𝑗 }
+
+[𝑣 (𝑀 − 𝑈 𝑘 ) − 𝑣 (𝑀 0 ) ] + [ 𝑣 (𝑀 − 𝑈 𝑗 ) − 𝑣 (𝑀 0 ) ] (𝑁 − 1)2
+
+=
+
+Í 
+
+> 𝑘 ∉{𝑖,𝑗 }
+
+[𝑣 (𝑀 − 𝑈 𝑘 ) − 𝑣 (𝑀 0 ) ] + [ 𝑣 (𝑀 − 𝑈 𝑖 ) − 𝑣 (𝑀 0 ) ] (𝑁 − 1)2
+
+= 𝛾 ( 𝑗 )
+
+Thus, it is obtained EE (𝑖 ) = EE ( 𝑗 ), this is EE satisfies symmetry property 3. Finally, Property 1 is also satisfied, as the same normal-izing step is used as in FP . Note that, for this reason, the same edge case could also emerge, as we detailed above. 
+
+## C Proof of Theorem 3 
+
+We prove the statement for each individual building block of the metrics, ensuring that their combination also inherits this validity. From Definition 3, it is clear that computing 𝛼 (𝑖 ) for a single client requires O( 1) operations. Thus, computing the scores for all 𝑁 
+
+clients requires O( 𝑁 ) time overall. Similarly, according to (5) , the complexity of computing the terms 𝛽 (𝑖 ) and 𝛾 (𝑖 ) for a single client is O( 𝑁 ). However, the evaluations 𝑣 (𝑀 0 + 𝑈 𝑗 ) and 𝑣 (𝑀 − 𝑈 𝑗 ) for each client 𝑗 are shared when computing the scores for different clients 𝑖 , since each evaluation depends only on client 𝑗 , not on the client being scored. Therefore, the overall computational cost remains O( 𝑁 ).
+
+## D Experimental Setup 
+
+Table 10: Overview of the experimental setup                        
+
+> ISIC2019 PCam Brain-MRI CIFAR10 Task Multi-class Binary-class Multi-class Multi-class
+> Pred. Melanoma Metastatic Tumor Image
+> Model ResNet50 ResNet18 Simple CNN Simple CNN
+> Size 23,247 327,680 7,023 60,000
+> L-Epoch 3555
+
+## E The efficiency-linearity trade and semivalues 
+
+The practical and conceptual shift introduced by federated learning brings new challenges. In particular, data valuation in federated learning aims not only to identify which sets of data points con-tribute more to the final model but also to satisfy clients’ fairness and privacy requirements. This shift is reflected in the increased importance of fairness properties in the federated learning setting. For instance, the efficiency property is significantly more relevant in federated learning than in the centralized scenario because con-tribution scores are assigned to clients rather than to individual data points. In this context, contribution evaluation is ultimately tied to resource allocation decisions (e.g., incentives, quotas, or pri-orities), which typically operate under a fixed budget. This stands in contrast to centralized data valuation, where the objective is simply to measure which data points improve model performance the most. Semivalues are appropriate when the goal is to describe players in a game without requiring a fair division [ 9 ]. We view centralized data valuation as fitting this description. As alternatives to the Shapley value, Beta Shapley and Data Banzhaf semivalues have been proposed to address data valuation Beyond Leave-One-Out : Private and Robust Contribution Evaluation in Federated Learning Conference’17, July 2017, Washington, DC, USA 
+
+problems in machine learning, particularly in settings such as noisy label detection, where the Shapley value has been shown to be suboptimal [ 17 , 36 ]. Specifically, a semivalue is a function in the space of games that satisfies the symmetry, null player, and linearity properties, but may not satisfy the efficiency property. Federated learning commonly requires dividing a fixed resource among participants, and in such scenarios, efficiency becomes a natural, and often necessary, requirement. We define our scores with this consideration in mind. For this reason, they lie outside the family of semivalues, with the exception of the unnormalized score FP , i.e., 𝛼 (𝑖 ) (see Equation 2). In contrast to the role of effi-ciency in federated learning, linearity can be relaxed in this setting. Linearity is primarily an algebraic and technical condition in coop-erative game theory rather than a fairness axiom. Its main role is to establish uniqueness results or, in the case of semivalues, to char-acterize their functional form. Since our objective is not to prove the existence of unique solutions under a specific set of axioms, relaxing linearity does not compromise fairness guarantees or prac-tical interpretability. As a result, analyzing the unnormalized score satisfying linearity offers limited additional insight from either a fairness or an applied perspective. Overall, this discussion highlights that the choice of axioms underlying a data valuation score cannot be decoupled from the structure of the underlying machine learning task. While central-ized settings may favor descriptive measures that relax efficiency, federated learning inherently demands allocation-aware scores that respect budget constraints. Understanding this interplay between axiomatic properties and application-specific requirements is, there-fore, a central component of the data valuation endeavor.

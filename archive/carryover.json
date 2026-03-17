@@ -1,47 +1,8 @@
 {
-  "generated_at": "2026-03-16T01:26:33.978454+00:00",
-  "updated_date": "20260215-20260316",
+  "generated_at": "2026-03-17T08:14:48.161504+00:00",
+  "updated_date": "20260216-20260317",
   "carryover_days": 9,
   "items": [
-    {
-      "id": "2602.22611v1",
-      "title": "Mitigating Membership Inference in Intermediate Representations via Layer-wise MIA-risk-aware DP-SGD",
-      "abstract": "In Embedding-as-an-Interface (EaaI) settings, pre-trained models are queried for Intermediate Representations (IRs). The distributional properties of IRs can leak training-set membership signals, enabling Membership Inference Attacks (MIAs) whose strength varies across layers. Although Differentially Private Stochastic Gradient Descent (DP-SGD) mitigates such leakage, existing implementations employ per-example gradient clipping and a uniform, layer-agnostic noise multiplier, ignoring heterogeneous layer-wise MIA vulnerability. This paper introduces Layer-wise MIA-risk-aware DP-SGD (LM-DP-SGD), which adaptively allocates privacy protection across layers in proportion to their MIA risk. Specifically, LM-DP-SGD trains a shadow model on a public shadow dataset, extracts per-layer IRs from its train/test splits, and fits layer-specific MIA adversaries, using their attack error rates as MIA-risk estimates. Leveraging the cross-dataset transferability of MIAs, these estimates are then used to reweight each layer's contribution to the globally clipped gradient during private training, providing layer-appropriate protection under a fixed noise magnitude. We further establish theoretical guarantees on both privacy and convergence of LM-DP-SGD. Extensive experiments show that, under the same privacy budget, LM-DP-SGD reduces the peak IR-level MIA risk while preserving utility, yielding a superior privacy-utility trade-off.",
-      "authors": [
-        "Jiayang Meng",
-        "Tao Huang",
-        "Chen Hou",
-        "Guolong Zheng",
-        "Hong Chen"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG"
-      ],
-      "published": "2026-02-26T04:32:14+00:00",
-      "link": "https://arxiv.org/pdf/2602.22611v1",
-      "tags": [
-        "keyword:PPML",
-        "query:FSS LLM"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "mitigating membership inference in intermediate representations",
-      "llm_evidence_cn": "减轻中间表示中的成员推理攻击",
-      "llm_evidence": "减轻中间表示中的成员推理攻击",
-      "canonical_evidence": "减轻中间表示中的成员推理攻击",
-      "llm_tldr_en": "Develops LM-DP-SGD to adaptively protect intermediate representations against membership inference attacks.",
-      "llm_tldr_cn": "开发LM-DP-SGD算法，通过自适应分配隐私保护来防御针对中间表示的成员推理攻击。",
-      "llm_tldr": "开发LM-DP-SGD算法，通过自适应分配隐私保护来防御针对中间表示的成员推理攻击。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "privacy-preserving machine learning techniques and frameworks",
-      "matched_requirement_id": "req-10",
-      "selection_source": "carryover_cache",
-      "paper_id": "2602.22611v1",
-      "carry_days": 1
-    },
     {
       "id": "2603.08252v1",
       "title": "FedPrism: Adaptive Personalized Federated Learning under Non-IID Data",
@@ -63,13 +24,13 @@
         "query:FSS LLM"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "personalized federated learning architecture",
-      "llm_evidence_cn": "个性化联邦学习架构",
-      "llm_evidence": "个性化联邦学习架构",
-      "canonical_evidence": "个性化联邦学习架构",
-      "llm_tldr_en": "Introduces FedPrism for adaptive personalized federated learning under non-IID data distributions.",
-      "llm_tldr_cn": "引入FedPrism框架，解决非独立同分布数据下的自适应个性化联邦学习问题。",
-      "llm_tldr": "引入FedPrism框架，解决非独立同分布数据下的自适应个性化联邦学习问题。",
+      "llm_evidence_en": "Personalized Federated Learning under statistical heterogeneity",
+      "llm_evidence_cn": "统计异构性下的个性化联邦学习",
+      "llm_evidence": "统计异构性下的个性化联邦学习",
+      "canonical_evidence": "统计异构性下的个性化联邦学习",
+      "llm_tldr_en": "Introduces FedPrism for adaptive personalized federated learning using prism decomposition for non-IID data.",
+      "llm_tldr_cn": "引入了 FedPrism 框架，通过棱镜分解实现非独立同分布数据下的自适应个性化联邦学习。",
+      "llm_tldr": "引入了 FedPrism 框架，通过棱镜分解实现非独立同分布数据下的自适应个性化联邦学习。",
       "llm_tags": [
         "query:ppml"
       ],
@@ -104,9 +65,9 @@
       "llm_evidence_cn": "保护隐私的个性化联邦学习",
       "llm_evidence": "保护隐私的个性化联邦学习",
       "canonical_evidence": "保护隐私的个性化联邦学习",
-      "llm_tldr_en": "Proposes pFedGM for personalized federated learning using Gaussian generative modeling to handle data heterogeneity.",
-      "llm_tldr_cn": "提出pFedGM方法，通过高斯生成模型处理联邦学习中的数据异构性并保护隐私。",
-      "llm_tldr": "提出pFedGM方法，通过高斯生成模型处理联邦学习中的数据异构性并保护隐私。",
+      "llm_tldr_en": "Introduces a Gaussian generative modeling approach for personalized federated learning with data heterogeneity.",
+      "llm_tldr_cn": "引入一种高斯生成模型方法，用于处理数据异构性的个性化联邦学习。",
+      "llm_tldr": "引入一种高斯生成模型方法，用于处理数据异构性的个性化联邦学习。",
       "llm_tags": [
         "query:ppml"
       ],
@@ -115,171 +76,6 @@
       "matched_requirement_id": "req-13",
       "selection_source": "carryover_cache",
       "paper_id": "2603.11620v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2602.19945v1",
-      "title": "DP-FedAdamW: An Efficient Optimizer for Differentially Private Federated Large Models",
-      "abstract": "Balancing convergence efficiency and robustness under Differential Privacy (DP) is a central challenge in Federated Learning (FL). While AdamW accelerates training and fine-tuning in large-scale models, we find that directly applying it to Differentially Private FL (DPFL) suffers from three major issues: (i) data heterogeneity and privacy noise jointly amplify the variance of second-moment estimator, (ii) DP perturbations bias the second-moment estimator, and (iii) DP amplify AdamW sensitivity to local overfitting, worsening client drift. We propose DP-FedAdamW, the first AdamW-based optimizer for DPFL. It restores AdamW under DP by stabilizing second-moment variance, removing DP-induced bias, and aligning local updates to the global descent to curb client drift. Theoretically, we establish an unbiased second-moment estimator and prove a linearly accelerated convergence rate without any heterogeneity assumption, while providing tighter $(\\varepsilon,δ)$-DP guarantees. Our empirical results demonstrate the effectiveness of DP-FedAdamW across language and vision Transformers and ResNet-18. On Tiny-ImageNet (Swin-Base, $\\varepsilon=1$), DP-FedAdamW outperforms the state-of-the-art (SOTA) by 5.83\\%. The code is available in Appendix.",
-      "authors": [
-        "Jin Liu",
-        "Yinbin Miao",
-        "Ning Xi",
-        "Junkang Liu"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG",
-        "cs.AI"
-      ],
-      "published": "2026-02-23T15:15:47+00:00",
-      "link": "https://arxiv.org/pdf/2602.19945v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Differentially Private Federated Learning for large models",
-      "llm_evidence_cn": "针对大模型的差分隐私联邦学习",
-      "llm_evidence": "针对大模型的差分隐私联邦学习",
-      "canonical_evidence": "针对大模型的差分隐私联邦学习",
-      "llm_tldr_en": "Introduces DP-FedAdamW to optimize convergence and robustness in differentially private federated learning.",
-      "llm_tldr_cn": "引入DP-FedAdamW优化器，旨在提升差分隐私联邦学习的收敛效率与鲁棒性。",
-      "llm_tldr": "引入DP-FedAdamW优化器，旨在提升差分隐私联邦学习的收敛效率与鲁棒性。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "privacy-preserving federated learning architectures",
-      "matched_requirement_id": "req-13",
-      "selection_source": "carryover_cache",
-      "paper_id": "2602.19945v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.02017v1",
-      "title": "Protection against Source Inference Attacks in Federated Learning",
-      "abstract": "Federated Learning (FL) was initially proposed as a privacy-preserving machine learning paradigm. However, FL has been shown to be susceptible to a series of privacy attacks. Recently, there has been concern about the Source Inference Attack (SIA), where an honest-but-curious central server attempts to identify exactly which client owns a given data point which was used in the training phase. Alarmingly, standard gradient obfuscation techniques with Differential Privacy have been shown to be ineffective against SIAs, at least without severely diminishing the accuracy.   In this work, we propose a defense against SIAs within the widely studied shuffle model of FL, where an honest shuffler acts as an intermediary between the clients and the server. First, we demonstrate that standard naive shuffling alone is insufficient to prevent SIAs. To effectively defend against SIAs, shuffling needs to be applied at a more granular level; we propose a novel combination of parameter-level shuffling with the residue number system (RNS). Our approach provides robust protection against SIAs without affecting the accuracy of the joint model and can be seamlessly integrated into other privacy protection mechanisms.   We conduct experiments on a series of models and datasets, confirming that standard shuffling approaches fail to prevent SIAs and that, in contrast, our proposed method reduce the attack's accuracy to the level of random guessing.",
-      "authors": [
-        "Andreas Athanasiou",
-        "Kangsoo Jung",
-        "Catuscia Palamidessi"
-      ],
-      "primary_category": "cs.CR",
-      "categories": [
-        "cs.CR"
-      ],
-      "published": "2026-03-02T16:01:41+00:00",
-      "link": "https://arxiv.org/pdf/2603.02017v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Defense against Source Inference Attacks in Federated Learning",
-      "llm_evidence_cn": "联邦学习中针对源推理攻击的防御",
-      "llm_evidence": "联邦学习中针对源推理攻击的防御",
-      "canonical_evidence": "联邦学习中针对源推理攻击的防御",
-      "llm_tldr_en": "Proposes a defense against source inference attacks in the shuffle model of federated learning.",
-      "llm_tldr_cn": "在联邦学习的洗牌模型中提出了一种针对源推理攻击的防御方法。",
-      "llm_tldr": "在联邦学习的洗牌模型中提出了一种针对源推理攻击的防御方法。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "privacy-preserving federated learning architectures",
-      "matched_requirement_id": "req-13",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.02017v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.10063v1",
-      "title": "Building Privacy-and-Security-Focused Federated Learning Infrastructure for Global Multi-Centre Healthcare Research",
-      "abstract": "Collaborative healthcare research across multiple institutions increasingly requires diverse clinical datasets, but cross-border data sharing is strictly constrained by privacy regulations. Federated learning (FL) enables model training while keeping data local; however, many existing frameworks remain proof-of-concept and do not adequately address governance risks such as unauthorised participation, misuse, and lack of accountability. In particular, enforceable mechanisms for authentication, authorisation, and accounting (AAA) are often missing, limiting real-world clinical deployment. This paper presents FLA$^3$ (Federated Learning with Authentication, Authorisation, and Accounting), a governance-aware federated learning platform that operationalises regulatory obligations through runtime policy enforcement. FLA$^3$ integrates eXtensible Access Control Markup Language (XACML) compliant attribute-based access control (ABAC), cryptographic accounting, and study-scoped federation directly into the federated learning orchestration layer to enforce institutional sovereignty and protocol adherence. We evaluate FLA$^3$ through two complementary studies. First, we demonstrate operational feasibility by deploying the platform infrastructure across five BloodCounts! Consortium institutions in four countries: United Kingdom, Netherlands, India, and The Gambia. Second, we assess clinical utility using simulated federation of full blood count (FBC) data from 54,446 samples from 35,315 subjects across 25 centres in the INTERVAL study. Results show that FLA$^3$ achieves predictive performance comparable to centralised training while strictly enforcing governance constraints. These results show that enforceable governance can function as a first-class privacy-preserving control, improving trustworthiness for scalable artificial intelligence (AI) in cross-jurisdictional healthcare deployments.",
-      "authors": [
-        "Fan Zhang",
-        "Daniel Kreuter",
-        "Javier Fernandez-Marques",
-        "BloodCounts Consortium",
-        "Gregory Verghese",
-        "Bernard Butler",
-        "Nicholas Lane",
-        "Suthesh Sivapalaratnam",
-        "Joseph Taylor",
-        "Norbert C. J. de Wit",
-        "Nicholas S. Gleadall",
-        "Carola-Bibiane Schönlieb",
-        "Michael Roberts"
-      ],
-      "primary_category": "cs.CR",
-      "categories": [
-        "cs.CR",
-        "cs.SE"
-      ],
-      "published": "2026-03-09T22:13:00+00:00",
-      "link": "https://arxiv.org/pdf/2603.10063v1",
-      "tags": [
-        "keyword:PPML"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "privacy-and-security-focused federated learning infrastructure",
-      "llm_evidence_cn": "关注隐私与安全的联邦学习基础设施",
-      "llm_evidence": "关注隐私与安全的联邦学习基础设施",
-      "canonical_evidence": "关注隐私与安全的联邦学习基础设施",
-      "llm_tldr_en": "Proposes a governance-aware federated learning framework with AAA mechanisms for healthcare research.",
-      "llm_tldr_cn": "提出了一种具有AAA机制的治理感知型联邦学习框架，用于医疗研究。",
-      "llm_tldr": "提出了一种具有AAA机制的治理感知型联邦学习框架，用于医疗研究。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "privacy-preserving federated learning architectures",
-      "matched_requirement_id": "req-13",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.10063v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.01730v1",
-      "title": "Decentralized Federated Learning by Partial Message Exchange",
-      "abstract": "Decentralized federated learning (DFL) has emerged as a transformative server-free paradigm that enables collaborative learning over large-scale heterogeneous networks. However, it continues to face fundamental challenges, including data heterogeneity, restrictive assumptions for theoretical analysis, and degraded convergence when standard communication- or privacyenhancing techniques are applied. To overcome these drawbacks, this paper develops a novel algorithm, PaME (DFL by Partial Message Exchange). The central principle is to allow only randomly selected sparse coordinates to be exchanged between two neighbor nodes. Consequently, PaME achieves substantial reductions in communication costs while still preserving a high level of privacy, without sacrificing accuracy. Moreover, grounded in rigorous analysis, the algorithm is shown to converge at a linear rate under the gradient to be locally Lipschitz continuous and the communication matrix to be doubly stochastic. These two mild assumptions not only dispense with many restrictive conditions commonly imposed by existing DFL methods but also enables PaME to effectively address data heterogeneity. Furthermore, comprehensive numerical experiments demonstrate its superior performance compared with several representative decentralized learning algorithms.",
-      "authors": [
-        "Shan Sha",
-        "Shenglong Zhou",
-        "Xin Wang",
-        "Lingchen Kong",
-        "Geoffrey Ye Li"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG"
-      ],
-      "published": "2026-03-02T10:57:18+00:00",
-      "link": "https://arxiv.org/pdf/2603.01730v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "decentralized federated learning with privacy enhancement",
-      "llm_evidence_cn": "隐私增强的去中心化联邦学习",
-      "llm_evidence": "隐私增强的去中心化联邦学习",
-      "canonical_evidence": "隐私增强的去中心化联邦学习",
-      "llm_tldr_en": "Proposes PaME to reduce communication costs and preserve privacy in decentralized federated learning.",
-      "llm_tldr_cn": "提出PaME算法，在去中心化联邦学习中降低通信成本并提高隐私保护水平。",
-      "llm_tldr": "提出PaME算法，在去中心化联邦学习中降低通信成本并提高隐私保护水平。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "privacy-preserving federated learning architectures",
-      "matched_requirement_id": "req-13",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.01730v1",
       "carry_days": 1
     },
     {
@@ -303,13 +99,13 @@
         "query:FSS LLM"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "federated learning for intrusion detection in a privacy preserving manner",
-      "llm_evidence_cn": "以隐私保护方式进行入侵检测的联邦学习",
-      "llm_evidence": "以隐私保护方式进行入侵检测的联邦学习",
-      "canonical_evidence": "以隐私保护方式进行入侵检测的联邦学习",
-      "llm_tldr_en": "Proposes incremental federated learning for IoT intrusion detection while maintaining data privacy.",
-      "llm_tldr_cn": "提出用于物联网入侵检测的增量联邦学习，同时维护数据隐私。",
-      "llm_tldr": "提出用于物联网入侵检测的增量联邦学习，同时维护数据隐私。",
+      "llm_evidence_en": "Privacy preserving federated learning for IoT intrusion detection",
+      "llm_evidence_cn": "用于物联网入侵检测的隐私保护联邦学习",
+      "llm_evidence": "用于物联网入侵检测的隐私保护联邦学习",
+      "canonical_evidence": "用于物联网入侵检测的隐私保护联邦学习",
+      "llm_tldr_en": "Applies incremental federated learning to detect evolving threats in IoT networks while preserving data privacy.",
+      "llm_tldr_cn": "将增量联邦学习应用于物联网入侵检测，在保护隐私的同时应对不断演变的威胁。",
+      "llm_tldr": "将增量联邦学习应用于物联网入侵检测，在保护隐私的同时应对不断演变的威胁。",
       "llm_tags": [
         "query:ppml"
       ],
@@ -318,79 +114,6 @@
       "matched_requirement_id": "req-13",
       "selection_source": "carryover_cache",
       "paper_id": "2603.10776v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.07505v1",
-      "title": "Adapting to noise tails in private linear regression",
-      "abstract": "While the traditional goal of statistics is to infer population parameters, modern practice increasingly demands protection of individual privacy. One way to address this need is to adapt classical statistical procedures into privacy-preserving algorithms. In this paper, we develop differentially private tail-robust methods for linear regression. The trade-off among bias, privacy, and robustness is controlled by a tunable robustification parameter in the Huber loss. We implement noisy clipped gradient descent for low-dimensional settings and noisy iterative hard thresholding for high-dimensional sparse models. Under sub-Gaussian errors, our method achieves near-optimal convergence rates while relaxing several assumptions required in earlier work. For heavy-tailed errors, we explicitly characterize how the non-asymptotic convergence rate depends on the moment index, privacy parameters, sample size, and intrinsic dimension. Our analysis shows how the moment index influences the choice of robustification parameters and, in turn, the resulting statistical error and privacy cost. By quantifying the interplay among bias, privacy, and robustness, we extend classical perspectives on privacy-preserving robust regression. The proposed methods are evaluated through simulations and two real datasets.",
-      "authors": [
-        "Jinyuan Chang",
-        "Lin Yang",
-        "Mengyue Zha",
-        "Wen-Xin Zhou"
-      ],
-      "primary_category": "stat.ME",
-      "categories": [
-        "stat.ME"
-      ],
-      "published": "2026-03-08T07:21:26+00:00",
-      "link": "https://arxiv.org/pdf/2603.07505v1",
-      "tags": [
-        "keyword:PPML"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "differentially private algorithms for linear regression",
-      "llm_evidence_cn": "线性回归的差分隐私算法",
-      "llm_evidence": "线性回归的差分隐私算法",
-      "canonical_evidence": "线性回归的差分隐私算法",
-      "llm_tldr_en": "Develops differentially private and tail-robust methods for linear regression to protect individual privacy.",
-      "llm_tldr_cn": "开发了用于线性回归的差分隐私和尾部鲁棒方法，以保护个人隐私。",
-      "llm_tldr": "开发了用于线性回归的差分隐私和尾部鲁棒方法，以保护个人隐私。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "privacy-preserving machine learning techniques and frameworks",
-      "matched_requirement_id": "req-10",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.07505v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.02010v1",
-      "title": "Noise-Calibrated Inference from Differentially Private Sufficient Statistics in Exponential Families",
-      "abstract": "Many differentially private (DP) data release systems either output DP synthetic data and leave analysts to perform inference as usual, which can lead to severe miscalibration, or output a DP point estimate without a principled way to do uncertainty quantification. This paper develops a clean and tractable middle ground for exponential families: release only DP sufficient statistics, then perform noise-calibrated likelihood-based inference and optional parametric synthetic data generation as post-processing. Our contributions are: (1) a general recipe for approximate-DP release of clipped sufficient statistics under the Gaussian mechanism; (2) asymptotic normality, explicit variance inflation, and valid Wald-style confidence intervals for the plug-in DP MLE; (3) a noise-aware likelihood correction that is first-order equivalent to the plug-in but supports bootstrap-based intervals; and (4) a matching minimax lower bound showing the privacy distortion rate is unavoidable. The resulting theory yields concrete design rules and a practical pipeline for releasing DP synthetic data with principled uncertainty quantification, validated on three exponential families and real census data.",
-      "authors": [
-        "Amir Asiaee",
-        "Samhita Pal"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG",
-        "stat.ML"
-      ],
-      "published": "2026-03-02T15:55:54+00:00",
-      "link": "https://arxiv.org/pdf/2603.02010v1",
-      "tags": [
-        "keyword:PPML"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "differentially private inference from sufficient statistics",
-      "llm_evidence_cn": "基于充分统计量的差分隐私推理",
-      "llm_evidence": "基于充分统计量的差分隐私推理",
-      "canonical_evidence": "基于充分统计量的差分隐私推理",
-      "llm_tldr_en": "Develops a method for noise-calibrated inference using differentially private sufficient statistics.",
-      "llm_tldr_cn": "开发了一种利用差分隐私充分统计量进行噪声校准推理的方法。",
-      "llm_tldr": "开发了一种利用差分隐私充分统计量进行噪声校准推理的方法。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "privacy-preserving machine learning techniques and frameworks",
-      "matched_requirement_id": "req-10",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.02010v1",
       "carry_days": 1
     },
     {
@@ -417,13 +140,13 @@
         "query:FSS LLM"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "differentially private tabular data synthesis in federated settings",
-      "llm_evidence_cn": "联邦环境下的差分隐私表格数据合成",
-      "llm_evidence": "联邦环境下的差分隐私表格数据合成",
-      "canonical_evidence": "联邦环境下的差分隐私表格数据合成",
-      "llm_tldr_en": "Introduces HeteroFedSyn for privacy-preserving tabular data synthesis across heterogeneous federated participants.",
-      "llm_tldr_cn": "引入 HeteroFedSyn 框架，用于在异构联邦参与者之间进行隐私保护的表格数据合成。",
-      "llm_tldr": "引入 HeteroFedSyn 框架，用于在异构联邦参与者之间进行隐私保护的表格数据合成。",
+      "llm_evidence_en": "Differentially private data synthesis in federated learning settings",
+      "llm_evidence_cn": "联邦学习环境下的差分隐私数据合成",
+      "llm_evidence": "联邦学习环境下的差分隐私数据合成",
+      "canonical_evidence": "联邦学习环境下的差分隐私数据合成",
+      "llm_tldr_en": "Presents a framework for synthesizing tabular data with differential privacy in heterogeneous federated networks.",
+      "llm_tldr_cn": "提出一种在异构联邦网络中进行差分隐私表格数据合成的框架。",
+      "llm_tldr": "提出一种在异构联邦网络中进行差分隐私表格数据合成的框架。",
       "llm_tags": [
         "query:ppml"
       ],
@@ -432,45 +155,6 @@
       "matched_requirement_id": "req-13",
       "selection_source": "carryover_cache",
       "paper_id": "2603.08832v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2602.22633v1",
-      "title": "Tackling Privacy Heterogeneity in Differentially Private Federated Learning",
-      "abstract": "Differentially private federated learning (DP-FL) enables clients to collaboratively train machine learning models while preserving the privacy of their local data. However, most existing DP-FL approaches assume that all clients share a uniform privacy budget, an assumption that does not hold in real-world scenarios where privacy requirements vary widely. This privacy heterogeneity poses a significant challenge: conventional client selection strategies, which typically rely on data quantity, cannot distinguish between clients providing high-quality updates and those introducing substantial noise due to strict privacy constraints. To address this gap, we present the first systematic study of privacy-aware client selection in DP-FL. We establish a theoretical foundation by deriving a convergence analysis that quantifies the impact of privacy heterogeneity on training error. Building on this analysis, we propose a privacy-aware client selection strategy, formulated as a convex optimization problem, that adaptively adjusts selection probabilities to minimize training error. Extensive experiments on benchmark datasets demonstrate that our approach achieves up to a 10% improvement in test accuracy on CIFAR-10 compared to existing baselines under heterogeneous privacy budgets. These results highlight the importance of incorporating privacy heterogeneity into client selection for practical and effective federated learning.",
-      "authors": [
-        "Ruichen Xu",
-        "Ying-Jun Angela Zhang",
-        "Jianwei Huang"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG",
-        "cs.DC"
-      ],
-      "published": "2026-02-26T05:20:37+00:00",
-      "link": "https://arxiv.org/pdf/2602.22633v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "privacy-aware client selection in differentially private federated learning",
-      "llm_evidence_cn": "差分隐私联邦学习中的隐私感知客户端选择",
-      "llm_evidence": "差分隐私联邦学习中的隐私感知客户端选择",
-      "canonical_evidence": "差分隐私联邦学习中的隐私感知客户端选择",
-      "llm_tldr_en": "Studies client selection strategies to handle privacy heterogeneity in differentially private federated learning.",
-      "llm_tldr_cn": "研究了差分隐私联邦学习中的客户端选择策略，以应对不同客户端的隐私预算差异。",
-      "llm_tldr": "研究了差分隐私联邦学习中的客户端选择策略，以应对不同客户端的隐私预算差异。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "privacy-preserving federated learning architectures",
-      "matched_requirement_id": "req-13",
-      "selection_source": "carryover_cache",
-      "paper_id": "2602.22633v1",
       "carry_days": 1
     },
     {
@@ -494,13 +178,13 @@
         "query:FSS LLM"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "Federated text generation with differential privacy for LLMs",
-      "llm_evidence_cn": "针对大语言模型的差分隐私联邦文本生成",
-      "llm_evidence": "针对大语言模型的差分隐私联邦文本生成",
-      "canonical_evidence": "针对大语言模型的差分隐私联邦文本生成",
-      "llm_tldr_en": "Proposes a resource-adaptive federated learning framework for private synthetic text generation using LLMs.",
-      "llm_tldr_cn": "提出一种资源自适应的联邦学习框架，用于大语言模型的隐私合成文本生成。",
-      "llm_tldr": "提出一种资源自适应的联邦学习框架，用于大语言模型的隐私合成文本生成。",
+      "llm_evidence_en": "resource-adaptive federated learning with differential privacy",
+      "llm_evidence_cn": "具有差分隐私的资源自适应联邦学习",
+      "llm_evidence": "具有差分隐私的资源自适应联邦学习",
+      "canonical_evidence": "具有差分隐私的资源自适应联邦学习",
+      "llm_tldr_en": "Proposes a federated learning framework for generating DP synthetic text datasets across heterogeneous clients.",
+      "llm_tldr_cn": "提出了一种联邦学习框架，用于在异构客户端之间生成差分隐私合成文本数据集。",
+      "llm_tldr": "提出了一种联邦学习框架，用于在异构客户端之间生成差分隐私合成文本数据集。",
       "llm_tags": [
         "query:ppml"
       ],
@@ -528,13 +212,13 @@
         "keyword:PPML"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "Differentially private RLHF for medical dialogue systems",
+      "llm_evidence_en": "differentially private RLHF for medical dialogue systems",
       "llm_evidence_cn": "医疗对话系统的差分隐私RLHF",
       "llm_evidence": "医疗对话系统的差分隐私RLHF",
       "canonical_evidence": "医疗对话系统的差分隐私RLHF",
-      "llm_tldr_en": "Introduces a framework for end-to-end differentially private reinforcement learning from human feedback in LLMs.",
-      "llm_tldr_cn": "介绍了一种在大语言模型中实现端到端差分隐私人类反馈强化学习的框架。",
-      "llm_tldr": "介绍了一种在大语言模型中实现端到端差分隐私人类反馈强化学习的框架。",
+      "llm_tldr_en": "Presents an end-to-end framework for differentially private reinforcement learning from human feedback in LLMs.",
+      "llm_tldr_cn": "提出了一个用于大语言模型差分隐私人类反馈强化学习的端到端框架。",
+      "llm_tldr": "提出了一个用于大语言模型差分隐私人类反馈强化学习的端到端框架。",
       "llm_tags": [
         "query:ppml:composite"
       ],
@@ -543,210 +227,6 @@
       "matched_requirement_id": "req-composite-ppml",
       "selection_source": "carryover_cache",
       "paper_id": "2603.03054v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2602.21721v1",
-      "title": "Private and Robust Contribution Evaluation in Federated Learning",
-      "abstract": "Cross-silo federated learning allows multiple organizations to collaboratively train machine learning models without sharing raw data, but client updates can still leak sensitive information through inference attacks. Secure aggregation protects privacy by hiding individual updates, yet it complicates contribution evaluation, which is critical for fair rewards and detecting low-quality or malicious participants. Existing marginal-contribution methods, such as the Shapley value, are incompatible with secure aggregation, and practical alternatives, such as Leave-One-Out, are crude and rely on self-evaluation.   We introduce two marginal-difference contribution scores compatible with secure aggregation. Fair-Private satisfies standard fairness axioms, while Everybody-Else eliminates self-evaluation and provides resistance to manipulation, addressing a largely overlooked vulnerability. We provide theoretical guarantees for fairness, privacy, robustness, and computational efficiency, and evaluate our methods on multiple medical image datasets and CIFAR10 in cross-silo settings. Our scores consistently outperform existing baselines, better approximate Shapley-induced client rankings, and improve downstream model performance as well as misbehavior detection. These results demonstrate that fairness, privacy, robustness, and practical utility can be achieved jointly in federated contribution evaluation, offering a principled solution for real-world cross-silo deployments.",
-      "authors": [
-        "Delio Jaramillo Velez",
-        "Gergely Biczok",
-        "Alexandre Graell i Amat",
-        "Johan Ostman",
-        "Balazs Pejo"
-      ],
-      "primary_category": "cs.CR",
-      "categories": [
-        "cs.CR",
-        "cs.GT",
-        "cs.LG"
-      ],
-      "published": "2026-02-25T09:27:40+00:00",
-      "link": "https://arxiv.org/pdf/2602.21721v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "secure aggregation and contribution evaluation in federated learning",
-      "llm_evidence_cn": "联邦学习中的安全聚合与贡献评估",
-      "llm_evidence": "联邦学习中的安全聚合与贡献评估",
-      "canonical_evidence": "联邦学习中的安全聚合与贡献评估",
-      "llm_tldr_en": "Introduces contribution scores compatible with secure aggregation for fair and private federated learning.",
-      "llm_tldr_cn": "引入与安全聚合兼容的贡献评分，实现公平且隐私保护的联邦学习。",
-      "llm_tldr": "引入与安全聚合兼容的贡献评分，实现公平且隐私保护的联邦学习。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "privacy-preserving federated learning architectures",
-      "matched_requirement_id": "req-13",
-      "selection_source": "carryover_cache",
-      "paper_id": "2602.21721v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2602.18304v1",
-      "title": "FeatureBleed: Inferring Private Enriched Attributes From Sparsity-Optimized AI Accelerators",
-      "abstract": "Backend enrichment is now widely deployed in sensitive domains such as product recommendation pipelines, healthcare, and finance, where models are trained on confidential data and retrieve private features whose values influence inference behavior while remaining hidden from the API caller. This paper presents the first hardware-level backend retrieval data-stealing attack, showing that accelerator optimizations designed for performance can directly undermine data confidentiality and bypass state-of-the-art privacy defenses.   Our attack, FEATUREBLEED, exploits zero-skipping in AI accelerators to infer private backend-retrieved features solely through end-to-end timing, without relying on power analysis, DVFS manipulation, or shared-cache side channels. We evaluate FEATUREBLEED on three datasets spanning medical and non-medical domains: Texas-100X (clinical records), OrganAMNIST (medical imaging), and Census-19 (socioeconomic data). We further evaluate FEATUREBLEED across three hardware backends (Intel AVX, Intel AMX, and NVIDIA A100) and three model architectures (DNNs, CNNs, and hybrid CNN-MLP pipelines), demonstrating that the leakage generalizes across CPU and GPU accelerators, data modalities, and application domains, with an adversarial advantage of up to 98.87 percentage points.   Finally, we identify the root cause of the leakage as sparsity-driven zero-skipping in modern hardware. We quantify the privacy-performance-power trade-off: disabling zero-skipping increases Intel AMX per-operation energy by up to 25 percent and incurs 100 percent performance overhead. We propose a padding-based defense that masks timing leakage by equalizing responses to the worst-case execution time, achieving protection with only 7.24 percent average performance overhead and no additional power cost.",
-      "authors": [
-        "Darsh Asher",
-        "Farshad Dizani",
-        "Joshua Kalyanapu",
-        "Rosario Cammarota",
-        "Aydin Aysu",
-        "Samira Mirbagher Ajorpaz"
-      ],
-      "primary_category": "cs.CR",
-      "categories": [
-        "cs.CR"
-      ],
-      "published": "2026-02-20T16:01:16+00:00",
-      "link": "https://arxiv.org/pdf/2602.18304v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "hardware-level side-channel attack on private inference",
-      "llm_evidence_cn": "针对隐私推理的硬件级侧信道攻击",
-      "llm_evidence": "针对隐私推理的硬件级侧信道攻击",
-      "canonical_evidence": "针对隐私推理的硬件级侧信道攻击",
-      "llm_tldr_en": "Introduces FeatureBleed, a timing attack on AI accelerators that leaks private features during inference.",
-      "llm_tldr_cn": "介绍了FeatureBleed，一种利用AI加速器时序泄露推理过程中私有特征的攻击。",
-      "llm_tldr": "介绍了FeatureBleed，一种利用AI加速器时序泄露推理过程中私有特征的攻击。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "secure and private inference in neural networks",
-      "matched_requirement_id": "req-11",
-      "selection_source": "carryover_cache",
-      "paper_id": "2602.18304v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.08252v2",
-      "title": "FedPrism: Adaptive Personalized Federated Learning under Non-IID Data",
-      "abstract": "Federated Learning (FL) suffers significant performance degradation in real-world deployments characterized by moderate to extreme statistical heterogeneity (non-IID client data). While global aggregation strategies promote broad generalization, they often fail to capture the diversity of local data distributions, leading to suboptimal personalization.   We address this problem with FedPrism, a framework that uses two main strategies. First, it uses a Prism Decomposition method that builds each client's model from three parts: a global foundation, a shared group part for similar clients, and a private part for unique local data. This allows the system to group similar users together automatically and adapt if their data changes. Second, we include a Dual-Stream design that runs a general model alongside a local specialist. The system routes predictions between the general model and the local specialist based on the specialist's confidence.   Through systematic experiments on non-IID data partitions, we demonstrate that FedPrism exceeds static aggregation and hard-clustering baselines, achieving significant accuracy gains under high heterogeneity. These results establish FedPrism as a robust and flexible solution for federated learning in heterogeneous environments, effectively balancing generalizable knowledge with adaptive personalization.",
-      "authors": [
-        "Prakash Kumbhakar",
-        "Shrey Srivastava",
-        "Haroon R Lone"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG"
-      ],
-      "published": "2026-03-09T11:23:32+00:00",
-      "link": "https://arxiv.org/pdf/2603.08252v2",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Personalized Federated Learning framework for non-IID data",
-      "llm_evidence_cn": "针对非独立同分布数据的个性化联邦学习框架",
-      "llm_evidence": "针对非独立同分布数据的个性化联邦学习框架",
-      "canonical_evidence": "针对非独立同分布数据的个性化联邦学习框架",
-      "llm_tldr_en": "FedPrism uses decomposition to handle statistical heterogeneity in personalized federated learning.",
-      "llm_tldr_cn": "FedPrism通过模型分解策略解决个性化联邦学习中的数据异构性问题。",
-      "llm_tldr": "FedPrism通过模型分解策略解决个性化联邦学习中的数据异构性问题。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "privacy-preserving federated learning architectures",
-      "matched_requirement_id": "req-13",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.08252v2",
-      "carry_days": 1
-    },
-    {
-      "id": "2602.19207v1",
-      "title": "HybridFL: A Federated Learning Approach for Financial Crime Detection",
-      "abstract": "Federated learning (FL) is a privacy-preserving machine learning paradigm that enables multiple parties to collaboratively train models on privately owned data without sharing raw information. While standard FL typically addresses either horizontal or vertical data partitions, many real-world scenarios exhibit a complex hybrid distribution. This paper proposes Hybrid Federated Learning (HybridFL) to address data split both horizontally across disjoint users and vertically across complementary feature sets. We evaluate HybridFL in a financial crime detection context, where a transaction party holds transaction-level attributes and multiple banks maintain private account-level features. By integrating horizontal aggregation and vertical feature fusion, the proposed architecture enables joint learning while strictly preserving data locality. Experiments on AMLSim and SWIFT datasets demonstrate that HybridFL significantly outperforms the transaction-only local model and achieves performance comparable to a centralized benchmark.",
-      "authors": [
-        "Afsana Khan",
-        "Marijn ten Thij",
-        "Guangzhi Tang",
-        "Anna Wilbik"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG",
-        "cs.AI"
-      ],
-      "published": "2026-02-22T14:36:24+00:00",
-      "link": "https://arxiv.org/pdf/2602.19207v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Hybrid Federated Learning for horizontal and vertical data partitions",
-      "llm_evidence_cn": "针对横向和纵向数据分区的混合联邦学习",
-      "llm_evidence": "针对横向和纵向数据分区的混合联邦学习",
-      "canonical_evidence": "针对横向和纵向数据分区的混合联邦学习",
-      "llm_tldr_en": "HybridFL addresses complex data distributions in financial crime detection using federated learning.",
-      "llm_tldr_cn": "HybridFL通过整合横向聚合和纵向特征融合来解决金融犯罪检测中的复杂数据分布问题。",
-      "llm_tldr": "HybridFL通过整合横向聚合和纵向特征融合来解决金融犯罪检测中的复杂数据分布问题。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "privacy-preserving federated learning architectures",
-      "matched_requirement_id": "req-13",
-      "selection_source": "carryover_cache",
-      "paper_id": "2602.19207v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.00181v1",
-      "title": "Engineering FAIR Privacy-preserving Applications that Learn Histories of Disease",
-      "abstract": "A recent report on \"Learning the natural history of human disease with generative transformers\" created an opportunity to assess the engineering challenge of delivering user-facing Generative AI applications in privacy-sensitive domains. The application of these models, particularly for personalized healthcare tasks like predicting individual morbidity risk, is typically constrained by data privacy concerns. This project was accordingly designed as an in-browser model deployment exercise (an \"App\") testing the architectural boundaries of client-side inference generation (no downloads or installations). We relied exclusively on the documentation provided in the reference report to develop the model, specifically testing the \"R\" component of the FAIR data principles: Findability, Accessibility, Interoperability, and Reusability. The successful model deployment, leveraging ONNX and a custom JavaScript SDK, establishes a secure, high-performance architectural blueprint for the future of private generative AI in medicine.",
-      "authors": [
-        "Ines N. Duarte",
-        "Praphulla M. S. Bhawsar",
-        "Lee K. Mason",
-        "Jeya Balaji Balasubramanian",
-        "Daniel E. Russ",
-        "Arlindo L. Oliveira",
-        "Jonas S. Almeida"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG",
-        "cs.AI",
-        "cs.SE"
-      ],
-      "published": "2026-02-26T21:19:28+00:00",
-      "link": "https://arxiv.org/pdf/2603.00181v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Client-side inference for generative transformers in healthcare",
-      "llm_evidence_cn": "医疗领域生成式Transformer的客户端推理",
-      "llm_evidence": "医疗领域生成式Transformer的客户端推理",
-      "canonical_evidence": "医疗领域生成式Transformer的客户端推理",
-      "llm_tldr_en": "Explores architectural boundaries of client-side private inference for disease history transformers.",
-      "llm_tldr_cn": "探讨了用于疾病史预测的Transformer模型在客户端进行隐私推理的架构边界。",
-      "llm_tldr": "探讨了用于疾病史预测的Transformer模型在客户端进行隐私推理的架构边界。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "secure and private inference in neural networks",
-      "matched_requirement_id": "req-11",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.00181v1",
       "carry_days": 1
     }
   ]
