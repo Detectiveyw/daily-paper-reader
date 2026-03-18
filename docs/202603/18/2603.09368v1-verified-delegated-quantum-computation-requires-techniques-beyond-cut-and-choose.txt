@@ -1,0 +1,1528 @@
+Title: Verified delegated quantum computation requires techniques beyond cut-and-choose
+
+URL Source: https://arxiv.org/pdf/2603.09368v1
+
+Published Time: Wed, 11 Mar 2026 00:46:50 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# Verified delegated quantum computation requires techniques beyond cut-and-choose 
+
+Fabian Wiesner 1, † and Anna Pappa 1
+
+> 1
+
+Electrical Engineering and Computer Science Department, Technische Universität Berlin, 10587 Berlin, Germany 
+
+E-mail: †f.wiesner@tu-berlin.de 
+
+Abstract. Delegated quantum computation enables a client with limited quantum capabilities to outsource computations to a more powerful quantum server while preserving correctness and privacy. Verification is crucial in this setting to ensure that the untrusted quantum server performs the computation honestly and returns correct results. A common verification method is the quantum cut-and-choose technique. Inspired by classical verification methods for two-party computation, the client uses the majority of the delegated rounds to test the server’s honesty, while keeping the remaining ones for the actual computation. Combining this technique with other methods, such as quantum error correction, could help achieve negligible cheating probabilities for the server; however, such methods can impose significant overheads making implementations unfeasible for the near-term future. In this work, we investigate whether cut-and-choose can yield efficient and secure verifiable quantum computation without additional costly techniques. We find that verifiable delegated quantum computation protocols relying solely on cut-and-choose techniques cannot be secure and efficient at the same time. 
+
+1. Introduction 
+
+Several technological advances towards usable quantum computers have been made recently. Due to the expected unprecedented speedup for relevant computational problems, such as factoring and simulating chemical reactions, quantum computers are appealing to scientific institutions and companies alike. However, compared to classical computers, current and near-term implementations of quantum computers are expensive, massive in size, and require considerable effort to operate and maintain. Indeed, there is no indication that these drawbacks will be alleviated in the foreseeable future, if ever, and that non-specialized organizations will be able to operate quantum computers. One solution to this problem is cloud access via the (quantum) Internet. Although companies building quantum computers have already implemented this solution, it comes with significant downsides. If a client requires access to a quantum computer, beyond mere testing or playful exploration, it is reasonable to assume that the delegated computation is non-trivial. This implies that the algorithm, as well as the input and output data, may be of significant value. Consequently, if the service provider (server) is untrusted, the client cannot risk the disclosure of this sensitive information. 
+
+> arXiv:2603.09368v1 [quant-ph] 10 Mar 2026
+
+Verified delegated quantum computation requires techniques beyond cut-and-choose 2
+
+Blindness is the property that ensures that no information about the computation, the input, or the output is leaked. Recent explorations [1] provide evidence that achieving blindness for purely classical clients is unlikely without additional assumptions, such as the quantum hardness of the Learning with Errors (LWE) problem. Remarkably, granting the client only minimal quantum capabilities, such as preparing or measuring single qubits and performing Pauli operations, is sufficient to obtain perfect, information-theoretic blindness [2, 3]. Beyond preserving privacy, the client must also be assured that the computation is performed correctly; therefore, the protocol should provide verifiability . A widely used approach is for the client to assess the server’s honesty by delegating multiple computations: in certain rounds (test rounds), the client assigns easily verifiable tasks, while in the remaining rounds (computation rounds), the actual target computation is delegated. If a high fraction of the outputs of the test rounds are correct, the client can use a majority vote on the outputs of the computation rounds to guaranty that the server did not cheat (except with a negligible probability). The described cut-and-choose technique , i.e., intertwining verifiable test rounds with computation rounds, has been used and studied extensively in classical cryptography, e.g. in [4, 5, 6, 7]. It therefore appeared very promising at first for verifying blind quantum computations as well, and has been used in many previous studies [8, 9, 10, 11]. However, verification of quantum computation, especially with a potentially malicious server, is challenging if the output is a quantum state. In fact, all previous protocols with quantum output that achieve verifiability with negligible cheating probability, albeit not in the number of rounds but in other parameters such as the code distance, require additional techniques such as error correction [12, 13, 14]. Moreover, a recent work [15] establishes that error correction is, in fact, necessary for verifiable delegated quantum computation based on trap techniques in measurement-based quantum computing. These observations naturally lead to the question whether the cut-and-choose technique alone can suffice for verifying delegated quantum computation or whether more resource-intensive methods are fundamentally unavoidable. We demonstrate that the latter holds: we prove that every protocol that solely relies on the cut-and-choose technique is affected by a fundamental trade-off between efficiency, correctness, and security. We show that a) for a fidelity-based stand-alone and b) for a generic composable security definition, if a protocol utilizes the cut-and-choose technique with on average N test rounds, the following holds (informally): If εH is the probability of wrongly rejecting the output state, and εD is the deviation (measured with the fidelity or trace distance) of the (malicious) server from an honest behavior that is not noticed by the client, then the sum of the two is lower bounded by a non-negligible function in N .We specifically construct an attack that results in these lower bounds for εH +εD for composable and stand-alone security. Importantly, this attack is separable, independent and identically distributed (i.i.d.) and does not require a predetermined round number Verified delegated quantum computation requires techniques beyond cut-and-choose 3or knowledge of the server about the distribution that governs the round number. Hence, our work surpasses intuitive arguments about the limitations of the cut-and-choose technique and provides a formal no-go result for a broad class of protocols. 
+
+2. Background 
+
+In this section, we present the required background and describe the general class of protocols under consideration. We assume a protocol with a probabilistic total of n + 1 
+
+rounds, of which n are devoted to verification 1. We assume that the client and the server use a (blind) delegated quantum computation (DQC) subroutine, which allows the client to delegate computations to the server. We consider: 
+
+• a probability distribution Ω : N → [0 , 1] , that the client uses to sample the number of test rounds n,
+
+• k qubit number of the input and output of the computation, 
+
+• a family of trap-generators {Θk,n }n∈N 
+
+> k∈N+
+
+, each returning for a given round i, a test computation and input, i.e., a unitary on Ti ∈ U( C2k
+
+) and a pure state χi ∈ S( C2k
+
+),2
+
+• a family of (positive semidefinite) measurement operators n
+
+μk,n (0) ∈ Pos 
+
+
+
+C2kn 
+
+o 
+
+> k∈N+,n ∈N
+
+that the client uses to decide whether to accept or reject the server’s behavior. We prove that cut-and-choose verifiable delegated quantum computing (VDQC) with quantum output cannot be secure and correct, and at the same time efficient, without additional correction or detection techniques, such as error-detection codes. Since we prove a no-go result, it suffices to present a successful malicious strategy for one pair of input and computation. Let’s consider the state ψ = |+⟩⟨ +|⊗k and the computation U = 1⊗k 
+
+> 2
+
+for an arbitrary 
+
+k > 0. The server’s attack is fairly simple; the server acts honestly in every round, except for applying the operation: 
+
+P (α) = 1 00 eiα 
+
+!
+
+to the kth qubit either before or after the delegated unitary – note that all currently known implementations of DQC offer at least one of these two types of access to the server. For a given number of test rounds n and output round number ℓ, the probability that the client accepts when the server performs this attack is: 
+
+pD 
+
+> (n,ℓ )
+
+=
+
+*
+
+μk,n (0) 
+
+> n+1
+
+O
+
+> i=1
+> i̸=ℓ
+
+T αi (|χi⟩⟨ χi|)
+
++
+
+.  
+
+> 1Note that there is no loss of generality in assuming only a single state for the output, as outputting more states can only decrease the fidelity if the server is dishonest.
+> 2We lift the implied restrictions in the appendix.
+
+Verified delegated quantum computation requires techniques beyond cut-and-choose 4
+
+Protocol 1 The client inputs a state ψC ∈ D (C2k
+
+) and a unitary U ∈ U( C2k
+
+) and receives as output the state ρc. 
+
+> 1:
+
+The client samples n ←Ω N. 
+
+> 2:
+
+The client samples randomly the round that is used for output ℓ ←$ {1, ..., n + 1 }. 
+
+> 3:
+
+for i = 1 , ..., n + 1 do  
+
+> 4:
+
+if i̸ = ℓ then  
+
+> 5:
+
+The client delegates a trap-computation Ti, χ i ← Θk,n (i) and saves the output of the computation.  
+
+> 6:
+
+else  
+
+> 7:
+
+The client delegates U on the input ψC and saves the output as ϕℓ. 
+
+> 8:
+
+end if  
+
+> 9:
+
+end for  
+
+> 10:
+
+The client measures the outputs of the trap-computations using {μk,n (0) , 1⊗n 
+
+> C2k
+
+−
+
+μk,n (0) }. The output is r. 
+
+> 11:
+
+if r = 0 then  
+
+> 12:
+
+ρc ← ϕℓ 
+
+> 13:
+
+else  
+
+> 14:
+
+ρc ← ⊥  
+
+> 15:
+
+end if 
+
+with either T αi = Ti ◦ (1⊗k−12 ⊗ P (α)) or T αi = ( 1⊗k−12 ⊗ P (α)) ◦ Ti, depending on the order that P (α) and the delegated unitary were applied. Similarly, for a given n and ℓ, the acceptance probability pH 
+
+> (n,ℓ )
+
+when the server is honest is: 
+
+pH 
+
+> (n,ℓ )
+
+=
+
+*
+
+μk,n (0) 
+
+> n+1
+
+O
+
+> i=1
+> i̸=ℓ
+
+Ti (|χi⟩⟨ χi|)
+
++
+
+.
+
+Hence, the overall probabilities for acceptance if the server is honest (pH ), and respectively dishonest ( pD), are given by: 
+
+pH =
+
+> ∞
+
+X
+
+> n=0
+
+Ω( n)
+
+n + 1 
+
+> n+1
+
+X
+
+> ℓ=1
+
+pH
+
+> (n,ℓ )
+
+, pD =
+
+> ∞
+
+X
+
+> n=0
+
+Ω( n)
+
+n + 1 
+
+> n+1
+
+X
+
+> ℓ=1
+
+pD
+
+> (n,ℓ )
+
+.
+
+We can derive an upper bound for |pH − pD| by using the triangle inequality: 
+
+|pH − pD| =
+
+> ∞
+
+X
+
+> n=0
+
+Ω( n)
+
+n + 1 
+
+> n+1
+
+X
+
+> ℓ=1
+
+ pH 
+
+> (n,ℓ )
+
+− pD
+
+> (n,ℓ )
+
+ ≤
+
+> ∞
+
+X
+
+> n=0
+
+Ω( n)
+
+n + 1 
+
+> n+1
+
+X
+
+> ℓ=1
+
+pH 
+
+> (n,ℓ )
+
+− pD 
+
+> (n,ℓ )
+
+. (1) We can further upper-bound the individual terms by using the fact that the trace distance of n-fold tensor products Nn+1 
+
+> i=1
+> i̸=ℓ
+
+Ti(|χi⟩⟨ χi|) and Nn+1 
+
+> i=1
+> i̸=ℓ
+
+T αi (|χi⟩⟨ χi|) of pure states Verified delegated quantum computation requires techniques beyond cut-and-choose 5is given by 
+
+> n+1
+
+O
+
+> i=1
+> i̸=ℓ
+
+Ti(|χi⟩⟨ χi|) −
+
+> n+1
+
+O
+
+> i=1
+> i̸=ℓ
+
+T αi (|χi⟩⟨ χi|)
+
+> 1
+
+= 2 
+
+vuuut1 −
+
+> n+1
+
+Y
+
+> i=1
+> i̸=ℓ
+
+⟨χi| T † 
+
+> i
+
+T αi |χi⟩ 2
+
+.
+
+Using the Holevo-Helstrom theorem [16], which states that the distinguishability between two states is upper bounded by half the trace distance, we find: 
+
+|pH 
+
+> (n,ℓ )
+
+− pD
+
+> (n,ℓ )
+
+| ≤ 
+
+vuuut1 −
+
+> n+1
+
+Y
+
+> i=1
+> i̸=ℓ
+
+⟨χi| T † 
+
+> i
+
+T αi |χi⟩ 2
+
+. (2) If the attack is applied before the delegated unitary, we find 
+
+⟨χi| T † 
+
+> i
+
+T αi |χi⟩ 2
+
+= ⟨χi| T † 
+
+> i
+
+Ti
+
+ 1⊗k−12 ⊗ P (α) |χi⟩ 2
+
+= ⟨χi|  1⊗k−12 ⊗ P (α) |χi⟩ 2 .
+
+If, however, the attack happened after the delegated unitary, we find 
+
+⟨χi| T † 
+
+> i
+
+T αi |χi⟩ 2
+
+= ⟨χi| T †
+
+> i
+
+ 1⊗k−12 ⊗ P (α) Ti |χi⟩ 2
+
+.
+
+So either way it holds 
+
+⟨χi| T † 
+
+> i
+
+T αi |χi⟩ 2
+
+≥ min  
+
+> |u⟩∈ S( C2k)
+
+⟨u|  1⊗k−12 ⊗ P (α) |u⟩ 2 .
+
+The right-hand side of this inequality is the minimum of the squared absolute values of the elements in the numerical range of 1⊗k−12 ⊗ P (α). Since this operator has only two different eigenvalues, 1 and eiα , and the numerical range is convex by the Toeplitz–Hausdorff theorem [16] we can write 
+
+⟨χi| T † 
+
+> i
+
+T αi |χi⟩ 2
+
+≥ min  
+
+> λ∈[0 ,1]
+
+λ + (1 − λ)eiα 2 = min  
+
+> λ∈[0 ,1]
+
+λ2 + (1 − λ)2 + 2 λ(1 − λ) cos( α).
+
+The minimum is obtained at λ = 1/2 which implies 
+
+⟨χi| T † 
+
+> i
+
+T αi |χi⟩ 2
+
+≥ cos 
+
+α
+
+2
+
+2
+
+Inserted in (2) we find 
+
+|pH 
+
+> (n,ℓ )
+
+− pD
+
+> (n,ℓ )
+
+| ≤ 
+
+r
+
+1 − cos 
+
+α
+
+2
+
+2n
+
+,
+
+which implies for (1) 
+
+|pH − pD| ≤ 
+
+> ∞
+
+X
+
+> n=0
+
+Ω( n)
+
+n + 1 
+
+> n+1
+
+X
+
+> ℓ=1
+
+r
+
+1 − cos 
+
+α
+
+2
+
+2n
+
+=
+
+> ∞
+
+X
+
+> n=0
+
+Ω( n)
+
+r
+
+1 − cos 
+
+α
+
+2
+
+2nVerified delegated quantum computation requires techniques beyond cut-and-choose 6The function 
+
+q
+
+1 − cos( α/2)2n is concave in n (since 0 ≤ cos( α/2)2 ≤ 1), and we can therefore utilize Jensen’s inequality and find: 
+
+|pH − pD| ≤ 
+
+r
+
+1 − cos 
+
+α
+
+2
+
+2N
+
+=
+
+s
+
+1 −
+
+
+
+1 − sin 
+
+α
+
+2
+
+2N
+
+. (3) where N is the expected number of test rounds. With this preparation, we present our main results in the next section. 
+
+3. Security 
+
+We are now ready to examine the security aspects of the type of protocols presented above. We will first define stand-alone security and prove a trade-off between efficiency and security. We will also prove a similar trade-off for generic composable security definitions by providing a bound for trace distances that are crucial in all composable security frameworks. 
+
+3.1. Stand-alone security 
+
+We first define fidelity-based stand-alone security inspired by a similar security definition for quantum state verification used in [17]. The protocol of the client (respectively server) is denoted as πC (respectively πS ). 
+
+Definition 1 A protocol π = ( πC , π S ) applied on a resource R is an εH -correct εD-secure implementation of VDQC if for any input ψ ∈ D (X ) and any unitary U ∈ U( X ):
+
+• Correctness : If the server is honest, it holds 3:
+
+F (ρH , U (ψ)) ≥ 1 − εH , (4) 
+
+where ρH is the state obtained from πC RπS .
+
+• Security : For any attack of the server, it holds: 
+
+max 
+
+> p∈[0 ,1]
+
+F (ρD, pU (ψ) + (1 − p) |⊥⟩⟨⊥| ) ≥ 1 − εD, (5) 
+
+where ρD is the state the client obtains from πC R in composition with the attack of the server and |⊥⟩⟨⊥| is orthogonal to all possible outputs of the protocol in case of no abort. 
+
+We now prove the trade-off with respect to Definition 1, using the results from the previous section. 
+
+Theorem 1 Let π = ( πC , π S ) be a protocol that implements VDQC from quantum communication channels as described in Protocol 1. If π is εH -correct and εD-secure according to Definition 1, it holds that εH + εD ≥ 1/7N , where N is the expected number of test rounds.      
+
+> 3We use F(ρ, σ ) =  Tr p √ρσ √ρ2.
+
+Verified delegated quantum computation requires techniques beyond cut-and-choose 7
+
+Proof: We consider ψ = |+⟩⟨ +|⊗k, U = 1⊗k 
+
+> 2
+
+and the same attack as in the preparation. The state outputted by the protocol if the server is honest is 
+
+ρH = pH |+⟩⟨ +|⊗k + (1 − pH ) |⊥⟩⟨⊥| . (6) 
+
+This implies directly 
+
+F
+
+
+
+ρH , |+⟩⟨ +|⊗k
+
+= pH ⇒ εH ≥ 1 − pH . (7) 
+
+If the server is dishonest, we find 
+
+ρD =pD |+⟩⟨ +|⊗k−1 ⊗ | +α⟩⟨ +α|
+
++(1 − pD) |⊥⟩⟨⊥| . (8) 
+
+where |+α⟩ = 1/√2
+
+> eiα
+
+/√2
+
+!
+
+.Now, if every pair of positive semi-definite operators (R1, S 2) ∈ { P1, Q 1} × { P2, Q 2} is orthogonal, it holds: 
+
+F (P1 + P2, Q 1 + Q2) = 
+
+p F (P1, Q 1) + pF (P2, Q 2)
+
+2
+
+,
+
+and therefore we can compute the fidelity of ρD with σp = p |+⟩⟨ +|⊗k + (1 − p) |⊥⟩⟨⊥| :
+
+F (ρD, σ p) = 
+
+r
+
+pDp cos 
+
+α
+
+2
+
+2
+
++ p(1 − pD) (1 − p)
+
+!2
+
+.
+
+This implies according to Definition 1 
+
+εD ≥ 1 − max 
+
+> p∈[0 ,1]
+
+r
+
+pDp cos 
+
+α
+
+2
+
+2
+
++ p(1 − pD) (1 − p)
+
+!2
+
+,
+
+Since, max p∈[0 ,1] 
+
+ √pa + √1 − pb 2 = a2 + b2 we find 
+
+εD ≥ 1 − pD cos 
+
+α
+
+2
+
+2
+
+− (1 − pD) = pD sin 
+
+α
+
+2
+
+2
+
+.
+
+Now we get a lower bound for the sum of εH and εD:
+
+εH + εD ≥ 1 − pH + pD sin 
+
+α
+
+2
+
+2
+
+≥ sin 
+
+α
+
+2
+
+2
+
+(1 − | pH − pD|).
+
+Using (3) next gives us 
+
+εH + εD ≥ sin 
+
+α
+
+2
+
+2
+
+1 −
+
+s
+
+1 −
+
+
+
+1 − sin 
+
+α
+
+2
+
+2N
+
+ .Verified delegated quantum computation requires techniques beyond cut-and-choose 8
+
+The attacker can choose α and therefore also sin( α/2). We let the attacker choose α such that sin( α/2)2 = 4/9N and using (1 − x/n)n ≥ 1 − x for |x| ≤ n we find 
+
+εH + εD ≥ 49N 1 −
+
+s
+
+1 −
+
+
+
+1 − 49
+
+!
+
+= 427 N ≥ 17N
+
+■
+
+3.2. Composable security 
+
+Composable security definitions in frameworks such as universal composability [18], 
+
+abstract cryptography [19], or categorical composable cryptography [20] fulfill reasonable stand-alone security definitions. So, one could extend the stand-alone no-go result to composable security. However, we note that a more tailored analysis provides a better bound; in fact, the scaling for composable security is Ω( 1/√N ) and not just Ω( 1/N ).
+
+ρ =
+
+(U (ψ) if c = 0 
+
+⊥ if c=1 
+
+ψ, U 
+
+ρ
+
+lψ
+
+c
+
+SV
+
+c = 0 
+
+♯S             
+
+> Figure 1. Ideal functionality for VDQC. The interface of the server (right interface) is obstructed by a filter ♯Sif the server is honest, which does not forward lψand inputs c= 0 .lψis the allowed leakage that contains the register size of ψand an upper bound for the circuit length of U.
+
+The canonical ideal resource for VDQC is depicted in Fig. 1. A protocol that is 
+
+εH -correct with respect to SV ♯S fulfills: 
+
+12 ∥ρH − U (ψ)∥1 ≤ εH (9) where ρH is the client’s average output state for the input ψ in the protocol. This is because the trace distance gives the distinguishability according to the Holevo-Helstrom theorem [16], the latter being the relevant quantity in composable cryptography. If, on the other side, the protocol is εD composably secure with respect to SV , this implies that for every attack of the server on the implementation, there is an attack on the ideal setup that renders both setups indistinguishable. In abstract cryptography and 
+
+universal composability , a simulator attached to the ideal resource converts attacks on the real setting into attacks on the ideal setting; in categorical composable cryptography ,Verified delegated quantum computation requires techniques beyond cut-and-choose 9one defines an attack model and can choose the attack on the ideal setting freely. In either framework, it holds that (i) tracing out the state the server might hold cannot increase distinguishability, (ii) the attack on the ideal setting can only input c = 0 with some probability p and 
+
+c = 1 with probability 1 − p.Hence, εD-composable security implies 
+
+12 ∥ρD − (pU (ψ) + (1 − p) |⊥⟩⟨⊥| )∥1 ≤ εD, (10) where ρD is the state of the client in the implementation. We now prove a lower bound concerning the trace distances presented in (9) and (10). Again, the proof follows ideas similar to those presented in [21]. 
+
+Theorem 2 Let π = ( πC , π S ) be a protocol that implements VDQC from quantum communication channels as described in Protocol 1, ρH be the output state if the server is honest and ρD if the server is dishonest. If 
+
+12 ∥ρH − U (ψ)∥1 ≤ εH and 
+
+min 
+
+> p∈[0 ,1]
+
+12 ∥ρD − (pU (ψ) + (1 − p) |⊥⟩⟨⊥| )∥1 ≤ εD,
+
+it holds 
+
+εH + εD ≥ 14√N ,
+
+where N is the expected number of test rounds. Proof: As in Theorem 1, we consider ψ = |+⟩⟨ +|⊗k and U = 1⊗k 
+
+> 2
+
+. We also consider the same attack, which means that ρH and ρD are given in (6) and (8) respectively. As 
+
+|⊥⟩⟨⊥| is orthogonal to the space of possible output, (9) becomes: 
+
+εH ≥ 12 ρH − | +⟩⟨ +|⊗k
+
+> 1
+
+= 1 − pH
+
+We note that ∥ϕ ⊗ ν − χ ⊗ ν∥1 = ∥ϕ − χ∥1 for any density matrices ϕ, χ and ν.Further, if every pair of positive semi-definite operators (R1, S 2) ∈ { P1, Q 1} × { P2, Q 2}
+
+is orthogonal, it holds 
+
+∥P1 + P2 − Q1 + Q2∥1 = ∥P1 − Q1∥1 + ∥P2 − Q2∥1.
+
+Hence, if the server is dishonest, we find for (10) :
+
+εD ≥ min 
+
+> p∈[0 ,1]
+
+12 ρD − (p |+⟩⟨ +|⊗k + (1 − p) |⊥⟩⟨⊥| ) 1
+
+= min 
+
+> p∈[0 ,1]
+
+12 ∥pD |+α⟩⟨ +α| − p |+⟩⟨ +|∥ 1 + 12|p − pD|.Verified delegated quantum computation requires techniques beyond cut-and-choose 10 
+
+Similar to [21], we use the triangle-inequality and the fact that ∥ | +⟩⟨ +| ∥ 1 = 1 implies 
+
+|p − pD| = ∥p |+⟩⟨ +| − pD |+⟩⟨ +| ∥ 1, and we find: 
+
+min 
+
+> p∈[0 ,1]
+
+12 ∥pD |+α⟩⟨ +α| − p |+⟩⟨ +|∥ 1 + 12|p − pD| ≥ pD
+
+2 ∥| +α⟩⟨ +α| − | +⟩⟨ +|∥ 1 .
+
+On the other side, considering p = pD yields 
+
+min 
+
+> p∈[0 ,1]
+
+12 ∥pD |+α⟩⟨ +α| − p |+⟩⟨ +|∥ 1 + 12|p − pD| ≤ pD
+
+2 ∥| +α⟩⟨ +α| − | +⟩⟨ +|∥ 1 ,
+
+therefore, the left- and right-side of the above two inequalities are equal. Hence, we find: 
+
+εH + εD ≥ 1 − pH + pD
+
+2 ∥| +α⟩⟨ +α| − | +⟩⟨ +|∥ 1
+
+≥ 12 ∥| +α⟩⟨ +α| − | +⟩⟨ +|∥ 1 (1 − | pH − pD|) .
+
+Using 12 ∥| +α⟩⟨ +α| − | +⟩⟨ +|∥ 1 = | sin( α/2)| and (3) we find 
+
+εH + εD ≥ | sin( α/2)|
+
+
+
+1 −
+
+q
+
+1 −  1 − sin( α/2)2N
+
+
+
+.
+
+We finally choose | sin( α/2)| = 1/2√N and find with (1 − x/n)n ≥ 1 − x for |x| ≤ n,
+
+εH + εD ≥ 12√N
+
+1 −
+
+s
+
+1 −
+
+
+
+1 − 14N
+
+N
+
+ ≥ 14√N
+
+■
+
+4. Discussion and open questions 
+
+In our work, we prove the existence of a fundamental trade-off between correctness, security, and efficiency of verifiable delegated quantum computing protocols that solely rely on the cut-and-choose technique. We derive this trade-off for both fidelity-based stand-alone security and composable security, and observe that composable security is affected more severely. Our results can also be adapted to settings where multiple, potentially untrusted, clients delegate quantum computations to a remote server. For the sake of simplicity, in the main text we consider that the client can only send separable pure states for the test rounds and has to sample the output round uniformly. Both restrictions are lifted in the appendix, where we consider general test strategies and find a similar trade-off. The same trade-off as in the main part has also been shown to affect quantum state verification protocols that are based on cut-and-choose [21]. This similarity raises the question of whether other functionalities for verification using this technique are similarly affected. However, there are protocols [13, 14, 12] for verifiable delegated quantum computing that circumvent this trade-off by leveraging quantum error correction Verified delegated quantum computation requires techniques beyond cut-and-choose 11 combined with partitioning the resource state for each computation in the cut-and-choose procedure. We expect that one layer of quantum error correction suffices to provide security and fault tolerance, since there is no relevant difference whether the server is malicious or its devices are imperfect. Nevertheless, this double role of error correction imposes a trade-off on its own: More tolerated errors increase the risk of accepting corrupted states, while tolerating fewer errors demands better experimental implementations. The investigation of verification with noisy devices [22], which also results in non-negligible security, suggests that the double role of error-correction could pose a problem indeed. It remains to investigate under which conditions this trade-off allows for realistic and secure setups. Finally, our work does show that the overheads of techniques such as error correction are inevitable in principle, which motivates further research in this direction. 
+
+5. Ackowledgments 
+
+F. W. and A. P. acknowledge support from the Emmy Noether DFG grant No. 41829458. This work was funded by the European Union’s Horizon Europe research and innovation programme under grant agreement No. 101102140 – QIA Phase 1. This project was financially supported by BERLIN QUANTUM, an initiative endowed by the Innovation Promotion Fund of the city of Berlin. 
+
+6. References 
+
+[1] Christian Badertscher et al. “Security Limitations of Classical-Client Delegated Quantum Computing”. In: Advances in Cryptology – ASIACRYPT 2020 . Ed. by Shiho Moriai and Huaxiong Wang. Cham: Springer International Publishing, 2020. [2] Anne Broadbent, Joseph Fitzsimons, and Elham Kashefi. “Universal blind quantum computation”. In: 2009 50th Annual IEEE Symposium on Foundations of Computer Science (2009). doi : 10.1109/focs.2009.36 .[3] Tomoyuki Morimae and Keisuke Fujii. “Blind quantum computation protocol in which Alice only makes measurements”. In: Phys. Rev. A (2013). doi : 10.1103/ physreva.87.050301 .[4] Michael O Rabin. “Digitalized signatures”. In: Foundations of secure computation 
+
+(1978). [5] Gilles Brassard, David Chaum, and Claude Crépeau. “Minimum disclosure proofs of knowledge”. In: Journal of computer and system sciences (1988). [6] Claude Crépeau. “Cut-and-choose protocol”. In: Encyclopedia of Cryptography and Security . Ed. by Henk C. A. van Tilborg. Boston, MA: Springer US, 2005. doi :
+
+10.1007/0-387-23483-7_92 .Verified delegated quantum computation requires techniques beyond cut-and-choose 12 [7] Yehuda Lindell and Benny Pinkas. “An Efficient Protocol for Secure Two-Party Computation in the Presence of Malicious Adversaries”. In: Advances in Cryptology - EUROCRYPT 2007 . Ed. by Moni Naor. Berlin, Heidelberg: Springer Berlin Heidelberg, 2007. [8] Theodoros Kapourniotis et al. “Asymmetric secure multi-party quantum computation with weak clients against dishonest majority”. In: Quantum Science and Technology (Feb. 2025). [9] Dominik Leichtle et al. “Verifying BQP Computations on Noisy Devices with Minimal Overhead”. In: PRX Quantum (4 Oct. 2021). doi : 10.1103/PRXQuantum. 2.040302 .[10] Elham Kashefi, Luka Music, and Petros Wallden. “The Quantum Cut-and-Choose Technique and Quantum Two-Party Computation”. 2017. arXiv: 1703 . 03754 [quant-ph] .[11] Anne Broadbent. “How to Verify a Quantum Computation”. In: Theory of Computing (2018). doi : 10.4086/toc.2018.v014a011 .[12] Elham Kashefi and Petros Wallden. “Optimised resource construction for verifiable quantum computation”. In: J. Phys. A (2017). doi : 10.1088/1751-8121/aa5dac .[13] Tomoyuki Morimae. “Verification for measurement-only blind quantum comput-ing”. In: Phys. Rev. A (6 2014). doi : 10.1103/PhysRevA.89.060302 .[14] Joseph F. Fitzsimons and Elham Kashefi. “Unconditionally verifiable blind quantum computation”. In: Phys. Rev. A (2017). doi : 10.1103/physreva.96. 012303 .[15] Theodoros Kapourniotis et al. “Unifying quantum verification and error-detection: theory and tools for optimisations”. In: Quantum Science and Technology (May 2024). doi : 10.1088/2058-9565/ad466d .[16] John Watrous. The Theory of Quantum Information . 1st ed. Cambridge University Press, Apr. 2018. doi : 10.1017/9781316848142 .[17] Léo Colisson, Damian Markham, and Raja Yehia. “All graph state verification protocols are composably secure”. 2024. arXiv: 2402.01445 [quant-ph] .[18] Ran Canetti. “Universally composable security: A new paradigm for cryptographic protocols”. In: Proceedings 42nd IEEE Symposium on Foundations of Computer Science . 2000. [19] Ueli Maurer and Renato Renner. “Abstract cryptography”. In: Innovations in Computer Science . Tsinghua University Press, 2011. [20] Anne Broadbent and Martti Karvonen. “Categorical composable cryptography”. In: Lecture Notes in Computer Science . Springer International Publishing, 2022. 
+
+doi : 10.1007/978-3-030-99253-8_9 .[21] Fabian Wiesner et al. “Why cut-and-choose quantum state verification cannot be both efficient and secure”. In: IACR Communications in Cryptology (Jan. 8, 2026). 
+
+doi : 10.62056/ay11c3c2h .Verified delegated quantum computation requires techniques beyond cut-and-choose 13 [22] Alexandru Gheorghiu, Matty J Hoban, and Elham Kashefi. “A simple protocol for fault tolerant verification of quantum computation”. In: Quantum Science and Technology (Nov. 2018). [23] Anne Broadbent and Martti Karvonen. “Categorical composable cryptography: extended version”. In: Logical Methods in Computer Science (Dec. 2023). doi :
+
+10.46298/lmcs-19(4:30)2023 .[24] Fabian Wiesner et al. “Why quantum state verification cannot be both efficient and secure: a categorical approach”. 2025. arXiv: 2411.04767 [quant-ph] .
+
+Appendix A. General tests 
+
+In Protocol 1, the client is restricted to use pure states for the test, to keep no register for themselves and to maintain seperability between the rounds. This restriction allows to have proofs of the trade-offs that are rather similar to these for quantum state verification in [21], in which the client has no input at all. While this restriction is also motivated by the assumed incapabilities that cause the client to use verifiable delegated quantum computing instead of computing the unitary themselves, it leaves a loophole in the trade-off that will be closed in this subsection. The first step towards closing this loophole is the formalisation of the new considered protocol type. The new component of the protocol type is the channel network . The most general thing the client can do is to compose the unitaries of the test rounds using sequential and parallel composition as they like. One condition, however, is that the order of delegating these individual tests is preserved. 
+
+Q1
+
+Q2
+
+Q3
+
+T1 T2
+
+T3
+
+T4
+
+T5
+
+> {μn,k,ℓ (0) , 1⊗3
+> X − μn,k,ℓ (0) }
+
+r   
+
+> Figure A1. An example for a network of 5test unitaries that the client uses to catch the server cheating followed by the measurement.
+
+In Figure A1 we see such an example of a channel network, where a client with three registers of size D( X ) and a register K they keep for themselves, runs five test rounds. The first register, Q1, is used for the first and second test round, i.e. T1 ◦ T2 is applied. The second, Q2, is used for the third and the fifth test, i.e. T3 ◦ T5 is applied. Finally, T4 acts on Q3. After this network of unitaries is applied the client measures the registers, including K, and decides whether to accept or reject the server’s behavior. An important aspect of these networks is the order of the unitaries. Since the client can not change the order of the rounds which label the test unitaries, there is Verified delegated quantum computation requires techniques beyond cut-and-choose 14 no reasonable interpretation for the application of T2 followed by the application of T1,i.e. T2 ◦ T1. This perseverance of order is already captured in n-combs which formalize these networks, where n is the number of test rounds. An n-comb gets a sequence of 
+
+n operations and intertwines these with n + 1 other operations called teeth , where the teeth are connected by memory registers [23, 24]. Hence, the n-comb is for the client a mapping from n unitaries in U( X ), plugged into the holes of the n-comb, to a channel of type C  X ⊗W , X ⊗W , where W depends on the number of registers the client uses. Note that if the client just distributed the unitaries on different registers, the teeth basically just changed which register is part of the memory and which register goes to the next unitary, and the resulting operation will be a unitary. However, in an n-comb the client could also apply other operations within the teeth such that the resulting operation is no longer a unitary. 
+
+Appendix A.1. Protocol type 
+
+In the following, the parameters of this general cut-and-choose protocol for verifiable delegated quantum computing will be revisited or added. Lifting the restrictions on the client’s test has no influence on formalization of the probability distribution 
+
+Ω : N → [0 , 1] used to sample the number of test rounds and also k still denotes the number of qubit register the input consists of and the notation X = C2k
+
+is used again. The probability distributions {ωn : {1, ..., n + 1 } → [0 , 1] }n∈N govern the round that is used for the output in dependence on n.The n-comb Bn,k,ℓ : U( X )n → C  X ⊗Wn,k,ℓ , X ⊗Wn,k,ℓ 
+
+ that compiles the test operation has to depend on the number of test rounds n and the number of qubit registers r. The client could also choose the n-comb in dependence of the outcome round ℓ. The same holds for the number Wn,k,ℓ ∈ N of registers that are used for the tests. The test-generators are indeed rather different in the general version; instead of mapping a round to a tuple of a pure quantum state and a unitary, a test Θn,k is a tuple of a quantum state χn ∈ D  X ⊗Wn,k,ℓ ⊗ Y  and a sequence of unitaries (Ti ∈ U( X )) ni=1 ,where Y is the space that the client uses to boost its distinguishing advantage. Finally, the measurement also changed; for each test round number n, number of qubit register k and output round ℓ, the client chooses a measurement operator 
+
+μn,k,ℓ (0) ∈ Pos( X ⊗Wn,k,ℓ ⊗Y ), which again corresponds to accepting the server’s behavior. Note that the register in Y is measured as well which could allow for catching a cheating server with higher probability. The protocol type that utilizes this generalized testing is denoted in Protocol 2 below. Verified delegated quantum computation requires techniques beyond cut-and-choose 15 
+
+Protocol 2 The client inputs a register RC corresponding to D( X ) and a unitary 
+
+U ∈ U( X ). 
+
+> 1:
+
+The client samples the number of test rounds n ←Ω N according to Ω. 
+
+> 2:
+
+The client samples the round that is used for output ℓ ←ωn {1, ..., n + 1 } according to ωn. 
+
+> 3:
+
+The client fixes Wn,k,ℓ and Bn,k,ℓ . 
+
+> 4:
+
+The client initializes the register Q1, ..., QWn,k,ℓ , K ← χn with the test state.  
+
+> 5:
+
+for i = 1 , ..., n + 1 do  
+
+> 6:
+
+if i̸ = ℓ then  
+
+> 7:
+
+The client delegates a test-computation with the input Qj which is the input register in the ith hole of Bn,k,ℓ and the unitary Ti and saves the output of the computation.  
+
+> 8:
+
+else  
+
+> 9:
+
+The client delegates U on the input RC and loads the result into the register 
+
+R′ 
+
+> C
+
+. 
+
+> 10:
+
+end if  
+
+> 11:
+
+end for  
+
+> 12:
+
+The client measures the outputs of the test-computations along with K using n
+
+μn,k,ℓ (0) , 1⊗Wn,k,ℓ  
+
+> X
+
+− μn,k,ℓ (0) 
+
+o
+
+. The output is r. 
+
+> 13:
+
+if r = 0 then  
+
+> 14:
+
+The client outputs R′ 
+
+> C
+
+. 
+
+> 15:
+
+else  
+
+> 16:
+
+The client output ⊥ 
+
+> 17:
+
+end if 
+
+Appendix A.2. Preliminaries for the proofs of the trade-offs 
+
+In fact, an attack of the same type as used for the restricted protocol type is sufficient here as well. Hence, the server either applies before or after the delegated unitary a rotation of the form 1⊗k−1 
+
+> C2
+
+⊗ P (α). For an attack of this type, one can find a similar result as Section 2 for this general situation. 
+
+Lemma 1 Let π = {πC , π S } be a protocol as described in Protocol 1. Let 
+
+pH 
+
+> (n,k,ℓ )
+
+:= ⟨μn,k,ℓ (0) |(Bn,k,ℓ (( Ti)ni=1 ) ⊗ 1Y ) ( |χn⟩⟨ χn|)⟩ ,pD 
+
+> (n,k,ℓ )
+
+:= ⟨μn,k,ℓ (0) |(Bn,k,ℓ (( T αi )ni=1 ) ⊗ 1Y ) ( |χn⟩⟨ χn|)⟩
+
+be the acceptance probability for fixed n and ℓ for the honest 
+
+
+
+pH
+
+> (n,k,ℓ )
+
+
+
+and dishonest 
+
+
+
+pD
+
+> (n,k,ℓ )
+
+
+
+setting where the server applies the attack described above. The overall acceptance probabilities are hence given by 
+
+pH := 
+
+> ∞
+
+X
+
+> n=0
+
+Ω( n)
+
+> n+1
+
+X
+
+> ℓ=1
+
+ωn(ℓ)pH 
+
+> (n,k,ℓ )
+
+and pD := 
+
+> ∞
+
+X
+
+> n=0
+
+Ω( n)
+
+> n+1
+
+X
+
+> ℓ=1
+
+ωn(ℓ)pD
+
+> (n,k,ℓ )
+
+.Verified delegated quantum computation requires techniques beyond cut-and-choose 16 
+
+It holds 
+
+|pH − pD| ≤ N sin 
+
+α
+
+2
+
+
+
+,
+
+where N denotes the expected number of test rounds. Proof: The proof indeed follows ideas similar to those for the result in Section 2 and uses standard results for the diamond distance, which we denote as a difference in the completely bounded trace distance 1/2 ||| (·)||| 1, and the trace norm. First, the triangle-inequality and the Holevo-Helstrom theorem imply 
+
+|pH − pD| ≤ 
+
+> ∞
+
+X
+
+> n=0
+
+Ω( n)
+
+> n+1
+
+X
+
+> ℓ=1
+
+ωn(ℓ)12 ∥(Bn,k,ℓ (( Ti)ni=1 ) ⊗ 1Y ) ( |χn⟩⟨ χn|)−
+
+(Bn,k,ℓ (( T αi )ni=1 ) ⊗ 1Y ) ( |χn⟩⟨ χn|)∥1 .
+
+Since the diamond distance is larger or equal to the above trace distance (cf. Theorem 3.46 in [16]), one can write: 
+
+|pH − pD| ≤ 
+
+> ∞
+
+X
+
+> n=0
+
+Ω( n)
+
+> n+1
+
+X
+
+> ℓ=1
+
+ωn(ℓ)12 ||| Bn,k,ℓ (( Ti)ni=1 ) − Bn,k,ℓ (( T αi )ni=1 )||| 1 .
+
+Since the diamond distance does not increase under the applications of combs 4, this implies 
+
+|pH − pD| ≤ 
+
+> ∞
+
+X
+
+> n=0
+
+Ω( n)12
+
+> n
+
+X
+
+> i=1
+
+||| Ti − T αi ||| 1 .
+
+If the server applies the rotation after the delegated unitary, by rewriting the diamond distance in the sum and using the fact that the completely bounded trace norm is multiplicative under the tensor product and sequential composition (cf. Proposition 3.48 and Theorem 3.49 in [16]), we get: 
+
+||| Ti − T αi ||| 1 = Ti
+
+ 1⊗k 
+
+> C2
+
+− 1⊗k−1 
+
+> C2
+
+⊗ P (α)
+
+> 1
+
+= ||| Ti||| 1 1⊗k 
+
+> C2
+
+− 1⊗k−1 
+
+> C2
+
+⊗ P (α) 1 = ||| 1C2 − P (α)||| 1
+
+If the server applies the rotation before the delegated unitary, we get: 
+
+||| Ti − T αi ||| 1 =  1⊗k 
+
+> C2
+
+− 1⊗k−1 
+
+> C2
+
+⊗ P (α) Ti 1
+
+= 1⊗k 
+
+> C2
+
+− 1⊗k−1 
+
+> C2
+
+⊗ P (α) 1 ||| Ti||| 1 = ||| 1C2 − P (α)||| 1 .
+
+Theorem 3.51 in [16]) allows us to express the diamond distance as a trace distance of the maps applied on pure states: 
+
+12 ||| 1C2 − P (α)||| 1 = max 
+
+> |u⟩∈ S( C2⊗C2)
+
+12 ∥1C2⊗C2 (|u⟩⟨ u|) − (P (α) ⊗ 1C2 )( |u⟩⟨ u|)∥1
+
+=
+
+r
+
+1 − min 
+
+> |u⟩∈ S( C2⊗C2)
+
+|⟨ u| (P (α) ⊗ 1C2 ) |u⟩| 2,   
+
+> 4We refer here to the discussion in subsection Distances between networks of channels in [16] or subsection 3.1 in [24].
+
+Verified delegated quantum computation requires techniques beyond cut-and-choose 17 
+
+where we used the expression for the trace distance of pure states for the second equality. As in the main part, one finds that 
+
+min 
+
+> |u⟩∈ S( C2⊗C2)
+
+|⟨ u| (P (α) ⊗ 1C2 ) |u⟩| 2 = sin 
+
+α
+
+2
+
+
+
+,
+
+since the operator P (α) ⊗ 1C2 has only eigenvalues 1 and eiα and the same arguments for numerical range apply. Hence, using 12 ||| Ti − T αi ||| 1 = | sin( α/2)| for all 0 ≤ i ≤ n
+
+yields: 
+
+|pH − pD| ≤ | sin( α/2)|
+
+> ∞
+
+X
+
+> n=0
+
+Ω( n)n = N | sin( α/2)|,
+
+■
+
+Note how this result differs from the one for the simpler case. The new result uses a bound which essentially is of the same nature as a composition theorem: Distinguishing two compositions with the same structure – here the same comb – cannot be harder than distinguishing the components of the compositions. Interestingly, this combination of bounds implies that the overall bound for the difference in acceptance probabilities does not converge for N → ∞ although the difference can be at most 1 in the first place. The result for the simpler case 
+
+
+
+|pH − pD| ≤ 
+
+q
+
+1 −  1 − sin( α/2)2N
+
+
+
+uses areduction to an i.i.d. argument. For each round, we considered the optimal measurement for the client,where restricting to pure state testing implies an exponential convergence to 1.
+
+Appendix A.3. Fidelity-based security 
+
+Equipped with this preparation, the proofs for the trade-offs considering fidelity-based and composable security are not much different from the ones in the simpler setting. First, the trade-off for fidelity-based security is presented in Theorem 3. 
+
+Theorem 3 Let π = {πC , π S } be a verifiable delegated quantum computing protocol as described in Protocol 2. Assume the server is able to apply a unitary on the last qubit register of either the input before the delegated unitary is applied or of the output. Under this condition, if π is εH -correct and εD-secure according to Definition 1, it holds that 
+
+εH + εD ≥ 17N 2 ,
+
+where N is the expected number of test rounds. Proof: As in Theorem 1, the input ψC = |+⟩⟨ +|⊗k and the unitary U = 1X are considered. By the same argument as for Theorem 1, one finds 
+
+εH ≥ 1 − pH ,
+
+where pH in now given in Lemma 1. Verified delegated quantum computation requires techniques beyond cut-and-choose 18 
+
+Also if the server is dishonest, the same manipulations as in Theorem 1 suffice and one finds 
+
+εD ≥ pD(1 − |⟨ +|+α⟩| 2),
+
+where pH in now given in Lemma 1. Using |⟨ +|+α⟩| = cos( α/2) and Lemma 1 implies for the sum of εH and εD
+
+εH + εD ≥ 1 − pH + pD sin 
+
+α
+
+2
+
+2
+
+≥ sin 
+
+α
+
+2
+
+2
+
+(1 − | pH − pD|) ≥ sin 
+
+α
+
+2
+
+2 
+
+1 − N sin 
+
+α
+
+2
+
+  
+
+Computing the roots of first derivative after sin( α/2) reveals that sin( α/2) = 2/3N
+
+maximizes the lower bounds. This implies 
+
+εH + εD ≥ 427 N 2 ≥ 17N 2 ,
+
+which proves the claim. ■
+
+Appendix A.4. Composable security 
+
+The proof for the trade-off with regard to composable security is also similar to its counterpart for the restricted setting. 
+
+Theorem 4 Let π = {πC , π S } be a protocol that implements VDQC from quantum communication channels as described in Protocol 2. If 
+
+12 ∥ρH − U (ψ)∥1 ≤ εH and 
+
+min 
+
+> p∈[0 ,1]
+
+12 ∥ρD − (pU (ψ) + (1 − p) |⊥⟩⟨⊥| )∥1 ≤ εD,
+
+it holds 
+
+εH + εD ≥ 14N ,
+
+where N is the expected number of test rounds. Proof: Again, the input state is ψC = |+⟩⟨ +|⊗k and the delegated unitary is U = 1⊗k 
+
+> C2
+
+.Similarly as in Theorem 2, we find 
+
+εH ≥ 1 − pH ,
+
+where pH defined as in Lemma 1. If, however, the server is dishonest, by the same argument as in Theorem 2, we find 
+
+εD ≥ pD
+
+2 |+⟩⟨ +|⊗k−1 ⊗ | +α⟩⟨ +α| − | +⟩⟨ +|⊗k
+
+> 1
+
+,Verified delegated quantum computation requires techniques beyond cut-and-choose 19 
+
+where pD is given as in Lemma 1. Using the expression for the trace distance of pure state, the above becomes 
+
+εD ≥ pD
+
+q
+
+1 − |⟨ +|+α⟩| 2 = pD
+
+r
+
+1 − cos 
+
+α
+
+2
+
+2
+
+= pD sin 
+
+α
+
+2
+
+
+
+.
+
+Adding εH and εD yields in combination with Lemma 1 
+
+εH + εD ≥ 1 − pH + pD sin 
+
+α
+
+2
+
+
+
+≥ sin 
+
+α
+
+2
+
+
+
+(1 − | pH − pD|)
+
+≥ sin 
+
+α
+
+2
+
+  
+
+1 − N sin 
+
+α
+
+2
+
+  
+
+.
+
+The choice sin( α/2) = 1/2N maximizes the lower bound and yields εH + εD ≥ 1/4N . ■

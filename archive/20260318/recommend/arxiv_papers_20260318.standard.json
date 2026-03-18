@@ -1,0 +1,767 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-18T20:29:47.473285+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 25,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 77,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2603.09190v1",
+      "title": "ZipPIR: High-throughput Single-server PIR without Client-side Storage",
+      "abstract": "Private Information Retrieval (PIR) allows a client to privately access a database without revealing which element is accessed. Initial PIR protocols based on Ring Learning with Errors (RLWE) demonstrated the practicality of PIR, but achieve limited throughput. Alternatively, high-throughput protocols leverage an offline phase that requires substantial client-side storage (e.g., hints in SimplePIR) or involve prohibitive communication costs during the offline phase (e.g., Piano). These limitations conflict with the practical constraints of resource-limited clients and are further exacerbated by dynamic databases, where updates necessitate costly regeneration and retransmission of hints.   To address these challenges, we propose ZipPIR, a high-throughput PIR protocol that compresses LWE ciphertexts into significantly smaller Paillier ciphertexts. ZipPIR leverages the offline phase to obtain this size reduction without incurring the associated computational cost in the online phase. Moreover, under computational assumptions, ZipPIR features an almost silent offline phase, requiring no communication beyond an initial public key, enabling the server to independently generate and update hints during idle times without client interaction. ZipPIR achieves over 2 GB/s of throughput - comparable to state-of-the-art protocols such as SimplePIR - without the need for a large client-stored hint. For PIR over a 1 GB database, ZipPIR has up to 10x higher throughput than existing protocols with no client-side storage, while requiring less than 200 KB of server-side storage per client, significantly enhancing scalability for practical deployments. While prior PIR protocols using Paillier are very inefficient, ZipPIR is the first PIR protocol using Paillier that achieves throughput that is competitive with state-of-the-art PIR protocols.",
+      "authors": [
+        "Rasoul Akhavan Mahdavi",
+        "Abdulrahman Diaa",
+        "Florian Kerschbaum"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-10T05:02:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.09190v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "High-throughput Single-server Private Information Retrieval (PIR)",
+      "llm_evidence_cn": "高吞吐量单服务器私有信息检索 (PIR)",
+      "llm_evidence": "高吞吐量单服务器私有信息检索 (PIR)",
+      "canonical_evidence": "高吞吐量单服务器私有信息检索 (PIR)",
+      "llm_tldr_en": "Proposes ZipPIR, a high-throughput PIR protocol that eliminates the need for client-side storage.",
+      "llm_tldr_cn": "提出ZipPIR，一种无需客户端存储的高吞吐量私有信息检索协议。",
+      "llm_tldr": "提出ZipPIR，一种无需客户端存储的高吞吐量私有信息检索协议。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "PIR，PSU，PSI",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.10769v1",
+      "title": "A Disguise-and-Squeeze PIR Scheme for the MDS-TPIR Setting and Beyond",
+      "abstract": "We consider the problem of private information retrieval (PIR) from MDS coded databases with colluding servers, i.e., MDS-TPIR. In the MDS-TPIR setting, $M$ files are stored across $N$ servers, where each file is stored independently using an $(N,K)$-MDS code. A user wants to retrieve one file without disclosing the index of the desired file to any set of up to $T$ colluding servers. The general problem in studying PIR schemes is to maximize the PIR rate, defined as the ratio of the size of the desired file to the size of the total download. Freij-Hollanti et al. proposed a conjecture of the MDS-TPIR capacity (the maximum achievable PIR rate), which was later disproved by Sun and Jafar by a counterexample with $(M,N,T,K)=(2,4,2,2)$.   In this paper, we propose a new MDS-TPIR scheme based on a disguise-and-squeeze approach. The features of our scheme include the following.   Our scheme generalizes the Sun-Jafar counterexample to $(M,N,T,K)=(2,N,2,K)$ with $N\\geq K+2$ for an arbitrary $(N,K)$-MDS coded system, providing more counterexamples to the conjecture by Freij-Hollanti et al.   For $(M,N,T,K)=(2,N,2,K)$ and a GRS (generalized Reed-Solomon codes) coded system, our scheme has rate $\\frac{N^2-N}{N^2+KN-2K}$, beating the state-of-the-art results. We further show that this rate achieves the linear MDS-TPIR capacity when $K=2$.   Our scheme features a significantly smaller field size for implementation and the adaptiveness to generalized PIR models such as multi-file MDS-TPIR and MDS-PIR against cyclically adjacent colluding servers.   Lastly, we provide an $ε$-error MDS-TPIR scheme for $T\\geq 3$ based on the disguise-and-squeeze framework.",
+      "authors": [
+        "Rui Sun",
+        "Ran Tao",
+        "Jingke Xu",
+        "Yiwei Zhang"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-03-11T13:46:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.10769v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Private information retrieval (PIR) from MDS coded databases",
+      "llm_evidence_cn": "从MDS编码数据库中进行隐私信息检索 (PIR)",
+      "llm_evidence": "从MDS编码数据库中进行隐私信息检索 (PIR)",
+      "canonical_evidence": "从MDS编码数据库中进行隐私信息检索 (PIR)",
+      "llm_tldr_en": "Develops a Disguise-and-Squeeze PIR scheme to improve retrieval rates in MDS-TPIR settings.",
+      "llm_tldr_cn": "开发了一种Disguise-and-Squeeze PIR方案，以提高MDS-TPIR设置中的检索率。",
+      "llm_tldr": "开发了一种Disguise-and-Squeeze PIR方案，以提高MDS-TPIR设置中的检索率。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "PIR，PSU，PSI",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.08944v1",
+      "title": "Differentially Private Secure Multiplication: Beyond Two Multiplicands",
+      "abstract": "We study the problem of differentially private (DP) secure multiplication in distributed computing systems, focusing on regimes where perfect privacy and perfect accuracy cannot be simultaneously achieved. Specifically, N nodes collaboratively compute the product of M private inputs while guaranteeing epsilon-DP against any collusion of up to T nodes. Prior work has characterized the fundamental privacy-accuracy trade-off for the multiplication of two multiplicands. In this paper, we extend these results to the more general setting of computing the product of an arbitrary number M of multiplicands. We propose a secure multiplication framework based on carefully designed encoding polynomials combined with layered noise injection. The proposed construction generalizes existing schemes and enables the systematic cancellation of lower-order noise terms, leading to improved estimation accuracy. We explore two regimes: (M-1)T+1 <= N <= MT and N = T+1. For (M-1)T+1 <= N <= MT, we characterize the optimal privacy--accuracy trade-off. When N = T+1, we derive nontrivial achievability and converse bounds that are asymptotically tight in the high-privacy regime.",
+      "authors": [
+        "Haoyang Hu",
+        "Viveck R. Cadambe"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-03-09T21:26:39+00:00",
+      "link": "https://arxiv.org/pdf/2603.08944v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "differentially private secure multiplication in distributed systems",
+      "llm_evidence_cn": "分布式系统中的差分隐私安全乘法",
+      "llm_evidence": "分布式系统中的差分隐私安全乘法",
+      "canonical_evidence": "分布式系统中的差分隐私安全乘法",
+      "llm_tldr_en": "Extends DP secure multiplication to multiple multiplicands using encoding polynomials and noise injection.",
+      "llm_tldr_cn": "利用编码多项式和噪声注入将差分隐私安全乘法扩展到多个乘数。",
+      "llm_tldr": "利用编码多项式和噪声注入将差分隐私安全乘法扩展到多个乘数。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "MPC protocols for privacy-preserving computation",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.14265v1",
+      "title": "MedPriv-Bench: Benchmarking the Privacy-Utility Trade-off of Large Language Models in Medical Open-End Question Answering",
+      "abstract": "Recent advances in Retrieval-Augmented Generation (RAG) have enabled large language models (LLMs) to ground outputs in clinical evidence. However, connecting LLMs with external databases introduces the risk of contextual leakage: a subtle privacy threat where unique combinations of medical details enable patient re-identification even without explicit identifiers. Current benchmarks in healthcare heavily focus on accuracy, ignoring such privacy issues, despite strict regulations like Health Insurance Portability and Accountability Act (HIPAA) and General Data Protection Regulation (GDPR). To fill this gap, we present MedPriv-Bench, the first benchmark specifically designed to jointly evaluate privacy preservation and clinical utility in medical open-ended question answering. Our framework utilizes a multi-agent, human-in-the-loop pipeline to synthesize sensitive medical contexts and clinically relevant queries that create realistic privacy pressure. We establish a standardized evaluation protocol leveraging a pre-trained RoBERTa-Natural Language Inference (NLI) model as an automated judge to quantify data leakage, achieving an average of 85.9% alignment with human experts. Through an extensive evaluation of 9 representative LLMs, we demonstrate a pervasive privacy-utility trade-off. Our findings underscore the necessity of domain-specific benchmarks to validate the safety and efficacy of medical AI systems in privacy-sensitive environments.",
+      "authors": [
+        "Shaowei Guan",
+        "Yu Zhai",
+        "Hin Chi Kwok",
+        "Jiawei Du",
+        "Xinyu Feng",
+        "Jing Li",
+        "Harry Qin",
+        "Vivian Hui"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.MA"
+      ],
+      "published": "2026-03-15T07:47:35+00:00",
+      "link": "https://arxiv.org/pdf/2603.14265v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Benchmarking privacy-utility trade-off in LLMs",
+      "llm_evidence_cn": "评估大语言模型中的隐私与效用权衡",
+      "llm_evidence": "评估大语言模型中的隐私与效用权衡",
+      "canonical_evidence": "评估大语言模型中的隐私与效用权衡",
+      "llm_tldr_en": "Introduces MedPriv-Bench to evaluate the privacy-utility trade-off of LLMs in medical question answering.",
+      "llm_tldr_cn": "推出了 MedPriv-Bench，用于评估医疗问答中大语言模型的隐私与效用权衡。",
+      "llm_tldr": "推出了 MedPriv-Bench，用于评估医疗问答中大语言模型的隐私与效用权衡。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "balancing utility and privacy in machine learning",
+      "matched_requirement_id": "req-17",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.14492v1",
+      "title": "Oblivis: A Framework for Delegated and Efficient Oblivious Transfer",
+      "abstract": "As database deployments shift toward cloud platforms and edge devices, thin clients need to securely retrieve sensitive records without leaking their query intent or metadata to the proxies that mediate access. Oblivious Transfer (OT) is a core tool for private retrieval, yet existing OTs assume direct client-database interaction and lack support for delegated querying or lightweight clients. We present Oblivis, a modular framework of new OT protocols that enable delegated, privacy-preserving query execution. Oblivis allows clients to retrieve database records without direct access, protects against leakage to both databases and proxies, and is designed with practical efficiency in mind. Its components include: (1) Delegated-Query OT, which permits secure outsourcing of query generation; (2) Multi-Receiver OT for merged, cloud-hosted databases; (3) a compiler producing constant-size responses suitable for thin clients; and (4) Supersonic OT, a proxy-based, informationtheoretic, and highly efficient 1-out-of-2 OT. The protocols are formally defined and proven secure in the simulation-based paradigm, under non-colluding assumption. We implement and empirically evaluate Supersonic OT. It achieves at least a 92x speedup over a highly efficient 1-out-of-2 OT, and a 2.6x-106x speedup over a standard OT extension across 200-100,000 invocations. Our implementation further shows that Supersonic OT remains efficient even on constrained hardware, e.g., it completes an end-to-end transfer in 1.36 ms on a Raspberry Pi 4.",
+      "authors": [
+        "Aydin Abadi",
+        "Yvo Desmedt"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.DB"
+      ],
+      "published": "2026-03-15T17:16:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.14492v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Delegated and efficient Oblivious Transfer (OT)",
+      "llm_evidence_cn": "委派且高效的不经意传输 (OT)",
+      "llm_evidence": "委派且高效的不经意传输 (OT)",
+      "canonical_evidence": "委派且高效的不经意传输 (OT)",
+      "llm_tldr_en": "Presents Oblivis, a framework for efficient and delegated Oblivious Transfer for private cloud queries.",
+      "llm_tldr_cn": "提出了 Oblivis 框架，为云端隐私查询提供高效且可委派的不经意传输协议。",
+      "llm_tldr": "提出了 Oblivis 框架，为云端隐私查询提供高效且可委派的不经意传输协议。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "PIR，PSU，PSI",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.15842v1",
+      "title": "Informationally Compressive Anonymization: Non-Degrading Sensitive Input Protection for Privacy-Preserving Supervised Machine Learning",
+      "abstract": "Modern machine learning systems increasingly rely on sensitive data, creating significant privacy, security, and regulatory risks that existing privacy-preserving machine learning (ppML) techniques, such as Differential Privacy (DP) and Homomorphic Encryption (HE), address only at the cost of degraded performance, increased complexity, or prohibitive computational overhead. This paper introduces Informationally Compressive Anonymization (ICA) and the VEIL architecture, a privacy-preserving ML framework that achieves strong privacy guarantees through architectural and mathematical design rather than noise injection or cryptography. ICA embeds a supervised, multi-objective encoder within a trusted Source Environment to transform raw inputs into low-dimensional, task-aligned latent representations, ensuring that only irreversibly anonymized vectors are exported to untrusted Training and Inference Environments. The paper rigorously proves that these encodings are structurally non-invertible using topological and information-theoretic arguments, showing that inversion is logically impossible, even under idealized attacker assumptions, and that, in realistic deployments, the attackers conditional entropy over the original data diverges, driving reconstruction probability to zero. Unlike prior autoencoder-based ppML approaches, ICA preserves predictive utility by aligning representation learning with downstream supervised objectives, enabling low-latency, high-performance ML without gradient clipping, noise budgets, or encryption at inference time. The VEIL architecture enforces strict trust boundaries, supports scalable multi-region deployment, and naturally aligns with privacy-by-design regulatory frameworks, establishing a new foundation for enterprise ML that is secure, performant, and safe by construction, even in the face of post-quantum threats.",
+      "authors": [
+        "Jeremy J Samuelson"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.IT"
+      ],
+      "published": "2026-03-16T19:17:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.15842v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Privacy-preserving ML framework using architectural design instead of cryptography",
+      "llm_evidence_cn": "使用架构设计而非密码学的隐私保护机器学习框架",
+      "llm_evidence": "使用架构设计而非密码学的隐私保护机器学习框架",
+      "canonical_evidence": "使用架构设计而非密码学的隐私保护机器学习框架",
+      "llm_tldr_en": "Introduces ICA and VEIL for privacy-preserving ML without the overhead of DP or HE.",
+      "llm_tldr_cn": "引入ICA和VEIL架构，在不增加DP或HE开销的情况下实现隐私保护机器学习。",
+      "llm_tldr": "引入ICA和VEIL架构，在不增加DP或HE开销的情况下实现隐私保护机器学习。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving machine learning techniques and frameworks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.08911v1",
+      "title": "FedLECC: Cluster- and Loss-Guided Client Selection for Federated Learning under Non-IID Data",
+      "abstract": "Federated Learning (FL) enables distributed Artificial Intelligence (AI) across cloud-edge environments by allowing collaborative model training without centralizing data. In cross-device deployments, FL systems face strict communication and participation constraints, as well as strong non-independent and identically distributed (non-IID) data that degrades convergence and model quality. Since only a subset of devices (a.k.a clients) can participate per training round, intelligent client selection becomes a key systems challenge. This paper proposes FedLECC (Federated Learning with Enhanced Cluster Choice), a lightweight, cluster-aware, and loss-guided client selection strategy for cross-device FL. FedLECC groups clients by label-distribution similarity and prioritizes clusters and clients with higher local loss, enabling the selection of a small yet informative and diverse set of clients. Experimental results under severe label skew show that FedLECC improves test accuracy by up to 12%, while reducing communication rounds by approximately 22% and overall communication overhead by up to 50% compared to strong baselines. These results demonstrate that informed client selection improves the efficiency and scalability of FL workloads in cloud-edge systems.",
+      "authors": [
+        "Daniel M. Jimenez-Gutierrez",
+        "Giovanni Giunta",
+        "Mehrdad Hassanzadeh",
+        "Aris Anagnostopoulos",
+        "Ioannis Chatzigiannakis",
+        "Andrea Vitaletti"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-09T20:28:17+00:00",
+      "link": "https://arxiv.org/pdf/2603.08911v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Federated Learning client selection strategy",
+      "llm_evidence_cn": "联邦学习客户端选择策略",
+      "llm_evidence": "联邦学习客户端选择策略",
+      "canonical_evidence": "联邦学习客户端选择策略",
+      "llm_tldr_en": "Proposes a lightweight client selection strategy for federated learning under non-IID data conditions.",
+      "llm_tldr_cn": "提出了一种针对非独立同分布数据环境下的轻量级联邦学习客户端选择策略。",
+      "llm_tldr": "提出了一种针对非独立同分布数据环境下的轻量级联邦学习客户端选择策略。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.08252v1",
+      "title": "FedPrism: Adaptive Personalized Federated Learning under Non-IID Data",
+      "abstract": "Federated Learning (FL) suffers significant performance degradation in real-world deployments characterized by moderate to extreme statistical heterogeneity (non-IID client data). While global aggregation strategies promote broad generalization, they often fail to capture the diversity of local data distributions, leading to suboptimal personalization.   We address this problem with FedPrism, a framework that uses two main strategies. First, it uses a Prism Decomposition method that builds each client's model from three parts: a global foundation, a shared group part for similar clients, and a private part for unique local data. This allows the system to group similar users together automatically and adapt if their data changes. Second, we include a Dual-Stream design that runs a general model alongside a local specialist. The system routes predictions between the general model and the local specialist based on the specialist's confidence.   Through systematic experiments on non-IID data partitions, we demonstrate that FedPrism exceeds static aggregation and hard-clustering baselines, achieving significant accuracy gains under high heterogeneity. These results establish FedPrism as a robust and flexible solution for federated learning in heterogeneous environments, effectively balancing generalizable knowledge with adaptive personalization.",
+      "authors": [
+        "Prakash Kumbhakar",
+        "Shrey Srivastava",
+        "Haroon R Lone"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-09T11:23:32+00:00",
+      "link": "https://arxiv.org/pdf/2603.08252v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "personalized federated learning architecture",
+      "llm_evidence_cn": "个性化联邦学习架构",
+      "llm_evidence": "个性化联邦学习架构",
+      "canonical_evidence": "个性化联邦学习架构",
+      "llm_tldr_en": "Introduces FedPrism to handle data heterogeneity in federated learning through model decomposition.",
+      "llm_tldr_cn": "引入FedPrism框架，通过模型分解处理联邦学习中的数据异构性。",
+      "llm_tldr": "引入FedPrism框架，通过模型分解处理联邦学习中的数据异构性。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.08252v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.09141v1",
+      "title": "Agentic AI as a Network Control-Plane Intelligence Layer for Federated Learning over 6G",
+      "abstract": "The shift toward user-customized on-device learning places new demands on wireless systems: models must be trained on diverse, distributed data while meeting strict latency, bandwidth, and reliability constraints. To address this, we propose an Agentic AI as the control layer for managing federated learning (FL) over 6G networks, which translates high-level task goals into actions that are aware of network conditions. Rather than simply viewing FL as a learning challenge, our system sees it as a combined task of learning and network management. A set of specialized agents focused on retrieval, planning, coding, and evaluation utilizes monitoring tools and optimization methods to handle client selection, incentive structuring, scheduling, resource allocation, adaptive local training, and code generation. The use of closed-loop evaluation and memory allows the system to consistently refine its decisions, taking into account varying signal-to-noise ratios, bandwidth conditions, and device capabilities. Finally, our case study has demonstrated the effectiveness of the Agentic AI system's use of tools for achieving high performance.",
+      "authors": [
+        "Loc X. Nguyen",
+        "Ji Su Yoon",
+        "Huy Q. Le",
+        "Yu Qiao",
+        "Avi Deb Raha",
+        "Eui-Nam Huh",
+        "Nguyen H. Tran",
+        "Choong Seon Hong"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-10T03:27:33+00:00",
+      "link": "https://arxiv.org/pdf/2603.09141v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Agentic AI for managing federated learning over 6G networks",
+      "llm_evidence_cn": "用于管理6G网络上联邦学习的代理AI",
+      "llm_evidence": "用于管理6G网络上联邦学习的代理AI",
+      "canonical_evidence": "用于管理6G网络上联邦学习的代理AI",
+      "llm_tldr_en": "Proposes an Agentic AI control layer to optimize federated learning management and client selection in 6G networks.",
+      "llm_tldr_cn": "提出一种代理AI控制层，用于优化6G网络中的联邦学习管理和客户端选择。",
+      "llm_tldr": "提出一种代理AI控制层，用于优化6G网络中的联邦学习管理和客户端选择。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.09356v1",
+      "title": "Democratising Clinical AI through Dataset Condensation for Classical Clinical Models",
+      "abstract": "Dataset condensation (DC) learns a compact synthetic dataset that enables models to match the performance of full-data training, prioritising utility over distributional fidelity. While typically explored for computational efficiency, DC also holds promise for healthcare data democratisation, especially when paired with differential privacy, allowing synthetic data to serve as a safe alternative to real records. However, existing DC methods rely on differentiable neural networks, limiting their compatibility with widely used clinical models such as decision trees and Cox regression. We address this gap using a differentially private, zero-order optimisation framework that extends DC to non-differentiable models using only function evaluations. Empirical results across six datasets, including both classification and survival tasks, show that the proposed method produces condensed datasets that preserve model utility while providing effective differential privacy guarantees - enabling model-agnostic data sharing for clinical prediction tasks without exposing sensitive patient information.",
+      "authors": [
+        "Anshul Thakur",
+        "Soheila Molaei",
+        "Pafue Christy Nganjimi",
+        "Joshua Fieggen",
+        "Andrew A. S. Soltan",
+        "Danielle Belgrave",
+        "Lei Clifton",
+        "David A. Clifton"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CR"
+      ],
+      "published": "2026-03-10T08:36:39+00:00",
+      "link": "https://arxiv.org/pdf/2603.09356v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Differentially private dataset condensation for utility and privacy",
+      "llm_evidence_cn": "用于效用与隐私平衡的差分隐私数据集压缩",
+      "llm_evidence": "用于效用与隐私平衡的差分隐私数据集压缩",
+      "canonical_evidence": "用于效用与隐私平衡的差分隐私数据集压缩",
+      "llm_tldr_en": "Extends dataset condensation to non-differentiable clinical models using differential privacy for data democratisation.",
+      "llm_tldr_cn": "利用差分隐私将数据集压缩扩展到非微分临床模型，以实现数据民主化。",
+      "llm_tldr": "利用差分隐私将数据集压缩扩展到非微分临床模型，以实现数据民主化。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "balancing utility and privacy in machine learning",
+      "matched_requirement_id": "req-17",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.08252v2",
+      "title": "FedPrism: Adaptive Personalized Federated Learning under Non-IID Data",
+      "abstract": "Federated Learning (FL) suffers significant performance degradation in real-world deployments characterized by moderate to extreme statistical heterogeneity (non-IID client data). While global aggregation strategies promote broad generalization, they often fail to capture the diversity of local data distributions, leading to suboptimal personalization.   We address this problem with FedPrism, a framework that uses two main strategies. First, it uses a Prism Decomposition method that builds each client's model from three parts: a global foundation, a shared group part for similar clients, and a private part for unique local data. This allows the system to group similar users together automatically and adapt if their data changes. Second, we include a Dual-Stream design that runs a general model alongside a local specialist. The system routes predictions between the general model and the local specialist based on the specialist's confidence.   Through systematic experiments on non-IID data partitions, we demonstrate that FedPrism exceeds static aggregation and hard-clustering baselines, achieving significant accuracy gains under high heterogeneity. These results establish FedPrism as a robust and flexible solution for federated learning in heterogeneous environments, effectively balancing generalizable knowledge with adaptive personalization.",
+      "authors": [
+        "Prakash Kumbhakar",
+        "Shrey Srivastava",
+        "Haroon R Lone"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-09T11:23:32+00:00",
+      "link": "https://arxiv.org/pdf/2603.08252v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "personalized federated learning framework for non-IID data",
+      "llm_evidence_cn": "针对非独立同分布数据的个性化联邦学习框架",
+      "llm_evidence": "针对非独立同分布数据的个性化联邦学习框架",
+      "canonical_evidence": "针对非独立同分布数据的个性化联邦学习框架",
+      "llm_tldr_en": "Proposes FedPrism to handle statistical heterogeneity in federated learning through model decomposition.",
+      "llm_tldr_cn": "提出 FedPrism 框架，通过模型分解处理联邦学习中的统计异构性。",
+      "llm_tldr": "提出 FedPrism 框架，通过模型分解处理联邦学习中的统计异构性。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.08252v2",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.09583v1",
+      "title": "Nonparametric Variational Differential Privacy via Embedding Parameter Clipping",
+      "abstract": "The nonparametric variational information bottleneck (NVIB) provides the foundation for nonparametric variational differential privacy (NVDP), a framework for building privacy-preserving language models. However, the learned latent representations can drift into regions with high information content, leading to poor privacy guarantees, but also low utility due to numerical instability during training. In this work, we introduce a principled parameter clipping strategy to directly address this issue. Our method is mathematically derived from the objective of minimizing the Rényi Divergence (RD) upper bound, yielding specific, theoretically grounded constraints on the posterior mean, variance, and mixture weight parameters. We apply our technique to an NVIB based model and empirically compare it against an unconstrained baseline. Our findings demonstrate that the clipped model consistently achieves tighter RD bounds, implying stronger privacy, while simultaneously attaining higher performance on several downstream tasks. This work presents a simple yet effective method for improving the privacy-utility trade-off in variational models, making them more robust and practical.",
+      "authors": [
+        "Dina El Zein",
+        "Shashi Kumar",
+        "James Henderson"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-10T12:34:03+00:00",
+      "link": "https://arxiv.org/pdf/2603.09583v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "differential privacy for language models",
+      "llm_evidence_cn": "语言模型的差分隐私",
+      "llm_evidence": "语言模型的差分隐私",
+      "canonical_evidence": "语言模型的差分隐私",
+      "llm_tldr_en": "Introduces parameter clipping to improve privacy and utility in nonparametric variational differential privacy models.",
+      "llm_tldr_cn": "引入参数裁剪策略，提高非参数变分差分隐私模型的隐私保证和实用性。",
+      "llm_tldr": "引入参数裁剪策略，提高非参数变分差分隐私模型的隐私保证和实用性。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving machine learning techniques and frameworks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.09368v1",
+      "title": "Verified delegated quantum computation requires techniques beyond cut-and-choose",
+      "abstract": "Delegated quantum computation enables a client with limited quantum capabilities to outsource computations to a more powerful quantum server while preserving correctness and privacy. Verification is crucial in this setting to ensure that the untrusted quantum server performs the computation honestly and returns correct results. A common verification method is the quantum cut-and-choose technique. Inspired by classical verification methods for two-party computation, the client uses the majority of the delegated rounds to test the server's honesty, while keeping the remaining ones for the actual computation. Combining this technique with other methods, such as quantum error correction, could help achieve negligible cheating probabilities for the server; however, such methods can impose significant overheads making implementations unfeasible for the near-term future. In this work, we investigate whether cut-and-choose can yield efficient and secure verifiable quantum computation without additional costly techniques. We find that verifiable delegated quantum computation protocols relying solely on cut-and-choose techniques cannot be secure and efficient at the same time.",
+      "authors": [
+        "Fabian Wiesner",
+        "Anna Pappa"
+      ],
+      "primary_category": "quant-ph",
+      "categories": [
+        "quant-ph",
+        "cs.CR"
+      ],
+      "published": "2026-03-10T08:45:23+00:00",
+      "link": "https://arxiv.org/pdf/2603.09368v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Verified delegated computation and two-party computation",
+      "llm_evidence_cn": "可验证的委派计算与两方计算",
+      "llm_evidence": "可验证的委派计算与两方计算",
+      "canonical_evidence": "可验证的委派计算与两方计算",
+      "llm_tldr_en": "Explores verification techniques for delegated quantum computation inspired by classical MPC methods.",
+      "llm_tldr_cn": "受经典多方安全计算启发，探索了委派量子计算的可验证技术。",
+      "llm_tldr": "受经典多方安全计算启发，探索了委派量子计算的可验证技术。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "MPC protocols for privacy-preserving computation",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.08421v1",
+      "title": "Client-Cooperative Split Learning",
+      "abstract": "Model training is increasingly offered as a service for resource-constrained data owners to build customized models. Split Learning (SL) enables such services by offloading training computation under privacy constraints, and evolves toward serverless and multi-client settings where model segments are distributed across training clients. This cooperative mode assumes partial trust: data owners hide labels and data from trainer clients, while trainer clients produce verifiable training artifacts and ownership proofs. We present CliCooper, a multi-client cooperative SL framework tailored for cooperative model training services in heterogeneous and partially trusted environments, where one client contributes data, while others collectively act as SL trainers. CliCooper bridges the privacy and trust gaps through two new designs. First, differential privacy-based activation protection and secret label obfuscation safeguard data owners' privacy without degrading model performance. Second, a dynamic chained watermarking scheme cryptographically links training stages on model segments across trainers, ensuring verifiable training integrity, robust model provenance, and copyright protection. Experiments show that CliCooper preserves model accuracy while enhancing resilience to privacy and ownership attacks. It reduces the success rate of clustering attacks (which infer label groups from intermediate activation) to 0%, decreases inversion-reconstruction (which recovers training data) similarity from 0.50 to 0.03, and limits model-extraction-based surrogates to about 1% accuracy, comparable to random guessing.",
+      "authors": [
+        "Haiyu Deng",
+        "Yanna Jiang",
+        "Guangsheng Yu",
+        "Qin Wang",
+        "Xu Wang",
+        "Wei Ni",
+        "Shiping Chen",
+        "Ren Ping Liu"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-09T14:17:26+00:00",
+      "link": "https://arxiv.org/pdf/2603.08421v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "split learning under privacy constraints with verifiable training artifacts",
+      "llm_evidence_cn": "隐私约束下具有可验证训练产物的拆分学习",
+      "llm_evidence": "隐私约束下具有可验证训练产物的拆分学习",
+      "canonical_evidence": "隐私约束下具有可验证训练产物的拆分学习",
+      "llm_tldr_en": "Presents CliCooper, a multi-client split learning framework for private and verifiable model training.",
+      "llm_tldr_cn": "提出CliCooper，一个用于隐私和可验证模型训练的多客户端拆分学习框架。",
+      "llm_tldr": "提出CliCooper，一个用于隐私和可验证模型训练的多客户端拆分学习框架。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "secure inference protocols for deep learning models",
+      "matched_requirement_id": "req-15",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.08421v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.10075v1",
+      "title": "TASER: Task-Aware Spectral Energy Refine for Backdoor Suppression in UAV Swarms Decentralized Federated Learning",
+      "abstract": "As backdoor attacks in UAV-based decentralized federated learning (DFL) grow increasingly stealthy and sophisticated, existing defenses have likewise escalated in complexity. Yet these defenses, which rely heavily on outlier detection, remain vulnerable to carefully crafted backdoors. In UAV-DFL, the lack of global coordination and limited resources further render outlier-based defenses impractical. Against this backdrop, gradient spectral analysis offers a promising alternative. While prior work primarily leverages low-frequency coefficients for pairwise comparisons, it neglects to analyze the intrinsic spectral characteristics of backdoor gradients. Through empirical analysis of existing stealthy attacks, we reveal a key insight: the more effort attackers invest in mimicking benign behaviors, the more distinct the spectral concentration becomes. Motivated by this, we propose Task-Aware Spectral Energy Refine (TASER) -- a decentralized defense framework. To our knowledge, this is the first efficient backdoor defense that utilizes spectral concentration instead of complex outlier detection, enabling mitigation of stealthy attacks by structurally disrupting the backdoor task. To suppress the backdoor task, TASER preserves main-task-relevant frequency coefficients and discards others. We provide theoretical guarantees and demonstrate through experiments that TASER remains effective against stealthy backdoor attacks that bypass outlier-based defenses, achieving attack success rate below 20% and accuracy loss under 5%.",
+      "authors": [
+        "Sizhe Huang",
+        "Shujie Yang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-03-10T07:20:47+00:00",
+      "link": "https://arxiv.org/pdf/2603.10075v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Backdoor suppression in decentralized federated learning",
+      "llm_evidence_cn": "去中心化联邦学习中的后门抑制",
+      "llm_evidence": "去中心化联邦学习中的后门抑制",
+      "canonical_evidence": "去中心化联邦学习中的后门抑制",
+      "llm_tldr_en": "Introduces a spectral analysis method to suppress backdoor attacks in decentralized federated learning for UAVs.",
+      "llm_tldr_cn": "引入频谱分析方法来抑制无人机去中心化联邦学习中的后门攻击。",
+      "llm_tldr": "引入频谱分析方法来抑制无人机去中心化联邦学习中的后门攻击。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.09524v1",
+      "title": "A Unifying Primal-Dual Proximal Framework for Distributed Nonconvex Optimization",
+      "abstract": "We consider distributed nonconvex optimization over an undirected network, where each node privately possesses its local objective and communicates exclusively with its neighboring nodes, striving to collectively achieve a common optimal solution. To handle the nonconvexity of the objective, we linearize the augmented Lagrangian function and introduce a time-varying proximal term. This approach leads to a Unifying Primal-Dual Proximal (UPP) framework that unifies a variety of existing first-order and second-order methods. Building on this framework, we further derive two specialized realizations with different communication strategies, namely UPP-MC and UPP-SC. We prove that both UPP-MC and UPP-SC achieve stationary solutions for nonconvex smooth problems at a sublinear rate. Furthermore, under the additional Polyak-Łojasiewics (P-Ł) condition, UPP-MC is linearly convergent to the global optimum. These convergence results provide new or improved guarantees for many existing methods that can be viewed as specializations of UPP-MC or UPP-SC. To further optimize the mixing process, we incorporate Chebyshev acceleration into UPP-SC, resulting in UPP-SC-OPT, which attains an optimal communication complexity bound. Extensive experiments across diverse network topologies demonstrate that our proposed algorithms outperform state-of-the-art methods in both convergence speed and communication efficiency.",
+      "authors": [
+        "Zichong Ou",
+        "Jie Lu"
+      ],
+      "primary_category": "math.OC",
+      "categories": [
+        "math.OC"
+      ],
+      "published": "2026-03-10T11:29:39+00:00",
+      "link": "https://arxiv.org/pdf/2603.09524v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Distributed nonconvex optimization where nodes privately possess local objectives",
+      "llm_evidence_cn": "节点私有持有本地目标的分布式非凸优化",
+      "llm_evidence": "节点私有持有本地目标的分布式非凸优化",
+      "canonical_evidence": "节点私有持有本地目标的分布式非凸优化",
+      "llm_tldr_en": "Develops a unifying primal-dual proximal framework for distributed nonconvex optimization over networks.",
+      "llm_tldr_cn": "为网络上的分布式非凸优化开发了一个统一的原对偶近端框架。",
+      "llm_tldr": "为网络上的分布式非凸优化开发了一个统一的原对偶近端框架。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "MPC protocols for privacy-preserving computation",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.08832v1",
+      "title": "HeteroFedSyn: Differentially Private Tabular Data Synthesis for Heterogeneous Federated Settings",
+      "abstract": "Traditional Differential Privacy (DP) mechanisms are typically tailored to specific analysis tasks, which limits the reusability of protected data. DP tabular data synthesis overcomes this by generating synthetic datasets that can be shared for arbitrary downstream tasks. However, existing synthesis methods predominantly assume centralized or local settings and overlook the more practical horizontal federated scenario. Naively synthesizing data locally or perturbing individual records either produces biased mixtures or introduces excessive noise, especially under heterogeneous data distributions across participants.   We propose HeteroFedSyn, the first DP tabular data synthesis framework designed specifically for the horizontal federated setting. Built upon the PrivSyn paradigm of 2-way marginal-based synthesis, HeteroFedSyn introduces three key innovations for distributed marginal selection: (i) an L2-based dependency metric with random projection for noise-efficient correlation measurement, (ii) an unbiased estimator to correct multiplicative noise, and (iii) an adaptive selection strategy that dynamically updates dependency scores to avoid redundancy. Extensive experiments on range queries, Wasserstein fidelity, and machine learning tasks show that, despite the increased noise inherent to federated execution, HeteroFedSyn achieves utility comparable to centralized synthesis. Our code is open-sourced via the link.",
+      "authors": [
+        "Xiaochen Li",
+        "Fengyu Gao",
+        "Xizixiang Wei",
+        "Tianhao Wang",
+        "Cong Shen",
+        "Jing Yang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-09T18:44:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.08832v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "differentially private tabular data synthesis in federated settings",
+      "llm_evidence_cn": "联邦设置下的差分隐私表格数据合成",
+      "llm_evidence": "联邦设置下的差分隐私表格数据合成",
+      "canonical_evidence": "联邦设置下的差分隐私表格数据合成",
+      "llm_tldr_en": "Introduces a DP framework for synthesizing tabular data across heterogeneous federated participants.",
+      "llm_tldr_cn": "引入一种差分隐私框架，用于在异构联邦参与者之间合成表格数据。",
+      "llm_tldr": "引入一种差分隐私框架，用于在异构联邦参与者之间合成表格数据。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.08832v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.10692v1",
+      "title": "Repurposing Backdoors for Good: Ephemeral Intrinsic Proofs for Verifiable Aggregation in Cross-silo Federated Learning",
+      "abstract": "While Secure Aggregation (SA) protects update confidentiality in Cross-silo Federated Learning, it fails to guarantee aggregation integrity, allowing malicious servers to silently omit or tamper with updates. Existing verifiable aggregation schemes rely on heavyweight cryptography (e.g., ZKPs, HE), incurring computational costs that scale poorly with model size. In this paper, we propose a lightweight architecture that shifts from extrinsic cryptographic proofs to \\textit{Intrinsic Proofs}. We repurpose backdoor injection to embed verification signals directly into model parameters. By harnessing Catastrophic Forgetting, these signals are robust for immediate verification yet ephemeral, naturally decaying to preserve final model utility. We design a randomized, single-verifier auditing framework compatible with SA, ensuring client anonymity and preventing signal collision without trusted third parties. Experiments on SVHN, CIFAR-10, and CIFAR-100 demonstrate high detection probabilities against malicious servers. Notably, our approach achieves over $1000\\times$ speedup on ResNet-18 compared to cryptographic baselines, effectively scaling to large models.",
+      "authors": [
+        "Xian Qin",
+        "Xue Yang",
+        "Xiaohu Tang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-03-11T12:04:18+00:00",
+      "link": "https://arxiv.org/pdf/2603.10692v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Verifiable aggregation in federated learning using intrinsic proofs",
+      "llm_evidence_cn": "联邦学习中使用内在证明的可验证聚合",
+      "llm_evidence": "联邦学习中使用内在证明的可验证聚合",
+      "canonical_evidence": "联邦学习中使用内在证明的可验证聚合",
+      "llm_tldr_en": "Proposes a lightweight verifiable aggregation scheme for federated learning using embedded verification signals.",
+      "llm_tldr_cn": "为联邦学习提出一种轻量级可验证聚合方案，通过嵌入验证信号确保聚合完整性。",
+      "llm_tldr": "为联邦学习提出一种轻量级可验证聚合方案，通过嵌入验证信号确保聚合完整性。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.10060v1",
+      "title": "Tool Receipts, Not Zero-Knowledge Proofs: Practical Hallucination Detection for AI Agents",
+      "abstract": "AI agents that execute tasks via tool calls frequently hallucinate results - fabricating tool executions, misstating output counts, or presenting inferences as facts. Recent approaches to verifiable AI inference rely on zero-knowledge proofs, which provide cryptographic guarantees but impose minutes of proving time per query, making them impractical for interactive agents. We propose NabaOS, a lightweight verification framework inspired by Indian epistemology (Nyaya Shastra), which classifies every claim in an LLM response by its epistemic source (pramana): direct tool output (pratyaksha), inference (anumana), external testimony (shabda), absence (abhava), or ungrounded opinion. Our runtime generates HMAC-signed tool execution receipts that the LLM cannot forge, then cross-references claims against these receipts to detect hallucinations in real time. We evaluate on NyayaVerifyBench, a new benchmark of 1,800 agent response scenarios across four languages with injected hallucinations of six types. NabaOS detects 94.2% of fabricated tool references, 87.6% of count misstatements, and 91.3% of false absence claims, with <15ms verification overhead per response. For deep delegation (agents performing multi-step web tasks), our cross-checking protocol catches 78.4% of URL fabrications via independent re-fetching. We compare against five approaches: zkLLM (cryptographic proofs, 180s/query), TOPLOC (locality-sensitive hashing), SPEX (sampling-based proof of execution), tensor commitments, and self-consistency checking. NabaOS achieves the best cost-latency-coverage trade-off for interactive agents: 94.2% coverage at <15ms versus zkLLM's near-perfect coverage at 180,000ms. For interactive agents, practical receipt-based verification provides better cost-benefit than cryptographic proofs, and epistemic classification gives users actionable trust signals rather than binary judgments.",
+      "authors": [
+        "Abhinaba Basu"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-03-09T20:45:41+00:00",
+      "link": "https://arxiv.org/pdf/2603.10060v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "verifiable AI inference and hallucination detection for LLM agents",
+      "llm_evidence_cn": "大模型智能体的可验证推理与幻觉检测",
+      "llm_evidence": "大模型智能体的可验证推理与幻觉检测",
+      "canonical_evidence": "大模型智能体的可验证推理与幻觉检测",
+      "llm_tldr_en": "Proposes a lightweight verification framework for LLM tool calls to detect hallucinations without heavy ZKPs.",
+      "llm_tldr_cn": "提出一种轻量级验证框架，用于检测大模型工具调用中的幻觉，无需高开销的零知识证明。",
+      "llm_tldr": "提出一种轻量级验证框架，用于检测大模型工具调用中的幻觉，无需高开销的零知识证明。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

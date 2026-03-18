@@ -1,0 +1,522 @@
+Title: TASER: Task-Aware Spectral Energy Refine for Backdoor Suppression in UAV Swarms Decentralized Federated Learning
+
+URL Source: https://arxiv.org/pdf/2603.10075v1
+
+Published Time: Thu, 12 Mar 2026 00:03:46 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+## TASER: Task-Aware Spectral Energy Refine for Backdoor Suppression in UAV Swarms Decentralized Federated Learning 
+
+Sizhe Huang, Shujie Yang Abstract 
+
+As backdoor attacks in UAV-based decentral-ized federated learning (DFL) grow increasingly stealthy and sophisticated, existing defenses have likewise escalated in complexity. Yet these de-fenses, which rely heavily on outlier detection, re-main vulnerable to carefully crafted backdoors. In UAV-DFL, the lack of global coordination and lim-ited resources further render outlier-based defenses impractical. Against this backdrop, gradient spec-tral analysis offers a promising alternative. While prior work primarily leverages low-frequency coef-ficients for pairwise comparisons, it neglects to an-alyze the intrinsic spectral characteristics of back-door gradients. Through empirical analysis of ex-isting stealthy attacks, we reveal a key insight: the more effort attackers invest in mimicking benign behaviors, the more distinct the spectral concen-tration becomes. Motivated by this, we propose Task-Aware Spectral Energy Refine (TASER)—a decentralized defense framework. To our knowl-edge, this is the first efficient backdoor defense that utilizes spectral concentration instead of complex outlier detection, enabling mitigation of stealthy at-tacks by structurally disrupting the backdoor task. To suppress the backdoor task, TASER preserves main-task-relevant frequency coefficients and dis-cards others. We provide theoretical guarantees and demonstrate through experiments that TASER re-mains effective against stealthy backdoor attacks that bypass outlier-based defenses, achieving attack success rate below 20% and accuracy loss under 5%. 
+
+1 Introduction 
+
+The integration of decentralized federated learning (DFL) into Unmanned Aerial Vehicle (UAV) swarms has enabled resilient, collaborative model training without relying on a centralized coordinator [Mart´ ınez Beltr´ an et al. , 2023; Feng et al. , 2022]. UAV swarms can collect diverse on-site data and collaboratively train models while preserving data privacy. By leveraging DFL, they eliminate reliance on cen-tralized infrastructure and enable scalable, real-time learning across a distributed network of autonomous agents. How-ever, this integration also introduces new security vulnerabil-ities, particularly stealthy backdoor attacks, in which mali-cious participants inject carefully crafted, subtle model per-turbations to manipulate predictions on attacker-chosen in-puts. 
+
+Stealthy Backdoor Attacks. Modern backdoor attacks have become increasingly stealthy and sophisticated [Lyu 
+
+et al. , 2024]. Rather than introducing detectable anoma-lies, these attacks carefully mimic benign gradient behaviors, thereby evading traditional defenses [Zhang et al. , 2024]. In response, defense mechanisms have grown correspond-ingly complex, often relying on global gradient collection, cross-client comparisons, or computationally expensive out-lier detection techniques [Wan et al. , 2024]. This esca-lating arms race imposes substantial overhead, yet increas-ing defense complexity no longer guarantees effectiveness— particularly in UAV-DFL systems, where computational and communication resources are severely constrained [Javed et al. , 2024]. Moreover, the ad hoc deployment of UAV net-works leads to a lack of centralized scheduling and secure identity verification, rendering these systems particularly vul-nerable to stealthy backdoor attacks [Pasquini et al. , 2023], where compromised nodes inject malicious behaviors into the global model while preserving normal performance on benign tasks [Sun et al. , 2019]. 
+
+Spectral-Based Backdoor Defense. Recent studies have validated the effectiveness of frequency-domain representa-tions for model analysis [Wang et al. , 2020b; Wang et al. ,2018]. In particular, it has been observed that most of the en-ergy in neural network weights concentrates in low-frequency components after applying the Discrete Cosine Transform (DCT) [Zhou et al. , 2024]. In the context of federated learning, FreqFed [Fereidooni et al. , 2023] has demonstrated the utility of frequency-based filtering for backdoor mitiga-tion. However, FreqFed primarily focuses on pruning high-frequency components to suppress noise for clustering, and does not explicitly investigate the spectral distinctions be-tween benign and backdoored gradients. Moreover, due to the orthogonality of the DCT, the resulting feature space preserves the geometric structure of the original gradients. As such, FreqFed yields no significant improvement over FLAME [Nguyen et al. , 2022], which performs clustering di-rectly in the gradient space. In summary, existing defenses 
+
+> arXiv:2603.10075v1 [cs.CR] 10 Mar 2026
+
+predominantly focus on distributional statistics and overlook whether stealthy backdoor gradients exhibit pronounced en-ergy concentration in mid-to-high frequency bands compared to benign updates. 
+
+Spectral Insights into Stealthy Backdoor Behavior. To visualize these differences, we construct a frequency–time heatmap, where each entry represents the difference in high-energy selection ratio between malicious and benign clients at a particular frequency and communication round. In the heatmap, blue indicates a frequency more frequently selected as high-energy by malicious clients, while red indicates fre-quencies more favored by benign clients. As shown in Fig. 1, we observe that while stealthy backdoor attacks [Lyu et al. ,2024] are carefully crafted to align with benign clients in the gradient space to evade detection, this alignment inad-vertently introduces more concentrated energy patterns in the frequency domain, particularly in mid-frequency bands .This seemingly counterintuitive phenomenon can be ex-plained as follows. Stealthy adversaries must satisfy two con-straints simultaneously: (1) suppressing high-frequency per-turbations that would otherwise trigger outlier detection, and (2) mimicking benign updates in low-frequency components to remain hidden. These dual constraints force malicious ma-nipulations into a narrower mid-frequency region, producing a denser and more structured spectral footprint. In essence, the very effort to remain hidden in the parameter space leads to exposure in the frequency space. In contrast, traditional non-stealthy attacks [Bagdasaryan 
+
+et al. , 2020], which lack such gradient alignment strategies, often inject arbitrary or exaggerated updates that disperse more broadly across the frequency spectrum. Their spec-tral signatures are relatively scattered and less consistent over time, reflecting the absence of stealth constraints. This clear divergence between stealthy and non-stealthy attack patterns—particularly in how spectral energy is distributed—highlights a fundamental vulnerability in stealthy attacks. These findings suggest that analyzing gradients in the frequency domain provides a more dis-criminative perspective for identifying adversarial behaviors that remain concealed under conventional gradient-space evaluations. This observation motivates the development of frequency-aware defenses that exploit spectral concentration to suppress malicious influence, even when attacks evade norm-based or clustering-based detection strategies. 
+
+We propose Task-Aware Spectral Energy Refine (TASER), a decentralized defense framework tailored for communication-constrained and coordination-limited UAV-DFL scenarios. TASER operates in the frequency do-main to exploit the divergent spectral characteristics between benign and backdoor updates. Specifically, each node per-forms DCT on the gradients computed from multiple local mini-batches, yielding a set of frequency-domain represen-tations. A task-aware scoring metric is then applied to each frequency component, combining approximate Fisher infor-mation [Liao et al. , 2018] and inter-batch consistency via ag-gregated absolute values to reflect both task sensitivity and directional stability. Under communication constraints, each node selects the top-k frequency components based on this score and broad-casts their indices to its immediate neighbors. Upon receiving requests, nodes respond with only the requested coefficients. This selective communication protocol significantly reduces bandwidth usage while enabling robust information sharing. The final local update is reconstructed via inverse DCT using the received coefficients. 2 12 22 32 42 52 62 72 82 92 102 112 122 132 142 152 162 172 182 192 202 212 222 232 242 252 262 272 282 292 302 312 322 332 342 352 362 372 382 392 
+
+> Round
+> 0
+> 5000
+> 10000
+> 15000
+> 20000
+> 25000
+> 30000
+> 35000
+> 40000
+> Frequency Index
+> Difference in Frequency Usage Increment (Clean - Backdoor)
+> 0.00100
+> 0.00075
+> 0.00050
+> 0.00025
+> 0.00000
+> 0.00025
+> 0.00050
+> 0.00075
+> 0.00100
+> Frequency Selection Increment Difference
+
+(a) Traditional Backdoor At-tack 2 12 22 32 42 52 62 72 82 92 102 112 122 132 142 152 162 172 182 192 202 212 222 232 242 252 262 272 282 292 302 312 322 332 342 352 362 372 382 392 
+
+> Round
+> 0
+> 5000
+> 10000
+> 15000
+> 20000
+> 25000
+> 30000
+> 35000
+> 40000
+> Frequency Index
+> Difference in Frequency Usage Increment (Clean - Backdoor)
+> 0.0010
+> 0.0005
+> 0.0000
+> 0.0005
+> 0.0010
+> Frequency Selection Increment Difference
+
+(b) Stealthy Backdoor Attack Figure 1: High-energy frequency gradient differences between tra-ditional and stealthy backdoor attacks. We tracked the high-energy frequency indices of 50 clean clients and 50 malicious clients over 400 communication rounds and aggregated their selections into a frequency–time heatmap. The x-axis represents the frequency in-dex, and the y-axis represents the communication round. Blue re-gions indicate frequencies more frequently selected as high-energy by malicious clients, while red regions indicate those favored by be-nign clients. 
+
+By retaining only task-relevant frequency components and suppressing anomalous spectral regions typically exploited by backdoor attackers, TASER naturally mitigates adversarial interference. Moreover, its fully decentralized workflow re-quires no global coordination or intensive computation, mak-ing it well-suited for dynamic UAV-based federated systems. 
+
+Contributions. Our main contributions are summarized as follows: 1. Spectral Exposure of Stealthy Backdoor Attacks. To our knowledge, this is the first work revealing that stealthy backdoor attacks exhibit distinctive high-energy concentration patterns in specific frequency bands, offer-ing a novel perspective for defense design. 2. Task-Aware Spectral Energy Refine (TASER). We propose TASER, a lightweight, fully decentralized de-fense mechanism that selects gradient frequency com-ponents based on task relevance, effectively suppressing stealthy backdoors under communication constraints. 3. Theoretical and Empirical Validation. We provide rigorous convergence analysis and comprehensive ex-periments demonstrating effectiveness across diverse backdoor scenarios. 
+
+2 Background and Motivation 
+
+2.1 Challenges in Defending Stealthy Backdoor Attacks 
+
+Stealthy backdoor attacks carefully manipulate the model pa-rameter update process [Gong et al. , 2022], enabling the suc-cessful injection of backdoors under the guise of normal up-date behavior, thereby concealing the attack intent. These approaches can be categorized into two classes: (1) Concealment , which hides the malicious updates in less sen-sitive regions of the model, and (2) Mimicry , which forces the malicious behavior to resemble that of benign clients. 
+
+(1) Concealment: These attacks inject backdoor pertur-bations into parameters that are weakly associated with the main task, minimizing interference. Neurotoxin [Zhang et al. , 2022b] uploads poisoned gradients that only modify in-frequently updated (“lazy”) parameters, allowing the back-door to persist across rounds. Similarly, IBA [Nguyen et al. ,2023] targets parameters with low variance across training, incrementally injecting malicious signals that are unlikely to be overwritten by benign updates. 
+
+(2) Mimicry: These attacks aim to hide poisoned updates by aligning them with benign contributions, either in the gra-dient or model parameter space. DEFEAT [Zhao et al. , 2022] adds regularization constraints on the intermediate features of the triggered samples to enforce their similarity to clean samples across all layers. PFedBA [Lyu et al. , 2024] opti-mizes the backdoor trigger such that its gradient aligns with the direction of the main task in the gradient space, while minimizing the loss difference between the main task and the backdoor task. By minimizing the divergence between malicious and be-nign gradient updates, stealthy backdoor attacks pose a sig-nificant challenge to existing defense mechanisms that rely on detecting malicious update gradients. 
+
+2.2 Limitations of Existing Backdoor Defenses in UAV-DFL 
+
+Decentralized federated learning (DFL) over UAV networks imposes several critical constraints on backdoor defense de-sign: (1) partial observability, as each UAV can only commu-nicate with a limited set of neighbors; (2) constrained com-putation and energy resources, which limit the feasibility of high-complexity algorithms; and (3) dynamic and unstable network topology, which hinders long-term coordination or global trust modeling. 
+
+Robust aggregation approaches require global visibil-ity to collect client updates and apply global aggregation rules, such as RFA [Pillutla et al. , 2022] and RLR [Ozdayi 
+
+et al. , 2021]. RFA updates the global model by the geometric median of gradients, while RLR adjusts the dimension-wise learning rate to corrupt the dimensions updated by the back-door. However, in UAV-DFL, each client can only access a small subset of updates from its directly connected neighbors in each round, making it difficult to identify benign gradients. 
+
+Detection-based defenses require comparison of model updates , such as FreqFed [Fereidooni et al. , 2023] and Multi-Metrics [Huang et al. , 2023]. FreqFed utilizes the cosine sim-ilarity between the low-frequency components of gradients as the clustering metric in HDBSCAN. Multi-Metrics uti-lizes multiple metrics with dynamic weighting to detect back-door attacks. However, these methods typically incur O(n2d)
+
+computational complexity for n clients and d-dimensional models, which is prohibitive for UAV platforms with con-strained computational and energy resources. 
+
+Credit-based defenses assume a stable network topol-ogy for long-term reputation tracking , such as Baffle [An-dreina et al. , 2021] and FLDetector [Zhang et al. , 2022a]. FLDetector detects malicious clients by checking the consis-tency of their model updates across rounds. Baffle detects poisoned updates via client feedback and per-class perfor-mance evaluation. However, UAV networks are often highly dynamic and ad hoc [Gupta et al. , 2015], with rapidly chang-ing communication links and participation sets. As a result, constructing reliable trust models becomes exceedingly diffi-cult, and reputation-based defenses cannot be effectively ap-plied. Collectively, these limitations reveal a fundamental mis-match between existing defense designs and the decentral-ized, resource-constrained, and dynamically connected na-ture of UAV-based federated networks. While most backdoor defenses are inapplicable in de-centralized UAV networks, model purification-based ap-proaches offer an alternative direction . These methods typically operate by pruning backdoor-sensitive neurons [Wu and Wang, 2021] or injecting noise into intermediate lay-ers [Sun et al. , 2019], thereby suppressing hidden triggers. However, their computation and inference cost is prohibitive for UAVs with limited resources. In addition, injecting noise can severely degrade benign performance if it is not guided by task relevance. 
+
+2.3 Motivation 
+
+Stealthy backdoor attacks are known to exhibit greater sen-sitivity to model perturbations than benign tasks [Wu and Wang, 2021], meaning that even small modifications to the model may significantly disrupt their effectiveness. Comple-menting this, our empirical observations reveal that such at-tacks tend to concentrate their influence in a narrow range of frequency components when gradients are transformed via DCT. This insight motivates a frequency-aware defense strategy: by selectively discarding frequency components that are both (i) less relevant to the main task and (ii) more likely to carry backdoor-related perturbations, it becomes possible to sup-press hidden triggers while retaining benign performance. To this end, we propose a lightweight decentralized mechanism that estimates task relevance in the frequency domain and fil-ters model updates accordingly. 
+
+3 Preliminaries 
+
+3.1 Discrete Cosine Transform for Gradient Analysis 
+
+The Discrete Cosine Transform (DCT) is a frequency-domain transformation that decomposes a signal into a weighted sum of cosine functions at different frequencies. For a gradient vector g ∈ Rn, the DCT coefficients are computed as: 
+
+Gk =
+
+> n−1
+
+X
+
+> i=0
+
+gi cos 
+
+ πn
+
+
+
+i + 12
+
+
+
+k
+
+
+
+, k = 0 , 1, . . . , n − 1
+
+(1) where Gk denotes the k-th frequency coefficient. 
+
+Frequency Components. In the DCT representation, low-frequency components (small k) capture smooth, global pat-terns in the gradient that typically correspond to the over-all learning direction. High-frequency components (large k)encode rapid local variations, which often include noise or fine-grained perturbations. Mid-frequency components lie be-tween these extremes and capture intermediate structural in-formation. 
+
+High-Energy Components. The energy of a frequency component is defined as |Gk|2. High-energy components re-fer to frequency indices where |Gk|2 is large relative to other components, indicating significant contribution to the overall gradient structure. In neural network gradients, energy is typ-ically concentrated in low-frequency components due to the inherent smoothness of loss landscapes [Zhou et al. , 2024]. 
+
+Why DCT for Backdoor Defense? DCT is particularly suitable for gradient analysis in backdoor defense for three reasons: 1. Energy Compaction : DCT concentrates most signal energy into a few coefficients, making it easier to iden-tify anomalous energy distributions introduced by back-door attacks. 2. Structure Preservation : Due to its orthogonality, DCT preserves the geometric relationships in the original gra-dient space while revealing hidden spectral patterns. 3. Computational Efficiency : The Fast Cosine Transform enables O(n log n) computation, making it practical for resource-constrained UAV systems. 
+
+Intuition Behind Spectral Exposure. Frequencies with larger accumulated energy tend to correspond to parameters that are more sensitive to task-specific loss variations, and thus encode stronger task relevance. When stealthy attackers attempt to align their malicious gradients with benign ones in the parameter space, they inadvertently create distinctive patterns in the frequency domain. Specifically, suppressing detectable high-frequency anomalies while mimicking low-frequency benign behavior forces the backdoor signal into mid-frequency bands, resulting in anomalous energy concen-tration that can be detected and filtered. 
+
+4 System Overview 
+
+4.1 System Setting and Threat Model 
+
+We consider a decentralized federated learning (DFL) sce-nario deployed across a swarm of UAVs. As shown in Fig. 2, let the total number of UAV clients be N , and each UAV i (1 ≤ i ≤ N ) has a local dataset Di
+
+consisting of clean training samples. Each node performs training on its local data and engages in communication only with its immediate neighbors over an ad-hoc wireless network. To simplify the communication workflow, global training is conducted in synchronous communication rounds indexed by t = 1 , 2, . . . , T . In each round, node i updates its local model parameters θti by performing stochastic gradient de-scent (SGD) over its dataset Di, resulting in a model update 
+
+∆θti . Let gti = ∆ θti denote the gradient or model delta com-puted by client i at round t.Due to limited bandwidth constraints on UAVs, transmit-ting full model updates is inefficient. Hence, each node should adopt communication-efficient strategies when shar-ing updates. 
+
+4.2 Threat Model 
+
+We assume a stealthy backdoor threat model. A subset of UAV clients A ⊂ { 1, . . . , N } are compromised and attempt to implant a backdoor task into the global model. These adversarial nodes create malicious updates gti for 
+
+i ∈ A that preserve the accuracy of the main task while encoding the behavior of targeted misclassifications on trig-gered inputs. The system lacks global coordination or a centralized ver-ifier, and any node may potentially be adversarial. Further-more, attackers may exploit gradient manipulation strategies such as scaling, clipping, or directional alignment to evade detection. 
+
+4.3 Workflow 
+
+In each communication round t, every node i performs the following steps: 1. Local Update: Node i trains its local model on dataset 
+
+Di and obtains the gradient gti .2. Frequency Transformation: For each mini-batch gra-dient gti,b , node i applies DCT to obtain ˆgti,b =
+
+DCT (gti,b ). The set of transformed gradients is denoted as {ˆgti,b }Bb=1 .3. Task-Aware Scoring: Node i aggregates information across mini-batches to compute a frequency-wise score: score ti =
+
+> B
+
+X
+
+> b=1
+
+ ˆgti,b 
+
+2 +
+
+> B
+
+X
+
+> b=1
+
+ˆgti,b ,
+
+where the first term serves as an approximation to the di-agonal of the Fisher information matrix in the frequency domain, capturing the relative importance of each fre-quency component to the training objective, and the sec-ond term captures cumulative frequency energy. 4. Top-k Selection: Based on the magnitude of score ti,node i selects the top-k frequency indices Kti to retain, where k is determined by communication constraints. 5. Frequency Request: Node i broadcasts a request mes-sage containing its index set Kti to its neighbors and lis-tens for incoming requests. 6. Selective Communication and Aggregation: Node i
+
+transmits to each requesting neighbor the coefficients they asked for from its own aggregated DCT spec-trum, and in turn receives the requested coefficients from neighbors. It then aggregates received frequency com-ponents and reconstructs the final update ˜gti via inverse DCT. 7. Model Update: Node i updates its local model using the reconstructed aggregate ˜gti .This decentralized, task-driven workflow enables efficient information exchange under bandwidth constraints while suppressing anomalous frequency components injected by backdoor clients. Local Dataset DCT Frequencies of Gradients Top-K Score of Frequencies 1 1 1 1 0 0 0 0 0 1 0 0 0 0 0 Aggregating 
+
+> Local Model Local Model
+
+…   
+
+> DCT Frequencies of Poisoned Gradients
+> Poisoned Dataset Local Model Filtered Frequencies
+> ➃Update Frequencies 1 1 1 1 0 0 0 0 0 1 0 0 0 0 0
+> cos_sim=0.980 Low-frequency coefficients (FreqFed)
+> cos_sim=0.988 cos_sim=0.229 High-energy coefficients (Reserved) Low-energy coefficients (Discarded) Benign UAV  Malicious UAV Empirical Comp
+> ①Local Training ②DCT ③TASER Blue Scatter: Benign Gradients Red Scatter: Poisoned Gradients
+
+…
+
+> Benign Gradients Poisoned Gradients cos_sim=0.977 Compare with gradients (Traditional)
+> Phase 1 Original Gradients Phase 2 Frequency Coefficients Phase 3 Filtered Frequencies
+
+Figure 2: Workflow of TASER 
+
+5 Methodology 
+
+In this section, we present TASER to defend against backdoor attacks under UAV-DFL scenarios. 
+
+5.1 Frequency Transformation 
+
+To reveal the energy structure of gradient updates, we apply the Discrete Cosine Transform (DCT) to project them into the frequency domain [Zhou et al. , 2024]. DCT is known for its energy compaction property—benign updates typically concentrate most of their energy in low-frequency components, while adversarial perturbations or abrupt changes are more likely to activate mid-to-high fre-quency bands. For each client i at communication round t, we denote the mini-batch gradients as {gti,b }Bb=1 , where each gti,b ∈ Rd rep-resents the flattened gradient vector computed from batch b
+
+of the local clean dataset Di. Each gradient is projected into the frequency domain as: 
+
+ˆgti,b = DCT (gti,b ),
+
+where DCT is applied using an orthonormal basis. Specifically, for a gradient vector g ∈ Rd, its DCT (type-II) is defined as: 
+
+ˆg[k] = 
+
+r 2
+
+d
+
+> d−1
+
+X
+
+> n=0
+
+g[n] cos 
+
+ π(2 n + 1) k
+
+2d
+
+
+
+, for 0 ≤ k < d. 
+
+For k = 0 , we use the normalization factor p1/d to ensure orthogonality: 
+
+ˆg[0] = 
+
+r 1
+
+d
+
+> d−1
+
+X
+
+> n=0
+
+g[n].
+
+The resulting set {ˆgti,b }Bb=1 serves as the foundation for our subsequent scoring and filtering mechanism. 
+
+5.2 Task-Aware Frequency Scoring 
+
+After transforming gradient updates to the frequency domain, we aim to quantify the importance of each frequency compo-nent in a manner that reflects both task relevance and robust-ness to adversarial manipulation. Our design is motivated by the following observations: • Gradient Energy Distribution Reflects Task Sensitiv-ity. Frequency components with consistently high en-ergy across mini-batches are more likely to encode sta-ble task-relevant information. • Directional Consistency Implies Optimization Align-ment. Frequencies whose directions remain stable across updates suggest convergence toward a shared local objective and are less likely to originate from stochastic noise. Based on these principles, we define a frequency-wise scoring function composed of two terms: score ti[k] = α · Eti [k] + (1 − α) · Dti [k],
+
+where 
+
+Eti [k] = 
+
+> B
+
+X
+
+> b=1
+
+ ˆgti,b [k]2 , Dti [k] = 
+
+> B
+
+X
+
+> b=1
+
+ˆgti,b [k] .
+
+The first term Eti [k] captures the accumulated gradient energy in the k-th frequency component across local mini-batches. Due to the orthogonality of DCT, this value serves as a local proxy for task sensitivity in the k-th frequency di-rection, consistent with the intuition behind diagonal Fisher information: 
+
+Eti [k] ≈ Eb
+
+ ∂ℓ ∂ˆgti,b [k]
+
+!2 .
+
+It reflects the degree to which this frequency direction con-sistently participates in optimization dynamics. Frequencies with larger accumulated energy tend to correspond to param-eters more sensitive to task-specific loss variations and thus encode stronger task relevance. The second term Dti [k] captures directional agreement of the gradients. Frequencies with aligned update directions are likely driven by task-level learning dynamics, whereas adver-sarial components typically vary in direction to evade detec-tion or align selectively. By combining Eti [k] and Dti [k], the scoring function favors components that are both stable and semantically meaningful for the main task. The hyperparameter α ∈ [0 , 1] balances the influence between frequency energy and directional coher-ence. This enables each node to prioritize trustworthy update elements under local view and communication constraints— without relying on pairwise comparison or global consensus. The final score vector score ti ∈ Rd serves as the input for the subsequent Top-k selection step. 
+
+5.3 Top-k Frequency Filtering 
+
+Given the task-aware score vector score ti ∈ Rd computed for each frequency component, node i performs a sparsification step to select the most informative and trustworthy update el-ements under communication constraints. 
+
+Dual-purpose filtering. The top-k frequency selection plays two roles: • Communication Efficiency. Only the k most informa-tive frequency components are retained and exchanged, significantly reducing transmission volume per node. • Backdoor Filtering. Malicious updates are naturally as-signed lower scores and filtered out in this process. Specifically, the node retains only the indices of the top-k
+
+scoring frequencies: 
+
+Kti = TopK  score ti, k  ,
+
+where k is determined adaptively according to both system-level and security-level constraints. In particular, we define: 
+
+k = min {kbw , k adv } ,
+
+where kbw is the maximum number of coefficients that can be transmitted under current communication bandwidth and noise level, and kadv is a security-driven lower bound deter-mined by empirical analysis of backdoor spread across fre-quencies. 
+
+Bandwidth-constrained upper bound. Let each node transmit k floating-point values of size b bits per communi-cation round, over a noisy wireless link with signal-to-noise ratio (SNR) γ and channel bandwidth W . Then, the Shannon capacity gives an upper limit on data rate per node: 
+
+R = W log 2(1 + γ).
+
+Thus, the maximum permissible k under communication constraints is: 
+
+kbw =
+
+ R · ∆tb
+
+
+
+,
+
+where ∆t is the duration of each communication slot. 
+
+Security-driven lower bound. To ensure sufficient prun-ing of adversarial signals, k must also be larger than a mini-mum threshold kadv that ensures the exclusion of low-scoring, potentially malicious frequencies. This threshold can be de-termined empirically by observing the frequency rank distri-butions of known attacks. Each node then broadcasts its selected frequency indices 
+
+Kti to neighbors, receives matching coefficients in response, and reconstructs the aggregated update via inverse DCT. 
+
+6 Experiment 
+
+To evaluate the effectiveness and robustness of our proposed method, we conduct experiments on two standard image clas-sification benchmarks: EMNIST [Cohen et al. , 2017] and CIFAR-10 [Krizhevsky et al. , 2010]. EMNIST is a dataset of handwritten alphanumeric characters comprising 62 classes, for which we adopt the LeNet [LeCun et al. , 2002] archi-tecture. CIFAR-10 consists of 10 categories of natural color images with higher visual complexity, for which we employ a deeper VGG-9 [Simonyan and Zisserman, 2014] network. These two datasets provide complementary testbeds to assess defense performance under varying input domains, model depths, and task complexities. We compare our method against the following represen-tative federated backdoor defenses: Weak-DP [Sun et al. ,2019], Multi-Metrics [Huang et al. , 2023], Krum & Multi-Krum [Blanchard et al. , 2017], RFA [Pillutla et al. , 2022], and Freqfed [Fereidooni et al. , 2023]. We consider both 
+
+black-box stealthy backdoor attacks [Wang et al. , 2020a], which leverage rare edge-case samples to avoid dilution dur-ing aggregation, and white-box stealthy backdoor attacks 
+
+(PFedBA) [Lyu et al. , 2024], which evade detection by align-ing the injected update direction with clean task gradients. All experiments are conducted using PyTorch 2.5.1 and Python 3.12 on a virtualized GPU with 48 GB memory, a 20-core Intel Xeon Platinum 8470Q processor, and 90 GB RAM. We simulate a decentralized federated learning environment with 200 clients, where 10 clients are randomly selected per round over 100 communication rounds. Among all clients, 20% (40 clients) are malicious, each holding 30% poisoned data embedded with a fixed trigger pattern. 
+
+6.1 Impact of Frequency Selection Ratio 
+
+We conduct an ablation study by varying the Top-k selection ratio from 5% to 100% while keeping the Poisoned Model Rate (PMR) at 20%. Experiments are performed on CIFAR-10 under white-box stealthy backdoor attacks (PFedBA). As shown in Fig. 3, reducing k degrades both main-task accuracy and backdoor success rate, but the decline in back-door performance is significantly steeper. At k = 30% , the retained frequency band still includes regions where stealthy attacks concentrate their manipulations, allowing moderate backdoor persistence. At k = 10% , our method achieves sharp suppression of the backdoor effect (ASR ≈ 15%) while maintaining main-task accuracy within 5% of the baseline. However, k = 5% causes severe performance degradation, indicating over-aggressive pruning. 0 20 40 60 80 100 
+
+> Rounds
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Main Task Accuracy (%)
+> K=5%
+> K=10%
+> K=30%
+> K=100%
+
+(a) Main Task Accuracy 0 20 40 60 80 100  
+
+> Rounds
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Backdoor Success Rate (%)
+
+(b) Attack Success Rate Figure 3: Comparison of main task accuracy and backdoor success rate under different frequency selection ratios. 
+
+Practical Guidance. We recommend k ∈ [10% , 20%] as a default configuration: k = 10% for high-adversarial scenar-ios, and k = 20% for benign-dominated environments. 
+
+6.2 Comparison with Baseline Defenses 
+
+We evaluate Attack Success Rate (ASR) and Main Task Ac-curacy (MTA) for all defense methods on both datasets under black-box and white-box attacks. 0 20 40 60 80 100 
+
+> Communication Rounds
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Main Task Accuracy (%)
+> no defense
+> weak-DP
+> multi-metrics
+> krum
+> multi-krum
+> RFA
+> FreqFed
+> TASER
+
+(a) Main Task Accuracy 0 20 40 60 80 100  
+
+> Communication Rounds
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Backdoor Success Rate (%)
+
+(b) Attack Success Rate Figure 4: CIFAR-10 against black-box stealthy backdoor attacks. 0 20 40 60 80 100 
+
+> Communication Rounds
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Main Task Accuracy (%)
+> no defense
+> weak-DP
+> multi-metrics
+> krum
+> multi-krum
+> RFA
+> FreqFed
+> TASER
+
+(a) Main Task Accuracy 0 20 40 60 80 100  
+
+> Communication Rounds
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Backdoor Success Rate (%)
+
+(b) Attack Success Rate Figure 5: CIFAR-10 against white-box stealthy backdoor attacks. 
+
+Analysis of Baseline Defenses. As shown in Figs. 4– 7, robust aggregation methods (Krum, Multi-Krum, RFA) are largely ineffective against stealthy backdoor attacks. By aligning malicious updates with benign gradients, attackers bypass outlier filtering and maintain high ASR. This reliance on distance-based heuristics proves fundamentally insuffi-cient against well-camouflaged adversarial behavior, some-times resulting in higher ASR than the no-defense setting due to misidentifying malicious clients as benign. Weak-DP provides virtually no protection despite min-imal overhead. Multi-Metrics shows good performance on CIFAR-10 but suffers from non-deterministic failures— sudden ASR spikes occur when malicious clients evade de-tection. On EMNIST, Multi-Metrics exhibits significantly in-0 20 40 60 80 100 
+
+> Communication Rounds
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Main Task Accuracy (%)
+> no defense
+> weak-DP
+> multi-metrics
+> krum
+> multi-krum
+> RFA
+> FreqFed
+> TASER
+
+(a) Main Task Accuracy 0 20 40 60 80 100  
+
+> Communication Rounds
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Backdoor Success Rate (%)
+
+(b) Attack Success Rate Figure 6: EMNIST against black-box stealthy backdoor attacks. 0 20 40 60 80 100 
+
+> Communication Rounds
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Main Task Accuracy (%)
+> no defense
+> weak-DP
+> multi-metrics
+> krum
+> multi-krum
+> RFA
+> FreqFed
+> TASER
+
+(a) Main Task Accuracy 0 20 40 60 80 100  
+
+> Communication Rounds
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Backdoor Success Rate (%)
+
+(b) Attack Success Rate Figure 7: EMNIST against white-box stealthy backdoor attacks. 
+
+creased misclassifications due to elevated intra-class similar-ity in fine-grained tasks. For FreqFed [Fereidooni et al. , 2023], the frequency-based method exhibits much better performance than multi-metrics. However, it still faces the issue common to clustering-based backdoor detection methods: once a cluster containing a large number of attackers is selected, the backdoor task accuracy will sharply increase in the following round. 
+
+Performance of TASER. Our method selectively pre-serves task-critical frequency components while suppressing backdoor-related frequencies. On CIFAR-10, main-task ac-curacy drops by only 5% compared to no defense; on EM-NIST, performance remains virtually unaffected. More im-portantly, TASER consistently suppresses ASR below 20% across both datasets, significantly outperforming all base-lines. Unlike metric-based defenses, our method maintains stable performance without abrupt vulnerability spikes, con-firming the effectiveness of task-driven frequency filtering. 
+
+7 Conclusion 
+
+We introduce TASER, a novel defense framework designed to mitigate stealthy backdoor attacks in decentralized feder-ated learning, particularly in UAV-based scenarios lacking global coordination and identity stability. Instead of rely-ing on outlier detection in the gradient space, TASER lever-ages the frequency-domain structure of model updates and selectively retains main-task-relevant components, thereby structurally suppressing backdoor effects. Theoretical anal-ysis and empirical results across multiple datasets and threat models demonstrate that TASER achieves strong resistance to both white-box and black-box attacks while maintaining competitive main-task performance. Our findings highlight the potential of task-aware spectral filtering as a lightweight and effective alternative to distribution-based defenses. References 
+
+[Andreina et al. , 2021] Sebastien Andreina, Giorgia Azzurra Marson, Helen M¨ ollering, and Ghassan Karame. Baffle: Backdoor detection via feedback-based federated learn-ing. In 2021 IEEE 41st International Conference on Distributed Computing Systems (ICDCS) , pages 852–863. IEEE, 2021. [Bagdasaryan et al. , 2020] Eugene Bagdasaryan, Andreas Veit, Yiqing Hua, Deborah Estrin, and Vitaly Shmatikov. How to backdoor federated learning. In International conference on artificial intelligence and statistics , pages 2938–2948. PMLR, 2020. [Blanchard et al. , 2017] Peva Blanchard, El Mahdi El Mhamdi, Rachid Guerraoui, and Julien Stainer. Machine learning with adversaries: Byzantine toler-ant gradient descent. Advances in neural information processing systems , 30, 2017. [Cohen et al. , 2017] Gregory Cohen, Saeed Afshar, Jonathan Tapson, and Andre Van Schaik. Emnist: Extending mnist to handwritten letters. In 2017 international joint con-ference on neural networks (IJCNN) , pages 2921–2926. IEEE, 2017. [Feng et al. , 2022] Chaosheng Feng, Bin Liu, Keping Yu, Sotirios K. Goudos, and Shaohua Wan. Blockchain-empowered decentralized horizontal federated learning for 5g-enabled uavs. IEEE Transactions on Industrial Infor-matics , 18(5):3582–3592, 2022. [Fereidooni et al. , 2023] Hossein Fereidooni, Alessandro Pegoraro, Phillip Rieger, Alexandra Dmitrienko, and Ahmad-Reza Sadeghi. Freqfed: A frequency analysis-based approach for mitigating poisoning attacks in feder-ated learning. arXiv preprint arXiv:2312.04432 , 2023. [Gong et al. , 2022] Xueluan Gong, Yanjiao Chen, Qian Wang, and Weihan Kong. Backdoor attacks and de-fenses in federated learning: State-of-the-art, taxonomy, and future directions. IEEE Wireless Communications ,30(2):114–121, 2022. [Gupta et al. , 2015] Lav Gupta, Raj Jain, and Gabor Vaszkun. Survey of important issues in uav communica-tion networks. IEEE communications surveys & tutorials ,18(2):1123–1152, 2015. [Huang et al. , 2023] Siquan Huang, Yijiang Li, Chong Chen, Leyu Shi, and Ying Gao. Multi-metrics adaptively identi-fies backdoors in federated learning. In Proceedings of the IEEE/CVF International Conference on Computer Vision ,pages 4652–4662, 2023. [Javed et al. , 2024] Sadaf Javed, Ali Hassan, Rizwan Ah-mad, Waqas Ahmed, Rehan Ahmed, Ahsan Saadat, and Mohsen Guizani. State-of-the-art and future research chal-lenges in uav swarms. IEEE Internet of Things Journal ,11(11):19023–19045, 2024. [Krizhevsky et al. , 2010] Alex Krizhevsky, Geoff Hinton, et al. Convolutional deep belief networks on cifar-10. Un-published manuscript , 40(7):1–9, 2010. [LeCun et al. , 2002] Yann LeCun, L´ eon Bottou, Yoshua Bengio, and Patrick Haffner. Gradient-based learning ap-plied to document recognition. Proceedings of the IEEE ,86(11):2278–2324, 2002. [Liao et al. , 2018] Zhibin Liao, Tom Drummond, Ian Reid, and Gustavo Carneiro. Approximate fisher information matrix to characterize the training of deep neural networks. 
+
+IEEE transactions on pattern analysis and machine intel-ligence , 42(1):15–26, 2018. [Lyu et al. , 2024] Xiaoting Lyu, Yufei Han, Wei Wang, Jingkai Liu, Yongsheng Zhu, Guangquan Xu, Jiqiang Liu, and Xiangliang Zhang. Lurking in the shadows: Unveiling stealthy backdoor attacks against personalized federated learning. In 33rd USENIX Security Symposium (USENIX Security 24) , pages 4157–4174, 2024. [Mart´ ınez Beltr´ an et al. , 2023] Enrique Tom´ as Mart´ ınez Beltr´ an, Mario Quiles P´ erez, Pedro Miguel S´ anchez S´ anchez, Sergio L´ opez Bernal, G´ erˆ ome Bovet, Manuel Gil P´ erez, Gregorio Mart´ ınez P´ erez, and Alberto Huertas Celdr´ an. Decentralized federated learning: Fundamentals, state of the art, frameworks, trends, and challenges. IEEE Communications Surveys & Tutorials , 25(4):2983–3013, 2023. [Nguyen et al. , 2022] Thien Duc Nguyen, Phillip Rieger, Huili Chen, Hossein Yalame, Helen M¨ ollering, Hossein Fereidooni, Samuel Marchal, Markus Miettinen, Azalia Mirhoseini, Shaza Zeitouni, et al. {FLAME }: Taming backdoors in federated learning. In 31st USENIX Secu-rity Symposium (USENIX Security 22) , pages 1415–1432, 2022. [Nguyen et al. , 2023] Thuy Dung Nguyen, Tuan A Nguyen, Anh Tran, Khoa D Doan, and Kok-Seng Wong. Iba: Towards irreversible backdoor attacks in federated learn-ing. Advances in Neural Information Processing Systems ,36:66364–66376, 2023. [Ozdayi et al. , 2021] Mustafa Safa Ozdayi, Murat Kantar-cioglu, and Yulia R Gel. Defending against backdoors in federated learning with robust learning rate. In Pro-ceedings of the AAAI conference on artificial intelligence ,volume 35, pages 9268–9276, 2021. [Pasquini et al. , 2023] Dario Pasquini, Mathilde Raynal, and Carmela Troncoso. On the (in)security of peer-to-peer de-centralized machine learning. In 2023 IEEE Symposium on Security and Privacy (SP) , pages 418–436, 2023. [Pillutla et al. , 2022] Krishna Pillutla, Sham M Kakade, and Zaid Harchaoui. Robust aggregation for federated learn-ing. IEEE Transactions on Signal Processing , 70:1142– 1154, 2022. [Simonyan and Zisserman, 2014] Karen Simonyan and An-drew Zisserman. Very deep convolutional networks for large-scale image recognition. arXiv preprint arXiv:1409.1556 , 2014. [Sun et al. , 2019] Ziteng Sun, Peter Kairouz, Ananda Theertha Suresh, and H Brendan McMahan. Can you really backdoor federated learning? arXiv preprint arXiv:1911.07963 , 2019. [Wan et al. , 2024] Yichen Wan, Youyang Qu, Wei Ni, Yong Xiang, Longxiang Gao, and Ekram Hossain. Data and model poisoning backdoor attacks on wireless federated learning, and the defense mechanisms: A comprehen-sive survey. IEEE Communications Surveys & Tutorials ,26(3):1861–1897, 2024. [Wang et al. , 2018] Yunhe Wang, Chang Xu, Chao Xu, and Dacheng Tao. Packing convolutional neural networks in the frequency domain. IEEE transactions on pattern anal-ysis and machine intelligence , 41(10):2495–2510, 2018. [Wang et al. , 2020a] Hongyi Wang, Kartik Sreenivasan, Shashank Rajput, Harit Vishwakarma, Saurabh Agarwal, Jy-yong Sohn, Kangwook Lee, and Dimitris Papailiopou-los. Attack of the tails: Yes, you really can backdoor feder-ated learning. Advances in neural information processing systems , 33:16070–16084, 2020. [Wang et al. , 2020b] Yuntao Wang, Zhou Su, Ning Zhang, and Abderrahim Benslimane. Learning in the air: Se-cure federated learning for uav-assisted crowdsensing. 
+
+IEEE Transactions on network science and engineering ,8(2):1055–1069, 2020. [Wu and Wang, 2021] Dongxian Wu and Yisen Wang. Ad-versarial neuron pruning purifies backdoored deep mod-els. Advances in Neural Information Processing Systems ,34:16913–16925, 2021. [Zhang et al. , 2022a] Zaixi Zhang, Xiaoyu Cao, Jinyuan Jia, and Neil Zhenqiang Gong. Fldetector: Defending feder-ated learning against model poisoning attacks via detect-ing malicious clients. In Proceedings of the 28th ACM SIGKDD conference on knowledge discovery and data mining , pages 2545–2555, 2022. [Zhang et al. , 2022b] Zhengming Zhang, Ashwinee Panda, Linyue Song, Yaoqing Yang, Michael Mahoney, Prateek Mittal, Ramchandran Kannan, and Joseph Gonzalez. Neu-rotoxin: Durable backdoors in federated learning. In Inter-national Conference on Machine Learning , pages 26429– 26446. PMLR, 2022. [Zhang et al. , 2024] Shaobo Zhang, Yimeng Pan, Qin Liu, Zheng Yan, Kim-Kwang Raymond Choo, and Guojun Wang. Backdoor attacks and defenses targeting multi-domain ai models: A comprehensive review. ACM Com-puting Surveys , 57(4):1–35, 2024. [Zhao et al. , 2022] Zhendong Zhao, Xiaojun Chen, Yuexin Xuan, Ye Dong, Dakui Wang, and Kaitai Liang. De-feat: Deep hidden feature backdoor attacks by impercep-tible perturbation and latent representation constraints. In 
+
+Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pages 15213– 15222, June 2022. [Zhou et al. , 2024] Zan Zhou, Changqiao Xu, Bo Wang, Tengfei Li, Sizhe Huang, Shujie Yang, and Su Yao. Secfft: Safeguarding federated fine-tuning for large vision lan-guage models against covert backdoor attacks in iort net-works. IEEE Internet of Things Journal , 2024.
