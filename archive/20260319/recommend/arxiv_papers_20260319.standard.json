@@ -1,0 +1,760 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-19T20:23:43.063916+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 27,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 79,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2603.17453v1",
+      "title": "DDH-based schemes for multi-party Function Secret Sharing",
+      "abstract": "Function Secret Sharing (FSS) schemes enable sharing efficiently secret functions. Schemes dedicated to point functions, referred to as Distributed Point Functions (DPFs), are the center of FSS literature thanks to their numerous applications including private information retrieval, anonymous communications, and machine learning. While two-party DPFs benefit from schemes with logarithmic key sizes, multi-party DPFs have seen limited advancements: $O(\\sqrt{N})$ key sizes (with $N$, the function domain size) and/or exponential factors in the key size.   We propose a DDH-based technique reducing the key size of existing multi-party schemes. In particular, we build an honest-majority DPF with $O(\\sqrt[3]{N})$ key size. Our benchmark highlights key sizes up to $10\\times$ smaller (on realistic problem sizes) than state-of-the-art schemes. Finally, we extend our technique to schemes supporting comparison functions.",
+      "authors": [
+        "Marc Damie",
+        "Florian Hahn",
+        "Andreas Peter",
+        "Jan Ramon"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-18T07:48:19+00:00",
+      "link": "https://arxiv.org/pdf/2603.17453v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "DDH-based multi-party Distributed Point Functions (DPFs) for FSS",
+      "llm_evidence_cn": "基于DDH的多方分布式点函数(DPF)FSS方案",
+      "llm_evidence": "基于DDH的多方分布式点函数(DPF)FSS方案",
+      "canonical_evidence": "基于DDH的多方分布式点函数(DPF)FSS方案",
+      "llm_tldr_en": "Proposes a DDH-based technique to reduce key sizes in multi-party Function Secret Sharing and DPFs.",
+      "llm_tldr_cn": "提出一种基于DDH的技术，旨在减小多方函数机密共享和DPF的密钥大小。",
+      "llm_tldr": "提出一种基于DDH的技术，旨在减小多方函数机密共享和DPF的密钥大小。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Distributed Point Functions (DPF) in FSS",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.11659v1",
+      "title": "FL-MedSegBench: A Comprehensive Benchmark for Federated Learning on Medical Image Segmentation",
+      "abstract": "Federated learning (FL) offers a privacy-preserving paradigm for collaborative medical image analysis without sharing raw data. However, the absence of standardized benchmarks for medical image segmentation hinders fair and comprehensive evaluation of FL methods. To address this gap, we introduce FL-MedSegBench, the first comprehensive benchmark for federated learning on medical image segmentation. Our benchmark encompasses nine segmentation tasks across ten imaging modalities, covering both 2D and 3D formats with realistic clinical heterogeneity. We systematically evaluate eight generic FL (gFL) and five personalized FL (pFL) methods across multiple dimensions: segmentation accuracy, fairness, communication efficiency, convergence behavior, and generalization to unseen domains. Extensive experiments reveal several key insights: (i) pFL methods, particularly those with client-specific batch normalization (\\textit{e.g.}, FedBN), consistently outperform generic approaches; (ii) No single method universally dominates, with performance being dataset-dependent; (iii) Communication frequency analysis shows normalization-based personalization methods exhibit remarkable robustness to reduced communication frequency; (iv) Fairness evaluation identifies methods like Ditto and FedRDN that protect underperforming clients; (v) A method's generalization to unseen domains is strongly tied to its ability to perform well across participating clients. We will release an open-source toolkit to foster reproducible research and accelerate clinically applicable FL solutions, providing empirically grounded guidelines for real-world clinical deployment. The source code is available at https://github.com/meiluzhu/FL-MedSegBench.",
+      "authors": [
+        "Meilu Zhu",
+        "Zhiwei Wang",
+        "Axiu Mao",
+        "Yuxing Li",
+        "Xiaohan Xing",
+        "Yixuan Yuan",
+        "Edmund Y. Lam"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-12T08:28:41+00:00",
+      "link": "https://arxiv.org/pdf/2603.11659v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Federated learning benchmark for medical image segmentation",
+      "llm_evidence_cn": "医学图像分割的联邦学习基准",
+      "llm_evidence": "医学图像分割的联邦学习基准",
+      "canonical_evidence": "医学图像分割的联邦学习基准",
+      "llm_tldr_en": "Introduces a comprehensive benchmark for evaluating federated learning methods in medical image segmentation.",
+      "llm_tldr_cn": "引入了一个全面的基准，用于评估医学图像分割中的联邦学习方法。",
+      "llm_tldr": "引入了一个全面的基准，用于评估医学图像分割中的联邦学习方法。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.14238v1",
+      "title": "Domain-Skewed Federated Learning with Feature Decoupling and Calibration",
+      "abstract": "Federated learning (FL) allows distributed clients to collaboratively train a global model in a privacy-preserving manner. However, one major challenge is domain skew, where clients' data originating from diverse domains may hinder the aggregated global model from learning a consistent representation space, resulting in poor generalizable ability in multiple domains. In this paper, we argue that the domain skew is reflected in the domain-specific biased features of each client, causing the local model's representations to collapse into a narrow low-dimensional subspace. We then propose Federated Feature Decoupling and Calibration ($F^2$DC), which liberates valuable class-relevant information by calibrating the domain-specific biased features, enabling more consistent representations across domains. A novel component, Domain Feature Decoupler (DFD), is first introduced in $F^2$DC to determine the robustness of each feature unit, thereby separating the local features into domain-robust features and domain-related features. A Domain Feature Corrector (DFC) is further proposed to calibrate these domain-related features by explicitly linking discriminative signals, capturing additional class-relevant clues that complement the domain-robust features. Finally, a domain-aware aggregation of the local models is performed to promote consensus among clients. Empirical results on three popular multi-domain datasets demonstrate the effectiveness of the proposed $F^2$DC and the contributions of its two modules. Code is available at https://github.com/mala-lab/F2DC.",
+      "authors": [
+        "Huan Wang",
+        "Jun Shen",
+        "Jun Yan",
+        "Guansong Pang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.MM"
+      ],
+      "published": "2026-03-15T06:20:22+00:00",
+      "link": "https://arxiv.org/pdf/2603.14238v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Privacy-preserving federated learning with feature decoupling",
+      "llm_evidence_cn": "具有特征解耦的隐私保护联邦学习",
+      "llm_evidence": "具有特征解耦的隐私保护联邦学习",
+      "canonical_evidence": "具有特征解耦的隐私保护联邦学习",
+      "llm_tldr_en": "Proposes a federated learning framework to handle domain skew while maintaining privacy.",
+      "llm_tldr_cn": "提出一种联邦学习框架，在保护隐私的同时解决领域偏移问题。",
+      "llm_tldr": "提出一种联邦学习框架，在保护隐私的同时解决领域偏移问题。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.16723v1",
+      "title": "Federated Learning with Multi-Partner OneFlorida+ Consortium Data for Predicting Major Postoperative Complications",
+      "abstract": "Background: This study aims to develop and validate federated learning models for predicting major postoperative complications and mortality using a large multicenter dataset from the OneFlorida Data Trust. We hypothesize that federated learning models will offer robust generalizability while preserving data privacy and security. Methods: This retrospective, longitudinal, multicenter cohort study included 358,644 adult patients admitted to five healthcare institutions, who underwent 494,163 inpatient major surgical procedures from 2012-2023. We developed and internally and externally validated federated learning models to predict the postoperative risk of intensive care unit (ICU) admission, mechanical ventilation (MV) therapy, acute kidney injury (AKI), and in-hospital mortality. These models were compared with local models trained on data from a single center and central models trained on a pooled dataset from all centers. Performance was primarily evaluated using area under the receiver operating characteristics curve (AUROC) and the area under the precision-recall curve (AUPRC) values. Results: Our federated learning models demonstrated strong predictive performance, with AUROC scores consistently comparable or superior performance in terms of AUROC and AUPRC across all outcomes and sites. Our federated learning models also demonstrated strong generalizability, with comparable or superior performance in terms of both AUROC and AUPRC compared to the best local learning model at each site. Conclusions: By leveraging multicenter data, we developed robust, generalizable, and privacy-preserving predictive models for major postoperative complications and mortality. These findings support the feasibility of federated learning in clinical decision support systems.",
+      "authors": [
+        "Yuanfang Ren",
+        "Varun Sai Vemuri",
+        "Zhenhong Hu",
+        "Benjamin Shickel",
+        "Ziyuan Guan",
+        "Tyler J. Loftus",
+        "Parisa Rashidi",
+        "Tezcan Ozrazgat-Baslanti",
+        "Azra Bihorac"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-17T16:09:33+00:00",
+      "link": "https://arxiv.org/pdf/2603.16723v1",
+      "tags": [
+        "keyword:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Federated learning for multicenter medical data with privacy preservation",
+      "llm_evidence_cn": "多中心医疗数据的隐私保护联邦学习",
+      "llm_evidence": "多中心医疗数据的隐私保护联邦学习",
+      "canonical_evidence": "多中心医疗数据的隐私保护联邦学习",
+      "llm_tldr_en": "Validates federated learning for postoperative risk prediction while maintaining data privacy across institutions.",
+      "llm_tldr_cn": "验证了在保持机构间数据隐私的同时，利用联邦学习进行术后风险预测的有效性。",
+      "llm_tldr": "验证了在保持机构间数据隐私的同时，利用联邦学习进行术后风险预测的有效性。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.17507v1",
+      "title": "QuantFL: Sustainable Federated Learning for Edge IoT via Pre-Trained Model Quantisation",
+      "abstract": "Federated Learning (FL) enables privacy-preserving intelligence on Internet of Things (IoT) devices but incurs a significant carbon footprint due to the high energy cost of frequent uplink transmission. While pre-trained models are increasingly available on edge devices, their potential to reduce the energy overhead of fine-tuning remains underexplored. In this work, we propose QuantFL, a sustainable FL framework that leverages pre-trained initialisation to enable aggressive, computationally lightweight quantisation. We demonstrate that pre-training naturally concentrates update statistics, allowing us to use memory-efficient bucket quantisation without the energy-intensive overhead of complex error-feedback mechanisms. On MNIST and CIFAR-100, QuantFL reduces total communication by 40\\% ($\\simeq40\\%$ total-bit reduction with full-precision downlink; $\\geq80\\%$ on uplink or when downlink is quantised) while matching or exceeding uncompressed baselines under strict bandwidth budgets; BU attains 89.00\\% (MNIST) and 66.89\\% (CIFAR-100) test accuracy with orders of magnitude fewer bits. We also account for uplink and downlink costs and provide ablations on quantisation levels and initialisation. QuantFL delivers a practical, \"green\" recipe for scalable training on battery-constrained IoT networks.",
+      "authors": [
+        "Charuka Herath",
+        "Yogachandran Rahulamathavan",
+        "Varuna De Silva",
+        "Sangarapillai Lambotharan"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-18T09:08:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.17507v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Privacy-preserving federated learning for edge IoT devices",
+      "llm_evidence_cn": "面向边缘物联网设备的隐私保护联邦学习",
+      "llm_evidence": "面向边缘物联网设备的隐私保护联邦学习",
+      "canonical_evidence": "面向边缘物联网设备的隐私保护联邦学习",
+      "llm_tldr_en": "Proposes QuantFL, a sustainable federated learning framework using quantization to reduce energy and carbon footprint.",
+      "llm_tldr_cn": "提出QuantFL框架，通过量化技术降低联邦学习在物联网设备上的能耗与碳足迹。",
+      "llm_tldr": "提出QuantFL框架，通过量化技术降低联邦学习在物联网设备上的能耗与碳足迹。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.16267v1",
+      "title": "Novel CRT-based Asymptotically Ideal Disjunctive Hierarchical Secret Sharing Scheme",
+      "abstract": "Disjunctive Hierarchical Secret Sharing (DHSS)} scheme is a type of secret sharing scheme in which the set of all participants is partitioned into disjoint subsets, and each subset is said to be a level with different degrees of trust and different thresholds. In this work, we focus on the Chinese Remainder Theorem (CRT)-based DHSS schemes due to their ability to accommodate flexible share sizes. We point out that the ideal DHSS scheme of Yang et al. (ISIT, 2024) and the asymptotically ideal DHSS scheme of Tiplea et al. (IET Information Security, 2021) are insecure. Consequently, existing CRT-based DHSS schemes either exhibit security flaws or have an information rate less than $\\frac{1}{2}$. To address these limitations, we propose a CRT-based asymptotically perfect DHSS scheme that supports flexible share sizes. Notably, our scheme is asymptotically ideal when all shares are equal in size. Its information rate achieves one and it has computational security.",
+      "authors": [
+        "Hongju Li",
+        "Jian Ding",
+        "Fuyou Miao",
+        "Cheng Wang",
+        "Cheng Shu"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.IT"
+      ],
+      "published": "2026-03-17T08:56:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.16267v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "CRT-based Disjunctive Hierarchical Secret Sharing Scheme",
+      "llm_evidence_cn": "基于中国剩余定理的析取分级秘密共享方案",
+      "llm_evidence": "基于中国剩余定理的析取分级秘密共享方案",
+      "canonical_evidence": "基于中国剩余定理的析取分级秘密共享方案",
+      "llm_tldr_en": "Proposes a new hierarchical secret sharing scheme using CRT to improve security and information rates.",
+      "llm_tldr_cn": "提出一种基于CRT的新型分级秘密共享方案，以提高安全性和信息率。",
+      "llm_tldr": "提出一种基于CRT的新型分级秘密共享方案，以提高安全性和信息率。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.08944v2",
+      "title": "Differentially Private Secure Multiplication: Beyond Two Multiplicands",
+      "abstract": "We study the problem of differentially private (DP) secure multiplication in distributed computing systems, focusing on regimes where perfect privacy and perfect accuracy cannot be simultaneously achieved. Specifically, N nodes collaboratively compute the product of M private inputs while guaranteeing epsilon-DP against any collusion of up to T nodes. Prior work has characterized the fundamental privacy-accuracy trade-off for the multiplication of two multiplicands. In this paper, we extend these results to the more general setting of computing the product of an arbitrary number M of multiplicands. We propose a secure multiplication framework based on carefully designed encoding polynomials combined with layered noise injection. The proposed construction generalizes existing schemes and enables the systematic cancellation of lower-order noise terms, leading to improved estimation accuracy. We explore two regimes: (M-1)T+1 <= N <= MT and N = T+1. For (M-1)T+1 <= N <= MT, we characterize the optimal privacy--accuracy trade-off. When N = T+1, we derive nontrivial achievability and converse bounds that are asymptotically tight in the high-privacy regime.",
+      "authors": [
+        "Haoyang Hu",
+        "Viveck R. Cadambe"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-03-09T21:26:39+00:00",
+      "link": "https://arxiv.org/pdf/2603.08944v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "differentially private secure multiplication in distributed systems",
+      "llm_evidence_cn": "分布式系统中的差分隐私安全乘法",
+      "llm_evidence": "分布式系统中的差分隐私安全乘法",
+      "canonical_evidence": "分布式系统中的差分隐私安全乘法",
+      "llm_tldr_en": "Develops a framework for DP secure multiplication of multiple inputs in distributed computing nodes.",
+      "llm_tldr_cn": "开发了一个在分布式计算节点中对多个输入进行差分隐私安全乘法的框架。",
+      "llm_tldr": "开发了一个在分布式计算节点中对多个输入进行差分隐私安全乘法的框架。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "MPC protocols for privacy-preserving computation",
+      "matched_requirement_id": "req-12",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.08944v2"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.09577v1",
+      "title": "Randomized Distributed Function Computation (RDFC): Ultra-Efficient Semantic Communication Applications to Privacy",
+      "abstract": "We establish the randomized distributed function computation (RDFC) framework, in which a sender transmits just enough information for a receiver to generate a randomized function of the input data. Describing RDFC as a form of semantic communication, which can be essentially seen as a generalized remote-source-coding problem, we show that security and privacy constraints naturally fit this model, as they generally require a randomization step. Using strong coordination metrics, we ensure (local differential) privacy for every input sequence and prove that such guarantees can be met even when no common randomness is shared between the transmitter and receiver.   This work provides lower bounds on Wyner's common information (WCI), which is the communication cost when common randomness is absent, and proposes numerical techniques to evaluate the other corner point of the RDFC rate region for continuous-alphabet random variables with unlimited shared randomness. Experiments illustrate that a sufficient amount of common randomness can reduce the semantic communication rate by up to two orders of magnitude compared to the WCI point, while RDFC without any shared randomness still outperforms lossless transmission by a large margin. A finite blocklength analysis further confirms that the privacy parameter gap between the asymptotic and non-asymptotic RDFC methods closes exponentially fast with input length. Our results position RDFC as an energy-efficient semantic communication strategy for privacy-aware distributed computation systems.",
+      "authors": [
+        "Onur Günlü"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT",
+        "cs.CR",
+        "cs.DC",
+        "cs.SC",
+        "eess.SP"
+      ],
+      "published": "2026-03-10T12:23:50+00:00",
+      "link": "https://arxiv.org/pdf/2603.09577v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "randomized distributed function computation for privacy",
+      "llm_evidence_cn": "用于隐私保护的随机分布式函数计算",
+      "llm_evidence": "用于隐私保护的随机分布式函数计算",
+      "canonical_evidence": "用于隐私保护的随机分布式函数计算",
+      "llm_tldr_en": "Develops a framework for distributed function computation with local differential privacy guarantees.",
+      "llm_tldr_cn": "构建了一个分布式函数计算框架，在无需共享随机性的情况下保证本地差分隐私。",
+      "llm_tldr": "构建了一个分布式函数计算框架，在无需共享随机性的情况下保证本地差分隐私。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "MPC protocols for privacy-preserving computation",
+      "matched_requirement_id": "req-12",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.09577v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.10763v1",
+      "title": "Prioritizing Gradient Sign Over Modulus: An Importance-Aware Framework for Wireless Federated Learning",
+      "abstract": "Wireless federated learning (FL) facilitates collaborative training of artificial intelligence (AI) models to support ubiquitous intelligent applications at the wireless edge. However, the inherent constraints of limited wireless resources inevitably lead to unreliable communication, which poses a significant challenge to wireless FL. To overcome this challenge, we propose Sign-Prioritized FL (SP-FL), a novel framework that improves wireless FL by prioritizing the transmission of important gradient information through uneven resource allocation. Specifically, recognizing the importance of descent direction in model updating, we transmit gradient signs in individual packets and allow their reuse for gradient descent if the remaining gradient modulus cannot be correctly recovered. To further improve the reliability of transmission of important information, we formulate a hierarchical resource allocation problem based on the importance disparity at both the packet and device levels, optimizing bandwidth allocation across multiple devices and power allocation between sign and modulus packets. To make the problem tractable, the one-step convergence behavior of SP-FL, which characterizes data importance at both levels in an explicit form, is analyzed. We then propose an alternating optimization algorithm to solve this problem using the Newton-Raphson method and successive convex approximation (SCA). Simulation results confirm the superiority of SP-FL, especially in resource-constrained scenarios, demonstrating up to 9.96\\% higher testing accuracy on the CIFAR-10 dataset compared to existing methods.",
+      "authors": [
+        "Yiyang Yue",
+        "Jiacheng Yao",
+        "Wei Xu",
+        "Zhaohui Yang",
+        "George K. Karagiannidis",
+        "Dusit Niyato"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.IT",
+        "eess.SP"
+      ],
+      "published": "2026-03-11T13:41:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.10763v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Wireless federated learning framework for collaborative training",
+      "llm_evidence_cn": "用于协作训练的无线联邦学习框架",
+      "llm_evidence": "用于协作训练的无线联邦学习框架",
+      "canonical_evidence": "用于协作训练的无线联邦学习框架",
+      "llm_tldr_en": "Proposes a framework to improve wireless federated learning through importance-aware gradient transmission.",
+      "llm_tldr_cn": "提出一种通过重要性感知梯度传输来改进无线联邦学习的框架。",
+      "llm_tldr": "提出一种通过重要性感知梯度传输来改进无线联邦学习的框架。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.10341v1",
+      "title": "Federated Active Learning Under Extreme Non-IID and Global Class Imbalance",
+      "abstract": "Federated active learning (FAL) seeks to reduce annotation cost under privacy constraints, yet its effectiveness degrades in realistic settings with severe global class imbalance and highly heterogeneous clients. We conduct a systematic study of query-model selection in FAL and uncover a central insight: the model that achieves more class-balanced sampling, especially for minority classes, consistently leads to better final performance. Moreover, global-model querying is beneficial only when the global distribution is highly imbalanced and client data are relatively homogeneous; otherwise, the local model is preferable. Based on these findings, we propose FairFAL, an adaptive class-fair FAL framework. FairFAL (1) infers global imbalance and local-global divergence via lightweight prediction discrepancy, enabling adaptive selection between global and local query models; (2) performs prototype-guided pseudo-labeling using global features to promote class-aware querying; and (3) applies a two-stage uncertainty-diversity balanced sampling strategy with k-center refinement. Experiments on five benchmarks show that FairFAL consistently outperforms state-of-the-art approaches under challenging long-tailed and non-IID settings. The code is available at https://github.com/chenchenzong/FairFAL.",
+      "authors": [
+        "Chen-Chen Zong",
+        "Sheng-Jun Huang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-11T02:22:10+00:00",
+      "link": "https://arxiv.org/pdf/2603.10341v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Federated active learning under privacy constraints",
+      "llm_evidence_cn": "隐私限制下的联邦主动学习",
+      "llm_evidence": "隐私限制下的联邦主动学习",
+      "canonical_evidence": "隐私限制下的联邦主动学习",
+      "llm_tldr_en": "Proposes FairFAL to address class imbalance in federated active learning while maintaining privacy.",
+      "llm_tldr_cn": "提出了FairFAL，以在保持隐私的同时解决联邦主动学习中的类别不平衡问题。",
+      "llm_tldr": "提出了FairFAL，以在保持隐私的同时解决联邦主动学习中的类别不平衡问题。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.10776v1",
+      "title": "Incremental Federated Learning for Intrusion Detection in IoT Networks under Evolving Threat Landscape",
+      "abstract": "The expansion of Internet of Things (IoT) devices has increased the attack surface of networks, necessitating a robust and adaptive intrusion detection systems. Machine learning based systems have been considered promising in enhancing the detection performance. Federated learning settings enabled us to train models from network intrusion data collected from clients in a privacy preserving manner. However, the effectiveness of these systems can degrade over time due to concept drift, where patterns in data evolve as attackers develop new techniques. Realistic detection models should be non-stationary, so they can be continuously updated with new intrusion data while maintaining their detection capability for older data. As IoT environments are resource constrained, updates should consume minimal computational resources. This study provides a comprehensive performance analysis of incremental federated learning in enhancing the long term performance of non stationary IDS models in IoT networks. Specifically, we propose LSTM models within a federated learning setting to evaluate incremental learning approaches that utilize data and model-based measures against catastrophic learning under drift conditions. Using the CICIoMT2024 dataset, which includes various attack variants across five major categories, we conduct both binary and multiclass classification to provide a granular analysis of the intrusion detection task. Our results show that cumulative incremental learning and representative learning provide the most stable performance under drift, while retention-based methods offer a strong accuracy and latency trade off. The study offers new insights into the interplay between training strategy performance and latency in dynamic IoT environments, aiming to inform the development of more resilient IDS solutions considering the resource constraints in IoT devices.",
+      "authors": [
+        "Muaan Ur Rehman",
+        "Hayretdin Bahs",
+        "Rajesh Kalakoti"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-11T13:51:11+00:00",
+      "link": "https://arxiv.org/pdf/2603.10776v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "federated learning for intrusion detection in a privacy preserving manner",
+      "llm_evidence_cn": "以隐私保护方式进行入侵检测的联邦学习",
+      "llm_evidence": "以隐私保护方式进行入侵检测的联邦学习",
+      "canonical_evidence": "以隐私保护方式进行入侵检测的联邦学习",
+      "llm_tldr_en": "Explores incremental federated learning for adaptive and privacy-preserving intrusion detection in IoT networks.",
+      "llm_tldr_cn": "研究了物联网中用于自适应和隐私保护入侵检测的增量联邦学习。",
+      "llm_tldr": "研究了物联网中用于自适应和隐私保护入侵检测的增量联邦学习。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.10776v2",
+      "title": "Incremental Federated Learning for Intrusion Detection in IoT Networks under Evolving Threat Landscape",
+      "abstract": "The expansion of Internet of Things (IoT) devices has increased the attack surface of networks, necessitating a robust and adaptive intrusion detection systems. Machine learning based systems have been considered promising in enhancing the detection performance. Federated learning settings enabled us to train models from network intrusion data collected from clients in a privacy preserving manner. However, the effectiveness of these systems can degrade over time due to concept drift, where patterns in data evolve as attackers develop new techniques. Realistic detection models should be non-stationary, so they can be continuously updated with new intrusion data while maintaining their detection capability for older data. As IoT environments are resource constrained, updates should consume minimal computational resources. This study provides a comprehensive performance analysis of incremental federated learning in enhancing the long term performance of non stationary IDS models in IoT networks. Specifically, we propose LSTM models within a federated learning setting to evaluate incremental learning approaches that utilize data and model-based measures against catastrophic learning under drift conditions. Using the CICIoMT2024 dataset, which includes various attack variants across five major categories, we conduct both binary and multiclass classification to provide a granular analysis of the intrusion detection task. Our results show that cumulative incremental learning and representative learning provide the most stable performance under drift, while retention-based methods offer a strong accuracy and latency trade off. The study offers new insights into the interplay between training strategy performance and latency in dynamic IoT environments, aiming to inform the development of more resilient IDS solutions considering the resource constraints in IoT devices.",
+      "authors": [
+        "Muaan Ur Rehman",
+        "Hayretdin Bahsi",
+        "Rajesh Kalakoti"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-11T13:51:11+00:00",
+      "link": "https://arxiv.org/pdf/2603.10776v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Incremental federated learning for privacy-preserving intrusion detection",
+      "llm_evidence_cn": "用于隐私保护入侵检测的增量联邦学习",
+      "llm_evidence": "用于隐私保护入侵检测的增量联邦学习",
+      "canonical_evidence": "用于隐私保护入侵检测的增量联邦学习",
+      "llm_tldr_en": "Adapts federated learning to handle concept drift in IoT intrusion detection while maintaining privacy.",
+      "llm_tldr_cn": "改进联邦学习以应对IoT入侵检测中的概念漂移，同时保持隐私保护。",
+      "llm_tldr": "改进联邦学习以应对IoT入侵检测中的概念漂移，同时保持隐私保护。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.11503v1",
+      "title": "Sharpness-Aware Minimization for Generalized Embedding Learning in Federated Recommendation",
+      "abstract": "Federated recommender systems enable collaborative model training while keeping user interaction data local and sharing only essential model parameters, thereby mitigating privacy risks. However, existing methods overlook a critical issue, i.e., the stable learning of a generalized item embedding throughout the federated recommender system training process. Item embedding plays a central role in facilitating knowledge sharing across clients. Yet, under the cross-device setting, local data distributions exhibit significant heterogeneity and sparsity, exacerbating the difficulty of learning generalized embeddings. These factors make the stable learning of generalized item embeddings both indispensable for effective federated recommendation and inherently difficult to achieve. To fill this gap, we propose a new federated recommendation framework, named Federated Recommendation with Generalized Embedding Learning (FedRecGEL). We reformulate the federated recommendation problem from an item-centered perspective and cast it as a multi-task learning problem, aiming to learn generalized embeddings throughout the training procedure. Based on theoretical analysis, we employ sharpness-aware minimization to address the generalization problem, thereby stabilizing the training process and enhancing recommendation performance. Extensive experiments on four datasets demonstrate the effectiveness of FedRecGEL in significantly improving federated recommendation performance. Our code is available at https://github.com/anonymifish/FedRecGEL.",
+      "authors": [
+        "Fengyuan Yu",
+        "Xiaohua Feng",
+        "Yuyuan Li",
+        "Changwang Zhang",
+        "Jun Wang",
+        "Chaochao Chen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-12T03:43:25+00:00",
+      "link": "https://arxiv.org/pdf/2603.11503v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:PPML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Federated recommendation privacy risks",
+      "llm_evidence_cn": "联邦推荐系统隐私风险",
+      "llm_evidence": "联邦推荐系统隐私风险",
+      "canonical_evidence": "联邦推荐系统隐私风险",
+      "llm_tldr_en": "Improves item embedding learning in federated recommendation systems while maintaining data privacy.",
+      "llm_tldr_cn": "在保持数据隐私的同时，改进联邦推荐系统中的项嵌入学习。",
+      "llm_tldr": "在保持数据隐私的同时，改进联邦推荐系统中的项嵌入学习。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.11620v1",
+      "title": "Personalized Federated Learning via Gaussian Generative Modeling",
+      "abstract": "Federated learning has emerged as a paradigm to train models collaboratively on inherently distributed client data while safeguarding privacy. In this context, personalized federated learning tackles the challenge of data heterogeneity by equipping each client with a dedicated model. A prevalent strategy decouples the model into a shared feature extractor and a personalized classifier head, where the latter actively guides the representation learning. However, previous works have focused on classifier head-guided personalization, neglecting the potential personalized characteristics in the representation distribution. Building on this insight, we propose pFedGM, a method based on Gaussian generative modeling. The approach begins by training a Gaussian generator that models client heterogeneity via weighted re-sampling. A balance between global collaboration and personalization is then struck by employing a dual objective: a shared objective that maximizes inter-class distance across clients, and a local objective that minimizes intra-class distance within them. To achieve this, we decouple the conventional Gaussian classifier into a navigator for global optimization, and a statistic extractor for capturing distributional statistics. Inspired by the Kalman gain, the algorithm then employs a dual-scale fusion framework at global and local levels to equip each client with a personalized classifier head. In this framework, we model the global representation distribution as a prior and the client-specific data as the likelihood, enabling Bayesian inference for class probability estimation. The evaluation covers a comprehensive range of scenarios: heterogeneity in class counts, environmental corruption, and multiple benchmark datasets and configurations. pFedGM achieves superior or competitive performance compared to state-of-the-art methods.",
+      "authors": [
+        "Peng Hu",
+        "Jianwei Ma"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-12T07:26:03+00:00",
+      "link": "https://arxiv.org/pdf/2603.11620v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Personalized federated learning for distributed data privacy",
+      "llm_evidence_cn": "针对分布式数据隐私的个性化联邦学习",
+      "llm_evidence": "针对分布式数据隐私的个性化联邦学习",
+      "canonical_evidence": "针对分布式数据隐私的个性化联邦学习",
+      "llm_tldr_en": "Proposes pFedGM to handle data heterogeneity in federated learning using Gaussian generative modeling.",
+      "llm_tldr_cn": "提出 pFedGM 方法，利用高斯生成模型解决联邦学习中的数据异构性挑战。",
+      "llm_tldr": "提出 pFedGM 方法，利用高斯生成模型解决联邦学习中的数据异构性挑战。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.10977v1",
+      "title": "FRIEND: Federated Learning for Joint Optimization of multi-RIS Configuration and Eavesdropper Intelligent Detection in B5G Networks",
+      "abstract": "As wireless systems evolve toward Beyond 5G (B5G), the adoption of cell-free (CF) millimeter-wave (mmWave) architectures combined with Reconfigurable Intelligent Surfaces (RIS) is emerging as a key enabler for ultra-reliable, high-capacity, scalable, and secure Industrial Internet of Things (IIoT) communications. However, safeguarding these complex and distributed environments against eavesdropping remains a critical challenge, particularly when conventional security mechanisms struggle to overcome scalability, and latency constraints. In this paper, a novel framework for detecting malicious users in RIS-enhanced cell-free mmWave networks using Federated Learning (FL) is presented. The envisioned setup features multiple access points (APs) operating without traditional cell boundaries, assisted by RIS nodes to dynamically shape the wireless propagation environment. Edge devices collaboratively train a Deep Convolutional Neural Network (DCNN) on locally observed Channel State Information (CSI), eliminating the need for raw data exchange. Moreover, an early-exit mechanism is incorporated in that model to jointly satisfy computational complexity requirements. Performance evaluation indicates that the integration of FL and multi-RIS coordination improves approximately 30% the achieved secrecy rate (SR) compared to baseline non-RIS-assisted methods while maintaining near-optimal detection accuracy levels. This work establishes a distributed, privacy-preserving approach to physical layer eavesdropping detection tailored for next-generation IIoT deployments.",
+      "authors": [
+        "Maria Lamprini A. Bartsioka",
+        "Ioannis A. Bartsiokas",
+        "Anastasios K. Papazafeiropoulos",
+        "Maria A. Seimeni",
+        "Dimitra I. Kaklamani",
+        "Iakovos S. Venieris"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-11T17:02:40+00:00",
+      "link": "https://arxiv.org/pdf/2603.10977v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Federated learning for secure detection of malicious users in B5G networks",
+      "llm_evidence_cn": "用于 B5G 网络中恶意用户安全检测的联邦学习",
+      "llm_evidence": "用于 B5G 网络中恶意用户安全检测的联邦学习",
+      "canonical_evidence": "用于 B5G 网络中恶意用户安全检测的联邦学习",
+      "llm_tldr_en": "Uses federated learning to detect eavesdroppers in RIS-enhanced cell-free millimeter-wave networks.",
+      "llm_tldr_cn": "利用联邦学习在 RIS 增强的无小区毫米波网络中实现对窃听者的智能检测。",
+      "llm_tldr": "利用联邦学习在 RIS 增强的无小区毫米波网络中实现对窃听者的智能检测。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.12112v2",
+      "title": "Structure Selection for Fairness-Constrained Differentially Private Data Synthesis",
+      "abstract": "Differential privacy (DP) enables safe data release, with synthetic data generation emerging as a common approach in recent years. Yet standard synthesizers preserve all dependencies in the data, including spurious correlations between sensitive attributes and outcomes. In fairness-critical settings, this reproduces unwanted bias. A principled remedy is to enforce conditional independence (CI) constraints, which encode domain knowledge or legal requirements that outcomes be independent of sensitive attributes once admissible factors are accounted for. DP synthesis typically proceeds in two phases: (i) a measure- ment step that privatizes selected marginals, often structured via maximum spanning trees (MSTs), and (ii) a reconstruction step that fits a probabilistic model consistent with the noisy marginals. We propose PrivCI, which enforces CI during the measurement step via a CI-aware greedy MST algorithm that integrates feasibility checks into Kruskal's construction under the exponential mechanism, improving accuracy over competing methods. Experiments on standard fairness benchmarks show that PrivCI achieves stronger fidelity and predictive accuracy than prior baselines while satisfying the specified CI constraints.",
+      "authors": [
+        "Naeim Ghahramanpour",
+        "Mostafa Milani"
+      ],
+      "primary_category": "cs.DB",
+      "categories": [
+        "cs.DB"
+      ],
+      "published": "2026-03-12T16:15:46+00:00",
+      "link": "https://arxiv.org/pdf/2603.12112v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Differentially private data synthesis for privacy-preserving data science",
+      "llm_evidence_cn": "用于隐私保护数据科学的差分隐私数据合成",
+      "llm_evidence": "用于隐私保护数据科学的差分隐私数据合成",
+      "canonical_evidence": "用于隐私保护数据科学的差分隐私数据合成",
+      "llm_tldr_en": "Introduces structure selection to ensure fairness in differentially private synthetic data generation.",
+      "llm_tldr_cn": "在差分隐私合成数据生成中引入结构选择，以确保公平性约束下的数据发布。",
+      "llm_tldr": "在差分隐私合成数据生成中引入结构选择，以确保公平性约束下的数据发布。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy computing technologies in data science",
+      "matched_requirement_id": "req-16",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.11992v1",
+      "title": "Few-for-Many Personalized Federated Learning",
+      "abstract": "Personalized Federated Learning (PFL) aims to train customized models for clients with highly heterogeneous data distributions while preserving data privacy. Existing approaches often rely on heuristics like clustering or model interpolation, which lack principled mechanisms for balancing heterogeneous client objectives. Serving $M$ clients with distinct data distributions is inherently a multi-objective optimization problem, where achieving optimal personalization ideally requires $M$ distinct models on the Pareto front. However, maintaining $M$ separate models poses significant scalability challenges in federated settings with hundreds or thousands of clients. To address this challenge, we reformulate PFL as a few-for-many optimization problem that maintains only $K$ shared server models ($K \\ll M$) to collectively serve all $M$ clients. We prove that this framework achieves near-optimal personalization: the approximation error diminishes as $K$ increases and each client's model converges to each client's optimum as data grows. Building on this reformulation, we propose FedFew, a practical algorithm that jointly optimizes the $K$ server models through efficient gradient-based updates. Unlike clustering-based approaches that require manual client partitioning or interpolation-based methods that demand careful hyperparameter tuning, FedFew automatically discovers the optimal model diversity through its optimization process. Experiments across vision, NLP, and real-world medical imaging datasets demonstrate that FedFew, with just 3 models, consistently outperforms other state-of-the-art approaches. Code is available at https://github.com/pgg3/FedFew.",
+      "authors": [
+        "Ping Guo",
+        "Tiantian Zhang",
+        "Xi Lin",
+        "Xiang Li",
+        "Zhi-Ri Tang",
+        "Qingfu Zhang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-12T14:43:46+00:00",
+      "link": "https://arxiv.org/pdf/2603.11992v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Personalized Federated Learning with data privacy",
+      "llm_evidence_cn": "具有数据隐私保护的个性化联邦学习",
+      "llm_evidence": "具有数据隐私保护的个性化联邦学习",
+      "canonical_evidence": "具有数据隐私保护的个性化联邦学习",
+      "llm_tldr_en": "Reformulates personalized federated learning to balance scalability and client-specific objectives.",
+      "llm_tldr_cn": "重新构建了个性化联邦学习框架，以平衡可扩展性和客户端特定目标。",
+      "llm_tldr": "重新构建了个性化联邦学习框架，以平衡可扩展性和客户端特定目标。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.11307v1",
+      "title": "Client-Conditional Federated Learning via Local Training Data Statistics",
+      "abstract": "Federated learning (FL) under data heterogeneity remains challenging: existing methods either ignore client differences (FedAvg), require costly cluster discovery (IFCA), or maintain per-client models (Ditto). All degrade when data is sparse or heterogeneity is multi-dimensional. We propose conditioning a single global model on locally-computed PCA statistics of each client's training data, requiring zero additional communication. Evaluating across 97~configurations spanning four heterogeneity types (label shift, covariate shift, concept shift, and combined heterogeneity), four datasets (MNIST, Fashion-MNIST, CIFAR-10, CIFAR-100), and seven FL baseline methods, we find that our method matches the Oracle baseline -- which knows true cluster assignments -- across all settings, surpasses it by 1--6% on combined heterogeneity where continuous statistics are richer than discrete cluster identifiers, and is uniquely sparsity-robust among all tested methods.",
+      "authors": [
+        "Rickard Brännvall"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-11T21:06:12+00:00",
+      "link": "https://arxiv.org/pdf/2603.11307v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Federated learning under data heterogeneity using local statistics",
+      "llm_evidence_cn": "针对数据异构性的联邦学习，利用本地统计数据进行条件化建模",
+      "llm_evidence": "针对数据异构性的联邦学习，利用本地统计数据进行条件化建模",
+      "canonical_evidence": "针对数据异构性的联邦学习，利用本地统计数据进行条件化建模",
+      "llm_tldr_en": "Proposes a client-conditional FL method using local PCA statistics to handle data heterogeneity without extra communication.",
+      "llm_tldr_cn": "提出一种利用本地PCA统计数据的联邦学习方法，在不增加通信的情况下解决数据异构性问题。",
+      "llm_tldr": "提出一种利用本地PCA统计数据的联邦学习方法，在不增加通信的情况下解决数据异构性问题。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.12512v1",
+      "title": "Byzantine-Robust Optimization under $(L_0, L_1)$-Smoothness",
+      "abstract": "We consider distributed optimization under Byzantine attacks in the presence of $(L_0,L_1)$-smoothness, a generalization of standard $L$-smoothness that captures functions with state-dependent gradient Lipschitz constants. We propose Byz-NSGDM, a normalized stochastic gradient descent method with momentum that achieves robustness against Byzantine workers while maintaining convergence guarantees. Our algorithm combines momentum normalization with Byzantine-robust aggregation enhanced by Nearest Neighbor Mixing (NNM) to handle both the challenges posed by $(L_0,L_1)$-smoothness and Byzantine adversaries. We prove that Byz-NSGDM achieves a convergence rate of $O(K^{-1/4})$ up to a Byzantine bias floor proportional to the robustness coefficient and gradient heterogeneity. Experimental validation on heterogeneous MNIST classification, synthetic $(L_0,L_1)$-smooth optimization, and character-level language modeling with a small GPT model demonstrates the effectiveness of our approach against various Byzantine attack strategies. An ablation study further shows that Byz-NSGDM is robust across a wide range of momentum and learning rate choices.",
+      "authors": [
+        "Arman Bolatov",
+        "Samuel Horváth",
+        "Martin Takáč",
+        "Eduard Gorbunov"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-12T23:09:03+00:00",
+      "link": "https://arxiv.org/pdf/2603.12512v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Byzantine-robust optimization in distributed settings",
+      "llm_evidence_cn": "分布式环境中的拜占庭容错优化",
+      "llm_evidence": "分布式环境中的拜占庭容错优化",
+      "canonical_evidence": "分布式环境中的拜占庭容错优化",
+      "llm_tldr_en": "Introduces a robust gradient descent method to handle Byzantine attacks in distributed optimization.",
+      "llm_tldr_cn": "引入了一种鲁棒梯度下降方法，用于处理分布式优化中的拜占庭攻击。",
+      "llm_tldr": "引入了一种鲁棒梯度下降方法，用于处理分布式优化中的拜占庭攻击。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "MPC protocols for privacy-preserving computation",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

@@ -6,79 +6,79 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-18
-- 运行时间：2026-03-18 20:32:04 UTC
+- 最新运行日期：2026-03-19
+- 运行时间：2026-03-19 20:31:35 UTC
 - 运行状态：成功
 - 本次总论文数：19
 - 精读区：7
 - 速读区：12
 
 ### 今日简报（AI）
-今日深挖 19 篇前沿论文，重点聚焦高吞吐隐私信息检索（PIR）与自适应联邦学习的性能突破。
-ZipPIR 与 Disguise-and-Squeeze 方案凭借满分表现，刷新了单服务器及 MDS 架构下的隐私检索效率上限。
-建议优先研读 PIR 的无存储优化技术，并关注非独立同分布数据
-- 详情：[/202603/18/README](/202603/18/README)
+今日深度复盘 19 篇论文，重点攻克了满分级 DDH 函数秘密共享协议与医疗影像联邦学习基准。
+核心突破在于多方 FSS 方案的效率提升，以及针对医疗分割任务构建的标准化 FL 评测体系。
+推荐优先研读隐私计算底层协议的数学优化，并关注联邦学习在医疗及 IoT 入侵检测等动态场景的落地。
+- 详情：[/202603/19/README](/202603/19/README)
 
 ### 精读区论文标签
-1. [ZipPIR: High-throughput Single-server PIR without Client-side Storage](/202603/18/2603.09190v1-zippir-high-throughput-single-server-pir-without-client-side-storage)  
-   标签：评分：10.0/10、query:ppml
-   evidence：高吞吐量单服务器私有信息检索 (PIR)
-2. [A Disguise-and-Squeeze PIR Scheme for the MDS-TPIR Setting and Beyond](/202603/18/2603.10769v1-a-disguise-and-squeeze-pir-scheme-for-the-mds-tpir-setting-and-beyond)  
-   标签：评分：10.0/10、query:ppml
-   evidence：从MDS编码数据库中进行隐私信息检索 (PIR)
-3. [Differentially Private Secure Multiplication: Beyond Two Multiplicands](/202603/18/2603.08944v1-differentially-private-secure-multiplication-beyond-two-multiplicands)  
+1. [DDH-based schemes for multi-party Function Secret Sharing](/202603/19/2603.17453v1-ddh-based-schemes-for-multi-party-function-secret-sharing)  
+   标签：评分：10.0/10、query:fss-llm
+   evidence：基于DDH的多方分布式点函数(DPF)FSS方案
+2. [FL-MedSegBench: A Comprehensive Benchmark for Federated Learning on Medical Image Segmentation](/202603/19/2603.11659v1-fl-medsegbench-a-comprehensive-benchmark-for-federated-learning-on-medical-image-segmentation)  
    标签：评分：9.0/10、query:ppml
-   evidence：分布式系统中的差分隐私安全乘法
-4. [MedPriv-Bench: Benchmarking the Privacy-Utility Trade-off of Large Language Models in Medical Open-End Question Answering](/202603/18/2603.14265v1-medpriv-bench-benchmarking-the-privacy-utility-trade-off-of-large-language-models-in-medical-open-end-question-answering)  
+   evidence：医学图像分割的联邦学习基准
+3. [Domain-Skewed Federated Learning with Feature Decoupling and Calibration](/202603/19/2603.14238v1-domain-skewed-federated-learning-with-feature-decoupling-and-calibration)  
    标签：评分：9.0/10、query:ppml
-   evidence：评估大语言模型中的隐私与效用权衡
-5. [Oblivis: A Framework for Delegated and Efficient Oblivious Transfer](/202603/18/2603.14492v1-oblivis-a-framework-for-delegated-and-efficient-oblivious-transfer)  
+   evidence：具有特征解耦的隐私保护联邦学习
+4. [Federated Learning with Multi-Partner OneFlorida+ Consortium Data for Predicting Major Postoperative Complications](/202603/19/2603.16723v1-federated-learning-with-multi-partner-oneflorida-consortium-data-for-predicting-major-postoperative-complications)  
    标签：评分：9.0/10、query:ppml
-   evidence：委派且高效的不经意传输 (OT)
-6. [Informationally Compressive Anonymization: Non-Degrading Sensitive Input Protection for Privacy-Preserving Supervised Machine Learning](/202603/18/2603.15842v1-informationally-compressive-anonymization-non-degrading-sensitive-input-protection-for-privacy-preserving-supervised-machine-learning)  
+   evidence：多中心医疗数据的隐私保护联邦学习
+5. [QuantFL: Sustainable Federated Learning for Edge IoT via Pre-Trained Model Quantisation](/202603/19/2603.17507v1-quantfl-sustainable-federated-learning-for-edge-iot-via-pre-trained-model-quantisation)  
    标签：评分：9.0/10、query:ppml
-   evidence：使用架构设计而非密码学的隐私保护机器学习框架
-7. [FedLECC: Cluster- and Loss-Guided Client Selection for Federated Learning under Non-IID Data](/202603/18/2603.08911v1-fedlecc-cluster--and-loss-guided-client-selection-for-federated-learning-under-non-iid-data)  
+   evidence：面向边缘物联网设备的隐私保护联邦学习
+6. [Differentially Private Secure Multiplication: Beyond Two Multiplicands](/202603/19/2603.08944v2-differentially-private-secure-multiplication-beyond-two-multiplicands)  
    标签：评分：8.0/10、query:ppml
-   evidence：联邦学习客户端选择策略
+   evidence：分布式系统中的差分隐私安全乘法
+7. [Novel CRT-based Asymptotically Ideal Disjunctive Hierarchical Secret Sharing Scheme](/202603/19/2603.16267v1-novel-crt-based-asymptotically-ideal-disjunctive-hierarchical-secret-sharing-scheme)  
+   标签：评分：8.0/10、query:fss-llm
+   evidence：基于中国剩余定理的析取分级秘密共享方案
 
 ### 速读区论文标签
-1. [FedPrism: Adaptive Personalized Federated Learning under Non-IID Data](/202603/18/2603.08252v1-fedprism-adaptive-personalized-federated-learning-under-non-iid-data)  
+1. [Randomized Distributed Function Computation (RDFC): Ultra-Efficient Semantic Communication Applications to Privacy](/202603/19/2603.09577v1-randomized-distributed-function-computation-rdfc-ultra-efficient-semantic-communication-applications-to-privacy)  
    标签：评分：8.0/10、query:ppml
-   evidence：个性化联邦学习架构
-2. [FedPrism: Adaptive Personalized Federated Learning under Non-IID Data](/202603/18/2603.08252v2-fedprism-adaptive-personalized-federated-learning-under-non-iid-data)  
+   evidence：用于隐私保护的随机分布式函数计算
+2. [Incremental Federated Learning for Intrusion Detection in IoT Networks under Evolving Threat Landscape](/202603/19/2603.10776v1-incremental-federated-learning-for-intrusion-detection-in-iot-networks-under-evolving-threat-landscape)  
    标签：评分：8.0/10、query:ppml
-   evidence：针对非独立同分布数据的个性化联邦学习框架
-3. [Client-Cooperative Split Learning](/202603/18/2603.08421v1-client-cooperative-split-learning)  
+   evidence：以隐私保护方式进行入侵检测的联邦学习
+3. [Personalized Federated Learning via Gaussian Generative Modeling](/202603/19/2603.11620v1-personalized-federated-learning-via-gaussian-generative-modeling)  
    标签：评分：8.0/10、query:ppml
-   evidence：隐私约束下具有可验证训练产物的拆分学习
-4. [HeteroFedSyn: Differentially Private Tabular Data Synthesis for Heterogeneous Federated Settings](/202603/18/2603.08832v1-heterofedsyn-differentially-private-tabular-data-synthesis-for-heterogeneous-federated-settings)  
+   evidence：针对分布式数据隐私的个性化联邦学习
+4. [Few-for-Many Personalized Federated Learning](/202603/19/2603.11992v1-few-for-many-personalized-federated-learning)  
    标签：评分：8.0/10、query:ppml
-   evidence：联邦设置下的差分隐私表格数据合成
-5. [Agentic AI as a Network Control-Plane Intelligence Layer for Federated Learning over 6G](/202603/18/2603.09141v1-agentic-ai-as-a-network-control-plane-intelligence-layer-for-federated-learning-over-6g)  
+   evidence：具有数据隐私保护的个性化联邦学习
+5. [Prioritizing Gradient Sign Over Modulus: An Importance-Aware Framework for Wireless Federated Learning](/202603/19/2603.10763v1-prioritizing-gradient-sign-over-modulus-an-importance-aware-framework-for-wireless-federated-learning)  
    标签：评分：7.0/10、query:ppml
-   evidence：用于管理6G网络上联邦学习的代理AI
-6. [Nonparametric Variational Differential Privacy via Embedding Parameter Clipping](/202603/18/2603.09583v1-nonparametric-variational-differential-privacy-via-embedding-parameter-clipping)  
+   evidence：用于协作训练的无线联邦学习框架
+6. [Incremental Federated Learning for Intrusion Detection in IoT Networks under Evolving Threat Landscape](/202603/19/2603.10776v2-incremental-federated-learning-for-intrusion-detection-in-iot-networks-under-evolving-threat-landscape)  
    标签：评分：7.0/10、query:ppml
-   evidence：语言模型的差分隐私
-7. [TASER: Task-Aware Spectral Energy Refine for Backdoor Suppression in UAV Swarms Decentralized Federated Learning](/202603/18/2603.10075v1-taser-task-aware-spectral-energy-refine-for-backdoor-suppression-in-uav-swarms-decentralized-federated-learning)  
+   evidence：用于隐私保护入侵检测的增量联邦学习
+7. [FRIEND: Federated Learning for Joint Optimization of multi-RIS Configuration and Eavesdropper Intelligent Detection in B5G Networks](/202603/19/2603.10977v1-friend-federated-learning-for-joint-optimization-of-multi-ris-configuration-and-eavesdropper-intelligent-detection-in-b5g-networks)  
    标签：评分：7.0/10、query:ppml
-   evidence：去中心化联邦学习中的后门抑制
-8. [Repurposing Backdoors for Good: Ephemeral Intrinsic Proofs for Verifiable Aggregation in Cross-silo Federated Learning](/202603/18/2603.10692v1-repurposing-backdoors-for-good-ephemeral-intrinsic-proofs-for-verifiable-aggregation-in-cross-silo-federated-learning)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：联邦学习中使用内在证明的可验证聚合
-9. [Democratising Clinical AI through Dataset Condensation for Classical Clinical Models](/202603/18/2603.09356v1-democratising-clinical-ai-through-dataset-condensation-for-classical-clinical-models)  
+   evidence：用于 B5G 网络中恶意用户安全检测的联邦学习
+8. [Client-Conditional Federated Learning via Local Training Data Statistics](/202603/19/2603.11307v1-client-conditional-federated-learning-via-local-training-data-statistics)  
+   标签：评分：7.0/10、query:ppml
+   evidence：针对数据异构性的联邦学习，利用本地统计数据进行条件化建模
+9. [Federated Active Learning Under Extreme Non-IID and Global Class Imbalance](/202603/19/2603.10341v1-federated-active-learning-under-extreme-non-iid-and-global-class-imbalance)  
    标签：评分：6.0/10、query:ppml
-   evidence：用于效用与隐私平衡的差分隐私数据集压缩
-10. [Verified delegated quantum computation requires techniques beyond cut-and-choose](/202603/18/2603.09368v1-verified-delegated-quantum-computation-requires-techniques-beyond-cut-and-choose)  
+   evidence：隐私限制下的联邦主动学习
+10. [Sharpness-Aware Minimization for Generalized Embedding Learning in Federated Recommendation](/202603/19/2603.11503v1-sharpness-aware-minimization-for-generalized-embedding-learning-in-federated-recommendation)  
    标签：评分：6.0/10、query:ppml
-   evidence：可验证的委派计算与两方计算
-11. [A Unifying Primal-Dual Proximal Framework for Distributed Nonconvex Optimization](/202603/18/2603.09524v1-a-unifying-primal-dual-proximal-framework-for-distributed-nonconvex-optimization)  
+   evidence：联邦推荐系统隐私风险
+11. [Structure Selection for Fairness-Constrained Differentially Private Data Synthesis](/202603/19/2603.12112v2-structure-selection-for-fairness-constrained-differentially-private-data-synthesis)  
    标签：评分：6.0/10、query:ppml
-   evidence：节点私有持有本地目标的分布式非凸优化
-12. [Tool Receipts, Not Zero-Knowledge Proofs: Practical Hallucination Detection for AI Agents](/202603/18/2603.10060v1-tool-receipts-not-zero-knowledge-proofs-practical-hallucination-detection-for-ai-agents)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：大模型智能体的可验证推理与幻觉检测
+   evidence：用于隐私保护数据科学的差分隐私数据合成
+12. [Byzantine-Robust Optimization under $(L_0, L_1)$-Smoothness](/202603/19/2603.12512v1-byzantine-robust-optimization-under-l0-l1-smoothness)  
+   标签：评分：6.0/10、query:ppml
+   evidence：分布式环境中的拜占庭容错优化
 
 
 <div class="dpr-home-promo-card">
