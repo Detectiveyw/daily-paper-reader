@@ -6,82 +6,79 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-20
-- 运行时间：2026-03-20 19:55:43 UTC
+- 最新运行日期：2026-03-21
+- 运行时间：2026-03-21 19:25:55 UTC
 - 运行状态：成功
-- 本次总论文数：20
-- 精读区：8
+- 本次总论文数：19
+- 精读区：7
 - 速读区：12
 
 ### 今日简报（AI）
-今日精选 20 篇论文，深度解析物联网隐私保护路线图与医疗影像分割中的个性化联邦学习突破。
-重点关注利用残差 Fisher 信息优化医疗分割精度的方案，以及针对推荐系统和聚类任务的联邦学习新范式。
-建议优先研读物联网隐私综述以掌握跨范式架构，并关注成员推理攻击在数据安全评估中的实战价值。
-- 详情：[/202603/20/README](/202603/20/README)
+今日精选 19 篇前沿论文，深度解析贝叶斯估计与联邦学习中隐私、效用与计算的复杂权衡。
+重点关注如何在私有数据中提取可靠结论，以及利用二值神经网络和动态聚合技术提升去中心化网络的推理效率与鲁棒性。
+建议优先研读贝叶斯估计的权衡框架，掌握在带宽受限环境下实现低成本、高安全性联邦学习的核心策略。
+- 详情：[/202603/21/README](/202603/21/README)
 
 ### 精读区论文标签
-1. [Privacy-Preserving Machine Learning for IoT: A Cross-Paradigm Survey and Future Roadmap](/202603/20/2603.13570v2-privacy-preserving-machine-learning-for-iot-a-cross-paradigm-survey-and-future-roadmap)  
+1. [Computation-Utility-Privacy Tradeoffs in Bayesian Estimation](/202603/21/2603.18254v1-computation-utility-privacy-tradeoffs-in-bayesian-estimation)  
    标签：评分：9.0/10、query:ppml
-   evidence：隐私保护机器学习技术的全面综述
-2. [Personalized Federated Learning with Residual Fisher Information for Medical Image Segmentation](/202603/20/2603.14848v1-personalized-federated-learning-with-residual-fisher-information-for-medical-image-segmentation)  
-   标签：评分：9.0/10、query:ppml
-   evidence：个性化联邦学习框架
-3. [Federated Learning for Privacy-Preserving Medical AI](/202603/20/2603.15901v1-federated-learning-for-privacy-preserving-medical-ai)  
-   标签：评分：9.0/10、query:ppml
-   evidence：用于医疗人工智能的隐私保护联邦学习
-4. [NANOZK: Layerwise Zero-Knowledge Proofs for Verifiable Large Language Model Inference](/202603/20/2603.18046v1-nanozk-layerwise-zero-knowledge-proofs-for-verifiable-large-language-model-inference)  
-   标签：评分：9.0/10、query:fss-llm
-   evidence：用于可验证大语言模型推理的零知识证明
-5. [Probabilistic Federated Learning on Uncertain and Heterogeneous Data with Model Personalization](/202603/20/2603.18083v1-probabilistic-federated-learning-on-uncertain-and-heterogeneous-data-with-model-personalization)  
-   标签：评分：9.0/10、query:ppml
-   evidence：针对异构数据的个性化概率联邦学习
-6. [Secure Linear Alignment of Large Language Models](/202603/20/2603.18908v1-secure-linear-alignment-of-large-language-models)  
-   标签：评分：9.0/10、query:fss-llm
-   evidence：大语言模型的隐私保护跨孤岛推理
-7. [Towards Verifiable AI with Lightweight Cryptographic Proofs of Inference](/202603/20/2603.19025v1-towards-verifiable-ai-with-lightweight-cryptographic-proofs-of-inference)  
-   标签：评分：9.0/10、query:fss-llm
-   evidence：使用轻量级密码学证明的大模型可验证推理
-8. [When Differential Privacy Meets Wireless Federated Learning: An Improved Analysis for Privacy and Convergence](/202603/20/2603.19040v1-when-differential-privacy-meets-wireless-federated-learning-an-improved-analysis-for-privacy-and-convergence)  
-   标签：评分：9.0/10、query:ppml
-   evidence：差分隐私无线联邦学习分析
+   evidence：估计任务中的计算-效用-隐私权衡
+2. [Balancing the privacy-utility trade-off: How to draw reliable conclusions from private data](/202603/21/2603.12753v1-balancing-the-privacy-utility-trade-off-how-to-draw-reliable-conclusions-from-private-data)  
+   标签：评分：8.0/10、query:ppml
+   evidence：使用差分隐私平衡隐私与效用的权衡
+3. [Projection Guided Personalized Federated Learning for Low Dose CT Denoising](/202603/21/2603.13422v1-projection-guided-personalized-federated-learning-for-low-dose-ct-denoising)  
+   标签：评分：8.0/10、query:ppml
+   evidence：用于医学影像的个性化联邦学习
+4. [Bodhi VLM: Privacy-Alignment Modeling for Hierarchical Visual Representations in Vision Backbones and VLM Encoders via Bottom-Up and Top-Down Feature Search](/202603/21/2603.13728v2-bodhi-vlm-privacy-alignment-modeling-for-hierarchical-visual-representations-in-vision-backbones-and-vlm-encoders-via-bottom-up-and-top-down-feature-search)  
+   标签：评分：8.0/10、query:ppml
+   evidence：VLM中分层神经表示的隐私对齐建模
+5. [FedPBS: Proximal-Balanced Scaling Federated Learning Model for Robust Personalized Training for Non-IID Data](/202603/21/2603.13909v1-fedpbs-proximal-balanced-scaling-federated-learning-model-for-robust-personalized-training-for-non-iid-data)  
+   标签：评分：8.0/10、query:ppml
+   evidence：保护本地数据隐私且鲁棒的联邦学习算法
+6. [HO-SFL: Hybrid-Order Split Federated Learning with Backprop-Free Clients and Dimension-Free Aggregation](/202603/21/2603.14773v1-ho-sfl-hybrid-order-split-federated-learning-with-backprop-free-clients-and-dimension-free-aggregation)  
+   标签：评分：8.0/10、query:ppml
+   evidence：针对大模型的混合阶拆分联邦学习
+7. [SFedHIFI: Fire Rate-Based Heterogeneous Information Fusion for Spiking Federated Learning](/202603/21/2603.14956v1-sfedhifi-fire-rate-based-heterogeneous-information-fusion-for-spiking-federated-learning)  
+   标签：评分：8.0/10、query:ppml
+   evidence：异构脉冲联邦学习框架
 
 ### 速读区论文标签
-1. [Federated Learning and Unlearning for Recommendation with Personalized Data Sharing](/202603/20/2603.11610v1-federated-learning-and-unlearning-for-recommendation-with-personalized-data-sharing)  
+1. [Joint Routing and Model Pruning for Decentralized Federated Learning in Bandwidth-Constrained Multi-Hop Wireless Networks](/202603/21/2603.15188v1-joint-routing-and-model-pruning-for-decentralized-federated-learning-in-bandwidth-constrained-multi-hop-wireless-networks)  
    标签：评分：8.0/10、query:ppml
-   evidence：具有个性化数据共享的推荐联邦学习
-2. [Exponential-Family Membership Inference: From LiRA and RMIA to BaVarIA](/202603/20/2603.11799v1-exponential-family-membership-inference-from-lira-and-rmia-to-bavaria)  
+   evidence：具有隐私保护训练功能的去中心化联邦学习
+2. [Federated Learning of Binary Neural Networks: Enabling Low-Cost Inference](/202603/21/2603.15507v1-federated-learning-of-binary-neural-networks-enabling-low-cost-inference)  
    标签：评分：8.0/10、query:ppml
-   evidence：通过成员推理审计机器学习模型的隐私
-3. [Federated Hierarchical Clustering with Automatic Selection of Optimal Cluster Numbers](/202603/20/2603.12684v1-federated-hierarchical-clustering-with-automatic-selection-of-optimal-cluster-numbers)  
+   evidence：用于保护隐私的二值神经网络联邦学习框架
+3. [Dynamic Meta-Layer Aggregation for Byzantine-Robust Federated Learning](/202603/21/2603.16846v1-dynamic-meta-layer-aggregation-for-byzantine-robust-federated-learning)  
    标签：评分：8.0/10、query:ppml
-   evidence：具有隐私保护约束的联邦聚类
-4. [Privacy Preserving Topic-wise Sentiment Analysis of the Iran Israel USA Conflict Using Federated Transformer Models](/202603/20/2603.13655v1-privacy-preserving-topic-wise-sentiment-analysis-of-the-iran-israel-usa-conflict-using-federated-transformer-models)  
+   evidence：拜占庭容错的联邦学习防御
+4. [Learning Evolving Preferences: A Federated Continual Framework for User-Centric Recommendation](/202603/21/2603.17315v1-learning-evolving-preferences-a-federated-continual-framework-for-user-centric-recommendation)  
    标签：评分：8.0/10、query:ppml
-   evidence：使用联邦学习和Transformer的隐私保护框架
-5. [CFD-HAR: User-controllable Privacy through Conditional Feature Disentanglement](/202603/20/2603.11526v1-cfd-har-user-controllable-privacy-through-conditional-feature-disentanglement)  
+   evidence：用于推荐系统的隐私保护联邦学习
+5. [Neural Gate: Mitigating Privacy Risks in LVLMs via Neuron-Level Gradient Gating](/202603/21/2603.12598v1-neural-gate-mitigating-privacy-risks-in-lvlms-via-neuron-level-gradient-gating)  
    标签：评分：7.0/10、query:ppml
-   evidence：通过特征解耦保护机器学习中的敏感用户信息
-6. [Understanding Disclosure Risk in Differential Privacy with Applications to Noise Calibration and Auditing (Extended Version)](/202603/20/2603.12142v1-understanding-disclosure-risk-in-differential-privacy-with-applications-to-noise-calibration-and-auditing-extended-version)  
+   evidence：减轻LVLM中的隐私风险
+6. [SCOPE: Semantic Coreset with Orthogonal Projection Embeddings for Federated learning](/202603/21/2603.12976v1-scope-semantic-coreset-with-orthogonal-projection-embeddings-for-federated-learning)  
    标签：评分：7.0/10、query:ppml
-   evidence：用于平衡效用与隐私的差分隐私风险指标
-7. [STAMP: Selective Task-Aware Mechanism for Text Privacy](/202603/20/2603.12237v1-stamp-selective-task-aware-mechanism-for-text-privacy)  
+   evidence：用于联邦数据的核心集框架，旨在减轻偏斜并保护隐私
+7. [Exact Federated Continual Unlearning for Ridge Heads on Frozen Foundation Models](/202603/21/2603.12977v1-exact-federated-continual-unlearning-for-ridge-heads-on-frozen-foundation-models)  
    标签：评分：7.0/10、query:ppml
-   evidence：在文本私有化中平衡隐私与效用
-8. [CA-HFP: Curvature-Aware Heterogeneous Federated Pruning with Model Reconstruction](/202603/20/2603.12591v1-ca-hfp-curvature-aware-heterogeneous-federated-pruning-with-model-reconstruction)  
+   evidence：针对私有用户生成数据的联邦遗忘学习
+8. [Exact Federated Continual Unlearning for Ridge Heads on Frozen Foundation Models](/202603/21/2603.12977v2-exact-federated-continual-unlearning-for-ridge-heads-on-frozen-foundation-models)  
    标签：评分：7.0/10、query:ppml
-   evidence：具有模型剪枝的异构联邦学习
-9. [Strict Optimality of Frequency Estimation Under Local Differential Privacy](/202603/20/2603.11523v1-strict-optimality-of-frequency-estimation-under-local-differential-privacy)  
+   evidence：针对私有数据的联邦遗忘学习
+9. [Stake the Points: Structure-Faithful Instance Unlearning](/202603/21/2603.12915v1-stake-the-points-structure-faithful-instance-unlearning)  
    标签：评分：6.0/10、query:ppml
-   evidence：本地差分隐私下的最优频率估计
-10. [EmbTracker: Traceable Black-box Watermarking for Federated Language Models](/202603/20/2603.12089v1-embtracker-traceable-black-box-watermarking-for-federated-language-models)  
+   evidence：机器遗忘以解决预训练模型中的隐私风险
+10. [Test-Time Attention Purification for Backdoored Large Vision Language Models](/202603/21/2603.12989v1-test-time-attention-purification-for-backdoored-large-vision-language-models)  
    标签：评分：6.0/10、query:ppml
-   evidence：联邦语言模型的可追溯水印
-11. [Human-Centred LLM Privacy Audits: Findings and Frictions](/202603/20/2603.12094v1-human-centred-llm-privacy-audits-findings-and-frictions)  
+   evidence：视觉语言模型后门攻击防御
+11. [CONFETTY: A Tool for Enforcement and Data Confidentiality on Blockchain-Based Processes](/202603/21/2603.13900v1-confetty-a-tool-for-enforcement-and-data-confidentiality-on-blockchain-based-processes)  
    标签：评分：6.0/10、query:ppml
-   evidence：大语言模型中的隐私审计与关联
-12. [SpectralGuard: Detecting Memory Collapse Attacks in State Space Models](/202603/20/2603.12414v1-spectralguard-detecting-memory-collapse-attacks-in-state-space-models)  
-   标签：评分：6.0/10、query:ppml
-   evidence：检测状态空间模型中的内存崩溃攻击
+   evidence：基于区块链流程的数据机密性
+12. [On secret sharing from extended norm-trace curves](/202603/21/2603.14009v2-on-secret-sharing-from-extended-norm-trace-curves)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：渐进式秘密共享方案与代数几何代码
 
 
 <div class="dpr-home-promo-card">

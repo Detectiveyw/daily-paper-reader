@@ -1,131 +1,8 @@
 {
-  "generated_at": "2026-03-20T19:53:25.356580+00:00",
-  "updated_date": "20260320",
+  "generated_at": "2026-03-21T19:23:46.074227+00:00",
+  "updated_date": "20260321",
   "carryover_days": 9,
   "items": [
-    {
-      "id": "2603.16219v1",
-      "title": "SpecSteer: Synergizing Local Context and Global Reasoning for Efficient Personalized Generation",
-      "abstract": "Realizing personalized intelligence faces a core dilemma: sending user history to centralized large language models raises privacy concerns, while on-device small language models lack the reasoning capacity required for high-quality generation. Our pilot study shows that purely local enhancements remain insufficient to reliably bridge this gap. We therefore propose SpecSteer, an asymmetric collaborative inference framework that synergizes private on-device context with cloud-scale reasoning. SpecSteer casts collaboration as Bayesian knowledge fusion and repurposes speculative decoding as a distributed alignment protocol, yielding a Draft--Verify--Recover pipeline: the on-device model drafts personalized sequences; the cloud validates via a ratio-based mechanism that decouples reasoning verification from private context, filtering logical flaws without accessing raw user context; upon rejection, a steering recovery injects local intent during correction. Experiments demonstrate that SpecSteer successfully closes the reasoning gap and achieves superior personalized generation performance, while delivering a 2.36x speedup over standard baselines.",
-      "authors": [
-        "Hang Lv",
-        "Sheng Liang",
-        "Hao Wang",
-        "Yongyue Zhang",
-        "Hongchao Gu",
-        "Wei Guo",
-        "Defu Lian",
-        "Yong Liu",
-        "Enhong Chen"
-      ],
-      "primary_category": "cs.CL",
-      "categories": [
-        "cs.CL"
-      ],
-      "published": "2026-03-17T07:51:29+00:00",
-      "link": "https://arxiv.org/pdf/2603.16219v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM",
-        "query:PPML"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "collaborative inference framework for private on-device context",
-      "llm_evidence_cn": "保护本地上下文隐私的协作推理框架",
-      "llm_evidence": "保护本地上下文隐私的协作推理框架",
-      "canonical_evidence": "保护本地上下文隐私的协作推理框架",
-      "llm_tldr_en": "Synergizes local private context with cloud reasoning using a distributed alignment protocol.",
-      "llm_tldr_cn": "通过分布式对齐协议将本地隐私上下文与云端推理协同起来。",
-      "llm_tldr": "通过分布式对齐协议将本地隐私上下文与云端推理协同起来。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "secure and private inference in neural networks",
-      "matched_requirement_id": "req-11",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.16219v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.14283v1",
-      "title": "AEX: Non-Intrusive Multi-Hop Attestation and Provenance for LLM APIs",
-      "abstract": "Hosted large language models are increasingly accessed through remote APIs, but the API boundary still offers little direct evidence that a returned output actually corresponds to the client-visible request. Recent audits of shadow APIs show that unofficial or intermediary endpoints can diverge from claimed behavior, while existing approaches such as fingerprinting, model-equality testing, verifiable inference, and TEE attestation either remain inferential or answer different questions. We propose AEX, a non-intrusive attestation extension for existing JSON-based LLM APIs. AEX preserves request, response, tool-calling, streaming, and error semantics, and instead adds a signed top-level attestation object that binds a client-visible request projection to either a complete response object or a committed streaming output. To support realistic deployments, AEX provides explicit request-binding modes, signed request-transform receipts for trusted intermediaries, and source-output / output-transform receipts for trusted output rewriting. For streaming, it separates checkpoint proofs for verified prefixes of an unmodified source stream from complete-output lineage for outputs that have been rewritten, buffered, aggregated, or re-packaged, preventing transformed outputs from being mistaken for source-stream prefixes. AEX therefore makes a deliberately narrow claim: a trusted issuer attests to a specific request-output relation, or to a specific complete-output lineage, at the API boundary. We present the protocol design, threat model, verification state machine, security and privacy analysis, an OpenAI-compatible chat-completions profile, and a reference TypeScript prototype with local conformance tests and microbenchmarks.",
-      "authors": [
-        "Yongjie Guan"
-      ],
-      "primary_category": "cs.CR",
-      "categories": [
-        "cs.CR",
-        "cs.AI"
-      ],
-      "published": "2026-03-15T08:42:39+00:00",
-      "link": "https://arxiv.org/pdf/2603.14283v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM",
-        "query:PPML"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Verifiable inference and attestation for LLM APIs",
-      "llm_evidence_cn": "大模型 API 的可验证推理与证明",
-      "llm_evidence": "大模型 API 的可验证推理与证明",
-      "canonical_evidence": "大模型 API 的可验证推理与证明",
-      "llm_tldr_en": "Proposes a non-intrusive attestation extension to provide evidence of correct LLM API execution.",
-      "llm_tldr_cn": "提出了一种非侵入式证明扩展，为大模型 API 的正确执行提供证据。",
-      "llm_tldr": "提出了一种非侵入式证明扩展，为大模型 API 的正确执行提供证据。",
-      "llm_tags": [
-        "query:fss-llm"
-      ],
-      "matched_query_tag": "query:fss-llm",
-      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
-      "matched_requirement_id": "req-8",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.14283v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.16692v1",
-      "title": "Dataflow-Oriented Classification and Performance Analysis of GPU-Accelerated Homomorphic Encryption",
-      "abstract": "Fully Homomorphic Encryption (FHE) enables secure computation over encrypted data, but its computational cost remains a major obstacle to practical deployment. To mitigate this overhead, many studies have explored GPU acceleration for the CKKS scheme, which is widely used for approximate arithmetic. In CKKS, CKKS parameters are configured for each workload by balancing multiplicative depth, security requirements, and performance. These parameters significantly affect ciphertext size, thereby determining how the memory footprint fits within the GPU memory hierarchy. Nevertheless, prior studies typically apply their proposed optimization methods uniformly, without considering differences in CKKS parameter configurations. In this work, we demonstrate that the optimal GPU optimization strategy for CKKS depends on the CKKS parameter configuration. We first classify prior optimizations by two aspects of dataflows which affect memory footprint and then conduct both qualitative and quantitative performance analyses. Our analysis shows that even on the same GPU architecture, the optimal strategy varies with CKKS parameters with performance differences of up to 1.98 $\\times$ between strategies, and that the criteria for selecting an appropriate strategy differ across GPU architectures.",
-      "authors": [
-        "Ai Nozaki",
-        "Takuya Kojima",
-        "Hideki Takase",
-        "Hiroshi Nakamura"
-      ],
-      "primary_category": "cs.DC",
-      "categories": [
-        "cs.DC"
-      ],
-      "published": "2026-03-17T15:49:32+00:00",
-      "link": "https://arxiv.org/pdf/2603.16692v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM",
-        "query:PPML"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "GPU acceleration for Homomorphic Encryption (FHE) used in secure computation",
-      "llm_evidence_cn": "用于安全计算的全同态加密(FHE)的GPU加速",
-      "llm_evidence": "用于安全计算的全同态加密(FHE)的GPU加速",
-      "canonical_evidence": "用于安全计算的全同态加密(FHE)的GPU加速",
-      "llm_tldr_en": "Analyzes GPU acceleration for FHE to improve the efficiency of secure computation over encrypted data.",
-      "llm_tldr_cn": "分析了FHE的GPU加速，以提高加密数据安全计算的效率。",
-      "llm_tldr": "分析了FHE的GPU加速，以提高加密数据安全计算的效率。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "MPC protocols for privacy-preserving computation",
-      "matched_requirement_id": "req-12",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.16692v1",
-      "carry_days": 1
-    },
     {
       "id": "2603.18377v1",
       "title": "PlanTwin: Privacy-Preserving Planning Abstractions for Cloud-Assisted LLM Agents",
@@ -153,12 +30,12 @@
       ],
       "llm_score": 8.0,
       "llm_evidence_en": "Privacy-preserving architecture for cloud-assisted LLM planning",
-      "llm_evidence_cn": "云辅助LLM规划的隐私保护架构",
-      "llm_evidence": "云辅助LLM规划的隐私保护架构",
-      "canonical_evidence": "云辅助LLM规划的隐私保护架构",
-      "llm_tldr_en": "Introduces PlanTwin to protect private environment states during cloud-hosted LLM agent planning.",
-      "llm_tldr_cn": "引入PlanTwin架构，在云端LLM智能体规划过程中保护私有环境状态。",
-      "llm_tldr": "引入PlanTwin架构，在云端LLM智能体规划过程中保护私有环境状态。",
+      "llm_evidence_cn": "云辅助大模型规划的隐私保护架构",
+      "llm_evidence": "云辅助大模型规划的隐私保护架构",
+      "canonical_evidence": "云辅助大模型规划的隐私保护架构",
+      "llm_tldr_en": "Presents PlanTwin, an architecture to protect local environment state during cloud-based LLM planning.",
+      "llm_tldr_cn": "提出了PlanTwin架构，在云端大模型规划过程中保护本地环境状态隐私。",
+      "llm_tldr": "提出了PlanTwin架构，在云端大模型规划过程中保护本地环境状态隐私。",
       "llm_tags": [
         "query:ppml"
       ],
@@ -167,44 +44,6 @@
       "matched_requirement_id": "req-11",
       "selection_source": "carryover_cache",
       "paper_id": "2603.18377v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.16846v1",
-      "title": "Dynamic Meta-Layer Aggregation for Byzantine-Robust Federated Learning",
-      "abstract": "Federated Learning (FL) is increasingly applied in sectors like healthcare, finance, and IoT, enabling collaborative model training while safeguarding user privacy. However, FL systems are susceptible to Byzantine adversaries that inject malicious updates, which can severely compromise global model performance. Existing defenses tend to focus on specific attack types and fail against untargeted strategies, such as multi-label flipping or combinations of noise and backdoor patterns. To overcome these limitations, we propose FedAOT-a novel defense mechanism that counters multi-label flipping and untargeted poisoning attacks using a metalearning-inspired adaptive aggregation framework. FedAOT dynamically weights client updates based on their reliability, suppressing adversarial influence without relying on predefined thresholds or restrictive attack assumptions. Notably, FedAOT generalizes effectively across diverse datasets and a wide range of attack types, maintaining robust performance even in previously unseen scenarios. Experimental results demonstrate that FedAOT substantially improves model accuracy and resilience while maintaining computational efficiency, offering a scalable and practical solution for secure federated learning.",
-      "authors": [
-        "Reek Das",
-        "Biplab Kanti Sen"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG"
-      ],
-      "published": "2026-03-17T17:54:00+00:00",
-      "link": "https://arxiv.org/pdf/2603.16846v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM",
-        "query:PPML"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Byzantine-robust federated learning defense mechanism",
-      "llm_evidence_cn": "联邦学习中的拜占庭容错防御机制",
-      "llm_evidence": "联邦学习中的拜占庭容错防御机制",
-      "canonical_evidence": "联邦学习中的拜占庭容错防御机制",
-      "llm_tldr_en": "Proposes FedAOT, an adaptive aggregation framework to defend against malicious updates in federated learning.",
-      "llm_tldr_cn": "提出FedAOT防御机制，通过自适应聚合框架抵御联邦学习中的恶意更新。",
-      "llm_tldr": "提出FedAOT防御机制，通过自适应聚合框架抵御联邦学习中的恶意更新。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "Privacy-preserving federated learning architectures",
-      "matched_requirement_id": "req-13",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.16846v1",
       "carry_days": 1
     },
     {
@@ -232,13 +71,13 @@
         "query:PPML"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "defending against label inference attacks in vertical federated learning",
+      "llm_evidence_en": "Defending against label inference attacks in vertical federated learning",
       "llm_evidence_cn": "防御纵向联邦学习中的标签推理攻击",
       "llm_evidence": "防御纵向联邦学习中的标签推理攻击",
       "canonical_evidence": "防御纵向联邦学习中的标签推理攻击",
       "llm_tldr_en": "Analyzes and defends against label inference attacks in vertical federated learning using mutual information.",
-      "llm_tldr_cn": "利用互信息理论分析并防御纵向联邦学习中的标签推理攻击。",
-      "llm_tldr": "利用互信息理论分析并防御纵向联邦学习中的标签推理攻击。",
+      "llm_tldr_cn": "利用互信息分析并防御纵向联邦学习中的标签推理攻击。",
+      "llm_tldr": "利用互信息分析并防御纵向联邦学习中的标签推理攻击。",
       "llm_tags": [
         "query:ppml"
       ],
@@ -271,13 +110,13 @@
         "query:PPML"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "active auditing and defense against backdoor attacks in decentralized federated learning",
-      "llm_evidence_cn": "去中心化联邦学习中针对后门攻击的主动审计与防御",
-      "llm_evidence": "去中心化联邦学习中针对后门攻击的主动审计与防御",
-      "canonical_evidence": "去中心化联邦学习中针对后门攻击的主动审计与防御",
-      "llm_tldr_en": "Introduces an active auditing framework to detect latent backdoors in decentralized federated learning.",
-      "llm_tldr_cn": "为去中心化联邦学习引入主动审计框架，通过主动探测暴露潜在的后门攻击。",
-      "llm_tldr": "为去中心化联邦学习引入主动审计框架，通过主动探测暴露潜在的后门攻击。",
+      "llm_evidence_en": "defense in decentralized federated learning",
+      "llm_evidence_cn": "去中心化联邦学习中的防御",
+      "llm_evidence": "去中心化联邦学习中的防御",
+      "canonical_evidence": "去中心化联邦学习中的防御",
+      "llm_tldr_en": "Proposes an active auditing framework to detect backdoor attacks in decentralized federated learning.",
+      "llm_tldr_cn": "提出一种主动审计框架，用于检测去中心化联邦学习中的后门攻击。",
+      "llm_tldr": "提出一种主动审计框架，用于检测去中心化联邦学习中的后门攻击。",
       "llm_tags": [
         "query:ppml"
       ],
@@ -289,63 +128,20 @@
       "carry_days": 1
     },
     {
-      "id": "2603.14956v1",
-      "title": "SFedHIFI: Fire Rate-Based Heterogeneous Information Fusion for Spiking Federated Learning",
-      "abstract": "Spiking Federated Learning (SFL) has been widely studied with the energy efficiency of Spiking Neural Networks (SNNs). However, existing SFL methods require model homogeneity and assume all clients have sufficient computational resources, resulting in the exclusion of some resource-constrained clients. To address the prevalent system heterogeneity in real-world scenarios, enabling heterogeneous SFL systems that allow clients to adaptively deploy models of different scales based on their local resources is crucial. To this end, we introduce SFedHIFI, a novel Spiking Federated Learning framework with Fire Rate-Based Heterogeneous Information Fusion. Specifically, SFedHIFI employs channel-wise matrix decomposition to deploy SNN models of adaptive complexity on clients with heterogeneous resources. Building on this, the proposed heterogeneous information fusion module enables cross-scale aggregation among models of different widths, thereby enhancing the utilization of diverse local knowledge. Extensive experiments on three public benchmarks demonstrate that SFedHIFI can effectively enable heterogeneous SFL, consistently outperforming all three baseline methods. Compared with ANN-based FL, it achieves significant energy savings with only a marginal trade-off in accuracy.",
+      "id": "2603.17902v1",
+      "title": "Differential Privacy in Generative AI Agents: Analysis and Optimal Tradeoffs",
+      "abstract": "Large language models (LLMs) and AI agents are increasingly integrated into enterprise systems to access internal databases and generate context-aware responses. While such integration improves productivity and decision support, the model outputs may inadvertently reveal sensitive information. Although many prior efforts focus on protecting the privacy of user prompts, relatively few studies consider privacy risks from the enterprise data perspective. Hence, this paper develops a probabilistic framework for analyzing privacy leakage in AI agents based on differential privacy. We model response generation as a stochastic mechanism that maps prompts and datasets to distributions over token sequences. Within this framework, we introduce token-level and message-level differential privacy and derive privacy bounds that relate privacy leakage to generation parameters such as temperature and message length. We further formulate a privacy-utility design problem that characterizes optimal temperature selection.",
       "authors": [
-        "Ran Tao",
-        "Qiugang Zhan",
-        "Shantian Yang",
-        "Xiurui Xie",
-        "Qi Tian",
-        "Guisong Liu"
+        "Ya-Ting Yang",
+        "Quanyan Zhu"
       ],
-      "primary_category": "cs.LG",
+      "primary_category": "cs.CR",
       "categories": [
-        "cs.LG"
+        "cs.CR",
+        "cs.AI"
       ],
-      "published": "2026-03-16T08:13:03+00:00",
-      "link": "https://arxiv.org/pdf/2603.14956v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "keyword:PPML",
-        "query:FSS LLM"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Spiking Federated Learning framework for heterogeneous systems",
-      "llm_evidence_cn": "异构系统的脉冲联邦学习框架",
-      "llm_evidence": "异构系统的脉冲联邦学习框架",
-      "canonical_evidence": "异构系统的脉冲联邦学习框架",
-      "llm_tldr_en": "Presents SFedHIFI, a spiking federated learning framework that enables heterogeneous clients to participate.",
-      "llm_tldr_cn": "提出 SFedHIFI，一种允许异构客户端参与的脉冲联邦学习框架。",
-      "llm_tldr": "提出 SFedHIFI，一种允许异构客户端参与的脉冲联邦学习框架。",
-      "llm_tags": [
-        "query:ppml"
-      ],
-      "matched_query_tag": "query:ppml",
-      "matched_query_text": "Privacy-preserving federated learning architectures",
-      "matched_requirement_id": "req-13",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.14956v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.17315v1",
-      "title": "Learning Evolving Preferences: A Federated Continual Framework for User-Centric Recommendation",
-      "abstract": "User-centric recommendation has become essential for delivering personalized services, as it enables systems to adapt to users' evolving behaviors while respecting their long-term preferences and privacy constraints. Although federated learning offers a promising alternative to centralized training, existing approaches largely overlook user behavior dynamics, leading to temporal forgetting and weakened collaborative personalization. In this work, we propose FCUCR, a federated continual recommendation framework designed to support long-term personalization in a privacy-preserving manner. To address temporal forgetting, we introduce a time-aware self-distillation strategy that implicitly retains historical preferences during local model updates. To tackle collaborative personalization under heterogeneous user data, we design an inter-user prototype transfer mechanism that enriches each client's representation using knowledge from similar users while preserving individual decision logic. Extensive experiments on four public benchmarks demonstrate the superior effectiveness of our approach, along with strong compatibility and practical applicability. Code is available.",
-      "authors": [
-        "Chunxu Zhang",
-        "Zhiheng Xue",
-        "Guodong Long",
-        "Weipeng Zhang",
-        "Bo Yang"
-      ],
-      "primary_category": "cs.IR",
-      "categories": [
-        "cs.IR"
-      ],
-      "published": "2026-03-18T03:20:15+00:00",
-      "link": "https://arxiv.org/pdf/2603.17315v1",
+      "published": "2026-03-18T16:35:12+00:00",
+      "link": "https://arxiv.org/pdf/2603.17902v1",
       "tags": [
         "keyword:FSS LLM",
         "keyword:PPML",
@@ -353,21 +149,21 @@
         "query:PPML"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "privacy-preserving federated recommendation framework",
-      "llm_evidence_cn": "隐私保护联邦推荐框架",
-      "llm_evidence": "隐私保护联邦推荐框架",
-      "canonical_evidence": "隐私保护联邦推荐框架",
-      "llm_tldr_en": "FCUCR is a federated continual recommendation framework that preserves privacy while adapting to user dynamics.",
-      "llm_tldr_cn": "FCUCR是一个联邦持续推荐框架，在适应用户动态的同时保护隐私。",
-      "llm_tldr": "FCUCR是一个联邦持续推荐框架，在适应用户动态的同时保护隐私。",
+      "llm_evidence_en": "differential privacy framework for analyzing privacy leakage in AI agents",
+      "llm_evidence_cn": "用于分析 AI 智能体隐私泄露的差分隐私框架",
+      "llm_evidence": "用于分析 AI 智能体隐私泄露的差分隐私框架",
+      "canonical_evidence": "用于分析 AI 智能体隐私泄露的差分隐私框架",
+      "llm_tldr_en": "Develops a probabilistic framework using differential privacy to analyze and mitigate data leakage in LLM agents.",
+      "llm_tldr_cn": "开发了一个基于差分隐私的概率框架，用于分析和减轻大模型智能体中的数据泄露。",
+      "llm_tldr": "开发了一个基于差分隐私的概率框架，用于分析和减轻大模型智能体中的数据泄露。",
       "llm_tags": [
         "query:ppml"
       ],
       "matched_query_tag": "query:ppml",
-      "matched_query_text": "Privacy-preserving federated learning architectures",
-      "matched_requirement_id": "req-13",
+      "matched_query_text": "privacy-preserving machine learning techniques and frameworks",
+      "matched_requirement_id": "req-10",
       "selection_source": "carryover_cache",
-      "paper_id": "2603.17315v1",
+      "paper_id": "2603.17902v1",
       "carry_days": 1
     }
   ]
