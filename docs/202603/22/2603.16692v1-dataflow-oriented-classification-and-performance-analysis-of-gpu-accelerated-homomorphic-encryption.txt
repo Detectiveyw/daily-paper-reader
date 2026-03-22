@@ -1,0 +1,2646 @@
+Title: Dataflow-Oriented Classification and Performance Analysis of GPU-Accelerated Homomorphic Encryption
+
+URL Source: https://arxiv.org/pdf/2603.16692v1
+
+Published Time: Wed, 18 Mar 2026 01:29:36 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# Dataflow-Oriented Classification and Performance Analysis of GPU-Accelerated Homomorphic Encryption 
+
+Ai Nozaki ∗, Takuya Kojima †, Hiroshi Nakamura ∗, and Hideki Takase ∗∗The University of Tokyo 
+
+†Tsukuba University 
+
+∗nozaki@hal.ipc.i.u-tokyo.ac.jp 
+
+Abstract —Fully Homomorphic Encryption (FHE) enables se-cure computation over encrypted data, but its computational cost remains a major obstacle to practical deployment. To mitigate this overhead, many studies have explored GPU acceleration for the CKKS scheme, which is widely used for approximate arithmetic. In CKKS, CKKS parameters are configured for each workload by balancing multiplicative depth, security re-quirements, and performance. These parameters significantly affect ciphertext size, thereby determining how the memory footprint fits within the GPU memory hierarchy. Nevertheless, prior studies typically apply their proposed optimization methods uniformly, without considering differences in CKKS parameter configurations. In this work, we demonstrate that the optimal GPU optimization strategy for CKKS depends on the CKKS parameter configuration. We first classify prior optimizations by two aspects of dataflows which affect memory footprint and then conduct both qualitative and quantitative performance analyses. Our analysis shows that even on the same GPU architecture, the optimal strategy varies with CKKS parameters with performance differences of up to 1.98 × between strategies, and that the criteria for selecting an appropriate strategy differ across GPU architectures. 
+
+Index Terms —Fully Homomorphic Encryption, CKKS, GPU 
+
+I. I NTRODUCTION 
+
+With the widespread use of cloud computing, protect-ing data confidentiality has become increasingly important. FHE enables computation directly on encrypted data without decryption. FHE supports arithmetic or logical operations over ciphertexts and is therefore expected to enable privacy-sensitive machine learning and data analytics. However, the high computational overhead of FHE remains a significant barrier to its widespread adoption. In the CKKS scheme [1], which is one of the most widely adopted HE schemes, execution times are 10 4 to 10 5 times longer than plaintext computations. To mitigate this performance overhead, many prior studies have proposed GPU acceleration for CKKS. In CKKS, parameters are configured for each workload by balancing the number of supported operations, security re-quirements, and performance. We define the CKKS parameter set as a tuple (dnum, N, L ). Here, N denotes the polynomial degree of a ciphertext, and L represents the maximum mul-tiplicative depth. Given N and L, a CKKS ciphertext can be viewed as a structure consisting of L chained polynomials of dimension N . The parameter dnum determines the number of partitions used in the KeySwitch operation, which accounts for approximately 70 % of the total execution time in CKKS. During KeySwitch, the L polynomials are divided into dnum 
+
+parts, and each part is referred to as a digit. These CKKS parameters are configured for each workload according to the aforementioned trade-offs. For example, workloads requiring deep computational circuits, such as machine learning infer-ence, use a larger L, which in turn necessitates a larger N
+
+to satisfy security requirements. Typical parameter ranges are 
+
+N = 2 13 to 217 , L = 0 to 64 , and dnum = 2 to 10 .Prior work on GPU acceleration of CKKS generally applies proposed optimization strategies uniformly, without consider-ing differences in CKKS parameter configurations. However, CKKS parameters significantly affect the memory footprint, which in turn impacts the effectiveness of optimizations. Furthermore, under commonly used CKKS parameter ranges, the resulting memory footprint is close to the L2 cache capacity of modern GPUs. This observation raises the ques-tion of whether a single optimization strategy can be effec-tive across all CKKS parameter configurations. For example, WarpDrive [2] introduces a Parallelism-Enhanced Kernel that executes dnum independent sub-operations in KeySwitch in parallel, effectively exploiting digit-level parallelism. While this approach increases parallelism, it also enlarges the mem-ory footprint, potentially causing frequent L2 cache evictions and performance degradation. For a small parameter set, e.g., 
+
+(dnum, N, L ) = (2 , 215 , 10) , the on-chip memory footprint of WarpDrive’s method is 2 × 215 × 10 × 8 Bytes = 5 .12 MB ,which fits within the L2 cache of modern GPUs (e.g., 40 MB 
+
+in NVIDIA A100). In contrast, for a larger parameter set, e.g., (4 , 216 , 50) , the footprint reaches 100 MB , exceeding the L2 cache capacity of many GPUs. This observation suggests that the appropriate optimization strategy may depend on both CKKS parameters and the underlying GPU architecture. Furthermore, prior work evaluates performance using only a limited number of CKKS parameter configurations. For exam-ple, Cheddar [3] evaluates one configuration, WarpDrive [2] evaluates five, and Neo [4] evaluates seven. These represent only a small subset of the possible parameter combinations. As a result, there is limited discussion on whether each optimization strategy remains effective across a broader range of CKKS parameters. 
+
+> arXiv:2603.16692v1 [cs.DC] 17 Mar 2026
+
+In this work, we demonstrate that the optimal GPU opti-mization strategy for CKKS varies according to the CKKS parameter configuration. We classify existing optimization strategies into four categories and conduct both qualitative and quantitative performance analyses while varying CKKS parameters. We first classify prior optimizations by two aspects of dataflow that affect memory footprint: (1) whether digit-level parallelism is exploited in KeySwitch (DigitSerial or Digit-Parallel), and (2) whether output granularity in KeySwitch is partitioned (OutputBulk or OutputChunked). These two axes yield four distinct optimization strategies. Based on the above classification, we observe that prior studies have primarily focused on optimizing the total DRAM access traffic, improving DRAM bandwidth utilization, and reducing the memory footprint. To understand why the optimal optimization strategy changes with CKKS parameter configurations, we conduct a qualitative analysis of their computational characteristics. We first estimate the on-chip memory footprint of each optimiza-tion strategy across CKKS parameter configurations. Changes in memory footprint can lead to different cache behaviors, which in turn reshapes the distribution of execution stalls. We employ GCoM [5], a GPU performance modeling framework, to analyze how these changes in memory footprint affect the overall performance of each optimization strategy. Then, we perform quantitative performance evaluation across different CKKS parameter sets and GPU architectures. Our results show that even on the same GPU architecture, the optimal optimization strategy varies depending on CKKS parameters, with performance differences up to 1.98 × between strategies. Moreover, the criteria for selecting the optimal strat-egy differ across GPU architectures. Overall, we demonstrate that the appropriate optimization strategy depends on the com-bination of CKKS parameters and GPU architecture. These findings suggest that CKKS parameter-aware optimization can unlock additional performance improvements for CKKS workloads accelerated on GPUs. II. B ACKGROUND 
+
+A. CKKS Encryption 1) CKKS: CKKS [1] is one of the FHE schemes that enable approximate addition and multiplication over encrypted real numbers. Parameters used in CKKS are summarized in Table I. In CKKS, a message is represented as a vec-tor of N/ 2 real numbers. Through the encode and encrypt procedures, the message is transformed into a ciphertext 
+
+ct = ( ct 0(x), ct 1(x)) ∈ R2 
+
+> Q
+
+, where RQ = ZQ[x]/(xN − 1) 
+
+denotes a degree-N polynomial ring with coefficients in the integer ring ZQ, and Q is the modulus. Since Q is a large integer (typically around 1000 bit ), it is decomposed via the Chinese Remainder Theorem as Q = QL−1 
+
+> i=0
+
+qi, where each 
+
+qi is a machine-word-sized modulus. As a result of this decomposition, a ciphertext has a structure consisting of L
+
+chained polynomials, which is referred to as a ciphertext at level-L. The level indicates the remaining multiplicative depth of the ciphertext, and it decreases by one after each multiplication. The homomorphic operations in CKKS are defined as follows:  
+
+> •
+
+HADD : Adds two ciphertexts. ct add (ct, ct ′) = ct + ct ′• HMUL : Multiplies two ciphertexts. ct mul (ct, ct ′) =(ct 0ct ′
+
+> 0
+
+, ct 0ct ′ 
+
+> 1
+
++ ct ′
+
+> 0
+
+ct 1) + KS (ct 1ct ′
+
+> 1
+
+) 
+
+> •
+
+HROT : Rotates a ciphertext. ct rot (ct, r ) =(0 , rot (ct 1, r )) + KS (rot (ct 0, r )) 
+
+Here, KS denotes the KeySwitch operation, which trans-forms a ciphertext into a ciphertext under a different secret key. In CKKS workloads, KeySwitch accounts for approximately 
+
+70 % of the total execution time [6]. Accordingly, this work focuses on KeySwitch as the primary subject of analysis. 
+
+2) KeySwitch: The overall procedure of KeySwitch is il-lustrated in Fig. 1. In KeySwitch, the input ciphertext is first decomposed into dnum digits, each at level-α, where 
+
+α = ( l + 1) /dnum . In the first phase, shown in blue, each digit is expanded to level l + α by performing the operations 
+
+iNTT → BConv → NTT . Each digit is then multiplied by the corresponding evaluation key, and the results are accumulated across all digits. In the second phase, shown in green, the level of the ciphertext is reduced back to l by again applying iNTT 
+
+→ BConv → NTT . Here, BConv (Base Conversion) converts a polynomial into an approximately equivalent polynomial with a different set of moduli. NTT (Number Theoretic Trans-form) is a variant of the Fast Fourier Transform defined over integer polynomial rings. Ciphertexts are typically maintained in the NTT domain to accelerate polynomial multiplication. However, since BConv requires coefficients in the standard (non-NTT) domain, NTT and its inverse ( iNTT ) are performed before and after BConv . Because KeySwitch expands each digit to level l + α, it increases both computational cost and data size. 
+
+3) CKKS Parameter Configuration: These CKKS param-eters are configured for each workload by balancing the supported multiplicative depth, security requirements, and performance. A larger Q, i.e., a larger L, enables deeper computational circuits, however, it also weakens security. To maintain a target security level, a larger N is required when L increases, which in turn raises the computational cost. A smaller dnum also reduces security, whereas a larger 
+
+dnum increases computational overhead and evaluation key size. FHE compilers incorporate CKKS parameter selection into their compilation process [7], [8]. Similarly, FHE ASIC accelerators such as BTS [9] simulate execution time across a range of CKKS parameter configurations in advance to determine the supported parameter sets. 
+
+B. GPU Performance Modeling 
+
+We briefly describe the GPU performance modeling method proposed in GCoM [5]. GCoM analytically estimates the execution cycles of a GPU kernel. First, GCoM assumes a representative warp with no re-source contention and calculates the execution cycles con-sidering only stalls caused by data hazards. The SASS (the TABLE I: Parameters used in CKKS                                        
+
+> Parameter Description
+> NDegree of polynomial
+> QModulus
+> LMaximum multiplicative level. Q=QLi=1 qi
+> lCurrent level 1≤l≤L−1
+> dnum Decomposition number
+> α⌈(L+ 1) /dnum ⌉(",$)(",&)(",$)(",$+&)2(",$+&)Data Size
+> iNTT
+> Decomp
+> BConv NTT Mult
+> Key Accum
+> iNTT BConv NTT
+> dnum -1
+> 0
+> Sum
+> Reduce
+
+Fig. 1: KeySwitch operation instruction sequence of an NVIDIA GPU) of the representative warp is obtained via tracing. Then, GCoM conducts interval analysis and divides the instruction sequence into intervals where instructions can be issued continuously and intervals where execution stalls due to data dependencies waiting for memory access or computational results. Using cache simu-lation, the average memory access latency is estimated. As a result of interval analysis, the stall cycles for each interval 
+
+SIntv k are derived. Next, stalls caused by structural hazards among warps are considered to estimate the total execution cycles. The total kernel execution cycles are computed as follows: 
+
+Ckernel =
+
+P#SM i=1 Ci
+
+#SM (1) 
+
+Ci =
+
+P#Subcore j=1 Ci,j 
+
+#Subcore + Si (2) where Ci,j represents the execution cycles of subcore j in SM i, and Si represents the stall cycles due to inter-subcore interference. Here, a subcore refers to the execution unit associated with a GPU warp scheduler. The execution cycles per subcore, Ci,j , are decomposed as: 
+
+Ci,j = CActive i,j + CIdle i,j (3) 
+
+= CBase i,j + SComData i,j + SM emData i,j + CIdle i,j (4) 
+
+CBase i,j represents the ideal execution cycles assuming no stalls: 
+
+CBase i,j = W arps × InstsP erW arp IssueRate (5) 
+
+SComData i,j and SM emData i,j represent stalls due to compu-tational data dependencies and memory data dependencies, respectively. They are calculated by subtracting the cycles hidden by other warps from the stall cycles SIntv k for each interval as follows: 
+
+SCom/M emData i,j = X
+
+> k∈Intvs
+
+max( SIntv k − Cother , 0) (6) 
+
+Cother = Pwarp × (# W arps − 1) × AvgIntrvInsts (7) where Pwarp denotes the probability that other warps can issue instructions during a stall interval caused by data hazards. 
+
+CIdle i,j represents idle cycles incurred while waiting for other subcores. The stall cycles due to inter-subcore interference Si are further decomposed as: 
+
+Si = SComStruct i + SM emStruct i + SN oC i + SDRAM i (8) 
+
+SComStruct i represents stalls due to contention for compu-tational units, and SM emStruct i represents stalls due to L1 cache bank conflicts. For each interval, the required cycles for each functional unit are calculated, and the difference between the maximum required cycles and the ideal issue cycles is accumulated as stall cycles. 
+
+SN oC i and SDRAM i represent stalls caused by memory access contention in the on-chip network (NoC) and DRAM, respectively. They are estimated by multiplying the number of accesses (considering hit rates) by the respective access latencies: 
+
+SN oC i = 0 .5 × #SM × M × LN oC (9) 
+
+SDRAM i = 0 .5 × #SM × M × L2M iss × LDRAM (10) 
+
+M = ( M Read × L1M iss + M W rite ) × #W arps (11) Here, M denotes the number of memory accesses issued per warp. LDRAM and LN oC denote the DRAM and NoC access latencies, respectively, which are calculated as: 
+
+LDRAM = f × BlockSize Bandwidth DRAM (12) 
+
+LN oC = f × BlockSize Bandwidth N oC (13) By computing these various stall cycles, the total kernel execution cycles and their breakdown can be estimated. III. Q UALITATIVE ANALYSIS 
+
+In this study, we investigate the hypothesis that the appro-priate optimization strategy for accelerating CKKS on GPUs depends on the chosen CKKS parameter configuration. We first classify prior optimizations by two aspects of dataflows which affect memory footprint and then conduct qualitative performance analysis for each optimization strategy. 
+
+A. Dataflow-Oriented Classification of CKKS Acceleration 
+
+We organize the dataflow-related optimization strategies proposed in prior studies on GPU acceleration. Focusing on the dataflow of KeySwitch computation, we consider the following two axes: 1) Digit-level parallelism in KeySwitch. KeySwitch con-sists of dnum independent partial computations. We Decomp 
+
+> iNTT
+> BConv
+> NTT
+> Mult
+> Accum
+> iNTT
+> BConv
+> NTT
+> Sum
+> time
+
+(a) DSOB Decomp  
+
+> iNTT
+> BConv
+> NTT
+> Mult
+> Accum
+> iNTT
+> BConv
+> NTT
+> Sum
+> time
+
+(b) DPOB Decomp 
+
+> iNTT
+> BConv
+> NTT
+> Mult
+> Accum
+> iNTT
+> BConv
+> NTT
+> Sum
+> time
+
+(c) DSOC Decomp  
+
+> iNTT
+> BConv
+> NTT
+> Mult
+> Accum
+> iNTT
+> BConv
+> NTT
+> Sum
+> time
+
+(d) DPOC 
+
+Fig. 2: KeySwitch dataflow in the four categories. TABLE II: Classification of prior work     
+
+> DigitSerial DigitParallel OutputBulk 100x [10], HE-Booster [11], FIDESlib [12], Phantom [13], CARM [14], HEonGPU [15], [16] WarpDrive [2], Cheddar [3] OutputChunked MAD [17] -
+
+refer to the method that executes these computations sequentially as DigitSerial (DS), and the method that executes them in parallel within a single kernel as DigitParallel (DP). 2) Output granularity in KeySwitch. KeySwitch pro-duces a ciphertext of level-(L + α) and level-L poly-nomials in the first and second phases, respectively. In the first and second phases, KeySwitch generates inter-mediate polynomials at levels l + α and l, respectively. We refer to the method that computes all levels at once as OutputBulk (OB), and the method that partitions the output and computes it incrementally as OutputChunked (OC). In OC, the number of output partitions is denoted by chunks .Combining these two axes yields four approaches. Fig. 2 illustrates the KeySwitch dataflow for these approaches. In the figure, the horizontal axis represents time, indicating the execution order of the internal KeySwitch steps, and the colors correspond to those used in Fig. 1. For example, in DSOB, computations are performed sequentially across digits over time (DS), and for each digit, the entire output is computed in a single pass (OB). 
+
+B. Mapping of Prior Work 
+
+This subsection maps prior work to the dataflow optimiza-tion taxonomy introduced above (Table II). Since this work focuses on inter-kernel dataflow optimizations, we omit the details of intra-kernel computational optimizations (e.g., the use of Tensor Cores for NTT). DSOB follows the baseline algorithmic dataflow without special optimizations. 100x [10] is the first work to acceler-ate the full CKKS pipeline on GPUs. Identifying element-wise operations as a performance bottleneck, it introduced kernel fusion across adjacent kernels. Since kernel fusion for element-wise operations has been adopted by nearly all subsequent studies, we exclude it from our classification and do not discuss it further. HE-Booster [11] is charac-terized by fine-grained inter-thread synchronization in NTT. FIDESlib [12] provides an OpenFHE [18]-compatible in-terface. Phantom [13] targets unified acceleration of BFV, BGV, and CKKS. CARM [14] focuses on resource-constrained environments such as IoT. [16] presents optimizations tailored for Intel GPUs. DPOB addresses the low utilization of computational re-sources in DSOB by extracting parallelism through kernel fusion across multiple digits in KeySwitch. WarpDrive [2] is the first work to introduce DPOB. WarpDrive also proposes concurrent use of Tensor Cores and CUDA Cores for NTT. Cheddar [3] makes a major contribution by introducing 25– 30 bit primes, and also proposes kernel fusion both inside and outside FHE operations from a dataflow perspective. DSOC is proposed based on the observation that CKKS ASIC accelerators require substantial on-chip memory (e.g., 
+
+512 MB as reported in BTS [9]). MAD [17] partitions cipher-texts and reorders execution to maximize data reuse under limited on-chip memory capacity. Although primarily moti-vated by ASIC design, MAD demonstrates its effectiveness via simulation on ASICs, GPUs, and FPGAs. CiFlow [19] proposes a similar partitioned dataflow, but it is not GPU-focused. DPOC is a theoretically feasible dataflow, but it has not yet been adopted in existing work. This is likely because OC was originally proposed to reduce the required on-chip memory footprint for ASIC acceleration, whereas combining it with DP increases on-chip memory demand. However, on GPU architectures where such an on-chip memory footprint is acceptable, DPOC may become effective as it conceptually lies between DPOB (high parallelism due to kernel fusion) and DSOC (high data reuse due to partitioning). Therefore, we include DPOC in our analysis. Several prior works do not fall into the four approaches described above. TensorFHE [20] is the first work to pro-pose using Tensor Cores, and from a dataflow perspective it improves throughput by batching multiple FHE operations. However, as also pointed out in WarpDrive [2], CKKS already processes N 
+
+> 2
+
+real numbers in parallel within a single FHE operation, and thus workloads that can extract additional parallelism through batching are limited. We therefore exclude batching from our classification. Neo [4], a successor to TensorFHE [20], proposes mapping not only NTT but also other kernels to matrix multiplications to leverage Tensor Cores. Neo adopts the KLSS algorithm [21] for KeySwitch, but since this work targets the more widely used Hybrid TABLE III: Computational characteristics (denoting dnum as 
+
+d and chunks as c)
+
+DSOB DPOB DSOC DPOC on-chip memory footprint O(N L ) O(dN L ) O  N L c
+
+ O  dN L c
+
+
+
+kernel launches O(d) O(1) O(dc ) O(c)
+
+warps/kernel O(1) O(d) O  1
+
+> c
+
+ O  dc
+
+
+
+instructions/warp O(1) O(1) O(1) O(1) (2,15,10) 
+
+> (2,15,30)
+> (2,15,50)
+> (2,16,10)
+> (2,16,30)
+> (2,16,50)
+> (4,15,10)
+> (4,15,30)
+> (4,15,50)
+> (4,16,10)
+> (4,16,30)
+> (4,16,50)
+> (6,15,10)
+> (6,15,30)
+> (6,15,50)
+> (6,16,10)
+> (6,16,30)
+> (6,16,50)
+> (8,15,10)
+> (8,15,30)
+> (8,15,50)
+> (8,16,10)
+> (8,16,30)
+> (8,16,50)
+> (digits, logN, L)
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Data Size (MiB)
+> RTX 2080Ti L2 Cache
+> A100 L2 Cache
+> RTX 4090 L2 Cache
+> RTX 6000 L2 Cache
+> DSOB
+> DPOB
+> DSOC
+> DPOC
+
+Fig. 3: Relationship between memory footprint and CKKS parameter algorithm [22], we do not include Neo in our classification. GME [23] proposes architecture-level improvements based on AMD GPUs. It supports NoC communication across Compute Units (CUs, analogous to NVIDIA Streaming Multiprocessors) and proposes scheduling that places blocks processing the same data on the same CU across kernels. Because GME formulates scheduling as a general graph problem and does not clearly describe the resulting mapping, we exclude it from our classification. Finally, HE-Booster [11] also proposes multi-GPU execution strategies. Since this work focuses on single-GPU optimizations, we exclude multi-GPU dataflow from our classification. 
+
+C. Qualitative Performance Analysis 
+
+We qualitatively analyze the performance of the classified approaches using the GPU performance modeling framework introduced in Sec. II-B. Table III summarizes the differences in computational char-acteristics among the four approaches. First, memory footprint and cache behavior vary across approaches. Fig. 3 compares the memory footprint determined by the CKKS parameters with the L2 cache capacities of several GPUs. Since aciphertext consists of L polynomials of dimension N , its size scales as O(N L ). In DP, the footprint increases by a factor of dnum because it concurrently processes dnum 
+
+ciphertext components that are handled separately in DS. In OC, the footprint decreases by a factor of 1/chunks because the ciphertext is processed in chunks partitions. The DSOC footprint (shown in red) fits within the L2 cache for many CKKS parameter settings, even on GPUs with relatively small L2 caches such as the RTX 2080 Ti with 4 MB . In contrast, the DPOB footprint (shown in orange) can reach several tens of MB , and for some CKKS parameter settings it exceeds the L2 cache capacity even on high-end GPUs. Consequently, the cache hit rate varies depending on the relationship between the memory footprint and the L2 cache capacity. The four approaches also differ in kernel granularity and the number of kernel launches. In DP, the dnum kernels used in DS are merged into a single kernel. Therefore, the number of kernel launches is reduced to 1/dnum times of that in DS. In contrast, OC divides a single kernel in OB into chunks 
+
+number of smaller kernels, increasing the number of kernel launches by a factor of chunks . Because the total amount of computation remains identical across the four approaches, the computation per kernel scales inversely with the number of launches. Although the mapping of computations to warps within each kernel is implementation-dependent, we assume that the number of executed instructions per warp remains constant and that the number of warps is adjusted accordingly. That is, DP increases the number of warps per kernel by a factor of dnum compared with DS, while OB increases the number of warps per kernel by a factor of chunks compared with OC, such that the product of the number of launches and the number of warps per launch remains constant. These differences in computational characteristics lead to the following performance implications.  
+
+> •
+
+Ideal instruction execution cycles The ideal execution cycles without stalls, CBase i,j , are identical across the four approaches. This is because 
+
+InstsP erW arp in eq. (5) is constant, and the total number of warps executed over time is the same for all approaches.  
+
+> •
+
+Stalls due to data hazards Stalls caused by data hazards, SComData and SM emData ,depend on the cache hit rate and the number of con-currently executing warps. In eq. (7), a higher cache hit rate reduces the stall cycles SIntv k incurred while waiting for memory accesses. Furthermore, a larger number of concurrent warps enables more effective latency hiding, as data-hazard stalls in one warp can be overlapped with the execution of other warps. DP and OB exhibit a high warp density as long as the number of simultaneously resident blocks per SM remains within the architectural limit, resulting in bet-ter latency hiding. DP tends to require large memory footprint and may lower the cache hit rate, leading to increased stalls. Conversely, when the footprint fits within the L2 cache, DPOB can benefit from both high cache hit rates and effective latency hiding due to its high warp density.  
+
+> •
+
+Stalls due to structural hazards Structural-hazard stalls caused by inter-subcore interfer-TABLE IV: GPUs used in the evaluation 
+
+GPU Peak INT32 L2 cache Frequency DRAM bandwidth RTX 6000 Ada 44 .5 TOPS 96 MB 2.51 GHz 960 GB /s
+
+RTX 4090 41 .3 TOPS 72 MB 2.52 GHz 1008 GB /s
+
+A100 19 .5 TOPS 40 MB 1.41 GHz 1555 GB /s
+
+RTX 2080 Ti 13 .4 TOPS 5.5 MB 1.67 GHz 616 GB /s
+
+ence, SComStruct and SM emStruct , increase with the number of concurrently executing warps. Consequently, DP incurs more such stalls than DS, and OB incurs more than OC. 
+
+• Stalls due to NoC/DRAM access contention As shown in eq. (9) and eq. (10), SN oC and SDRAM in-crease with the number of concurrently executing warps. Therefore, similar to structural hazards, these stalls are larger in DP than in DS and larger in OB than in OC. In addition, these stalls increase when the L1/L2 cache hit rates are low. Hence, for approaches whose memory footprint exceeds the L2 cache capacity (as illustrated in Fig. 3), SN oC and SDRAM become more significant. We expect the impact of the L1 cache hit rate to be limited, because differences in inter-kernel dataflow do not substantially alter L1 cache utilization within each kernel. 
+
+• Kernel launch overhead Since kernel launch overhead increases with the number of kernel launches, the overhead is larger in DSOC than in DSOB, and in DPOC than in DPOB. In summary, the four approaches exhibit distinct compu-tational characteristics, each of which may either increase or decrease execution time depending on the type of stall involved. IV. Q UANTITATIVE ANALYSIS 
+
+A. Methodology 
+
+We next conduct a quantitative performance analysis of the four approaches. For the CKKS parameter configurations, we consider N ∈ { 214 , 215 , 216 , 217 }, L ∈ { 10 , 30 , 50 }, and 
+
+dnum ∈ { 2, 4, 6, 8}. Note that the parameter combination 
+
+(L, dnum ) = (10 , 8) does not meet the security requirements of CKKS and is therefore excluded from the evaluation. The GPUs used in our experiments are summarized in Table IV. We evaluate four GPUs representing different classes of computing resources. The RTX 6000 Ada server is equipped with an Intel Xeon Gold 6226R CPU and 155 GB of memory. The RTX 4090 server features an Intel Xeon w9-3495X CPU and 502 GB of memory. The A100 server is equipped with an Intel Xeon Gold 6226R CPU and 187 GB of memory. The GTX 2080 Ti server features an Intel Xeon Gold 6240R CPU and 251 GB of memory. For profiling, we use NVIDIA Nsight Compute [24]. Under these experimental conditions, we measure the ex-ecution time of homomorphic multiplication ( HMUL ). Each experiment is repeated 100 times, and we report the average 14 15 16 17 
+
+> 10
+> 30
+> 50
+> L
+> DPOB
+> 1.18
+> 1.48
+> DPOB
+> 1.21
+> 1.43
+> DPOB
+> 1.10
+> 1.25
+> DPOB
+> 1.05
+> 1.14
+> DPOB
+> 1.17
+> 1.30
+> DPOB
+> 1.04
+> 1.19
+> DPOC
+> 1.03
+> 1.08
+> DPOC
+> 1.02
+> 1.14
+> DPOB
+> 1.06
+> 1.18
+> DPOB
+> 1.01
+> 1.08
+> DPOC
+> 1.04
+> 1.11
+> DPOC
+> 1.01
+> 1.17
+
+NVIDIA RTX6000 
+
+d=2    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> DPOB
+> 1.32
+> 1.76
+> DPOB
+> 1.25
+> 1.65
+> DPOB
+> 1.07
+> 1.32
+> DPOC
+> 1.08
+> 1.18
+> DPOB
+> 1.16
+> 1.43
+> DPOB
+> 1.03
+> 1.24
+> DPOC
+> 1.10
+> 1.15
+> DPOC
+> 1.07
+> 1.26
+> DPOB
+> 1.05
+> 1.24
+> DPOC
+> 1.08
+> 1.15
+> DPOC
+> 1.08
+> 1.20
+> DPOC
+> 1.04
+> 1.25
+
+NVIDIA RTX6000 
+
+d=4    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> DPOB
+> 1.31
+> 1.98
+> DPOB
+> 1.21
+> 1.74
+> DPOB
+> 1.04
+> 1.37
+> DPOC
+> 1.13
+> 1.22
+> DPOB
+> 1.14
+> 1.49
+> DPOC
+> 1.06
+> 1.21
+> DPOC
+> 1.18
+> 1.26
+> DPOC
+> 1.08
+> 1.31
+> DPOB
+> 1.02
+> 1.27
+> DPOC
+> 1.13
+> 1.18
+> DPOC
+> 1.13
+> 1.28
+> DSOC
+> 1.02
+> 1.24
+
+NVIDIA RTX6000 
+
+d=6    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> DPOB
+> 1.12
+> 1.51
+> DPOC
+> 1.09
+> 1.25
+> DPOC
+> 1.21
+> 1.28
+> DPOC
+> 1.08
+> 1.32
+> DPOC
+> 1.04
+> 1.26
+> DPOC
+> 1.21
+> 1.23
+> DPOC
+> 1.15
+> 1.33
+> DSOC
+> 1.04
+> 1.27
+
+NVIDIA RTX6000 
+
+d=8    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> L
+> DPOB
+> 1.21
+> 1.50
+> DPOB
+> 1.19
+> 1.41
+> DPOB
+> 1.08
+> 1.21
+> DPOC
+> 1.00
+> 1.06
+> DPOB
+> 1.12
+> 1.25
+> DPOB
+> 1.05
+> 1.15
+> DPOC
+> 1.02
+> 1.08
+> DPOC
+> 1.02
+> 1.13
+> DPOB
+> 1.05
+> 1.16
+> DPOB
+> 1.00
+> 1.05
+> DPOC
+> 1.03
+> 1.12
+> DSOC
+> 1.01
+> 1.10
+
+NVIDIA RTX4090 
+
+d=2    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> DPOB
+> 1.29
+> 1.74
+> DPOB
+> 1.22
+> 1.55
+> DPOB
+> 1.06
+> 1.27
+> DPOC
+> 1.06
+> 1.12
+> DPOB
+> 1.13
+> 1.38
+> DPOC
+> 1.00
+> 1.16
+> DPOC
+> 1.09
+> 1.12
+> DPOC
+> 1.07
+> 1.22
+> DPOB
+> 1.06
+> 1.24
+> DPOC
+> 1.06
+> 1.12
+> DPOC
+> 1.07
+> 1.22
+> DSOC
+> 1.00
+> 1.12
+
+NVIDIA RTX4090 
+
+d=4    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> DPOB
+> 1.29
+> 1.92
+> DPOB
+> 1.19
+> 1.63
+> DPOC
+> 1.03
+> 1.26
+> DPOC
+> 1.14
+> 1.17
+> DPOB
+> 1.11
+> 1.42
+> DPOC
+> 1.07
+> 1.22
+> DPOC
+> 1.15
+> 1.20
+> DPOC
+> 1.02
+> 1.20
+> DPOC
+> 1.04
+> 1.23
+> DPOC
+> 1.17
+> 1.18
+> DPOC
+> 1.09
+> 1.27
+> DSOC
+> 1.03
+> 1.15
+
+NVIDIA RTX4090 
+
+d=6    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> DPOB
+> 1.05
+> 1.42
+> DPOC
+> 1.10
+> 1.24
+> DPOC
+> 1.16
+> 1.22
+> DSOC
+> 1.01
+> 1.21
+> DPOC
+> 1.07
+> 1.27
+> DPOC
+> 1.19
+> 1.21
+> DPOC
+> 1.06
+> 1.26
+> DSOC
+> 1.07
+> 1.18
+
+NVIDIA RTX4090 
+
+d=8    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> L
+> DPOB
+> 1.21
+> 1.49
+> DPOB
+> 1.17
+> 1.38
+> DPOB
+> 1.12
+> 1.25
+> DPOB
+> 1.05
+> 1.13
+> DPOB
+> 1.13
+> 1.32
+> DPOB
+> 1.09
+> 1.20
+> DPOB
+> 1.04
+> 1.09
+> DPOB
+> 1.01
+> 1.05
+> DPOB
+> 1.09
+> 1.19
+> DPOB
+> 1.04
+> 1.10
+> DPOB
+> 1.02
+> 1.05
+> DPOB
+> 1.00
+> 1.03
+
+NVIDIA A100 
+
+d=2    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> DPOB
+> 1.28
+> 1.70
+> DPOB
+> 1.22
+> 1.56
+> DPOB
+> 1.14
+> 1.37
+> DPOB
+> 1.07
+> 1.18
+> DPOB
+> 1.16
+> 1.45
+> DPOB
+> 1.10
+> 1.26
+> DPOB
+> 1.04
+> 1.12
+> DPOB
+> 1.04
+> 1.07
+> DPOB
+> 1.11
+> 1.27
+> DPOB
+> 1.06
+> 1.15
+> DPOB
+> 1.04
+> 1.08
+> DPOB
+> 1.02
+> 1.03
+
+NVIDIA A100 
+
+d=4    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> DPOB
+> 1.29
+> 1.89
+> DPOB
+> 1.21
+> 1.69
+> DPOB
+> 1.14
+> 1.44
+> DPOB
+> 1.07
+> 1.21
+> DPOB
+> 1.15
+> 1.52
+> DPOB
+> 1.10
+> 1.32
+> DPOB
+> 1.06
+> 1.16
+> DPOB
+> 1.04
+> 1.09
+> DPOB
+> 1.10
+> 1.35
+> DPOB
+> 1.06
+> 1.19
+> DPOB
+> 1.04
+> 1.10
+> DPOC
+> 1.03
+> 1.09
+
+NVIDIA A100 
+
+d=6    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> DPOB
+> 1.15
+> 1.62
+> DPOB
+> 1.11
+> 1.37
+> DPOB
+> 1.06
+> 1.19
+> DPOB
+> 1.04
+> 1.10
+> DPOB
+> 1.11
+> 1.43
+> DPOB
+> 1.06
+> 1.21
+> DPOB
+> 1.04
+> 1.11
+> DPOC
+> 1.02
+> 1.08
+
+NVIDIA A100 
+
+d=8    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> L
+> DPOB
+> 1.12
+> 1.29
+> DPOB
+> 1.09
+> 1.18
+> DPOB
+> 1.04
+> 1.09
+> DPOB
+> 1.02
+> 1.06
+> DPOB
+> 1.06
+> 1.12
+> DPOB
+> 1.04
+> 1.08
+> DPOB
+> 1.04
+> 1.07
+> DPOB
+> 1.01
+> 1.03
+> DPOB
+> 1.04
+> 1.09
+> DPOB
+> 1.03
+> 1.06
+> DSOB
+> 1.01
+> 1.04
+> DPOB
+> 1.01
+> 1.02
+
+NVIDIA RTX2080Ti 
+
+d=2    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> DPOB
+> 1.16
+> 1.38
+> DPOB
+> 1.10
+> 1.22
+> DPOB
+> 1.07
+> 1.13
+> DPOB
+> 1.05
+> 1.10
+> DPOB
+> 1.08
+> 1.17
+> DPOB
+> 1.05
+> 1.12
+> DPOB
+> 1.03
+> 1.07
+> DPOB
+> 1.02
+> 1.04
+> DPOB
+> 1.05
+> 1.14
+> DPOB
+> 1.04
+> 1.09
+> DPOB
+> 1.03
+> 1.05
+> DPOB
+> 1.01
+> 1.03
+
+NVIDIA RTX2080Ti 
+
+d=4    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> DPOB
+> 1.16
+> 1.46
+> DPOB
+> 1.09
+> 1.26
+> DPOB
+> 1.06
+> 1.15
+> DPOB
+> 1.05
+> 1.12
+> DPOB
+> 1.08
+> 1.23
+> DPOB
+> 1.05
+> 1.14
+> DPOB
+> 1.04
+> 1.08
+> DPOB
+> 1.02
+> 1.04
+> DPOB
+> 1.05
+> 1.15
+> DPOB
+> 1.04
+> 1.10
+> DPOB
+> 1.03
+> 1.06
+> DPOB
+> 1.01
+> 1.03
+
+NVIDIA RTX2080Ti 
+
+d=6    
+
+> 14 15 16 17
+> 10
+> 30
+> 50
+> DPOB
+> 1.07
+> 1.23
+> DPOB
+> 1.05
+> 1.15
+> DPOB
+> 1.03
+> 1.09
+> DPOB
+> 1.03
+> 1.10
+> DPOB
+> 1.05
+> 1.17
+> DPOB
+> 1.04
+> 1.13
+> DPOB
+> 1.03
+> 1.07
+> DPOB
+> 1.01
+> 1.03
+
+NVIDIA RTX2080Ti 
+
+d=8 
+
+Fig. 4: Distribution of the approach that achieves the best execution time. For each cell, the top row indicates the best-performing approach, and the middle/bottom rows show the performance ratio relative to the second-best/worst-performing strategies. execution time. The reported time includes the entire HMUL 
+
+process, including data transfer from the CPU to the GPU. 
+
+B. Execution Time across CKKS Parameters 
+
+Fig. 4 shows the distribution of optimization strategies that achieve the best execution time. Fig. 5 presents the detailed execution times and their breakdown. The stacked bars represent execution time normalized to DSOB, while the line plots indicate absolute execution time. On the RTX 6000 Ada and RTX 4090, the optimal strategy varies with the CKKS parameters even on the same GPU. Specifically, as the CKKS parameters increase, the best-performing strategy shifts from DPOB (orange) to DPOC (green) and then to DSOC (red). This trend corresponds to the ordering of the on-chip memory footprints of the approaches. When the L2 cache capacity becomes less than about twice the footprint, the optimal strategy tends to shift to the approach with the next smaller footprint. The maximum performance gap between the best and worst strategies reaches 1.98 × on the RTX 4090 at (dnum, N, L ) = (6 , 214 , 10) .For small parameter sets (e.g., (2 , 215 , 30) and (4 , 215 , 10) ), DPOB achieves the best performance, while DSOC exhibits significantly longer NTT and BConv execution times than the other strategies. Furthermore, kernel launch overhead (la-beled as CPU ) accounts for a substantial fraction of the total time relative to GPU computation, making DSOC particularly costly in these cases. In contrast, for larger parameter sets, DPOB becomes the worst-performing strategy. For example, at (4 , 216 , 50) and (8 , 216 , 50) , the execution time of DPOB in-(2,15,10) (2,15,30) (2,15,50) (2,16,10) (2,16,30) (2,16,50) (4,15,10) (4,15,30) (4,15,50) (4,16,10) (4,16,30) (4,16,50) (8,15,30) (8,15,50) (8,16,30) (8,16,50)                                                                
+
+> SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+
+NVIDIA RTX6000 Ada                                                                                        
+
+> CPU NTTPhase1 NTTPhase2 accum add bconv iNTTPhase1 iNTTPhase2 mult sub
+> (2,15,10) (2,15,30) (2,15,50) (2,16,10) (2,16,30) (2,16,50) (4,15,10) (4,15,30) (4,15,50) (4,16,10) (4,16,30) (4,16,50) (8,15,30) (8,15,50) (8,16,30) (8,16,50)
+> SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+
+NVIDIA RTX4090                                                                                        
+
+> CPU NTTPhase1 NTTPhase2 accum add bconv iNTTPhase1 iNTTPhase2 mult sub
+> (2,15,10) (2,15,30) (2,15,50) (2,16,10) (2,16,30) (2,16,50) (4,15,10) (4,15,30) (4,15,50) (4,16,10) (4,16,30) (4,16,50) (8,15,30) (8,15,50) (8,16,30) (8,16,50)
+> SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+
+NVIDIA A100                                                                                        
+
+> CPU NTTPhase1 NTTPhase2 accum add bconv iNTTPhase1 iNTTPhase2 mult sub
+> (2,15,10) (2,15,30) (2,15,50) (2,16,10) (2,16,30) (2,16,50) (4,15,10) (4,15,30) (4,15,50) (4,16,10) (4,16,30) (4,16,50) (8,15,30) (8,15,50) (8,16,30) (8,16,50)
+> SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC SB PB SC PC
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+
+NVIDIA RTX2080Ti          
+
+> CPU NTTPhase1 NTTPhase2 accum add bconv iNTTPhase1 iNTTPhase2 mult sub
+> 2000
+> 4000 Total [us]
+> 2000
+> 4000 Total [us]
+> 2000
+> 4000
+> 6000
+> Total [us]
+> 2500
+> 5000
+> 7500
+> 10000
+> Total [us]
+
+CKKS Parameter set (dnum, logN, L) 
+
+> Total Execution Time [us]
+> Normalized Execution Time
+
+Fig. 5: Execution times across optimization strategies. S/P denote DigitSerial/Parallel, and B/C denote OutputBulk/Chunked. The stacked bars show the breakdown of execution time, normalized to DSOB. The line plots indicate the absolute execution time. creases substantially, particularly in NTTPhase2 , and DPOC achieves the best performance. On the A100, DPOB achieves the best execution time for most CKKS parameter settings. As shown in Fig. 5, the relative ordering of execution times among the four strategies is generally DPOB, DPOC < DSOB, DSOC across most parameter sets. Regardless of parameter size, DSOC tends to incur longer kernel execution and launch times than the other strategies. In a few cases, DPOC performs best, but the difference from the worst strategy is less than 10%, indicating only a marginal gap. On the RTX 2080 Ti, DSOB provides the best performance for most CKKS parameters. The performance differences among the four strategies are smaller than on the A100, and aside from kernel launch overhead, execution times are nearly identical. Overall, DPOB achieves the best execution time under a wide range of conditions on the A100 and RTX 2080 Ti. On the A100, we attribute this to architectural features that mitigate DPOB’s primary drawback, which is stalls caused by DRAM access contention ( SDRAM ). Because DPOB has a large on-chip footprint, it is more likely to incur DRAM accesses as a result of L2 cache misses. Indeed, Fig. 6b shows that even on the A100, DPOB tends to have a lower L2 cache hit rate than the other strategies. As shown in eq. (10), SDRAM increases proportionally to the number of L2 cache misses, making it more pronounced for DPOB. How-ever, SDRAM is also proportional to DRAM access latency, 
+
+LDRAM = f × BlockSize/Bandwidth DRAM , and LDRAM 
+
+is smaller on the A100 than on the other GPUs. Specifically, as calculated from Table IV, the value of f / Bandwidth DRAM 
+
+for the A100 is approximately one-third that of the other GPUs. Therefore, on the A100, the negative impact of SDRAM 
+
+is reduced. At the same time, DPOB benefits from fewer kernel launches and improved latency hiding due to a larger number of concurrently active warps, leading to the best performance across many settings. This interpretation is consistent with Fig. 8, which presents the breakdown of stall cycles for se-lected kernels under the CKKS parameter setting (4 , 216 , 30) .Although other GPUs exhibit a high fraction of long stalls (including SDRAM ) in DSOB, the A100 shows a smaller fraction, suggesting that DRAM access contention has a less pronounced impact on the A100. Finally, we discuss why DPOB tends to achieve the best performance on the RTX 2080 Ti. Because its L2 cache capacity is small, performance differences caused by memory-access behavior are less pronounced across the four strategies. As shown in Fig. 3, the L2 cache of the RTX 2080 Ti can fully accommodate DSOC and only some configurations of DPOC/DSOB. In practice, as shown in Fig. 6b, the RTX 2080 Ti exhibits lower L2 hit rates than the other GPUs, and the differences among the four strategies are also small. Consequently, similar to the A100, DPOB tends to perform best across many settings due to lower kernel-launch overhead and better utilization of parallelism. NTTPhase1 
+
+NTTPhase2 
+
+accum 
+
+add 
+
+bconv 
+
+iNTTPhase1 
+
+iNTTPhase2 
+
+mult 
+
+sub 
+
+RTX6000 Ada - DSOB RTX6000 Ada - DPOB RTX6000 Ada - DSOC RTX6000 Ada - DPOC 
+
+NTTPhase1 
+
+NTTPhase2 
+
+accum 
+
+add 
+
+bconv 
+
+iNTTPhase1 
+
+iNTTPhase2 
+
+mult 
+
+sub 
+
+RTX4090 - DSOB RTX4090 - DPOB RTX4090 - DSOC RTX4090 - DPOC 
+
+NTTPhase1 
+
+NTTPhase2 
+
+accum 
+
+add 
+
+bconv 
+
+iNTTPhase1 
+
+iNTTPhase2 
+
+mult 
+
+sub 
+
+A100 - DSOB A100 - DPOB A100 - DSOC A100 - DPOC 
+
+> (2,15,10)
+> (2,15,30)
+> (2,15,50)
+> (2,16,10)
+> (2,16,30)
+> (2,16,50)
+> (4,15,10)
+> (4,15,30)
+> (4,15,50)
+> (4,16,10)
+> (4,16,30)
+> (4,16,50)
+> (8,15,30)
+> (8,15,50)
+> (8,16,30)
+> (8,16,50)
+
+(dnum, logN, L) 
+
+NTTPhase1 
+
+NTTPhase2 
+
+accum 
+
+add 
+
+bconv 
+
+iNTTPhase1 
+
+iNTTPhase2 
+
+mult 
+
+sub 
+
+RTX2080Ti - DSOB 
+
+> (2,15,10)
+> (2,15,30)
+> (2,15,50)
+> (2,16,10)
+> (2,16,30)
+> (2,16,50)
+> (4,15,10)
+> (4,15,30)
+> (4,15,50)
+> (4,16,10)
+> (4,16,30)
+> (4,16,50)
+> (8,15,30)
+> (8,15,50)
+> (8,16,30)
+> (8,16,50)
+
+(dnum, logN, L) 
+
+RTX2080Ti - DPOB 
+
+> (2,15,10)
+> (2,15,30)
+> (2,15,50)
+> (2,16,10)
+> (2,16,30)
+> (2,16,50)
+> (4,15,10)
+> (4,15,30)
+> (4,15,50)
+> (4,16,10)
+> (4,16,30)
+> (4,16,50)
+> (8,15,30)
+> (8,15,50)
+> (8,16,30)
+> (8,16,50)
+
+(dnum, logN, L) 
+
+RTX2080Ti - DSOC 
+
+> (2,15,10)
+> (2,15,30)
+> (2,15,50)
+> (2,16,10)
+> (2,16,30)
+> (2,16,50)
+> (4,15,10)
+> (4,15,30)
+> (4,15,50)
+> (4,16,10)
+> (4,16,30)
+> (4,16,50)
+> (8,15,30)
+> (8,15,50)
+> (8,16,30)
+> (8,16,50)
+
+(dnum, logN, L) 
+
+RTX2080Ti - DPOC 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 (a) L1 cache NTTPhase1 
+
+NTTPhase2 
+
+accum 
+
+add 
+
+bconv 
+
+iNTTPhase1 
+
+iNTTPhase2 
+
+mult 
+
+sub 
+
+RTX6000 Ada - DSOB RTX6000 Ada - DPOB RTX6000 Ada - DSOC RTX6000 Ada - DPOC 
+
+NTTPhase1 
+
+NTTPhase2 
+
+accum 
+
+add 
+
+bconv 
+
+iNTTPhase1 
+
+iNTTPhase2 
+
+mult 
+
+sub 
+
+RTX4090 - DSOB RTX4090 - DPOB RTX4090 - DSOC RTX4090 - DPOC 
+
+NTTPhase1 
+
+NTTPhase2 
+
+accum 
+
+add 
+
+bconv 
+
+iNTTPhase1 
+
+iNTTPhase2 
+
+mult 
+
+sub 
+
+A100 - DSOB A100 - DPOB A100 - DSOC A100 - DPOC 
+
+> (2,15,10)
+> (2,15,30)
+> (2,15,50)
+> (2,16,10)
+> (2,16,30)
+> (2,16,50)
+> (4,15,10)
+> (4,15,30)
+> (4,15,50)
+> (4,16,10)
+> (4,16,30)
+> (4,16,50)
+> (8,15,30)
+> (8,15,50)
+> (8,16,30)
+> (8,16,50)
+
+(dnum, logN, L) 
+
+NTTPhase1 
+
+NTTPhase2 
+
+accum 
+
+add 
+
+bconv 
+
+iNTTPhase1 
+
+iNTTPhase2 
+
+mult 
+
+sub 
+
+RTX2080Ti - DSOB 
+
+> (2,15,10)
+> (2,15,30)
+> (2,15,50)
+> (2,16,10)
+> (2,16,30)
+> (2,16,50)
+> (4,15,10)
+> (4,15,30)
+> (4,15,50)
+> (4,16,10)
+> (4,16,30)
+> (4,16,50)
+> (8,15,30)
+> (8,15,50)
+> (8,16,30)
+> (8,16,50)
+
+(dnum, logN, L) 
+
+RTX2080Ti - DPOB 
+
+> (2,15,10)
+> (2,15,30)
+> (2,15,50)
+> (2,16,10)
+> (2,16,30)
+> (2,16,50)
+> (4,15,10)
+> (4,15,30)
+> (4,15,50)
+> (4,16,10)
+> (4,16,30)
+> (4,16,50)
+> (8,15,30)
+> (8,15,50)
+> (8,16,30)
+> (8,16,50)
+
+(dnum, logN, L) 
+
+RTX2080Ti - DSOC 
+
+> (2,15,10)
+> (2,15,30)
+> (2,15,50)
+> (2,16,10)
+> (2,16,30)
+> (2,16,50)
+> (4,15,10)
+> (4,15,30)
+> (4,15,50)
+> (4,16,10)
+> (4,16,30)
+> (4,16,50)
+> (8,15,30)
+> (8,15,50)
+> (8,16,30)
+> (8,16,50)
+
+(dnum, logN, L) 
+
+RTX2080Ti - DPOC 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+(b) L2 cache 
+
+Fig. 6: Cache hit rates 14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+> L
+
+2 2 2 2
+
+2 2 2 3
+
+2 2 2 4
+
+NVIDIA RTX6000 
+
+d=2 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 2 2
+
+2 2 3 3
+
+NVIDIA RTX6000 
+
+d=4 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 3 2
+
+2 2 2 3
+
+NVIDIA RTX6000 
+
+d=6 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+-1 -1 -1 -1 
+
+2 2 2 2
+
+2 3 2 3
+
+NVIDIA RTX6000 
+
+d=8 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+> L
+
+2 2 2 2
+
+2 2 2 3
+
+2 2 3 5
+
+NVIDIA RTX4090 
+
+d=2 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 3 2
+
+2 2 2 2
+
+NVIDIA RTX4090 
+
+d=4 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 2 2
+
+2 3 2 4
+
+NVIDIA RTX4090 
+
+d=6 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+-1 -1 -1 -1 
+
+2 2 2 2
+
+2 2 2 3
+
+NVIDIA RTX4090 
+
+d=8 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+> L
+
+2 2 2 2
+
+2 2 2 2
+
+2 2 2 2
+
+NVIDIA A100 
+
+d=2 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 2 2
+
+2 2 2 3
+
+NVIDIA A100 
+
+d=4 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 2 2
+
+2 2 2 2
+
+NVIDIA A100 
+
+d=6 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+-1 -1 -1 -1 
+
+2 2 2 2
+
+2 2 2 3
+
+NVIDIA A100 
+
+d=8 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+> L
+
+2 2 2 2
+
+2 2 2 2
+
+2 2 2 2
+
+NVIDIA RTX2080Ti 
+
+d=2 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 2 2
+
+2 2 2 2
+
+NVIDIA RTX2080Ti 
+
+d=4 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 2 2
+
+2 2 2 2
+
+NVIDIA RTX2080Ti 
+
+d=6 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+-1 -1 -1 -1 
+
+2 2 2 2
+
+2 2 2 2
+
+NVIDIA RTX2080Ti 
+
+d=8 
+
+(a) DSOC 14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+> L
+
+2 2 2 2
+
+2 2 2 3
+
+2 2 2 4
+
+NVIDIA RTX6000 
+
+d=2 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 2 5
+
+2 2 3 6
+
+NVIDIA RTX6000 
+
+d=4 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 3 6
+
+2 4 5 6
+
+NVIDIA RTX6000 
+
+d=6 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+-1 -1 -1 -1 
+
+2 2 4 6
+
+3 3 6 6
+
+NVIDIA RTX6000 
+
+d=8 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+> L
+
+2 2 2 2
+
+2 2 2 4
+
+2 2 3 6
+
+NVIDIA RTX4090 
+
+d=2 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 3 5
+
+2 2 4 5
+
+NVIDIA RTX4090 
+
+d=4 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 3
+
+2 2 4 5
+
+2 3 6 6
+
+NVIDIA RTX4090 
+
+d=6 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+-1 -1 -1 -1 
+
+2 2 4 6
+
+2 4 6 6
+
+NVIDIA RTX4090 
+
+d=8 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+> L
+
+2 2 2 2
+
+2 2 2 2
+
+2 2 2 2
+
+NVIDIA A100 
+
+d=2 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 2 2
+
+2 2 2 2
+
+NVIDIA A100 
+
+d=4 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 2 2
+
+2 2 2 2
+
+NVIDIA A100 
+
+d=6 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+-1 -1 -1 -1 
+
+2 2 2 2
+
+2 2 2 3
+
+NVIDIA A100 
+
+d=8 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+> L
+
+2 2 2 2
+
+2 2 3 2
+
+2 2 3 2
+
+NVIDIA RTX2080Ti 
+
+d=2 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 2 2
+
+2 2 2 2
+
+NVIDIA RTX2080Ti 
+
+d=4 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+2 2 2 2
+
+2 2 2 2
+
+2 2 2 2
+
+NVIDIA RTX2080Ti 
+
+d=6 
+
+14 15 16 17 
+
+10 
+
+30 
+
+50 
+
+-1 -1 -1 -1 
+
+2 2 2 3
+
+2 2 2 2
+
+NVIDIA RTX2080Ti 
+
+d=8 (b) DPOC 
+
+Fig. 7: Best chunks for OutputChunked 
+
+C. Memory-related Profile 
+
+Fig. 6 illustrates the distribution of L1 and L2 cache hit rates. For the L1 cache, no significant differences are observed among the four strategies. This is because the L1 cache capacity is small relative to the ciphertext size and is therefore insensitive to differences in inter-kernel dataflow optimization. In contrast, for the L2 cache, the hit rates generally follow the order DSOC > DSOB, DPOC > DPOB, except on the RTX 2080 Ti. This trend is consistent with the relative memory footprints of the approaches and aligns with the execution-time trends observed on the RTX 6000 Ada and RTX 4090. On the 6000 
+
+NTTP1 
+
+6000 
+
+NTTP2 
+
+6000 
+
+BConv 
+
+6000 
+
+Accum 
+
+4090 
+
+NTTP1 
+
+4090 
+
+NTTP2 
+
+4090 
+
+BConv 
+
+4090 
+
+Accum 
+
+A100 
+
+NTTP1 
+
+A100 
+
+NTTP2 
+
+A100 
+
+BConv 
+
+A100 
+
+Accum 
+
+2080Ti 
+
+NTTP1 
+
+2080Ti 
+
+NTTP2 
+
+2080Ti 
+
+BConv 
+
+2080Ti 
+
+Accum 
+
+selected 
+
+not selected 
+
+long 
+
+short 
+
+imc_miss 
+
+math_pipe 
+
+lg_throttle 
+
+mio_throttle 
+
+barrier 
+
+branch 
+
+wait 
+
+drain 
+
+no inst 
+
+dispatch 
+
+10.1 9.2 5.9 9.0 8.9 5.8 9.6 8.7 5.8 6.0 6.2 8.0 
+
+14.3 12.0 22.6 10.7 11.0 18.0 13.8 10.3 25.4 9.8 6.6 18.6 
+
+6.6 13.8 21.3 82.6 16.5 19.0 32.3 92.9 12.4 24.8 13.6 52.2 9.6 40.5 21.5 81.7 
+
+5.2 7.9 5.2 7.6 5.2 8.6 7.3 
+
+13.1 12.0 23.3 9.9 10.9 18.3 13.2 10.8 26.4 10.4 5.2 22.7 
+
+6.1 21.2 7.0 
+
+8.4 11.6 9.2 10.6 5.8 6.3 19.7 14.8 
+
+7.8 8.1 7.6 7.7 6.7 6.8 9.1 8.0 
+
+18.4 16.1 12.4 5.9 16.0 15.5 12.1 17.8 15.2 12.4 11.7 10.8 8.3 16.0 6.1 
+
+8.5 6.4 9.3 6.5 5.9 7.7 8.6 5.8 10.6 5.3 8.8 
+
+DSOB 
+
+6000 
+
+NTTP1 
+
+6000 
+
+NTTP2 
+
+6000 
+
+BConv 
+
+6000 
+
+Accum 
+
+4090 
+
+NTTP1 
+
+4090 
+
+NTTP2 
+
+4090 
+
+BConv 
+
+4090 
+
+Accum 
+
+A100 
+
+NTTP1 
+
+A100 
+
+NTTP2 
+
+A100 
+
+BConv 
+
+A100 
+
+Accum 
+
+2080Ti 
+
+NTTP1 
+
+2080Ti 
+
+NTTP2 
+
+2080Ti 
+
+BConv 
+
+2080Ti 
+
+Accum 
+
+selected 
+
+not selected 
+
+long 
+
+short 
+
+imc_miss 
+
+math_pipe 
+
+lg_throttle 
+
+mio_throttle 
+
+barrier 
+
+branch 
+
+wait 
+
+drain 
+
+no inst 
+
+dispatch 
+
+11.1 8.7 5.9 9.4 5.1 5.4 10.6 8.2 5.2 6.0 6.7 7.9 
+
+12.0 10.8 24.9 7.8 17.5 10.6 8.9 28.1 9.8 6.3 18.3 
+
+9.4 19.8 15.4 82.6 25.0 56.8 35.1 92.9 19.1 30.0 11.2 52.0 12.0 43.7 20.6 81.7 
+
+5.1 7.6 5.0 5.1 8.2 5.4 
+
+11.1 10.8 24.4 7.3 16.9 10.2 9.1 27.9 10.4 5.2 21.7 
+
+18.5 6.7 
+
+9.6 10.8 9.3 5.6 6.1 18.5 14.6 
+
+7.9 8.1 7.6 8.2 6.5 7.2 9.4 8.3 
+
+19.8 15.4 13.8 5.9 16.5 8.7 12.3 18.9 14.5 12.2 11.7 11.6 7.8 17.0 6.1 
+
+7.5 5.9 10.3 5.3 7.7 7.1 5.2 11.4 5.2 10.2 
+
+DPOB 
+
+6000 
+
+NTTP1 
+
+6000 
+
+NTTP2 
+
+6000 
+
+BConv 
+
+6000 
+
+Accum 
+
+4090 
+
+NTTP1 
+
+4090 
+
+NTTP2 
+
+4090 
+
+BConv 
+
+4090 
+
+Accum 
+
+A100 
+
+NTTP1 
+
+A100 
+
+NTTP2 
+
+A100 
+
+BConv 
+
+A100 
+
+Accum 
+
+2080Ti 
+
+NTTP1 
+
+2080Ti 
+
+NTTP2 
+
+2080Ti 
+
+BConv 
+
+2080Ti 
+
+Accum 
+
+selected 
+
+not selected 
+
+long 
+
+short 
+
+imc_miss 
+
+math_pipe 
+
+lg_throttle 
+
+mio_throttle 
+
+barrier 
+
+branch 
+
+wait 
+
+drain 
+
+no inst 
+
+dispatch 
+
+10.4 9.2 6.0 6.2 9.5 9.3 5.7 6.0 10.0 8.9 5.3 5.9 6.0 5.1 7.5 
+
+13.5 11.4 18.2 10.7 10.5 10.1 15.5 10.3 14.2 11.0 26.7 9.6 6.5 15.2 
+
+8.2 15.1 31.2 47.5 15.0 19.5 37.6 48.0 9.5 19.9 16.0 53.3 9.6 36.4 31.6 81.3 
+
+5.6 9.1 5.8 9.3 5.6 10.2 5.2 8.3 
+
+12.5 11.3 18.3 10.7 9.5 9.7 15.9 10.4 13.4 11.4 28.7 10.2 5.1 17.6 
+
+8.8 23.2 7.7 
+
+7.3 11.2 7.5 9.5 5.1 6.8 18.7 15.7 
+
+6.5 6.6 5.5 5.8 6.1 6.0 8.0 7.5 
+
+18.9 17.1 12.2 12.1 17.2 17.9 11.5 11.7 18.6 16.6 10.9 11.5 10.6 9.2 14.5 6.1 
+
+7.9 5.8 7.7 5.5 5.9 5.1 6.9 5.4 8.6 5.8 9.9 5.2 7.9 
+
+DSOC 
+
+6000 
+
+NTTP1 
+
+6000 
+
+NTTP2 
+
+6000 
+
+BConv 
+
+6000 
+
+Accum 
+
+4090 
+
+NTTP1 
+
+4090 
+
+NTTP2 
+
+4090 
+
+BConv 
+
+4090 
+
+Accum 
+
+A100 
+
+NTTP1 
+
+A100 
+
+NTTP2 
+
+A100 
+
+BConv 
+
+A100 
+
+Accum 
+
+2080Ti 
+
+NTTP1 
+
+2080Ti 
+
+NTTP2 
+
+2080Ti 
+
+BConv 
+
+2080Ti 
+
+Accum 
+
+selected 
+
+not selected 
+
+long 
+
+short 
+
+imc_miss 
+
+math_pipe 
+
+lg_throttle 
+
+mio_throttle 
+
+barrier 
+
+branch 
+
+wait 
+
+drain 
+
+no inst 
+
+dispatch 
+
+11.5 9.2 6.0 6.0 10.0 8.6 5.5 6.0 11.0 8.5 5.2 5.9 6.6 7.5 
+
+12.4 11.8 23.5 9.8 9.7 9.8 17.0 10.4 11.2 9.5 26.2 9.7 6.3 15.5 
+
+8.0 14.5 17.4 50.1 18.7 22.2 35.2 47.5 15.9 26.4 14.2 53.2 11.6 40.6 29.3 81.4 
+
+5.4 8.9 5.2 8.9 5.7 9.6 5.2 6.2 
+
+11.4 11.8 23.5 9.8 9.0 9.8 16.8 10.5 10.8 9.9 26.6 10.2 5.1 18.8 
+
+6.7 21.0 7.8 
+
+8.4 10.9 7.5 10.0 5.7 6.2 17.5 15.0 
+
+6.8 6.8 5.9 6.7 5.9 6.2 8.3 7.8 
+
+20.6 17.2 14.2 11.6 17.7 16.5 13.0 11.8 19.8 16.0 12.5 11.5 11.6 8.5 16.3 6.1 
+
+7.7 6.1 9.9 5.1 6.0 5.1 7.5 5.4 7.3 5.3 10.5 5.1 8.5 
+
+DPOC 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+> Stall ratio [%]
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+> Stall ratio [%]
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+> Stall ratio [%]
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+> Stall ratio [%]
+
+Fig. 8: Breakdown of stall cycles with (dnum, N, L ) =(4 , 216 , 30) 
+
+RTX 2080 Ti, however, differences in L2 hit rate are minor because even the smallest-footprint strategy (DSOC) exceeds the available L2 cache capacity. 
+
+D. Selection of chunks in OutputChunked 
+
+Finally, we evaluate the selection of chunks in OC. Fig. 7 shows the distribution of selected chunks values in OC. In OC, the number of output partitions ( chunks ) is chosen from 2 to 10 to minimize execution time. As shown in Fig. 7a, DSOC most frequently achieves optimal performance with chunks =2 across many GPU and CKKS parameter combinations. For DPOC, as shown in Fig. 7b, larger CKKS parameters on the RTX 6000 Ada and RTX 4090 tend to favor chunks = 4–6 
+
+for optimal performance. V. O PPORTUNITIES FOR FURTHER ACCELERATION 
+
+Based on the above performance analysis, we identify two promising directions for further improving GPU acceleration of CKKS. The first direction, which is also the main focus of this study, is CKKS parameter-aware optimization. Existing work typically adopts a uniform optimization strategy regardless of differences in CKKS parameter settings. However, our results suggest that further performance improvements can be achieved by selecting the optimal dataflow strategy according to both the GPU architecture and the CKKS parameters. In particular, the parameter L changes depending on the number of executed multiplications even within a single workload. This suggests that optimization strategies can be dynamically switched in response to changes in L during execution. The second direction is to explore DPOC-based optimiza-tion. Although DPOC has not been adopted in prior work, it achieves the best execution time under certain CKKS parameter settings on the RTX 6000 Ada and RTX 4090. Designing optimization strategies that incorporate DPOC may therefore lead to further performance improvements. VI. C ONCLUSION 
+
+In this study, we demonstrated that in GPU acceleration of CKKS, the appropriate dataflow optimization strategy de-pends on the CKKS parameter configuration. We classified dataflow optimization techniques proposed in existing work and conducted both qualitative and quantitative performance analyses of these approaches. Our analysis revealed that the optimal strategy can vary depending on the CKKS parameters, and that the performance gap between different strategies can reach up to 1.98 ×. In addition, we found that the criteria for selecting an appropriate optimization strategy differ across GPU architectures. Based on these findings, future work will work on accelerating whole CKKS workloads with parameter-aware and GPU architecture-aware optimization. REFERENCES [1] J. H. Cheon, A. Kim, M. Kim, and Y. Song, “Homomorphic encryption for arithmetic of approximate numbers,” in Advances in Cryptology– ASIACRYPT 2017: 23rd International Conference on the Theory and Applications of Cryptology and Information Security, Hong Kong, China, December 3-7, 2017, Proceedings, Part I 23 . Springer, 2017, pp. 409– 437. [2] G. Fan, M. Zhang, F. Zheng, S. Fan, T. Zhou, X. Deng, W. Tang, L. Kong, Y. Song, and S. Yan, “ WarpDrive: GPU-Based Fully Homo-morphic Encryption Acceleration Leveraging Tensor and CUDA Cores ,” pp. 1187–1200, 2025. [3] J. Kim, W. Choi, and J. H. Ahn, “Cheddar: A Swift Fully Homomorphic Encryption Library for CUDA GPUs,” 2026. [Online]. Available: https://arxiv.org/abs/2407.13055 [4] D. Jiao, X. Deng, Z. Wang, S. Fan, Y. Chen, D. Meng, R. Hou, and M. Zhang, “Neo: Towards efficient fully homomorphic encryption acceleration using tensor core,” in Proceedings of the 52nd Annual International Symposium on Computer Architecture , ser. ISCA ’25. New York, NY, USA: Association for Computing Machinery, 2025, p. 107–121. [Online]. Available: https://doi.org/10.1145/3695053.3731408 [5] J. Lee, Y. Ha, S. Lee, J. Woo, J. Lee, H. Jang, and Y. Kim, “Gcom: a detailed gpu core model for accurate analytical modeling of modern gpus,” in Proceedings of the 49th Annual International Symposium on Computer Architecture , ser. ISCA ’22. New York, NY, USA: Association for Computing Machinery, 2022, p. 424–436. [Online]. Available: https://doi.org/10.1145/3470496.3527384 [6] E. Lee, J.-W. Lee, J. Lee, Y.-S. Kim, Y. Kim, J.-S. No, and W. Choi, “Low-complexity deep convolutional neural networks on fully homomorphic encryption using multiplexed parallel convolutions,” in 
+
+Proceedings of the 39th International Conference on Machine Learning ,ser. Proceedings of Machine Learning Research, K. Chaudhuri, S. Jegelka, L. Song, C. Szepesvari, G. Niu, and S. Sabato, Eds., vol. 162. PMLR, 17–23 Jul 2022, pp. 12 403–12 422. [Online]. Available: https://proceedings.mlr.press/v162/lee22e.html [7] L. Li, J. Lai, P. Yuan, T. Sui, Y. Liu, Q. Zhu, X. Zhang, L. Xiao, W. Chen, and J. Xue, “ANT-ACE: An FHE Compiler Framework for Automating Neural Network Inference,” in Proceedings of the 23rd ACM/IEEE International Symposium on Code Generation and Optimization , ser. CGO ’25. New York, NY, USA: Association for Computing Machinery, 2025, p. 193–208. [Online]. Available: https://doi.org/10.1145/3696443.3708924 [8] R. Dathathri, O. Saarikivi, H. Chen, K. Laine, K. Lauter, S. Maleki, M. Musuvathi, and T. Mytkowicz, “Chet: an optimizing compiler for fully-homomorphic neural-network inferencing,” in Proceedings of the 40th ACM SIGPLAN conference on programming language design and implementation , 2019, pp. 142–156. [9] S. Kim, J. Kim, M. J. Kim, W. Jung, J. Kim, M. Rhu, and J. H. Ahn, “Bts: An accelerator for bootstrappable fully homomorphic encryption,” in Proceedings of the 49th Annual International Symposium on Com-puter Architecture , 2022, pp. 711–725. [10] W. Jung, S. Kim, J. H. Ahn, J. H. Cheon, and Y. Lee, “Over 100x faster bootstrapping in fully homomorphic encryption through memory-centric optimization with gpus,” IACR Transactions on Cryptographic Hardware and Embedded Systems , pp. 114–148, 2021. [11] Z. Wang, P. Li, R. Hou, Z. Li, J. Cao, X. Wang, and D. Meng, “He-booster: An efficient polynomial arithmetic acceleration on gpus for fully homomorphic encryption,” IEEE Transactions on Parallel and Distributed Systems , vol. 34, no. 4, pp. 1067–1081, 2023. [12] C. Agullo-Domingo, O. Vera-Lopez, S. Guzelhan, L. Daksha, A. E. Jerari, K. Shivdikar, R. Agrawal, D. Kaeli, A. Joshi, and J. L. Abell´ an, “Fideslib: A fully-fledged open-source fhe library for efficient ckks on gpus,” in 2025 IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS) , 2025, pp. 1–3. [13] H. Yang, S. Shen, W. Dai, L. Zhou, Z. Liu, and Y. Zhao, “Phantom: A CUDA-Accelerated Word-Wise Homomorphic Encryption Library,” 
+
+IEEE Transactions on Dependable and Secure Computing , pp. 1–12, 2024. [14] S. Shen, H. Yang, Y. Liu, Z. Liu, and Y. Zhao, “ CARM: CUDA-Accelerated RNS Multiplication in Word-Wise Homomorphic Encryption Schemes for Internet of Things ,” IEEE Transactions on Computers , vol. 72, no. 07, pp. 1999–2010, Jul. 2023. [Online]. Avail-able: https://doi.ieeecomputersociety.org/10.1109/TC.2022.3227874 [15] A. S¸ ah ¨Ozcan and E. Savas ¸, “HEonGPU: a GPU-based fully homomorphic encryption library 1.0,” Cryptology ePrint Archive, Paper 2024/1543, 2024. [Online]. Available: https://eprint.iacr.org/2024/1543 [16] Y. Zhai, M. Ibrahim, Y. Qiu, F. Boemer, Z. Chen, A. Titov, and A. Lyashevsky, “ Accelerating Encrypted Computing on Intel GPUs ,” in 2022 IEEE International Parallel and Distributed Processing Symposium (IPDPS) . Los Alamitos, CA, USA: IEEE Computer Society, Jun. 2022, pp. 705–716. [Online]. Available: https://doi.ieeecomputersociety.org/10.1109/IPDPS53621.2022.00074 [17] R. Agrawal, L. De Castro, C. Juvekar, A. Chandrakasan, V. Vaikun-tanathan, and A. Joshi, “Mad: Memory-aware design techniques for accelerating fully homomorphic encryption,” ser. MICRO ’23, 2023. [18] A. Al Badawi, J. Bates, F. Bergamaschi, D. B. Cousins, S. Erabelli, N. Genise, S. Halevi, H. Hunt, A. Kim, Y. Lee, Z. Liu, D. Micciancio, I. Quah, Y. Polyakov, S. R.V., K. Rohloff, J. Saylor, D. Suponitsky, M. Triplett, V. Vaikuntanathan, and V. Zucca, “Openfhe: Open-source fully homomorphic encryption library,” in Proceedings of the 10th Workshop on Encrypted Computing & Applied Homomorphic Cryptography , ser. WAHC’22. New York, NY, USA: Association for Computing Machinery, 2022, pp. 53–63. [Online]. Available: https://doi.org/10.1145/3560827.3563379 [19] N. Neda, A. Ebel, B. Reynwar, and B. Reagen, “Ciflow: Dataflow analysis and optimization of key switching for homomorphic encryp-tion,” 2024 IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS) , pp. 61–72, 2023. [20] S. Fan, Z. Wang, W. Xu, R. Hou, D. Meng, and M. Zhang, “Tensorfhe: Achieving practical computation on encrypted data using gpgpu,” in 
+
+2023 IEEE International Symposium on High-Performance Computer Architecture (HPCA) . IEEE, 2023, pp. 922–934. [21] M. Kim, D. Lee, J. Seo, and Y. Song, “Accelerating he operations from key decomposition technique,” in Advances in Cryptology – CRYPTO 2023: 43rd Annual International Cryptology Conference, CRYPTO 2023, Santa Barbara, CA, USA, August 20–24, 2023, Proceedings, Part IV .Berlin, Heidelberg: Springer-Verlag, 2023, p. 70–92. [22] K. Han and D. Ki, “Better bootstrapping for approximate homomorphic encryption,” in Topics in Cryptology – CT-RSA 2020: The Cryptogra-phers’ Track at the RSA Conference 2020, San Francisco, CA, USA, February 24–28, 2020, Proceedings . Berlin, Heidelberg: Springer-Verlag, 2020, p. 364–390. [23] K. Shivdikar, Y. Bao, R. Agrawal, M. Shen, G. Jonatan, E. Mora, A. Ingare, N. Livesay, J. L. Abell ´ AN, J. Kim, A. Joshi, and D. Kaeli, “Gme: Gpu-based microarchitectural extensions to accelerate homo-morphic encryption,” in Proceedings of the 56th Annual IEEE/ACM International Symposium on Microarchitecture , 2023, p. 670–684. [24] NVIDIA, “NVIDIA Nsight Systems,” https://developer.nvidia.com/nsight-systems, accessed: 2025-01-06.

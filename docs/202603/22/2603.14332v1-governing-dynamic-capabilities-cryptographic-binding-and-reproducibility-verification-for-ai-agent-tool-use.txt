@@ -1,0 +1,1089 @@
+Title: Governing Dynamic Capabilities: Cryptographic Binding and Reproducibility Verification for AI Agent Tool Use
+
+URL Source: https://arxiv.org/pdf/2603.14332v1
+
+Published Time: Tue, 17 Mar 2026 06:20:10 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+# Governing Dynamic Capabilities: Cryptographic Binding and Reproducibility Verification for AI Agent Tool Use 
+
+Ziling Zhou Genupixel Technology Pte. Ltd. 
+
+ziling@genupixel.com 
+
+## Abstract 
+
+AI agents dynamically acquire capabilities at runtime via MCP and A2A, yet no framework detects when ca-pabilities change post-authorization. We term this the 
+
+capability-identity gap : it enables silent capability esca-lation and violates EU AI Act traceability requirements. We propose three mechanisms. Capability-bound agent certificates extend X.509 v3 with a skills manifest hash; any tool change invalidates the certificate. Reproducibility commitments leverage LLM inference near-determinism for post-hoc replay verification. A verifiable interaction ledger provides hash-linked, signed records for multi-agent forensic reconstruction. We formalize nine security proper-ties and prove they hold under a realistic adversary model. Our Rust prototype achieves 97 μs certificate verification (<1 ns capability binding overhead, ∼1,200 ,000 × faster than BAID’s zkVM), 0.62 ms total governance overhead per tool call (0.1–1.2% of typical latency), and ∼2,230 ledger appends/s. We validate reproducibility across 9 models from 7 providers (15,120 pairwise comparisons): same-provider outputs achieve 4.7 × separation from cross-provider outputs (Cohen’s d > 1.0 on all four metrics), with best classification at F1=0.876 (Jaccard, θ=0.408); single-provider deployments achieve F1=0.990 with 11.5 ×
+
+separation. We evaluate 12 attack scenarios—silent escala-tion, tool trojanization, phantom delegation, evidence tam-pering, collusion, and runtime behavioral attacks validated against NVIDIA’s Nemotron-AIQ traces—each detected with a traceable mechanism, while the MCP+OAuth 2.1 baseline detects none. An end-to-end evaluation over a 5-to-20-agent pipeline with real LLM calls confirms that full governance (G1–G3) adds ∼10.8 ms per pipeline run (0.12% overhead), scales sub-linearly per agent, and de-tects all five in-situ attacks with zero false positives. 
+
+## 1 Introduction 
+
+1.1 Agent Governance: A Missing Foun-dation 
+
+AI agents are no longer isolated tools. Through proto-cols like MCP (Model Context Protocol) [ 8 ] and A2A (Agent-to-Agent Protocol) [ 8], modern agents dynami-cally discover tools, invoke external APIs, execute code, and orchestrate other agents at runtime. The MCP ecosystem alone has grown to over 1,000 tool servers in under a year [ 32 ]. As these agents assume real-world responsibilities—managing enterprise credentials, execut-ing financial transactions, accessing sensitive data—a fun-damental question emerges: what properties must an agent ecosystem satisfy for humans to trust it? 
+
+This question has been raised from multiple directions. The EU AI Act (Regulation 2024/1689) mandates trace-ability, logging, and conformity assessment for high-risk AI systems (Articles 12, 43, 72). NIST’s AI Agent Standards Initiative [ 26 ] identifies security controls, governance over-sight, and monitoring as key requirements. The TRiSM framework [ 28 ] structures agent governance around ex-plainability, security, privacy, and lifecycle management. Schroeder de Witt [ 11 ] calls for secure interaction proto-cols that prevent insecure emergent behaviors. Cheng et al. [ 43 ] ground agent safety in transparency, accountabil-ity, and trustworthiness. Allegrini et al. [44] formalize 31 safety and liveness properties for agentic task lifecycles in temporal logic. Ghosh et al. [ 45 ] propose an opera-tional safety framework with red-teaming methodology, policy-based tool scoping, and optional trace signing—but without cryptographic capability binding, formal adver-sary models, or verifiable replay mechanisms. Yet despite this convergence of concern, no existing framework translates these governance aspirations into enforceable cryptographic infrastructure . The gap is not in recognizing what is needed, but in building it. We propose three Agent Governance Requirements 
+
+that distill the common thread across these efforts into technically precise, verifiable properties: 
+
+Definition 1 (Agent Governance Requirements) . A gov-erned agent ecosystem satisfies three properties: 
+
+G1: Capability Integrity. Every agent’s identity is cryptographically bound to its complete capability set—the model it executes and every tool it can invoke. The identity is unforgeable and non-repudiable. Any change to the capability set invalidates existing credentials and requires explicit re-authorization by a human or organizational principal. 
+
+> arXiv:2603.14332v1 [cs.CR] 15 Mar 2026
+
+G2: Behavioral Verifiability. An agent’s actions within its authorized capability envelope can be indepen-dently verified post-hoc, enabling detection of model sub-stitution, unauthorized tool use, or output manipulation. 
+
+G3: Interaction Auditability. All inter-agent and agent-human interactions produce tamper-evident records sufficient for forensic reconstruction, allowing humans to audit agent behavior, attribute responsibility, and provide evidence for regulatory compliance and system improve-ment. 
+
+These requirements are not novel in aspiration—they reflect the consensus of legal [ 33 , 34 ], regulatory [ 26 ], and technical [11, 28, 43, 44, 45] communities. What is novel is the claim that all three must hold simultaneously , and that none is achievable with existing agent infrastructure .G1 alone (without G2 and G3) permits certified agents to misbehave undetectably within their capability envelope. G2 alone (without G1) cannot distinguish authorized from unauthorized capabilities. G3 alone (without G1 and G2) produces audit logs of unverified actions by unverified agents. 
+
+1.2 Why the Current Landscape Falls Short 
+
+The current agent security landscape can be mapped into four layers (Figure 1), each addressing fragments of the governance requirements but none satisfying them: 
+
+Identity platforms (Keyfactor [ 19 ], SPIFFE/SPIRE [ 21 ,22 ]) issue certificates binding an agent to a public key— but a certificate remains valid regardless of how many tools the agent acquires after issuance. G1 violated :capability changes are invisible to the identity layer. 
+
+Authorization frameworks (OIDC-A [ 4], Authenticated Delegation [ 3], Cerbos [ 39 ]) define what an authenticated agent may access—but authorization is evaluated against declared capabilities at grant time, with no mechanism to detect drift. G1 violated : authorization does not track capability changes. 
+
+Runtime gateways (Gravitee [ 40 ], Lasso Security [ 41 ]) inspect tool calls in real time—but are fundamentally stateless, with no memory of prior tool configurations and no behavioral verification. G2 and G3 violated .
+
+Governance platforms (Credo AI [ 42 ]) maintain agent registries documenting capabilities—but operate at the documentation layer without cryptographic enforcement. 
+
+G1 violated : declared capabilities are not bound to the agent’s actual configuration. The root cause is a failure to recognize a fundamental architectural distinction in LLM-based agents. Inside a transformer’s forward pass, tool definitions and user con-text are indistinguishable token sequences. But at the orchestration layer, tool definitions determine which real-world actions the model’s outputs can trigger ,while runtime context determines which actions the model chooses . This yields a principled capability-context separation : the capability envelope (model identity, Existing Landscape                
+
+> Layer 1: Identity
+> Who is this agent?
+> Keyfactor, SPIFFE/SPIRE, CyberArk
+> Layer 2: Authorization
+> What may this agent access?
+> OIDC-A, Authenticated Delegation, Cerbos
+> CAPABILITY-IDENTITY GAP
+> No layer detects capability change between authorization and enforcement
+> Layer 3: Runtime Gateway
+> Is this specic call permitted?
+> Gravitee, Lasso Security, Cerbos MCP
+> Layer 4: Governance
+> Is this agent compliant?
+> Credo AI, Sumsub KYA, CrowdStrike/SGNL
+> Our Framework (A2Auth)
+> Capability-Bound Certicates
+> X.509 v3 + Skills Manifest Hash Trust Propagation Tree (NA →AG) 3  Bridges Identity ↔Authorization
+> Reproducibility Commitments
+> Replay Verication (Full / Statistical) Chain Veriability Theorem 4  Bridges Authorization ↔Enforcement
+> Veriable Interaction Ledger
+> Hash-Linked Signed Records Forensic Reconstruction + Audit 5  Bridges Enforcement ↔Governance
+> Performance
+> 97 μs cert verify ·<1 ns capability binding
+> ∼0.62 ms overhead · ∼ 1,200,000 ×faster than BAID 12/12 attack scenarios detected/prevented
+> End-to-End Validation
+> 520 agent pipeline ·0.12% overhead Sub-linear per-agent scaling OAuth 2.1 + OTEL baselines detect 0/5 attacks
+
+Figure 1: The four-layer agent security landscape and the capability-identity gap. Existing layers partially ad-dress individual requirements but none bridges them. Our framework provides the missing cryptographic governance layer satisfying G1–G3, validated end-to-end across 5–20 agent pipelines. tool definitions, permission scopes) governs what is pos-sible and changes infrequently; the runtime context (con-versation history, user instructions, memories) governs what is chosen and changes per-interaction. The secu-rity implication is direct: capability changes require re-authorization (G1); context changes require ver-ifiability (G2) and auditability (G3) .Existing frameworks conflate the two. A tool addi-tion and a new user message are treated identically— neither triggers re-evaluation. We call this the capability-identity gap : existing frameworks authenticate who an agent is and authorize what it may access, but none detect 
+
+when the agent’s capabilities have changed . This gap en-ables a class of attacks we term silent capability escalation .
+
+1.3 Our Framework: Bridging the Gap 
+
+The capability-context separation provides the theoretical foundation for three mechanisms, each targeting a specific governance requirement: 
+
+Capability-Bound Agent Certificates (§3) → G1. 
+
+We extend X.509 v3 with a skills manifest hash —a SHA-256 commitment to the agent’s complete tool configuration. Any mismatch causes immediate certificate invalidation. Certificates are embedded within a trust propagation tree 
+
+where human and organizational entities form the roots, and trust constraints (maximum credential tier, delegation depth, allowed tools, rate limits) propagate monotonically downward. No agent can exceed the trust boundaries set by its human principal. 
+
+Reproducibility Commitments (§4) → G2. Given that the capability envelope is fixed (certificate-bound), we leverage LLM inference near-determinism [ 1, 6 ] to enable post-hoc replay verification. Agents declare a reproducibil-ity commitment level in their certificate. When an incident occurs, a verifier re-executes the agent’s declared model 2with the recorded inputs and compares outputs. Diver-gence beyond the committed threshold proves the agent executed something other than what its certificate claims. 
+
+Verifiable Interaction Ledger (§5) → G3. Each interaction record contains agent IDs, certificate hashes, content commitments, and reproducibility anchors, linked by a hash chain with per-record signatures. The ledger stores only cryptographic commitments (not raw content), preserving privacy while enabling forensic reconstruction of multi-agent chains. Together, these three mechanisms provide what the existing landscape lacks: a stateful, cryptographic gov-ernance layer satisfying G1–G3, bridging identity plat-forms and runtime gateways. Our contribution is not in novel cryptographic primitives; rather, we show that 
+
+standard mechanisms —X.509 certificates, SHA-256 hash-ing, Ed25519 signatures, hash chains—when composed through the capability-context separation, are sufficient to enforce G1–G3 with negligible overhead, providing ac-tionable design guidance for how agents should be built, how they should interact, and how their behavior should be audited. 
+
+1.4 Threat Model and Security Guaran-tees 
+
+We consider a PPT adversary who can compromise up to 
+
+k agent nodes, create malicious agents, inject or modify tools, and manipulate network traffic (Dolev-Yao model). Critically, the adversary can perform silent capability es-calation . The adversary cannot compromise non-agent nodes or break standard cryptographic primitives. Under this model, we define and prove nine security properties: 1. Capability Binding : tool configuration change ⇒
+
+access denied (Theorem 5). 2. Trust Containment : child constraints ≤κ parent constraints (Theorem 4). 3. Chain Integrity : valid chain to trusted root required (Theorem 6). 4. Delegation Depth : chains bounded by ancestor’s 
+
+max _depth (Theorem 7). 5. Reproducibility Soundness : different model/tools detected with overwhelming probability (Theorem 8). 6. Bounded Divergence : adversary-controlled model passing n replay checks is (n, ϵ )-indistinguishable from declared model (Theorem 9). 7. Chain Verifiability : a single unverifiable interior agent breaks end-to-end behavioral verification for all downstream nodes (Theorem 12). 8. Credential Isolation : colluding agents gain no ex-tra permissions (Theorem 10). 9. Ledger Integrity : undetectable modification impos-sible (Theorem 11). Properties 1–4 enforce G1. Properties 5–7 enforce G2 (with 7 characterizing its chain-level semantics). Proper-ties 8–9 enforce G3. 
+
+1.5 Contributions 
+
+In summary: 
+
+• We define three Agent Governance Require-ments —capability integrity, behavioral verifiability, and interaction auditability—distilling converging reg-ulatory, legal, and technical concerns into formally precise properties (§1.1). 
+
+• We identify the capability-identity gap and the 
+
+capability-context separation principle as its root cause and resolution (§1.2). 
+
+• We show that standard cryptographic mecha-nisms —composed through the capability-context separation—are sufficient to enforce all three require-ments with negligible overhead, providing design guid-ance for secure agent ecosystems. 
+
+• We propose capability-bound agent certificates 
+
+with monotonic trust propagation (§3). 
+
+• We introduce reproducibility as a trust primi-tive and establish that reproducibility is a necessary condition for behavioral verifiability : high-assurance agent deployments must be designed for deterministic output to be auditable (§4). 
+
+• We define a verifiable interaction ledger for tamper-evident forensic reconstruction (§5). 
+
+• We prove that sufficient replay verification yields 
+
+bounded divergence : an adversary-controlled model that passes n replay checks is provably (n, ϵ )-indistinguishable from the declared model, with ϵ
+
+exponentially small in n (§4.7). 
+
+• We establish chain verifiability : behavioral verifi-ability is a chain property, not a node property—a single unverifiable interior agent breaks end-to-end verification for all downstream nodes, yielding princi-pled deployment constraints on model placement in trust trees (§4.8). 
+
+• We implement a working MCP governance proxy 
+
+that enforces all three requirements in real-time with 
+
+∼120 μs overhead per call, detecting silent capability escalation, tool trojanization, and certificate forgery (§7). 
+
+• We formalize and prove nine security properties 
+
+under a realistic adversary model (§6). 
+
+• We implement a Rust prototype achieving 97 μsverification, ∼0.62 ms governance overhead, and 
+
+∼1,200 ,000 × speedup over BAID (§7). 
+
+• We deploy the full governance stack in an end-to-end multi-agent pipeline (5–20 agents with real LLM calls), demonstrating 0.12% overhead, sub-linear per-agent scaling, and detection of all in-situ attacks— while OAuth 2.1 and OpenTelemetry baselines detect none (§7.4). 
+
+1.6 Paper Organization 
+
+§2 presents the threat model and attack scenarios. §3 defines capability-bound certificates and the trust propa-gation tree. §4 introduces reproducibility commitments. §5 describes the verifiable interaction ledger. §6 presents 3formal security properties and proofs. §7 describes imple-mentation and evaluation. §8 discusses limitations. §9 covers related work. §10 concludes. 
+
+## 2 Threat Model and Motivating Attacks 
+
+2.1 System Model 
+
+We model the trust infrastructure as a rooted directed tree T = ( V, E, r, τ ), where V is the set of all entities (CAs, humans, organizations, AI agents), E is the set of certificate issuance relationships, r is the root CA, and 
+
+τ : V → { NA , AG } classifies each node as Non-Agent (NA ) or Agent ( AG ). The tree satisfies a structural type constraint : τ (u) = 
+
+AG =⇒ ∀(u, v ) ∈ E : τ (v) = AG . Agents can delegate to sub-agents, but cannot confer trust upon humans or legal entities. Each agent node v holds a Capability-Bound Certificate 
+
+cert v and maintains a runtime tool configuration Tv (t)
+
+that may change over time. Each credential c has a risk tier tier c ∈ { T 0, T 1, T 2, T 3} where T 0 (human-only) is most sensitive. 
+
+2.2 Adversary Model 
+
+We define a PPT adversary A with capabilities: C1: Network Control (Dolev-Yao). C2: Agent Com-promise of up to k agent nodes. C3: Rogue Agent Creation with fresh key pairs. C4: Silent Capabil-ity Escalation —modifying tool configurations without changing identity credentials. C5: Interaction Injec-tion —fabricating or modifying ledger records. 
+
+A cannot : compromise non-agent nodes, forge digital signatures (EUF-CMA), find hash collisions, or reverse hash functions. 
+
+2.3 Motivating Attack Scenarios 
+
+We enumerate twelve attacks organized into four cate-gories. ATK-1 through ATK-9 address structural gover-nance threats; ATK-10 through ATK-12 address runtime behavioral attacks empirically validated by the Nemotron-AIQ dataset [ 45 ], which demonstrates 100% success rates for prompt injection and tool-mediated attacks against unprotected agentic workflows. 
+
+Capability Attacks. ATK-1: Silent Capability Es-calation. Agent v certified with {code_gen , unit_test }
+
+acquires web_browser via a plugin marketplace. Under every existing framework, v’s credentials remain valid. Our framework detects the skills manifest hash change. 
+
+ATK-2: Model Substitution. A replaces the certified model with a fine-tuned variant. Detected via model binding mismatch and replay verification divergence. 
+
+ATK-3: Tool Trojanization. A replaces tool implemen-tation (same name/version, different code). Detected via code-level hashing in the skills manifest. 
+
+Delegation Attacks. ATK-4: Phantom Delegation. 
+
+Compromised agent (T2) issues T1 certificate to sub-agent. Prevented by monotonic trust propagation. ATK-5: Chain Forgery. Fabricated certificate chain. Prevented by signa-ture verification at every level. ATK-6: Depth Overflow. 
+
+Deep delegation hierarchy. Prevented by strictly decreas-ing depth counters. ATK-7: Credential Collusion. Two or more compromised agents at lower tiers (e.g., T3 +T3) attempt to combine their credentials to access resources restricted to a higher tier (T1). Prevented by indepen-dent per-agent credential evaluation—each agent’s tier and permissions are verified in isolation, so colluding agents gain no additional permissions beyond their individual certificates (Theorem 10). 
+
+Forensic Attacks. ATK-8: Evidence Tampering. Log modification after incident. Prevented by hash-linked ledger with bilateral signing. ATK-9: Blame Shifting. 
+
+Dispute in multi-agent chain. Resolved via interaction commitments and reproducibility replay. 
+
+Runtime Behavioral Attacks. ATK-10: Injection-Driven Knowledge Poisoning. Adversarial content in-jected via tool outputs (e.g., retrieval results) propagates through the agent’s reasoning chain, corrupting final out-puts. Nemotron-AIQ traces show this attack succeeds in 100% of undefended trials across knowledge-poisoning and phishing-link templates. Our ledger’s content com-mitments ( ηin , η out ) enable post-hoc identification of the exact span where poisoned content entered the chain. 
+
+ATK-11: Cascading Action Hijack. Injected instruc-tions persist across multiple agent workflow stages (IN-FECT template), causing the agent to refuse legitimate tasks or produce harmful content at downstream nodes. Our hash-chain ledger records every inter-span transition, enabling forensic tracing of attack propagation paths that OTEL-only audit trails cannot reliably provide. 
+
+ATK-12: Output Exfiltration via Rendering. Agent outputs are manipulated to embed phishing links (PHISH-ING_LINK) or malicious markdown (MARKDOWN) that exfiltrate data when rendered by downstream consumers. Detected post-hoc via reproducibility verification: replay-ing the interaction with the committed parameters pro-duces benign output, diverging from the tampered record. 
+
+## 3 Capability-Bound Agent Certifi-cates 
+
+3.1 Certificate Structure 
+
+Definition 2 (Capability-Bound Certificate) . ACapability-Bound Certificate for node v is: 
+
+cert v = ( id v , id par (v), pk v , μ v , σ v , κ v , ρ v , t s, t e, sig )
+
+where μv = (provider , model _id , model _ver ) is the model binding , σv = {(sid i, ver i, h i, P i)}ni=1 
+
+is the skills manifest , κv =(max _tier , max _depth , allowed _models , max _rate )
+
+are trust constraints , and ρv = ( level , config ) is the 
+
+reproducibility commitment .
+
+4Trust Propagation Tree with Monotonic Constraint Decay            
+
+> NA (Non-Agent: human, org, CA) AG (Agent) Issues certificate ( κdecays) Forbidden (AG →NA)
+> Root CA
+> NA · T0 · d=8
+> Org-Acme
+> NA · T2 · d=5
+> T0 →T2, d: 8 →5
+> User-Alice
+> NA · T2 · d=4
+> User-Bob
+> NA · T2 · d=3
+> A1-coder
+> AG · T2 · d=2 {code_gen, test}
+> A2-review
+> AG · T2 · d=2 {code_review}
+> A3-orch
+> AG · T2 · d=2 {plan, delegate}
+> A6-data
+> AG · T3 · d=1 {sql_query}
+> A4-api
+> AG · T3 · d=0 {rest_call}
+> A5-monitor
+> AG · T3 · d=0 {log_read} AG →NA ✗
+> Constraint Decay
+> Root: T0, d=8
+> ↓strict subset Org: T2, d=5
+> ↓strict subset User: T2, d=4
+> ↓strict subset A3: T2, d=2 →A4: T3, d=0 d=0 ⇒no further delegation Fig. 3. Trust propagation tree for the evaluation environment. NA nodes (rectangles) form the trust anchor; AG nodes (rounded) are agents. Constraints decay monotonically. AG →NA edges are structurally forbidden.
+
+Figure 2: Trust propagation tree for the evaluation envi-ronment. NA nodes (rectangles) form the trust anchor; AG nodes (rounded) are agents. Constraints decay mono-tonically downward. 
+
+3.2 Skills Manifest and Capability Bind-ing 
+
+Definition 3 (Skills Manifest Hash) .
+
+Hcert 
+
+v = SHA -256(canonical( {(sid i, ver i, h i, P i)}ni=1 )) 
+
+At runtime: Hv (t) = SHA -256(canonical( Sv (t))) .
+
+Capability Binding Invariant. Access permitted only if Hv (t) = Hcert 
+
+v . Any capability change invalidates access. Crucially, runtime context changes (memories, preferences) do not affect Hv (t)—the practical conse-quence of capability-context separation. For open-source tools, hi is the SHA-256 hash of source code. For closed-source tools, hi is the hash of the public configuration descriptor (name, version, API schema). 
+
+3.3 Trust Propagation Tree 
+
+Definition 4 (Trust Constraint Ordering) . κa ≤κ κb
+
+iff κa.max _tier ≤ κb.max _tier , κa.max _depth <κb.max _depth (strict), κa.allowed _models ⊆
+
+κb.allowed _models , and κa.max _rate ≤ κb.max _rate .
+
+Trust Propagation Rule. For every edge (u, v ) ∈ E:
+
+κv ≤κ κu.
+
+3.4 Certificate Verification Algorithm 
+
+When agent v requests access to credential c at time t,the verifier executes four phases (Figure 3): 
+
+1 function Verify ( chain , credential , skills , roots ) : 
+
+2 // Phase 1: Chain Integrity 
+
+3 if chain [0]. issuer /∈ roots : return DENY 
+
+4 for i in 1.. len ( chain ) : 
+
+5 if not VerifySig ( chain [i -1]. pk , chain [ i ]. sig ) : return DENY 
+
+6 if chain [ i ]. κ̸ ≤κ chain [i -1]. κ: return DENY 
+
+7 // Phase 2: Capability Binding 
+
+8 if SHA256 ( canonical ( skills ) ) ̸ = cert_v . σ _hash : return DENY 
+
+9 // Phase 3: Trust Constraint Check 
+
+10 if credential . tier > cert_v . κ. max_tier : return DENY 
+
+11 // Phase 4: Revocation Check 
+
+12 if IsRevoked ( cert_v ) : return DENY 
+
+13 return ALLOW Certificate Verification and Governance Flow Agent v                
+
+> Model: claude-sonnet-4 Tools: {code_gen, test} Cert: cert_v (T2, d=2) H_v(t) = SHA-256(skills) MCP call
+> A2Auth Governance Layer Phase 1: Chain Integrity
+> Verify root ∈trusted_roots
+> ∀i: VerifySig(pk_{i-1}, sig_i)
+> ∀i: now ∈[t_s, t_e] ∧ κ _i ≤ κ _{i-1}
+> Phase 2: Capability Binding
+> H_v(t) == H_v^cert ? (runtime hash vs certificate hash)
+> Phase 3: Trust Check
+> ⑤credential.tier ≤cert_v.max_tier
+> ⑤agent_depth ≤max_depth
+> Phase 4: Record & Allow
+> ⑤Append interaction record (hash-link + Ed25519 sign + persist)
+> ALLOW
+> MCP Tool Server
+> DENY
+> sig_verify temporal constraint_monotonicity
+> DENY
+> capability_binding
+> DENY
+> tier_check ~97 μs <1 ns ~0.02 μs ~448 μs
+> Total:
+> ~0.62 ms
+> Post-hoc Verification
+> Replay inference with same (model, context, seed) TokenMatch ≥ θ = 0.98 audit trigger Fig. 2. Verification flow for an MCP tool call through the A2Auth governance layer. Each phase can independently reject with a specific reason. Post-hoc replay verification (dashed) is triggered by audit or incident investigation.
+
+Figure 3: Verification flow for an MCP tool call through the A2Auth governance layer. Each phase can indepen-dently reject with a specific reason. 
+
+3.5 Integration with A2A Agent Cards 
+
+Agent Certificates are designed as non-invasive extensions of the A2A ecosystem via an optional extensions field in the Agent Card containing the certificate PEM, chain, and skills manifest hash. 
+
+## 4 Reproducibility Commitments 
+
+4.1 Reproducibility as a Necessary Con-dition 
+
+A key observation motivates our approach: behavioral verifiability (G2) is impossible without repro-ducibility . If an agent’s outputs cannot be indepen-dently regenerated—even approximately—then no post-hoc mechanism can distinguish authorized behavior from unauthorized behavior. This is not merely a limitation of our framework; it is a fundamental constraint on any 
+
+verification scheme that does not rely on trusted execution environments. This observation has a prescriptive implication for se-cure agent system design: high-assurance agent de-ployments must be engineered for reproducible output. Concretely, this means using deterministic sam-pling (temperature =0, fixed seeds), preferring structured outputs (code, JSON, SQL) over free-form prose where security-critical decisions are involved, and selecting in-ference providers that guarantee bitwise or near-bitwise reproducibility [ 6]. Agents that cannot commit to any reproducibility level receive a trust tier downgrade (§4.4), making the security cost of non-reproducibility explicit in the governance framework. 
+
+4.2 Empirical Foundation 
+
+LLM inference is nearly deterministic . Karvonen et al. [ 1]demonstrated that with fixed sampling parameters, regen-erating output produces >98% token-identical sequences. 5EigenAI [ 6 ] achieved 100% bit-exact deterministic infer-ence on fixed GPU architectures with negligible perfor-mance loss. Our own validation (§7, Experiment 5) con-firms that code-generating agents achieve perfect determin-ism, while prose outputs exhibit paraphrase-level variation that remains well-separated from cross-model divergence. 
+
+4.3 Reproducibility as a Trust Primitive 
+
+Definition 5 (Reproducibility Commitment) . ρv =(level , config ) where level ∈ { full , statistical , none }.
+
+Full (level = full ): ∀(context , seed ) :
+
+Ov (context , seed ) = Oreplay  
+
+> v
+
+(context , seed ).
+
+Statistical (level = statistical ): 
+
+∀(context , seed ) : CharMatch( Ov , O replay  
+
+> v
+
+) ≥ θ
+
+The threshold θ is task-type dependent: our empirical validation (Experiment 5, §7) shows that code-generating agents achieve perfect determinism ( θ = 0 .98 ), while prose-generating agents require θ = 0 .10 to account for paraphrase-level variation. Cross-model divergence re-mains well below even the relaxed threshold (max 0.089). 
+
+None : No reproducibility commitment. 
+
+4.4 Reproducibility and Trust Tier Inter-action 
+
+Reproducibility commitments interact with credential gov-ernance through a trust bonus : agents with no repro-ducibility commitment are downgraded one tier (T1 →T2, T2 →T3). This makes the governance cost of non-reproducibility explicit: an agent that cannot be verified post-hoc is inherently less trustworthy, regardless of its other credentials. 
+
+4.5 Replay-Based Verification Protocol                                              
+
+> 1function ReplayVerify ( cert , record , O_orig ) :
+> 2ρ:= cert . ρ
+> 3if ρ. level =none : return INCONCLUSIVE
+> 4O_ref := ExecuteModel ( cert . μ,cert . σ,
+> 5record . input , record . seed , ρ. config )
+> 6if ρ. level =full :
+> 7return O_ref == O_orig ?VERIFIED :VIOLATION
+> 8else : // statistical
+> 9return CharMatch ( O_ref , O_orig ) ≥θ?
+> 10 VERIFIED :VIOLATION
+
+4.6 Security Analysis 
+
+Theorem 1 (Reproducibility Soundness, informal) . If compromised agent v executes model M ′̸ = M or skills 
+
+S′̸ = S, replay verification detects the deviation with prob-ability ≥ 1 − ϵ(λ) for negligible ϵ.
+
+By the DiFR token divergence result [ 1], the match rate between different models is δ ≈ 0.06 (character-level, validated in Experiment 5). By Hoeffding’s inequality: 
+
+Pr [ CharMatch ≥ θ] ≤ exp (−2n(θ − δ)2), which is negligi-ble for realistic output lengths. 
+
+4.7 Indistinguishability Under Sufficient Verification 
+
+A natural concern is adversarial fine-tuning: could an adversary produce a model M ′ that passes reproducibil-ity checks on tested inputs but behaves maliciously on untested ones? We show that sufficient replay verification bounds the impact of any such attack. 
+
+Definition 6 ((n, ϵ )-Indistinguishability) . Models M and 
+
+M ′ are (n, ϵ )-indistinguishable under skill set S and prompt distribution D if, after M ′ passes replay verifi-cation on n independent prompts x1, . . . , x n ∼ D across skills in S:
+
+Pr 
+
+> x∼D
+
+[CharMatch( M (x), M ′(x)) < θ ] ≤ ϵ
+
+Theorem 2 (Bounded Divergence) . If adversary-controlled model M ′ passes replay verification (CharMatch 
+
+≥ θ) on n independent prompts drawn from D across |S| 
+
+skills, then M and M ′ are (n, ϵ )-indistinguishable with: 
+
+ϵ ≤ exp (−2nθ 2)
+
+Equivalently, for target confidence 1 − ϵ, n ≥ ln(1 /ϵ )2θ2 veri-fication prompts suffice. 
+
+Proof sketch. Let Zi =
+
+1[ CharMatch (M (xi), M ′(xi)) < θ] be indepen-dent Bernoulli random variables with p =Pr x∼D [ CharMatch < θ]. Observing ∑ Zi = 0
+
+(all n tests pass), by a one-sided binomial test: 
+
+Pr [∑ Zi = 0 | p ≥ ϵ] = (1 − p)n ≤ (1 − ϵ)n ≤ exp (−nϵ ).Setting this equal to α (significance level) and solving yields p ≤ ln (1 /α )/n with confidence 1−α. The Hoeffding refinement accounting for the threshold gap gives the stated bound. Full proof in §6. 
+
+Practical implications. For code-generating agents (θ = 0 .98 ), only n = 3 prompts per skill achieve ϵ < 
+
+10 −2; n = 12 achieves ϵ < 10 −10 . Even for relaxed prose thresholds ( θ = 0 .10 ), n = 1200 prompts achieve ϵ < 
+
+10 −10 . These are operationally feasible: a verification suite of 50 prompts per skill, run periodically, provides strong guarantees. 
+
+Security interpretation. This transforms repro-ducibility from a detection mechanism into a safety cer-tificate : an adversary who fine-tunes M into M ′ that passes n diverse replay checks has produced a model that is provably close to M on the tested distribution. Any residual divergence is bounded by ϵ, which decreases expo-nentially with the verification budget. The adversary faces a dilemma: either M ′ behaves like M (and the fine-tuning achieves nothing), or M ′ diverges on some inputs and will be caught with probability increasing exponentially in n. This is analogous to cryptographic indistinguishabil-ity: the adversary’s advantage is negligible given sufficient verification. 6v0: Human                                      
+
+> Trust Anchor
+> v1:Agent
+> G2= full
+> vk:Agent
+> G2= none
+> vk+1 :Agent
+> G2= full
+> vn:Agent
+> G2= full
+> signed signed signed signed
+> · · ·
+> Veriable Region Unveriable Region
+> CVD (vn) = k
+> Chain veriability breaks here
+> G1 G2 G3
+> Replay conrms v1's declared model produced its output. Input from v0is trusted.
+> G1 G2 ×G3
+> No replay possible. Could execute M′̸=Mk.Output o′
+> kis unveriable .
+> G1 G2 G3
+> Replay conrms vk+1 (o′
+> k) = ok+1 .But o′
+> kmay dier from o∗
+> k.
+> Correct on corrupted input.
+> Chain Veriability Theorem: Behavioral veriability is a chain property , not a node property. A single G2= none interior agent at position kbreaks verication for all downstream nodes vk+1 , . . . , v n.
+> Implication: High-determinism models must be placed at interior trust tree positions (security constraint, not performance preference).
+
+Figure 4: Chain Verifiability: a single G2 =none inte-rior agent at position k breaks behavioral verification for all downstream nodes, even if they individually sat-isfy G2 =full . The verifiable region extends only to CVD (vn) = k.
+
+4.8 Chain Verifiability 
+
+The preceding analysis establishes that G2 can verify an individual agent’s computational process. A natural question arises: when agents form a multi-hop execution chain, is per-node verification sufficient for end-to-end behavioral verifiability? We show that it is not—behavioral verifiability is a chain property , not a node property— and that this observation has direct implications for trust tree architecture (Figure 4). 
+
+The gap that G2 uniquely fills. Consider what G1+G3 alone guarantee. G1 (capability binding) ensures that each agent’s certificate is bound to its declared model and tool set; any capability change invalidates the certifi-cate. G3 (interaction auditability) ensures that every input and output is bilaterally signed and hash-chain linked; no record can be silently modified. Together, G1+G3 provide 
+
+attribution integrity : we know who sent what to whom ,and that no message was altered in transit. However, signing proves attribution, not computa-tional fidelity . A compromised agent holding a valid cer-tificate (G1 ✓) can execute an arbitrary model internally, produce output, and sign it (G3 ✓). The ledger faithfully records the interaction. Every cryptographic check passes. The only mechanism that detects this attack is G2: replay-ing the agent’s declared model on the recorded input and comparing outputs. G2 is the software-only equiva-lent of trusted execution —it verifies that the declared computational process actually produced the observed output, without requiring hardware attestation (TEE). 
+
+Why chain position matters. Now consider a trust tree execution chain v0 → v1 → · · · → vn, where v0 is a human principal (trust anchor) and each vi (i ≥ 1) is an agent node. Agent vj receives input from vj−1, processes it using its declared model, and passes output to vj+1 .Suppose vj is a compromised agent with G2 =none 
+
+(either because it uses a low-determinism model or because G2 verification is not enforced). Then: 1. vj ’s output cannot be verified as originating from its declared model. 2. vj ’s output becomes vj+1 ’s input. Even if vj+1 satis-fies G2 =full , replay verification of vj+1 only proves that vj+1 faithfully processed the input it received— but that input itself is unverifiable. 3. By induction, all downstream nodes vj+1 , . . . , v n op-erate on data whose provenance cannot be crypto-graphically verified back to the trust anchor. 
+
+Definition 7 (Chain Verifiability Depth) . For execution chain v0 → v1 → · · · → vn with v0 a non-agent trust anchor, define: 
+
+CVD( vn) = min {j ≥ 1 : vj is an agent with ρvj .level = none }
+
+with CVD (vn) = n if no such vj exists (fully verifiable chain). 
+
+Theorem 3 (Chain Verifiability) . Let v0 → v1 → · · · → 
+
+vn be an execution chain where v0 is a non-agent trust an-chor. If CVD (vn) = k < n , then for all i > k , the output of vi cannot be verified as originating from a legitimate computation chain rooted at v0, even if vi individually satisfies ρvi .level = full .
+
+Proof sketch. By Definition 7, vk has ρ. level = none ,so no replay verification can confirm that vk’s declared model produced its output ok. Under the adversary model (§2), vk may have executed an arbitrary model M ′̸ = Mk
+
+that produces output o′
+
+> k
+
+̸ = o∗ 
+
+> k
+
+(where o∗ 
+
+> k
+
+is the output the declared model would have produced). Agent vk+1 
+
+receives o′ 
+
+> k
+
+as input. Even with ρvk+1 .level = full , replay verification confirms vk+1 (o′
+
+> k
+
+) = ok+1 , i.e., that vk+1 faith-fully processed o′
+
+> k
+
+. But o′ 
+
+> k
+
+may differ from o∗
+
+> k
+
+, so ok+1 is the correct computation on incorrect input. By induction on chain length, the same applies to all vi with i > k . Full proof in §6. 
+
+Architectural implications. This theorem yields three deployment principles: 
+
+Principle 1: High-determinism models at interior nodes. 
+
+Models with strong reproducibility (Anthropic Haiku: CharMatch =0.987, Sonnet: 0.823; see Table 4) should be placed at coordinator and interior positions in the trust tree, where their outputs become inputs for down-stream agents. Low-determinism models (Kimi: 0.169, DeepSeek: 0.225) should be constrained to leaf positions where their outputs do not propagate further. This is not merely a performance recommendation—it is a security architecture constraint .
+
+Principle 2: Verification boundary checkpoints. When a G2 =none agent must appear at an interior position (e.g., a reasoning model as coordinator), the chain requires a verification boundary : either (a) a human-in-the-loop checkpoint that re-anchors trust by reviewing and sign-ing the output, (b) TEE attestation providing hardware-enforced computational integrity, or (c) dual-execution with independent instances and output comparison (anal-ogous to Byzantine fault tolerance). Each mechanism re-establishes chain verifiability for downstream nodes. 
+
+Principle 3: Explicit degradation in the ledger. When chain verifiability is broken at node vk, the ledger should 7record a PARTIAL_VERIFIABILITY marker at that bound-ary. Downstream agents inherit a trust tier penalty be-yond the standard G2 =none downgrade (§4.4), making the reduced security guarantee visible to auditors and compliance systems. 
+
+Relationship to TEE. This analysis clarifies the com-plementary roles of G2 and trusted execution environ-ments. G2 provides software-only verification of computa-tional fidelity—a “software TEE”—using only black-box API access and the near-determinism of LLM inference. Hardware TEEs provide the same guarantee through hard-ware attestation but require infrastructure unavailable in most LLM deployments. The Chain Verifiability Theorem shows precisely where each mechanism is needed: at every interior agent node in the trust tree. In mixed deploy-ments, G2 and TEE are interchangeable at the chain level: an agent with TEE attestation and G2 =none maintains chain verifiability identically to an agent with G2 =full 
+
+and no TEE. 
+
+## 5 Verifiable Interaction Ledger 
+
+5.1 Motivation 
+
+Capability binding and reproducibility verify individual agents. Real-world incidents involve chains of interactions. We need an immutable, tamper-evident record where no single party—including the ledger operator—can unde-tectably alter history. 
+
+Why OpenTelemetry traces are insufficient. The industry standard for agentic observability is OpenTeleme-try (OTEL) [ 46 ], whose span trees record execution traces with span_id /parent_id linkage, timestamped 
+
+input.value /output.value payloads, and span-kind an-notations ( CHAIN , LLM , TOOL ). Analysis of the Nemotron-AIQ Agentic Safety Dataset [ 45 ]—10,796 OTEL traces from NVIDIA’s AI-Q research assistant under 22 distinct attack templates—reveals three critical gaps: (1) No in-tegrity protection : span linkage is purely referential; any party with storage access can modify, delete, or reorder spans undetectably. (2) No identity binding : spans record function names but not cryptographically verified agent identities or capability certificates. (3) No privacy preser-vation : OTEL stores full plaintext input/output payloads, creating data exposure risk. Our interaction ledger ad-dresses all three gaps through hash-chain linking ( hprev ), Ed25519 bilateral signing ( sig i), agent certificate binding (ch send , ch recv ), and commitment-only storage ( ηin , η out ). 
+
+5.2 Ledger Structure 
+
+Definition 8 (Interaction Record) . Ri =(seq i, t i, a send , a recv , ch send , ch recv , η in , η out , π i, h prev , sig i)
+
+where ηin = SHA -256 (input ), ηout = SHA -256 (output ),
+
+πi = (seed , model _ver , skills _hash ), and hprev =SHA -256( Ri−1).
+
+Definition 9 (Verifiable Interaction Ledger) . L =(R1, . . . , R n) satisfying: (1) sequential consistency, (2) hash chain integrity, and (3) signature validity at every record. 
+
+5.3 Privacy Preservation 
+
+The ledger stores only commitments (hashes), not content. During normal operation, only interaction metadata is revealed. During forensic investigation, parties produce original content verified against stored commitments. 
+
+5.4 Forensic Reconstruction Protocol 
+
+The protocol proceeds in five steps: (1) identify the rele-vant interaction chain, (2) verify ledger integrity (signa-tures + hash chain), (3) request content disclosure and verify against commitments, (4) verify agent certificates at interaction time, and (5) execute replay verification for agents with reproducibility commitments. 
+
+## 6 Formal Security Properties and Proofs 
+
+We prove nine properties under the adversary model of §2, using standard cryptographic assumptions: EUF-CMA security, collision resistance of SHA-256, and the DiFR token divergence property [1]. 
+
+Theorem 4 (Trust Containment) . For all edges (u, v ) ∈
+
+E: κv ≤κ κu.Proof. Suppose A issues cert w with κw̸ ≤κ κv . The veri-fier checks κw ≤κ κv using constraints in cert v , which is signed by v’s parent. A cannot modify cert v without the parent’s key. Recursing upward, the chain terminates at an uncompromised non-agent ancestor (EUF-CMA). 
+
+Theorem 5 (Capability Binding) . If Hv (t′)̸ = Hcert  
+
+> v
+
+,then ∀t ≥ t′ : Access( v, c, t ) = DENY .Proof. By collision resistance: Pr [Hv (t′) = Hcert  
+
+> v
+
+] ≤
+
+negl (λ) when Sv (t′)̸ = σv . Forging a new certifi-cate requires the parent’s key (same argument as The-orem 4). 
+
+Theorem 6 (Chain Integrity) . Only chains forming a valid path from a trusted root with valid signatures pass verification. Proof. Fabricating any link requires the corresponding private key. By EUF-CMA, A cannot produce valid sig-natures without the key. 
+
+Theorem 7 (Delegation Depth Enforcement) . Agent del-egation depth from any non-agent ancestor never exceeds 
+
+max _depth .Proof. Trust Containment requires κv .max _depth <κpar (v).max _depth (strict). Starting from depth d, the chain has at most d agent levels before reaching 0. 
+
+Theorem 8 (Reproducibility Soundness) . If v executes 
+
+M ′̸ = M or S′̸ = S, replay verification detects with proba-bility ≥ 1 − ϵ(λ).
+
+8Proof. By DiFR [ 1]: E[ CharMatch (Oactual , O ref )] ≤ δ for different models. By Hoeffding: Pr [ CharMatch ≥ θ] ≤
+
+exp( −2n(θ − δ)2), negligible for realistic n.
+
+Theorem 9 (Bounded Divergence Under Verification) . If 
+
+M ′ passes replay verification on n independent prompts from D, then Pr x∼D [ CharMatch (M (x), M ′(x)) < θ ] ≤ ϵ
+
+where ϵ ≤ exp( −2nθ 2).Proof. Let p = Pr x∼D [ CharMatch (M (x), M ′(x)) < θ ] be the true failure rate. Each verification trial is Bernoulli( p). Observing n successes (all pass), the likelihood ratio test gives: Pr [all pass | p] = (1 − p)n. For p ≥ ϵ: (1 −
+
+ϵ)n ≤ e−nϵ . Setting the false-acceptance probability to 
+
+e−nϵ ≤ e−2nθ 2
+
+(using ϵ = 2 θ2 as the critical value from the Hoeffding bound on the CharMatch statistic), we obtain the stated bound. The Hoeffding refinement uses the fact that CharMatch is a bounded [0 , 1] statistic with expected value ≥ θ under H0 (same model), applying Pr [ ¯X − μ ≤−t] ≤ exp( −2nt 2) to the complement event. 
+
+Theorem 10 (Credential Isolation) . Accessible (C′) = ⋃ 
+
+> v∈C′
+
+Accessible( {v}).Proof. Access depends solely on the requesting agent’s certificate. No protocol mechanism combines permissions. Proxy tokens are bound to specific agent IDs. 
+
+Theorem 11 (Ledger Integrity) . No party can unde-tectably modify, delete, or reorder records. Proof. (a) Modification invalidates hprev of successor, cas-cading through chain; re-signing requires all subsequent senders’ keys. (b) Deletion breaks hash chain. (c) Reorder-ing breaks both sequence numbers and hash links. 
+
+Theorem 12 (Chain Verifiability) . Let v0 → v1 → · · · → 
+
+vn be an execution chain where v0 is a non-agent trust anchor, and let CVD (vn) = k < n (Definition 7). Then for all i > k , the output of vi cannot be verified as origi-nating from a legitimate computation chain rooted at v0,even if ρvi .level = full .Proof. We proceed by induction on chain position. 
+
+Base case (i = k + 1 ): Agent vk has ρ. level = none .Under the adversary model (§2), A may have replaced 
+
+vk’s model Mk with M ′
+
+> k
+
+. Since no replay verification applies to vk, the verifier cannot distinguish vk’s actual output o′ 
+
+> k
+
+= M ′
+
+> k
+
+(input k) from the legitimate output o∗ 
+
+> k
+
+=
+
+Mk(input k). Both are validly signed by vk (G3 ✓) and 
+
+vk’s certificate is valid (G1 ✓). Agent vk+1 receives o′ 
+
+> k
+
+as input. Even with ρvk+1 .level = full , replay verification confirms vk+1 (o′
+
+> k
+
+) = ok+1 —i.e., vk+1 faithfully processed 
+
+o′
+
+> k
+
+. But since o′ 
+
+> k
+
+may differ from o∗
+
+> k
+
+, the computation is correct on potentially corrupted input. The verifier cannot detect this because verifying vk+1 ’s replay requires vk’s output as the reference input, which is itself unverifiable. 
+
+Inductive step : Assume the output of vi−1 (i − 1 > k )cannot be verified as legitimate. Agent vi receives this unverifiable output as input. By the same argument as the Table 1: Implementation summary.                                
+
+> Component Dependencies LoC
+> Certificate (parse, issue, verify) x509-parser ,ring ∼1,400 Skills manifest hasher sha2 ,serde_cbor ∼500 Trust tree (internal) ∼700 Reproducibility verifier sha2 ∼400 Interaction ledger ed25519-dalek ,sled ∼1,100 Credential vault aes-gcm ,argon2 ∼800 Agent registry + proxy tokens agent-trust-kit ∼600 MCP server + CLI jsonrpc-core ,clap ∼900 Real LLM repro. validation anthropic ,sklearn (Python) ∼870 MCP governance proxy demo cryptography ,cbor2 ∼520
+> Total ∼8,290
+
+base case, vi’s replay verification confirms computational fidelity on unverifiable input. 
+
+## 7 Implementation and Evaluation 
+
+7.1 Prototype Architecture 
+
+We implement the framework as two Rust crates: 
+
+agent-trust-kit (open-source SDK) and a2auth (cre-dential governance application). Table 1 summarizes the implementation. 
+
+7.2 Performance Evaluation 
+
+We evaluate on Apple M2, 16 GB RAM, macOS. All bench-marks use Criterion.rs with 10,000 samples and 3-second warmup. 
+
+Experiment 1: Certificate Verification Latency.                        
+
+> Chain Depth Mean Per-Sig Cap. Binding
+> 2 (CA →User →Agent) 66.1 μs33.0 μs<1 ns 3 (CA →Org →User →Agent) 97.4 μs32.5 μs<1 ns 4 (CA →Org →Agent →Sub) 129.0 μs32.2 μs<1 ns 5 (max practical) 163.6 μs32.7 μs<1 ns
+
+Capability binding adds <1 ns—the cost of a single 32-byte comparison. Verification is dominated by Ed25519 signature verification ( ∼33 μs/sig). 
+
+Experiment 2: Skills Manifest Hash.                                        
+
+> Tools Sort CBOR SHA-256 Total
+> 532 ns 0.41 μs2.25 μs2.69 μs10 42 ns 0.76 μs4.30 μs5.10 μs20 64 ns 1.71 μs8.78 μs10.6 μs50 152 ns 3.94 μs21.8 μs25.9 μs100 263 ns 8.05 μs43.3 μs51.6 μs
+
+Experiment 3: Ledger Throughput. 
+
+9Operation Latency Throughput                 
+
+> Append record 448 μs∼2,230 rec/s Verify single record 32.4 μs∼30,900 rec/s Full audit (1K records) 34.7 ms 34.7 μs/rec Full audit (100K records) 3.46 s 34.6 μs/rec Query by agent ID 112 μs0.56 μs/rec
+
+Experiment 4: Reproducibility Verification La-tency.                             
+
+> Tokens Compare Replay Skip Commit
+> 128 120 ns 123 ns 3.5 ns 1.72 μs512 416 ns 418 ns 3.5 ns 6.55 μs2,048 1.55 μs1.55 μs3.5 ns 24.3 μs8,192 6.01 μs6.10 μs3.6 ns 96.6 μs
+
+Token comparison scales at ∼0.73 ns/token. Batch veri-fication: 100 interactions (512 tokens each) in 41.8 μs. An auditor verifies 100,000 interactions in ∼42 ms. 
+
+Experiment 5: Real LLM Reproducibility Val-idation. We validate the DiFR finding empirically in two phases. Phase 1 uses two Anthropic mod-els (Claude Sonnet 4 and Haiku 4.5, temperature =0, max_tokens =512) across 105 prompts in five task types— code generation (25), JSON/structured output (15), math-ematical reasoning (20), prose explanation (30), and creative writing (15)—with 5 same-model repetitions and 3 cross-model repetitions each (1,050 same-model + 1,575 cross-model pairwise comparisons). Phase 2 ex-tends to 9 models from 7 providers : Claude Son-net 4 and Haiku 4.5 (Anthropic), GPT-4.1 and GPT-4.1 mini (OpenAI), Gemini 2.5 Pro (Google), Grok 4 (xAI), DeepSeek V3 (DeepSeek), Llama 4 Maverick (Meta), and Kimi K2.5 (Moonshot). All models are accessed via Open-Router as a unified API gateway (plus Volcengine for Doubao), with temperature =0 and 100 prompts across six task types (code, JSON, math, prose, creative, knowledge), 10 repetitions per model-prompt pair (5,400 total API calls; 15,120 pairwise comparisons: 10,800 same-model + 240 same-provider + 4,080 cross-provider). We compute four similarity metrics: character-level positional match (CharMatch), Jaccard token overlap, word-level TF-IDF cosine, and character n-gram (3–5) cosine; then apply Welch’s t-test, Mann-Whitney U , and Cohen’s d to quan-tify separation, and use Youden’s J statistic for optimal threshold selection. 
+
+Result 5a: Same-model reproducibility is task-type de-pendent. Table 2 shows per-task reproducibility from Phase 1 across 105 prompts (1,050 same-model pairwise comparisons). Table 2: Same-model (Sonnet 4) reproducibility by task type.                             
+
+> Task Type nIdentical CharMatch TF-IDF cos
+> JSON / structured 15 54.0% 0.715 ±0.43 0.722 ±0.44 Code generation 25 51.2% 0.672 ±0.43 0.735 ±0.43 Math reasoning 20 50.5% 0.649 ±0.45 0.673 ±0.46 Creative writing 15 47.3% 0.612 ±0.43 0.712 ±0.42 Prose explanation 30 34.7% 0.538 ±0.45 0.628 ±0.46
+> Overall 105 46.3% 0.627 ±0.45 0.688 ±0.45
+
+Structured outputs (JSON, code) have the highest identical-output fractions ( >50%), while prose shows the most variation (34.7% identical), driven by paraphrase-level reorganization. The bimodal distribution (median CharMatch = 0 .975 vs. mean = 0 .627 ) confirms that same-model outputs are either near-identical or substantially rephrased. 
+
+Result 5b: Multi-provider separation analysis. Table 3 presents the Phase 2 multi-provider results across 15,120 pairwise comparisons (10,800 same-model vs. 4,080 cross-provider). All differences are statistically significant ( p ≈
+
+0, Welch’s t and Mann-Whitney U ). Table 3: Multi-provider separation: 9 models, 7 providers (15,120 comparisons).                      
+
+> Metric Same-model Cross-provider Sep. Cohen’s d
+> CharMatch 0.538 0.114 4.7×1.36 Jaccard 0.710 0.321 2.2×1.51 TF-IDF cosine 0.839 0.586 1.4×1.08 Char n-gram cos 0.871 0.640 1.4×1.20
+
+All four metrics achieve Cohen’s d > 1.0 (large effect sizes) across the full 9-model set, with Jaccard ( d = 1 .51 )and CharMatch ( d = 1 .36 ) providing the strongest separa-tion. Notably, same-provider pairs (e.g., GPT-4.1 vs. GPT-4.1 mini: CharMatch = 0 .251 ; Sonnet 4 vs. Haiku 4.5: 
+
+0.192 ) exhibit similarity intermediate between same-model and cross-provider, confirming that even models from the same vendor maintain distinct output fingerprints. 
+
+Result 5c: Per-model determinism varies by over an order of magnitude. Table 4 ranks models by same-model CharMatch, revealing a wide determinism spectrum. 10 Table 4: Per-model same-model reproducibility (Char-Match, temperature =0).                               
+
+> Model Provider CharMatch Std
+> Claude Haiku 4.5 Anthropic 0.987 0.088 Claude Sonnet 4 Anthropic 0.823 0.273 GPT-4.1 mini OpenAI 0.701 0.335 GPT-4.1 OpenAI 0.617 0.363 Llama 4 Maverick Meta 0.528 0.360 Grok 4 †xAI 0.402 0.343 Gemini 2.5 Pro †Google 0.392 0.397 DeepSeek V3 DeepSeek 0.225 0.271 Kimi K2.5 †Moonshot 0.169 0.233
+> †Reasoning/thinking model (internal chain-of-thought).
+
+Claude Haiku 4.5 produces near-identical outputs across repetitions (CharMatch = 0 .987 ), while reasoning mod-els (Kimi K2.5, Gemini 2.5 Pro, Grok 4) exhibit sub-stantially lower determinism due to stochastic chain-of-thought reasoning even at temperature 0. Despite this variation, even the least deterministic model (Kimi K2.5, CharMatch = 0 .169 ) still exceeds the mean cross-provider similarity ( 0.114 ), demonstrating that model identity re-mains distinguishable for all tested models. 
+
+Result 5d: Per-task separation is strongest for mathe-matical reasoning. Table 5 shows CharMatch separation factors across six task categories. Table 5: Per-task CharMatch separation (same-model / cross-provider).                      
+
+> Task Type Same-model Cross-provider Sep.
+> Math reasoning 0.508 0.042 12 .2×
+> Knowledge 0.511 0.072 7.1×
+> Creative writing 0.402 0.057 7.0×
+> Prose 0.488 0.083 5.9×
+> Code generation 0.594 0.161 3.7×
+> JSON / structured 0.779 0.299 2.6×
+
+Mathematical reasoning achieves the highest separation (12 .2×) because models develop highly distinctive step-by-step reasoning styles, while JSON outputs show the lowest separation ( 2.6×) because structural constraints force convergent formatting. These task-dependent results motivate per-task threshold calibration in deployment. 
+
+Result 5e: Optimal threshold via Youden’s J statistic. 
+
+Table 6 reports optimal thresholds from the multi-provider experiment. Table 6: Optimal classification thresholds (multi-provider, 15,120 comparisons).                 
+
+> Metric θ∗Youden’s JF1
+> Jaccard 0.408 0.592 0.876 CharMatch 0.146 0.572 0.873 Char n-gram cos 0.809 0.538 0.855 TF-IDF cosine 0.837 0.466 0.844
+
+In the multi-provider setting, Jaccard achieves the best overall classification ( F1 = 0 .876 , J = 0 .592 ), followed closely by CharMatch ( F1 = 0 .873 , J = 0 .572 ). Both metrics attain F1 > 0.87 across 9 models and 7 providers, confirming that lightweight textual similarity metrics— requiring no model internals, embeddings, or logit access— provide practically useful model identity verification even in a heterogeneous multi-provider environment. 
+
+Experiment 6: End-to-End MCP Overhead.          
+
+> Phase Latency
+> MCP request parse 0.02 ms Certificate chain verification 0.097 ms Skills hash comparison <0.001 ms Proxy token validation 0.05 ms Ledger append 0.448 ms
+> Total governance overhead ∼0.62 ms
+> Typical MCP call (no governance) 50–500 ms
+> Overhead as % of total 0.1–1.2%
+
+Experiment 7: Comparison with BAID.                
+
+> Metric BAID Ours Ratio
+> Verification latency ∼120 s 0.097 ms 1.2×10 6
+> Proof size ∼50 KB ∼2 KB 25 ×
+> Infrastructure Blockchain None —Cap. change detection Post-hoc Real-time —
+
+Experiment 8: MCP Governance Proxy Demo. 
+
+To validate real-world applicability, we implement a complete MCP governance proxy in Python (520 lines) that interposes between an MCP client (agent) and MCP server (tool provider). The proxy enforces all three gover-nance requirements: G1 via skills manifest hash verifica-tion against the agent’s certificate, G2 via reproducibility commitment tracking, and G3 via a hash-chain interaction ledger with Ed25519-signed records. We test 5 live attack scenarios:                      
+
+> Attack Result Latency
+> S1: Inject web_browser at runtime Blocked (hash ∆)121 μsS2: Replace read_file with trojan Blocked (code hash) 103 μsS3: Forged certificate (rogue CA) Blocked (sig verify) 106 μsS4: Rate limit abuse (5 →8 calls) 5 pass, 3 blocked 165 μsS5: Tamper ledger record #2 Detected (chain break) —
+
+11 Depth 3 Depth 2 Depth 0                                     
+
+> Root CA + Human
+> NA ·T0
+> Coordinator
+> AG ·T1_HIGH ·d=2 G2= full
+> cert
+> Research
+> T2 ·d=0 {web_search}
+> Analysis
+> T2 ·d=0 {data_proc}
+> Writer
+> T2 ·d=0 {text_gen}
+> Review
+> T3_MON ·d=0 {review}
+> Fact-Check
+> T2 ·d=0 {verify}
+> results insights draft feedback
+> Veriable Interaction Ledger 21 records/run ·bilateral Ed25519 signing ·hash-chain linked · ∼ 250 B/record
+> Per-pipeline governance
+> 10.8 ms total (0.12% overhead) 6 cert verications 10 capability checks 21 ledger appends
+> E2E-1 :+tool E2E-2 :model swap E2E-3 :phantom deleg.
+> E2E-4 :tamper
+> E2E-5 :cascade
+> Scaling: 5 →20 agents
+> Parallel specialist groups Per-agent cost: 1.81 →2.30 ms Sub-linear scaling ( R2>0.99 )
+
+Figure 5: End-to-end multi-agent pipeline architecture with governance overlay. Five specialist agents coordinate through a trust tree (depth 3). Red labels indicate E2E attack injection points (Table 10). All inter-agent commu-nications produce bilaterally-signed ledger records. All attacks are detected in real-time. Over 1,000 gov-erned calls, the proxy achieves mean governance overhead of 120 μs/call (median: 106 μs, p99: 432 μs), throughput of 8,195 governed calls/sec, and all ledger records pass integrity verification. This confirms that the framework provides real-time protection with overhead well below the latency of typical MCP calls (50–500 ms). 
+
+7.3 Attack Scenario Evaluation 
+
+We implement 12 attack scenarios as automated tests: 9 structural governance attacks as Rust unit tests (774 lines), 5 end-to-end scenarios via the MCP governance proxy demo (520 lines), and 3 runtime behavioral at-tacks informed by the Nemotron-AIQ dataset [ 45 ] (which demonstrates 100% attack success rates without structural defenses). Table 7 summarizes results. 
+
+7.4 End-to-End Multi-Agent Pipeline 
+
+Experiments 1–8 evaluate individual governance opera-tions in isolation. To validate the framework under real-istic conditions, we deploy the full A2Auth governance stack across a multi-agent pipeline where agents coor-dinate, delegate tasks, invoke tools via MCP, and pass results through the interaction ledger. This experiment measures: (a) end-to-end governance overhead as a frac-tion of pipeline latency, (b) scaling behavior from 5 to 20 agents, (c) attack detection in situ, and (d) comparison with three baselines. The implementation uses the Rust 
+
+agent-trust-kit SDK exposed to Python via PyO3 FFI, with agents making real Anthropic Claude API calls. 
+
+Pipeline architecture (Figure 5). We implement an AI Research Assistant pipeline: a user submits a research query; a Coordinator agent (T1_HIGH) or-chestrates five specialist agents—Research (T2), Anal-ysis (T2), Writer (T2), Review (T3_MONITORED), and Fact-Checker (T2)—each with a distinct skills manifest and reproducibility commitment. The trust tree has depth 3 (Root CA → Human → Coordinator → Work-ers), with the Coordinator’s max_delegation_depth = 2 
+
+and all workers at depth 0 (cannot delegate). A single pipeline run traverses 21 steps: 10 tool calls (7 LLM invoca-tions + 3 non-LLM tools), 11 inter-agent communications (task assignments and result deliveries), each producing a bilaterally-signed ledger record with capability verification and reproducibility commitment. 
+
+Experiment 9a: Governance overhead. Table 8 breaks down governance cost per pipeline run. Each oper-ation’s latency is consistent with the micro-benchmarks from Experiments 1–4; the end-to-end cost is their com-position. Table 8: Per-pipeline governance overhead breakdown (5-agent configuration, 21 ledger entries per run, mean of 100 runs). 
+
+Operation Per-op Count Subtotal 
+
+Certificate chain verification 97 μs 6 0.58 ms Skills manifest hash check 5.1 μs 10 0.05 ms Ledger append (tool call) 448 μs 10 4.48 ms Reproducibility commitment 6.6 μs 10 0.07 ms Ledger append (inter-agent) 448 μs 11 4.93 ms Bilateral Ed25519 signing 66 μs 11 0.73 ms 
+
+Total governance 21 10.8 ms 
+
+Pipeline latency (real LLM) ∼8.7 s 
+
+Overhead 0.12% 
+
+Governance adds 10.8 ms to a pipeline that takes ∼8.7 s with real Claude API calls (7 LLM inferences at ∼1.2 s each + 3 non-LLM tools at ∼100 ms each). The overhead of 0.12% is dominated by ledger appends (87% of gover-nance cost), confirming that the cryptographic operations themselves (hashing, signing, verification) are negligible relative to I/O-bound agent workloads. 
+
+Experiment 9b: Scaling behavior. We scale the pipeline from 5 to 20 agents by instantiating parallel spe-cialist groups: the Large configuration uses 4 Research agents (handling sub-queries in parallel), 4 Analysis agents, 3 Writer agents, 3 Review agents, 3 Fact-Checkers, 2 Coor-dinators (primary + sub-coordinator), and 1 Aggregator. Table 9 shows that per-agent governance cost remains approximately constant. Table 9: Governance scaling: 5 → 20 agents (mean of 50 runs per configuration). 
+
+Config Agents Ledger Gov. Per-agent Storage entries (ms) (ms) (KB) 
+
+Small 5 21 10.8 1.81 5.2 Medium 10 45 23.0 2.09 11.2 Large 20 95 48.3 2.30 23.8 
+
+Total governance cost scales linearly with ledger en-tries ( R2 > 0.99 ), but per-agent cost increases only 27% when quadrupling the agent count (1.81 ms → 2.30 ms). This near-constant per-agent cost arises because each 12 Table 7: Attack scenario evaluation. All 12 tests pass deterministically. S10–S12 are runtime behavioral attacks validated against Nemotron-AIQ traces. 
+
+Scenario Attack Baseline Framework Detection Mechanism 
+
+S1: Silent escalation Install web_browser at runtime Undetected Prevented capability_binding : hash mismatch S2: Tool trojanization Replace implementation (same name) Undetected Prevented capability_binding : code hash chan S3: Model substitution Forge cert with different model Undetected Detected sig_verify : forged cert unsigned S4: Phantom delegation T2 agent issues T1 cert Undetected Prevented constraint_monotonicity 
+
+S5: Evidence tampering Modify ledger record N/A Detected Hash chain + signature invalidation S6: Blame shifting Dispute in agent chain Unresolvable Resolved Ed25519 signatures S7: Colluding agents T3+T3 attempt T1 access Undetected Prevented tier_check : independent evaluation S8: Chain forgery Fabricated chain — Prevented sig_verify : fake key ̸ = root S9: Depth overflow max _depth = 0 delegation — Prevented Structural: depth < 0 impossible S10: Knowledge poisoning Inject false data via tool output Undetected † Traced Ledger ηin /η out : pinpoint injection sp S11: Cascading hijack Multi-stage instruction persistence Undetected † Traced Hash-chain: full propagation path au S12: Output exfiltration Embed phishing via rendered output Undetected † Detected Replay divergence from committed πi
+
+> †100% attack success in Nemotron-AIQ undefended traces (2,596 security trials).
+
+agent’s governance operations—certificate verification, ca-pability checking, ledger append—are independent of the total number of agents in the pipeline. The slight in-crease comes from deeper trust chains in the Large con-figuration (depth 4 vs. depth 3) adding one extra signa-ture verification per activation. Ledger storage grows at 
+
+∼250 bytes per entry; even the 20-agent pipeline produces only 23.8 KB per run, confirming that commitment-only storage (§5) is practical for long-running agent workflows. 
+
+Experiment 9c: End-to-end attack detection. We inject five attacks into the live 5-agent pipeline, each targeting a different governance layer. Unlike the unit-level tests in Table 7, these attacks occur mid-pipeline with real inter-agent data flow. Table 10: End-to-end attack detection in the live multi-agent pipeline. 
+
+Attack Target Layer Detect. Hops ∗
+
+E2E-1: Capability escalation Research G1 5 μs —E2E-2: Model substitution Analysis G2 † —E2E-3: Phantom delegation Writer G1 97 μs —E2E-4: Ledger tampering Ledger G3 32 μs —E2E-5: Cascading injection Pipeline G1+G2+G3 97 μs 3  
+
+> ∗Forensic trace hops to identify root cause. †Replay latency dominated by LLM re-inference ( ∼1.2 s), not framework cost ( ∼13 μs).
+
+All five attacks are detected. E2E-1 (Research Agent’s MCP server advertises an extra file_write tool at run-time) is caught in 5 μs by the skills manifest hash check— the cheapest possible defense. E2E-2 (Analysis Agent secretly uses Haiku 4.5 instead of declared Sonnet 4) re-quires replay verification; the framework’s comparison cost is 13 μs, but the dominant cost is LLM re-inference (∼1.2 s). E2E-3 (Writer Agent attempts to delegate to an unregistered “Formatter” agent) is blocked at two lev-els: the Writer’s max_depth = 0 prevents delegation, and the Formatter has no valid certificate chain. E2E-4 (at-tacker modifies the Research →Analysis result record’s output commitment) is detected immediately by hash-chain verification. E2E-5 (poisoned search results propa-gate through Research →Analysis →Writer) demonstrates multi-layer detection: ledger forensics traces the prove-nance chain through 3 hops to the injected web_search 
+
+call, replay verification confirms divergence, and if the poi-soned tool is a code-level replacement, capability binding catches the hash mismatch before execution. Across 100 clean pipeline runs (500 total governed tool calls, 2,100 ledger entries), zero false positives are ob-served. 
+
+Experiment 9d: Baseline comparison. We evaluate the same five E2E attacks against three baselines: (1) no governance (raw MCP), (2) MCP with OAuth 2.1 (stan-dard MCP authentication per specification), and (3) MCP with OpenTelemetry traces (observability-only, no crypto-graphic integrity). Table 11 summarizes results. Table 11: E2E attack detection: A2Auth vs. baselines (✓ = detected/prevented, ✗ = undetected). G1/G2/G3 indicate which governance requirement enables detection. 
+
+Attack No gov. OAuth OTEL A2Au 
+
+E2E-1: Capability escalation ✗ ✗ ✗ ✓ (G1 E2E-2: Model substitution ✗ ✗ ✗ ✓ (G2 E2E-3: Phantom delegation ✗ ✗a ✗ ✓ (G1 E2E-4: Ledger tampering N/A N/A ✗b ✓ (G3 E2E-5: Cascading injection ✗ ✗ ✗c ✓ (G1+G2 
+
+Total detected 0/5 0/5 0/5 5/5   
+
+> aOAuth authenticates the Writer but has no delegation depth constraint. bOTEL traces can be silently modified (no hash chain or signatures; §5). cOTEL logs the poisoned data flow but cannot prove tampering or trace provenance cryptographically.
+
+OAuth 2.1 provides identity authentication but not ca-pability binding: it verifies who the agent is, not what tools it currently has . OpenTelemetry provides observability 13 but not integrity: OTEL span trees log tool calls and parent-child relationships, but as demonstrated by anal-ysis of 10,796 Nemotron-AIQ traces (§5), OTEL records contain no hash chains, no cryptographic signatures, and no identity binding—any field can be silently modified. A2Auth’s three governance layers (G1+G2+G3) provide the only configuration that detects all five attack types, with governance overhead below 0.2% of pipeline latency. 
+
+## 8 Limitations and Future Work 
+
+8.1 Scope of Contribution 
+
+Our contribution is a governance framework , not novel cryptographic primitives. The individual building blocks— X.509 certificates, SHA-256, Ed25519, hash chains—are standard. The novelty lies in (a) identifying the capability-context separation as the principled boundary for agent governance, (b) showing that composing standard mecha-nisms along this boundary enforces G1–G3 with negligible overhead, and (c) demonstrating this is practically achiev-able. We view this as analogous to Certificate Trans-parency [ 16 ], which composes Merkle trees and gossip protocols—neither novel individually—into infrastructure that fundamentally changed how the web PKI operates. The security proofs are intentionally straightforward re-ductions to standard assumptions (collision resistance, EUF-CMA); the contribution is in what to build , not in 
+
+new ways to prove things .
+
+8.2 Capability Binding Limitations 
+
+Capability-context boundary. Our sharp boundary has edge cases: a “code execution” tool can effectively acquire new capabilities through composition (e.g., down-loading and running arbitrary scripts). Our framework guarantees that the registered capability set has not changed, but the effective attack surface within a fixed capability envelope can still be large. Complementary approaches (sandboxing, taint tracking, output filtering) are needed to govern behavior within the envelope. We view capability binding and intra-capability governance as orthogonal layers: the former ensures the attack surface is known; the latter constrains behavior within it. 
+
+Closed-source binding. For closed-source models and tools, the skills hash captures configuration metadata (name, version, API schema), not implementation code. A provider could change implementation without changing the public descriptor. Reproducibility verification provides a complementary detection mechanism: implementation changes that alter behavior will be detected via replay divergence. 
+
+Re-signing frequency. Mitigated through wildcard tool categories, short-lived auto-renewable certificates, and the empirical observation that tool configurations change far less frequently than user context. 
+
+8.3 Reproducibility Limitations and Graceful Degradation 
+
+Reproducibility is a design constraint, not a uni-versal guarantee. Our framework makes explicit what is often implicit: non-reproducible agent behavior is non-verifiable . This is not a limitation unique to our approach— it applies to any verification scheme not based on trusted hardware. For high-assurance deployments, this means agents should be configured for deterministic output (struc-tured formats, temperature =0, fixed seeds). Our empirical results (§7) show that code-generating agents already sat-isfy this constraint perfectly, and the separation between same-model and cross-model distributions ( 11 .5×) pro-vides robust detection even for prose tasks. 
+
+Graceful degradation under partial G2. Our multi-provider experiment (§7, Experiment 5c) reveals that model determinism varies by over an order of magnitude: from CharMatch =0.987 (Haiku 4.5) to 0.169 (Kimi K2.5). This raises a practical question: what security guarantees hold when some agents use low-determinism models? When G2 is unavailable (reproducibility commitment =
+
+none ), the framework degrades to G1+G3 only. Table 12 characterizes the precise security impact. Table 12: Security guarantees under G1+G2+G3 vs. G1+G3 degradation.                     
+
+> Attack class G1+G2+G3 G1+G3
+> Silent capability escalation (ATK-1) Prevented Prevented Tool trojanization (ATK-3) Prevented Prevented Phantom delegation (ATK-4) Prevented Prevented Chain/depth violation (ATK-5,6) Prevented Prevented Evidence tampering (ATK-8) Detected Detected Blame shifting (ATK-9) Resolved Resolved Credential collusion (ATK-7) Prevented Prevented Model substitution (ATK-2) Detected ✗
+> Output exfiltration (ATK-12) Detected ✗
+
+G1+G3 alone protect against 9 of 12 attack types. The three attacks that require G2—model substitution (ATK-2), cascading injection via model compromise (ATK-10/11 when the injection occurs through model replacement rather than tool replacement), and output exfiltration via model tampering (ATK-12)—share a common structure: the attacker operates within a valid capability envelope by substituting the computational process itself. Signing proves attribution; only G2 proves computational fidelity. 
+
+Chain-level degradation. The Chain Verifiability Theorem (§4.8) establishes a stronger result: a G2 =none 
+
+agent at an interior position breaks behavioral verifica-tion for all downstream nodes. This means the true cost of deploying a low-determinism model at a coordinator position is not merely that the coordinator itself is un-verifiable, but that the entire sub-tree it governs loses G2 protection. The framework’s three commitment levels (full /statistical /none ) are thus not equivalent—their 14 security implications depend critically on chain position. 
+
+Statistical vs. computational security. Token-level reproducibility provides statistical rather than computa-tional security. However, the Bounded Divergence Theo-rem (§4.7) shows this gap is operationally small: sufficient replay verification transforms statistical detection into a provable safety certificate. An adversary who fine-tunes a model to pass n diverse replay checks has produced a model that is (n, ϵ )-indistinguishable from the original, with ϵ decreasing exponentially in n. Future work will ex-plore semantic similarity (embedding cosine distance) as a verification metric, which may provide tighter separation bounds and is robust to paraphrase-level variation. 
+
+Provider cooperation. Replay verification requires access to the same model version. Organizations should ne-gotiate replay rights as part of service agreements. Deter-ministic inference providers [ 6] eliminate this dependency entirely. 
+
+8.4 Trust Infrastructure Limitations 
+
+Non-agent node compromise. We assume non-agent nodes (CAs, humans, organizations) are uncompromised. Standard PKI mitigations apply: Certificate Transparency logs, hardware trust anchors (TPM 2.0), and multi-party issuance protocols. Ledger operator trust. The current single-operator ledger relies on bilateral signing for tamper evidence. A multi-operator design with consensus is possi-ble but introduces latency overhead. Application-layer data flow. Our framework governs agent identity and capability , not the content of data flows. Complementary approaches (data-flow taint tracking, differential privacy) address this orthogonal concern. 
+
+8.5 Future Work 
+
+Hardware-attested agent identity (TPM 2.0, TEEs) for stronger G2 guarantees without provider cooperation. Embedding-based semantic similarity for reproducibility verification with formal threshold analysis. Cross-protocol capability governance beyond MCP/A2A. AI-assisted cer-tificate issuance to reduce operational burden. Dynamic trust calibration from ledger history, enabling trust scores to evolve based on observed agent behavior. 
+
+## 9 Related Work 
+
+We organize related work along the four-layer landscape. 
+
+Identity Platforms. Keyfactor [19 ] and HID Global [ 20 ] propose X.509 for agents but without tool binding. SPIFFE/SPIRE [ 21 , 22 ] provides workload iden-tity. CyberArk [37] extends PAM to agents. 
+
+Authorization Frameworks. OIDC-A [ 4] extends OpenID Connect with agent claims. South et al. [ 3 ] pro-pose Agent-ID Tokens (ICML 2025). Agentic JWT [ 10 ]defines delegation with temporal constraints. 
+
+Runtime Gateways. Gravitee [ 40 ] and Lasso [ 41 ]provide MCP proxies with per-call enforcement— fundamentally stateless. 
+
+Governance Platforms. Credo AI [ 42 ] maintains agent registries at the documentation layer. 
+
+Verifiable Execution. BAID [ 2] provides zkVM-based verification ( ∼120 s per proof). DiFR [ 1] demonstrates inference near-determinism. EigenAI [ 6 ] achieves 100% deterministic inference. Attestable Audits [7] uses TEEs. 
+
+Classical Trust Management. PolicyMaker [ 12 ], KeyNote [13], SPKI/SDSI [14], F-PKI [16], ARPKI [17]. 
+
+Agent Protocols. A2A [ 8] provides agent communica-tion. MCP enables agent-tool interaction with OAuth 2.1. 
+
+Agent Governance Frameworks. Cheng et al. [ 43 ]propose a three-pillar model (transparency, accountability, trustworthiness) as a conceptual governance framework. Allegrini et al. [ 44 ] formalize 31 task-lifecycle properties in CTL/LTL but address operational correctness rather than cryptographic governance. Ghosh et al. [ 45 ] pro-pose an operational safety framework with agent red-teaming probes (ARP), policy-based tool scoping, and OpenTelemetry-based audit trails, validated through a 10,796-trace dataset (Nemotron-AIQ) covering 22 secu-rity attack templates and 13 content-safety categories against NVIDIA’s AI-Q research assistant. Their empiri-cal results demonstrate that without guardrails, all 2,596 security attacks succeed (100%), and 20% of 2,800 safety attacks propagate to the final output—providing com-pelling evidence for the inadequacy of relying solely on model alignment. However, their OTEL-based audit trails lack cryptographic integrity: span linkage is purely refer-ential (no hash chaining), spans carry no agent identity binding (no certificates), and full plaintext I/O is stored (no privacy preservation). Our framework addresses these gaps with a formally verified, hash-chain-linked, bilaterally signed interaction ledger (Section 5). Furthermore, their “signed schemas” and “per-call capability tokens” remain design principles without cryptographic specification or formal proofs. Raza et al. [ 28 ] adapt TRiSM for agentic multi-agent systems. 
+
+Regulatory Landscape. The EU AI Act (Regulation 2024/1689) requires traceability but lacks agent-specific implementing acts [ 33 ]. NIST CAISI [ 26 ] is developing agent standards. CSA [ 24 , 25 ] proposes agentic trust frameworks. 
+
+## 10 Conclusion 
+
+AI agents increasingly acquire capabilities at runtime, yet no existing framework enforces the three governance requirements—capability integrity, behavioral verifiability, and interaction auditability—that a trustworthy agent ecosystem demands. We addressed this through the capability-context sepa-ration principle and three mechanisms: capability-bound certificates (G1), reproducibility commitments (G2), and a verifiable interaction ledger (G3). We formalized nine security properties (including chain verifiability: behav-ioral verification is a chain property broken by any un-verifiable interior agent), implemented the framework in 15 Rust with 97 μs verification and <1 ns capability binding overhead ( ∼1,200 ,000 × faster than BAID), validated re-producibility across 9 models from 7 providers ( F1 = 0 .876 
+
+multi-provider, F1 = 0 .990 single-provider), and verified 12 attack scenarios—including runtime behavioral attacks validated against NVIDIA Nemotron-AIQ traces—with specific, traceable detection mechanisms. An end-to-end evaluation deploying the full governance stack across a 5-to-20-agent pipeline with real LLM calls confirms 0.12% overhead, sub-linear per-agent scaling, and detection of all in-situ attacks with zero false positives—while three base-lines (no governance, OAuth 2.1, OpenTelemetry) detect none. Our framework fills the stateful, capability-aware gover-nance gap between identity platforms and runtime gate-ways. As the EU AI Act’s high-risk provisions take effect and NIST develops agent-specific standards, the need for cryptographic infrastructure enforcing G1–G3 will only grow. We release the core mechanisms as an open-source SDK (agent-trust-kit ) to enable ecosystem adoption. 
+
+## References 
+
+[1] A. Karvonen et al., “DiFR: Inference Verification Despite Nondeterminism,” arXiv:2511.20621 , 2025. 
+
+https://arxiv.org/abs/2511.20621 
+
+[2] Z. Lin, S. Zhang, G. Liao, D. Tao, T. Wang, “Binding Agent ID: Unleashing the Power of AI Agents with Accountability and Credibility,” arXiv:2512.17538 ,2025. https://arxiv.org/abs/2512.17538 
+
+[3] T. South et al., “Authenticated Delegation and Authorized AI Agents,” ICML 2025 (Position), 
+
+arXiv:2501.09674 . https://arxiv.org/abs/2501. 09674 
+
+[4] S. N., “OpenID Connect for Agents (OIDC-A) 1.0: A Standard Extension for LLM-Based Agent Identity and Authorization,” arXiv:2509.25974 , 2025. https: //arxiv.org/abs/2509.25974 
+
+[5] T. South et al., “Identity Management for Agentic AI,” OpenID Foundation, arXiv:2510.25819 , 2025. 
+
+https://arxiv.org/abs/2510.25819 
+
+[6] D. R. Alves, “EigenAI: Deterministic Inference, Ver-ifiable Results,” arXiv:2602.00182 , 2026. https:// arxiv.org/abs/2602.00182 
+
+[7] C. Schnabl et al., “Attestable Audits: Verifiable AI Safety Benchmarks Using Trusted Execution Envi-ronments,” arXiv:2506.23706 , 2025. https://arxiv. org/abs/2506.23706 
+
+[8] Google / Linux Foundation, “Agent2Agent (A2A) Protocol Specification v0.3,” 2025. https://github. com/google/A2A 
+
+[9] “Improving Google A2A Protocol: Protecting Sensi-tive Data and Mitigating Unintended Harms in Multi-Agent Systems,” arXiv:2505.12490 , 2025. https: //arxiv.org/abs/2505.12490 
+
+[10] “Agentic JWT: A Secure Delegation Protocol for Autonomous AI Agents,” arXiv:2509.13597 , 2025. 
+
+https://arxiv.org/abs/2509.13597 
+
+[11] C. Schroeder de Witt et al., “Open Challenges in Multi-Agent Security: Towards Secure Systems of Interacting AI Agents,” arXiv:2505.02077 , 2025. 
+
+https://arxiv.org/abs/2505.02077 
+
+[12] M. Blaze, J. Feigenbaum, J. Lacy, “Decentralized Trust Management,” Proc. IEEE S&P , 1996. https: //dl.acm.org/doi/10.1109/SECPRI.1996.502679 
+
+[13] M. Blaze, J. Feigenbaum, A. Keromytis, “The KeyNote Trust-Management System Version 2,” RFC 2704, 1999. https://www.rfc-editor.org/ rfc/rfc2704 
+
+[14] C. Ellison et al., “SPKI Certificate Theory,” RFC 2693, 1999. https://www.rfc-editor.org/ rfc/rfc2693 
+
+[15] D. Cooper et al., “Internet X.509 PKI Certificate and CRL Profile,” RFC 5280, 2008. https://www. rfc-editor.org/rfc/rfc5280 
+
+[16] L. Chuat et al., “F-PKI: Enabling Innova-tion and Trust Flexibility in the HTTPS Public-Key Infrastructure,” Proc. NDSS , 2022. 
+
+https://www.ndss-symposium.org/ndss-paper/ auto-draft-249/ 
+
+[17] D. Basin et al., “ARPKI: Attack Resilient Public-Key Infrastructure,” Proc. CCS , 2014. https://dl.acm. org/doi/10.1145/2660267.2660298 
+
+[18] S. Wrótniak, H. Leibowitz, E. Syta, A. Herzberg, “Provable Security for PKI Schemes,” Proc. CCS ,2024. https://eprint.iacr.org/2019/807 
+
+[19] Keyfactor, “3 Things to Know About Key-factor’s PKI-Based Identity for Agentic AI,” 2025. https://www.keyfactor.com/blog/ 3-things-to-know-about-keyfactors-pki-based-identity-
+
+[20] HID Global, “Trust Standards Evolve: AI Agents, the Next Chapter for PKI,” 2025. https://blog.hidglobal.com/ trust-standards-evolve-ai-agents-next-chapter-pki 
+
+[21] HashiCorp, “SPIFFE: Securing the Iden-tity of Agentic AI and Non-Human Actors,” 2025. https://www.hashicorp.com/en/blog/ spiffe-securing-the-identity-of-agentic-ai-and-non-hu 
+
+[22] Solo.io, “Agent Identity and Access Management— Can SPIFFE Work?” 2026. https://www.solo.io/ blog/agent-identity-management-spiffe 
+
+16 [23] OASIS Security, “Agentic Access Management Frame-work,” 2025. https://www.oasis.security/blog/ agentic-access-management-framework 
+
+[24] CSA, “AI Security: When Your Agent Crosses Multiple Independent Systems, Who Vouches for It?” 2026. https:// cloudsecurityalliance.org/blog/2026/03/11/ ai-security-when-your-agent-crosses-multiple-independent-systems-who-vouches-for-it 
+
+[25] CSA, “The Agentic Trust Framework: Zero Trust Governance for AI Agents,” 2026. https:// cloudsecurityalliance.org/blog/2026/02/02/ the-agentic-trust-framework-zero-trust-governance-for-ai-agents 
+
+[26] NIST, “AI Agent Standards Initiative (CAISI),” 2026. https://www.nist.gov/caisi/ ai-agent-standards-initiative 
+
+[27] Ping Identity, “Identity for AI,” 2026. 
+
+https://developer.pingidentity.com/ identity-for-ai/index.html 
+
+[28] S. Raza, R. Sapkota, M. Karkee, C. Emmanouilidis, “TRiSM for Agentic AI: A Review of Trust, Risk, and Security Management in LLM-based Agentic Multi-Agent Systems,” AI Open , vol. 7, pp. 71–95, 2026. https://www.sciencedirect.com/science/ article/pii/S2666651026000069 
+
+[29] “Trusted AI Agents in the Cloud,” arXiv:2512.05951 ,2025. https://arxiv.org/abs/2512.05951 
+
+[30] Y. Ding, “Decentralized Multi-Agent System with Trust-Aware Communication,” arXiv:2512.02410 ,2025. https://arxiv.org/abs/2512.02410 
+
+[31] Red Hat, “How to Enhance Agent2Agent (A2A) Security,” 2025. https://developers. redhat.com/articles/2025/08/19/ how-enhance-agent2agent-security 
+
+[32] MCP Ecosystem Report, “Over 1,000 MCP tool servers,” 2026. https://www.pulsemcp.com/ 
+
+[33] L. Jones, “Agentic Tool Sovereignty,” European Law Blog , 2025. https://www.europeanlawblog. eu/pub/dq249o3c/release/1 
+
+[34] A. Oueslati, R. Staes-Polet, The Future Society, “Ahead of the Curve: Governing AI Agents Under the EU AI Act,” 2025. https://thefuturesociety. org/wp-content/uploads/2023/04/ Report-Ahead-of-the-Curve-Governing-AI-Agents-Under-the-EU-AI-Act-4-June-2025. pdf 
+
+[35] Token Security, “The Shift From Credentials to Capabilities in AI Access Control Systems,” 2025. https://www.token.security/blog/ the-shift-from-credentials-to-capabilities-in-ai-access-control-systems 
+
+[36] Obsidian Security, “The 2025 AI Agent Secu-rity Landscape: Players, Trends, and Risks,” 2025. https://www.obsidiansecurity.com/blog/ ai-agent-market-landscape 
+
+[37] CyberArk, “Securing Identities for the Agentic AI Landscape,” 2026. https: //www.cyberark.com/resources/blog/ securing-identities-for-the-agentic-ai-landscape 
+
+[38] Aembit, “Workload-to-Workload Identity for Non-Human Entities,” 2025. https://aembit.io/ 
+
+[39] Cerbos, “MCP Authorization: Securing Model Con-text Protocol Servers With Fine-Grained Access Control,” 2026. https://www.cerbos.dev/blog/ mcp-authorization 
+
+[40] Gravitee, “AI Agent Management,” 2026. https:// www.gravitee.io/ai-agent-management 
+
+[41] Lasso Security, “Secure Your MCP Connections,” 2026. https://www.lasso.security/use-cases/ mcp-security 
+
+[42] Credo AI, “Agents Registry,” 2026. https://www. credo.ai/ai-agent-registry 
+
+[43] E. C. Cheng, J. Cheng, A. Siu, “Toward Safe and Responsible AI Agents: A Three-Pillar Model for Transparency, Accountability, and Trustworthiness,” 
+
+arXiv:2601.06223 , 2026. https://arxiv.org/abs/ 2601.06223 
+
+[44] E. Allegrini, A. Shreekumar, Z. B. Celik, “Formalizing the Safety, Security, and Functional Properties of Agentic AI Systems,” arXiv:2510.14133 , 2025. https: //arxiv.org/abs/2510.14133 
+
+[45] S. Ghosh et al., “A Safety and Security Framework for Real-World Agentic Systems,” arXiv:2511.21990 ,2025. https://arxiv.org/abs/2511.21990 
+
+[46] OpenTelemetry Authors, “OpenTelemetry Specifica-tion v1.40,” CNCF, 2025. https://opentelemetry. io/docs/specs/otel/ 
+
+17
