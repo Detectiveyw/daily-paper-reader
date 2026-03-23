@@ -1,0 +1,588 @@
+Title: AEX: Non-Intrusive Multi-Hop Attestation and Provenance for LLM APIs
+
+URL Source: https://arxiv.org/pdf/2603.14283v1
+
+Published Time: Tue, 17 Mar 2026 04:39:59 GMT
+
+Number of Pages: 29
+
+Markdown Content:
+# AEX : Non-Intrusive Multi-Hop Attestation and Provenance for LLM APIs 
+
+Yongjie Guan Zhejiang University of Technology March 17, 2026 
+
+Abstract 
+
+Hosted large language models are increasingly accessed through remote APIs, but the API boundary still offers little direct evidence that a returned output actually corresponds to the client-visible request. Recent audits of shadow APIs show that unofficial or intermediary end-points can diverge from claimed behavior, while existing approaches such as fingerprinting, model-equality testing, verifiable inference, and TEE attestation either remain inferential or answer different questions. We propose AEX , a non-intrusive attestation extension for existing JSON-based LLM APIs. AEX preserves request, response, tool-calling, streaming, and error semantics, and instead adds a signed top-level attestation object that binds a client-visible request projection to either a complete response object or a committed streaming output. To support realistic deployments, AEX provides explicit request-binding modes, signed request-transform receipts for trusted intermediaries, and source-output / output-transform receipts for trusted output rewriting. For streaming, it separates checkpoint proofs for verified prefixes of an unmodified source stream from complete-output lineage for outputs that have been rewrit-ten, buffered, aggregated, or re-packaged, preventing transformed outputs from being mistaken for source-stream prefixes. AEX therefore makes a deliberately narrow claim: a trusted is-suer attests to a specific request-output relation, or to a specific complete-output lineage, at the API boundary. We present the protocol design, threat model, verification state machine, security and privacy analysis, an OpenAI-compatible chat-completions profile, and a reference TypeScript prototype with local conformance tests and microbenchmarks. 
+
+# 1 Introduction 
+
+Large language models (LLMs) have become infrastructure consumed primarily through remote APIs rather than local model execution [3, 17]. That shift moves an important trust boundary outward: users and downstream systems therefore rely on a provider’s API boundary not only for availability and latency, but also for provenance, integrity, and reproducibility. Recent evidence suggests that this trust boundary is increasingly stressed. Zhang et al. present the first systematic audit of LLM shadow APIs — unofficial endpoints that claim compatibility with official model APIs — and identify 17 such services appearing in 187 papers. Their study reports utility divergence up to 47.21%, fingerprint-verification failures on 45.83% of evaluated endpoints, and concludes by calling for “lightweight official verification endpoints” that researchers could query to confirm model identity independently [1]. The same paper also shows that fingerprinting and statistical testing are useful but incomplete: in some cases, identity-consistent serving still fails to preserve behavior, suggesting that audit-by-inference is not enough [1]. 1
+
+> arXiv:2603.14283v1 [cs.CR] 15 Mar 2026
+
+A growing body of work seeks to verify LLM services in other ways. LLM fingerprinting aims to infer which model likely sits behind an endpoint [2]. Model Equality Testing (MET) detects distributional mismatches between an endpoint and a reference model [3]. Verifiable inference schemes such as SVIP ask providers to expose model-internal evidence [4]. TEE-based systems and remote-attestation protocols seek stronger guarantees about the environment in which code runs [6, 7, 5]. These are all useful, but they answer different questions. The gap addressed in this paper is simpler and more deployment-oriented: how can an existing LLM API attach direct, online, verifiable evidence that a particular client-visible request is bound to a particular response object or streaming output sequence? 
+
+We argue that the right place to answer that question is the API protocol boundary itself. In practice, many LLM APIs are JSON-based and frequently streamed over Server-Sent Events (SSE). They also often pass through middleware layers that add defaults, rewrite prompts, inject policy instructions, redact outputs, buffer streams, or re-encode responses. A deployable attestation layer therefore needs to satisfy eight constraints at once: 1. preserve existing request and response semantics; 2. bind a client-visible request object without requiring byte-for-byte preservation of the transport representation; 3. support explicit, client-selected request-binding strictness; 4. bind entire streaming outputs, including order, count, and completeness; 5. detect truncation; and 6. distinguish between unauthorized request mutation and trusted, explicitly accepted request rewriting; 7. represent trusted output rewriting, re-encoding, aggregation, or stream re-packaging explicitly rather than treating it as undifferentiated tampering; and 8. distinguish source-stream prefix proofs from complete-output lineage proofs so that clients do not over-interpret partial evidence. This paper proposes AEX (Attestation EXtension), a protocol extension that addresses those constraints by composing well-understood mechanisms — canonical JSON, cryptographic hashing, digital signatures, issuer-discovered public keys, and hash chaining — into an LLM-specific trans-action attestation layer. AEX deliberately does not claim a new cryptographic primitive. Its contribution is protocol design: a concrete, interoperable way to add request-output attestation to existing LLM APIs without changing their body semantics. 
+
+Contributions. This paper makes five contributions. 
+
+• It formulates the API-boundary attestation problem for hosted LLM services and argues that recent shadow-API evidence makes this problem practically urgent [1]. 
+
+• It presents AEX , a non-invasive attestation extension for existing JSON-based LLM APIs, including request commitments, complete-output commitments, explicit request-binding modes, issuer-signed top-level attestations, and output-mode-aware lineage metadata. 
+
+• It introduces three LLM-specific protocol mechanisms: a dual-anchor streaming hash chain ,2an explicit request-transform chain for trusted intermediaries, and a source-output / output-transform receipt model for trusted output rewriting. 
+
+• It provides a security, privacy, and deployment analysis and positions AEX against neighboring approaches from HTTP message signing, provenance frameworks, TEE attestation, and LLM auditing. 
+
+• It reports a reference TypeScript prototype together with simulator-based local validation, automated conformance testing, and scenario-driven microbenchmarks over a gateway/prox-y/provider testbed that exercises both checkpoint-based streaming proofs and complete-output-lineage flows. 
+
+Scope. AEX is a provenance and integrity mechanism at the transaction boundary. It proves that a trusted issuer signed a binding between a request commitment and an output commitment, and when output-lineage metadata is present it additionally proves that the final complete output was derived from an explicitly attested source output through a signed transform chain. It does not 
+
+prove that an output is true, that no hidden prompt exists, that the serving path used a specific set of model weights, or that the provider behaved honestly beyond what is captured by the signed object. 
+
+# 2 Problem Statement and Threat Model 
+
+2.1 System model 
+
+We consider a client invoking an LLM API whose request and response bodies are JSON objects. Responses may be non-streaming or may arrive as a sequence of JSON objects, often carried in SSE framing [16, 18]. Between the client and the model-serving backend, a request may pass through multiple components: 
+
+• API gateways or reverse proxies, 
+
+• middleware that injects defaults or policy text, 
+
+• auditing or logging sidecars, 
+
+• trusted-execution environments (TEEs) or attestation-capable serving stacks, and 
+
+• untrusted or semi-trusted third-party intermediaries. An issuer is the entity that signs the final attestation. A verifier is the party that receives the response together with the original request and checks the attestation. A verifier may be the client itself, an SDK, a gateway, or an auditor. 
+
+2.2 Goals 
+
+AEX is designed to satisfy the following goals. 1. Non-invasiveness. The original API body semantics, tool semantics, streaming semantics, and error semantics remain unchanged. 32. Client-visible request binding. The verifier can reconstruct a stable request commitment from the request object the client actually sent. 3. Explicit compatibility control. The client can select how strict request binding should be, to account for benign middleware changes. 4. Streaming integrity. The verifier can detect chunk insertion, deletion, reordering, and trun-cation. 5. Trusted request rewriting. Explicitly trusted intermediaries can rewrite requests without collapsing all differences into a generic request mismatch. 6. Trusted output rewriting. Explicitly trusted intermediaries can rewrite, buffer, re-encode, aggregate, or re-package outputs through an auditable output-lineage chain. 7. Sound streaming proof boundaries. Prefix proofs for a source stream must be distinguished from complete-output lineage for transformed outputs; the protocol must not let clients confuse one for the other. 8. Deployment realism. The mechanism should compose with OpenAI-compatible APIs and with issuer-specific key-discovery infrastructure. 
+
+2.3 Non-goals 
+
+AEX does not attempt to solve all trust problems in hosted LLM use. 
+
+• It does not prove model truthfulness or factual correctness. 
+
+• It does not prove absence of hidden prompts, hidden retrieval, or hidden policy systems. 
+
+• It does not prove exact model weights or hardware configuration. 
+
+• It does not prove that every hidden intermediate output in an accepted output-transform chain is visible or reconstructible to the client. 
+
+• It does not prove that an accepted output transform is semantically correct, reasonable, or minimal. 
+
+• It does not replace TEE remote attestation, model fingerprinting, or model-equality testing; it complements them. 
+
+2.4 Adversary model 
+
+We consider an active network or middleware adversary that can tamper with requests and re-sponses, reorder or truncate streaming outputs, attach stale or unrelated attestations, or attempt to induce verification failures through key-discovery abuse. We also consider an untrusted interme-diary that may silently rewrite the request or misrepresent a backend model. 
+
+AEX can detect many such actions if they alter the attested request or output relation. However, if the issuer itself is malicious, or if the verifier trusts the wrong issuer, the attestation proves only that that issuer signed the relation. This is an unavoidable trust-root limitation shared by other attestation systems [7, 6]. 43 Design Overview 
+
+3.1 Boundary and representation 
+
+AEX operates over JSON semantic objects , not raw transport bytes. This choice follows the logic of JSON canonicalization: cryptographic operations need an invariant representation even when the “wire” form differs in whitespace, field ordering, or numeric spelling [14]. Accordingly, AEX uses the JSON Canonicalization Scheme (JCS) [14] as its canonical byte representation and Ed25519 signatures as a mandatory signature algorithm [15]. The design assumes I-JSON-like inputs with unique object keys and no NaN/Infinity values [8]; objects that cannot be deterministically canon-icalized are out of scope for successful attestation. Numeric spellings such as 1, 1.0 , and 1e3 
+
+therefore matter only through the canonicalized value they denote, not through their original lexi-cal representation. The protocol attaches a top-level field named attestation to a JSON response object. For com-mitment computation, the top-level attestation field is removed; nested fields with the same name are left untouched. This makes AEX detached from the business payload while allowing the payload to remain an ordinary JSON object. Domain separation is provided by literal UTF-8 tags such as AEX-REQ-V1 , AEX-RESP-V1 , AEX-CHUNK-V1 , AEX-STREAM-V1 , AEX-TRANSFORM-V1 ,
+
+AEX-ORIGIN-OUTPUT-V1 , AEX-OUTPUT-TRANSFORM-V1 , and AEX-ATTESTATION-V1 , each prepended to the relevant canonicalized object before hashing or signing. 
+
+3.2 Requests, outputs, and profiles 
+
+A protocol profile defines how AEX is attached to a particular API. The motivating profile in this paper is an OpenAI-compatible chat-completions API, which accepts a JSON request containing a list of messages and returns either a single chat-completion object or a streamed sequence of chunk objects [17]. Because many deployed APIs follow this interface or close variants of it, an OpenAI-compatible profile provides a realistic baseline. 
+
+3.3 Core commitments 
+
+AEX introduces three kinds of cryptographic commitments. 
+
+• Request commitment. A digest over a client-visible request projection. 
+
+• Effective request commitment. An optional digest over the final, publicly explainable request actually executed after trusted rewriting or deterministic normalization. 
+
+• Output commitment. A digest over a complete non-streaming response object or over a complete authenticated streaming chain. In all cases, commitments are represented in JSON as strings of the form 
+
+sha256:<64 lowercase hex characters> 
+
+but are interpreted internally as raw 32-byte digests. Output commitments are always interpreted together with an explicit output_mode so that complete non-streaming objects and complete stream-ing chains are never conflated. 53.4 Request binding as an explicit choice 
+
+A distinctive feature of AEX is that the client chooses the request-binding mode. The reason is practical: some deployments require end-to-end request immutability, whereas others legitimately add fields such as trace identifiers or routing hints at the gateway. AEX therefore defines three request-binding modes: 1. full : bind the entire request object after removing the top-level attestation ;2. top_level_exclude : bind the request after removing a named set of top-level fields; 3. top_level_include : bind only a named set of top-level fields. The third mode has one subtle but important feature: it also binds which listed top-level fields are 
+
+absent . This protects against a class of compatibility/security failures in which a middleware layer silently injects a previously absent field. 
+
+3.5 Streaming as a first-class object 
+
+Streaming is not merely a transport optimization; it changes what must be verified. In a non-streaming response, integrity of the final JSON object is sufficient. In a streamed response, the verifier must be able to detect not only tampering with any chunk but also deletion, insertion, reordering, and premature termination. Prior stream-authentication work has long recognized that efficient authentication for streamed data needs different machinery than independent signatures per packet [22]. AEX adopts that lesson at the LLM API layer using a chunk hash chain. However, AEX draws a sharp line between two different streaming claims. If the delivered stream is the source issuer’s own untransformed stream, checkpoint attestations can certify verified pre-fixes of that source stream. If a trusted intermediary changes chunk content, count, order, framing boundaries, aggregation, or streaming/non-streaming representation, then the final output is no longer the source stream. In that case, AEX stops offering prefix proofs and instead offers only complete-output lineage: the final terminal attestation can identify a source issuer’s original com-plete output and a signed chain of trusted output transforms that lead to the final complete output delivered to the client. 
+
+3.6 Trusted request transforms 
+
+Existing message-signing systems already acknowledge that intermediaries may transform mes-sages. HTTP Message Signatures, for example, are designed to survive only those transformations that the signer intentionally excludes from the signed component set [13]. AEX goes further for LLM APIs by making trusted request mutation explicit through signed request_transforms re-ceipts. A sequence of such receipts can attest that a request commitment was transformed into a later effective-request commitment by named, trusted intermediaries. This turns otherwise opaque prompt rewriting into a verifiable chain rather than an implicit exception. 
+
+3.7 Trusted output transforms and source receipts 
+
+Request-side provenance alone is insufficient once gateways or trusted middleware buffer outputs, redact spans, apply safety filtering, convert a source stream into one non-streaming object, or re-6Client request 
+
+> messages · tools · stream?
+
+Bound request   
+
+> selected projection canonical JSON bytes
+> request_commit
+> binding + absent fi elds fi xed nonce if present
+> request_transforms
+> signed receipts same commitment space
+> eff ective_request commit
+> post-rewrite request
+> terminal attestation
+> iss · kid · sig request/output commits optional lineage metadata
+> origin_output
+> source output_commit source output_mode
+
+Response / stream 
+
+> business payload only
+> output_commit
+> fi nal complete output output_mode declared
+> Streaming proof split
+> checkpoint pre fi x proofs or complete-output lineage never both
+> output_transforms
+> signed lineage receipts commit + mode closure
+
+Veri fi er 
+
+> recompute + compare verify receipts + local trust
+
+Figure 1: High-level structure of AEX . Request-side commitments flow from the client-visible request and optional signed request_transforms ; output-side lineage, when present, flows from a source output through origin_output and output_transforms to the final output_commit . The terminal attestation binds these commitments to the returned response or stream without changing business-payload semantics. package one complete object as a stream. AEX therefore makes trusted output mutation explicit too. An origin_output receipt states that a source issuer signed an original complete output commitment for the same request context. A sequence of output_transforms receipts can then map that original complete output commitment into the final complete output commitment signed by the terminal issuer. Each output-lineage node carries an explicit output_mode , allowing the lineage to cross between non-streaming and streaming forms without ambiguity. This detail matters because a commitment over a full JSON object and a commitment over a full chunk sequence are different objects even when they encode similar business content. Importantly, output_transforms attest only relations between complete outputs. They are not prefix-to-prefix streaming proofs. Figure 1 summarizes the protocol boundary: AEX leaves the business payload in its existing API shape while adding a detached terminal attestation that binds request-side commitments, and when present complete-output lineage metadata, to the returned output. 74 Protocol Mechanics 
+
+4.1 Activation 
+
+AEX is enabled by adding a top-level attestation member to the request. The minimal enabling form is simply 
+
+> "attestation": true
+
+A parameterized form may include a nonce, a required flag, and a request-binding object. The nonce is supplied by the client and echoed back by the issuer. It reduces linkability and can sup-port replay detection when combined with verifier-side freshness or stateful replay policy. The 
+
+required flag is a no-silent-downgrade control: if a client marks attestation as required, a ser-vice that cannot honor the requested AEX behavior should fail explicitly rather than return an unattested success response. When a client expects complete-output lineage metadata such as 
+
+origin_output or output_transforms , high-entropy nonces become especially valuable because they reduce correlatability across repeated requests. 
+
+4.2 Canonical request input 
+
+Let R denote the original request object after removing the top-level attestation . Let B denote the binding descriptor chosen by the client. Let N denote an optional request-binding nonce. AEX 
+
+computes a canonical request input object 
+
+BoundRequestInput( R, B, N )
+
+that contains the binding descriptor, the selected request projection, and (if present) the nonce. The top-level request attestation object itself is never part of the request projection; it contributes only the extracted nonce when one is present. For top_level_include , the object also contains an absent_fields array listing requested top-level fields that were not present in R. This is the mechanism that binds the distinction between “present” and “not present” and prevents a middleware layer from silently injecting a previously absent protected field. The request commitment is then defined as 
+
+request _commit = SHA -256 (AEX-REQ-V1 ∥∥ JCS(BoundRequestInput( R, B, N )) ).
+
+4.3 Effective request commitment 
+
+Some services deterministically derive an effective request that differs from the externally visible request: they may fill in documented defaults, normalize deprecated parameter spellings, or apply trusted prompt rewriting. To represent such behavior without redefining the client-visible request, 
+
+AEX allows an optional effective_request_commit . This commitment is computed in the same 
+
+commitment space as the original request commitment: 
+
+effective _request _commit = SHA -256 (AEX-REQ-V1 ∥∥ JCS(BoundRequestInput( Reff , B, N )) ).
+
+The same binding descriptor and the same nonce must be used for both. This matters because it makes the original request, the effective request, and every request-transform step comparable within one commitment space. 84.4 Output modes and complete-output commitments 
+
+AEX distinguishes two complete-output modes: 
+
+• non_stream : the complete output is one top-level JSON object; and 
+
+• stream : the complete output is a full committed sequence of JSON chunk objects. The output_mode is therefore part of the meaning of every complete-output commitment. For a non-streaming response object O, remove the top-level attestation and compute 
+
+output _commit = SHA -256 (AEX-RESP-V1 ∥∥ JCS( O)).
+
+Streaming is defined over JSON event objects , not arbitrary transport frames. If SSE is used, the relevant unit is a complete SSE event whose concatenated data: payload parses as a JSON object [16]. Non-JSON markers such as [DONE] are outside the commitment chain. Let the ith committed chunk after removal of its top-level attestation be Ci. Define 
+
+Hi = SHA -256 (AEX-CHUNK-V1 ∥∥ uint64be( i) ∥∥ JCS( Ci)).
+
+Here i starts at 1 in arrival order, and uint64be( i) denotes an 8-byte unsigned big-endian encoding. Let r be the raw 32-byte request commitment, and let e be the raw 32-byte effective-request commitment if present, otherwise e = r. Initialize the chain as 
+
+chain 0 = SHA -256 (AEX-STREAM-V1 ∥∥ r ∥∥ e).
+
+Then update recursively: 
+
+chain i = SHA -256 (chain i−1 ∥∥ Hi
+
+> )
+
+.
+
+After n committed chunks, the streaming complete-output commitment is 
+
+output _commit = chain n.
+
+This construction makes the complete streaming commitment sensitive to chunk content, order, count, and the request anchors. Any insertion, deletion, mutation, reordering, re-chunking, aggre-gation, or split of JSON chunk objects changes the committed object and therefore constitutes an output transform. Figures 2 and 3 contrast the two streaming proof modes. In both modes, request anchors seed the delivered stream’s complete-output commitment. Source-stream prefix mode additionally allows checkpoints over an untransformed source stream, whereas complete-output-lineage mode forbids checkpoints and instead carries origin_output plus output_transforms only on the terminal attestation. 
+
+4.5 Streaming proof modes 
+
+AEX supports exactly two streaming proof modes, and they are intentionally not mixed. In source-stream prefix mode , the delivered stream is the source issuer’s own stream. A checkpoint attestation covers the prefix ending at chunk k and includes the prefix chain value and chunk count 
+
+k. The stream must still end with exactly one terminal attestation on the final JSON chunk. This mode lets a verifier distinguish “verified prefix then truncation” from “no verifiable prefix at all.” 9request_commit   
+
+> seed 1
+> eff ective_request commit
+> seed 2
+> chain 0
+> Chunk 1
+> JSON SSE event
+> Chunk 2
+> JSON SSE event
+> H1
+
+· · ·  
+
+> H2
+> Chunk n
+> fi nal JSON event
+> [DONE]
+> marker only not committed
+> Hn
+
+· · ·
+
+> checkpoint attestation
+> pre fi x chain + count k
+> output_commit
+> chain root after n chunks
+> terminal attestation
+> output_commit + n
+> Detects
+> insert · delete · reorder · truncate
+
+Figure 2: Source-stream prefix mode in AEX . Request anchors seed the source stream chain, each committed JSON event contributes to the complete source-stream commitment, checkpoints may certify verified prefixes, and the terminal attestation seals the complete stream commitment. Protocol markers such as [DONE] remain outside the chain. In complete-output-lineage mode , the final delivered stream is treated as one complete output that may have descended from a different source complete output. The terminal attestation may there-fore carry origin_output and output_transforms receipts instead of offering prefix proofs. In this mode, checkpoints are forbidden. A checkpoint attests only a source-stream prefix chain value; it is not itself a complete-output commitment and must never be reused as an origin_output node or an output_transforms endpoint. 
+
+4.6 Request-transform receipts 
+
+If a trusted intermediary rewrites the request, AEX can include a sequence of request-transform receipts in the terminal attestation. Each receipt names an issuer, an input request commitment, an output request commitment, an algorithm, a key identifier, and a signature over the receipt body. The transform chain must begin at the original request_commit and end at the attested 
+
+effective_request_commit . Just as importantly, every step remains in the same commitment space. The same client-selected binding mode and the same nonce, if any, apply throughout. A transform chain can therefore explain trusted rewriting, but it cannot silently downgrade the original request-binding rule. Operationally, these receipts are control-plane inputs to the final issuer rather than ordinary client payload. They should therefore travel on trusted intermediary-to-issuer channels such as proxy metadata or service-mesh context, not as unauthenticated client instructions that the issuer blindly echoes. Figure 4 shows this more concretely: each trusted intermediary signs one receipt that maps the prior request commitment into the next commitment, while the binding mode and nonce stay fixed across the entire chain. 
+
+4.7 Origin-output receipts and output-transform receipts 
+
+If a trusted intermediary rewrites outputs, AEX can include an origin_output receipt and a sequence of output_transforms receipts in the terminal attestation. The origin_output receipt 10 request_commit   
+
+> seed 1
+> eff ective_request commit
+> seed 2
+> chain 0
+> Chunk 1
+> JSON SSE event
+> Chunk 2
+> JSON SSE event
+> H1
+
+· · ·  
+
+> H2
+> Chunk n
+> fi nal JSON event
+> [DONE]
+> marker only not committed
+> Hn
+
+· · · output_commit 
+
+> chain root after n chunks
+> terminal attestation
+> output_commit + n carries origin_output + output_transforms
+> origin_output
+> source output_commit source output_mode
+> output_transforms
+> complete outputs only commit + mode closure
+> No veri fi ed pre fi x
+> checkpoints forbidden wait for terminal
+
+Figure 3: Complete-output-lineage mode in AEX . The delivered stream still has a request-anchored complete-output commitment, but checkpoints are forbidden and no verified prefix is exposed before the terminal attestation. Instead, the terminal attestation carries origin_output and 
+
+output_transforms , which link the final delivered stream to a source complete output through a signed lineage that closes on both commitment values and output_mode .Proxy A      
+
+> trusted intermediary
+> Proxy B
+> trusted intermediary
+> Receipt A
+> iss_A · kid_A in_request_commit →out_request_commit sig_A
+> Receipt B
+> iss_B · kid_B in_request_commit →out_request_commit sig_B
+> request_commit
+> original request
+> intermediate_request commit
+> after rewrite A
+> Chain invariant
+> binding mode + nonce fi xed trusted control-plane only
+> eff ective_request commit
+> after rewrite B
+> terminal attestation
+> eff ective_request_commit output_commit
+> Output-side analogue
+> origin_output + output_transforms close on output_commit + output_mode
+
+Figure 4: Illustrative trusted request-transform chain. Each receipt is signed by a named inter-mediary, maps one request commitment into the next, and ultimately explains how the original 
+
+request_commit becomes the attested effective_request_commit . The binding mode and nonce remain fixed across the chain, the receipts are conveyed on trusted control-plane channels rather than as ordinary client payload, and the note at right highlights the analogous output-side closure pattern over origin_output , output_transforms , output_commit , and output_mode .states that a source issuer signed an original complete-output commitment for the same request context. Each output-transform receipt then maps one complete-output commitment into the next, while carrying both an input output_mode and an output output_mode . The chain must begin at origin_output.output_commit and end at the terminal attestation’s output_commit , while closing on both commitment values and output modes. These receipts are signed objects in their own right, using domain-separated payloads analogous to request-transform receipts. They are also control-plane metadata rather than client instructions. The terminal issuer must therefore verify them before re-signing them inside the top-level terminal attestation. A verifier need not be able to reconstruct every hidden intermediate output object to validate the lineage claim: the relevant claim is that trusted issuers signed the lineage edges and that the edges close on the final delivered complete output. 11 4.8 Issuer discovery and trust 
+
+AEX assumes issuer-based key discovery using a JSON Web Key Set (JWKS) published at a well-known issuer-relative URL, concretely {iss}/.well-known/aex-keys.json [9, 11, 10]. This choice is operational rather than cryptographic: many web-scale systems already use issuer + key-ID conventions. However, successful key lookup is not sufficient for trust. The verifier must still decide which issuers it trusts, for example through an allowlist, an origin-binding rule that matches the target API origin, or a comparable local policy. This requirement mirrors the broader remote-attestation literature, where attestation only has value relative to a verifier’s trust policy [7, 6]. These same trust and discovery rules apply not only to the terminal attestation issuer but also to any request-transform issuer, source-output issuer, or output-transform issuer. To make the operational story less brittle, attestation objects may also carry issuance and expiry times, and verifiers should honor normal HTTP caching semantics when fetching JWKS documents [12]. On a key-ID miss, refreshes should be rate-limited per issuer rather than retried unboundedly; during key rotation, old public keys should remain available long enough to validate attestations still within policy or expiry windows. 
+
+# 5 Verification Model and Failure Semantics 
+
+A useful attestation system must do more than answer “valid” or “invalid.” Streaming clients, auditors, and SDKs need structured failure semantics, and they need those semantics to respect the difference between source-stream prefix proofs and complete-output lineage proofs. 
+
+5.1 Non-streaming verification 
+
+A verifier processing a non-streaming response performs the following steps. Implementations may precompute local commitments for efficiency, but a response is accepted only if signature validation, issuer-trust checks, commitment comparisons, and any transform-chain verification all succeed. 1. reconstruct the local request commitment from the original request, binding mode, and optional nonce; 2. extract and remove the response’s top-level attestation ;3. recompute the local complete-output commitment from the business payload and check that the terminal output_mode is non_stream ;4. verify the top-level attestation signature using the issuer’s public key and local trust policy; 5. if present, verify the request-transform chain and the effective-request commitment; 6. if present, verify the origin_output receipt, the output_transforms chain, and closure of both commitment values and output modes; 7. compare the locally reconstructed commitments to the attested commitments. The verifier need not be able to reconstruct any hidden source output or hidden intermediate output objects named only through origin_output or output_transforms . Those objects are 12 validated through signature checks, request-context consistency checks, output-mode checks, and chain closure, not by requiring the client to recompute every hidden node. 
+
+5.2 Streaming verification 
+
+Streaming verification differs in one key way: chunk hashes may be accumulated before the verifier knows which proof mode the stream will end up using or whether the stream will end cleanly. The verifier therefore tracks chunk hashes, chunk counts, and attestation-bearing chunks as the stream arrives. If the stream uses source-stream prefix mode , a successful checkpoint yields a temporary verified prefix state. The final terminal attestation must appear on the last JSON chunk, must carry 
+
+output_mode = stream , and must not carry origin_output or output_transforms . Missing or invalid terminal attestations then produce truncation or tampering states depending on whether a valid checkpoint was previously observed. If the stream uses complete-output-lineage mode , the verifier still accumulates the streaming chain over the delivered chunk sequence, but it must not interpret any received prefix as already verified output. Instead, it waits for the final terminal attestation, verifies the delivered stream’s complete-output commitment, and then verifies the embedded origin_output and output_transforms 
+
+lineage. In this mode, checkpoints are illegal. 
+
+5.3 Recommended states 
+
+We recommend the following core states: 
+
+• verified_complete : the request, output, signature, trust, and any transform-lineage checks all succeed; 
+
+• verified_prefix : at least one checkpoint attestation verified, but no terminal attestation has been seen yet; 
+
+• truncated_after_verified_prefix : a verified checkpoint exists, but the terminal attestation is missing or unusable; 
+
+• truncated_without_terminal : streamed chunks were seen, but the stream ended without a valid terminal attestation; 
+
+• unattested_or_out_of_scope : no applicable AEX object is present, or the response lies outside the profile boundary under local policy; 
+
+• request_mismatch : the original request commitment does not match the attested request commitment; 
+
+• key_unavailable : the correct key could not be retrieved or resolved under local policy; 
+
+• tampered : a hard failure such as signature failure, output mismatch, illegal mixing of check-points with output transforms, issuer mismatch, transform-chain failure, or illegal attestation structure. 
+
+verified_prefix and truncated_after_verified_prefix apply only to source-stream prefix mode. In complete-output-lineage mode, a verifier should not expose any received prefix as already 13 Issuer   
+
+> signs attestation
+> response + attestation
+> attests output_commit
+> mutated payload
+> body changed in transit
+> Veri fi er
+> recompute local commit
+> compare commits
+> local ≠attested
+> Why detection still works
+> signature may still verify payload commit no longer matches
+> tampered
+> hard veri fi cation failure
+
+Figure 5: Illustrative tampering attempt and detection path. The issuer emits a signed response, an attacker mutates the payload in transit, and the verifier rejects the result as tampered because the locally recomputed payload commitment no longer matches the attested commitment, even if the detached signature object itself still parses or verifies. attested output, because the protocol intentionally does not define prefix-to-prefix output-transform proofs. These states make explicit what many deployed clients lack: a machine-readable difference between a source stream that ended early after a verified prefix, a transformed stream that never delivered its final lineage proof, and a response that was never attested at all. Figure 5 illustrates a representative tampered outcome: an attacker alters a signed response after issuance, the verifier recomputes the local payload commitment, and the mismatch is surfaced explicitly rather than being silently accepted. 
+
+# 6 Security and Privacy Analysis 
+
+6.1 What AEX proves 
+
+AEX proves that a trusted issuer signed a specific relation between a request commitment and an output commitment. If effective_request_commit and request_transforms are present, it additionally proves that the issuer signed a relation from the original request commitment, through an explicit chain of trusted request transforms, to the effective request commitment, and then to the output. If origin_output and output_transforms are present, AEX additionally proves that a source issuer signed an original complete-output commitment for the same request context and that a con-tinuous, signed chain of trusted output transforms closes from that source commitment to the final complete-output commitment delivered to the client. In source-stream prefix mode, checkpoints additionally prove that a source issuer signed a particular untransformed stream prefix. This is a narrower but more realistic claim than proving exact model identity. Fingerprinting and MET are still useful for detecting that an API appears to serve a different model or output distribution [2, 3]; AEX instead provides a signed transaction binding and, when needed, a signed complete-output lineage. 
+
+6.2 What AEX does not prove 
+
+AEX should not be read as evidence of exact model identity or hidden-behavior absence. Those concerns require different evidence channels, such as model-auditing methods, TEEs, or provider disclosure [1, 4, 5]. Nor does AEX prove that every hidden intermediate output in an accepted output-transform chain is visible to the client, or that an accepted transform is semantically correct, 14 reasonable, or minimal. 
+
+6.3 Replay and nonce use 
+
+Without a nonce, request commitments are deterministic. For low-entropy requests, an observer who sees an attestation may be able to guess the underlying request by dictionary enumeration. Client-supplied nonces reduce this linkability and can support replay detection when combined with freshness windows, issuance times, or verifier-side replay policy. For backward compatibility, 
+
+AEX does not make nonces globally mandatory, but deployed profiles should strongly encourage high-entropy client nonces whenever request privacy or freshness matters, especially when complete-output lineage metadata is returned. The design is similar in spirit to replay mitigations discussed in HTTP Message Signatures, which note the importance of choosing signed components and nonces carefully to avoid replayable signatures [13]. 
+
+6.4 Trusted rewriting versus silent mutation 
+
+Silent request mutation is a serious problem for LLM APIs. Even if an endpoint really forwards a request to the expected model family, undeclared prompt preprocessing, context truncation, or inference-parameter changes can alter behavior substantially [1]. By separating original and effective request commitments and making accepted rewrites explicit, AEX prevents the verifier from having to choose between two bad extremes: treating all mutation as harmless noise, or treating all mutation as fatal mismatch even when it is documented and trusted. 
+
+6.5 Trusted output rewriting and complete-output lineage 
+
+Output-side mutation presents an analogous problem. A gateway may legitimately redact sensitive spans, normalize tool-call envelopes, aggregate a stream into one final object, or re-package one complete object as a stream. Treating every such change as simple tampering would make the protocol unusable for many real deployments; treating every such change as harmless would erase provenance. By separating a source complete output from the final complete output, and by requiring signed origin_output and output_transforms receipts, AEX lets verifiers distinguish trusted, explicit output rewriting from silent mutation. 
+
+6.6 Cross-mode output transforms 
+
+AEX permits output lineage to cross between non-streaming and streaming forms. This is op-erationally realistic, but it requires explicit output_mode values on every lineage node and mode closure along the chain. Otherwise a verifier could accidentally compare commitments that were computed over different objects under different algorithms and accept an invalid lineage. The explicit mode labels are therefore a security boundary, not just descriptive metadata. 
+
+6.7 Checkpoints, truncation, and midstream tampering 
+
+The streaming chain protects against content mutation, insertion, deletion, reordering, and trunca-tion. Classical stream-authentication work observes that authenticating a stream efficiently requires 15 linking data units together so that integrity failures are detectable without signing each unit in-dependently [22]. AEX applies this lesson to JSON chunk streams and augments it with request anchors and explicit terminal semantics. 
+
+6.8 Why checkpoints and output transforms are mutually exclusive 
+
+The mutual exclusion rule between checkpoints and output_transforms is deliberate. A check-point proves something about a source issuer’s original stream prefix . Once output transforms are introduced, the final delivered output is no longer the same object as that source prefix stream. 
+
+AEX v1 therefore avoids a misleading stronger claim. It keeps checkpoints as source-prefix proofs, keeps output transforms as complete-output lineage proofs, and refuses to define prefix-to-prefix lineage across rewritten outputs in this version. 
+
+6.9 Issuer trust and key-discovery abuse 
+
+A verifier must not trust an issuer merely because that issuer serves a valid JWKS [9]. Issuer trust must be established by local policy, target-origin matching, pinning, or a comparable external trust rule. This applies to terminal issuers, request-transform issuers, source-output issuers, and output-transform issuers alike. In addition, unknown key identifiers can be abused to provoke repeated JWKS refreshes. A robust implementation should therefore rate-limit bypass-cache JWKS refresh attempts per issuer. 
+
+6.10 Privacy implications of commitments and lineage metadata 
+
+Commitment values are deterministic: the same committed object yields the same commitment. That means low-entropy requests or outputs may be guessable by dictionary attack. Output-lineage metadata can also reveal structural facts even when the hidden intermediate objects are not disclosed. For example, origin_output and output_transforms may reveal that the source and final outputs differ, which trusted intermediaries participated, which transform policy labels were used, and whether the lineage crossed between non-streaming and streaming forms. Archived checkpoints may reveal that a source issuer had already signed a particular stream prefix at a particular time. Deployments that log or publish attestations should therefore evaluate carefully which commitment values, receipts, and policy annotations they retain or expose. 
+
+6.11 Interaction with TEEs 
+
+TEE remote attestation proves something different from AEX . It helps establish trust in the serving environment and measured code, while AEX binds application-layer request and response objects, streaming chunks, and when needed complete-output lineage metadata. The two mechanisms are complementary. A TEE may act as the issuer; equally, an AEX issuer may exist without a TEE. The distinction is important because remote attestation alone does not define how client-visible API objects, streaming chunks, or trusted middleware transforms are represented at the application layer [6, 7]. 16 7 Related Work and Positioning 
+
+7.1 HTTP message signing and JSON canonicalization 
+
+The closest standard-adjacent ancestor to AEX is HTTP Message Signatures [13]. RFC 9421 defines how to sign semantically meaningful HTTP components under transformation, supports signing re-quest components in a response, and explicitly acknowledges intermediary-induced transformation [13]. AEX borrows that mindset but specializes it to JSON LLM APIs. The specialization matters because AEX adds JSON-object commitments, request-binding modes, explicit absent-field bind-ing, chunk-stream semantics, request-transform receipts, and source-output / output-transform lineage receipts. At the representation layer, AEX depends on JCS to canonicalize JSON data for stable hashing and signing [14]. This is a pragmatic design choice: the protocol seeks interoperability over existing JSON objects rather than inventing a new serialization. 
+
+7.2 Supply-chain and media provenance 
+
+in-toto and DSSE provide a useful conceptual baseline. in-toto secures software supply chains by chaining signed metadata across steps, while DSSE provides a simple envelope for signing arbitrary payloads [20, 21]. AEX shares the idea that provenance often needs to describe relations between states rather than sign a single blob in isolation. However, software-supply-chain attestations are offline and artifact-centric, whereas AEX targets online LLM API transactions. C2PA likewise offers strong provenance machinery for digital media and content credentials, but its focus is media-asset lineage rather than interactive request/stream semantics [19]. 
+
+7.3 Auditing and fingerprinting LLM APIs 
+
+LLMmap and MET study a different problem: given an endpoint, what evidence can a user collect to infer which model or distribution is being served? LLMmap uses active fingerprinting to identify likely models across unknown prompts and application layers [2]. MET formalizes black-box end-point auditing as a two-sample testing problem and shows that many inference endpoints deviate from reference distributions [3]. Zhang et al. apply related tools in their shadow-API audit and find both identity mismatches and behavior drift [1]. AEX complements this line of work. Rather than infer model identity from outputs, it binds a request-output transaction to a trusted issuer. 
+
+7.4 Verifiable inference and trusted execution 
+
+SVIP and AttestLLM attack model-verification problems more directly. SVIP proposes a secret-based scheme that uses hidden representations as model identifiers for open-source LLM inference [4]. AttestLLM focuses on billion-scale on-device LLMs and combines hardware/software techniques with a TEE-oriented attestation workflow [5]. RA-WEBs, meanwhile, designs a web-compatible remote-attestation protocol for services using TEEs [6]. These approaches are valuable but answer a stronger and often more intrusive question: what code or model actually ran? AEX is intentionally weaker and more deployable. It can operate with black-box APIs and existing request/response formats. 17 Table 1: Positioning AEX against neighboring mechanisms. The table summarizes the design space rather than claiming mutual exclusivity. Mechanism Main object Online API transaction binding Streaming chunk semantics Primary question answered HTTP Message Signatures [13] HTTP components Partial, generic No LLM-specific chunk model Which HTTP components were signed, despite safe transformation? C2PA [19] Media assets No No What is the provenance history of this media asset? in-toto / DSSE [20, 21] Supply-chain metadata Not transaction-oriented No What signed steps and artifacts formed a software supply chain? LLMmap / MET [2, 3] Output behavior Inferential only Indirect Which model or distribution does this endpoint appear to serve? SVIP [4] Model internals + outputs Yes, but intrusive Not targeted at API chunk streams Did the provider likely use the requested open-source model? TEE attestation / RA-WEBs / AttestLLM [7, 6, 5] Execution environment Indirect unless coupled with app semantics No LLM-API semantics by default What measured code/environment is running? 
+
+AEX (this paper) 
+
+JSON requests, complete outputs, and lineage receipts 
+
+Yes Yes Which issuer attested to this request-output relation or complete-output lineage at the API boundary? 
+
+# 8 Deployment and Standardization Path 
+
+8.1 Why a protocol extension? 
+
+The shadow-API literature points toward a need for lightweight, official verification endpoints [1]. A practical verification endpoint should require minimal application changes, work with existing API formats, and compose with SDKs and gateways. AEX is designed to fit that niche. Because it adds only a top-level attestation object and leaves the rest of the payload untouched, existing clients can adopt it incrementally. 
+
+8.2 OpenAI-compatible profile 
+
+The most obvious first profile is an OpenAI-compatible chat-completions interface. OpenAI’s chat-completions endpoint accepts a list of messages and can return either a full chat-completion object or 18 a streamed sequence of chunk objects [17, 18]. AEX can attach to that boundary directly, making it possible to support existing request shapes, multimodal message content, and tool-calling payloads without inventing a new application protocol. For streaming, the profile treats each complete JSON SSE event as one committed chunk and leaves protocol markers such as [DONE] outside the chain [16, 18]. A practical deployment can request streaming attestations with a profile-level control such as stream_options.include_attestation .Business fields such as delta.content , delta.refusal , and delta.tool_calls remain unchanged and are covered simply because they are part of the committed chunk objects. The profile naturally supports both AEX streaming proof modes. In source-stream prefix mode, checkpoints may appear on intermediate JSON chunks and the final terminal attestation must not carry origin_output or output_transforms . In complete-output-lineage mode, checkpoints do not appear; instead, the final terminal attestation may carry origin_output and output_transforms ,and the source output_mode may differ from the final delivered output_mode . The same profile also permits non-streaming responses to carry output-lineage metadata, for example when a gateway buffers a source stream into one final JSON object before returning it. If the profile represents errors as top-level JSON objects, those errors can be attested in the same way as ordinary non-streaming responses. 
+
+8.3 Implementation patterns 
+
+Several deployment patterns are plausible. 
+
+• Origin signing: the provider signs responses at the serving edge. 
+
+• Gateway signing: a trusted gateway computes commitments and signs them. 
+
+• TEE-assisted signing: a confidential-computing environment or enclave-backed service emits the attestation, possibly after separate remote-attestation checks [6, 7]. 
+
+• Auditor verification: an SDK or proxy verifies signatures and surfaces structured states to applications. 
+
+8.4 What remains to standardize 
+
+This paper presents the protocol core and an initial profile. A standardization path would still need to define key-discovery metadata, profile registries, and implementation guidance for gateways and SDKs. It would also benefit from cross-language test vectors for canonicalization, request-binding projections, and streaming event boundaries, together with a public verifier library and independent implementations. Those are engineering and standardization tasks rather than open cryptographic questions. 
+
+# 9 Reference Prototype, Experiments, and Testing 
+
+9.1 Prototype and testbed 
+
+To validate that the protocol can be implemented without changing application-visible API seman-tics, we built a reference TypeScript prototype in the repository accompanying this preprint. The 19 Reference lab service 
+
+> Client
+> UI / SDK public /v1/*
+> Gateway
+> veri fi er + HTTP edge
+> Proxy A
+> rewrite + issue
+> Trace store
+> request · e ff ective SSE · states · diagnostics
+> Proxy B
+> rewrite + issue
+> Per-issuer JWKS
+> /.well-known/aex-keys.json
+> Provider
+> model simulator terminal issuer
+
+Figure 6: Reference prototype topology used in the accompanying artifact. The public client surface terminates at the gateway verifier; the internal proxies model trusted request rewriting while the provider emits source-stream and terminal evidence; and the gateway stores a per-run trace with request, effective-request, SSE, checkpoint, and verifier-state diagnostics. prototype has three parts: a core library that implements canonicalization, signing, verification, and JWKS caching; a standalone lab service that exposes an OpenAI-compatible chat-completions endpoint; and an optional browser workbench that consumes the service’s public API but is not part of the trust boundary. The lab service is a single-host testbed with one HTTP gateway, two internal HTTPS proxies, and one internal HTTPS provider simulator. Proxy A, Proxy B, and the provider each act as issuers and publish issuer-relative JWKS documents. The gateway acts as the verifier and stores a per-run trace that includes the request text, any effective request after trusted rewriting, raw SSE events, verifier states, and structured diagnostics. The artifact exercises the request-binding modes, effective-request commitments, request-transform chains, streaming checkpoints, complete-output-lineage verification via origin_output and output_transforms , cross-mode output rewriting, and negative-path failure states discussed earlier in this paper. It is intentionally a protocol testbed rather than a model-quality benchmark: the upstream component is a deterministic simulator, not a production LLM service. Figure 6 shows the concrete topology used in the artifact and clarifies which components are inside the signed request/response path versus which are merely consumers of the public API. 
+
+9.2 Automated validation 
+
+We validated the prototype with unit, integration, and browser end-to-end tests. Table 2 keeps only the top-level validation counts, and all listed tests passed in the validation rerun reported here. The unit tests cover request-binding projections, non-stream attestation issuance and veri-fication, stream checkpoint and terminal verification, non-stream output-lineage receipts, stream output-lineage verification, and JWKS cache behavior. The integration tests exercise the full gateway/proxy/provider stack, including checkpoint-mode streaming, non-stream lineage, stream lineage, and negative-path states such as request_mismatch , tampered , and truncated streams. The browser tests verify that the public /v1/* service surface drives the workbench correctly. We additionally ran a repository-wide TypeScript build check and an automated traceability-matrix consistency check; both passed, with the traceability script validating 13 rows, 58 references, and 11 required section anchors. 20 Table 2: Automated validation in the reference prototype. Layer Count Main coverage Unit tests 29 Core request binding, attestation issuance/verification, output-lineage receipts, stream verification, and JWKS behavior Integration tests 25 End-to-end gateway/proxy/provider flows, request/output transform chains, lineage scenarios, and negative-path verification states Browser end-to-end tests 6 Public /v1/* API wiring, stream progress, diagnostics, and proxy configuration workflows 
+
+9.3 Local microbenchmarks 
+
+We also ran a small local benchmark to sanity-check overhead in the reference implementation. The benchmark script starts an isolated copy of the lab stack on one Ubuntu 24.04 x86-64 host, performs 3 warmup runs, and then records 20 measured runs for each of five success scenarios covering non-stream success, checkpoint-mode streaming, request-transform-chain success, non-stream lineage, and stream lineage. For each run, it records client-side latency as observed by the benchmark driver and server-side timing, size, and event counters from the gateway’s stored run trace. These measurements should be interpreted narrowly. First, they are single-host measurements on a deterministic simulator rather than on a remote production deployment. Second, the streaming scenarios intentionally insert two fixed 120 ms delays between emitted chunks in order to make checkpoint and terminal behavior visible; the absolute end-to-end stream latency is therefore dom-inated by those inserted delays rather than by cryptographic work. Third, in this implementation the JWKS cache is scoped to a verification run, so the request-transform-chain scenario performs three JWKS fetches (Proxy A, Proxy B, and Provider) by construction, whereas the lineage sce-narios perform two. Fourth, the table below still reports only five representative success cases rather than every implemented lineage configuration, so it should be read as a sanity check on local overhead rather than as a full performance characterization of all protocol paths. Table 3 reports only the median latency figures that are most useful for interpreting the prototype. Across all 100 measured runs, the five benchmarked scenarios returned HTTP 200 and completed with verified_complete . In the simple non-streaming case, median client-observed completion was 2.287 ms and median gateway verification time was 0.495 ms. In the source-stream checkpoint case, median time to the first streamed chunk was 1.736 ms, while full completion was 243.371 ms be-cause of the simulator’s fixed delays; the gateway’s own median verification time remained 0.843 ms. In the trusted request-transform-chain case, median gateway verification time rose to 0.952 ms, with two transform receipts and three JWKS fetches per run. In the non-stream lineage case, median client-observed completion was 2.225 ms and median gateway verification time was 0.710 ms. In the stream-lineage case, median time to the first streamed chunk was 1.666 ms, full completion was 243.028 ms, and median gateway verification time was 1.491 ms; both lineage scenarios carried one transform receipt and two JWKS fetches per run in the reference implementation. 21 Table 3: Local microbenchmarks on the reference lab stack. The table reports only the median latency figures used in the discussion text.             
+
+> Scenario Runs Median client completion (ms) Median first stream chunk (ms) Median gateway verification (ms) Non-stream success 20/20 verified 2.287 —0.495 Stream success (checkpoint) 20/20 verified 243.371 1.736 0.843 Transform-chain success 20/20 verified 2.609 —0.952 Non-stream lineage success 20/20 verified 2.225 —0.710 Stream lineage success 20/20 verified 243.028 1.666 1.491
+
+# 10 Limitations and Open Questions 
+
+This paper remains primarily a design and analysis preprint, although Section 9 reports a reference prototype and local measurements. Several limitations are therefore explicit. 
+
+• Only local prototype measurements in this version. Section 9 reports single-host mea-surements from a simulator-based reference implementation. These results are useful as a sanity check on implementability and local overhead, but they are not cross-provider interoperability results, WAN measurements, or production capacity benchmarks. 
+
+• Benchmark coverage remains selective. The repository prototype exercises detached termi-nal attestations, request-binding modes, request-transform chains, streaming checkpoints, and the broader origin_output / output_transforms lineage model end-to-end. However, the microbenchmark table in Section 9 still reports only five representative success scenarios rather than every implemented lineage configuration. 
+
+• No public cross-language interop suite. This work does not ship a public verifier together with cross-language test vectors and independent implementations. Those will matter for pro-duction deployment and standardization. 
+
+• No direct model-identity or hidden-behavior proof. AEX can coexist with fingerprinting, MET, or TEE attestation, but it does not replace them, nor can it prove the absence of hidden prompts, private retrieval, or internal policy engines [2, 3, 4, 5]. 
+
+• Issuer trust remains foundational. If the issuer is malicious or the verifier trusts the wrong issuer, AEX does not rescue the system. 
+
+• No prefix-to-prefix output-transform proofs in v1. The protocol revision studied here in-tentionally refuses to translate a source-stream checkpoint into a verified prefix of a transformed output. Once output transforms are present, AEX falls back to complete-output lineage only. Richer prefix-to-prefix lineage is a possible future extension, but it would materially increase protocol and verifier complexity. 22 • Future profile work is needed. This paper focuses on JSON objects and JSON-object streams. Binary responses, audio streams, and non-JSON protocols need separate treatment. A particularly important open question is how to combine AEX with stronger evidence sources. One attractive path is layering: a TEE-backed endpoint can first prove the serving environment using remote attestation and then use AEX to bind that environment to the exact request and response objects seen by the application. Another path is policy composition: an auditor could combine an 
+
+AEX verification result with LLMmap or MET to distinguish “issuer signed this transaction” from “issuer signed a transaction that still appears behaviorally inconsistent with the claimed model.” 
+
+# 11 Conclusion 
+
+Hosted LLM APIs expose an important trust boundary that remains under-specified by existing infrastructures. Recent evidence from shadow-API auditing shows that the boundary is not only theoretically interesting but practically fragile [1]. Existing techniques such as fingerprinting, sta-tistical testing, verifiable inference, and remote attestation each illuminate part of the problem, but they do not directly provide a low-friction, transaction-bound attestation layer for existing APIs. 
+
+AEX is a proposal for that missing layer. By attaching a signed top-level attestation to an oth-erwise ordinary JSON response, and by defining request commitments, effective request commit-ments, request-transform receipts, source-output receipts, output-transform receipts, and output-mode-aware streaming commitments, AEX offers a practical path toward verifiable request-output binding and complete-output lineage at the LLM API boundary. It is intentionally scoped to that transaction boundary: a trusted issuer signed a specific request-output relation, and when applica-ble a trusted chain of issuers signed how the delivered complete output descended from a source output. That scope keeps AEX deployable, composable, and well matched to the API-centric way LLM systems are actually consumed today. 
+
+# A Illustrative JSON Examples 
+
+This appendix gives simplified examples of AEX syntax. The digests and signatures shown are placeholders. 
+
+A.1 Request with explicit binding mode 
+
+> {"model": "gpt-5", "messages": [ {"role": "user", "content": "Summarize this document."} ], "attestation": { "required": true, "nonce": "Q2xpZW50Tm9uY2UxMjM", "request_binding": { "mode": "top_level_include", "fields": ["messages", "model", "tools"] }
+
+23 }}
+
+A.2 Non-streaming response 
+
+{"id": "chatcmpl-123", "choices": [ {"index": 0, "message": {"role": "assistant", "content": "Here is the summary."}, "finish_reason": "stop" }], "attestation": { "version": "1", "kind": "terminal", "profile": "openai.chat_completions", "iss": "https://gateway.example", "request_commit": "sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "effective_request_commit": "sha256: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "request_transforms": [ {"iss": "https://proxy-a.example", "in_request_commit": "sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "out_request_commit": "sha256: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "policy": "normalize-openai-chat/v1", "alg": "Ed25519", "kid": "proxy-a-key-2", "sig": "BASE64URL_SIGNATURE" }], "output_mode": "non_stream", "origin_output": { "profile": "openai.chat_completions", "iss": "https://api.provider.com", "request_commit": "sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "effective_request_commit": "sha256: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "output_mode": "stream", "output_commit": "sha256: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "alg": "Ed25519", "kid": "provider-key-1", "sig": "BASE64URL_SIGNATURE" }, "output_transforms": [ 
+
+24 {"iss": "https://gateway.example", "request_commit": "sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "effective_request_commit": "sha256: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "in_output_mode": "stream", "in_output_commit": "sha256: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "out_output_mode": "non_stream", "out_output_commit": "sha256: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "policy": "buffer-and-collapse/v1", "alg": "Ed25519", "kid": "gateway-key-9", "sig": "BASE64URL_SIGNATURE" }], "output_commit": "sha256: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "nonce": "Q2xpZW50Tm9uY2UxMjM", "alg": "Ed25519", "kid": "gateway-key-9", "sig": "BASE64URL_SIGNATURE" }}
+
+A.3 Terminal streaming chunk in source-stream prefix mode 
+
+{"id": "chatcmpl-123", "choices": [], "usage": { "prompt_tokens": 128, "completion_tokens": 42, "total_tokens": 170 }, "attestation": { "version": "1", "kind": "terminal", "profile": "openai.chat_completions", "iss": "https://api.example.com", "request_commit": "sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "effective_request_commit": "sha256: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "request_transforms": [ {"iss": "https://proxy-a.example", "in_request_commit": "sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 
+
+25 "out_request_commit": "sha256: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "policy": "normalize-openai-chat/v1", "alg": "Ed25519", "kid": "proxy-a-key-2", "sig": "BASE64URL_SIGNATURE" }], "output_mode": "stream", "output_commit": "sha256: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "chunk_count": "42", "alg": "Ed25519", "kid": "edge-key-2026-01", "sig": "BASE64URL_SIGNATURE" }}
+
+A.4 Terminal streaming chunk in complete-output-lineage mode 
+
+{"id": "chatcmpl-123", "choices": [], "usage": { "prompt_tokens": 128, "completion_tokens": 42, "total_tokens": 170 }, "attestation": { "version": "1", "kind": "terminal", "profile": "openai.chat_completions", "iss": "https://gateway.example", "request_commit": "sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "effective_request_commit": "sha256: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "request_transforms": [ {"iss": "https://proxy-a.example", "in_request_commit": "sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "out_request_commit": "sha256: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "policy": "normalize-openai-chat/v1", "alg": "Ed25519", "kid": "proxy-a-key-2", "sig": "BASE64URL_SIGNATURE" }], "output_mode": "stream", "origin_output": { 
+
+26 "profile": "openai.chat_completions", "iss": "https://api.provider.com", "request_commit": "sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "effective_request_commit": "sha256: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "output_mode": "non_stream", "output_commit": "sha256 :9999999999999999999999999999999999999999999999999999999999999999", "alg": "Ed25519", "kid": "provider-key-1", "sig": "BASE64URL_SIGNATURE" }, "output_transforms": [ {"iss": "https://gateway.example", "request_commit": "sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "effective_request_commit": "sha256: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "in_output_mode": "non_stream", "in_output_commit": "sha256 :9999999999999999999999999999999999999999999999999999999999999999", "out_output_mode": "stream", "out_output_commit": "sha256: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "policy": "repackage-as-stream/v1", "alg": "Ed25519", "kid": "gateway-key-9", "sig": "BASE64URL_SIGNATURE" }], "output_commit": "sha256: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "chunk_count": "42", "alg": "Ed25519", "kid": "gateway-key-9", "sig": "BASE64URL_SIGNATURE" }}
+
+# B What AEX Proves and Does Not Prove References 
+
+[1] Yage Zhang, Yukun Jiang, Zeyuan Chen, Michael Backes, Xinyue Shen, and Yang Zhang. Real Money, Fake Models: Deceptive Model Claims in Shadow APIs. arXiv preprint arXiv:2603.01919 , 2026. URL: https://arxiv.org/abs/2603.01919 .[2] Dario Pasquini, Evgenios M. Kornaropoulos, and Giuseppe Ateniese. LLMmap: Finger-printing for Large Language Models. In 34th USENIX Security Symposium (USENIX 
+
+27 Table 4: Claim boundary of AEX .
+
+AEX can prove AEX does not prove 
+
+A trusted issuer signed a particular request-output relation. The response is factually true. A streamed output was received in the committed order and count, subject to the terminal proof mode that was actually used. The provider used a specific internal model weight snapshot. A request was transformed through a chain of explicitly signed, trusted transforms. No hidden prompts, private retrieval, or server-side policy text existed. A final complete output descended from a source issuer’s complete output through an explicitly signed chain of trusted output transforms. Every hidden intermediate output in that lineage is visible to the client. A non-streaming or streaming response is inconsistent with the attested commit-ments if tampered with. An accepted output transform is semanti-cally correct, reasonable, or minimal ab-sent external policy. 
+
+Security 25) , pages 299–318, 2025. URL: https://www.usenix.org/system/files/ usenixsecurity25-pasquini.pdf .[3] Irena Gao, Percy Liang, and Carlos Guestrin. Model Equality Testing: Which Model is this API Serving? In International Conference on Learning Representations (ICLR 2025) , 2025. URL: https://proceedings.iclr.cc/paper_files/paper/2025/hash/ d73234a13815fc1f9779dd17d89be9b4-Abstract-Conference.html .[4] Yifan Sun, Yuhang Li, Yue Zhang, Yuchen Jin, and Huan Zhang. SVIP: Towards Verifiable Inference of Open-source Large Language Models. In NeurIPS 2025 Workshop on Socially Responsible and Trustworthy Foundation Models , poster, 2025. URL: https://neurips.cc/ virtual/2025/133217 .[5] Ruisi Zhang, Yifei Zhao, Neusha Javidnia, Mengxin Zheng, and Farinaz Koushanfar. At-testLLM: Efficient Attestation Framework for Billion-scale On-device LLMs. arXiv preprint arXiv:2509.06326 , 2025. URL: https://arxiv.org/abs/2509.06326 .[6] Kosei Akama, Yoshimichi Nakatsuka, Korry Luke, Masaaki Sato, and Keisuke Uehara. RA-WEBs: Remote Attestation for WEB services. arXiv preprint arXiv:2411.01340 , 2024. URL: 
+
+https://arxiv.org/abs/2411.01340 .[7] Jämes Ménétrey, Christian Göttel, Anum Khurshid, Marcelo Pasin, Pascal Felber, Valerio Schiavoni, and Shahid Raza. Attestation Mechanisms for Trusted Execution Environments Demystified. In Distributed Applications and Interoperable Systems , pages 95–113. Springer, 2022. DOI: https://doi.org/10.1007/978-3-031-16092-9_7 .[8] Tim Bray. The I-JSON Message Format. RFC 7493, RFC Editor, March 2015. DOI: https: //doi.org/10.17487/RFC7493 .[9] Michael B. Jones. JSON Web Key (JWK). RFC 7517, RFC Editor, May 2015. DOI: https: //doi.org/10.17487/RFC7517 .28 [10] Michael B. Jones, Nat Sakimura, and John Bradley. OAuth 2.0 Authorization Server Metadata. RFC 8414, RFC Editor, June 2018. DOI: https://doi.org/10.17487/RFC8414 .[11] Mark Nottingham. Well-Known Uniform Resource Identifiers (URIs). RFC 8615, RFC Editor, May 2019. DOI: https://doi.org/10.17487/RFC8615 .[12] Roy T. Fielding, Mark Nottingham, and Julian Reschke. HTTP Caching. RFC 9111, RFC Editor, June 2022. DOI: https://doi.org/10.17487/RFC9111 .[13] Annabelle Backman, Justin Richer, and Manu Sporny. HTTP Message Signatures. RFC 9421, RFC Editor, February 2024. DOI: https://doi.org/10.17487/RFC9421 .[14] Anders Rundgren, Brian Jordan, and Samuel Erdtman. JSON Canonicalization Scheme (JCS). RFC 8785, RFC Editor, June 2020. DOI: https://doi.org/10.17487/RFC8785 .[15] Simon Josefsson and Ilari Liusvaara. Edwards-Curve Digital Signature Algorithm (EdDSA). RFC 8032, RFC Editor, January 2017. DOI: https://doi.org/10.17487/RFC8032 .[16] WHATWG. HTML Standard: Server-Sent Events. Living standard, accessed March 2026. URL: https://html.spec.whatwg.org/multipage/server-sent-events.html .[17] OpenAI. Chat Completions Overview. Developer documentation, accessed March 2026. URL: 
+
+https://developers.openai.com/api/reference/chat-completions/overview .[18] OpenAI. Chat Completions streaming events. Developer documentation, accessed March 2026. URL: https://developers.openai.com/api/reference/resources/chat/subresources/ completions/streaming-events .[19] Coalition for Content Provenance and Authenticity. C2PA Technical Specification, Ver-sion 2.3. Technical specification, 2025. URL: https://spec.c2pa.org/specifications/ specifications/2.3/specs/C2PA_Specification.html .[20] Santiago Torres-Arias, Hammad Afzali, Trishank Karthik Kuppusamy, Reza Curtmola, and Justin Cappos. in-toto: Providing farm-to-table guarantees for bits and bytes. In 28th USENIX Security Symposium (USENIX Security 19) , pages 1393–1410, 2019. URL: https: //www.usenix.org/conference/usenixsecurity19/presentation/torres-arias .[21] Secure Systems Lab. DSSE: Dead Simple Signing Envelope. Specification repository, version 
+
+v1.0.2 , accessed March 2026. URL: https://github.com/secure-systems-lab/dsse/tree/ v1.0.2 .[22] Philippe Golle and Nagendra Modadugu. Authenticating Streamed Data in the Pres-ence of Random Packet Loss. In Proceedings of the Network and Distributed System Security Symposium (NDSS) , 2001. URL: https://www.ndss-symposium.org/ndss2001/ authenticating-streamed-data-presence-random-packet-loss/ .29
