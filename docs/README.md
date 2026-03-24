@@ -6,79 +6,79 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-23
-- 运行时间：2026-03-23 20:14:58 UTC
+- 最新运行日期：2026-03-24
+- 运行时间：2026-03-24 20:00:00 UTC
 - 运行状态：成功
 - 本次总论文数：19
 - 精读区：7
 - 速读区：12
 
 ### 今日简报（AI）
-今日聚焦 19 篇 AI 顶尖成果，深度解析云端 LLM 智能体隐私保护与个性化生成效率的突破性方案。
-重点推荐 PlanTwin 框架实现的隐私规划抽象，以及 SpecSteer 协同局部与全局推理带来的高效个性化生成。
-建议关注隐私计算在智能体协作中的落地，探索如何在保障数据安全的同时提升大模型推理效能。
-- 详情：[/202603/23/README](/202603/23/README)
+今日深度解析 19 篇 AI 论文，聚焦大模型安全对齐与高效联邦学习的前沿突破。
+核心推荐 LLM 安全线性对齐（9.0分）及 FastPFRec 隐私推荐方案，揭示了安全与性能兼得的新路径。
+建议关注大模型梯度反演防御及多模态生物特征识别，提前布局隐私计算与感知增强技术。
+- 详情：[/202603/24/README](/202603/24/README)
 
 ### 精读区论文标签
-1. [PlanTwin: Privacy-Preserving Planning Abstractions for Cloud-Assisted LLM Agents](/202603/23/2603.18377v2-plantwin-privacy-preserving-planning-abstractions-for-cloud-assisted-llm-agents)  
+1. [Secure Linear Alignment of Large Language Models](/202603/24/2603.18908v2-secure-linear-alignment-of-large-language-models)  
    标签：评分：9.0/10、query:ppml
-   evidence：云辅助大模型规划与机密推理的隐私保护架构
-2. [SpecSteer: Synergizing Local Context and Global Reasoning for Efficient Personalized Generation](/202603/23/2603.16219v1-specsteer-synergizing-local-context-and-global-reasoning-for-efficient-personalized-generation)  
+   evidence：使用同态加密实现语言模型间跨孤岛推理的隐私保护框架
+2. [FastPFRec: A Fast Personalized Federated Recommendation with Secure Sharing](/202603/24/2603.20283v1-fastpfrec-a-fast-personalized-federated-recommendation-with-secure-sharing)  
    标签：评分：8.0/10、query:ppml
-   evidence：协同私有设备上下文与云端推理的协作推理
-3. [FederatedFactory: Generative One-Shot Learning for Extremely Non-IID Distributed Scenarios](/202603/23/2603.16370v1-federatedfactory-generative-one-shot-learning-for-extremely-non-iid-distributed-scenarios)  
+   evidence：具有安全共享的联邦推荐系统
+3. [Low-pass Personalized Subgraph Federated Recommendation](/202603/24/2603.20338v1-low-pass-personalized-subgraph-federated-recommendation)  
    标签：评分：8.0/10、query:ppml
-   evidence：针对非独立同分布数据的联邦学习架构
-4. [ARES: Scalable and Practical Gradient Inversion Attack in Federated Learning through Activation Recovery](/202603/23/2603.17623v1-ares-scalable-and-practical-gradient-inversion-attack-in-federated-learning-through-activation-recovery)  
+   evidence：使用图傅里叶变换的隐私保护联邦推荐系统
+4. [Meeting in the Middle: A Co-Design Paradigm for FHE and AI Inference](/202603/24/2603.20504v1-meeting-in-the-middle-a-co-design-paradigm-for-fhe-and-ai-inference)  
    标签：评分：8.0/10、query:ppml
-   evidence：联邦学习中的隐私保护机器学习与梯度逆向攻击
-5. [Differential Privacy in Generative AI Agents: Analysis and Optimal Tradeoffs](/202603/23/2603.17902v1-differential-privacy-in-generative-ai-agents-analysis-and-optimal-tradeoffs)  
+   evidence：针对FHE和AI推理的协同设计，解决双侧隐私问题
+5. [Privacy-Preserving Federated Action Recognition via Differentially Private Selective Tuning and Efficient Communication](/202603/24/2603.21305v1-privacy-preserving-federated-action-recognition-via-differentially-private-selective-tuning-and-efficient-communication)  
    标签：评分：8.0/10、query:ppml
-   evidence：用于分析AI智能体泄露的差分隐私框架
-6. [Scalable Cross-Facility Federated Learning for Scientific Foundation Models on Multiple Supercomputers](/202603/23/2603.19544v1-scalable-cross-facility-federated-learning-for-scientific-foundation-models-on-multiple-supercomputers)  
+   evidence：用于视频动作识别的差分隐私联邦学习
+6. [Hardening Confidential Federated Compute against Side-channel Attacks](/202603/24/2603.21469v1-hardening-confidential-federated-compute-against-side-channel-attacks)  
    标签：评分：8.0/10、query:ppml
-   evidence：针对科学基础模型的隐私保护联邦学习
-7. [Sharing The Secret: Distributed Privacy-Preserving Monitoring](/202603/23/2603.20107v1-sharing-the-secret-distributed-privacy-preserving-monitoring)  
-   标签：评分：8.0/10、query:fss-llm
-   evidence：使用高效秘密共享方案的分布式监控
+   evidence：增强机密联邦计算抵御侧信道攻击的能力
+7. [FedCVU: Federated Learning for Cross-View Video Understanding](/202603/24/2603.21647v1-fedcvu-federated-learning-for-cross-view-video-understanding)  
+   标签：评分：8.0/10、query:ppml
+   evidence：用于视频理解的隐私保护联邦学习
 
 ### 速读区论文标签
-1. [On the Fundamental Limits of Hierarchical Secure Aggregation with Dropout and Collusion Resilience](/202603/23/2603.19705v1-on-the-fundamental-limits-of-hierarchical-secure-aggregation-with-dropout-and-collusion-resilience)  
+1. [Adaptive Federated Fine-Tuning of Self-Supervised Speech Representations](/202603/24/2603.21888v1-adaptive-federated-fine-tuning-of-self-supervised-speech-representations)  
    标签：评分：8.0/10、query:ppml
-   evidence：分层网络中的信息论安全聚合
-2. [TAPAS: Efficient Two-Server Asymmetric Private Aggregation Beyond Prio(+)](/202603/23/2603.19949v1-tapas-efficient-two-server-asymmetric-private-aggregation-beyond-prio)  
-   标签：评分：8.0/10、query:ppml
-   evidence：用于联邦学习的双服务器隐私聚合
-3. [Membership Inference for Contrastive Pre-training Models with Text-only PII Queries](/202603/23/2603.14222v1-membership-inference-for-contrastive-pre-training-models-with-text-only-pii-queries)  
+   evidence：联邦学习中的隐私保护微调
+2. [SOMP: Scalable Gradient Inversion for Large Language Models via Subspace-Guided Orthogonal Matching Pursuit](/202603/24/2603.16761v1-somp-scalable-gradient-inversion-for-large-language-models-via-subspace-guided-orthogonal-matching-pursuit)  
    标签：评分：7.0/10、query:ppml
-   evidence：多模态模型隐私的成员推理审计
-4. [AEX: Non-Intrusive Multi-Hop Attestation and Provenance for LLM APIs](/202603/23/2603.14283v1-aex-non-intrusive-multi-hop-attestation-and-provenance-for-llm-apis)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：大模型API的可验证推理
-5. [Governing Dynamic Capabilities: Cryptographic Binding and Reproducibility Verification for AI Agent Tool Use](/202603/23/2603.14332v2-governing-dynamic-capabilities-cryptographic-binding-and-reproducibility-verification-for-ai-agent-tool-use)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：AI智能体的密码学绑定与可复现性验证
-6. [Lightweight User-Personalization Method for Closed Split Computing](/202603/23/2603.14958v1-lightweight-user-personalization-method-for-closed-split-computing)  
+   evidence：针对大语言模型的梯度逆向攻击
+3. [Generalist Multimodal LLMs Gain Biometric Expertise via Human Salience](/202603/24/2603.17173v1-generalist-multimodal-llms-gain-biometric-expertise-via-human-salience)  
    标签：评分：7.0/10、query:ppml
-   evidence：拆分计算中的协作推理与隐私扰动
-7. [RESQ: A Unified Framework for REliability- and Security Enhancement of Quantized Deep Neural Networks](/202603/23/2603.15413v1-resq-a-unified-framework-for-reliability--and-security-enhancement-of-quantized-deep-neural-networks)  
+   evidence：隐私受限下使用多模态大模型的生物识别推理
+4. [Anonymous-by-Construction: An LLM-Driven Framework for Privacy-Preserving Text](/202603/24/2603.17217v1-anonymous-by-construction-an-llm-driven-framework-for-privacy-preserving-text)  
    标签：评分：7.0/10、query:ppml
-   evidence：量化神经网络的安全增强
-8. [Grant, Verify, Revoke: A User-Centric Pattern for Blockchain Compliance](/202603/23/2603.15721v1-grant-verify-revoke-a-user-centric-pattern-for-blockchain-compliance)  
+   evidence：大模型驱动的隐私保护文本框架
+5. [A Distributionally Robust Optimal Control Approach for Differentially Private Dynamical Systems](/202603/24/2603.18364v1-a-distributionally-robust-optimal-control-approach-for-differentially-private-dynamical-systems)  
    标签：评分：7.0/10、query:ppml
-   evidence：用于隐私保护合规性的零知识证明
-9. [Collective Grid: Privacy-Preserved Multi-Operator Energy Sharing Optimization via Federated Energy Prediction](/202603/23/2603.14606v1-collective-grid-privacy-preserved-multi-operator-energy-sharing-optimization-via-federated-energy-prediction)  
+   evidence：利用差分隐私将计算安全外包给不可信服务器
+6. [PlanTwin: Privacy-Preserving Planning Abstractions for Cloud-Assisted LLM Agents](/202603/24/2603.18377v1-plantwin-privacy-preserving-planning-abstractions-for-cloud-assisted-llm-agents)  
+   标签：评分：7.0/10、query:ppml
+   evidence：云辅助LLM规划的隐私保护架构
+7. [From Weak Cues to Real Identities: Evaluating Inference-Driven De-Anonymization in LLM Agents](/202603/24/2603.18382v1-from-weak-cues-to-real-identities-evaluating-inference-driven-de-anonymization-in-llm-agents)  
+   标签：评分：7.0/10、query:ppml
+   evidence：评估大模型智能体中推理驱动的去匿名化风险
+8. [Beyond Passive Aggregation: Active Auditing and Topology-Aware Defense in Decentralized Federated Learning](/202603/24/2603.18538v1-beyond-passive-aggregation-active-auditing-and-topology-aware-defense-in-decentralized-federated-learning)  
+   标签：评分：7.0/10、query:ppml
+   evidence：去中心化联邦学习中的防御机制
+9. [SIMD-PAC-DB: Pretty Performant PAC Privacy](/202603/24/2603.15023v3-simd-pac-db-pretty-performant-pac-privacy)  
    标签：评分：6.0/10、query:ppml
-   evidence：用于能源预测的隐私保护联邦学习
-10. [Two Birds, One Projection: Harmonizing Safety and Utility in LVLMs via Inference-time Feature Projection](/202603/23/2603.14825v1-two-birds-one-projection-harmonizing-safety-and-utility-in-lvlms-via-inference-time-feature-projection)  
+   evidence：优化的数据库隐私模型与SIMD实现
+10. [LEXI: Lossless Exponent Coding for Efficient Inter-Chiplet Communication in Hybrid LLMs](/202603/24/2603.15589v1-lexi-lossless-exponent-coding-for-efficient-inter-chiplet-communication-in-hybrid-llms)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：高效LLM推理与浮点压缩
+11. [Ruyi2.5 Technical Report](/202603/24/2603.17311v1-ruyi25-technical-report)  
    标签：评分：6.0/10、query:ppml
-   evidence：平衡大型视觉语言模型的安全与效用
-11. [DP-S4S: Accurate and Scalable Select-Join-Aggregate Query Processing with User-Level Differential Privacy](/202603/23/2603.14994v1-dp-s4s-accurate-and-scalable-select-join-aggregate-query-processing-with-user-level-differential-privacy)  
+   evidence：具有去标识化功能的隐私保护摄像头服务系统
+12. [Federated Computing as Code (FCaC): Sovereignty-aware Systems by Design](/202603/24/2603.17331v1-federated-computing-as-code-fcac-sovereignty-aware-systems-by-design)  
    标签：评分：6.0/10、query:ppml
-   evidence：查询处理中的用户级差分隐私
-12. [SIMD-PAC-DB: Pretty Performant PAC Privacy](/202603/23/2603.15023v2-simd-pac-db-pretty-performant-pac-privacy)  
-   标签：评分：6.0/10、query:ppml
-   evidence：数据库隐私模型与私有化SQL查询
+   evidence：支持主权保护协作的联邦计算架构
 
 
 <div class="dpr-home-promo-card">
