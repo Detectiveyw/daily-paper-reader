@@ -1,0 +1,393 @@
+Title: Data Obfuscation for Secure Use of Classical Values in Quantum Computation
+
+URL Source: https://arxiv.org/pdf/2603.17725v1
+
+Published Time: Thu, 19 Mar 2026 01:19:29 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Data Obfuscation for Secure Use of Classical Values in Quantum Computation 
+
+# Amal Raj 
+
+amal.raj@singaporetech.edu.sg Singapore Institute of Technology Singapore 
+
+# Vivek Balachandran 
+
+vivek.b@singaporetech.edu.sg Singapore Institute of Technology Singapore 
+
+## Abstract 
+
+Quantum computing often requires classical data to be supplied to execution environments that may not be fully trusted or isolated. While encryption protects data at rest and in transit, it provides limited protection once computation begins, when classical values are encoded into quantum registers. This paper explores data obfus-cation for protecting classical values during quantum computation. To the best of our knowledge, we present the first explicit data obfuscation technique designed to protect classical values during quantum execution. We propose an obfuscation technique that encodes sensitive data into structured quantum representations across multiple registers, avoiding direct exposure while preserv-ing computational usability. Reversible quantum operations and amplitude amplification allow selective recovery of valid encodings without revealing the underlying data. We evaluate the feasibility of the proposed method through simulation and analyze its resource requirements and practical limitations. Our results highlight data obfuscation as a complementary security primitive for quantum computing. 
+
+## Keywords 
+
+Quantum data obfuscation, Classical data confidentiality, Execution-time data protection, Quantum computation security 
+
+## 1 Introduction 
+
+Quantum computing is increasingly deployed across a variety of execution environments, including shared hardware, experimen-tal platforms, simulators, and cloud-based services [ 1, 2 ]. In these settings, classical input data must be supplied to the quantum com-puting stack and encoded into quantum registers as part of the computation. While conventional data protection mechanisms such as encryption are effective at securing data at rest and in transit, they provide limited protection once computation begins, when classical values are explicitly represented within quantum registers. At this stage, sensitive data may be exposed to inspection, partial measurement, or misuse by an adversarial or curious execution environment, for example through debug hooks or diagnostic mea-surements. This gap between existing cryptographic protections and the realities of quantum execution motivates the need for mech-anisms that protect data during quantum computation, rather than only before or after execution. Obfuscation offers a complementary approach to encryption by transforming data and code into representations that preserve func-tionality while concealing underlying values. In classical software security, obfuscation is widely used to protect sensitive logic and data against the Man-at-the-End (MATE) attacker model [ 3 ], where adversaries have direct access to executable code and runtime state. Translating this idea to quantum computation is non-trivial, as quantum programs operate on quantum states rather than classical memory, and partial observation can irreversibly affect computa-tion through measurement-induced collapse. Existing research on quantum obfuscation has primarily focused on protecting quantum circuits and algorithms deployed on untrusted toolchains or hard-ware, using techniques such as compiler-level transformations [ 4 ], split compilation [ 5], and logic locking [ 6, 7 ]. While effective for safeguarding quantum intellectual property, these approaches do not directly address the problem of obfuscating classical data values used during quantum computation. Similarly, quantum data hiding techniques conceal information in bipartite or multipartite states us-ing entanglement and locality constraints [ 8], and are analyzed pri-marily as state-discrimination and access-control primitives rather than as mechanisms for supporting general computation over the hidden data. This work addresses this gap by exploring data obfuscation as a mechanism for protecting classical values during quantum compu-tation. Instead of representing sensitive data directly, we encode a classical value into a structured quantum representation distributed across multiple registers. The encoding is defined implicitly through arithmetic constraints enforced by reversible quantum circuits, and Grover’s amplitude amplification is employed to selectively recover valid encodings. This design avoids direct exposure of the under-lying data to the execution environment beyond what is revealed by the computation’s input–output behavior, while still allowing correct computation to proceed. We implement the proposed obfus-cation technique using standard quantum primitives and evaluate its feasibility through simulation across multiple problem sizes. Our analysis characterizes qubit requirements, circuit depth, and execu-tion overhead, highlighting both the practicality of the approach for small instances and the challenges posed by current quantum hardware. Overall, these results position data obfuscation as a com-plementary security primitive for quantum computing, applicable across a range of execution environments. 
+
+## 1.1 Contributions of This Paper 
+
+This paper makes the following contributions: 
+
+• Problem formulation for quantum data obfuscation: 
+
+We identify and formalize the problem of protecting classical values during quantum computation, highlighting a gap be-tween existing encryption-based protections and the realities of execution-time data exposure in quantum systems. 
+
+• Quantum data obfuscation construction: We propose a quantum data obfuscation technique that encodes classical values into structured quantum representations distributed across multiple registers, using reversible arithmetic circuits 
+
+> arXiv:2603.17725v1 [cs.CR] 18 Mar 2026
+
+and amplitude amplification to enable computation without direct data exposure. 
+
+• Implementation and feasibility analysis: We implement the proposed approach using standard quantum primitives and evaluate its feasibility through simulation, analyzing qubit requirements, circuit depth, and execution overhead across multiple problem sizes. 
+
+## 1.2 Related Works 
+
+Research on quantum obfuscation has developed along multiple directions, motivated by the need to protect quantum programs, ex-ecution environments, and sensitive information as quantum com-puting systems become more widely deployed. Early foundational work by Alagic and Fefferman established fundamental impossi-bility results for perfect black-box quantum circuit obfuscation, showing that general quantum circuits cannot be fully obfuscated under broad adversarial models involving multiple queries and ac-cess to multiple obfuscations [ 9]. Building on these results, Bartusek et al. proposed candidate constructions for indistinguishability ob-fuscation of pseudo-deterministic quantum circuits, supported by formal security arguments under quantum hardness assumptions [ 10 ]. These works establish the theoretical limits and possibili-ties of quantum obfuscation, primarily from a cryptographic and complexity-theoretic perspective. Subsequent research has focused on practical techniques for pro-tecting quantum circuit intellectual property against threats arising from untrusted compilers and execution environments. Suresh et al. introduced dummy gate insertion, where SWAP gates are de-liberately injected to corrupt circuit functionality during compi-lation and later removed by the designer to restore the original outputs, thereby obfuscating the circuit structure [ 4]. Saki et al. proposed split compilation, which partitions a quantum circuit across multiple compilation stages to prevent any single compiler from accessing the full circuit [ 5]. Das and Ghosh developed a ran-domized reversible gate-based obfuscation technique that embeds random reversible subcircuits before compilation and appends their inverses afterward, making reverse engineering during compilation harder while maintaining functional correctness [ 11 ]. Raj and Bal-achandran proposed a hybrid approach that intentionally corrupts quantum outputs using additional gates and relies on lightweight classical post-processing to restore correctness, achieving improved obfuscation strength with reduced quantum overhead [12]. Logic locking has also been adapted to quantum circuits as a means of protecting quantum intellectual property. Liu, John, and Wang introduced the E-LoQ framework, which compresses multi-ple key bits into single qubits and distributes key-dependent gates throughout the circuit, providing resistance to structural and func-tional reverse engineering with modest qubit overhead [ 6]. Simi-larly, Rehman, Langford, and Liu proposed OPAQUE, a phase-based obfuscation scheme that embeds secret keys into gate parameters to conceal circuit functionality and structure [ 7]. More recently, Bar-take et al. introduced ObfusQate, an automated quantum program obfuscation framework that integrates multiple obfuscation strate-gies and demonstrates resilience against code extraction attacks, including those using large language models [ 13 ]. While effective for protecting circuit implementations and program logic, these approaches primarily focus on obfuscating quantum code rather than classical data values used during computation. Beyond circuit obfuscation, several works extend quantum se-curity mechanisms to related domains such as authentication and secure execution. Huang and Tang constructed a quantum state obfuscation scheme for unitary quantum programs, built around a functional quantum authentication scheme that allows authorized parties to learn specific functions of authenticated quantum states with simulation-based security [ 14 ]. Zhang et al. introduced an encrypted-state quantum compilation scheme for quantum cloud platforms that applies quantum homomorphic encryption and quan-tum circuit obfuscation to enable computation over protected quan-tum states while limiting structural and output information leakage to cloud service providers [ 15 ]. These approaches address authenti-cation, execution integrity, and platform security, but do not explic-itly consider the obfuscation of classical input data values during quantum computation. A related but fundamentally distinct line of research is quan-tum data hiding, introduced by DiVincenzo, Leung, and Terhal [ 8 ]. Quantum data hiding schemes use entanglement to conceal classi-cal or quantum information such that it is indistinguishable under local operations and classical communication (LOCC) [ 16 ], provid-ing information-theoretic security guarantees. Subsequent works have extended these ideas to multipartite systems, qubit hiding, and more general probabilistic theories [ 17 , 18 ]. However, quantum data hiding schemes are explicitly designed to prevent computation over the hidden data unless global quantum operations are permitted, and therefore address a different security objective than computa-tional obfuscation techniques that aim to conceal data while still enabling controlled use during computation. Overall, existing work on quantum obfuscation and related secu-rity mechanisms can be broadly categorized into quantum circuit and program protection, authentication and secure execution, and information-theoretic data hiding. Despite significant progress in these areas, none explicitly address the computational obfuscation of classical data values used during quantum computation. In par-ticular, existing circuit obfuscation techniques focus on algorithmic structure, while data hiding schemes preclude computation over concealed values. To the best of our knowledge, the use of quantum computational primitives to obfuscate classical numerical relation-ships while preserving computational usability remains unexplored. This gap motivates our investigation into quantum data obfuscation as a complementary security primitive for quantum computing. 
+
+## 1.3 Overview of the Paper 
+
+The paper is organized as follows. Section 2 provides an overview of the various concepts needed to understand the paper. Section 3 explains the methodology of the technique. The technique is illustrated through a sample case study in Section 4. Evaluation metrics are shown in 5. Section 6 discusses the limitations of the present work and outlines possible directions for future research, while Section 7 concludes the paper. 
+
+> 2
+
+## 2 Background 
+
+(1) Qubit : Qubits, or quantum bits, form the fundamental unit of quantum information, analogous to bits in classical com-putation. Unlike a classical bit, which can exist exclusively in one of two states, 0 or 1, a qubit may exist in a linear superposition of both computational basis states, denoted 
+
+|0⟩ and |1⟩. The general state of a single qubit is expressed as: 
+
+|𝜓 ⟩ = 𝛼 |0⟩ + 𝛽 |1⟩ ,
+
+where 𝛼, 𝛽 ∈ C are complex probability amplitudes satisfying the normalization condition |𝛼 |2 + | 𝛽 |2 = 1. The probabilities of obtaining outcomes |0⟩ or |1⟩ upon measurement in the computational basis are given by |𝛼 |2 and |𝛽 |2, respectively. This capacity to encode information in coherent superpo-sitions underpins quantum parallelism, a key resource ex-ploited in quantum algorithms. Moreover, the extension to multi-qubit systems enables entanglement , a non-classical correlation without classical analog, which is central to quan-tum cryptography, communication, and obfuscation [19]. (2) Quantum Gate : Quantum gates are the fundamental building blocks of quantum computation, analogous to Boolean logic gates in the classical paradigm. Formally, a quantum gate corresponds to a unitary operator 𝑈 acting on one or more qubits, preserving normalization and ensuring reversibility (i.e., 𝑈 †𝑈 = 𝐼 ). Single-qubit gates include the Pauli matri-ces ( 𝑋, 𝑌, 𝑍 ), the Hadamard gate ( 𝐻 ) which generates su-perpositions, and the phase gates (such as 𝑆 and 𝑇 gates). Multi-qubit gates capture entangling operations, the most notable being the controlled-NOT (CNOT) gate, which en-ables non-classical correlations between qubits. Since any unitary operator can be decomposed into a sequence of such elementary gates, quantum gates serve as a universal primi-tive for constructing arbitrary quantum algorithms [19]. (3) Quantum Circuit : A quantum circuit is a structured compo-sition of qubits and quantum gates, serving as a model for quantum computation [ 20 ]. The circuit begins with an initial-ized quantum register (often in the |0⟩⊗𝑛 state), undergoes a sequence of unitary transformations through applied gates, and concludes with projective measurements yielding clas-sical outcomes. Quantum circuits provide both an intuitive diagrammatic representation and a rigorous mathematical abstraction of quantum algorithms. 
+
+## 2.1 Quantum Adder Circuits 
+
+Quantum adders constitute a fundamental class of arithmetic cir-cuits in quantum computing, designed to perform integer addition on quantum registers [ 21 ]. Similar to their classical counterparts, they form the basis for more complex arithmetic operations, such as multiplication, modular reduction, and number-theoretic trans-forms. These operations are central to a wide range of quantum algorithms, including Shor’s factoring algorithm [ 22 ], quantum linear system solvers [23], and cryptographic primitives. Formally, given two 𝑛 -qubit registers |𝑎 ⟩ and |𝑏 ⟩ representing integers 𝑎, 𝑏 ∈ { 0, 1, . . . , 2𝑛 − 1}, a quantum adder implements the reversible mapping 
+
+|𝑎 ⟩ | 𝑏 ⟩ ↦ → | 𝑎 ⟩ | 𝑎 + 𝑏 mod 2 𝑛 ⟩ ,
+
+ensuring reversibility and unitarity. Depending on the design, some adders also employ ancillary qubits for carry propagation or modular overflow detection. 
+
+2.1.1 Ripple-Carry Adders. Ripple-carry adders are direct quan-tum analogues of their classical counterparts [ 21 ]. They operate by computing each carry bit sequentially, starting from the least significant bit. At each stage, a controlled operation is used to up-date the carry qubit, which is then propagated forward to influence the computation of higher-order bits. While this design leads to a linear depth in the number of qubits 𝑛 , it is conceptually simple and requires only a modest number of elementary gates, making it suitable for near-term implementations. The general structure of a ripple-carry adder consists of two phases: (1) Carry Generation and Propagation: Ancillary qubits are em-ployed to compute carry information based on the input bits. Multi-controlled Toffoli gates are often used for this purpose. (2) Sum Computation: Once carries are established, the sum bits are updated using CNOT operations conditioned on the input and carry states. Ripple-carry designs have been extensively studied, with opti-mizations proposed to minimize gate count and ancilla overhead. Among these, the Cuccaro adder is one of the most space-efficient constructions [24]. 
+
+2.1.2 Cuccaro Adder. The Cuccaro adder [ 24 ] is a seminal ripple-carry design notable for its simplicity and minimal ancillary qubit usage. Unlike earlier designs, which required a linear number of ancillas, the Cuccaro adder achieves full addition using only a single ancillary qubit to propagate carries. Its construction relies primarily on CNOT and Toffoli gates, both of which are standard primitives in fault-tolerant quantum architectures. The adder consists of three main components: (1) Majority Gate (MAJ): A reversible gate that computes the majority function of three inputs (𝑎 𝑖 , 𝑏 𝑖 , 𝑐 𝑖 ), where 𝑎 𝑖 , 𝑏 𝑖 are input bits and 𝑐 𝑖 is the carry. The output is used to update the carry for the next stage. (2) UnMajority-and-Sum Gate (UMA): The inverse operation of MAJ, which uncomputes the carry information while simul-taneously producing the correct sum bit. (3) Carry Chain: A sequence of MAJ gates that propagates the carry from the least significant to the most significant qubit, followed by UMA gates to restore ancillary states and output the final sum. Formally, for two 𝑛 -bit registers |𝑎 ⟩ and |𝑏 ⟩ and an ancilla |𝑐 0⟩
+
+initialized to |0⟩, the Cuccaro adder implements: 
+
+|𝑎 ⟩ | 𝑏 ⟩ | 0⟩ ↦ → | 𝑎 ⟩ | 𝑎 + 𝑏 ⟩ | 𝑐 𝑛 ⟩ ,
+
+where 𝑐 𝑛 is the final carry-out bit. Importantly, all ancillary states except the final carry are uncomputed, preserving reversibility and ensuring that no residual garbage states remain. The Cuccaro adder’s gate complexity is 2𝑛 − 1 Toffoli gates and 
+
+5𝑛 − 3 CNOT gates, with a circuit depth linear in 𝑛 . Its efficiency and elegance have made it a canonical benchmark in the study of 
+
+> 3
+
+quantum arithmetic, frequently used as a building block in modular exponentiation and number-theoretic algorithms. 
+
+## 2.2 Grover’s Algorithm 
+
+Grover’s search algorithm [ 25 ] is one of the fundamental quantum algorithms that demonstrates a provable speedup over classical ap-proaches. It addresses the unstructured search problem: given an un-sorted database of size 𝑁 and an oracle function 𝑓 : {0, 1}𝑛 → { 0, 1},the task is to find an input 𝑥 ∗ such that 𝑓 (𝑥 ∗) = 1. Classically, solv-ing this problem requires 𝑂 (𝑁 ) queries in the worst case, whereas Grover’s algorithm finds a solution using only 𝑂 (√𝑁 ) queries, of-fering a quadratic improvement. 
+
+2.2.1 High-Level Idea. Grover’s algorithm operates by amplifying the amplitude of the “marked” states (those 𝑥 ∗ for which 𝑓 (𝑥 ∗) = 1)through a sequence of unitary transformations known as Grover iterations . The algorithm proceeds as follows: (1) Initialization: Prepare an 𝑛 -qubit register in the uniform su-perposition state 
+
+|𝜓 0⟩ = 1
+
+√𝑁  
+
+> 𝑁 −1
+
+∑︁ 
+
+> 𝑥 =0
+
+|𝑥 ⟩ .
+
+(2) Oracle Query: Apply the oracle 𝑂 𝑓 , which flips the phase of the marked state: 
+
+𝑂 𝑓 |𝑥 ⟩ = (− 1)𝑓 (𝑥 ) |𝑥 ⟩ .
+
+(3) Diffusion Operator: Apply the Grover diffusion operator 𝐷 ,which inverts amplitudes about their average, thereby in-creasing the relative amplitude of marked states. (4) Iteration: Repeat the oracle and diffusion steps approximately 
+
+> 𝜋
+> 4
+
+√︃ 𝑁 𝑀 times, where 𝑀 is the number of marked states. (5) Measurement: Measure the register, yielding the marked ele-ment 𝑥 ∗ with high probability. 
+
+2.2.2 Mathematical Intuition. The algorithm can be visualized ge-ometrically as a rotation in a two-dimensional subspace spanned by: 
+
+|𝛼 ⟩ = 1
+
+√𝑁 − 𝑀 ∑︁ 𝑥 :𝑓 (𝑥 )=0
+
+|𝑥 ⟩ (1) 
+
+|𝛽 ⟩ = 1
+
+√𝑀 ∑︁ 𝑥 :𝑓 (𝑥 )=1
+
+|𝑥 ⟩ , (2) Each Grover iteration rotates the state vector by an angle 2𝜃 ,where sin 2 𝜃 = 𝑀 𝑁 . After 𝑂 
+
+√︃ 
+
+> 𝑁 𝑀
+
+
+
+iterations, the system is close to 
+
+|𝛽 ⟩, ensuring that measurement yields a marked element with high probability. 
+
+## 3 Methodology 
+
+This section outlines the methodology of our proposed quantum data obfuscation algorithm. The central idea is to conceal clas-sical information within a hybrid quantum–classical framework by distributing it across quantum registers such that it is not di-rectly observable. In our construction, the classical data consists of a natural number 𝑁 . Through the obfuscation process, 𝑁 is not stored directly but instead encoded across three 𝑛 -qubit quantum registers 𝑥, 𝑦, and 𝑧 , ensuring that the circuit enforces the relation 
+
+𝑥 + 𝑦 + 𝑧 = 𝑁 . The transformation hides 𝑁 across the registers but still makes it possible to amplify and recover the valid sums using quantum search. If 𝑥, 𝑦, 𝑧 each occupy 𝑛 qubits, the maximum representable sum is 3 · ( 2𝑛 − 1). Therefore, 𝑛 must satisfy 𝑁 ≤ 3 · ( 2𝑛 − 1). Once 𝑛 is fixed, the circuit requires 3𝑛 + 5 qubits in total: 3𝑛 for the addends, up to two carry qubits, two ancillas for the adder circuit and one for Grover amplification. The overall procedure is divided into three stages: (1) Sum Computation: Constructing a reversible circuit for 
+
+𝑠 = 𝑥 + 𝑦 + 𝑧 ,(2) Grover Amplification: Selectively amplifying solutions where 𝑠 = 𝑁 ,(3) Measurement and Decoding: Extracting valid decomposi-tions of 𝑁 .
+
+## 3.1 Sum Computation 
+
+The first part of the circuit computes 𝑠 = 𝑥 +𝑦 + 𝑧 by cascading two reversible adders. This adder is well-suited for oracle constructions because it uncomputes intermediate carries, leaving no residual garbage qubits. The computation is structured as follows: 
+
+• Adder 1: Computes 𝑠 1 = 𝑥 + 𝑦 , with the result stored in 𝑦 
+
+and a carry qubit cout_0 holding the overflow bit. 
+
+• Adder 2: Computes 𝑠 = 𝑠 1 + 𝑧 , where 𝑧 is extended to (𝑛 + 1)
+
+bits using an ancilla. A second carry qubit cout_1 stores the final overflow bit. Thus, the total qubit requirement for the adder module is 3𝑛 + 4,and the sum register 𝑠 is prepared for use in the Grover oracle. 
+
+## 3.2 Grover Amplification 
+
+After sum computation, we apply Grover’s algorithm to amplify states where 𝑠 = 𝑁 . This involves two key components: 
+
+3.2.1 Oracle Construction. The oracle compares the sum register 
+
+𝑠 with the classical target 𝑁 . If equality holds, a dedicated ancilla qubit initialized in the |−⟩ state undergoes a phase flip: 
+
+𝑂 𝑓 |𝑠 ⟩ |−⟩ =
+
+(
+
+− | 𝑠 ⟩ |−⟩ , if 𝑠 = 𝑁 , 
+
+|𝑠 ⟩ |−⟩ , otherwise. The equality check is implemented using multi-controlled NOT gates with selective bit flips to match the binary representation of 
+
+𝑁 .
+
+3.2.2 Diffusion Operator. The diffusion operator inverts ampli-tudes about the mean: (1) Apply Hadamard gates on the input register, (2) Apply Pauli-X gates on the same qubits, (3) Apply a multi-controlled 𝑍 gate, with the input registers being the controls and ancilla being the target, (4) Undo the 𝑋 and 𝐻 gates. This transformation increases the amplitude of the marked states where 𝑠 = 𝑁 .
+
+> 4
+
+3.2.3 Number of Iterations. Let 𝑀 be the number of valid solutions to 𝑥 + 𝑦 + 𝑧 = 𝑁 , and 𝑇 = 23𝑛 the total number of possible triplets. The optimal number of Grover iterations 𝑅 is 
+
+𝑅 = round 𝜋 
+
+4√︂ 
+
+𝑇 𝑀 
+
+!
+
+(3) The value of 𝑀 can be determined using the inclusion–exclusion principle for bounded integer compositions: 
+
+𝑀 =
+
+> 3
+
+∑︁ 
+
+> 𝑗 =0
+
+(− 1) 𝑗 
+
+3
+
+𝑗 
+
+  𝑁 − 𝑗 · 2𝑛 + 22
+
+
+
+, 𝑁 − 𝑗 · 2𝑛 ≥ 0. (4) 
+
+## 3.3 Measurement and Decoding 
+
+After 𝑅 Grover iterations, we measure the 3𝑛 qubits corresponding to 𝑥, 𝑦, 𝑧 . The observed bitstrings are decoded into integers, and the most frequently observed triplets correspond to valid decom-positions of 𝑁 . These outputs represent obfuscated encodings of 
+
+𝑁 as structured triplets, suitable for downstream cryptographic or functional obfuscation tasks. 
+
+## 4 Case Study: Obfuscating N=19 
+
+To illustrate the methodology, we present a concrete case study where the natural number 19 is obfuscated as the sum of three integers 𝑥, 𝑦, 𝑧 , each represented on 𝑛 = 3 qubits. This small-scale example demonstrates the practical construction of the quantum adder subcircuit and clarifies qubit allocation, ancilla reuse, and carry management. Fig. 1 shows a high-level overview of the circuit used. 
+
+Figure 1: The final circuit for obfuscating 𝑁 = 19 as the sum of 3-bit numbers 𝑥 , 𝑦 , and 𝑧 . The qubits 𝑞 0 to 𝑞 8 represent 
+
+𝑥, 𝑦, 𝑧 , the first three being for 𝑥 , next three for 𝑦 and last three for 𝑧 in little-endian format. 
+
+## 4.1 Adder Architecture 
+
+The computation of 𝑠 = 𝑥 + 𝑦 + 𝑧 is performed using two cascaded 
+
+CDKMRippleCarryAdder circuits from Qiskit [ 26 ], each configured with kind=‘half’ . In this configuration: 
+
+• The first adder requires 2𝑛 qubits for the two operands, one ancilla qubit for internal carry propagation (returned to |0⟩
+
+after the operation), and one carry-out qubit to store the most significant bit (MSB). 
+
+• The second adder requires 𝑛 qubits for the third operand (𝑧 ), reuses the (𝑛 + 1)-qubit output of the first adder as its second input, and also reuses the ancilla of the first adder to extend 𝑧 to (𝑛 + 1) qubits. In addition, it introduces one new ancilla qubit for carry propagation and one carry-out qubit for the final MSB. 
+
+4.1.1 Adder 1: Computing 𝑥 + 𝑦 . In Fig. 2, the first adder (outlined in red) computes the partial sum 𝑠 1 = 𝑥 + 𝑦 :
+
+• Qubits 𝑞 0, 𝑞 1, 𝑞 2 represent the input 𝑥 ,
+
+• Qubits 𝑞 3, 𝑞 4, 𝑞 5 represent the input 𝑦 ,
+
+• The result 𝑠 1 overwrites register 𝑦 ,
+
+• The carry-out qubit 𝑞 9 stores the MSB of 𝑠 1,
+
+• Ancilla 𝑞 10 is used during computation but reset by the end. Since 𝑠 1 may require up to 𝑛 + 1 = 4 qubits, the carry-out qubit 
+
+𝑞 9 is essential to store the overflow. 
+
+4.1.2 Adder 2: Computing (𝑥 + 𝑦 ) + 𝑧 . The second adder (outlined in blue in Fig. 2) computes the final sum 𝑠 = 𝑠 1 + 𝑧 :
+
+• 𝑧 is initially represented by qubits 𝑞 6, 𝑞 7, 𝑞 8.
+
+• To align with the (𝑛 + 1)-bit width of 𝑠 1, 𝑧 is extended to 4 bits by prepending the previously used ancilla 𝑞 10 .
+
+• Thus, the inputs to the second adder are: 
+
+– Addend 1: (𝑞 3, 𝑞 4, 𝑞 5, 𝑞 9) (the 4-bit sum 𝑠 1), 
+
+– Addend 2: (𝑞 6, 𝑞 7, 𝑞 8, 𝑞 10 ) (the 4-bit extended 𝑧 ), 
+
+– Carry-out: 𝑞 11 
+
+– Ancilla: 𝑞 12 
+
+• The result 𝑠 = 𝑥 +𝑦 +𝑧 is stored in (𝑞 6, 𝑞 7, 𝑞 8, 𝑞 10 , 𝑞 11 ), where 
+
+𝑞 11 holds the final MSB. 
+
+Figure 2: Quantum circuit for computing 𝑠 = 𝑥 + 𝑦 + 𝑧 with 
+
+𝑛 = 3. Adder 1 (red) computes 𝑠 1 = 𝑥 + 𝑦 , and Adder 2 (blue) computes 𝑠 = 𝑠 1 + 𝑧 . Ancilla reuse is employed to extend 𝑧 to 4 bits in Adder 2. 
+
+## 4.2 Grover Circuit 
+
+Building on the adder construction from Fig. 2, we now extend the circuit with Grover’s algorithm to amplify those (𝑥, 𝑦, 𝑧 ) triplets that satisfy 𝑥 + 𝑦 + 𝑧 = 19 , with each of 𝑥, 𝑦, 𝑧 encoded on 3 qubits. This case study demonstrates the oracle construction, diffuser design, and execution flow of the Grover stage. 
+
+> 5
+
+4.2.1 Input Initialization. The input register consists of 9 qubits: 
+
+𝑞 0, 𝑞 1, 𝑞 2 for 𝑥 , 𝑞 3, 𝑞 4, 𝑞 5 for 𝑦 , and 𝑞 6, 𝑞 7, 𝑞 8 for 𝑧 . All nine qubits are placed into equal superposition using Hadamard gates: 
+
+|𝜓 0⟩ = 1
+
+√512 
+
+> 7
+
+∑︁ 
+
+> 𝑥,𝑦,𝑧 =0
+
+|𝑥 ⟩ | 𝑦 ⟩ | 𝑧 ⟩ ,
+
+where the search space is 29 = 512 possible assignments. The Grover ancilla 𝑞 13 is initialized in the |−⟩ state and serves as the phase flag. 
+
+4.2.2 Oracle Construction. The oracle is encapsulated as a gate to enable repeated application during Grover iterations. It has three components: (1) Adder gate: The previously constructed double half-CDKM adder is encapsulated as a single gate and appended. This maps (𝑥, 𝑦, 𝑧 ) ↦ → ( 𝑥, 𝑦, 𝑧, 𝑠 ), where 𝑠 = 𝑥 + 𝑦 + 𝑧 is exposed on the sum register (𝑞 6, 𝑞 7, 𝑞 8, 𝑞 10 , 𝑞 11 ).(2) Query circuit: To check whether 𝑠 = 19 , we note that 19 10 =
+
+10011 2 (5-bit representation). The query circuit applies 𝑋 
+
+gates to sum bits that are 0 in this binary expansion, then performs a 5-controlled 𝑋 targeting the Grover ancilla 𝑞 13 ,and finally undoes the 𝑋 gates. This induces a phase flip only when the sum equals 19. This is shown in Fig. 3. 
+
+Figure 3: Sub-circuit representing the query part of the oracle. Qubits 𝑠 0 to 𝑠 4 represent the sum, while 𝑠 5 is the ancilla qubit. 
+
+(3) Uncomputation: The inverse adder gate is appended to restore ancillas and remove garbage, leaving only the condi-tional phase on valid states. The oracle circuit is shown in Fig. 4. 
+
+Figure 4: Oracle sub-circuit 
+
+4.2.3 Diffuser. The diffuser is also implemented as a gate, acting only on the 9 input qubits and the Grover ancilla: (1) Apply Hadamards on 𝑞 0—𝑞 8,(2) Apply 𝑋 gates on 𝑞 0—𝑞 8,(3) Apply a multi-controlled 𝑋 with 𝑞 0—𝑞 8 as controls and target 
+
+𝑞 13 ,(4) Undo the 𝑋 and Hadamard gates. This realizes inversion about the mean for the 512-dimensional input space. The diffuser sub-circuit is shown in Fig. 5. 
+
+Figure 5: Diffuser sub-circuit. Qubits 𝑑 0 to 𝑑 8 represent the input registers, while 𝑑 9 is the ancilla. 
+
+4.2.4 Grover Iterations for 𝑁 = 19 . The number of valid solutions to 𝑥 + 𝑦 + 𝑧 = 19 with 0 ≤ 𝑥, 𝑦, 𝑧 < 8 is 𝑀 = 6. With 𝑇 = 512 total states, the optimal number of Grover iterations is 
+
+𝑅 ≈ 𝜋 
+
+4√︂ 
+
+𝑇 𝑀 = 𝜋 
+
+4√︂ 
+
+512 6 ≈ 7.26 .
+
+> 6
+
+We therefore apply 𝑅 = 7 iterations of the oracle and diffuser in sequence. 
+
+## 4.3 Measurement and Results 
+
+Finally, the 9 input qubits 𝑞 0–𝑞 8 are measured. The measurement results are decoded into (𝑥, 𝑦, 𝑧 ) triples using the register mapping. The most frequent outcomes correspond to the valid decomposi-tions of 19 . These constitute the obfuscated representations of 𝑁 
+
+as structured quantum states. An anonymized link for the code is available at [27]. 
+
+Figure 6: Histogram showing the frequency of top 12 combi-nations of (𝑥, 𝑦, 𝑧 ) decoded post-measurement. The triplets that sum to 19 occupy the highest counts (the six possible combinations occupying a total of 883 shots out of the total 1024), while others occur in negligible frequency. 
+
+## 5 Evaluation 5.1 Implementation Setup 
+
+All simulations were conducted on a laptop equipped with an AMD Ryzen 5 5500U processor (2.10 GHz), Windows 11 Home OS, and 8 GB RAM. The software environment comprised Python 3.11.3 and Qiskit 2.0.2. Experiments were executed in a noise-free environ-ment using the Qiskit AerSimulator to accurately measure circuit resource requirements. We selected benchmark values 𝑁 = 2𝑘 − 1,for 𝑘 = 3, 4, 5, ..., 8, which correspond to natural boundaries in bit-width for the quantum decomposition registers 𝑥, 𝑦, 𝑧 . This selection enabled a systematic study of circuit scalability from small (𝑁 = 7)
+
+to moderate ( 𝑁 = 255 ) problem sizes. Bit-width 𝑛 was assigned such that all valid decompositions fit within n-bit registers, meeting the condition 𝑁 ≤ 3 · ( 2𝑛 − 1).
+
+## 5.2 Evaluation Metrics 
+
+Table 1 tabulates the register bit-width 𝑛 , number of Grover itera-tions, number of qubits, circuit depth (after 3 levels of decomposi-tion), run time, total gate count (sum of all elementary gates used) and number of valid solutions (triplets (𝑥, 𝑦, 𝑧 )) for each target value 
+
+𝑁 .
+
+Table 1: Benchmark results for varying 𝑁                                               
+
+> Nn(bits) Grover Iterations Qubits Depth Run Time (s) Number of gates Valid Solutions 72311 359 0.32 501 615 3314 830 0.31 1029 28 31 4517 2597 0.46 3017 120 63 5620 5168 2.23 5787 496 127 6923 11558 24.78 12645 2016 255 713 26 23480 345.33 25293 8128
+
+It is evident that both depth and gate count increase rapidly with 
+
+𝑁 , reflecting the cumulative cost of Grover iterations combined with cascaded ripple-carry adders in the oracle. The circuit depth shows a steep rise with 𝑁 , starting from 359 
+
+for 𝑁 = 7 and reaching 23480 for 𝑁 = 255 . This sharp growth high-lights the combined complexity of the Cuccaro adder and Grover’s algorithm, as larger problem instances require more qubits and additional layers of sequential quantum operations. The number of gates follows a similar trajectory, further emphasizing the increas-ing resource overhead as 𝑁 scales. The runtime also grows with 𝑁 , though the increase is less abrupt for small and moderate values. From 𝑁 = 7 to 𝑁 = 63 ,runtimes remain under 3 seconds, while for 𝑁 = 127 and 𝑁 = 255 ,they rise sharply to 25 seconds and 345 seconds, respectively. Since runtime here refers to the execution time of the compiled circuit (excluding compilation time), these results illustrate that while classical simulation remains practical for small circuits, it becomes increasingly demanding as the size and depth of the quantum circuit grow. 
+
+## 5.3 Discussion 
+
+These results demonstrate that while the quantum obfuscation scheme is effective and scalable in principle, its resource require-ments grow rapidly with 𝑁 . For small values of 𝑁 , both circuit depth and runtime are manageable, but for larger problems, the demands on quantum hardware and classical simulators become substantial. This underscores the importance of circuit optimization and motivates future work on more efficient quantum arithmetic and search techniques. 
+
+## 6 Limitations and Future Works 
+
+The principal limitation of our current approach lies in the depth and resource requirements of the constructed quantum circuits. As the size of the target integer 𝑁 increases, the circuit depth, gate count, and overall qubit requirements grow rapidly, resulting in circuits that are beyond the capability of current Noisy Intermediate-Scale Quantum (NISQ) [ 28 ] hardware to execute reliably. While our simulations demonstrate conceptual feasibility, practical deploy-ment will require significant advances in quantum hardware as well as further circuit optimizations. In addition, the present frame-work addresses only decomposition into exactly three summands, which, while illustrative and sufficient for proof of concept, may not represent the broadest range of obfuscation applications. 
+
+> 7
+
+Future work will explore alternative decomposition strategies for 𝑁 , such as obfuscation schemes involving more than three sum-mands or expressing 𝑁 as the solutions of Diophantine equations. Such extensions could allow for more complex and versatile ob-fuscation scenarios, enhancing applicability to a wider range of data types and cryptographic settings. Additional directions include optimizing quantum circuit design to reduce depth and gate count, investigating robustness with respect to realistic noise, and experi-menting on real quantum hardware when available. The integra-tion of cryptographic primitives and algorithm-specific obfuscation strategies also remains an open area for significantly strengthening the security and utility of this framework. 
+
+## 7 Conclusion 
+
+We have presented a quantum-enabled data obfuscation scheme that encodes classical integers as quantum decomposition problems, leveraging Grover’s amplitude amplification to efficiently find and hide valid solutions. Our results demonstrate that, although signif-icant resource barriers currently exist, this approach establishes a practical baseline for quantum data obfuscation and motivates further advances in both algorithms and hardware. The techniques developed herein extend the application of quantum obfuscation beyond software protection to the direct safeguarding of classical data, offering a novel cryptographic primitive for the emerging quantum era. 
+
+## References 
+
+[1] IBM Quantum. 2025. Qiskit: An open-source framework for quantum computing .https://qiskit.org Accessed: Dec. 2025. [2] Amazon Web Services. 2019. Amazon Braket. https://aws.amazon.com/braket. Accessed: 2025-12-13. [3] Sebastian Banescu and Alexander Pretschner. 2018. Chapter Five - A Tutorial on Software Obfuscation. Advances in Computers, Vol. 108. Elsevier, 283–353. doi:10.1016/bs.adcom.2017.09.004 [4] Aakarshitha Suresh, Abdullah Ash Saki, Mahabubul Alam, Rasit o Topalaglu, and Swaroop Ghosh. 2021. A Quantum Circuit Obfuscation Methodology for Security and Privacy. arXiv:2104.05943 [quant-ph] https://arxiv.org/abs/2104.05943 [5] Abdullah Ash Saki, Aakarshitha Suresh, Rasit Onur Topaloglu, and Swaroop Ghosh. 2021. Split Compilation for Security of Quantum Circuits. In 2021 IEEE/ACM International Conference On Computer Aided Design (ICCAD) . 1–7. doi:10.1109/ICCAD51958.2021.9643478 [6] Yuntao Liu, Jayden John, and Qian Wang. 2025. E-LoQ: Enhanced Locking for Quantum Circuit IP Protection. In 2025 IEEE International Symposium on Hardware Oriented Security and Trust (HOST) . IEEE, 67–77. doi:10.1109/host64725. 2025.11050014 [7] Anees Rehman, Vincent Langford, Jayden John, and Yuntao Liu. 2025. OPAQUE: Obfuscating Phase in Quantum Circuit Compilation for Efficient IP Protection. In 2025 26th International Symposium on Quality Electronic Design (ISQED) . IEEE, 1–6. doi:10.1109/isqed65160.2025.11014313 [8] D. P. DiVincenzo, D. W. Leung, and B. M. Terhal. 2006. Quantum data hiding. 
+
+IEEE Trans. Inf. Theor. 48, 3 (Sept. 2006), 580–598. doi:10.1109/18.985948 [9] Gorjan Alagic and Bill Fefferman. 2016. On Quantum Obfuscation. arXiv:1602.01771 [quant-ph] https://arxiv.org/abs/1602.01771 [10] James Bartusek, Fuyuki Kitagawa, Ryo Nishimaki, and Takashi Yamakawa. 2023. Obfuscation of Pseudo-Deterministic Quantum Circuits. arXiv:2302.11083 [quant-ph] https://arxiv.org/abs/2302.11083 [11] Subrata Das and Swaroop Ghosh. 2023. Randomized Reversible Gate-Based Obfus-cation for Secured Compilation of Quantum Circuit. arXiv:2305.01133 [quant-ph] https://arxiv.org/abs/2305.01133 [12] Amal Raj and Vivek Balachandran. 2025. Quantum Opacity, Classical Clarity: A Hybrid Approach to Quantum Circuit Obfuscation. arXiv:2505.13848 [quant-ph] https://arxiv.org/abs/2505.13848 [13] Nikhil Bartake, See Toh Zi Jie, Carmen Wong Jiawen, Michael Kasper, and Vivek Balachandran. 2025. ObfusQate: Unveiling the First Quantum Program Obfusca-tion Framework. arXiv:2503.23785 [cs.CR] https://arxiv.org/abs/2503.23785 [14] Mi-Ying Huang and Er-Cheng Tang. 2025. Obfuscation of Unitary Quantum Programs. arXiv:2507.11970 [quant-ph] https://arxiv.org/abs/2507.11970 [15] Chenyi Zhang, Tao Shang, Xueyi Guo, and Yuanjing Zhang. 2025. Encrypted-state quantum compilation scheme based on quantum circuit obfuscation for quantum cloud platforms. arXiv:2507.17589 [quant-ph] https://arxiv.org/abs/2507.17589 [16] Eric Chitambar, Debbie Leung, Laura Mančinska, Maris Ozols, and Andreas Winter. 2014. Everything You Always Wanted to Know About LOCC (But Were Afraid to Ask). Communications in Mathematical Physics 328, 1 (01 May 2014), 303–326. doi:10.1007/s00220-014-1953-9 [17] David P. DiVincenzo, Patrick Hayden, and Barbara M. Terhal. 2003. Hiding Quantum Data. Foundations of Physics 33, 11 (01 Nov 2003), 1629–1647. doi:10. 1023/A:1026013201376 [18] Ludovico Lami, Carlos Palazuelos, and Andreas Winter. 2018. Ultimate Data Hiding in Quantum Mechanics and Beyond. Communications in Mathematical Physics 361, 2 (01 Jul 2018), 661–708. doi:10.1007/s00220-018-3154-4 [19] Michael A. Nielsen and Isaac L. Chuang. 2010. Quantum Computation and Quantum Information: 10th Anniversary Edition . Cambridge University Press. [20] A Yu Kitaev. 1997. Quantum computations: algorithms and error correc-tion. Russian Mathematical Surveys 52, 6 (dec 1997), 1191. doi:10.1070/ RM1997v052n06ABEH002155 [21] Vlatko Vedral, Adriano Barenco, and Artur Ekert. 1996. Quantum networks for elementary arithmetic operations. Phys. Rev. A 54 (Jul 1996), 147–153. Issue 1. doi:10.1103/PhysRevA.54.147 [22] Peter W Shor. 1999. Polynomial-time algorithms for prime factorization and discrete logarithms on a quantum computer. SIAM review 41, 2 (1999), 303–332. [23] Mauro E. S. Morales, Lirandë Pira, Philipp Schleich, Kelvin Koor, Pedro C. S. Costa, Dong An, Alán Aspuru-Guzik, Lin Lin, Patrick Rebentrost, and Dominic W. Berry. 2025. Quantum Linear System Solvers: A Survey of Algorithms and Applications. arXiv:2411.02522 [quant-ph] https://arxiv.org/abs/2411.02522 [24] Steven A Cuccaro, Thomas G Draper, Samuel A Kutin, and David Petrie Moul-ton. 2004. A new quantum ripple-carry addition circuit. arXiv preprint quant-ph/0410184 (2004). [25] Lov K Grover. 1996. A fast quantum mechanical algorithm for database search. In 
+
+Proceedings of the twenty-eighth annual ACM symposium on Theory of computing .212–219. [26] IBM Quantum. 2025. CDKMRippleCarryAdder. https://quantum.cloud.ibm.com/ docs/en/api/qiskit/qiskit.circuit.library.CDKMRippleCarryAdder. Accessed: 2025-09-23. [27] Amal Raj and Vivek Balachandran. 2026. Data Obfuscation for Secure Use of Classical Values in Quantum Computation. https://github.com/amalraj28/data-obfuscation. Accessed: March 2026. [28] John Preskill. 1998. Lecture notes for physics 229: Quantum information and computation. California institute of technology 16, 1 (1998), 1–8.
