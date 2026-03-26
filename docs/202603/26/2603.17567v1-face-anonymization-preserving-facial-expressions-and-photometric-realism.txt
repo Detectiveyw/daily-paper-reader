@@ -1,0 +1,420 @@
+Title: Face anonymization preserving facial expressions and photometric realism
+
+URL Source: https://arxiv.org/pdf/2603.17567v1
+
+Published Time: Thu, 19 Mar 2026 01:10:07 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+> JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 1
+
+# Face anonymization preserving facial expressions and photometric realism 
+
+Luigi Celona, Simone Bianco, Raimondo Schettini 
+
+Abstract —The widespread sharing of face images on social media platforms and in large-scale datasets raises pressing privacy concerns, as biometric identifiers can be exploited without consent. Face anonymization seeks to generate realistic facial images that irreversibly conceal the subject’s identity while preserving their usefulness for downstream tasks. However, most existing generative approaches focus on identity removal and image realism, often neglecting facial expressions as well as pho-tometric consistency—specifically attributes such as illumination and skin tone—that are critical for applications like relighting, color constancy, and medical or affective analysis. In this work, we propose a feature-preserving anonymization framework that extends DeepPrivacy by incorporating dense facial landmarks to better retain expressions, and by introducing lightweight post-processing modules that ensure consistency in lighting direction and skin color. We further establish evaluation metrics specifi-cally designed to quantify expression fidelity, lighting consistency, and color preservation, complementing standard measures of image realism, pose accuracy, and re-identification resistance. Experiments on the CelebA-HQ dataset demonstrate that our method produces anonymized faces with improved realism and significantly higher fidelity in expression, illumination, and skin tone compared to state-of-the-art baselines. These results un-derscore the importance of feature-aware anonymization as a step toward more useful, fair, and trustworthy privacy-preserving facial data. 
+
+Index Terms —Face anonymization, characteristics preserva-tion, GAN. 
+
+I. I NTRODUCTION 
+
+# ANONYMIZATION refers to the process of removing or altering personally identifiable information within data to safeguard individuals’ privacy. In computer vision, large collections of visual data are indispensable for the develop-ment of robust recognition and analysis systems. However, these datasets often include privacy-sensitive contents such as faces, license plates, or other biometric and contextual cues. The publication and reuse of such data raise ethical and legal concerns, amplified by recent regulatory frameworks. In particular, the General Data Protection Regulation (GDPR) in Europe [1], the California Consumer Privacy Act (CCPA) in the United States [2], and the Act on the Protection of Personal Information (APPI) in Japan [3] require that personal data be either anonymized or used only with explicit user content. Since obtaining consent at scale is rarely feasible, reliable anonymization has become a prerequisite for the ethical and lawful use of visual data. 
+
+Luigi Celona, Simone Bianco and Raimondo Schettini are with the De-partment of Informatics, Systems and Communication, University of Milano-Bicocca, 20126 Milan, Italy (e-mail: {first name }.{last name }@unimib.it). Manuscript received April 19, 2005; revised August 26, 2015. 
+
+Face anonymization methods can be broadly divided into two main categories: target-specific and target-generic ap-proaches [4]. Target-specific methods rely on adversarial perturbations to fool a particular recognition model [5]–[7]. Although they can achieve near-perfect identity obfuscation for the attached model, they often fail to generalize to other recognition systems and may remain vulnerable to human identification. Target-generic methods, in contrast, modify the visual appearance of the face itself so that both humans and algorithms cannot infer the original identity. Early approaches in this direction—such as masking [8], blurring [9], or pixela-tion [10]—are simple and effective but heavily compromise image utility. As shown in Figure 1, these occlusion-based techniques disrupt structural and photometric information, making anonymized faces unsuitable for downstream tasks such as expression recognition, pose estimation, or relighting. To overcome these limitations, learning-based approaches have emerged as a dominant paradigm. Generative Adversarial Network (GAN)-based methods synthesize artificial faces that preserve selected non-identity attributes, such as pose or approximate facial geometry, while removing identity-related features [11]–[13]. For instance, DeepPrivacy [11] introduced a conditional GAN framework to replace the original head region with an anonymized but realistic version, while CIA-GAN [14] and IdentityDP [15] extended this paradigm with more controllable identity vectors and privacy guarantees. More recent works have explored StyleGAN inversion [16], latent code optimization [17], and hybrid approaches combin-ing adversarial perturbations with generative synthesis [18], [19]. Diffusion-based anonymization has also emerged as a promising alternative, with methods such as Diff-Privacy [20] and LDFA [21] showing strong results in identity removal. Despite these advances, the majority of existing methods focus primarily on preventing re-identification and maxi-mizing image realism, often at the expense of photometric consistency—the accurate preservation of lighting and color characteristics across the original and anonymized face. This consistency is vital for downstream tasks where visual cues like illumination and skin tone must remain stable to avoid performance degradation or bias. Such tasks include:  
+
+> •
+
+Facial expression analysis, where anonymized data should retain the underlying emotion to remain useful for affective computing.  
+
+> •
+
+Illuminant estimation and relighting, which require ac-curate preservation of lighting direction and intensity for tasks such as image enhancement or virtual reality rendering.  
+
+> arXiv:2603.17567v1 [cs.CV] 18 Mar 2026 JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 2
+
+Original face Masking Blurring Pixelization Noise Generation   
+
+> Fig. 1. Comparison of canonical image processing methods for face anonymization. From left to right are masking, blurring, pixelation, noise, and generation [11].
+> •
+
+Color constancy and fairness-aware recognition, where consistent skin tone reproduction ensures both technical reliability and social inclusivity. Existing anonymization methods often distort shadows, alter shading, or shift skin tones, leading to anonymized datasets that are less representative and less useful for these tasks. In particular, landmark-conditioned GAN approaches frequently fail to preserve non-identity cues such as pose and gaze, which reduces the utility of the anonymized data for downstream applications. In this work, we propose a feature-preserving face anonymization framework designed to address this gap. Build-ing upon the DeepPrivacy architecture [11], we introduce ar-chitectural and photometric refinements that allow the preser-vation of three underrepresented but crucial features: facial expression, lighting direction, and skin color. Specifically, our contributions are as follows:  
+
+> •
+
+We enhance DeepPrivacy’s conditioning mechanism by providing a denser set of facial landmarks provided to the generator. This modification improves the retention of subtle expression details, resulting in anonymized faces that more faithfully reflect the affective state of the original subject.  
+
+> •
+
+We design lightweight post-processing methods to rein-troduce low-level image information into the anonymized output. A Laplacian pyramid blending technique transfers illumination cues from the input to the anonymized face, while a color transfer method in the YCbCr color space aligns skin tone statistics, ensuring that skin color is preserved without reintroducing identity.  
+
+> •
+
+We consolidate existing metrics for realism, detection, pose preservation, and re-identification, and introduce new measures for expression retention, lighting consis-tency, and skin color fidelity. This evaluation framework provides a more complete understanding of the trade-offs in anonymization. We validate our approach on the CelebA-HQ dataset, com-paring against eight state-of-the-art anonymization methods. Experimental results demonstrate that our method improves upon existing baselines in terms of both qualitative visual realism and quantitative metrics, particularly in preserving expression, lighting, and skin tone. These improvements make anonymized images more useful for downstream vision tasks while maintaining privacy guarantees. The remainder of this paper is organized as follows. In Section II, the related works are summarized. Section III presents the proposed method for face anonymization and the adopted evaluation metrics. Section IV details the experimental setup, including the datasets used, the benchmark methods considered for comparison, and the obtained results. Finally, Section V summarizes the key findings and presents conclud-ing remarks. II. R ELATED WORK 
+
+A. Face Privacy 1) Face Anonymization: Anonymization or de-identification methods concentrate on preserving facial attributes, such as gender, age, and race, while eliminating identity information from input images. Early face anonymization techniques mainly involve masking, pixelization, blurring, and similar approaches. However, these occlusion methods significantly diminish the data’s usefulness (see Figure 1). Additionally, they have proven to be ineffective for deep learning-based face recognition [22]. An alternative approach involves k-same algorithm-based methods, wherein the average face of k-closest faces replaces the given face, reducing face recognition accuracy to less than 1/ k [23]. Various modifications [24], [25] aim to enhance the data utility of the average face. Recent advances incorporate new techniques, such as de-identification through adversarial perturbations [5]–[7]. Shan et al . [7] proposed a system altering image feature representations using imperceptible perturbations. Generative Adversarial Networks (GANs) [26] have inspired a new category of face de-identification techniques, divided into conditional inpainting-based [11], [18], [27] and face representations manipulating-based [14], [15], [28]. For example, Sun et al . [27] generate realistic head inpainting based on facial landmarks, while DeepPrivacy [11] utilized a GAN-based head inpainting technique for comprehensive privacy removal. Gafni et al . [28] generate high-level representations from face images, minimizing identity associations while retaining perceptions (pose, illumination, and expression). CIAGAN [14] employs a vector to control the fake identity, and IdentityDP [15] combines differential privacy mechanisms with deep neural networks for adjustable privacy control. Cao et al . [19] introduced user-specific passwords and adjustable parameters for invertible de-identification. FALCO [17] optimizes latent representation in a pre-trained GAN’s space, synthesizing face images for effective de-identification and attribute preservation. RiDDLE [16] involves mapping the original face image into the latent space of a pre-trained StyleGAN2. Subsequently, the latent JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 3
+
+code and password undergo processing using a streamlined transformer, ultimately producing encrypted code. Similarly, HFORD [29] achieves high-fidelity and occlusion-robust deidentification by adding an attribute retention module. Leveraging the advancements in diffusion models, He et al . [20] introduced Diff-Privacy, merging anonymization and identity information hiding via a multi-scale image inversion module. This approach utilizes a stable diffusion model for robust privacy protection. AIDPro [30] leverages a hybrid architecture combining a face anonymization GAN with a signature embedding network to ensure both identity concealment and verification capability. 
+
+2) Identity-Preserving Face Privacy: These methods aim to alleviate privacy concerns in face recognition systems by preventing the use of facial information beyond identity recog-nition. Existing methods fall into two categories: image-level and representation-level. At the image level, Othman et al . [31] introduced the concept of soft biometric privacy, proposing a face-mixing approach that conceals gender attributes while preserving recognition utility. Adversarial perturbation-based methods [32], [33] are introduced for further enhancement. Chhabera et al . [34] applied adversarial perturbation for k-facial attributes anonymization, and Mirjalili et al . extended semi-adversarial networks for multi-attribute privacy in facial images [35]. Li et al . [36], [37] proposed visual appearance obfuscation methods for face image protection. Although these methods prevent automatic mining of facial attributes, some results are model-dependent and suffer from artifacts. Minor visual changes may not guarantee privacy concerning human observers, leading to risks like malicious AI face swapping without consent. Our work introduces a high-resolution face obfuscation framework to address these issues. At the repre-sentation level, some researchers focused on privacy in face descriptors [38]–[40], aiming for facial representations without privacy-sensitive attributes. For instance, SensitiveNet [38] eliminates sensitive information using a modified triplet loss. Terh¨ orst et al . [39], [40] proposed methods to suppress privacy-sensitive information on the template level. However, these methods cannot protect images in face recognition sys-tems and heavily depend on face descriptor extraction models. Our proposal introduces a privacy-preserving framework for face images rather than representations. 
+
+B. Anonymization Metrics 
+
+Although many face anonymization methods have been proposed in the literature, their evaluation is often just partial since many aspects have to be taken into account. This is why the first attempts towards a comprehensive evaluation methodology have recently started to appear [41], [42]. Face anonymization methods are typically evaluated based on two primary criteria: the effectiveness of privacy protection and the visual quality and/or utility of the generated faces. Among the privacy preserving metrics, the principal one is the reduction in recognition accuracy. The metric eval-uates how well an anonymization method obscures an in-dividual’s identity by measuring the decrease in accuracy of facial recognition systems when applied to anonymized images. A similar metric exploits the computation of face identity embeddings, a step used by almost all face verification models. To determine whether two images are of the same identity, they comparing the distance between their identity embeddings; therefore an increase in the distance between the original and anonymized face embeddings indicates an effective anonymization [42]. Todt et al . [43] investigated the phenomenon of face anonymization reversibility, testing the potential to reconstruct or reverse the anonymized image back to its original form. Techniques that resist such reconstruction attempts are considered more robust in preserving privacy. Visual quality and utility preserving metrics focus on mea-suring the naturalness and quality of the generated images, or their utility for downstream computer vision tasks [44]. This has been done measuring for example face detectability, i.e. how well anonymized faces are detected by face detectors [42], [45]. Sometimes this metric is complemented with a more fine-grained metric to measure the distance of face landmarks before and after anonymization, to evaluate to what extent their position has been preserved, or even if non-biometric facial attributes have been preserved [46]. From a visual quality point of view, common metrics taken from the image quality assess-ment field are usually used. This type of features comprises signal-based metrics, as for example the Peak signal-to-noise ratio (PSNR) or the Structural Similarity index (SSIM) [47], as well as more semantic-aware metrics, such as, for example the Fr´ echet Inception Distance (FID) [48], that measures the distance between the distribution of original and anonymized face images, with a low FID indicating a high similarity. III. P ROPOSED METHOD 
+
+In this section, we first formalize the face anonymization problem. We then describe our modifications to the existing GAN-based anonymization framework, followed by the eval-uation methodology. 
+
+A. Problem Formalization 
+
+Let Io ∈ RH×W ×3 denote the original face image with identity y ∈ Y , where Y is the set of possible identities. The goal of face anonymization is to generate a new image 
+
+Ia that conceals the identity y while retaining useful visual information. Formally, let A be the anonymization function. The anonymized image is defined as: 
+
+Ia = A(Io),
+
+where Ia ∈ RH×W ×3 is the output image that no longer reveals the subject’s identity but preserves key non-identity features. An effective anonymization method must satisfy the following criteria: 1) Privacy preservation. The probability of re-identifying y
+
+from Ia is minimized. Formally, for a face recognition model f : RH×W ×3 → Y ,
+
+Pr[ f (Ia) = y] ≈ 0.
+
+2) Utility preservation. The anonymized image should re-tain non-identity features such as pose, facial expression, JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 4
+
+(a) (b)  
+
+> Fig. 2. Comparison of pose-conditioning landmarks for anonymization. (a) Sparse set of seven landmarks extracted with Mask R-CNN [49], covering only ears, eyes, nose, and shoulders as in the original DeepPrivacy framework. (b) Dense set of 68 facial landmarks detected with the DLib implementation of [50], providing finer geometric detail and enabling more faithful expression preservation.
+
+illumination, and skin tone. Let ϕk(·) denote attribute extractors for task k (e.g., pose, expression). We require 
+
+d ϕk(Io), ϕ k(Ia) ≤ ϵk,
+
+where d(·, ·) is a task-specific distance and ϵk a tol-erance threshold. In our framework, utility preserva-tion specifically includes the retention of photomet-ric attributes such as illumination direction and skin tone—collectively referred to as photometric consis-tency. These low-level features are essential for main-taining image utility in applications where lighting cues and color constancy matter. 3) Realism. The output Ia should resemble a natural image, consistent with the distribution of real facial data. This is typically enforced by generative models and quanti-fied by metrics such as the Fr´ echet Inception Distance (FID) [48]. 
+
+B. Anonymization Method 
+
+Our approach builds upon the DeepPrivacy framework [11], which employs a conditional GAN-based inpainting strategy to replace the head region with a synthetic but realistic alterna-tive. We extend this framework with two main modifications. 
+
+1) Landmarks: DeepPrivacy conditions its anonymized face synthesis on pose information extracted during decoding. In the original framework, sparse pose estimation is performed using Mask R-CNN [49], providing only seven landmarks corresponding to the ears, eyes, nose, and shoulders. In our approach, we replace this sparse representation with a denser landmark configuration consisting of 68 facial keypoints (see Fig. 2). For this purpose, we employ the implementation of Kazemi and Sullivan [50] available in the DLib library [51]. By enriching the conditioning space with a more detailed geometric prior, our model is able to capture subtle facial deformations and expression cues, thereby improving the perceptual fidelity of the anonymized output. Given that this change impacts the information encoded and processed by the model, we need to retrain DeepPrivacy by changing the pose information given in input. 
+
+2) Post-Processing for Relighting and Color Transfer: 
+
+After the anonymized face Ia = A(Io) is generated by the GAN, we apply a two-step post-processing procedure to restore the photometric properties of the original image Io: (i) relighting based on shading transfer and (ii) color transfer to preserve skin tone consistency. 
+
+a) Intrinsic decomposition for relighting: We assume that a face image I can be factorized according to image intrinsic decomposition [52] into an albedo A and a shading map S as: 
+
+I(x, y ) ≈ A(x, y ) · S(x, y ),
+
+where A(x, y ) ∈ [0 , 1] 3 encodes reflectance and S(x, y ) ∈
+
+[0 , 1] encodes illumination intensity. An approximate decomposition is obtained using Retinex-style bilateral filtering [53]: 
+
+S = B gray( I), (1) 
+
+A = IS , (2) where B(·) denotes a bilateral filter applied to the grayscale image. We adopt intrinsic image decomposition as the core mecha-nism for relighting because it explicitly separates illumination and reflectance components, allowing the transfer of lighting information from the original to the anonymized face without reintroducing identity cues encoded in the albedo. In contrast to learned relighting networks such as SfSNet [54], intrinsic decomposition is model-agnostic, computationally lightweight, and does not require additional training data. This makes it particularly suitable for anonymization frameworks, where photometric correction must be efficient and interpretable, and where maintaining privacy precludes reliance on large-scale face-specific relighting datasets. Moreover, this physically motivated formulation ensures consistent illumination transfer under varying imaging conditions, aligning with our goal of preserving photometric consistency across anonymized faces in a resource-efficient manner. Given the original image Io and the anonymized output 
+
+Ia, relighting is performed by combining the albedo of the anonymized face with the shading of the original: 
+
+Irelight = AIa · SIo .
+
+As illustrated in Figure 3, to improve consistency across spatial frequencies, we refine relighting with a Laplacian pyramid. For each level k, the Laplacian residual is 
+
+Lk = Gk − upsample (Gk+1 ),
+
+where Gk is the Gaussian pyramid. We substitute the low-frequency Ia with the Irelight , then reconstruct the blended image: 
+
+Iblend =
+
+> K
+
+X
+
+> k=1
+
+upsample (Lk).JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 5Laplacian pyramid  Approximate intrinsic               
+
+> decomposition
+> AIa
+> AIoSIoSIa
+> •
+> Approximate intrinsic
+> decomposition
+> Output: Iblend
+> Laplacian pyramid
+> Blur and subsample
+> Upsample
+> Input: IoInput: Ia
+> Fig. 3. Relighting pipeline. The original image Ioand anonymized image Iaare decomposed into albedo ( A) and shading ( S) components. The shading of
+> Iois combined with the albedo of Ia, and a Laplacian pyramid is used to refine consistency across spatial frequencies, producing the blended output Iblend .
+
+b) Color transfer: To ensure that the anonymized output preserves the skin tone of the original subject, we perform a channel-wise color transfer. Specifically, we align the chro-matic statistics of the blended image Iblend with those of the original image Io. The final corrected image is obtained as 
+
+If = C Iblend , I o
+
+,
+
+where C(·) denotes the color transfer operator. Formally, let μct and σct denote the mean and standard deviation of channel c in Iblend , and μcr , σcr the corresponding statistics in Io. For each pixel (x, y ) and channel c, we define: 
+
+Icf (x, y ) = σcr
+
+σct
+
+(Ic
+
+> blend
+
+(x, y ) − μct ) + μcr .
+
+Here, the channels c correspond to the chrominance compo-nents ( Cb , Cr ) of the YCbCr color space, while the luminance channel ( Y ) is left unchanged to avoid altering structural information. After transformation, pixel values are clipped to the valid range [0 , 255] and converted back to the RGB space. 
+
+C. Anonymization Performance Evaluation 
+
+To evaluate anonymization quality, we compare multiple generative models under a unified set of criteria. Our eval-uation framework considers three complementary dimensions:  
+
+> •
+
+Image quality – measuring perceptual realism and fidelity of the generated images.  
+
+> •
+
+Privacy – quantifying the ability of the anonymization method to prevent identity leakage.  
+
+> •
+
+Utility – assessing whether the anonymized images re-main usable for downstream computer vision tasks, such as pose estimation, expression analysis, or relighting. To provide a comprehensive analysis, we report both com-monly used metrics from the literature and our proposed metrics tailored to specific utility aspects not fully captured by standard benchmarks. 
+
+1) Common Evaluation Metrics: The performance of face anonymization models is typically assessed through four widely adopted criteria, namely visual quality, face detection rate, pose preservation, and face re-identification risk [11], [14], [55]. Visual quality is quantified using the Fr´ echet Inception Distance (FID) [48], which measures the distance between distributions of real and anonymized images in a deep feature space. These features are extracted from specific layers of an Inception network pre-trained on ImageNet, yielding FIDImageNet. Since FIDImageNet may be biased by the fact that many generative models are trained on ImageNet-pretrained backbones, we also compute a CLIP-based variant, FID CLIP [56], which leverages the more semantically aligned CLIP embedding space. Lower FID scores indicate higher image realism and closer alignment with the distribution of real faces. The detection rate is defined as the percentage of anonymized images in which a valid face is detected relative to the total number of images. This metric serves as a proxy for whether the generated faces remain recognizable by generic face detectors, a necessary condition for downstream use. We employ the MTCNN face detector [57] for this task, and an ideal anonymization method should approach a detection rate of 100%. Pose preservation ensures that anonymized images retain the geometric arrangement of facial landmarks. It is measured by the L 1 distance between the 68 landmarks detected on the original and anonymized faces, normalized by the inter-ocular distance [50]. We use the DLib implementation [51] for landmark detection, which captures facial contours, eyes, mouth corners, and eyebrows. Finally, we assess face re-identification risk by computing the cosine similarity be-tween identity embeddings of original and anonymized faces. Since CelebA-HQ does not provide paired identity labels, we apply anonymization to each test sample and extract identity embeddings using two variants of FaceNet [58], one trained on JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 6
+
+Face image Albedo Normal Shading  
+
+> Fig. 4. Albedo, normal and shading images estimated for a face image by the SfSNet model [54].
+
+VGGFace2 [59] and another on CASIA-WebFace [60]. Lower similarity scores indicate better identity obfuscation. 
+
+D. Proposed utility metrics 
+
+To complement the common metrics and better capture the utility dimension, we introduce additional metrics targeting expression, lighting, and color consistency. The facial expres-sion coherence between the original and anonymized faces is measured using two complementary approaches. First, we compute the normalized L 1 distance between 51 expression-related facial landmarks (excluding contour points), focusing on regions such as eyes, eyebrows, nose, and mouth. Lower distances indicate better expression preservation. Second, we assess affective consistency by evaluating the accuracy of a pretrained emotion classifier in predicting the same emotion label for both the original and anonymized faces [61]. Fol-lowing the relighting evaluation framework proposed in [62], we quantify lighting direction error using the scale-invariant Mean Squared Error (Si-MSE) and scale-invariant L 2 norm (Si-L 2) [63] between the original RGB face image Io and its anonymized counterpart Ia:Si-MSE = 1
+
+NI
+
+min  
+
+> α
+
+∥Io − αIa∥22, (3) where NI is the number of facial pixels and α is a scalar that accounts for global intensity differences. The use of 
+
+α ensures invariance to the overall brightness scaling while remaining sensitive to illuminant color. To further refine the lighting evaluation, we compute the scale-invariant L 2 distance between the estimated shadings So and Sa:Si-L 2 = min α
+
+q
+
+∥So − αSa∥22. (4) Shading images are extracted using SfSNet [54], which also provides albedo and normal maps (see Fig. 4). Finally, to measure color similarity , we compare the albedo images of the original and anonymized faces in the L∗a∗b∗ color space. We compute per-pixel lightness difference ∆L, chroma difference ∆C, and perceptual color difference ∆E2000 using the implementation from the colour-science library [64] as follows: 
+
+∆L =| L∗ 
+
+> o
+
+− L∗ 
+
+> a
+
+|,
+
+∆C =| p(a∗
+
+> o
+
+)2 + ( b∗
+
+> o
+
+)2 − p(a∗
+
+> a
+
+)2 + ( b∗
+
+> a
+
+)2 |, (5) where L∗
+
+> o
+
+, a ∗
+
+> o
+
+, b ∗ 
+
+> o
+
+are the original image lightness and chroma values and L∗
+
+> a
+
+, a ∗
+
+> a
+
+, b ∗ 
+
+> a
+
+are the generated image lightness and chroma values. The mean values of these differences serve as image-level descriptors, indicating how closely the anonymized face reproduces the original’s intrinsic color ap-pearance. 
+
+E. Discussion 
+
+By combining metrics from multiple dimensions—image quality, privacy, and utility—we ensure that the evaluation does not overfit to a single objective (e.g., identity suppression) at the expense of others (e.g., expression fidelity). This holistic approach provides a more reliable picture of an anonymization method’s real-world applicability, where generated faces must be visually convincing, privacy-preserving, and still usable for downstream tasks such as expression analysis, pose estimation, or lighting-aware applications. IV. E XPERIMENTS 
+
+This section describes the datasets, evaluation metrics, state-of-the-art baselines, and implementation details used to bench-mark our approach. The goal is to provide a reproducible and rigorous assessment of the proposed anonymization method. 
+
+A. Datasets 
+
+We use the Flickr-Faces-HQ (FFHQ) dataset [65] to train our model and CelebA-HQ [66] for evaluation. FFHQ consists of 70,000 high-resolution images at 1024 ×
+
+1024 pixels, exhibiting substantial diversity in age, ethnicity, and background, as well as accessories such as eyeglasses, sunglasses, hats, and facial hair. The images were sourced from Flickr, inheriting its demographic and contextual biases, and have been automatically aligned and cropped. CelebA-HQ is a high-quality subset of the CelebA dataset [67], containing 30,000 celebrity face images at 1024 × 1024 
+
+resolution. Each image is annotated with 40 attribute labels describing facial properties (e.g., smiling, wearing glasses, hair color), which are particularly valuable for assessing identity obfuscation and attribute preservation. 
+
+B. Evaluation metrics 
+
+To rigorously assess anonymization performance, we evalu-ate our method across six key dimensions: image quality, pose preservation, privacy preservation, facial expression preserva-tion, skin color preservation, and lighting direction preserva-tion. The evaluation protocol follows a unified, reproducible methodology consistent with prior works [11], [14], [55], ensuring fair comparison across different models. For clarity, all metrics used in this work are summarized in Table I, grouped by evaluation dimension (image quality, privacy, and utility) and accompanied by their computation methods. 
+
+C. State-of-the-art methods 
+
+We benchmark our approach against eight state-of-the-art face anonymization methods representing different modeling strategies:  
+
+> •
+
+AIDPro [30]: a recent method focusing on identity-disentangled face generation with strong privacy guar-antees. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 7                               
+
+> TABLE I SUMMARY OF EVALUATION METRICS USED FOR ANONYMIZATION PERFORMANCE ASSESSMENT . M ETRICS ARE GROUPED BY EVALUATION DIMENSION ,WITH THEIR PURPOSE AND COMPUTATION METHOD EXPLICITLY STATED .Dimension Metric Description / Computation Image Quality FIDImageNet Fr´ echet Inception Distance computed in ImageNet-pretrained Inception feature space [48]. Lower is better. FIDCLIP FID computed in CLIP embedding space for semantically aligned evaluation [56]. Detection Rate Percentage of anonymized images where MTCNN detects a valid face [57]. Higher is better. Privacy Cosine Similarity of Identity Embeddings Cosine similarity between FaceNet embeddings of original and anonymized images, using two FaceNet versions (VGGFace2 and CASIA-WebFace) [58]–[60]. Lower indicates better anonymization. Face Re-identification Rate Percentage of original-anonymized pairs matched by a re-identification network above a similarity threshold. Geometry Pose Preservation Normalized L 1distance between 68 facial landmarks detected by DLib [50], [51]. Lower is better. Expression Coherence (1) Normalized L 1distance between 51 expression-related landmarks; (2) Emotion prediction consistency using a pretrained emotion classifier [61]. Lighting Si-MSE Scale-invariant Mean Squared Error between original and anonymized facial regions [62], [63]. Si-L 2Scale-invariant L 2distance between shading maps estimated by SfSNet [54]. Color ∆L,∆C,∆E2000 Pixelwise lightness, chroma, and perceptual color differences computed in L∗a∗b∗color space using
+> colour-science [64]. Lower is better.
+> •
+
+AnonyGAN [55]: a GAN-based anonymization model incorporating pose conditioning.  
+
+> •
+
+CIAGAN [14]: a conditional identity-anonymizing GAN leveraging pose heatmaps for identity removal.  
+
+> •
+
+DeepPrivacy [11] and DeepPrivacy2 [18]: privacy-preserving generative models using bounding-box-based anonymization, with DeepPrivacy2 introducing style-based generators.  
+
+> •
+
+FALCO [17]: an attribute-controllable anonymization framework that explicitly preserves non-identity at-tributes.  
+
+> •
+
+G2Face [12]: a geometry-guided anonymization approach designed to maintain pose and expression fidelity.  
+
+> •
+
+RiDDLE [16]: a disentanglement-based method separat-ing identity and attribute representations for controllable anonymization. We use the official implementations and pretrained weights provided by the authors where available, or faithfully re-implement the methods following their original papers when code is unavailable. All baselines are evaluated under the same resolution, preprocessing pipeline, and test split to ensure a fair and direct comparison. 
+
+D. Results 
+
+Table II reports the results on the common evaluation metrics, including image quality (FID ImageNet and FID CLIP ), face detection rate, face re-identification similarity, and pose preservation. Our method achieves the second-best FID ImageNet 
+
+and FID CLIP scores, indicating that the generated images are perceptually close to the distribution of real faces while avoiding overfitting to the ImageNet feature space. In partic-ular, our CLIP-based FID is substantially lower than Deep-Privacy2, FALCO, and AIDPro, demonstrating the semantic consistency of the generated content. Although RiDDLE and G2Face achieve slightly better re-identification suppression, our method provides a strong balance between privacy and visual fidelity, outperforming AnonyGAN and DeepPrivacy in both FID and identity obfuscation. Pose preservation is also competitive, with our normalized landmark error being the second lowest across all methods, suggesting that our approach reliably maintains the geometric structure of the input faces. While our inference time is not the fastest, it remains practical for real-time or batch anonymization scenarios, with only a marginal increase compared to the fastest baselines. A visual comparison of anonymized samples is shown in Figure 6, where our method exhibits stronger preservation of expression, shading, and skin tone, with fewer visual artifacts than the competing methods. Although RiDDLE and G 2Face achieve slightly better iden-tity suppression, our method strikes a stronger balance between privacy protection, photometric fidelity, and emotional realism, offering a more versatile solution for practical anonymization scenarios. Table III focuses on the preservation of facial expressions by reporting both landmark error (on 51 expression-related points) and emotion classification accuracy. Our method at-tains the highest expression classification accuracy (75.00%), outperforming AnonyGAN and G 2Face, which are the closest competitors. This result highlights the ability of our model to preserve subtle expression cues, which is essential for downstream tasks such as affective computing and human behavior analysis. The landmark error achieved by our method is also the second lowest overall, confirming that expression-related facial geometry is faithfully preserved. Table IV presents the evaluation of lighting direction preser-vation using scale-invariant metrics. Our method achieves the lowest Si-L 2 and a near-best Si-MSE, outperforming all other baselines, including G 2Face, which is specifically designed to preserve geometric properties. This suggests that our approach not only maintains spatial structure but also captures shading consistency, which is crucial for photorealistic anonymization and for downstream vision models that are sensitive to illumi-nation. Finally, Table V compares the methods in terms of skin color preservation using pixelwise L∗a∗b∗ differences and 
+
+∆E2000 perceptual distance. Our method achieves one of the lowest mean ∆E values, nearly matching G 2Face, which JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 8
+
+TABLE II COMPARISON OF COMMON ANONYMIZATION PERFORMANCE METRICS ACROSS STATE -OF -THE -ART METHODS . W E REPORT VISUAL QUALITY 
+
+(FID IMAGE NET , FID CLIP ), FACE DETECTION RATE , IDENTITY SIMILARITY USING FACE NET EMBEDDINGS (VGGF ACE 2 AND CASIA-W EB FACE ), POSE PRESERVATION ERROR (NORMALIZED L1 DISTANCE ), AND AVERAGE INFERENCE TIME PER IMAGE . ↓ INDICATES LOWER IS BETTER , ↑ INDICATES HIGHER IS BETTER . B EST AND SECOND -BEST RESULTS ARE HIGHLIGHTED IN BLUE AND RED RESPECTIVELY .Method Year FID ImageNet (↓) FID CLIP (↓) Face detection ( ↑) Face re-identification ( ↓) Pose estimation ( ↓) Inference time ( ↓)VGGFace2 CASIA-WebFace AIDPro [30] 2025 26.63 14.48 98.79 0.1532 ± 0.1591 0.2140 ± 0.1470 0.0500 0.02 AnonyGAN [55] 2022 60.23 19.34 96.79 0.3892 ± 0.1546 0.3768 ± 0.1408 0.0339 0.10 CIAGAN [14] 2020 1.78 34.00 95.25 0.1796 ± 0.1658 0.2172 ± 0.1432 0.0791 0.08 DeepPrivacy [11] 2019 32.50 21.10 97.24 0.1917 ± 0.1748 0.2170 ± 0.1514 0.0520 0.12 DeepPrivacy2 [18] 2022 15.08 11.69 95.84 0.1738 ± 0.1681 0.2063 ± 0.1507 0.0946 0.28 FALCO [17] 2023 26.59 14.46 99.74 0.4822 ± 0.1439 0.4996 ± 0.1268 0.0598 0.09 
+
+G2Face [12] 2024 16.32 5.77 98.38 0.1430 ± 0.1632 0.1916 ± 0.1485 0.0276 0.03 RiDDLE [16] 2023 52.79 33.63 99.86 0.0326 ± 0.1683 0.0941 ± 0.1513 0.0446 0.03 Our 2025 10.54 8.27 98.04 0.2125 ± 0.1599 0.2184 ± 0.1420 0.0334 0.12 TABLE III EVALUATION OF FACIAL EXPRESSION PRESERVATION USING NORMALIZED LANDMARK ERROR (51 EXPRESSION -RELATED LANDMARKS ) AND EMOTION CLASSIFICATION ACCURACY . L OWER VALUES (↓) INDICATE BETTER LANDMARK ALIGNMENT , HIGHER VALUES (↑) INDICATE BETTER EXPRESSION CONSISTENCY . B EST AND SECOND -BEST RESULTS ARE HIGHLIGHTED IN BLUE AND RED RESPECTIVELY .Method Landmark error ( ↓) Facial expression acc. ( ↑)AIDPro [30] 0.0510 63.91 AnonyGAN [55] 0.0321 73.11 CIAGAN [14] 0.0801 56.55 DeepPrivacy [11] 0.0513 53.29 DeepPrivacy2 [18] 0.0973 51.23 FALCO [17] 0.0598 59.43 
+
+G2Face [12] 0.0252 72.00 RiDDLE [16] 0.0446 67.66 Our 0.0318 75.00 TABLE IV LIGHTING DIRECTION PRESERVATION EVALUATED USING SCALE -INVARIANT MEAN SQUARED ERROR (S I-MSE) AND SCALE -INVARIANT L2 DISTANCE (S I-L 2 ) BETWEEN THE ORIGINAL AND ANONYMIZED FACES . L OWER VALUES (↓) INDICATE BETTER PRESERVATION . B EST AND SECOND -BEST RESULTS ARE HIGHLIGHTED IN BLUE AND RED RESPECTIVELY .Method Si-MSE ( ↓) Si-L 2 (↓)AIDPro [30] 0.0314 ± 0.0122 0.0131 ± 0.0073 AnonyGAN [55] 0.0359 ± 0.0205 0.0146 ± 0.0081 CIAGAN [14] 0.0792 ± 0.0392 0.0185 ± 0.0095 DeepPrivacy [11] 0.0549 ± 0.0355 0.0163 ± 0.0095 DeepPrivacy2 [18] 0.0838 ± 0.0516 0.0211 ± 0.0124 FALCO [17] 0.0654 ± 0.0386 0.0163 ± 0.0088 
+
+G2Face [12] 0.0179 ± 0.0070 0.0110 ± 0.0067 RiDDLE [16] 0.0531 ± 0.0247 0.0185 ± 0.0083 Our 0.0137 ± 0.0237 0.0100 ± 0.0085 
+
+obtains the best overall color consistency. Importantly, our method shows low variance across samples, indicating stable and consistent color reproduction. This is essential to prevent demographic bias amplification and to maintain downstream fairness in tasks involving skin-tone-sensitive analysis. Overall, the results across all tables demonstrate that our method strikes a favorable balance between image quality, privacy protection, and utility preservation. It achieves near state-of-the-art results in every metric, with particularly strong 
+
+TABLE V SKIN COLOR PRESERVATION EVALUATED USING SIMSE, LIGHTNESS ERROR (MSE-L), CHROMA ERROR (MSE-AB ), AND PERCEPTUAL DIFFERENCE (∆E2000 ) BETWEEN ORIGINAL AND ANONYMIZED FACES .LOWER VALUES INDICATE BETTER COLOR CONSISTENCY . B EST AND SECOND -BEST RESULTS ARE HIGHLIGHTED IN BLUE AND RED RESPECTIVELY .Method Si-MSE MSE-L MSE-ab ∆E                                                                                           
+
+> AIDPro [30] 3.60 ×10 −70.1241 ±0.1316 0.1426 ±0.1128 10.30 ±9.46 AnonyGAN [55] 3.19 ×10 −70.1053 ±0.1083 0.1269 ±0.0945 9.03 ±7.84 CIAGAN [14] 6.82 ×10 −70.2153 ±0.2320 0.2289 ±0.1976 17.26 ±16.61 DeepPrivacy [11] 4.76 ×10 −70.1482 ±0.1675 0.1710 ±0.1446 12.27 ±12.06 DeepPrivacy2 [18] 6.40 ×10 −70.2087 ±0.2353 0.2226 ±0.2010 16.73 ±16.87 FALCO [17] 4.89 ×10 −70.1605 ±0.1457 0.1772 ±0.1264 13.08 ±10.50 G2Face [12] 2.63 ×10 −70.0946 ±0.1310 0.1077 ±0.1134 7.83 ±9.46 RiDDLE [16] 5.07 ×10 −70.1737 ±0.1504 0.1941 ±0.1306 14.13 ±10.83 Our 3.14 ×10 −70.1117 ±0.1555 0.1163 ±0.1362 8.93 ±11.32
+
+performance in expression coherence and lighting preservation — two dimensions often neglected by existing anonymization approaches. These findings confirm the effectiveness of our design choices and their suitability for real-world applications where visual realism, privacy, and downstream task usability must be simultaneously guaranteed. A global view of this trade-off is provided in Fig. 5, where the aggregated scores across the five evaluation dimensions are summarized in a radar plot, highlighting the overall superiority and balanced performance of our approach compared to competing methods. 
+
+E. Ablation study 
+
+In this section, we analyze the contribution of the main com-ponents of our anonymization framework, namely the facial landmark alignment, the relighting strategy, and the Laplacian pyramid refinement. Table VI reports the quantitative results obtained by progressively enabling these modules and mea-suring their effect on image fidelity, privacy protection, and photometric consistency. The baseline configuration, which excludes landmark align-ment, relighting, and Laplacian refinement, corresponds to a simplified version similar to DeepPrivacy [11]. This base-line achieves moderate image quality (FID ImageNet =32.50, FID CLIP =21.10) and satisfactory privacy protection, but the resulting faces exhibit limited expression coherence and poor lighting consistency (SiMSE=0.0549). Introducing facial land-mark alignment notably improves perceptual quality and fa-JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 9Image quality            
+
+> Privacy
+> Geometry Lighting
+> Color
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> AIDPro AnonyGAN CIAGAN DeepPrivacy DeepPrivacy2 FALCO G2Face RiDDLE Ours
+> Fig. 5. Aggregated performance across five evaluation dimensions: image quality, privacy, geometry, lighting, and color. Each axis represents the normalized average score for a dimension, where higher values indicate better performance.
+
+cial geometry, reducing the FID scores by over 70% and increasing expression accuracy from 53.29% to 72.40%. The detection rate also rises to 99.35%, confirming that alignment ensures better face structure and stability during generation. Replacing standard relighting with the SfSNet-based relighting module further enhances expression accuracy (74.62%) and pose estimation, but the FID scores slightly worsen due to the coarse reflectance estimation provided by SfSNet. This step highlights the importance of accurate illumina-tion modeling for balancing realism and privacy. Switching to Intrinsic Decomposition-based relighting results in the best image fidelity among all variants (FID ImageNet =7.50, FID CLIP =6.02), along with superior lighting and color con-sistency (SiMSE=0.0208, ∆E=9.36). The improvement con-firms that a simple Retinex-based intrinsic decomposition can effectively approximate shading transfer at a fraction of the computational cost of deep relighting networks. This result highlights an additional advantage of our design: the relighting step adds negligible overhead, making the proposed pipeline suitable for real-time or large-scale anonymization scenarios without sacrificing photometric accuracy. The method effectively disentangles shading and albedo components, preserving both facial geometry and global il-lumination patterns. Finally, the inclusion of the Laplacian pyramid refinement leads to the most balanced configuration overall, achieving strong visual realism, improved expression accuracy (75.00%), and the lowest lighting and color errors (SiMSE=0.0137, ∆E=8.93). This refinement step sharpens fine-scale details, mitigates over-smoothing, and harmonizes relight regions with the background. Original 
+
+AIDPro 
+
+AnonyGAN 
+
+CIAGAN 
+
+DeepPrivacy 
+
+DeepPrivacy2 
+
+FALCO 
+
+G2Face 
+
+RiDDLE 
+
+Ours   
+
+> Fig. 6. Anonymization results on CelebA-HQ. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 10
+
+TABLE VI ABLATION STUDY . E FFECT OF FACIAL LANDMARK ALIGNMENT , RELIGHTING METHOD , AND LAPLACIAN PYRAMID REFINEMENT ON IMAGE FIDELITY ,
+
+> RECOGNITION
+
+, AND LIGHTING AND COLOR CONSISTENCY METRICS . T HE BEST RESULTAS ARE HIGHLITED IN BLUE AND RED RESPECTIVELY .68 Landmarks Relighting Lapl. Pyr. FID ImageNet FID CLIP Face det. Face re-identification Pose estim. Facial expr. Light. (SiMSE) Skin color ( ∆E)VGGFace2 CASIA-WebFace                                                        
+
+> ✗✗✗32.50 21.10 97.24 0.1917 0.2170 0.0520 53.29 0.0549 12.27
+> ✓✗✗9.85 7.20 99.35 0.2193 0.2237 0.0360 72.40 0.0430 9.74
+> ✓SfSNet ✓30.21 17.52 95.33 0.4641 0.4671 0.0339 74.62 0.0363 10.71
+> ✓Intr. Decom. ✗7.50 6.02 98.94 0.2331 0.2366 0.0392 74.77 0.0208 9.36
+> ✓Intr. Decom. ✓10.54 8.27 98.04 0.2125 0.2184 0.0334 75.00 0.0137 8.93
+
+V. C ONCLUSIONS 
+
+In this work, we introduced a feature-preserving face anonymization framework that explicitly maintains three crit-ical aspects often overlooked in current anonymization sys-tems: facial expression, lighting consistency, and skin color fidelity. Building upon DeepPrivacy, our approach integrates dense facial landmarks to better retain expression details and introduces lightweight photometric post-processing modules based on intrinsic image decomposition and color transfer in the YCbCr space. Comprehensive experiments on the CelebA-HQ dataset demonstrate that our method achieves a favorable balance between privacy protection, image realism, and down-stream usability, outperforming or matching state-of-the-art methods across multiple evaluation dimensions. In particular, it exhibits superior preservation of expression and lighting, two factors essential for affective computing, relighting, and fairness-aware computer vision. Beyond quantitative gains, our findings show that effective anonymization must conceal identity while preserving photometric and affective integrity. This paradigm shift is key for enabling anonymized datasets that remain valid for research and deployment in sensitive domains such as healthcare, driver monitoring, and social robotics. Future work will explore diffusion-based extensions and domain adaptation strategies to further generalize the proposed framework across diverse imaging conditions. ACKNOWLEDGMENT 
+
+The authors would like to thank Sofia Zonari for her helpful support to this project during her Master’s degree stage at the Imaging and Vision lab. Financial support from ICSC – Centro Nazionale di Ricerca in High Performance Computing, Big Data and Quantum Computing, funded by European Union – NextGenerationEU. REFERENCES [1] P. Regulation, “Regulation (eu) 2016/679 of the european parliament and of the council,” Regulation (eu) , vol. 679, p. 2016, 2016. [2] E. Illman and P. Temple, “California consumer privacy act,” The Business Lawyer , vol. 75, no. 1, pp. 1637–1646, 2019. [3] P. I. P. Commission et al. , “Act on the protection of personal information (2017),” 2017. [4] Q. Sun, A. Tewari, W. Xu, M. Fritz, C. Theobalt, and B. Schiele, “A hybrid model for identity obfuscation by face replacement,” in European Conference on Computer Vision , 2018, pp. 553–569. [5] S. Liang, B. Wu, Y. Fan, X. Wei, and X. Cao, “Parallel rectangle flip attack: A query-based black-box attack against object detection,” in 
+
+International Conference on Computer Vision . IEEE/CVF, 2021, pp. 7677–7687. [6] S. Liang, L. Li, Y. Fan, X. Jia, J. Li, B. Wu, and X. Cao, “A large-scale multiple-objective method for black-box attack against object detection,” in European Conference on Computer Vision . Springer, 2022, pp. 619– 636. [7] S. Shan, E. Wenger, J. Zhang, H. Li, H. Zheng, and B. Y. Zhao, “Fawkes: Protecting privacy against unauthorized deep learning models,” in USENIX Security symposium , 2020, pp. 1589–1604. [8] K. Yang, J. H. Yau, L. Fei-Fei, J. Deng, and O. Russakovsky, “A study of face obfuscation in imagenet,” in International Conference on Machine Learning . PMLR, 2022, pp. 25 313–25 330. [9] B. Jiang, B. Bai, H. Lin, Y. Wang, Y. Guo, and L. Fang, “Dartblur: Privacy preservation with detection artifact suppression,” in Computer Vision and Pattern Recognition . IEEE/CVF, 2023, pp. 16 479–16 488. [10] J. Zhou and C.-M. Pun, “Personal privacy protection via irrelevant faces tracking and pixelation in video live streaming,” IEEE Transactions on Information Forensics and Security , vol. 16, pp. 1088–1103, 2020. [11] H. Hukkel˚ as, R. Mester, and F. Lindseth, “Deepprivacy: A generative adversarial network for face anonymization,” in International symposium on visual computing . Springer, 2019, pp. 565–578. [12] H. Yang, X. Xu, C. Xu, H. Zhang, J. Qin, Y. Wang, P.-A. Heng, and S. He, “G² Face: High-fidelity reversible face anonymization via generative and geometric priors,” IEEE Transactions on Information Forensics and Security , 2024. [13] H.-W. Kung, T. Varanka, S. Saha, T. Sim, and N. Sebe, “Face anonymization made simple,” in Winter Conference on Applications of Computer Vision . IEEE/CVF, 2025, pp. 1040–1050. [14] M. Maximov, I. Elezi, and L. Leal-Taix´ e, “Ciagan: Conditional identity anonymization generative adversarial networks,” in Computer Vision and Pattern Recognition . IEEE/CVF, 2020, pp. 5447–5456. [15] Y. Wen, B. Liu, M. Ding, R. Xie, and L. Song, “Identitydp: Differential private identification protection for face images,” Springer Neurocom-puting , vol. 501, pp. 197–211, 2022. [16] D. Li, W. Wang, K. Zhao, J. Dong, and T. Tan, “Riddle: Reversible and diversified de-identification with latent encryptor,” in Computer Vision and Pattern Recognition . IEEE/CVF, 2023, pp. 8093–8102. [17] S. Barattin, C. Tzelepis, I. Patras, and N. Sebe, “Attribute-preserving face dataset anonymization via latent code optimization,” in Computer Vision and Pattern Recognition . IEEE/CVF, 2023, pp. 8001–8010. [18] H. Hukkel˚ as and F. Lindseth, “Deepprivacy2: Towards realistic full-body anonymization,” in Winter Conference on Applications of Computer Vision . IEEE/CVF, 2023. [19] J. Cao, B. Liu, Y. Wen, R. Xie, and L. Song, “Personalized and invertible face de-identification by disentangled identity information manipula-tion,” in International Conference on Computer Vision . IEEE/CVF, 2021, pp. 3334–3342. [20] X. He, M. Zhu, D. Chen, N. Wang, and X. Gao, “Diff-privacy: Diffusion-based face privacy protection,” IEEE Transactions on Circuits and Systems for Video Technology , 2024. [21] M. Klemp, K. R¨ osch, R. Wagner, J. Quehl, and M. Lauer, “LDFA: Latent diffusion face anonymization for self-driving applications,” in 
+
+Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2023, pp. 3199–3205. [22] R. Gross, L. Sweeney, F. De la Torre, and S. Baker, “Model-based face de-identification,” in Computer Vision and Pattern Recognition Workshop . IEEE, 2006, pp. 161–161. [23] E. M. Newton, L. Sweeney, and B. Malin, “Preserving privacy by de-identifying face images,” IEEE Transactions on Knowledge and Data Engineering , vol. 17, no. 2, pp. 232–243, 2005. [24] L. Du, M. Yi, E. Blasch, and H. Ling, “Garp-face: Balancing privacy protection and utility preservation in face de-identification,” in Interna-tional Joint Conference on Biometrics . IEEE, 2014, pp. 1–8. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 11 
+
+[25] A. Jourabloo, X. Yin, and X. Liu, “Attribute preserved face de-identification,” in International conference on biometrics (ICB) . IEEE, 2015, pp. 278–285. [26] I. Goodfellow, J. Pouget-Abadie, M. Mirza, B. Xu, D. Warde-Farley, S. Ozair, A. Courville, and Y. Bengio, “Generative adversarial networks,” 
+
+Communications of the ACM , vol. 63, no. 11, pp. 139–144, 2020. [27] Q. Sun, L. Ma, S. J. Oh, L. Van Gool, B. Schiele, and M. Fritz, “Natural and effective obfuscation by head inpainting,” in Computer Vision and Pattern Recognition . IEEE, 2018, pp. 5050–5059. [28] O. Gafni, L. Wolf, and Y. Taigman, “Live face de-identification in video,” in International Conference on Computer Vision . IEEE/CVF, 2019, pp. 9378–9387. [29] D. Chen, M. Zhu, N. Wang, and X. Gao, “HFORD: High-fidelity and occlusion-robust de-identification for face privacy protection,” arXiv preprint arXiv:2311.08786 , 2023. [30] T. Wang, W. Wen, X. Xiao, Z. Hua, Y. Zhang, and Y. Fang, “Beyond privacy: Generating privacy-preserving faces supporting robust image authentication,” IEEE Transactions on Information Forensics and Secu-rity , 2025. [31] A. Othman and A. Ross, “Privacy of facial soft biometrics: Suppressing gender but retaining identity,” in European Conference on Computer Vision . Springer, 2015, pp. 682–696. [32] V. Mirjalili, S. Raschka, A. Namboodiri, and A. Ross, “Semi-adversarial networks: Convolutional autoencoders for imparting privacy to face images,” in International Conference on Biometrics (ICB) . IEEE, 2018, pp. 82–89. [33] V. Mirjalili and A. Ross, “Soft biometric privacy: Retaining biometric utility of face images while perturbing gender,” in International Joint Conference on Biometrics (IJCB) . IEEE, 2017, pp. 564–573. [34] S. Chhabra, R. Singh, M. Vatsa, and G. Gupta, “Anonymizing k-facial attributes via adversarial perturbations,” in International Joint Conference on Artificial Intelligence , 2018, pp. 656–662. [35] V. Mirjalili, S. Raschka, and A. Ross, “Privacynet: Semi-adversarial networks for multi-attribute face privacy,” IEEE Transactions on Image Processing , vol. 29, pp. 9400–9412, 2020. [36] J. Li, L. Han, R. Chen, H. Zhang, B. Han, L. Wang, and X. Cao, “Identity-preserving face anonymization via adaptively facial attributes obfuscation,” in International Conference on Multimedia . ACM, 2021, pp. 3891–3899. [37] J. Li, L. Han, H. Zhang, X. Han, J. Ge, and X. Cao, “Learning dis-entangled representations for identity preserving surveillance face cam-ouflage,” in International Conference on Pattern Recognition . IEEE, 2021, pp. 9748–9755. [38] A. Morales, J. Fierrez, R. Vera-Rodriguez, and R. Tolosana, “Sensi-tivenets: Learning agnostic representations with application to face im-ages,” IEEE Transactions on Pattern Analysis and Machine Intelligence ,vol. 43, no. 6, pp. 2158–2164, 2020. [39] P. Terh¨ orst, D. F¨ ahrmann, N. Damer, F. Kirchbuchner, and A. Kuijper, “On soft-biometric information stored in biometric face embeddings,” 
+
+IEEE Transactions on Biometrics, Behavior, and Identity Science , vol. 3, no. 4, pp. 519–534, 2021. [40] P. Terh¨ orst, N. Damer, F. Kirchbuchner, and A. Kuijper, “Unsupervised privacy-enhancement of face representations using similarity-sensitive noise transformations,” Springer Applied Intelligence , vol. 49, pp. 3043– 3060, 2019. [41] S. Hanisch, J. Todt, J. Patino, N. Evans, and T. Strufe, “A false sense of privacy: Towards a reliable evaluation methodology for the anonymization of biometric data,” Privacy Enhancing Technologies ,vol. 1, pp. 116–132, 2024. [42] J. Cao, X. Chen, B. Liu, M. Ding, R. Xie, L. Song, Z. Li, and W. Zhang, “Face de-identification: State-of-the-art methods and comparative stud-ies,” arXiv preprint arXiv:2411.09863 , 2024. [43] J. Todt, S. Hanisch, and T. Strufe, “Fantˆ omas: Understanding face anonymization reversibility,” in Privacy Enhancing Technologies , vol. 4, 2024, pp. 24–43. [44] R. Stenger, S. Busse, J. Sander, T. Eisenbarth, and S. Fudickar, “Eval-uating the impact of face anonymization methods on computer vision tasks: A trade-off between privacy and utility,” IEEE Access , 2024. [45] S. R. Klomp, M. Van Rijn, R. G. Wijnhoven, C. G. Snoek, and P. H. De With, “Safe fakes: Evaluating face anonymizers for face detectors,” in 
+
+International Conference on Automatic Face and Gesture Recognition .IEEE, 2021, pp. 1–8. [46] Z. Cai, Z. Gao, B. Planche, M. Zheng, T. Chen, M. S. Asif, and Z. Wu, “Disguise without disruption: Utility-preserving face de-identification,” in AAAI Conference on Artificial Intelligence , vol. 38, no. 2, 2024, pp. 918–926. [47] Z. Wang, A. C. Bovik, H. R. Sheikh, and E. P. Simoncelli, “Image quality assessment: from error visibility to structural similarity,” IEEE Transactions on Image Processing , vol. 13, no. 4, pp. 600–612, 2004. [48] M. Heusel, H. Ramsauer, T. Unterthiner, B. Nessler, and S. Hochreiter, “Gans trained by a two time-scale update rule converge to a local nash equilibrium,” Advances in neural information processing systems ,vol. 30, 2017. [49] K. He, G. Gkioxari, P. Doll´ ar, and R. Girshick, “Mask r-cnn,” in 
+
+international conference on computer vision , 2017, pp. 2961–2969. [50] V. Kazemi and J. Sullivan, “One millisecond face alignment with an ensemble of regression trees,” in Computer Vision and Pattern Recognition . IEEE, 2014, pp. 1867–1874. [51] D. E. King, “Dlib-ml: A machine learning toolkit,” The Journal of Machine Learning Research , vol. 10, pp. 1755–1758, 2009. [52] H. Barrow, J. Tenenbaum, A. Hanson, and E. Riseman, “Recovering intrinsic scene characteristics,” Comput. vis. syst , vol. 2, no. 3-26, p. 2, 1978. [53] J. Jeon, S. Cho, X. Tong, and S. Lee, “Intrinsic image decomposition using structure-texture separation and surface normals,” in European Conference on Computer Vision . Springer, 2014, pp. 218–233. [54] S. Sengupta, A. Kanazawa, C. D. Castillo, and D. W. Jacobs, “Sfsnet: Learning shape, reflectance and illuminance of facesin the wild’,” in 
+
+Computer Vision and Pattern Recognition . IEEE, 2018, pp. 6296–6305. [55] N. Dall’Asen, Y. Wang, H. Tang, L. Zanella, and E. Ricci, “Graph-based generative face anonymisation with pose preservation,” in International Conference on Image Analysis and Processing . Springer, 2022, pp. 503–515. [56] T. Kynk¨ a¨ anniemi, T. Karras, M. Aittala, T. Aila, and J. Lehtinen, “The role of imagenet classes in Fr´ echet inception distance,” in International Conference on Learning Representations , 2023. [57] K. Zhang, Z. Zhang, Z. Li, and Y. Qiao, “Joint face detection and alignment using multitask cascaded convolutional networks,” IEEE Signal Processing Letters , vol. 23, no. 10, pp. 1499–1503, 2016. [58] F. Schroff, D. Kalenichenko, and J. Philbin, “Facenet: A unified em-bedding for face recognition and clustering,” in Computer Vision and Pattern Recognition . IEEE, 2015, pp. 815–823. [59] Q. Cao, L. Shen, W. Xie, O. M. Parkhi, and A. Zisserman, “Vggface2: A dataset for recognising faces across pose and age,” in International Conference on Automatic Face & Gesture Recognition (FG 2018) .IEEE, 2018, pp. 67–74. [60] D. Yi, Z. Lei, S. Liao, and S. Z. Li, “Learning face representation from scratch,” arXiv preprint arXiv:1411.7923 , 2014. [61] Y. Zhang, Y. Li, X. Liu, W. Deng et al. , “Leave no stone unturned: Mine extra knowledge for imbalanced facial expression recognition,” 
+
+Advances in Neural Information Processing Systems , vol. 36, 2024. [62] H. Zhou, S. Hadap, K. Sunkavalli, and D. W. Jacobs, “Deep single-image portrait relighting,” in International Conference on Computer Vision .IEEE/CVF, 2019, pp. 7194–7202. [63] J. T. Barron and J. Malik, “Shape, illumination, and reflectance from shading,” IEEE Transactions on Pattern Analysis and Machine Intelli-gence , vol. 37, no. 8, pp. 1670–1687, 2014. [64] T. Mansencal, M. Mauderer, M. Parsons, [...], G. Pal, N. Tessore, and A. Pierre, “Colour 0.4.1,” Feb. 2022. [Online]. Available: https://doi.org/10.5281/zenodo.6288658 [65] T. Karras, S. Laine, and T. Aila, “A style-based generator architecture for generative adversarial networks,” in Computer Vision and Pattern Recognition . IEEE/CVF, 2019, pp. 4401–4410. [66] T. Karras, T. Aila, S. Laine, and J. Lehtinen, “Progressive growing of gans for improved quality, stability, and variation,” in International Conference on Learning Representations , 2018. [67] Z. Liu, P. Luo, X. Wang, and X. Tang, “Deep learning face attributes in the wild,” in International Conference on Computer Vision , 2015. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 12 
+
+Luigi Celona is currently an assistant professor at DISCo (Department of Informatics, Systems and Communication) of the University of Milano-Bicocca, Italy. In 2018 and 2014, he obtained re-spectively the PhD and the MSc degree in Computer Science at DISCo. In 2011, he obtained the BSc degree in Computer Science from the University of Messina. His current research interests focus on image analysis and classification, machine learning and face analysis. 
+
+Simone Bianco is currently an Associate Professor of computer science with the University of Milano-Bicocca, Milan, Italy, holder of the Italian National Academic Qualification as a Full Professor of com-puter engineering (09/H1) and computer science (01/B1). He is on Stanford University’s World Rank-ing Scientists List for his achievements in Artificial Intelligence and Image Processing. His teaching and research interests include computer vision, ar-tificial intelligence, machine learning, optimization algorithms applied in multimodal, and multimedia applications. He is also a R&D Manager of the University of Milano-Bicocca spin-off Imaging and Vision Solutions, and Member of European Laboratory for Learning and Intelligent Systems. 
+
+Raimondo Schettini is currently a Full Professor with the University of Milano-Bicocca, Milan, Italy, where he leads the Imaging and Vision Lab. Since 1987, he has been associated with the Italian Na-tional Research Council, where he led the Color Imaging Lab from 1990 to 2002. He is a team leader in several research projects, some of them supported by companies. He authored or coauthored more than 400 refereed papers and 12 patents about color imag-ing, image processing, analysis, and classification, image, and video understanding and retrieval. He su-pervised more than ten Ph.D. students. He is the Chair of several international conferences and workshops and he is the Editor in Chief of the MDPI Journal of Imaging. He is on Stanford University’s World Ranking Scientists List for his achievements in artificial intelligence and image processing. He is a Fellow of the International Association of Pattern Recognition for his contributions to pattern recognition research and color image analysis, and Fellow of Asia-Pacific Artificial Intelligence Association. Raimondo Schettini is also the Chief Technical Officer of the University of Milano-Bicocca spin-off Imaging and Vision Solutions, Member of European Laboratory for Learning and Intelligent Systems, and Member of the advisory board of the international AIQT Foundation, an international competence platform for the active public and private exchange of experience in the fields of artificial intelligence and quantum technology.

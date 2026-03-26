@@ -1,0 +1,753 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-26T20:39:17.164637+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 9,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 37,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2603.22563v1",
+      "title": "Privacy-Preserving Reinforcement Learning from Human Feedback via Decoupled Reward Modeling",
+      "abstract": "Preference-based fine-tuning has become an important component in training large language models, and the data used at this stage may contain sensitive user information. A central question is how to design a differentially private pipeline that is well suited to the distinct structure of reinforcement learning from human feedback. We propose a privacy-preserving framework that imposes differential privacy only on reward learning and derives the final policy from the resulting private reward model. Theoretically, we study the suboptimality gap and show that privacy contributes an additional additive term beyond the usual non-private statistical error. We also establish a minimax lower bound and show that the dominant term changes with sample size and privacy level, which in turn characterizes regimes in which the upper bound is rate-optimal up to logarithmic factors. Empirically, synthetic experiments confirm the scaling predicted by the theory, and experiments on the Anthropic HH-RLHF dataset using the Gemma-2B-IT model show stronger private alignment performance than existing differentially private baseline methods across privacy budgets.",
+      "authors": [
+        "Young Hyun Cho",
+        "Will Wei Sun"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG"
+      ],
+      "published": "2026-03-23T20:45:17+00:00",
+      "link": "https://arxiv.org/pdf/2603.22563v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "differentially private reinforcement learning for LLMs",
+      "llm_evidence_cn": "大语言模型的差分隐私强化学习",
+      "llm_evidence": "大语言模型的差分隐私强化学习",
+      "canonical_evidence": "大语言模型的差分隐私强化学习",
+      "llm_tldr_en": "A framework for privacy-preserving RLHF using differential privacy on reward modeling.",
+      "llm_tldr_cn": "该框架通过在奖励建模中引入差分隐私，实现了大语言模型强化学习的隐私保护。",
+      "llm_tldr": "该框架通过在奖励建模中引入差分隐私，实现了大语言模型强化学习的隐私保护。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving machine learning techniques and frameworks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.24209v1",
+      "title": "HEART-PFL: Stable Personalized Federated Learning under Heterogeneity with Hierarchical Directional Alignment and Adversarial Knowledge Transfer",
+      "abstract": "Personalized Federated Learning (PFL) aims to deliver effective client-specific models under heterogeneous distributions, yet existing methods suffer from shallow prototype alignment and brittle server-side distillation. We propose HEART-PFL, a dual-sided framework that (i) performs depth-aware Hierarchical Directional Alignment (HDA) using cosine similarity in the early stage and MSE matching in the deep stage to preserve client specificity, and (ii) stabilizes global updates through Adversarial Knowledge Transfer (AKT) with symmetric KL distillation on clean and adversarial proxy data. Using lightweight adapters with only 1.46M trainable parameters, HEART-PFL achieves state-of-the-art personalized accuracy on CIFAR-100, Flowers-102, and Caltech-101 (63.42%, 84.23%, and 95.67%, respectively) under Dirichlet non-IID partitions, and remains robust to out-of-domain proxy data. Ablation studies further confirm that HDA and AKT provide complementary gains in alignment, robustness, and optimization stability, offering insights into how the two components mutually reinforce effective personalization. Overall, these results demonstrate that HEART-PFL simultaneously enhances personalization and global stability, highlighting its potential as a strong and scalable solution for PFL(code available at https://github.com/danny0628/HEART-PFL).",
+      "authors": [
+        "Minjun Kim",
+        "Minje Kim"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-03-25T11:35:07+00:00",
+      "link": "https://arxiv.org/pdf/2603.24209v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "personalized federated learning under heterogeneity",
+      "llm_evidence_cn": "异构环境下的个性化联邦学习",
+      "llm_evidence": "异构环境下的个性化联邦学习",
+      "canonical_evidence": "异构环境下的个性化联邦学习",
+      "llm_tldr_en": "Proposes a framework for stable personalized federated learning using hierarchical alignment and knowledge transfer.",
+      "llm_tldr_cn": "提出了一种利用分层对齐和知识迁移的稳定个性化联邦学习框架。",
+      "llm_tldr": "提出了一种利用分层对齐和知识迁移的稳定个性化联邦学习框架。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.20873v1",
+      "title": "Incentive-Aware Federated Averaging with Performance Guarantees under Strategic Participation",
+      "abstract": "Federated learning (FL) is a communication-efficient collaborative learning framework that enables model training across multiple agents with private local datasets. While the benefits of FL in improving global model performance are well established, individual agents may behave strategically, balancing the learning payoff against the cost of contributing their local data. Motivated by the need for FL frameworks that successfully retain participating agents, we propose an incentive-aware federated averaging method in which, at each communication round, clients transmit both their local model parameters and their updated training dataset sizes to the server. The dataset sizes are dynamically adjusted via a Nash equilibrium (NE)-seeking update rule that captures strategic data participation. We analyze the proposed method under convex and nonconvex global objective settings and establish performance guarantees for the resulting incentive-aware FL algorithm. Numerical experiments on the MNIST and CIFAR-10 datasets demonstrate that agents achieve competitive global model performance while converging to stable data participation strategies.",
+      "authors": [
+        "Fateme Maleki",
+        "Krishnan Raghavan",
+        "Farzad Yousefian"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "math.OC"
+      ],
+      "published": "2026-03-21T16:33:36+00:00",
+      "link": "https://arxiv.org/pdf/2603.20873v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "incentive-aware federated averaging with private local datasets",
+      "llm_evidence_cn": "具有私有本地数据集的激励感知联邦平均",
+      "llm_evidence": "具有私有本地数据集的激励感知联邦平均",
+      "canonical_evidence": "具有私有本地数据集的激励感知联邦平均",
+      "llm_tldr_en": "Proposes an incentive mechanism for federated learning to encourage participation while maintaining privacy.",
+      "llm_tldr_cn": "提出了一种联邦学习激励机制，在维护隐私的同时鼓励参与。",
+      "llm_tldr": "提出了一种联邦学习激励机制，在维护隐私的同时鼓励参与。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.21888v2",
+      "title": "Adaptive Federated Fine-Tuning of Self-Supervised Speech Representations",
+      "abstract": "Integrating Federated Learning (FL) with self-supervised learning (SSL) enables privacy-preserving fine-tuning for speech tasks. However, federated environments exhibit significant heterogeneity: clients differ in computational capacity, causing straggler effects under unified fine-tuning, while diverse downstream tasks require different representation depths, making full-model updates inefficient. To address these challenges, we propose an adaptive federated fine-tuning framework with early exits. Lightweight prediction heads are inserted at intermediate layers of the SSL backbone, allowing clients to terminate computation based on local constraints and task requirements. We further introduce a layer-wise, depth-aware partial aggregation strategy to better utilize representations from different network depths. Experiments show that the framework reduces edge overhead, supports heterogeneous hardware, and maintains competitive performance in resource-constrained federated environments.",
+      "authors": [
+        "Xin Guo",
+        "Chunrui Zhao",
+        "Hong Jia",
+        "Ting Dang",
+        "Gongping Huang",
+        "Xianrui Zheng",
+        "Yan Gao"
+      ],
+      "primary_category": "eess.AS",
+      "categories": [
+        "eess.AS"
+      ],
+      "published": "2026-03-23T12:14:32+00:00",
+      "link": "https://arxiv.org/pdf/2603.21888v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "privacy-preserving fine-tuning in federated learning for speech",
+      "llm_evidence_cn": "语音任务中联邦学习的隐私保护微调",
+      "llm_evidence": "语音任务中联邦学习的隐私保护微调",
+      "canonical_evidence": "语音任务中联邦学习的隐私保护微调",
+      "llm_tldr_en": "Proposes an adaptive federated fine-tuning framework for speech representations to handle heterogeneity.",
+      "llm_tldr_cn": "提出一种自适应联邦微调框架，用于处理语音表示学习中的异构性。",
+      "llm_tldr": "提出一种自适应联邦微调框架，用于处理语音表示学习中的异构性。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.22465v1",
+      "title": "A Theoretical Framework for Energy-Aware Gradient Pruning in Federated Learning",
+      "abstract": "Federated Learning (FL) is constrained by the communication and energy limitations of decentralized edge devices. While gradient sparsification via Top-K magnitude pruning effectively reduces the communication payload, it remains inherently energy-agnostic. It assumes all parameter updates incur identical downstream transmission and memory-update costs, ignoring hardware realities. We formalize the pruning process as an energy-constrained projection problem that accounts for the hardware-level disparities between memory-intensive and compute-efficient operations during the post-backpropagation phase. We propose Cost-Weighted Magnitude Pruning (CWMP), a selection rule that prioritizes parameter updates based on their magnitude relative to their physical cost. We demonstrate that CWMP is the optimal greedy solution to this constrained projection and provide a probabilistic analysis of its global energy efficiency. Numerical results on a non-IID CIFAR-10 benchmark show that CWMP consistently establishes a superior performance-energy Pareto frontier compared to the Top-K baseline.",
+      "authors": [
+        "Emmanouil M. Athanasakos"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.DC",
+        "cs.IT",
+        "cs.NI",
+        "stat.ML"
+      ],
+      "published": "2026-03-23T18:31:07+00:00",
+      "link": "https://arxiv.org/pdf/2603.22465v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "energy-aware gradient pruning in federated learning",
+      "llm_evidence_cn": "联邦学习中的能耗感知梯度剪枝",
+      "llm_evidence": "联邦学习中的能耗感知梯度剪枝",
+      "canonical_evidence": "联邦学习中的能耗感知梯度剪枝",
+      "llm_tldr_en": "Proposes a cost-weighted magnitude pruning rule to optimize energy and communication in federated learning.",
+      "llm_tldr_cn": "提出一种成本权重幅度剪枝规则，以优化联邦学习中的能耗和通信效率。",
+      "llm_tldr": "提出一种成本权重幅度剪枝规则，以优化联邦学习中的能耗和通信效率。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.22808v1",
+      "title": "Combinatorial Privacy: Private Multi-Party Bitstream Grand Sum by Hiding in Birkhoff Polytopes",
+      "abstract": "We introduce PolyVeil, a protocol for private Boolean summation across $k$ clients that encodes private bits as permutation matrices in the Birkhoff polytope. A two-layer architecture gives the server perfect simulation-based security (statistical distance zero) while a separate aggregator faces \\#P-hard likelihood inference via the permanent and mixed discriminant. Two variants (full and compressed) differ in what the aggregator observes.   We develop a finite-sample $(\\varepsilon,δ)$-DP analysis with explicit constants. In the full variant, where the aggregator sees a doubly stochastic matrix per client, the log-Lipschitz constant grows as $n^4 K_t$ and a signal-to-noise analysis shows the DP guarantee is non-vacuous only when the private signal is undetectable. In the compressed variant, where the aggregator sees a single scalar, the univariate density ratio yields non-vacuous $\\varepsilon$ at moderate SNR, with the optimal decoy count balancing CLT accuracy against noise concentration.   This exposes a fundamental tension. \\#P-hardness requires the full matrix view (Birkhoff structure visible), while non-vacuous DP requires the scalar view (low dimensionality). Whether both hold simultaneously in one variant remains open. The protocol needs no PKI, has $O(k)$ communication, and outputs exact aggregates.",
+      "authors": [
+        "Praneeth Vepakomma"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-03-24T05:08:38+00:00",
+      "link": "https://arxiv.org/pdf/2603.22808v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "private multi-party bitstream summation and simulation-based security",
+      "llm_evidence_cn": "私有多方比特流求和与基于模拟的安全",
+      "llm_evidence": "私有多方比特流求和与基于模拟的安全",
+      "canonical_evidence": "私有多方比特流求和与基于模拟的安全",
+      "llm_tldr_en": "Introduces a protocol for private Boolean summation across multiple clients using combinatorial techniques.",
+      "llm_tldr_cn": "引入了一种利用组合技术在多个客户端之间进行私有布尔求和的协议。",
+      "llm_tldr": "引入了一种利用组合技术在多个客户端之间进行私有布尔求和的协议。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "MPC protocols for privacy-preserving computation",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.22968v1",
+      "title": "Beyond Theoretical Bounds: Empirical Privacy Loss Calibration for Text Rewriting Under Local Differential Privacy",
+      "abstract": "The growing use of large language models has increased interest in sharing textual data in a privacy-preserving manner. One prominent line of work addresses this challenge through text rewriting under Local Differential Privacy (LDP), where input texts are locally obfuscated before release with formal privacy guarantees. These guarantees are typically expressed by a parameter $\\varepsilon$ that upper bounds the worst-case privacy loss. However, nominal $\\varepsilon$ values are often difficult to interpret and compare across mechanisms. In this work, we investigate how to empirically calibrate across text rewriting mechanisms under LDP. We propose TeDA, which formulates calibration via a hypothesis-testing framework that instantiates text distinguishability audits in both surface and embedding spaces, enabling empirical assessment of indistinguishability from privatized texts. Applying this calibration to several representative mechanisms, we demonstrate that similar nominal $\\varepsilon$ bounds can imply very different levels of distinguishability. Empirical calibration thus provides a more comparable footing for evaluating privacy-utility trade-offs, as well as a practical tool for mechanism comparison and analysis in real-world LDP text rewriting deployments.",
+      "authors": [
+        "Weijun Li",
+        "Arnaud Grivet Sébert",
+        "Qiongkai Xu",
+        "Annabelle McIver",
+        "Mark Dras"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.CL"
+      ],
+      "published": "2026-03-24T09:05:16+00:00",
+      "link": "https://arxiv.org/pdf/2603.22968v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "empirical privacy loss calibration for text rewriting under LDP",
+      "llm_evidence_cn": "本地差分隐私下文本重写的经验隐私损失校准",
+      "llm_evidence": "本地差分隐私下文本重写的经验隐私损失校准",
+      "canonical_evidence": "本地差分隐私下文本重写的经验隐私损失校准",
+      "llm_tldr_en": "Proposes TeDA to empirically calibrate privacy loss in LDP-based text rewriting for better utility balance.",
+      "llm_tldr_cn": "提出 TeDA 框架，通过假设检验校准本地差分隐私文本重写的实际隐私损失。",
+      "llm_tldr": "提出 TeDA 框架，通过假设检验校准本地差分隐私文本重写的实际隐私损失。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "balancing utility and privacy in machine learning",
+      "matched_requirement_id": "req-17",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.23678v1",
+      "title": "PLACID: Privacy-preserving Large language models for Acronym Clinical Inference and Disambiguation",
+      "abstract": "Large Language Models (LLMs) offer transformative solutions across many domains, but healthcare integration is hindered by strict data privacy constraints. Clinical narratives are dense with ambiguous acronyms, misinterpretation these abbreviations can precipitate severe outcomes like life-threatening medication errors. While cloud-dependent LLMs excel at Acronym Disambiguation, transmitting Protected Health Information to external servers violates privacy frameworks. To bridge this gap, this study pioneers the evaluation of small-parameter models deployed entirely on-device to ensure privacy preservation. We introduce a privacy-preserving cascaded pipeline leveraging general-purpose local models to detect clinical acronyms, routing them to domain-specific biomedical models for context-relevant expansions. Results reveal that while general instruction-following models achieve high detection accuracy (~0.988), their expansion capabilities plummet (~0.655). Our cascaded approach utilizes domain-specific medical models to increase expansion accuracy to (~0.81). This novel work demonstrates that privacy-preserving, on-device (2B-10B) models deliver high-fidelity clinical acronym disambiguation support.",
+      "authors": [
+        "Manjushree B. Aithal",
+        "Ph. D.",
+        "Alexander Kotz",
+        "James Mitchell",
+        "Ph. D"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-03-24T19:33:44+00:00",
+      "link": "https://arxiv.org/pdf/2603.23678v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "on-device deployment to ensure privacy preservation in clinical inference",
+      "llm_evidence_cn": "端侧部署以确保临床推理中的隐私保护",
+      "llm_evidence": "端侧部署以确保临床推理中的隐私保护",
+      "canonical_evidence": "端侧部署以确保临床推理中的隐私保护",
+      "llm_tldr_en": "Evaluates on-device small-parameter models for privacy-preserving clinical acronym disambiguation to avoid data leaks.",
+      "llm_tldr_cn": "评估了用于隐私保护临床缩写消歧的端侧小参数模型，以避免医疗数据泄露。",
+      "llm_tldr": "评估了用于隐私保护临床缩写消歧的端侧小参数模型，以避免医疗数据泄露。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "secure and private inference in neural networks",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.17914v1",
+      "title": "Noise-Aware Misclassification Attack Detection in Collaborative DNN Inference",
+      "abstract": "Collaborative inference of object classification Deep neural Networks (DNNs) where resource-constrained end-devices offload partially processed data to remote edge servers to complete end-to-end processing, is becoming a key enabler of edge-AI. However, such edge-offloading is vulnerable to malicious data injections leading to stealthy misclassifications that are tricky to detect, especially in the presence of environmental noise. In this paper, we propose a semi-gray-box and noise- aware anomaly detection framework fueled by a variational autoencoder (VAE) to capture deviations caused by adversarial manipulation. The proposed framework incorporates a robust noise-aware feature that captures the characteristic behavior of environmental noise to improve detection accuracy while reducing false alarm rates. Our evaluation with popular object classification DNNs demonstrate the robustness of the proposed detection (up to 90% AUROC across DNN configurations) under realistic noisy conditions while revealing limitations caused by feature similarity and elevated noise levels.",
+      "authors": [
+        "Shima Yousefi",
+        "Saptarshi Debroy"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-18T16:53:58+00:00",
+      "link": "https://arxiv.org/pdf/2603.17914v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "attack detection in collaborative DNN inference",
+      "llm_evidence_cn": "协作DNN推理中的攻击检测",
+      "llm_evidence": "协作DNN推理中的攻击检测",
+      "canonical_evidence": "协作DNN推理中的攻击检测",
+      "llm_tldr_en": "Proposes a VAE-based framework to detect misclassification attacks in edge-offloaded collaborative inference.",
+      "llm_tldr_cn": "提出了一种基于VAE的框架，用于检测边缘卸载协作推理中的误分类攻击。",
+      "llm_tldr": "提出了一种基于VAE的框架，用于检测边缘卸载协作推理中的误分类攻击。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "secure and private inference in neural networks",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.17567v1",
+      "title": "Face anonymization preserving facial expressions and photometric realism",
+      "abstract": "The widespread sharing of face images on social media platforms and in large-scale datasets raises pressing privacy concerns, as biometric identifiers can be exploited without consent. Face anonymization seeks to generate realistic facial images that irreversibly conceal the subject's identity while preserving their usefulness for downstream tasks. However, most existing generative approaches focus on identity removal and image realism, often neglecting facial expressions as well as photometric consistency -- specifically attributes such as illumination and skin tone -- that are critical for applications like relighting, color constancy, and medical or affective analysis. In this work, we propose a feature-preserving anonymization framework that extends DeepPrivacy by incorporating dense facial landmarks to better retain expressions, and by introducing lightweight post-processing modules that ensure consistency in lighting direction and skin color. We further establish evaluation metrics specifically designed to quantify expression fidelity, lighting consistency, and color preservation, complementing standard measures of image realism, pose accuracy, and re-identification resistance. Experiments on the CelebA-HQ dataset demonstrate that our method produces anonymized faces with improved realism and significantly higher fidelity in expression, illumination, and skin tone compared to state-of-the-art baselines. These results underscore the importance of feature-aware anonymization as a step toward more useful, fair, and trustworthy privacy-preserving facial data.",
+      "authors": [
+        "Luigi Celona",
+        "Simone Bianco",
+        "Raimondo Schettini"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-18T10:16:12+00:00",
+      "link": "https://arxiv.org/pdf/2603.17567v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Face anonymization for privacy preservation in datasets",
+      "llm_evidence_cn": "用于数据集隐私保护的人脸匿名化",
+      "llm_evidence": "用于数据集隐私保护的人脸匿名化",
+      "canonical_evidence": "用于数据集隐私保护的人脸匿名化",
+      "llm_tldr_en": "Develops a face anonymization framework that conceals identity while preserving expressions and realism.",
+      "llm_tldr_cn": "开发了一种人脸匿名化框架，在隐藏身份的同时保留表情和真实感。",
+      "llm_tldr": "开发了一种人脸匿名化框架，在隐藏身份的同时保留表情和真实感。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy computing technologies in data science",
+      "matched_requirement_id": "req-16",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.24392v1",
+      "title": "Federated fairness-aware classification under differential privacy",
+      "abstract": "Privacy and algorithmic fairness have become two central issues in modern machine learning. Although each has separately emerged as a rapidly growing research area, their joint effect remains comparatively under-explored. In this paper, we systematically study the joint impact of differential privacy and fairness on classification in a federated setting, where data are distributed across multiple servers. Targeting demographic disparity constrained classification under federated differential privacy, we propose a two-step algorithm, namely FDP-Fair. In the special case where there is only one server, we further propose a simple yet powerful algorithm, namely CDP-Fair, serving as a computationally-lightweight alternative. Under mild structural assumptions, theoretical guarantees on privacy, fairness and excess risk control are established. In particular, we disentangle the source of the private fairness-aware excess risk into a) intrinsic cost of classification, b) cost of private classification, c) non-private cost of fairness and d) private cost of fairness. Our theoretical findings are complemented by extensive numerical experiments on both synthetic and real datasets, highlighting the practicality of our designed algorithms.",
+      "authors": [
+        "Gengyu Xue",
+        "Yi Yu"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG",
+        "stat.ME"
+      ],
+      "published": "2026-03-25T15:09:12+00:00",
+      "link": "https://arxiv.org/pdf/2603.24392v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "federated differential privacy for fairness-aware classification",
+      "llm_evidence_cn": "公平感知分类的联邦差分隐私",
+      "llm_evidence": "公平感知分类的联邦差分隐私",
+      "canonical_evidence": "公平感知分类的联邦差分隐私",
+      "llm_tldr_en": "Studies the joint impact of differential privacy and fairness in distributed federated learning settings.",
+      "llm_tldr_cn": "系统研究了联邦学习环境下差分隐私与算法公平性对分类任务的共同影响。",
+      "llm_tldr": "系统研究了联邦学习环境下差分隐私与算法公平性对分类任务的共同影响。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.19101v1",
+      "title": "FedTrident: Resilient Road Condition Classification Against Poisoning Attacks in Federated Learning",
+      "abstract": "FL has emerged as a transformative paradigm for ITS, notably camera-based Road Condition Classification (RCC). However, by enabling collaboration, FL-based RCC exposes the system to adversarial participants launching Targeted Label-Flipping Attacks (TLFAs). Malicious clients (vehicles) can relabel their local training data (e.g., from an actual uneven road to a wrong smooth road), consequently compromising global model predictions and jeopardizing transportation safety. Existing countermeasures against such poisoning attacks fail to maintain resilient model performance near the necessary attack-free levels in various attack scenarios due to: 1) not tailoring poisoned local model detection to TLFAs, 2) not excluding malicious vehicular clients based on historical behavior, and 3) not remedying the already-corrupted global model after exclusion. To close this research gap, we propose FedTrident, which introduces: 1) neuron-wise analysis for local model misbehavior detection (notably including attack goal identification, critical feature extraction, and GMM-based model clustering and filtering); 2) adaptive client rating for client exclusion according to the local model detection results in each FL round; and 3) machine unlearning for corrupted global model remediation once malicious clients are excluded during FL. Extensive evaluation across diverse FL-RCC models, tasks, and configurations demonstrates that FedTrident can effectively thwart TLFAs, achieving performance comparable to that in attack-free scenarios and outperforming eight baseline countermeasures by 9.49% and 4.47% for the two most critical metrics. Moreover, FedTrident is resilient to various malicious client rates, data heterogeneity levels, complicated multi-task, and dynamic attacks.",
+      "authors": [
+        "Sheng Liu",
+        "Panos Papadimitratos"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.DC",
+        "cs.LG"
+      ],
+      "published": "2026-03-19T16:26:13+00:00",
+      "link": "https://arxiv.org/pdf/2603.19101v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "resilient federated learning against poisoning attacks in road classification",
+      "llm_evidence_cn": "道路分类中针对中毒攻击的弹性联邦学习",
+      "llm_evidence": "道路分类中针对中毒攻击的弹性联邦学习",
+      "canonical_evidence": "道路分类中针对中毒攻击的弹性联邦学习",
+      "llm_tldr_en": "Develops a resilient federated learning framework to detect and mitigate label-flipping attacks.",
+      "llm_tldr_cn": "开发了一个弹性的联邦学习框架，用于检测和减轻标签翻转攻击。",
+      "llm_tldr": "开发了一个弹性的联邦学习框架，用于检测和减轻标签翻转攻击。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.18080v1",
+      "title": "Growing Alphabets Do Not Automatically Amplify Shuffle Privacy: Obstruction, Estimation Bounds, and Optimal Mechanism Design",
+      "abstract": "We study neighboring shuffle experiments for epsilon_0-LDP channels along growing alphabets d -> infinity, and optimal mechanism design for frequency estimation under a canonical pairwise chi-squared budget.   On the privacy side, we prove an exact compression theorem: the shuffled histogram experiment depends only on the pushforward law of the pairwise likelihood ratio. We establish a sharp universal bound chi^2 <= (e^{epsilon_0}-1)^2/e^{epsilon_0}, construct explicit obstruction families for which the shuffled privacy curve equals binary randomized response for all d, and prove a sharp diluting/persistent dichotomy.   On the estimation side, we prove a universal lower bound of order (d-1)/(n chi_*(W)) via Cramer-Rao and Assouad arguments, and show that symmetrization to equivariant channels is WLOG.   On the design side, we show calibrated GRR is not optimal. The optimal mechanism is an augmented GRR: fraction p of users applies aggressive GRR with lambda_* = sqrt(d-1), the rest sends a null symbol. This thinning principle is specific to shuffle and has no local-DP counterpart. For low budget 0 < C <= C_*(d), augmented GRR is optimal among all permutation-equivariant channels. GRR is also the unique optimizer within the subset-selection family.",
+      "authors": [
+        "Alex Shvets"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-03-18T07:46:00+00:00",
+      "link": "https://arxiv.org/pdf/2603.18080v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Local Differential Privacy and shuffle privacy mechanisms",
+      "llm_evidence_cn": "本地差分隐私和洗牌隐私机制",
+      "llm_evidence": "本地差分隐私和洗牌隐私机制",
+      "canonical_evidence": "本地差分隐私和洗牌隐私机制",
+      "llm_tldr_en": "Analyzes shuffle privacy for LDP channels and provides optimal mechanism design for frequency estimation.",
+      "llm_tldr_cn": "分析了LDP通道的洗牌隐私，并为频率估计提供了最优机制设计。",
+      "llm_tldr": "分析了LDP通道的洗牌隐私，并为频率估计提供了最优机制设计。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving machine learning techniques and frameworks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.19375v1",
+      "title": "Automated Membership Inference Attacks: Discovering MIA Signal Computations using LLM Agents",
+      "abstract": "Membership inference attacks (MIAs), which enable adversaries to determine whether specific data points were part of a model's training dataset, have emerged as an important framework to understand, assess, and quantify the potential information leakage associated with machine learning systems. Designing effective MIAs is a challenging task that usually requires extensive manual exploration of model behaviors to identify potential vulnerabilities. In this paper, we introduce AutoMIA -- a novel framework that leverages large language model (LLM) agents to automate the design and implementation of new MIA signal computations. By utilizing LLM agents, we can systematically explore a vast space of potential attack strategies, enabling the discovery of novel strategies. Our experiments demonstrate AutoMIA can successfully discover new MIAs that are specifically tailored to user-configured target model and dataset, resulting in improvements of up to 0.18 in absolute AUC over existing MIAs. This work provides the first demonstration that LLM agents can serve as an effective and scalable paradigm for designing and implementing MIAs with SOTA performance, opening up new avenues for future exploration.",
+      "authors": [
+        "Toan Tran",
+        "Olivera Kotevska",
+        "Li Xiong"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-03-19T18:10:18+00:00",
+      "link": "https://arxiv.org/pdf/2603.19375v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Membership inference attacks and information leakage in ML",
+      "llm_evidence_cn": "机器学习中的成员推理攻击与信息泄露",
+      "llm_evidence": "机器学习中的成员推理攻击与信息泄露",
+      "canonical_evidence": "机器学习中的成员推理攻击与信息泄露",
+      "llm_tldr_en": "Automates membership inference attack design using LLM agents to assess ML model privacy leakage.",
+      "llm_tldr_cn": "利用LLM智能体自动设计成员推理攻击，以评估机器学习模型的隐私泄露风险。",
+      "llm_tldr": "利用LLM智能体自动设计成员推理攻击，以评估机器学习模型的隐私泄露风险。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving machine learning techniques and frameworks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.18570v1",
+      "title": "Attack by Unlearning: Unlearning-Induced Adversarial Attacks on Graph Neural Networks",
+      "abstract": "Graph neural networks (GNNs) are widely used for learning from graph-structured data in domains such as social networks, recommender systems, and financial platforms. To comply with privacy regulations like the GDPR, CCPA, and PIPEDA, approximate graph unlearning, which aims to remove the influence of specific data points from trained models without full retraining, has become an increasingly important component of trustworthy graph learning. However, approximate unlearning often incurs subtle performance degradation, which may incur negative and unintended side effects. In this work, we show that such degradations can be amplified into adversarial attacks. We introduce the notion of \\textbf{unlearning corruption attacks}, where an adversary injects carefully chosen nodes into the training graph and later requests their deletion. Because deletion requests are legally mandated and cannot be denied, this attack surface is both unavoidable and stealthy: the model performs normally during training, but accuracy collapses only after unlearning is applied. Technically, we formulate this attack as a bi-level optimization problem: to overcome the challenges of black-box unlearning and label scarcity, we approximate the unlearning process via gradient-based updates and employ a surrogate model to generate pseudo-labels for the optimization. Extensive experiments across benchmarks and unlearning algorithms demonstrate that small, carefully designed unlearning requests can induce significant accuracy degradation, raising urgent concerns about the robustness of GNN unlearning under real-world regulatory demands. The source code will be released upon paper acceptance.",
+      "authors": [
+        "Jiahao Zhang",
+        "Yilong Wang",
+        "Suhang Wang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CR"
+      ],
+      "published": "2026-03-19T07:30:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.18570v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "privacy regulations and unlearning in GNNs",
+      "llm_evidence_cn": "GNN中的隐私法规与遗忘学习",
+      "llm_evidence": "GNN中的隐私法规与遗忘学习",
+      "canonical_evidence": "GNN中的隐私法规与遗忘学习",
+      "llm_tldr_en": "Investigates how approximate unlearning in Graph Neural Networks can be exploited for adversarial attacks.",
+      "llm_tldr_cn": "研究了图神经网络中的近似遗忘学习如何被利用进行对抗性攻击。",
+      "llm_tldr": "研究了图神经网络中的近似遗忘学习如何被利用进行对抗性攻击。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy-preserving machine learning techniques and frameworks",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.19671v1",
+      "title": "Acyclic Graph Pattern Counting under Local Differential Privacy",
+      "abstract": "Graph pattern counting serves as a cornerstone of network analysis with extensive real-world applications. Its integration with local differential privacy (LDP) has gained growing attention for protecting sensitive graph information in decentralized settings. However, existing LDP frameworks are largely ad hoc, offering solutions only for specific patterns such as triangles and stars. A general mechanism for counting arbitrary graph patterns, even for the subclass of acyclic patterns, has remained an open problem. To fill this gap, we present the first general solution for counting arbitrary acyclic patterns under LDP. We identify and tackle two fundamental challenges: generalizing pattern construction from distributed data and eliminating node duplication during the construction. To address the first challenge, we propose an LDP-tailored recursive subpattern counting framework that incrementally builds patterns across multiple communication rounds. For the second challenge, we apply a random marking technique that restricts each node to a unique position in the pattern during computation. Our mechanism achieves strong utility guarantees: for any acyclic graph pattern with $k$ edges, we achieve an additive error of $\\tilde{O}(\\sqrt{N}d(G)^k)$, where $N$ is the number of nodes and $d(G)$ is the maximum degree of the input graph $G$. Experiments on real-world graph datasets across multiple types of acyclic patterns demonstrate that our mechanisms achieve up to $46$-$2600\\times$ improvement in utility and $300$-$650\\times$ reduction in communication cost compared to the baseline methods.",
+      "authors": [
+        "Yihua Hu",
+        "Kuncan Wang",
+        "Wei Dong"
+      ],
+      "primary_category": "cs.DB",
+      "categories": [
+        "cs.DB",
+        "cs.CR"
+      ],
+      "published": "2026-03-20T06:12:12+00:00",
+      "link": "https://arxiv.org/pdf/2603.19671v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "graph pattern counting under local differential privacy",
+      "llm_evidence_cn": "本地差分隐私下的图模式计数",
+      "llm_evidence": "本地差分隐私下的图模式计数",
+      "canonical_evidence": "本地差分隐私下的图模式计数",
+      "llm_tldr_en": "Introduces a general mechanism for counting acyclic graph patterns while preserving local differential privacy.",
+      "llm_tldr_cn": "引入了一种在保护本地差分隐私的同时进行无环图模式计数的通用机制。",
+      "llm_tldr": "引入了一种在保护本地差分隐私的同时进行无环图模式计数的通用机制。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "privacy computing technologies in data science",
+      "matched_requirement_id": "req-16",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.18608v1",
+      "title": "A Complexity Hierarchy of Shuffles in Card-Based Protocols",
+      "abstract": "Card-based cryptography uses physical playing cards to construct protocols for secure multi-party computation. Existing card-based protocols employ various types of shuffles, some of which are easy to implement in practice while others are considerably more complex. In this paper, we classify shuffle operations into several levels according to their implementation complexity. We motivate this hierarchy from both practical and theoretical perspectives, and prove separation results between several levels by showing that certain shuffles cannot be realized using only operations from lower levels. Finally, we propose a new complexity measure for evaluating card-based protocols based on this hierarchy.",
+      "authors": [
+        "Tomoki Ono",
+        "Suthee Ruangwises"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-19T08:27:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.18608v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Card-based protocols for secure multi-party computation",
+      "llm_evidence_cn": "用于安全多方计算的卡片协议",
+      "llm_evidence": "用于安全多方计算的卡片协议",
+      "canonical_evidence": "用于安全多方计算的卡片协议",
+      "llm_tldr_en": "Classifies the complexity of shuffle operations in card-based secure multi-party computation protocols.",
+      "llm_tldr_cn": "对基于卡片的安全多方计算协议中的洗牌操作复杂度进行了分类。",
+      "llm_tldr": "对基于卡片的安全多方计算协议中的洗牌操作复杂度进行了分类。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "MPC protocols for privacy-preserving computation",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.19902v1",
+      "title": "A Federated Many-to-One Hopfield model for associative Neural Networks",
+      "abstract": "Federated learning enables collaborative training without sharing raw data, but struggles under client heterogeneity and streaming distribution shifts, where drift and novel data can impair convergence and cause forgetting. We propose a federated associative-memory framework that learns shared archetypes in heterogeneous, continual settings, where client data are independent but not necessarily balanced. Each client encodes its experience as a low-rank Hebbian operator, sent to a central server for aggregation and factorization into global archetypes. This approach preserves privacy, avoids centralized replay buffers, and is robust to small, noisy, or evolving datasets. We cast aggregation as a low-rank-plus-noise spectral inference problem, deriving theoretical thresholds for detectability and retrieval robustness. An entropy-based controller balances stability and plasticity in streaming regimes. Experiments with heterogeneous clients, drift, and novelty show improved global archetype reconstruction and associative retrieval, supporting the spectral view of federated consolidation.",
+      "authors": [
+        "Andrea Alessandrelli",
+        "Fabrizio Durante",
+        "Andrea Ladiana",
+        "Andrea Lepre"
+      ],
+      "primary_category": "cond-mat.dis-nn",
+      "categories": [
+        "cond-mat.dis-nn",
+        "stat.ML"
+      ],
+      "published": "2026-03-20T12:37:43+00:00",
+      "link": "https://arxiv.org/pdf/2603.19902v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "federated associative-memory framework for privacy-preserving training",
+      "llm_evidence_cn": "用于隐私保护训练的联邦关联记忆框架",
+      "llm_evidence": "用于隐私保护训练的联邦关联记忆框架",
+      "canonical_evidence": "用于隐私保护训练的联邦关联记忆框架",
+      "llm_tldr_en": "A federated learning framework using Hopfield models to preserve privacy and handle data heterogeneity.",
+      "llm_tldr_cn": "一种利用Hopfield模型处理数据异构性并保护隐私的联邦学习框架。",
+      "llm_tldr": "一种利用Hopfield模型处理数据异构性并保护隐私的联邦学习框架。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.20615v1",
+      "title": "Unveiling the Security Risks of Federated Learning in the Wild: From Research to Practice",
+      "abstract": "Federated learning (FL) has attracted substantial attention in both academia and industry, yet its practical security posture remains poorly understood. In particular, a large body of poisoning research is evaluated under idealized assumptions about attacker participation, client homogeneity, and success metrics, which can substantially distort how security risks are perceived in deployed FL systems. This paper revisits FL security from a measurement perspective. We systematize three major sources of mismatch between research and practice: unrealistic poisoning threat models, the omission of hybrid heterogeneity, and incomplete metrics that overemphasize peak attack success while ignoring stability and utility cost. To study these gaps, we build TFLlib, a uniform evaluation framework that supports image, text, and tabular FL tasks and re-implements representative poisoning attacks under practical settings. Our empirical study shows that idealized evaluation often overstates security risk. Under practical settings, attack performance becomes markedly more dataset-dependent and unstable, and several attacks that appear consistently strong in idealized FL lose effectiveness or incur clear benign-task degradation once practical constraints are enforced. These findings further show that final-round attack success alone is insufficient for security assessment; practical measurement must jointly consider effectiveness, temporal stability, and collateral utility loss. Overall, this work argues that many conclusions in the FL poisoning literature are not directly transferable to real deployments. By tightening the threat model and using measurement protocols aligned with practice, we provide a more realistic view of the security risks faced by contemporary FL systems and distill concrete guidance for future FL security evaluation. Our code is available at https://github.com/xaddwell/TFLlib",
+      "authors": [
+        "Jiahao Chen",
+        "Zhiming Zhao",
+        "Yuwen Pu",
+        "Chunyi Zhou",
+        "Zhou Feng",
+        "Songze Li",
+        "Shouling Ji"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-21T03:19:05+00:00",
+      "link": "https://arxiv.org/pdf/2603.20615v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "keyword:PPML",
+        "query:FSS LLM",
+        "query:PPML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "security risks and poisoning in federated learning",
+      "llm_evidence_cn": "联邦学习中的安全风险与中毒攻击",
+      "llm_evidence": "联邦学习中的安全风险与中毒攻击",
+      "canonical_evidence": "联邦学习中的安全风险与中毒攻击",
+      "llm_tldr_en": "This paper analyzes the gap between research and practice in federated learning security and poisoning.",
+      "llm_tldr_cn": "该论文从测量角度分析了联邦学习安全研究与实际应用之间的差距。",
+      "llm_tldr": "该论文从测量角度分析了联邦学习安全研究与实际应用之间的差距。",
+      "llm_tags": [
+        "query:ppml"
+      ],
+      "matched_query_tag": "query:ppml",
+      "matched_query_text": "Privacy-preserving federated learning architectures",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

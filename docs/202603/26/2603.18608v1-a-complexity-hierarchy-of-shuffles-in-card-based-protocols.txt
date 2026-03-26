@@ -1,0 +1,218 @@
+Title: A Complexity Hierarchy of Shuffles in Card-Based Protocols
+
+URL Source: https://arxiv.org/pdf/2603.18608v1
+
+Published Time: Fri, 20 Mar 2026 00:48:25 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# A Complexity Hierarchy of Shuffles in Card-Based Protocols 
+
+Tomoki Ono ∗1 and Suthee Ruangwises †21The University of Electro-Communications, Tokyo, Japan 
+
+> 2
+
+Department of Computer Engineering, Faculty of Engineering, Chulalongkorn University, Bangkok, Thailand 
+
+Abstract 
+
+Card-based cryptography uses physical playing cards to construct protocols for se-cure multi-party computation. Existing card-based protocols employ various types of shuffles, some of which are easy to implement in practice while others are considerably more complex. In this paper, we classify shuffle operations into several levels according to their implementation complexity. We motivate this hierarchy from both practical and theoretical perspectives, and prove separation results between several levels by showing that certain shuffles cannot be realized using only operations from lower levels. Finally, we propose a new complexity measure for evaluating card-based protocols based on this hierarchy. 
+
+Keywords: card-based cryptography, secure multi-party computation, shuffles, complexity, permutation sets 
+
+# 1 Introduction 
+
+Card-based cryptography is a branch of cryptography that uses physical playing cards to construct cryptographic protocols. Instead of relying on computers or electronic devices, the computation is carried out through simple physical operations on cards, allowing partici-pants to perform cryptographic tasks while keeping their private information hidden. Appli-cations of card-based cryptography include secure multi-party computation, zero-knowledge proofs, and other cryptographic primitives. The study of card-based cryptography dates back to 1990, when den Boer [3] introduced the “five-card trick”, a protocol that allows two parties to compute the logical AND of their input bits using five cards. A key component of card-based protocols is the use of shuffles . Shuffles are randomized operations applied to a deck of cards in order to hide information about the positions of the cards. They play a crucial role in ensuring the security of card-based protocols, as they prevent players from learning sensitive information during the execution of the protocol. Over the years, a variety of shuffles have been proposed and used in the literature. However, not all shuffle operations are equally practical. Some shuffles are easy to perform in practice and can be implemented naturally by human players. Others, although 
+
+> ∗onotom@uec.ac.jp
+> †suthee@cp.eng.chula.ac.th
+
+1
+
+> arXiv:2603.18608v1 [cs.CR] 19 Mar 2026
+
+theoretically possible, are more difficult to realize physically. In fact, most existing card-based protocols rely on only a small number of basic shuffle primitives. In particular, the vast majority of known protocols use shuffles that can be expressed using four fundamental operations: the scramble shuffle (ss ), the random cut (rc ), the 
+
+pile-scramble shuffle (pss ), and the random pile cut (rpc ). These operations are widely studied in the literature and form the basic toolbox for constructing card-based protocols. 
+
+1.1 Related Work 
+
+Card-based cryptography was first introduced by den Boer [3] in 1990 through the well-known five-card trick , which uses the rc operation. In 2009, Gradwohl et al. [4] proposed a card-based zero-knowledge proof protocol for Sudoku that employs the ss . In the same year, Mizuki and Sone [12] introduced the random bisection cut , which can be viewed as a special case of both rpc and pss with two piles. Subsequent works introduced additional shuffle techniques and theoretical results. In 2015, Koch et al. [7] introduced the notions of non-closed and non-uniform shuffles, which are generally difficult to implement in practice. In the same year, Ishikawa et al. [5] introduced the pss . Shinagawa et al. [21] introduced the rpc in 2017, in the context of rotating polygon cards. Nishimura et al. [16] proposed special tools for performing shuffles with piles of unequal sizes, which can realize certain non-closed shuffles. In subsequent works, Nishimura et al. [14, 15] further showed that the same tools can be used to realize certain non-uniform shuffles. In 2020, Koch and Walzer [6] proved that every uniform closed shuffle can be realized using only rc operations, although additional cards of the same size but with a different back color are required. More recently, Miyamoto and Shinagawa [9] showed that certain shuffles corresponding to automorphism groups of graphs can be realized using only pss operations, again requiring additional cards. Saito et al. [18] proved that any shuffle with rational probabilities can be realized using only rc operations with additional cards; however, the number of required cards can grow extremely large, especially when the outcome set contains more than two permutations. On the experimental side, Miyahara et al. [8] experimentally measured the time required to perform some fundamental operations in practice and compared the running time of existing card-based protocols. 
+
+1.2 Our Contribution 
+
+In this paper, we introduce a hierarchy of shuffle operations used in card-based protocols based on their implementation complexity. We first analyze shuffle operations from both practical and theoretical viewpoints, identifying the fundamental operations that can be reliably performed in real-world settings. Based on these observations, we classify shuffles into several levels according to the operations required to realize them. We prove separation results between these levels by showing that certain sets of permutations cannot be realized using only operations from lower levels. In particular, we establish that rc is strictly more complex than ss , and that 
+
+rpc is strictly more complex than rc . We also show that some shuffles cannot be realized using the four fundamental operations. 2Finally, we perform an exhaustive search for small deck sizes to enumerate the per-mutation sets realizable at each level, revealing strong structural restrictions on achievable shuffles. Based on this hierarchy, we propose a new complexity measure for evaluating card-based protocols. 
+
+# 2 Preliminaries 
+
+In the formal computational model of card-based protocols proposed by Mizuki and Shizuya [11], a shuffle of a deck is mathematically defined by a pair (Π , F ), where Π is a set of permu-tations and F is a probability distribution over Π. A deterministic permutation can be viewed as a special case of a shuffle in which |Π| = 1, i.e. Π = {π} for some permutation π,and F assigns probability 1 to π.A shuffle is called uniform if F is the uniform distribution over Π, and is called closed 
+
+if Π forms a subgroup of the symmetric group. In this paper, we mainly consider uniform shuffles. Unless stated otherwise, a shuffle denoted only by a set Π refers to the shuffle (Π , F ), where F is the uniform distribution over Π. Another property sometimes considered in the literature is the cyclic property [1]. However, this property is irrelevant to the notion of shuffle complexity studied in this paper. For example, the cyclic shuffle {id , (1 2)(3 4) } is more complex than the non-cyclic shuffle 
+
+{id , (1 2) , (3 4) , (1 2)(3 4) } according to the hierarchy introduced later in this paper. Next, we will formally define the four fundamental shuffle operations. 
+
+2.1 Scramble Shuffle 
+
+The scramble shuffle ( ss ) rearranges a deck of n cards into a uniformly random permutation, denoted by Sn. In practice, this corresponds to scrambling the cards randomly on the table. While this is a natural operation commonly performed, the first card-based protocol to formally employ this operation is the zero-knowledge proof protocol for the Sudoku puzzle of Gradwohl et al. [4]. 
+
+2.2 Random Cut 
+
+The random cut ( rc ) rearranges a deck of n cards into a uniformly random cyclic shift, denoted by {id , σ, σ 2, . . . , σ n−1}, where σ = (1 2 . . . n ). In practice, this operation can be implemented by repeatedly performing a cut of the deck with randomly chosen cut positions [23]. This operation appears in the very first card-based protocol, the five-card trick of den Boer [3]. 
+
+2.3 Pile-Scramble Shuffle 
+
+The pile-scramble shuffle ( pss ) divides a deck of kn cards into k piles of n consecutive cards, and then rearranges the k piles according to a uniformly random permutation. Formally, we index the cards from 1 to kn according to their positions in the deck. The pss is denoted by 
+
+{πτ | τ ∈ Sk},
+
+where πτ (( i − 1) n + j) = ( τ (i) − 1) n + j for 1 ≤ i ≤ k and 1 ≤ j ≤ n.3In practice, this operation can be implemented by placing the n cards of each pile into an envelope and applying the ss to the pile of k envelopes. Alternatively, one may use a rubber band or paper clip to tie the cards in each pile together before scrambling them. This operation was first introduced by Ishikawa et al. [5]. 
+
+2.4 Random Pile Cut 
+
+The random pile cut ( rpc ), also known as a pile-shifting shuffle [2] or a random k-section cut [17], divides a deck of kn cards into k piles of n consecutive cards, and then rearranges the k piles according to a uniformly random cyclic shift. Formally, it is denoted by 
+
+{id , σ n, σ 2n, . . . , σ (k−1) n},
+
+where σ = (1 2 . . . kn ). Like the pss , the rpc can be implemented in practice by placing the n cards of each pile into an envelope and applying the rc to the pile of k envelopes. Alternatively, one may use a rubber band or paper clip to tie the cards in each pile together before performing the cut. This operation was first introduced by Shinagawa et al. [21]. In 2020, Koch and Walzer [6] showed that the rpc can be implemented without en-velopes, rubber bands, or paper clips; however, their method requires k additional cards of the same size but with a different back color. 
+
+# 3 Practical Viewpoint 
+
+When designing card-based protocols, it is important to consider whether the shuffle opera-tions used in the protocol can be performed reliably in the real world. In particular, we aim to identify fundamental operations that are both easy to execute and easy for all players to verify. From a practical perspective, a fundamental operation should satisfy two main properties. 
+
+1. The resulting permutation is unknown to everyone. After an operation is performed, no player should know the exact permutation applied to the deck, including the person performing the operation. This can be achieved through simple physical actions on the deck. One common method is to scramble the cards on the table. In this process, the cards are mixed randomly by repeatedly moving them around on the table. Although the result-ing distribution over permutations is not exactly uniform, the process can be modeled as a Markov chain whose stationary distribution is uniform over all permutations. If the scram-bling process is performed for a sufficiently long time, the resulting distribution becomes close to uniform. This operation corresponds to the ss .Another natural action is to grab a portion of the deck and move it to another position. If the insertion position is chosen arbitrarily, repeated applications of this operation also converge to a distribution close to that produced by the ss . However, if the operation is restricted so that cards are moved only in cyclic order (the bottom portion of the deck is moved to the top, or vice versa), the resulting permutation becomes a cyclic shift of the deck. Although a single cut does not necessarily produce a uniform distribution, if the deck is cut several times with independently chosen cut positions, the resulting process can be 4viewed as a Markov chain whose stationary distribution is uniform over all cyclic shifts. After sufficiently many cuts, the distribution becomes close to uniform. This operation corresponds to the rc .Thus, among simple physical actions that naturally hide the resulting permutation from all players, the two fundamental operations are the ss and the rc .
+
+2. All players can verify that no cheating occurs. In addition to hiding the per-mutation, it must also be possible for all players to verify that the shuffler performs only permutations from the allowed set Π. If the shuffler were able to secretly apply permutations outside Π, the security of the protocol could be compromised. From this perspective, the ss is particularly easy to verify. Since the allowed set Π consists of all permutations, every possible outcome of the scrambling process is valid. Therefore, players only need to observe that the cards are being mixed; there is no need to verify the exact permutation applied. In contrast, the rc is slightly more difficult to verify. In this case, the allowed set Π consists only of cyclic shifts. Players must therefore ensure that the shuffler performs only a cyclic cut and does not secretly apply any other permutation. This requires closer observation during the operation. 
+
+Conclusion. Combining these two considerations, we conclude that the ss is the easiest fundamental operation to perform and verify in practice, while the rc is the second easiest. In contrast, the pss and the rpc typically require extra tools such as envelopes, rubber bands, paper clips, or cards of the same size but with a different back color, and therefore cannot be performed as easily using only the cards from a given deck. 
+
+# 4 Theoretical Viewpoint 
+
+We say that a shuffle A is more complex than or equal to a shuffle B if shuffle B can be realized by applying shuffle A several times, possibly interleaved with deterministic permutations, without using any additional cards or tools. For example, the ss can be realized using the rc . Consider the following sequence of shuffles: 
+
+{id , σ 2}, {id , σ 3, σ 23 }, . . . , {id , σ n, σ 2
+
+> n
+
+, . . . , σ n−1 
+
+> n
+
+},
+
+where σi = (1 2 . . . i ) for 2 ≤ i ≤ n. Applying these shuffles sequentially produces a uniformly random permutation in Sn. Therefore, the rc is more complex than or equal to the ss .Similarly, the pss can be realized using the rpc . Since the rpc performs a uniformly random cyclic shift on the k piles, applying it k − 1 times generates a uniformly random permutation of the k piles. Hence, the rpc is more complex than or equal to the pss .1
+
+Moreover, since the ss is a special case of the pss , and the rc is a special case of the 
+
+rpc , it follows that the pss is more complex than or equal to the ss , and the rpc is more complex than or equal to the rc .2        
+
+> 1The rpc can also be realized using the pss if a large number of additional cards are used [9].
+> 2The rpc can also be realized using the rc if additional cards of the same size but with a different back color are used [6].
+
+5In fact, some sets of permutations obtainable using the rc cannot be realized using only ss operations (and deterministic permutations), as shown in Theorem 1. 
+
+Theorem 1. For n = 3, the shuffle {id , (1 2 3) , (1 2 3) 2} cannot be realized using only ss 
+
+operations and deterministic permutations. 
+
+Proof. Suppose the only allowed randomized operations are the 2-card ss and the 3-card 
+
+ss , together with deterministic permutations. 
+
+• If a 3-card ss is used at least once, the distribution becomes uniform on S3. Since the uniform distribution on S3 is invariant under further deterministic permutations and ss operations, the final distribution must remain uniform on all six permutations. Thus, the target set {id , (1 2 3) , (1 2 3) 2} cannot be obtained. 
+
+• If no 3-card ss is used, then only 2-card ss operations occur. After r such operations, each outcome has probability of the form m/ 2r. Thus, a uniform distribution assigning probability 1 /3 to three outcomes cannot be obtained. Hence, the shuffle {id , (1 2 3) , (1 2 3) 2} cannot be realized. Therefore, the rc is strictly more complex than the ss , which coincides with our con-clusion from the practical viewpoint that the ss is the easiest fundamental operation. 
+
+4.1 Levels of Shuffles 
+
+We now formally classify shuffles (with uniform distributions over sets of permutations) into levels according to the operations required to realize them. 
+
+• Level 0 shuffles are those obtainable using only deterministic permutations. Therefore, they consist only of single-element sets. 
+
+• Level 1 shuffles are those obtainable using ss operations and deterministic permuta-tions. 
+
+• Level 2 shuffles are those obtainable using rc operations and deterministic permuta-tions. For example, when n = 3, the shuffle {id , (1 2 3) , (1 2 3) 2} belongs to Level 2 since it can be realized using rc operations but cannot be realized using only ss operations. Next, we will prove that the rpc is strictly more complex than the rc . We do so by showing that there exists a set of permutations obtainable using the rpc that cannot be realized using only rc operations (and deterministic permutations), as stated in Theorem 2. 
+
+Theorem 2. For n = 4, the shuffle {id , (1 2)(3 4) } cannot be realized using only rc opera-tions and deterministic permutations. 
+
+Proof. Suppose the only allowed randomized operations are the 2-card rc , the 3-card rc ,and the 4-card rc , together with deterministic permutations. 6• If a 2-card or 4-card rc is used at least once, both even and odd permutations appear in the distribution (since a transposition is odd, and a 4-cycle alternates parity among its powers). Since further deterministic permutations and rc operations preserve the property that both parities appear, once both even and odd permutations appear they cannot be eliminated. However, the target set {id , (1 2)(3 4) } contains only even permutations, so it cannot be obtained. 
+
+• If no 2-card or 4-card rc is used, then only 3-card rc operations occur. After r
+
+such operations, each outcome has probability of the form m/ 3r. Thus, a uniform distribution assigning probability 1 /2 to two outcomes cannot be obtained. Hence, the shuffle {id , (1 2)(3 4) } cannot be realized. Indeed, the shuffle {id , (1 2)(3 4) } can be realized using the rpc and deterministic permutations. For example, apply the deterministic permutation (2 3), followed by the rpc 
+
+with two piles of two cards, and then apply the deterministic permutation (2 3) again. Therefore, the rpc is strictly more complex than the rc , which also coincides with our conclusion from the practical viewpoint. We then define Level 3 shuffles to be those obtainable using rpc operations and deterministic permutations. For example, when n = 4, the shuffle {id , (1 2)(3 4) } belongs to Level 3. 
+
+4.2 Shuffles Beyond the Four Fundamental Operations 
+
+Some shuffles cannot be realized using the four fundamental operations. One example is the shuffle {id , (1 2 3) }.At first glance, one might attempt to implement this shuffle using an operation similar to the rpc (or pss ), by dividing the deck into two piles of unequal size: one pile containing two cards and the other containing one card, and then randomly swapping the two piles. However, such an operation is not secure in practice. If rubber bands or paper clips are used to hold the piles together, players can distinguish the piles during the shuffle because they contain different numbers of cards. If envelopes are used instead, the players can still determine which pile is which after the cards are taken out of the envelopes. Therefore, this approach does not achieve a secure shuffle. In fact, it is theoretically impossible to realize the shuffle {id , (1 2 3) } using only rpc 
+
+operations and deterministic permutations, as shown in Theorem 3. 
+
+Theorem 3. For n = 3, the shuffle {id , (1 2 3) } cannot be realized using only rpc operations and deterministic permutations. 
+
+Proof. Since a nontrivial rpc operation requires at least two piles, each containing at least two cards, it can be applied to decks with at least four cards. Therefore, no nontrivial rpc 
+
+operation is available when n = 3, and the model has essentially the same power as using only rc operations and deterministic permutations. Suppose the only allowed randomized operations are the 2-card rc , the 3-card rc , and the 4-card rc , together with deterministic permutations. 
+
+• If a 2-card rc is used at least once, both even and odd permutations appear in the distribution. Since further deterministic permutations and rc operations preserve 7the property that both parities appear, once both even and odd permutations appear they cannot be eliminated. However, the target set {id , (1 2 3) } contains only even permutations, so it cannot be obtained. 
+
+• If no 2-card rc is used, then only 3-card rc operations occur. After r such operations, each outcome has probability of the form m/ 3r. Thus, a uniform distribution assigning probability 1 /2 to two outcomes cannot be obtained. Hence, the shuffle {id , (1 2 3) } cannot be realized. Nishimura et al. [16] proposed a tool to help implement such shuffles (i.e. rpc opera-tions with piles of different sizes). Their method uses boxes with sliding covers (see Fig. 1). The cards of each pile are placed into a separate box, and a random cut is applied to the boxes. The boxes are then stacked on top of each other, and the covers between them are removed so that the cards fall into a single pile. A simpler alternative, also proposed by [16], is to use one envelope for each pile of cards together with one large envelope (see Fig. 2). After applying the rc to the envelopes, all of them are placed inside the large envelope. The envelopes are then pulled out simultaneously, allowing the cards to fall into a single pile inside the large envelope. 
+
+Figure 1: Boxes with sliding covers Figure 2: Small envelopes inside a large envelope Theoretically, this additional tool allows us to perform shuffles of the form 
+
+{id , σ a1 , σ a2 , . . . , σ ak },
+
+where σ = (1 2 . . . n ) and k ≤ n − 1. We define Level 4 shuffles to be those realizable using this operation. For example, when n = 3, the shuffle {id , (1 2 3) } belongs to Level 4. 3
+
+4.3 Number of Realizable Shuffles 
+
+For a deck of n cards, there are n! possible permutations, and therefore 2 n! − 1 possible nonempty subsets of permutations. By performing an exhaustive search, we compute the number of realizable subsets at each level, as summarized in Table 1. As the table shows, only a small fraction of these subsets are realizable using the fundamental shuffle operations.   
+
+> 3More generally, any uniform shuffle can be realized using rc operations with a sufficiently large number of additional cards, although the number of required cards may grow extremely large [18].
+
+8Table 1: Number of realizable subsets using only each level of shuffles 
+
+n Level 0 Level 1 Level 2 Level 3 Level 4 #Nonempty subsets 1 1 1 1 1 1 12 2 3 3 3 3 33 6 25 27 27 33 63 4 24 564 1,231 2,307 18,249 16,777,215 For n = 3, Level 1 shuffles already generate 25 subsets out of the 63 possible nonempty subsets of S3. The two additional subsets that become realizable at Level 2 but not at Level 1 are the two cyclic subgroups of size 3: {id , (1 2 3) , (1 3 2) } and {(1 2) , (1 3) , (2 3) }.Level 3 does not introduce any new subsets when n ≤ 3. This is because a nontrivial 
+
+rpc operation requires at least two disjoint cycles, each of length at least two, which in turn requires at least four cards. Hence for n ≤ 3, Level 3 is equivalent to Level 2. For n = 4, the number of realizable subsets grows significantly but still remains ex-tremely small compared to the total number 2 24 − 1 = 16 ,777 ,215 of possible nonempty subsets. This illustrates that the structural constraints imposed by the shuffle operations severely limit the sets of permutations that can be obtained. 
+
+# 5 Complexity Measurement of Protocol 
+
+Using the hierarchy of shuffle operations introduced in this paper, we propose a way to measure the shuffle complexity of card-based protocols. The goal is to evaluate protocols based on the types of shuffle operations they require. Given a protocol, we represent its shuffle complexity by a tuple (a1, a 2, a 3, a 4, a 5),
+
+where each component counts the number of fundamental operations of a particular type used in the protocol. Specifically: 
+
+• a1 is the number of ss operations, 
+
+• a2 is the number of rc operations, 
+
+• a3 is the number of pss or rpc operations, 
+
+• a4 is the number of unequal shuffles introduced by Nishimura et al. [16], 
+
+• a5 counts any other shuffle operations not covered by previous categories. This representation is motivated by the observation that the practical difficulty of im-plementing shuffle operations can vary significantly depending on the type of shuffle and the method used to perform it. For example, the time required to perform a rpc operation may differ greatly depending on whether envelopes, rubber bands, or additional cards are used. Therefore, representing complexity by counting the types of shuffle operations provides a more flexible way to compare protocols than assigning fixed time costs. Previous experimental work by Miyahara et al. [8] attempted to measure the running time of card-based protocols by experimentally recording the exact time required to perform 9them in practice. Their approach focused on basic actions such as add (adding cards), turn 
+
+(turning cards), perm (deterministic permutation), and shuffle (any shuffle). However, they did not explicitly distinguish between different types of shuffle operations, although they briefly noted that under some implementations, performing the random bisection cut can take more than four times as long as performing the rc .Our approach differs in that we explicitly distinguish different classes of shuffle opera-tions according to the hierarchy introduced in this paper. Instead of measuring the exact execution time in seconds, we represent the shuffle complexity of a protocol as the tuple (a1, a 2, a 3, a 4, a 5), which records the number of operations of each type. This representa-tion allows protocols to be compared in terms of the structural complexity of the shuffle operations they require. 
+
+5.1 Shuffle Complexity of Selected Protocols 
+
+Table 2 summarizes the shuffle complexity of several well-known card-based protocols using the tuple representation introduced above. The table illustrates how different protocols rely on different types of shuffle operations. For example, the five-card trick [3] and the majority function protocol of Shinagawa and Mizuki [20] use only one rc , while the Sudoku ZKP protocols of Sasaki et al. [19] rely heavily on ss and pss operations. Note that we only consider protocols with guaranteed finite running time, and the complexity shown corresponds to the worst-case analysis. Table 2: Shuffle complexity of selected card-based protocols Protocol Reference Shuffle complexity Five-card trick den Boer [3], 1990 (0 , 1, 0, 0, 0) Six-card AND Mizuki-Sone [12], 2009 (0 , 0, 1, 0, 0) Four-card XOR Mizuki-Sone [12], 2009 (0 , 0, 1, 0, 0) Four-card AND Mizuki et al. [10], 2012 (1 , 0, 1, 0, 0) Eight-card majority Nishida et al. [13], 2013 (0 , 0, 2, 0, 0) Five-card AND Koch et al. [7, §5], 2015 (3 , 0, 1, 2, 0) Six-card equality Shinagawa-Mizuki [20], 2018 (0 , 1, 0, 0, 0) Six-card majority Toyoda et al. [22], 2021 (0 , 1, 1, 0, 0) 2n-card equality Ruangwises-Itoh [17], 2021 (0 , 0, n − 1, 0, 0) Sudoku ZKP (Protocol A) Sasaki et al. [19, §3.4], 2020 (n, 0, 4n, 0, 0) Sudoku ZKP (Protocol B) Sasaki et al. [19, §3.5], 2020 (2 n, 0, 2n, 0, 0) Sudoku ZKP (Protocol C) Sasaki et al. [19, §4], 2020 (3 n, 0, 1, 0, 0) 
+
+# 6 Future Work 
+
+In this paper, we classified shuffles into several levels according to their implementation complexity. One possible future work is to find explicit criteria for determining whether a given set of permutations can be realized by shuffles in a particular level. Another interesting work is to derive formulas for the number of realizable permutation sets at each level for a given deck size n.10 Acknowledgement 
+
+This work was supported by the 111th Anniversary Engineering Research Catalyst Fund Towards U Top 100. 
+
+# References 
+
+[1] Y. Abe, Y. Hayashi, T. Mizuki and H. Sone. Five-Card AND Computations in Com-mitted Format Using Only Uniform Cyclic Shuffles. New Generation Computing , 39(1): 97–114 (2021). [2] X. Bultel, J. Dreier, J.-G. Dumas, P. Lafourcade, D. Miyahara, T. Mizuki, A. Nagao, T. Sasaki, K. Shinagawa and H. Sone. Physical Zero-Knowledge Proof for Makaro. In 
+
+Proceedings of the 20th International Symposium on Stabilization, Safety, and Security of Distributed Systems (SSS) , pp. 111–125 (2018). [3] B. den Boer. More Efficient Match-Making and Satisfiability: the Five Card Trick. In 
+
+Proceedings of the Workshop on the Theory and Application of of Cryptographic Tech-niques (EUROCRYPT ’89) , pp. 208–217 (1990). [4] R. Gradwohl, M. Naor, B. Pinkas and G.N. Rothblum. Cryptographic and Physical Zero-Knowledge Proof Systems for Solutions of Sudoku Puzzles. Theory of Computing Systems , 44(2): 245–268 (2009). [5] R. Ishikawa, E. Chida and T. Mizuki. Efficient Card-Based Protocols for Generating a Hidden Random Permutation Without Fixed Points. In Proceedings of the 14th Interna-tional Conference on Unconventional Computation and Natural Computation (UCNC) ,pp. 215–226 (2015). [6] A. Koch and S. Walzer. Foundations for Actively Secure Card-Based Cryptography. In 
+
+Proceedings of the 10th International Conference on Fun with Algorithms (FUN) , pp. 17:1–17:23 (2020). [7] A. Koch, S. Walzer and K. H¨ artel. Card-Based Crypto-graphic Protocols Using a Mini-mal Number of Cards. In Proceedings of the 21st International Conference on the Theory and Application of Cryptology and Information Security (ASIACRYPT) , pp. 783–807 (2015). [8] D. Miyahara, I. Ueda, Y. Hayashi, T. Mizuki and H. Sone. Evaluating card-based pro-tocols in terms of execution time. International Journal of Information Security , 20(5): 729–740 (2021). [9] K. Miyamoto and K. Shinagawa. Graph Automorphism Shuffles from Pile-Scramble Shuffles. New Generation Computing, 40(1): 199–223 (2022). [10] T. Mizuki, M. Kumamoto and H. Sone. The Five-Card Trick Can Be Done with Four Cards. In Proceedings of the 18th International Conference on the Theory and Application of Cryptology and Information Security (ASIACRYPT) , pp. 598–606 (2012). 11 [11] T. Mizuki and H. Shizuya. A formalization of card-based cryptographic protocols via abstract machine. International Journal of Information Security , 13(1): 15–23 (2014). [12] T. Mizuki and H. Sone. Six-Card Secure AND and Four-Card Secure XOR. In Pro-ceedings of the 3rd International Frontiers of Algorithmics Workshop (FAW) , pp. 358–369 (2009). [13] T. Nishida, T. Mizuki and H. Sone. Securely Computing the Three-Input Majority Function with Eight Cards. In Proceedings of the 2nd International Conference on the Theory and Practice of Natural Computing (TPNC) , pp. 193–204 (2013). [14] A. Nishimura, Y. Hayashi, T. Mizuki and H. Sone. An Implementation of Non-Uniform Shuffle for Secure Multi-Party Computation. In Proceedings of the 3rd ACM International Workshop on ASIA Public-Key Cryptography (APKC) , pp. 49–55 (2016). [15] A. Nishimura, Y. Hayashi, T. Mizuki and H. Sone. Pile-Shifting Scramble for Card-Based Protocols. IEICE Trans. Fundamentals , E101.A(9): 1494–1502 (2018). [16] A. Nishimura, T. Nishida, Y. Hayashi, T. Mizuki and H. Sone. Card-based protocols using unequal division shuffles. Soft Computing , 22(2): 361–371 (2018). [17] S. Ruangwises and T. Itoh. Securely Computing the n-Variable Equality Function with 2n Cards. Theoretical Computer Science , 887: 99–110 (2021). [18] T. Saito, D. Miyahara, Y. Abe, T. Mizuki and H. Shizuya. How to Implement a Non-uniform or Non-closed Shuffle. In Proceedings of the 9th International Conference on the Theory and Practice of Natural Computing (TPNC) , pp. 107–118 (2020). [19] T. Sasaki, D. Miyahara, T. Mizuki and H. Sone. Efficient card-based zero-knowledge proof for Sudoku. Theoretical Computer Science , 839: 135–142 (2020). [20] K. Shinagawa and T. Mizuki. The Six-Card Trick: Secure Computation of Three-Input Equality. In Proceedings of the 21st Annual International Conference on Information Security and Cryptology (ICISC) , pp. 123–131 (2018). [21] K. Shinagawa, T. Mizuki, J.C.N. Schuldt, K. Nuida, N. Kanayama, T. Nishide, G. Hanaoka and E. Okamoto. Card-Based Protocols Using Regular Polygon Cards. IEICE Trans. Fundamentals , E100.A(9): 1900–1909 (2017). [22] K. Toyoda, D. Miyahara and T. Mizuki. Another Use of the Five-Card Trick: Card-Minimal Secure Three-Input Majority Function Evaluation. In Proceedings of the 22nd International Conference on Cryptology in India (INDOCRYPT) , pp. 536–555 (2021). [23] I. Ueda, D. Miyahara, A. Nishimura, Y. Hayashi, T. Mizuki and H. Sone. Secure im-plementations of a random bisection cut. International Journal of Information Security ,19(4): 445–452 (2020). 12
