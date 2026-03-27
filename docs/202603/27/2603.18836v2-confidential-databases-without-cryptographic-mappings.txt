@@ -1,0 +1,540 @@
+Title: Confidential Databases Without Cryptographic Mappings
+
+URL Source: https://arxiv.org/pdf/2603.18836v2
+
+Published Time: Tue, 24 Mar 2026 02:10:27 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# Confidential Databases Without Cryptographic Mappings 
+
+## Wenxuan Huang 1,2,3 Zhanbo Wang 1,2,3 Mingyu Li 1,21Key Laboratory of System Software (Chinese Academy of Sciences) 
+
+2Institute of Software, Chinese Academy of Sciences 
+
+3University of Chinese Academy of Sciences 
+
+## Abstract 
+
+Confidential databases (CDBs) are essential for enabling secure queries over sensitive data in untrusted cloud environ-ments using confidential computing hardware. While adop-tion is growing, widespread deployment is hindered by high performance overhead from frequent synchronous crypto-graphic operations, which causes significant computational and memory bottlenecks. We present F EDB , a novel CDB design that removes cryp-tographic operations from the critical path. F EDB leverages crypto-free mappings, which maintain data-independent iden-tifiers within the database while securely mapping them to plaintext secrets in a trusted domain. This paradigm shift reduces the runtime overhead by up to 78.0 × on industry-standard benchmarks including TPC-C and TPC-H. 
+
+## 1 Introduction 
+
+Cloud databases have become the backbone of modern digital infrastructure, with organizations increasingly outsourcing their data management to Database-as-a-Service (DBaaS) providers [1 – 3]. However, this convenience comes with a critical security risk: cloud administrators have unrestricted access to all tenant data, leaving opportunities for both mali-cious and accidental exposure. Recent breaches, such as the 2025 Allianz Life exposure of 1.1 million personal records [4], underscore this threat. For sensitive databases regulated by laws such as HIPAA [5] and PCI-DSS [6], entrusting cloud infrastructure with plaintext data is untenable. Confidential databases (CDBs) have emerged as a com-pelling solution. By leveraging trusted execution environ-ments (TEEs), CDBs enable secure data upload and query execution while ensuring data remains encrypted from the cloud provider. Over the past two decades, researchers have explored various CDB designs [7 –11], and major cloud providers have deployed CDB systems [12–16]. Despite this industry momentum, a critical roadblock to widespread adoption of CDB systems remains: severe perfor-mance degradation compared to plaintext databases, with an-alytical queries experiencing up to 79.5 × higher latency [15]. Encrypt   
+
+> Decrypt
+> DBMS Exp Ops
+> ~1,500 cycles
+> ~5,000 cycles
+> +
+> Ciphertext Plaintext TEE domain
+
+Figure 1: In modern CDBs, a cross-domain invocation involves two decryptions and one encryption, incurring high CPU overhead. 
+
+This gap arises from a deliberate system design choice made by industry deployments: rather than enclosing the entire DBMS within a TEE, which would prevent database adminis-trators from performing essential maintenance tasks, modern CDBs execute only critical operators (e.g., numeric SUM oper-ations) inside TEEs. The resulting split architecture necessi-tates synchronous software-based decryption and encryption for every remote procedure call (RPC) across domains, as il-lustrated in Figure 1. The computational burden scales linearly with data volume. For instance, a SUM aggregation over an 
+
+N-row table requires 2 N-2 decryptions and N-1 encryptions in total. Even worse, in order to support arbitrary computation across fields, modern CDBs employ field-level encryption, inflating each 4-byte integer to 32 bytes (8 × expansion) due to cryptographic metadata (12-byte nonce and 16-byte au-thentication tag required by schemes like AES-GCM). This dramatically amplifies cross-domain data movement, mem-ory pressure, and I/O bandwidth demands. These bottlenecks raise a fundamental question: Is cryptographic overhead in-herent to CDB design, or can we achieve the same security guarantees with far cheaper alternatives? 
+
+Key insight. We argue that the performance crisis stems from an unexamined assumption that has persisted for decades: any data leaving TEEs must be encrypted. Modern CDBs store ci-phertexts in the DBMS and decrypt them in TEEs for compu-tation. We observe that this is fundamentally a mapping-based protection scheme : the DBMS uses ciphertexts as pointers to reference plaintext data in TEEs. Current practice conflates 1
+
+> arXiv:2603.18836v2 [cs.CR] 23 Mar 2026
+
+Table 1: Comparison between modern CDBs and F EDB .       
+
+> Modern CDBs FEDB
+> Indirection Ciphertexts Data-independent FIDs
+> Protection Ciphertexts Encryption at rest
+> RPC cost Decrypt ( ∼1,500 cycles) + Encrypt ( ∼5,000 cycles) Get/Put ( ∼50 cycles)
+
+indirection with protection, encrypting both pointers and data. We decouple these concerns: pointers use lightweight indirec-tion; only data at rest uses encryption. Based on this insight, we aim to replace the costly ciphertext-to-plaintext mappings with highly efficient index-to-plaintext mappings, while pre-serving data confidentiality and database correctness. 
+
+Our approach. We present F EDB , a CDB system that elimi-nates compute-intensive cryptography from the critical path without sacrificing security. F EDB introduces crypto-free map-pings that bind data-independent field identifiers (FIDs) to their corresponding plaintext fields within TEEs. This allows the DBMS to manipulate data as before, but replaces slow per-field de/encryption with ultra-low-latency put/get opera-tions, as compared in Table 1. In addition, to avoid encrypting every field synchronously, F EDB defers encryption: when data must be evicted from TEE memory to untrusted storage, FEDB performs asynchronous block-level encryption rather than fine-grained field-level encryption. In short, crypto-free mappings deliver two key benefits: they remove cryptographic operations from query execution hot paths and reduce meta-data overhead via coarser-grained encryption. We evaluate F EDB against HEDB [15], a state-of-the-art modern CDB that achieves the trifecta of functionality, main-tainability, and security. Our results show that F EDB achieves substantial performance improvements while preserving all desired properties. On the transactional benchmark TPC-C, FEDB achieves up to 1.8 × speedup over HEDB. On the an-alytical benchmark TPC-H, F EDB reduces query execution time by up to 78.0 ×. F EDB outperforms HEDB with 2.9 ×-4.9 × speedups. Additionally, F EDB reduces storage over-head by 80.0% and 34.3% across two workloads, respectively. FEDB has been open-sourced and integrated into production GaussDB systems 1.
+
+Contributions. We make the following contributions: • We identify and analyze the performance bottlenecks of modern CDBs through comprehensive profiling and em-pirical analysis. • We propose a novel CDB design with crypto-free map-pings, which remove costly cryptographic operations from the critical path of existing modern CDBs. • We build and deploy F EDB , outperforming state-of-the-art CDBs across transactional and analytical benchmarks. 
+
+> 1https://gitee.com/openeuler/secGear/pulls/354
+
+## 2 Background and Motivation 2.1 Confidential Computing 
+
+Confidential computing [17 –26] provides hardware-based trusted execution environments (TEEs) with three secu-rity guarantees. First, secure isolation through either en-claves [18, 22, 23] or confidential virtual machines [17, 19, 20] protects against inspection or tampering by untrusted privi-leged software. Second, hardware root-of-trust enables clients to verify code authenticity via remote attestation. Third, mem-ory encryption and optional integrity checks resist physical attacks. Confidential computing is now widely available on commercial clouds [21, 27–30]. 
+
+## 2.2 Confidential Databases 
+
+Database-as-a-Service (DBaaS) [31] offers fully managed databases that handle updates, backups, and maintenance for users. However, since cloud environments are inherently un-trusted, sensitive data like healthcare and financial informa-tion requires secure storage and processing. Confidential databases (CDBs) [7 –16, 32] address this by leveraging confidential computing to enable SQL query pro-cessing over encrypted data without compromising confiden-tiality. Industry-deployed CDBs [12 –15] adopt a split archi-tecture: only essential expression operators (e.g., arithmetic, comparison 2) execute inside TEEs, while most DBMS logic (e.g., SQL parsing, planning, buffer management) remains in the untrusted domain. This minimizes the TCB and preserves maintainability: DBAs can inspect query plans and debug DBMS issues. We refer to these industry-adopted systems as 
+
+“modern CDBs.” 
+
+To enable flexible computation across arbitrary fields, mod-ern CDBs apply field-level encryption. For example, since all fields from the column Salary are encrypted, "SELECT SUM(Salary) FROM Employee" requires the DBMS to iter-atively call the addition operator inside the TEE, which decrypts operands, computes the sum, re-encrypts the result, and returns it to DBMS. While secure, this design incurs substantial performance overhead, as we will analyze later. 
+
+HEDB [15]: a representative modern CDB. Modern CDBs could be vulnerable to smuggle attacks [15]: malicious DBAs exploit operator interfaces to construct known ciphers (via arithmetic operators, e.g., division yields encrypted “one,” ad-dition builds sequences) and compare them against victim ciphertexts (via equality operators), thereby extracting secrets without authorization. HEDB [15] addresses smuggle attacks through a dual-TEE architecture: an integrity zone that hosts the DBMS and a privacy zone that hosts operators, with a se-cure channel preventing direct interface access by DBAs. For maintainability, HEDB records cross-zone calls in ciphertext, enabling DBAs to replay and debug queries without plain-text access. F EDB inherits and improves this design, but is   
+
+> 2All operators yield encrypted results, except for comparisons (e.g. <,=,
+> >), which output plaintext boolean values for use in indexing ciphertexts.
+
+2designed to work with any modern CDB. 
+
+## 2.3 What Makes Modern CDB Systems Slow? 
+
+Modern CDBs exemplified by HEDB [15] have demonstrated significant performance overheads. Benchmarks on TPC-H show that HEDB can incur up to a 79.5 × increase in latency compared to a plaintext database. These overheads render modern CDBs impractical for latency-sensitive applications, hindering broader industry adoption. Our analysis attributes them to two main factors. 
+
+Factor-#1: expensive en/decryption. In modern CDBs, each computation on sensitive data requires a cross-domain round-trip, involving two decryptions and one encryption, each tak-ing thousands of CPU cycles (see Table 1). For an operation like SUM on a table with N rows, the computation incurs N − 1round-trips, resulting in 2N − 2 decryptions and N − 1 en-cryptions. Given that N is often tens of millions in real-world scenarios (reported by several CDB vendors we surveyed), this high frequency of expensive en/decryptions inevitably introduces high overhead on the critical path. While batch-ing multiple RPC invocations into a single round trip (e.g., for aggregation operators such as SUM /AVG /MAX /MIN ) can help amortize overhead, the core issue remains that cryptographic operations must still be performed on every single data item. 
+
+Factor-#2: ciphertext expansion. Modern CDBs employ field-level encryption with AES-GCM. To guarantee data confidentiality and integrity, each encrypted field requires a nonce (12 bytes) and message authentication code (MAC, 16 bytes), causing ciphertext expansion: a 4-byte integer ex-pands to 32 bytes, an 8 × size increase. This expansion creates two performance bottlenecks. First, it enlarges the data trans-ferred during frequent inter-domain RPCs, resulting in higher memory copy latency. Second, it increases the overall stor-age footprint of the database, leading to more I/O operations between the DBMS buffer pool and storage. 
+
+Empirical analysis. We profile HEDB [15] (commit f48742de) using three workloads: (i) TPC-H Q1 with a dataset larger than memory, representing large table computation; (ii) TPC-H Q1 with a dataset fitting in memory, capturing lightweight analytical settings; and (iii) a transactional bench-mark with many write-heavy small queries. Figure 2 presents the breakdown of execution latency and storage costs. Despite the batching optimization, HEDB exhibits significantly higher overhead compared to the plaintext database. As shown in Figure 2 (a), the en/decryption operations, along with I/O amplification overhead, contribute considerably to the overall execution time, accounting for 10.5-62.6% and 13.9-25.5% across different workloads. Combined, they cause an overall latency slowdown of up to 5.3 × compared to plaintext. Fig-ure 2 (b) also shows that the field-level encryption incurs 1.4 ×
+
+to 3 × storage overhead compared to plaintext. The remaining 8.6-26.5% of the execution time is attributable to DBMS exe-cution and RPC overhead across domains, the latter of which Large Analytics   
+
+> Light Analytics
+> Transactions
+> 0
+> 25
+> 50
+> 75
+> 100
+> Normalized Latency (%)
+> Large Analytics
+> Light Analytics
+> Transactions
+> 0
+> 1
+> 2
+> 3
+> Normalized Storage  3.1×
+> 2.5×
+> 1.4×
+> En/Decryption Ciphertext Expansion The Rest
+
+Figure 2: Latency and storage overhead analysis across three typical workloads. Left : Profiling end-to-end SQL execution time; Rest denotes the normal DBMS execution and RPC invocations. Right :Storage overhead normalized to plaintext databases. 
+
+stems from frequent copying of expanded ciphertexts. 
+
+Strawman: a ciphertext-to-plaintext cache. Since confi-dential VM-based TEEs (e.g., Intel TDX [19], AMD SEV-SNP [17]) provide sufficiently large secure memory, one can maintain a ciphertext-to-plaintext cache within TEEs to elim-inate cryptographic operations from the critical path. How-ever, this has two drawbacks. First, ciphertext search costs can be substantial: our preliminary experiment using C++’s STL unordered_map with one million ciphertexts showed an average lookup time of 1,601 CPU cycles, exceeding the constant-time decryption cost of 1,408 cycles. Second, storing both ciphertexts and plaintexts does not address the overhead of ciphertext expansion. 
+
+## 3 FEDB Overview 
+
+Design goals. FEDB has two design goals: • G1: Compatibility. FEDB aims to be compatible with the modern CDB design with functionality (standard SQL and ACID), maintainability (enabling DBA operations) and security (data confidentiality and database integrity). • G2: Efficiency. FEDB aims to reduce the performance gap between existing modern CDBs and the plaintext baseline, by optimizing two factors as pointed out in § 2.3. 
+
+Threat model. We assume a powerful adversary who con-trols the entire cloud infrastructure except TEE hardware. This includes compromised server software, rogue cloud and database administrators, and external attackers. Adversaries can read and modify any data outside TEE domains—data at rest, in untrusted memory, and in transit—and observe all network traffic and I/O patterns between TEE memory and persistent storage. We do not consider database vulnerabil-ities [33], TEE defects [34], denial-of-service or physical attacks. We assume TEEs provide two essential properties: (i) mem-ory isolation preventing external access to TEE-internal state, and (ii) remote attestation enabling users to verify code in-tegrity before establishing trust. While TEE-agnostic, F EDB 
+
+requires these guarantees to ensure that sensitive plaintext 3Figure 3: High-level architecture of F EDB .data remains visible only within TEE domains (§ 8). 
+
+Insights. Current practice of modern CDBs employs a mapping-based protection scheme, using ciphertexts as point-ers to plaintext data in TEEs. This design conflates two or-thogonal concerns: indirection (cross-domain references) and 
+
+protection (data confidentiality). Because ciphertexts serve both roles, this coupling necessitates expensive en/decryption on every RPC. F EDB decouples them: FIDs provide efficient indirection, while encryption protects data at rest. In fact, separating indirection from protection is a long-standing systems principle [35]. Capability systems [36, 37] used unforgeable tokens protected by OS confinement, not cryptography. Similarly, OSes have long used opaque handles, e.g., Unix file descriptors [38, 39], that are mapped internally by the kernel. In both cases, security comes from address-space isolation, keeping references simple and fast. 
+
+Architecture. FEDB ’s high-level architecture is depicted in Figure 3. F EDB inherits HEDB’s dual-zone architecture but fundamentally redesigns how data flows between zones. The integrity zone runs a commodity DBMS engine, and the pri-vacy zone comprises four components: (1) a proxy that per-forms mapping translations and invokes the appropriate op-erators, (2) expression operators that perform computation over plaintext secrets, (3) the mapping store that manages the FID-to-secret mappings, and (4) a write-ahead log (WAL) for ensuring cross-domain consistency. The mapping store is divided into temporary and permanent partitions for fine-grained management. To ensure data durability and transac-tion consistency, F EDB uses a commit protocol and a WAL for crash recovery. The proxy interacts with the mapping store through a set of well-defined APIs. 
+
+APIs. FEDB provides five APIs to manage mapping store: • Put(partition_num, secret) → FID : Stores the given secret in the specified partition of the mapping store. Returns an FID with the partition number embedded, as a reference to the stored secret. • Get(FID) → secret : Retrieves the secret associated with the specified FID, or returns a null value if the FID has no corresponding mapping. • Delete(FID) : Removes the FID-to-secret mapping in the mapping store corresponding to the specified FID. • FlushLog() : Persistently flushes the mapping store’s WAL in a blocking I/O manner. • Recover() : Replays the WAL to restore the state of the mapping store after a crash. With minor modifications using the provided APIs, existing modern CDBs [10, 12 – 15] can enjoy the benefits of F EDB ’s performance gains (see Listing 1).                  
+
+> 1/* expression operators (unchanged) */
+> 2int int_add(int l, int r) { return l + r; }
+> 34/* proxy code snippet */
+> 5- EncInt enc_int(Ops ops, EncInt left, EncInt right)
+> 6+ FID enc_int(Ops ops, FID left, FID right)
+> 7{
+> 8- int l = Decrypt(left), r = Decrypt(right);
+> 9+ int l = Get(left), r = Get(right);
+> 10 int result;
+> 11 switch (ops) {
+> 12 case ADD: result = int_add(l, r); break;
+> 13 // other cases...
+> 14 }
+> 15 - return Encrypt(result);
+> 16 + // use temporary partitions for intermediate results
+> 17 + return Put(TMP_PARTITION_NUM, result);
+> 18 }
+
+Listing 1: Example code of extending the original expression operator using F EDB ’s APIs. 
+
+Workflow. FEDB ’s query execution follows modern CDBs (described in § 2.2). To perform computation, the proxy fetches secrets associated with each input FID from the map-ping store via Get() , invokes the appropriate expression op-erator to compute over these retrieved secrets, and then stores the result back to the mapping store via Put() , which gener-ates a new FID representing the output. The DBMS proceeds with query execution using this returned FID. Finally, the proxy translates FIDs back into ciphertexts by calling Get() 
+
+followed by encrypting the retrieved results within the privacy zone before returning them to users. This design preserves 
+
+compatibility (G1) with modern CDBs that employ client-side encryption [12–15]. 
+
+Challenges. Since F EDB introduces states into the privacy zone, it brings two challenges. First, the lookup latency in the mapping store may grow with dataset size and eventually exceed constant-time cryptographic operations (§ 4). Sec-ond, maintaining state consistency between the integrity and privacy zones is necessary for database correctness (§ 5). 
+
+## 4 Achieving Efficiency via Mapping Store 
+
+To achieve efficiency (G2), F EDB addresses the two perfor-mance bottlenecks of modern CDBs by introducing the map-ping store to implement crypto-free mappings. 
+
+## 4.1 Mapping Management 
+
+Data structure design. The mapping store is a linear array of tightly packed fields. Each sensitive field is assigned a unique integer as the FID that serves as a direct array index, 4hiding the size of individual fields from the adversary. This design restricts the metadata overhead per sensitive field to a mere 8B (FID), representing a 75% reduction compared to the 32B metadata required by modern CDBs. Compared to tree- or hash-based key-value stores (e.g., LevelDB [40], RocksDB [41], LMDB [42]), the design provides two advan-tages. First, it enables O(1) access complexity to sensitive fields in the privacy zone, eliminating the need for tree traver-sals or hash table probing. Second, synchronization is only necessary during FID allocation, which significantly reduces lock contention. 
+
+Mapping store operations. For fixed-length types (e.g., 
+
+FLOAT8 , TIMESTAMP ), the Delete() operation marks the cor-responding mapping entries as logically deleted. When in-serting with Put() , F EDB either overwrites logically deleted slots or appends the new data to the end. For variable-length types (e.g., VARCHAR , NUMERIC ), the situation is subtle be-cause values cannot be overwritten in place. We address this by maintaining two arrays within the privacy zone: an offset array and a slab-like data array. The offset array is indexed di-rectly by FIDs and stores pointers to the actual field. The data array is inspired by the slab allocator [43]: fields are grouped into size-class buckets, and each bucket is maintained as a con-tiguous packed array. This minimizes memory fragmentation for frequent allocation and deallocation. Operations within a single bucket follow the same overwrite/append logic as the fixed-length case. 
+
+Partition-based state management. The mapping store can-not directly infer the lifetime of each field. For example, when an expression operator produces a result, it is unclear whether this value will be discarded shortly after use or eventually persisted. Careless reclamation may leave live FIDs pointing to reclaimed storage, causing data loss. To address this, we categorize values into two classes: (i) ephemeral values (e.g., query constants and intermediate re-sults), and (ii) persistent values (e.g., data that survives query completion). These classes require distinct persistence and reclamation strategies, so we map them to separate mapping store partitions: a temporary partition for ephemeral values and a permanent partition for persistent values. Ephemeral values are first placed in the temporary parti-tion via Put() with the temporary partition identifier TMP_-PARTITION_NUM . If the DBMS later decides to persist such a value, F EDB intercepts the write path and performs another 
+
+Put() with the permanent partition identifier. During this 
+
+Put() call, F EDB allocates a new persistent FID, copies the value into the permanent partition, and returns the new FID to the DBMS. At the end of each query, any values remaining in the temporary partition—now either intermediate results or temporary copies—can be safely discarded. For persistent values, reclamation is triggered when the DBMS instructs the proxy to invoke Delete() on mappings associated with specific FIDs. This occurs when the DBMS needs to reclaim obsolete fields, for example, when Post-greSQL runs VACUUM to remove dead tuples. 
+
+## 4.2 Exploiting Data Locality 
+
+Mismatches in data access patterns between the DBMS and mapping store can cause major page faults on the critical path. For example, when the database accesses an FID whose corresponding secret is not in memory, F EDB must perform an extra I/O in the privacy zone, thereby increasing latency. To reduce such latency, we align the data layout between the DBMS and the mapping store, and proactively prefetch secrets likely to be accessed by the DBMS. This is achieved by exploiting both temporal and spatial locality. 
+
+Exploiting temporal locality. In F EDB , the DBMS must first retrieve the FID from storage, and then resolve it through the mapping store to obtain the secret. This dependency creates a natural alignment in temporal access patterns between the DBMS and the mapping store. For instance, when a query processes fields associated with FID 1, FID 2, and FID 3 in order, the mapping store will access the same sequence to retrieve secret 1, secret 2, and secret 3.
+
+Exploiting spatial locality. To further improve performance, we divide permanent partitions to align the mapping store layout with the storage layout of the underlying database. The partitioning policy is customizable depending on the database in use. For example, in PostgreSQL, each table is a separate heap file with unordered field placement and reclamation. FEDB assigns one mapping store partition per heap file to preserve field colocation. In InnoDB, data resides in globally ordered fixed-size pages (e.g., 16 KB) with unordered fields inside each page. F EDB assigns one partition per page to maintain this alignment. We encode the partition number in the high bits of each FID to segment the FID space. 
+
+Prefetching. A random lookup in F EDB may involve two serial I/O operations: one for the DBMS to fetch FIDs and another for the mapping store to retrieve secrets. F EDB re-duces this overhead by maximizing I/O overlap. Specifically, when the DBMS issues a disk read, F EDB intercepts it and identifies the partition being accessed. Since F EDB aligns ac-cesses across the two domains at the granularity of partitions, it proactively sends an RPC to the proxy specifying which partition will be accessed. The mapping store then prefetches the corresponding partition concurrently with the DBMS’s I/O operation. 
+
+## 5 Ensuring Cross-domain Consistency 
+
+Modern CDBs rely on DBMSes to provide ACID properties. In contrast, F EDB executes transactions across two isolated domains, requiring new mechanisms that not only preserve ACID semantics but also guarantee cross-domain consistency. We adopt external synchrony [44], a consistency model that distinguishes between internal system state (invisible to users) and external state (user-visible). External synchrony re-5Timeline                                       
+
+> DB Tables (User-visible)
+> Invisible
+> Secret RID Field
+> BEGIN ;UPDATE test SET k=k+'2'; ABORT ;
+> COMMIT #1 PREPARE DONE
+> Mapping Store WAL
+> Timeline
+> Volatile Persistent
+> BEGIN ;UPDATE test SET k=k+'2'; COMMIT ;
+> Logical Delete
+> ①
+> ABORT UPDATE BEGIN OFFLINE GC
+> k1kinv. k2k1k1
+> ③Rollback ④Physical
+> Delete
+> Append New Value
+> ②
+> 161616
+> 28
+> 16
+> 28
+> 16
+> Mapping Store DB WAL
+> ①✅All lost
+> COMMIT #2
+> ②☑User Unaware ③✅Recover
+> Invisible
+> Secret FID Field Logical Delete
+> ①
+> (a) Transaction Abort (b) Transaction Commit
+
+Figure 4: Timeline of a transaction execution in F EDB , illustrating the handling of (a) abort and (b) commit paths. 
+
+quires only that the external state remains consistent—internal states may temporarily diverge as long as they never violate external invariants. In F EDB , the mapping store constitutes internal state (users never see it), while the FIDs stored in the database represent external state. Therefore, external syn-chrony requires maintaining the invariant that every FID in the database maps to a valid, up-to-date secret in the map-ping store . Temporary "orphan" secrets in the mapping store without corresponding database FIDs are permissible, as they remain invisible to users. To uphold this invariant, F EDB in-troduces lightweight synchronization between the DBMS and mapping store at transaction boundaries. We now detail the mechanisms for handling aborts, commits, and crash recovery. 
+
+Handling transaction aborts. When the DBMS encounters exceptions, all modifications made by aborted transactions must be correctly rolled back. To ensure rollback correctness, FEDB guarantees that all old versions of FIDs have corre-sponding secrets in the mapping store. To this end, F EDB employs a multi-version concurrency control (MVCC)-like approach: old values from aborted trans-actions (e.g., deleted entries and values prior to updates) are 
+
+logically deleted at runtime but physically reclaimed only when the DBMS garbage-collects them (e.g., PostgreSQL’s off-path VACUUM ). For instance, as illustrated in Figure 4 (a), when a transaction issues an update, F EDB first uses 
+
+Delete() to mark the original value as logically deleted ( ①), then inserts the new value out-of-place ( ②). If the transaction is aborted, the DBMS can access the original values as usual (③). The old value is eventually reclaimed by the DBMS’s offline garbage collection process ( ④). 
+
+Handling transaction commits. While the above mechanism maintains the invariant at runtime, a privacy-zone crash can cause the mapping store to lose recently written secrets even though their corresponding FIDs are already persisted by the DBMS, violating the requirement of external synchrony. FEDB fixes this by enforcing a strict persistence order: the mapping store must durably persist before the DBMS commits. As shown in Figure 4 (b), the commit protocol has three phases: prepare, commit #1, and commit #2. During the prepare phase, F EDB intercepts the DBMS’s WAL flush events. In the commit #1 phase, F EDB invokes FlushLog() to persist its own WAL. Only after this step completes does the DBMS persist its log in the commit #2 phase, ensuring that secrets are durable before their corresponding FIDs become visible to users. 
+
+Recovering from system crashes. We first discuss privacy-zone crashes. Upon detecting an RPC timeout, the DBMS aborts the affected transactions and sends a reboot signal to the privacy zone. After the privacy zone reboots, the proxy starts a WAL replay. Once the privacy zone has successfully recovered, F EDB resumes normal operation. Next, we consider integrity-zone crashes, where the DBMS performs its own recovery using standard techniques. Our commit protocol ensures the external synchrony invariant remains satisfied, but this may sometimes lead to storage overhead. For example, if the integrity zone crashes while waiting for commit confirmation from the privacy zone (the ②
+
+crash point in Figure 4 (b)), some secrets remain recoverable from the privacy zone’s WAL, but their corresponding FIDs in the DBMS are lost. To identify and reclaim these “orphaned” secrets, F EDB periodically performs garbage collection. 
+
+## 6 Implementation 
+
+We implemented F EDB in 5.8K lines of C++ code on Post-greSQL 15.5. Table 2 lists the code complexity of each com-ponent. F EDB leverages ARMv8.4 Secure EL2 [24, 45] to create two isolated confidential VMs as integrity and privacy zones. Both use dm-integrity [46] for corruption detection; the privacy zone additionally applies dm-crypt [47] for trans-parent I/O encryption. The mapping store is implemented as memory-mapped ( mmap -based) arrays for persistence. Tempo-ral locality is handled by an LRU cache combined with Linux sequential prefetching, while spatial locality is achieved by aligning partitions with database tables. Each 64-bit FID en-codes a configurable 16-bit partition prefix and a 48-bit offset; unique FIDs within a partition are generated via an atomic monotonic counter. Users can tune FID length and partition-prefix size according to expected data volume—shorter FIDs reduce storage overhead and improve lookup efficiency. Table 2: Lines of code of each component in F EDB .
+
+FEDB Components Language LoC 
+
+mapping store C++ 1246 WAL C++ 325 Commit Protocol (in PostgreSQL source) C 384 Proxy C++ 1767 Operators (from HEDB [15]) C++ 1918 Crypto Library C 116 67 Performance Evaluation 
+
+We evaluate F EDB by answering the following questions: • RQ1: Can F EDB deliver high performance on industry standard benchmarks? (§ 7.1) • RQ2: How sensitive is F EDB to workload configurations, resource availability, and its internal techniques? (§ 7.2) • RQ3: How does F EDB perform under system recovery, and cross-platform settings? (§ 7.3) 
+
+Experimental setup. We evaluate F EDB on a Secure-EL2 enabled ARM server machine with a 128-core CPU (2.9 GHz, 4 NUMA nodes), 512 GB DDR4 DRAM and 1 TB SSD running Ubuntu 22.04 LTS. The experiments are performed on 2 confidential VMs running Linux 6.2.0. The integrity zone runs with 32 vCPUs and 64 GB of memory, whereas the privacy zone runs with 16 vCPUs and 32 GB of memory. Both disable memory swap. To reduce cross-NUMA RPC cost and exclude hypervisor scheduling overhead, we fix their CPU affinity in the same NUMA node. 
+
+## 7.1 End-to-end Benchmarks (RQ1) 
+
+We use two standard benchmarks: TPC-C and TPC-H. For comparison, we include the plaintext database (original Post-greSQL) and a state-of-the-art, HEDB [15]. 
+
+TPC-C. Following Microsoft Always Encrypted [12], we encrypt personally identifiable columns (e.g., C_STREET_1 ,
+
+C_CITY , C_STATE in the Customer table). We evaluate TPC-C throughput (transactions per second, or TPS) across vary-ing numbers of connection threads using 128 warehouses. To prevent data-size leakage, we pad variable-length types (e.g., VARCHAR ) to a fixed length of 128 B. After a 120-second warm-up, we measure for 600 seconds. As shown in Fig-ure 5, throughput peaks at 8 connections and then degrades due to contention. Across all bars, F EDB consistently outper-forms HEDB. HEDB achieves only 51.6–77.3% of baseline throughput, whereas F EDB reaches 63.3–91.3%, delivering up to 1.8 × speedup. 
+
+TPC-H. Following Alibaba HEDB [15], we use TPC-H (scale factor = 3), a standard OLAP benchmark with large joins, group-bys, aggregations, and arithmetic operations. We make all non-key columns sensitive, as TPC-H does not define se-curity attributes. Both F EDB and HEDB can enable batching (with a batch size of 256 fields), which aggregates multiple operations into a single RPC instead of iteratively. We also report results with batching disabled. Results are averaged over 5 runs per query after one warm-up run. Figure 6 shows the slowdown of HEDB and F EDB rela-tive to plaintext PostgreSQL. With batching enabled, HEDB incurs 22.7 × average slowdown, driven by excessive cryp-tographic operations and I/O amplification due to cipher-text expansion. In contrast, F EDB limits the slowdown to 0.9 ×-13.3 × (3.7 × on average) and delivers up to 78.0 ×
+
+speedup over HEDB. Disabling batching degrades perfor-2 4 8 16 32 64   
+
+> 0
+> 50
+> 100
+> 150
+> 200
+> 250
+> TPS
+> Plain HEDB FEDB
+
+Figure 5: TPC-C throughput under different client connections with 128 warehouses. F EDB achieves up to 1.8 × speedup over HEDB. 
+
+Table 3: Overall storage usage (in GB) across two workloads. F EDB            
+
+> reduces storage cost by up to 80.0% compared to HEDB. F EDB
+> offers equivalent size privacy to HEDB’s plaintext padding.
+> Database TPC-H (S=3) TPC-C (W=128)
+> PostgreSQL 5.2 13.3 FEDB 8.4 (1.6 ×)15.1 (1.1 ×)HEDB w/o 17.8 (3.4 ×)20.4 (1.5 ×)HEDB w42.1 (8.1 ×)23.0 (1.7 ×)
+> w/o : without plaintext padding w: with plaintext padding
+
+mance for both systems, since aggregation operators like 
+
+SUM/AVG/MIN/MAX can no longer process data in bulk. Even without batching, F EDB remains consistently faster than HEDB. Interestingly, F EDB slightly outperforms the plaintext PostgreSQL on Q3. This occurs because F EDB stores only fixed-size FIDs, enabling PostgreSQL’s query planner to ap-ply more aggressive and efficient physical optimizations than when handling variable-length data types in plaintext. 
+
+Storage consumption. As shown in Table 3, F EDB reduces storage consumption by 34.3–80.0% compared to HEDB across evaluated workloads. This is because F EDB adds an 8-byte FID per value, while existing modern CDBs attach 28 bytes of cryptographic metadata per field. In addition, HEDB requires padding each sensitive field to an upper bound to hide sizes (if necessary), which further amplifies I/O and memory pressure. In contrast, F EDB by design hides the size information as it replaces all fields with constant-size FIDs. 
+
+## 7.2 Sensitivity Analysis (RQ2) 
+
+The performance gain of F EDB depends on both workload characteristics and system configuration. To characterize the impact of these factors, we use Sysbench [48] to issue trans-actional microbenchmarks with configurable read/write ra-tios and access patterns. The benchmark runs on a synthetic dataset consisting of 32 tables with 1M rows each, occupying approximately 7 GB, 10 GB, and 12 GB in plaintext Post-greSQL, F EDB , and HEDB, respectively. To control for other variables, we set the total available memory equal to the ma-chine’s physical memory, except in the memory-sensitivity experiments. When experimenting with memory sensitivity, we use cgroups to adjust the total available memory (the sum 7120 
+
+> 130
+> 140
+> 124.9x
+> 124.8x
+> HEDB
+> HEDB-no-batch
+> FEDB
+> FEDB-no-batch
+> 60
+> 90
+> 61.7x
+> 63.0x
+> 94.6x
+> 63.4x
+> Q1
+> (25s)
+> Q2
+> (0.2s)
+> Q3
+> (30s)
+> Q4
+> (2s)
+> Q5
+> (3s)
+> Q6
+> (6s)
+> Q7
+> (8s)
+> Q8
+> (6s)
+> Q9
+> (20s)
+> Q10
+> (5s)
+> Q11
+> (0.5s)
+> Q12
+> (8s)
+> Q13
+> (8s)
+> Q14
+> (1s)
+> Q15
+> (2s)
+> Q16
+> (2s)
+> Q17
+> (5s)
+> Q18
+> (14s)
+> Q19
+> (0.3s)
+> Q20
+> (1s)
+> Q21
+> (6s)
+> Q22
+> (0.7s)
+> 0
+> 10
+> 20
+> 30
+> 15.6x
+> 4.7x
+> 3.4x
+> 14.1x
+> 26.7x
+> 1.2x
+> 12.7x
+> 27.2x
+> 5.8x
+> 12.8x
+> 4.5x
+> 25.3x
+> 19.9x
+> 14.5x
+> 1.6x
+> 9.3x
+> 18.1x
+> 13.6x
+> 18.0x
+> 15.9x
+> 4.8x
+> 3.4x
+> 14.4x
+> 26.8x
+> 1.2x
+> 13.2x
+> 27.5x
+> 6.8x
+> 13.0x
+> 4.5x
+> 27.8x
+> 21.5x
+> 14.8x
+> 1.6x
+> 12.6x
+> 18.1x
+> 13.6x
+> 18.7x
+> 8.8x
+> 5.4x
+> 0.9x
+> 2.1x
+> 1.6x
+> 2.1x
+> 2.9x
+> 1.2x
+> 3.2x
+> 2.2x
+> 3.5x
+> 4.0x
+> 1.5x
+> 1.8x
+> 13.3x
+> 3.5x
+> 1.0x
+> 1.7x
+> 4.1x
+> 5.5x
+> 2.0x
+> 4.7x
+> 10.9x
+> 5.6x
+> 0.9x
+> 2.7x
+> 1.9x
+> 2.2x
+> 2.4x
+> 1.2x
+> 7.4x
+> 2.4x
+> 3.7x
+> 3.8x
+> 1.5x
+> 2.4x
+> 2.7x
+> 3.5x
+> 1.0x
+> 2.1x
+> 4.1x
+> 5.4x
+> 2.7x
+> 4.8x
+> Normalized Overhead
+
+Figure 6: Execution time of TPC-H queries of HEDB and F EDB (with and without batching), normalized to the execution time of plaintext PostgreSQL (shown in parentheses). F EDB achieves speedups ranging from 1.0 × to 78.0 × compared to HEDB. ro rw wo    
+
+> 0.0
+> 0.5
+> 1.0
+> Normalized TPS
+> point range insert
+> HEDB FEDB
+
+(a) Transaction Modes (Zipfian, factor=0.8) ro rw wo     
+
+> 0.0
+> 0.5
+> 1.0
+> Normalized TPS
+> point range insert
+> HEDB FEDB
+
+(b) Transaction Modes (Uniform) 1G 5G 9G 13G Uncapped   
+
+> 0
+> 100
+> 200
+> 300
+> 400
+> TPS
+> HEDB FEDB
+
+(c) Total Memory Size 
+
+Figure 7: Microbenchmark throughput under different configurations. F EDB consistently achieves higher throughput than HEDB. 
+
+of the integrity and privacy zones) to match different sizes of the dataset. Each experiment runs a 120-second warm-up followed by a 600-second measurement, using 16 client connections by default. 
+
+Transaction sensitivity. Figure 7 (a) presents normalized throughput under Zipfian data distribution (factor = 0.8) across six operation modes: read-only, read-write, write-only, insert-only, point-select, and range-select. F EDB achieves 1.1-5.8 × speedup over HEDB and delivers 46.6-95.0% of plain-text throughput. In write-only mode, F EDB is 4.6 × faster than HEDB. This gap arises from frequent UPDATE queries such as “UPDATE test SET k=k+1; ” where F EDB avoids the costly decrypt–compute–re-encrypt cycle required by HEDB. 
+
+Skew sensitivity. We evaluate against a random access pattern generated from a uniform distribution, which exhibits rela-tively poor locality. As illustrated in Figure 7(b), even under a non-skewed access pattern that yields frequent CPU cache and TLB misses, F EDB still outperforms HEDB by up to 2.3 ×
+
+across all six modes, thanks to its crypto-free mapping. 
+
+Memory sensitivity. Both HEDB (with ciphertext expansion) and F EDB (with FIDs overhead) demand more memory than plaintext PostgreSQL, making them more sensitive to avail-able memory size than their plaintext counterpart. Memory constraints impact HEDB and F EDB differently. In contrast, HEDB suffers from much more severe storage expansion (as shown in Table 3). F EDB ’s overall performance is directly re-lated to the average mapping lookup latency; limited memory will trigger frequent major page faults on the critical path. To quantify this sensitivity, we measure their performance under different total memory sizes. We use a read-write work-load with 8 threads and a random access pattern. As illustrated in Figure 7(c), F EDB consistently outperforms HEDB, with an average speedup of 1.9 × and a 2.2 × speedup even when the total available memory is limited to 1 GB (10% of the dataset for F EDB ). This is because F EDB has a smaller storage footprint than HEDB and preserves the same locality between the mapping store and the database. 
+
+Technique sensitivity. Under the read-write mode with 16 threads, we evaluate the impact of three key techniques: (1) temporary partitioning (§ 4.1), (2) permanent partitioning (§ 4.2), and (3) transaction coordination (§ 5). Temporary partitioning improves throughput by 2.4%, with faster FID allocation via free lists outweighing extra RPC cost during persistence. Permanent partitioning delivers the highest gain (+7.0%) by maximizing data locality. Transaction coordina-tion incurs negligible overhead (-0.90%), as each transaction commit triggers a lightweight FlushLog() call. 
+
+## 7.3 Miscellaneous (RQ3) 
+
+System recovery cost. We run F EDB for 5 minutes in mi-crobenchmark read-write mode, then abruptly terminate its process to simulate a crash (generating 303 MB of WAL) 8Table 4: Performance comparison (in CPU cycles) between crypto-graphic and crypto-free mapping operations.            
+
+> Encrypt Decrypt Put Get
+> ARM 5795 1408 55 30 x86 1256 509 76 50
+
+and restart. The WAL replay in the mapping store takes 2.1 seconds, whereas the DBMS needs 13.2 seconds. When both zones crash, their replays occur in parallel; the faster map-ping store recovery is fully masked by the slower DBMS recovery. If only the privacy zone crashes, the DBMS in the integrity zone pauses for 2.1 seconds. To shorten this pause, FEDB supports a configurable WAL size bound, which allows for trading runtime performance for faster recovery: when reaching this bound, F EDB triggers earlier log truncation. 
+
+Performance on Intel x86. Our evaluation is based on ARM commodity hardware, as it relies on ARM TEE features [24]. We also measure operation costs on an Intel Xeon x86 plat-form that supports AES-NI hardware acceleration. The results on x86 show that en/decryption remains an order of magni-tude slower than put/get operations, as detailed in Table 4. 
+
+## 8 Security Analysis 
+
+Consistent with prior modern CDBs [10, 12 –15], we consider two adversary classes: active adversaries can arbitrarily tam-per with storage and modify untrusted memory, and passive adversaries (honest-but-curious) do not modify data but at-tempt to infer sensitive information through observation. 
+
+Defense against active attacks. FEDB ensures that sensi-tive data remains confidential and fresh. First, TEE hardware provides memory encryption and isolation, preventing ad-versaries from accessing plaintext data during computation. Second, when data is evicted to untrusted storage, F EDB en-crypts it using authenticated encryption at the block level with a counter-based freshness mechanism [49], which can detect storage corruption and rollback attacks [50, 51]. FEDB ensures faithful query execution through two mech-anisms. First, remote attestation allows users to verify legit-imate F EDB code is running in the TEEs before uploading data. Second, following HEDB [15], F EDB places both the DBMS (in the integrity zone) and expression operators (in the privacy zone) within trusted domains, with secure chan-nels between TEEs that prevent message injection, replay, man-in-the-middle and interface attacks. 
+
+Defense against passive attacks. The primary question is whether an adversary observing FIDs can learn anything about the corresponding plaintext secrets. We prove that F EDB pro-vides indistinguishability. The observation is that FID alloca-tion is stateful but plaintext-independent . The allocator main-tains an internal counter (tracking the next available FID) and assigns FIDs deterministically from the counter, indepen-dent of the plaintext m. After n prior Put() calls, any two plaintexts m0 and m1 submitted as the (n + 1)-th item receive the exact same FID. Thus, the adversary’s view of the FID sequence is identical for m0 and m1. F EDB ’s crypto-free map-pings provide confidentiality comparable to semantic secu-rity [52]: no information about plaintexts is revealed (beyond leakage from other channels, discussed later). Additionally, F EDB provides collision resistance : different plaintexts receive different FIDs due to the large FID space (264 possible values). Even inserting the same plaintext yields distinct FIDs, mirroring the behavior of non-deterministic encryption schemes like AES-GCM. 
+
+Leakage analysis. While F EDB protects plaintext contents, practical query functionality requires revealing certain meta-data to the untrusted infrastructure. We characterize F EDB ’s leakage profile using the definition of L-security [10, 53], which models security as a leakage function L that precisely specifies what information the adversary learns. We define FEDB ’s L = ( Linit , Lquery , Lupdate ) as follows: • Linit (D): During database initialization with dataset D,the adversary learns the total number of fields |D| from untrusted storage. However, since all fields are replaced by constant-size FIDs, individual record sizes remain hidden. • Lquery (q, D): For query q over D, the adversary learns: 1. I/O access pattern ap (q): which storage blocks (in-dexed by FIDs) are accessed during query execution. 2. Search pattern sp (q): whether two queries access over-lapping record sets, revealing query repetition. 3. Timing t (q): when and how long the query executes. 4. Result size |Rq|: the number of records returned or affected by the query. 5. Comparison results : the boolean outcomes (e.g., “ >”) necessary for indexing and filtering, a common trade-off to many enterprise CDBs [12–15]. • Lupdate (op , D): For update operation op (i.e., INSERT ,
+
+UPDATE , DELETE ), the adversary learns which storage blocks are modified and the operation type, but not the plaintext values being written or deleted. This leakage profile provides L-semantic security : an adver-sary observing F EDB ’s execution learns nothing beyond L
+
+about the underlying plaintext data. 
+
+Side-channel considerations. FEDB ’s stateful privacy zone retains plaintext data in TEE memory for extended periods (until eviction to storage). This residency could increase the attack window for digital side-channels (e.g., cache timing or memory access patterns). Modern CDBs already face similar risks, as encryption keys reside permanently in TEE mem-ory—key compromise would breach all sensitive data. Exist-ing mitigation for key protection (e.g., strict CPU resource iso-lation [54, 55]) can equally safeguard plaintext data in TEEs. To protect against controlled-channel attacks [56], F EDB uti-lizes ARM Secure EL2 [45] that fully isolates TEEs and their page tables from untrusted privileged software. Impor-9tantly, F EDB ’s design is generalizable to other TEEs offer-ing equivalent guarantees, including Intel TDX [19], AMD SEV-SNP [17], IBM PEF [25], etc. Physical attacks that infer DRAM access patterns remain prohibitively expensive [57]. 
+
+## 9 Related Work 
+
+Confidential databases (CDBs). To address rising pri-vacy concerns, CDBs on untrusted clouds have long been a goal [58]. Systems like TrustedDB [7], EnclaveDB [9], DB-Store [32], and SecuDB [16] shield an entire DBMS in TEEs for strong security with little maintainability. Modern CDBs, like AlwaysEncrypted [12], GaussDB [14], Operon [13], and HEDB [15] prioritize maintainability, yet often incur severe performance overhead. Motivated by the growing industrial adoption of this latter class of systems, F EDB aims to improve their efficiency while preserving their advantages. Other CDB systems take different approaches: fully cryp-tographic databases [53, 59 –65] require no trusted hardware, and oblivious databases [66 –68] hide access patterns. These lines of work are orthogonal to ours. 
+
+Indirection-protection separation. Separating indirection from protection is a classic systems principle [35]. Capability systems [36, 37] pioneered the use of unforgeable tokens (ca-pabilities) as references to resources protected by OS isolation. Similarly, OSes have long used opaque handles [38, 39]: file descriptors in Unix are integers mapped by the kernel to inter-nal objects. F EDB shares this insight: data-independent FIDs serve as capabilities protected by TEE isolation, removing cryptographic overhead on every reference. 
+
+Applicability beyond CDBs. Distributed confidential analyt-ics systems, like Spark-based Opaque [69] and Laputa [70], Hadoop-based Civet [71] and VC3 [72], encrypt data during cross-node shuffles, incurring costly cryptographic operations at TEE boundaries. These systems may benefit from the ab-straction of crypto-free mappings for better efficiency. 
+
+TEE Optimization. Several techniques have been proposed to optimize TEE-based applications, such as context switch-less [8, 12, 73, 74], userspace I/O [75, 76], and others [15, 77]. 
+
+## 10 Conclusion 
+
+This paper challenges a core assumption in modern CDB de-sign: mappings between untrusted and trusted domains must be cryptographic. Existing CDB systems using ciphertext-to-plaintext mappings suffer from critical performance bottle-necks. F EDB introduces crypto-free mappings, which elim-inate costly en/decryption from the critical path and avoid ciphertext expansion. Our deployment in production DBaaS systems validates the practicality of this approach. 
+
+## Acknowledgments 
+
+This work was sponsored by CCF-Huawei Populus Grove Fund. Mingyu Li is the corresponding author. 
+
+## References 
+
+[1] Amazon Aurora. https://aws.amazon.com/rds/ aurora/ , 2025. [2] Azure SQL Database. https://azure.microsoft. com/en-us/products/azure-sql/database/ ,2025. [3] Google Cloud SQL. https://cloud.google.com/ sql , 2025. [4] Recent data breaches 2025: latest cybersecurity inci-dents & lessons. https://preyproject.com/blog/ worst-data-security-breaches , 2025. [5] The HIPAA Privacy Rule. https://www.hhs.gov/ hipaa/for-professionals/privacy/index.html ,2024. [6] Payment Card Data Security Standard (PCI-DSS). 
+
+https://www.pcisecuritystandards.org/ standards/ , 2024. [7] Sumeet Bajaj and Radu Sion. Trusteddb: a trusted hard-ware based database with privacy and data confidential-ity. In Proceedings of the ACM SIGMOD Conference ,2011. [8] Arvind Arasu, Spyros Blanas, Ken Eguro, Raghav Kaushik, Donald Kossmann, Ravishankar Ramamurthy, and Ramarathnam Venkatesan. Orthogonal security with cipherbase. In Proceedings of the Conference on Innovative Data Systems Research (CIDR) , 2013. [9] Christian Priebe, Kapil Vaswani, and Manuel Costa. En-clavedb: A secure database using SGX. In Proceedings of the IEEE Symposium on Security and Privacy (S&P) ,2018. [10] Dhinakaran Vinayagamurthy, Alexey Gribov, and Sergey Gorbunov. Stealthdb: a scalable encrypted database with full SQL query support. Proceedings of the Privacy Enhancing Technologies Symposium (PETS) , 2019. [11] Benny Fuhry, Jayanth Jain H. A, and Florian Ker-schbaum. Encdbdb: Searchable encrypted, fast, com-pressed, in-memory database using enclaves. In Annual IEEE/IFIP International Conference on Dependable Systems and Networks (DSN) , 2021. [12] Panagiotis Antonopoulos, Arvind Arasu, Kunal D. Singh, Ken Eguro, Nitish Gupta, Rajat Jain, Raghav Kaushik, Hanuma Kodavalla, Donald Kossmann, Niko-las Ogg, Ravi Ramamurthy, Jakub Szymaszek, Jeffrey Trimmer, Kapil Vaswani, Ramarathnam Venkatesan, and Mike Zwilling. Azure SQL database always encrypted. In Proceedings of the ACM SIGMOD Conference , 2020. 10 [13] Sheng Wang, Yiran Li, Huorong Li, Feifei Li, Chengjin Tian, Le Su, Yanshan Zhang, Yubing Ma, Lie Yan, Yuanyuan Sun, Xuntao Cheng, Xiaolong Xie, and Yu Zou. Operon: An encrypted database for ownership-preserving data management. In Proceedings of the International Conference on Very Large Data Bases (VLDB) , 2022. [14] Liang Guo, Jinwei Zhu, Jiayang Liu, and Kun Cheng. Full encryption: An end to end encryption mechanism in gaussdb. In Proceedings of the International Conference on Very Large Data Bases (VLDB) , 2021. [15] Mingyu Li, Xuyang Zhao, Le Chen, Cheng Tan, Huorong Li, Sheng Wang, Zeyu Mi, Yubin Xia, Feifei Li, and Haibo Chen. Encrypted databases made secure yet maintainable. In Proceedings of the USENIX Sympo-sium on Operating Systems Design and Implementation (OSDI) , 2023. [16] Xinying Yang, Cong Yue, Wenhui Zhang, Yang Liu, Beng Chin Ooi, and Jianjun Chen. Secudb: An in-enclave privacy-preserving and tamper-resistant rela-tional database. 2024. [17] AMD. AMD Secure Encrypted Virtualization (SEV). 
+
+https://developer.amd.com/sev/ , 2025. [18] Intel Software Guard Extensions. https://www.intel. com/content/www/us/en/developer/tools/ software-guard-extensions/overview.html ,2025. [19] Intel Trust Domain Extensions. https://www.intel. com/content/www/us/en/developer/articles/ technical/intel-trust-domain-extensions. html , 2025. [20] Confidential Compute Architecture. https://www. arm.com/architecture/security-features/ arm-confidential-compute-architecture , 2025. [21] AWS Nitro Enclaves. https://aws.amazon.com/ ec2/nitro/nitro-enclaves/ , 2025. [22] Dayeol Lee, David Kohlbrenner, Shweta Shinde, Krste Asanovic, and Dawn Song. Keystone: an open frame-work for architecting trusted execution environments. In Proceedings of the ACM European Conference on Computer Systems (EuroSys) . ACM, 2020. [23] Erhu Feng, Xu Lu, Dong Du, Bicheng Yang, Xueqiang Jiang, Yubin Xia, Binyu Zang, and Haibo Chen. Scal-able memory protection in the PENGLAI enclave. In 
+
+Proceedings of the USENIX Symposium on Operating Systems Design and Implementation (OSDI) , 2021. [24] Dingji Li, Zeyu Mi, Yubin Xia, Binyu Zang, Haibo Chen, and Haibing Guan. Twinvisor: Hardware-isolated con-fidential virtual machines for ARM. In Proceedings of the ACM Symposium on Operating Systems Principles (SOSP) , 2021. [25] Guerney D. H. Hunt, Ramachandra Pai, Michael V. Le, Hani Jamjoom, Sukadev Bhattiprolu, Rick Boivie, Laurent Dufour, Brad Frey, Mohit Kapur, Kenneth A. Goldman, Ryan Grimm, Janani Janakirman, John M. Ludden, Paul Mackerras, Cathy May, Elaine R. Palmer, Bharata Bhasker Rao, Lawrence Roy, William A. Starke, Jeff Stuecheli, Enriquillo Valdez, and Wendel Voigt. Confidential computing for openpower. In Proceed-ings of the ACM European Conference on Computer Systems (EuroSys) , 2021. [26] Xupeng Li, Xuheng Li, Christoffer Dall, Ronghui Gu, Jason Nieh, Yousuf Sait, and Gareth Stockwell. Design and verification of the arm confidential compute archi-tecture. In Proceedings of the USENIX Symposium on Operating Systems Design and Implementation (OSDI) ,2022. [27] Confidential VM overview - Google Cloud. 
+
+https://cloud.google.com/security/products/ confidential-computing?hl=en , 2025. [28] Build with SGX enclaves - Azure Virtual Ma-chines. https://learn.microsoft.com/ en-us/azure/confidential-computing/ confidential-computing-enclaves , 2022. [29] IBM Cloud - Confidential computing solu-tions. https://www.ibm.com/solutions/ confidential-computing , 2025. [30] Alibaba Cloud - TEE-based confidential computing. 
+
+https://www.alibabacloud.com/help/en/ack/ ack-managed-and-ack-dedicated/user-guide/ tee-based-confidential-computing/ , 2025. [31] Hakan Hacigümüs, Sharad Mehrotra, and Balakrishna R. Iyer. Providing database as a service. IEEE Computer Society, 2002. [32] Pedro S. Ribeiro, Nuno Santos, and Nuno O. Duarte. Db-store: A trustzone-backed database management system for mobile applications. In International Conference on E-Business and Telecommunication Networks , 2018. [33] Bugs found in Database Management Systems. https: //www.manuelrigger.at/dbms-bugs/ , 2025. [34] Paul Kocher, Jann Horn, Anders Fogh, Daniel Genkin, Daniel Gruss, Werner Haas, Mike Hamburg, Moritz Lipp, Stefan Mangard, Thomas Prescher, Michael Schwarz, and Yuval Yarom. Spectre attacks: Exploiting speculative execution. pages 1–19. IEEE. 11 [35] Butler Lampson. Hints and principles for computer system design. arXiv preprint arXiv:2011.02455 , 2020. [36] T. Don Dennis. A capability architecture . PhD thesis, Purdue University, USA, 1980. [37] Henry M Levy. Capability-based computer systems .Digital Press, 2014. [38] Dennis M Ritchie and Ken Thompson. The unix time-sharing system. Communications of the ACM ,17(7):365–375, 1974. [39] Michael J. Accetta, Robert V. Baron, William J. Bolosky, David B. Golub, Richard F. Rashid, Avadis Tevanian, and Michael Young. Mach: A new kernel founda-tion for UNIX development. In Proceedings of the USENIX Summer Conference, Altanta, GA, USA, June 1986 . USENIX Association, 1986. [40] Sanjay Ghemawat and Jeff Dean. Leveldb. http:// code.google.com/p/leveldb , 2011. [41] Facebook. Rocksdb. http://rocksdb.org , 2013. [42] Howard Chu. Mdb: A memory-mapped database and backend for openldap. In Proceedings of the 3rd Inter-national Conference on LDAP, Heidelberg, Germany ,volume 35, page 34, 2011. [43] Jeff Bonwick et al. The slab allocator: An object-caching kernel memory allocator. In USENIX summer ,volume 16. Boston, MA, USA, 1994. [44] Edmund B Nightingale, Kaushik Veeraraghavan, Pe-ter M Chen, and Jason Flinn. Rethink the sync. ACM Transactions on Computer Systems (TOCS) , 2008. [45] Arm architecture reference manual for a-profile architecture. https://developer.arm.com/ documentation/ddi0487/latest/ , 2025. [46] Linux dm-integrity. https://www.kernel.org/ doc/html/latest/admin-guide/device-mapper/ dm-integrity.html , 2025. [47] Linux dm-crypt. https://www.kernel.org/doc/ html/latest/admin-guide/device-mapper/ dm-crypt.html , 2025. [48] Oracle. Sysbench benchmark tool, 2021. [49] Rollback protection in TF-M secure boot. 
+
+https://trustedfirmware-m.readthedocs. io/en/latest/design_docs/booting/secure_ boot_rollback_protection.html , 2020. [50] Sebastian Angel, Aditya Basu, Weidong Cui, Trent Jaeger, Stella Lau, Srinath T. V. Setty, and Sudheesh Singanamalla. Nimble: Rollback protection for confi-dential cloud services. In Proceedings of the USENIX Symposium on Operating Systems Design and Imple-mentation (OSDI) , 2023. [51] David Chu, Aditya Balasubramanian, Dee Bao, Natacha Crooks, Heidi Howard, Lucky E Katahanas, and Sou-janya Ponnapalli. Rollbaccine: Herd Immunity against Storage Rollback Attacks in TEEs. Proceedings of the ACM SIGMOD Conference , 2026. [52] Shafi Goldwasser and Silvio Micali. Probabilistic en-cryption & how to play mental poker keeping secret all partial information. In Proceedings of the Fourteenth An-nual ACM Symposium on Theory of Computing , STOC ’82, page 365–377. [53] Rishabh Poddar, Tobias Boelter, and Raluca A. Popa. Arx: An encrypted database using semantically secure encryption. In Proceedings of the International Confer-ence on Very Large Data Bases (VLDB) , 2019. [54] Ziqiao Zhou, Yizhou Shan, Weidong Cui, Xinyang Ge, Marcus Peinado, and Andrew Baumann. Core slicing: closing the gap between leaky confidential vms and bare-metal cloud. In Proceedings of the USENIX Sympo-sium on Operating Systems Design and Implementation (OSDI) , pages 247–267. USENIX Association, 2023. [55] Charly Castes and Andrew Baumann. Sharing is leaking: blocking transient-execution attacks with core-gapped confidential vms. In Proceedings of the International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS) , 2024. [56] Yuanzhong Xu, Weidong Cui, and Marcus Peinado. Controlled-channel attacks: Deterministic side channels for untrusted operating systems. pages 640–656. IEEE Computer Society, 2015. [57] Dayeol Lee, Dongha Jung, Ian T. Fang, Chia-Che Tsai, and Raluca Ada Popa. An off-chip attack on hardware enclaves via the memory bus. In Proceedings of the USENIX Security Symposium , pages 487–504. USENIX Association, 2020. [58] Umesh Maheshwari, Radek Vingralek, and William Shapiro. How to build a trusted database system on untrusted storage. In Proceedings of the USENIX Sym-posium on Operating Systems Design and Implemen-tation (OSDI) , pages 135–150. USENIX Association, 2000. [59] Raluca A. Popa, Catherine M. S. Redfield, Nickolai Zel-dovich, and Hari Balakrishnan. Cryptdb: protecting confidentiality with encrypted query processing. In Pro-ceedings of the ACM Symposium on Operating Systems Principles (SOSP) , 2011. 12 [60] Stephen Tu, M. Frans Kaashoek, Samuel Madden, and Nickolai Zeldovich. Processing analytical queries over encrypted data. In Proceedings of the International Conference on Very Large Data Bases (VLDB) , 2013. [61] Song Bian, Zhou Zhang, Haowen Pan, Ran Mao, Zian Zhao, Yier Jin, and Zhenyu Guan. HE3DB: an efficient and elastic encrypted database via arithmetic-and-logic fully homomorphic encryption. In Proceedings of the ACM Conference on Computer and Communications Security (CCS) , 2023. [62] Xuanle Ren, Le Su, Zhen Gu, Sheng Wang, Feifei Li, Yuan Xie, Song Bian, Chao Li, and Fan Zhang. HEDA: multi-attribute unbounded aggregation over homomor-phically encrypted database. In Proceedings of the Inter-national Conference on Very Large Data Bases (VLDB) ,2022. [63] Song Bian, Haowen Pan, Jiaqi Hu, Zhou Zhang, Yun-hao Fu, Jiafeng Hua, Yunyi Chen, Bo Zhang, Yier Jin, Jin Dong, and Zhenyu Guan. Engorgio: An arbitrary-precision unbounded-size hybrid encrypted database via quantized fully homomorphic encryption. In Proceed-ings of the USENIX Security Symposium , 2025. [64] Zhou Zhang, Song Bian, Zian Zhao, Ran Mao, Haoyi Zhou, Jiafeng Hua, Yier Jin, and Zhenyu Guan. Arcedb: An arbitrary-precision encrypted database via (amor-tized) modular homomorphic encryption. In Proceed-ings of the ACM Conference on Computer and Com-munications Security (CCS) , pages 4613–4627. ACM, 2024. [65] Dongfang Zhao. Hermes: High-performance homo-morphically encrypted vector databases. arXiv preprint arXiv:2506.03308 , 2025. [66] Pratyush Mishra, Rishabh Poddar, Jerry Chen, Alessan-dro Chiesa, and Raluca Ada Popa. Oblix: An efficient oblivious search index. In 2018 IEEE symposium on security and privacy (SP) , pages 279–296. IEEE, 2018. [67] Natacha Crooks, Matthew Burke, Ethan Cecchetti, Sitar Harel, Rachit Agarwal, and Lorenzo Alvisi. Obladi: Oblivious serializable transactions in the cloud. In Pro-ceedings of the USENIX Symposium on Operating Sys-tems Design and Implementation (OSDI) , pages 727– 743, 2018. [68] Jinhao Zhu, Liana Patel, Matei Zaharia, and Raluca Ada Popa. Compass: encrypted semantic search with high accuracy. In Proceedings of the USENIX Symposium on Operating Systems Design and Implementation (OSDI) ,pages 915–938, 2025. [69] Wenting Zheng, Ankur Dave, Jethro G Beekman, Raluca Ada Popa, Joseph E Gonzalez, and Ion Stoica. Opaque: An oblivious and encrypted distributed analyt-ics platform. In Proceedings of the USENIX Sympo-sium on Networked Systems Design and Implementation (NSDI) , 2017. [70] Byeongwook Kim, Jaewon Hur, Adil Ahmad, and By-oungyoung Lee. Secure data analytics in apache spark with fine-grained policy enforcement and isolated exe-cution. In Proceedings of the Network and Distributed System Security Symposium (NDSS) . The Internet Soci-ety, 2025. [71] Chia-Che Tsai, Jeongseok Son, Bhushan Jain, John McAvey, Raluca Ada Popa, and Donald E. Porter. Civet: An efficient java partitioning framework for hardware enclaves. In Proceedings of the USENIX Security Sym-posium , 2020. [72] Felix Schuster, Manuel Costa, Cédric Fournet, Christos Gkantsidis, Marcus Peinado, Gloria Mainar-Ruiz, and Mark Russinovich. Vc3: Trustworthy data analytics in the cloud using sgx. In IEEE S&P , 2015. [73] Sergei Arnautov, Bohdan Trach, Franz Gregor, Thomas Knauth, André Martin, Christian Priebe, Joshua Lind, Divya Muthukumaran, Dan O’Keeffe, Mark Stillwell, David Goltzsche, David M. Eyers, Rüdiger Kapitza, Pe-ter R. Pietzuch, and Christof Fetzer. SCONE: secure linux containers with intel SGX. In Proceedings of the USENIX Symposium on Operating Systems Design and Implementation (OSDI) , pages 689–703. USENIX Association, 2016. [74] Ofir Weisse, Valeria Bertacco, and Todd M. Austin. Re-gaining lost cycles with hotcalls: A fast interface for SGX secure enclaves. In Proceedings of the Interna-tional Symposium on Computer Architecture (ISCA) ,2017. [75] Maurice Bailleu, Jörg Thalheim, Pramod Bhatotia, Christof Fetzer, Michio Honda, and Kapil Vaswani. SPE-ICHER: securing lsm-based key-value stores using shielded execution. In Proceedings of the USENIX Con-ference on File and Storage Technologies (FAST) , 2019. [76] Jörg Thalheim, Harshavardhan Unnibhavi, Christian Priebe, Pramod Bhatotia, and Peter R. Pietzuch. rkt-io: a direct I/O stack for shielded execution. In Proceedings of the ACM European Conference on Computer Systems (EuroSys) , 2021. [77] Taehoon Kim, Joongun Park, Jaewook Woo, Seungheun Jeon, and Jaehyuk Huh. Shieldstore: Shielded in-memory key-value storage with sgx. In Proceedings of the ACM European Conference on Computer Systems (EuroSys) , 2019. 13

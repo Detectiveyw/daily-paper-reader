@@ -1,0 +1,658 @@
+Title: Gyokuro: Source-assisted Private Membership Testing using Trusted Execution Environments
+
+URL Source: https://arxiv.org/pdf/2603.23226v1
+
+Published Time: Wed, 25 Mar 2026 01:15:54 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# Gyokuro : Source-assisted Private Membership Testing using Trusted Execution Environments 
+
+## Yoshimichi Nakatsuka 
+
+## ETH Zurich 
+
+## Nicolas Dutly 
+
+## ETH Zurich 
+
+## Kari Kostiainen 
+
+## ETH Zurich 
+
+## Srdjan ˇ Capkun 
+
+## ETH Zurich 
+
+## Abstract 
+
+Private Membership Testing (PMT) protocols enable clients to verify whether a certain data item is included in a database without revealing the item to the database oper-ator or other external parties. This paper examines Source-assisted PMT (SPMT), in which clients leverage compact data source-provided information issued when the data item is first submitted to the database. SPMT is relevant in ap-plications such as certificate transparency and supply-chain auditing; yet, designing an approach that is efficient, scalable, and privacy-preserving remains a challenge. This work presents Gyokuro , which takes a different ap-proach to conventional membership testing schemes. Instead of requesting the server to produce a proof attesting that a certain data item exists in the database, we leverage Trusted Execution Environments (TEEs) to produce proofs demon-strating that the server has made enough progress to add the data item to the database. With the help of existing monitoring services, clients can infer that no items have been removed from the database. This allows Gyokuro to provide strong privacy guaranties and achieve high efficiency, as a client’s membership testing query does not include any information regarding their interests, and eliminates the need for complex and inefficient protection mechanisms. Additionally, this ap-proach enables membership testing on large-scale databases, since the communication and computation required are inde-pendent of the database size. Our evaluations show practical feasibility, achieving 7 ms membership testing latency and throughput of around 1400 requests/sec/core. 
+
+## 1 Introduction 
+
+Verifying whether a certain piece of data is included in a database with the aid of an external party (i.e., monitor) while protecting the verifier’s (i.e., client’s) privacy from the prover (i.e., server) is called “Private Membership Testing” (PMT) [64, 86]. Many prior work has proposed PMT pro-tocols that leverage techniques such as Private Information Retrieval (PIR) [7, 8, 11, 13, 15, 19, 26, 27, 31, 32, 40, 46, 51, 53, 56, 57, 60, 68, 72, 79, 83, 94, 95], Private Set Intersection (PSI) [1, 20, 22, 23, 43, 52, 76, 77, 80, 81], Oblivious RAM (ORAM) [12, 38, 48, 88], homomorphic encryption [25, 78], and trusted computing [44, 86, 89]. However, designing a PMT protocol that is efficient, scal-able, and privacy-preserving remains a challenge. In this work, we focus on a sub-variant of the PMT protocol, which we denote as Source-assisted PMT (SPMT). The unique aspect of this protocol is that clients utilize information they received from the data source, denoted as source-assisted information ,in addition to the data item during membership testing. SPMT protocols are useful in various applications, such as certificate transparency (CT) log auditing, supply-chain auditing, data provenance verification, and public document auditing. For example, in the context of drug supply-chain auditing, con-sumers ( clients ) check whether the supply-chain information (source-assisted information ) of the drug they purchased is issued by valid pharmaceutical supply-chain partners ( data sources ) and is stored in valid public logs ( server/database )without revealing the drug label ( private data item ). Supply-chain information could, e.g., be presented to consumers in the form of a QR code found on the medicine package. Con-sumers would then engage in an SPMT protocol with the public log using this QR code to verify that the public log has stored the supply-chain information correctly, while receiving assistance from regulatory agencies ( monitors ) that inspect whether supply-chain partners comply with regulations. Assisting clients with source-assisted information does not make the SPMT problem trivial, as designing an SPMT pro-tocol that balances efficiency, scalability, and privacy remains a challenging task. The complexity of the SPMT problem is also illustrated by the lack of a known method to privately au-dit CT logs that is efficient and scalable [62]. Current browser implementations either forego CT log auditing altogether [49] or perform it in a semi-private manner, providing only k-set anonymity [36]. 
+
+Alternative approach & its issues. If we can design a system that does not require clients to interact with any third party 1
+
+> arXiv:2603.23226v1 [cs.CR] 24 Mar 2026
+
+by leveraging the source-assisted information, then this sys-tem is, by design, privacy-preserving. A method that has been overlooked by related efforts is leveraging the passage of time ;that is, if a server can guarantee that it will store data items before a specific deadline, then the client can locally check whether enough time has passed during membership testing. This requires the server to guarantee execution integrity (i.e., it will follow the protocol) and execution timeliness (i.e., it will finish executing before a certain deadline). However, up-holding the two guarantees under actively malicious servers, which is assumed by the SPMT protocol, is no easy task. Hardware-based confidential computing technologies (e.g., Trusted Execution Environments, TEEs) have demonstrated that guaranteeing execution integrity under malicious envi-ronments is possible; however, ensuring execution timeliness under such conditions is, to the best of our knowledge, impos-sible, even with the aid of TEEs [2]. 
+
+Our solution. Motivated by the above discussion, we propose 
+
+Gyokuro , a system that takes a different approach. As cur-rently available TEEs cannot uphold timeliness guarantees, we take the viable alternative which is to check whether the TEE is making sufficient progress . There are several ways to realize this in practice, and this work uses an approach based on monotonically increasing counters stored within the TEE. 
+
+Gyokuro is composed of two protocols, Upload and Testing .For every data item generated by the data source, Gyokuro 
+
+runs the Upload protocol, shown below. When the TEE re-ceives a data item from the data source, it generates a digital signature over the data item and the current counter value, de-noted as “Proof Of Reception” ( POR ). Once the TEE receives a fixed number of data items, it stores them to an external database and increments the counter. The TEE also updates an accumulator data structure, which compresses the entire history of data items submitted to the TEE into a single struc-ture serving as the master record of all submitted data items. For the data item which the client wants to test, Gyokuro 
+
+runs the Testing protocol, shown below. The client receives one of the data item sent by the data source and its accompany-ing POR (source-assisted information). The monitor periodi-cally downloads the entire database and updates its accumula-tor. During membership testing, the client requests the TEE for a digital signature over the current counter value, denoted as “Proof Of Processing” ( POP ). The client verifies POR and 
+
+POP using the TEE’s public key, and checks whether the counter value in POP is greater than in POR . If it is, then the client concludes that the data item has been processed by the TEE and sent to the database for storage. The client requests accumulator values from the TEE and monitor. If the TEE’s and monitors’ accumulator values match, the client can safely conclude that the tested data item is present in the database. 
+
+Benefits and limitations. One novel aspect of this work is that the client does not send the data item or any of its derivatives to the database operator during membership testing. Instead, the client infers that the data item is included in the database by comparing the counter values and accumulator values it received from the TEE and monitors. This is conceptually different from every prior PMT approach. As with previous work, ensuring client privacy is our ut-most priority. In our design, the membership testing query is independent of the client’s interest. This means that even if the TEE is targeted with side-channel attacks, the queried data item cannot leak to the untrusted server, as it is never sent to the TEE. This is a significant advantage, given the increase in side-channel attacks targeting TEE confidential-ity [16, 18, 24, 35, 41, 50, 58, 59, 66, 70, 90, 91]. Another benefit of Gyokuro is its efficiency . To hide database access patterns from revealing the client query, TEE-based PMT solutions typically rely on expensive crypto-graphic primitives, such as ORAM [44, 89], or simply touch every database record [86], which puts a toll on the solutions’ performance. Our design does not have this shortcoming be-cause the TEE does not communicate with the database during membership testing at all, allowing for extremely fast query processing, which we show is around 7 ms for both Upload and Testing protocols in our experimental setup. 
+
+Scalability is also an important feature of Gyokuro , which we show to be 1021 and 1432 requests/sec/core for Up-load and Testing protocols, respectively. This is because the amount of communication and computation required in the proposed system is independent of the database size. This allows Gyokuro to support large-scale systems, e.g., CT logs storing billions of certificates. Despite such numerous benefits, Gyokuro has one notable limitation. As our solution relies on TEEs, there is no guar-antee that the required execution integrity property will not be compromised in the future. Purely cryptographic PMT solutions are free from this limitation. 
+
+Contributions. In summary, the main contributions of this work are as follows. • Problem identification. We observe that the SPMT problem has not been widely studied but appears in pop-ular applications such as certificate transparency and supply-chain auditing (Section 3). • Novel solution. We propose Gyokuro , a novel TEE-based SPMT scheme that does not require the client to disclose their private information to the database op-erator, TEE, or any third party (Sections 4 and 5). • Performance evaluation. We demonstrate low data sub-mission and membership test latencies, on the order of several milliseconds, and high system throughput by serving thousands of requests per second per CPU core (Section 6). • Security analysis . Our analysis shows that Gyokuro 
+
+guarantees membership testing correctness and strong client privacy protection (Section 7). Our open-source implementation is available at [71]. 22 Background and Related Work 2.1 Private Membership Testing 
+
+Private Membership Testing (PMT) is a protocol that al-lows clients to verify whether a specific data item exists in a database without disclosing their interest in that item to any external entity. Here, we highlight primitives proposed in prior work that can be used to protect client privacy during membership testing. A comparison of these primitives with our solution Gyokuro is presented in Table 1, while Table 2 shows comparison of the computational and communication complexity with respect to the size of the database. 
+
+PIR. Private Information Retrieval (PIR) enables clients to 
+
+retrieve specific items from a database without revealing their interest. Privacy-preserving retrieval schemes could also be used for private membership testing , although the intended usage of such schemes is slightly different. Early PIR schemes [26, 27] depended on two synchronized (i.e., communicating) yet non-colluding databases, which can be difficult to realize in practice. This led to the introduc-tion of single-server PIR schemes [40, 53], which, however, incurred a high communication cost. Recent schemes, such as Batched PIR [7, 8, 11, 46, 60, 68, 79] and Online-Offline (OO) PIR [13, 15, 19, 31, 32, 51, 56, 57, 72, 83, 94, 95], improve performance, although there is a trade-off between commu-nication cost and server- and client-side computation, with additional compromises in areas such as client storage and offline computation for OO PIR schemes. 
+
+PSI. Private Set Intersection (PSI) is a specific type of secure multi-party computation, where two or more parties provide their private sets as inputs and receive their intersection as outputs, but nothing else. In the context of PMT, the client engages in a PSI protocol with the server by presenting a set with a single item, while the server provides the content of the database as its set. The main drawback of PSI-based approaches is their limitations in performance due to the cryptographic prim-itives they leverage. For instance, HE- and Pairing-based PSI [1, 20, 22, 23, 80] trade off communication costs for computation costs, while OT-, OPRF-, and OKVS-based PSI [43, 52, 76, 77, 81] vise versa. Moreover, computational costs increase significantly in fully malicious settings, as pro-tocols must introduce additional protection measures, includ-ing zero-knowledge proofs or oblivious key-value stores. For a complete overview of the PSI work, we refer to [67]. 
+
+ORAM. Oblivious RAM (ORAM) hides access patterns within the data structure, and its performance has been shown to be relatively good. Using this property, ORAM can hide PMT queries when accessing the database content. However, ORAM-based PMT schemes are limited in their scalability, as they do not natively support multiple clients [12, 48]. Several recent works have proposed multi-client ORAMs [38,88], but they are still limited to a small number of clients. 
+
+HE. PMT methods that leverage Homomorphic Encryption (HE) [25,78] encrypt the client query, run the encrypted query over the database content to produce an encrypted response, and then send the encrypted response to the client, which decrypts it to retrieve the PMT result. Since client queries are evaluated in their encrypted form, no information is leaked to the server. However, HE-based approaches are impracti-cal for large databases due to the high offline computation cost as well as the insertion/deletion latencies. Furthermore, these schemes require database preprocessing to support en-crypted queries, making them less suitable for applications with frequently updated databases. 
+
+Trusted computing. Previous works have leveraged server-side trusted computing to solve the PMT problem [44, 86, 89]. In these approaches, clients encrypt queries such that they can only be decrypted within a trusted computing platform, e.g., a TEE. However, this causes PMT queries to exist in plaintext within the TEE, rendering them vulnerable to side-channel attacks. Moreover, to prevent database access patterns from leaking information about the query, these approaches either rely on privacy-preserving protocols and data structures or necessitate the traversal of the entire database, with the former compromising scalability and the latter, performance. 
+
+Out of scope: Anonymous networks. Several PMT proto-cols leverage anonymous networks, such as Tor and mix-nets, to allow clients to hide their identity when submitting their PMT query to the server [34, 37, 92]. However, we do not consider this approach “private”, since the query is not hidden from the server. With knowledge of client queries, the server can still estimate the overall distribution of the database ac-cess patterns and launch correlation attacks. Therefore, we consider anonymous network-based approaches orthogonal to our work. 
+
+## 2.2 Monitors 
+
+This work utilizes existing third-party monitors. We point out that any PMT scheme that seeks to remain secure against 
+
+split-view attacks , where the malicious server creates mul-tiple versions of the database and presents different views to different parties, requires support from some external en-tity (e.g., monitors [55], gossipping between clients [29], blockchains [14, 87]) that enables the client to verify that it is performing the membership test protocol with the correct database version. Let us take Certificate Transparency (CT) as an example. Assume that a malicious CT log operator keeps two copies of the log, A and B, with log A containing a maliciously issued certificate and log B not. The log operator could show log A to clients while presenting log B to monitors in an attempt to convince clients that the malicious certificate is logged for public scrutiny while preventing monitors from detecting the certificate. To identify this type of attack, clients and monitors must share their views of the database. Such attacks are not 3Table 1: Comparison with related work. “Low” computation/communication indicates constant cost and “High” scalability indicates low online computation and communication.                                                                                                        
+
+> Trust assumptions Performance Security & Privacy No non-colluding servers required No trusted computing required Low offline computation cost Low online computation cost Low communication cost High scalability No client-side storage required No database pre-processing required Resistant to side-channel attacks Privacy-preserving Vanilla PIR [27] ✗✓✓✗✗✗✓✓✓✓
+> Single-server PIR [40] ✓✓✗✗✗✗✓✗✓✓
+> Batched PIR [69] ✓✓✗✗✓✗✓✗✓✓
+> Online-Offline PIR [72] ✓✓✗✗✗✗✗✗✓✓
+> PSI [77] ✓✓✓✗✗✗✓✓✓✓
+> ORAM [48] ✓✓✗✗✗✗✓✗✓✓
+> HE [25] ✓✓✗✓✓✓✓✗✓✓
+> PMT Trusted computing [86] ✓✗✗✗✓✗✓✗✗✗
+> Proof of inclusion [62] ✓✓✓✗✗✗✓✓✓✗
+> SPMT This work ✓✗✓✓✓✓✓✓✓✓
+
+Table 2: Per-query computation and communication complex-ity with respect to database size M                               
+
+> Offline Computation Online Computation Communi-cation Vanilla PIR [27] N/A O(M)O(√M)
+> Single-serv. PIR [40] O(M)O(√M)O(log M )
+> Batched PIR [69] O(M)O(M)O(1)
+> OO-PIR [72] O(M)O(√M)O(√M)
+> PSI [77] N/A O(M)O(M log M )
+> ORAM [48] O(M)O(log M )O(M log M )
+> HE [25] O(M2log M )O(1)O(1)
+> Trusted comp. [86] O(M)O(M)O(1)
+> Proof of inc. [62] N/A O(log M )O(log M )
+> This work N/A OOO(((111)))OOO(((111)))
+
+exclusive to our work; indeed, all previous works discussed in Section 2 must rely on an external entity to detect this attack. Monitors that check database consistency are already avail-able in existing ecosystems, such as CT. In addition to al-lowing domain owners to check for misissued certificates, the CT specification enables monitors to maintain copies of entire logs [54, 55], a practice adopted by many CT moni-tors [21, 63, 65, 82, 84]. During this process, the specification requires them to calculate an accumulator using the log copy to ensure that the CT log operator does not remove any cer-tificates. In the case of CT, this accumulator is an MHT root, which is signed and periodically published by the CT log (called Signed Tree Head, STH). To verify that no data items are removed from the database, a monitor downloads every data item from the database, reconstructs the MHT root, and compares it with the STH. Although our solution Gyokuro 
+
+leverages hash chains, it can equally leverage MHT roots. 
+
+## 2.3 Trusted Execution Environments 
+
+TEEs protect security-sensitive code and data from untrusted entities. Examples of TEEs include Intel SGX [5], Intel TDX [45], AMD SEV [3, 4], ARM TrustZone [10], and ARM CCA [9]. The following functionalities are typically provided. Isolated execution. TEEs are isolated from all other soft-ware, including privileged ones, such as the OS and hyper-visor. Most prominently, data within the TEE can only be accessed by the code running inside the TEE ( confiden-tiality ). Moreover, the code inside the TEE provides well-defined entry points, preventing adversaries from running arbitrary parts of the code ( execution integrity ). To mitigate the wide range of side-channel attacks proposed in the litera-ture [16,18,24,35,41,50,58,59,66,70,90,91], it is commonly accepted that constant-time coding techniques provide some form of protection. Although applying constant-time cod-ing in cryptographic libraries has seen immense progress, applying this to general-purpose programs is shown to be difficult [93] and error-prone [39, 47], and therefore relying on TEEs to protect the confidentiality of arbitrary data is no longer ideal. The majority of attacks against TEEs target its confidentiality aspect, while there has been little focus on attacking its integrity. Remote attestation. Remote attestation enables TEEs to gen-erate attestation proofs, providing remote parties with strong assurances about the TEE and the code running within it. Specifically, the TEE: (1) demonstrates that it is a genuine 4Server Database   
+
+> Data Source Client Monitor
+> U1 Data Submission
+> U2 Storage & Processing
+> T1 Handover
+> T2 Monitoring T3 Membership Testing
+> T4 Consistency Checking
+
+Figure 1: SPMT system model and main operations. Solid ar-rows represent Upload protocols and dashed arrows represent Testing protocols. TEE running on genuine hardware, and (2) describes the code in a cryptographically verifiable manner. Using the proof, the remote party decides whether to trust the TEE and its outputs. 
+
+## 3 Problem Statement 
+
+A significant challenge in designing a PMT scheme is to balance efficiency, scalability, and client privacy. This work focuses on a specific variant of the PMT protocol, referred to as Source-assisted PMT (SPMT), where clients engage in the protocol with information provided by the data source in ad-dition to the issued data item. Although SPMT protocols have not received much attention from the research community, they can be utilized in various applications, including CT log auditing, supply chain auditing, data provenance verification, and public document auditing. We discuss such applications and their suitability to our solution in Section 8. 
+
+## 3.1 System and Threat Model 
+
+The SPMT protocol involves the following five entities: data source, client, server, database, and monitor, as illustrated in Figure 1. We assume that clients are trusted. Monitors are considered honest-but-curious, i.e., they will faithfully pro-vide their view of the database to clients, but may attempt to violate their privacy. We consider servers, database hosts, and data sources fully malicious. The goal of the malicious server and the database host is to selectively remove a certain piece of data from being processed and stored without being caught. For instance, they may remove the target data from the database before the monitor downloads it so that the exis-tence of the target data is not known to any external auditors. Additionally, the goal of the malicious server is to violate the client’s privacy. The goal of a malicious data source is to deceive clients into believing that a specific piece of data is stored in the database, when in fact it is not. We assume that data sources and monitors safeguard their signing keys to prevent impersonation and thus will not be leaked. Finally, we assume that data generated by data sources and that the database is public. TEE Trust Model. Although general SPMT solutions do not necessarily need to use TEEs, the proposed approach does; therefore, we define the TEE trust model as follows. We assume that TEEs are trusted for their execution integrity and secure state. The TEE host (e.g., an untrusted OS) has full control over the network, scheduling, and memory man-agement; therefore, it can arbitrarily delay network pack-ets, temporarily halt TEEs, and learn TEE memory access patterns. Providing TEE state continuity [85], rollback at-tack prevention [6, 28, 42, 61], and intra-machine fork de-tection [17, 75, 85], as well as inter-machine fork detec-tion [61, 73], are considered out of scope but are assumed to be integrated into the TEE. Additionally, all cryptographic primitives used within the TEE are assumed to implement constant-time coding techniques and therefore do not leak keys when used. Any other non-cryptographic computations performed by the TEE may leak processed data. Denial-of-service attacks against TEEs and attacks that modify TEE execution paths (e.g., return-oriented programming attacks) are considered out of scope. 
+
+## 3.2 Main Operations 
+
+The SPMT protocol consists of the following two protocols: (1) Upload and (2) Testing. Upload protocols are standard operations , meaning that these protocol run for every data item submitted by a data source. Meanwhile, Testing proto-cols are conditional operations , where the condition is trig-gered if the client obtains a data item it is interested in (e.g., client purchases a drug). This means that Testing protocols run for limited selection of data items under which the client requested from the data source. The two protocols can be further broken down into the following sub-protocols: U1 Data submission: The data source generates a data item, sends it to the server, then receives a response. U2 Storage & Processing: The server stores the data item in the database. T1 Handover: The data source provides the data item and additional data (for membership testing) to the client. T2 Monitoring: The monitor downloads the database con-tent to check for any misissued data items. T3 Membership Testing: The client runs an interactive ver-ification algorithm with the server. The algorithm that outputs true or false depending on whether the data item of interest is stored in the database. T4 Consistency Checking: The client runs an interactive verification algorithm with the monitor and the server. The algorithm outputs true or false depending on whether there are any data items that have been removed from the database and that the is only one copy of the database. Example: Drug supply-chain auditing. U1 Pharmaceutical supply chain partners (data sources) submit their data to a public log (server/database), and U2 The data gets stored in a public log. T1 The consumer (client) purchases a medicine that contains the drug label (private data item), which also allows them to obtain the source-assisted information, e.g., in 5a form of a QR code, T2 The regulatory inspector (monitor) downloads the supply chain information to verify that there are no issues with the medicine, T3 The consumer checks that the supply chain information for the drug label is indeed stored in the public log, and T4 The consumer verifies that no supply chain information is missing and that there is only one copy of the public log with the help of the regulatory inspector. 
+
+## 3.3 Requirements 
+
+SPMT protocol has the following security requirements: 
+
+Client privacy , i.e., servers, monitors, and database hosts must not be able to gain any advantage in correctly identifying what the client’s interest is; and Correctness , i.e., if the system out-puts true, then the data item of interest is indeed stored in the publicly monitored database, or any of the attacker’s wrong-doings will be caught. It should also fulfill the following non-security require-ments: Low communication cost , i.e., messages exchanged during data submission/membership testing should be con-stant with respect to the database size; Low computation cost , i.e., client-/server-side computation during data submis-sion/membership testing should be constant with respect to the database size; No client-side storage , i.e., the protocol must not rely on client-side storage; and High scalability ,i.e., the proposed system should scale to large databases and handle large numbers of data submissions/client requests. Example: Certificate Transparency. When submitting a cer-tificate to a CT log, a Certification Authority (CA) should not be kept waiting for minutes (low communication, com-putation cost). Since millions of certificates are submitted each day [30], the system should support a large number of CAs (scalability). The client must not be required to submit their certificate during membership testing (client privacy), but must be able to efficiently (low communication, compu-tation cost) know whether the CT log has stored the certifi-cate (correctness) and should not be required to store any information (no client-side storage). Moreover, since clients from all around the globe conduct membership testing, the system should be able to serve this large number of clients (scalability) without disrupting their browsing activity (low communication, computation cost). 
+
+Non-requirements. Preventing Denial-of-Service (DoS) at-tacks is not a requirement for an SPMT protocol, as malicious servers can always trivially launch such attack (e.g., by not replying to any client requests). 
+
+## 4 Solution Intution 
+
+Supporting clients with source-assisted information does not make the SPMT protocol trivially overcome the issues of PMT. A naive approach to conducting an SPMT protocol is to have the data source send the database to the client so that it can perform membership testing locally. Although this approach does not leak any data to the server, requiring every client to download the database seems unrealistic, especially if the database is extremely large. Moreover, the client’s database must be updated every time it performs SPMT, which can be expensive, especially for clients with limited bandwidth (e.g., mobile phones). Therefore, we do not consider this approach in the proposed system. A technique proposed by prior work [62] is to have the server immediately store the data item d submitted by the data source and generate a proof that d has been included in the database (aka proof of inclusion ), which is sent along with 
+
+d to the client via the data source. For example, by leveraging a Merkle Hash Tree (MHT), the server can produce a proof of inclusion that consists of a digital signature of the MHT root and the MHT inclusion path from the leaf corresponding to d up to the root. Since proof of inclusions can be verified locally, clients do not need to communicate with the server, enabling local and private membership testing. However, generating a proof of inclusion requires the server and the database to process and store d in near real-time. Therefore, this approach remains a theoretical discussion and has not been deployed in the real world, as it does not scale to modern, large-scale systems, where processing d can take an unpredictable amount of time due to various reasons, e.g., the sheer size of data that require processing, complex pre-processing, and global distribution. Moreover, this approach has a privacy drawback [62]. Since the proof of inclusion received by the client would most likely include an old MHT root, the client must check whether the database has not excluded any data up to the point of mem-bership testing. To do so, the client transmits the old MHT root to the server and requests the server’s root along with the sibling paths that differ between the two roots. With this information, the client reconstructs the root of the server and confirms that the database is not removing any data. However, if a malicious server creates an MHT root that is updated only with d, sending this MHT root during this process will reveal the client’s interest. 
+
+## 4.1 Testing Passage of Time & its issues 
+
+The main objective of an SPMT protocol is to convince a client that a certain data item is stored in a database without violating the client’s privacy. If we can design a system that is non-interactive, i.e., allows the client to conduct membership testing locally by utilizing the source-assisted information, then this system is by definition privacy-preserving, since there exists no information that can possibly be passed from the client to the server. Moreover, since clients no longer need to interact with the server, there is an added benefit for servers as they can focus their resources on accepting data items from data sources and storing them in the database. 6Server        
+
+> TEE
+> Counter Accumulator Buffer Signing key Database
+> Data Source Client
+> Monitor
+> U1 Data Submission
+> dPOR
+> U2 Storage & Processing
+> Buffer
+> T1 Handover
+> d′,POR ′
+> T2 Monitoring
+> Database content T3 Membership Testing
+> POP ,
+> Accumulator
+> T4 Consistency Checking
+> Accumulator
+
+Figure 2: Overview of our solution. Notations are listed in Table 3. Solid arrows represent Upload protocols and dashed arrows represent Testing protocols. Dotted boxes represent information exchanged during the interaction. One method that has been overlooked by previous work is to leverage the passage of time . That is, if the server can ensure that it will store data items before a certain deadline, then the client can locally check whether enough time has passed to be convinced that the data item is stored in the database. To realize this, the server must be able to guarantee that it will (1) follow the pre-defined protocol (i.e., guarantee 
+
+execution integrity ), and (2) store the data item in a database before a certain deadline (i.e., guarantee execution timeliness ). Now, recall that in membership testing protocols, the server is considered to be actively malicious, where it may attempt to violate the guarantees shown above. Hardware-based trusted computing, e.g., Trusted Execution Environments (TEEs), have shown that upholding execution integrity under mali-cious environments is possible. However, it is impossible to build a system that guarantees timeliness in malicious envi-ronments, even if the system leverages the execution integrity property of currently available TEEs [2]. This is because a malicious server can always delay packets that are sent to and from the TEE or temporarily halt TEE execution. In addition, it is impossible to prevent or detect certain attacks without the client interacting with external parties. For instance, as some TEEs have restrictions in the amount of secure memory (e.g., Intel SGX), the database would be maintained outside of the TEE where the adversary has full control over it. Therefore, since malicious database operators can alter the database content, the client must perform checks to verify that the server is not removing any data items from the database. Additionally, it is impossible for clients to detect split-view attacks without interacting with external parties. 
+
+## 4.2 Our Approach: Testing for Sufficient Progress 
+
+Since it is impossible to build a system that allows clients to remain strictly non-interactive, we take the viable subse-quent approach where we introduce a number of carefully designed interactions. The first interaction is with the TEE during membership testing to check whether the TEE has not been interfered with by the server and is making sufficient progress to store the data item in the database. There are different ways to realize this approach, and this work utilizes monotonically increasing counters stored within the TEE. The second interaction is with the monitor and the TEE to check whether the database is not excluding any data items and there are no malicious copies of the database. This is done by com-paring the view of the TEE’s and the monitor’s view of the database content. Figure 2 provides an overview of our solution: U1 Data sources submit data item d to the TEE which is then stored in its buffer, and, in response, sends back a “Proof Of Reception” (POR ) which asserts that the TEE has received d. POR is a signature over d and the counter value cnt POR . U2 Once full, the TEE sends the buffer to the database. It simultaneously updates an accumulator (e.g., a hash chain) with the content of the buffer. Once updated, the TEE increments the counter. T1 The client receives POR ′ for the d′ it is interested in. T2 The monitor downloads the database content and updates its accumulator with the database content. T3 During mem-bership testing, the client requests a “Proof Of Processing” (POP ), a signature over the current counter value, from the TEE to check whether the TEE has been processing the data items. POP is a signature over an appropriate counter value 
+
+cnt POP . If POR ′ and POP are correct and cnt ′ 
+
+> POR
+
+< cnt POP 
+
+is true, the client has assurance that “the TEE has received and processed d′”. T4 The client requests the accumulator from the TEE and the monitor. If the two accumulator values match (i.e., “the TEE’s and monitor’s view of the database are consistent”), the client has assurance that d′ must be included in the database. 
+
+Note. In the actual design presented in Section 5, cnt POP is the counter associated with the hash-chain value of the monitor. This is to accommodate cases where monitors may lag behind databases (see Section 5.1 for details). 
+
+## 5 Solution Details 
+
+Gyokuro consists of the following protocols: 0 Initializa-tion, U1 Data submission, U2 Storage & Processing, T1/2 Handover and Monitoring, and T3/4 Membership testing and Consistency checking. The sequence diagrams and algorithms of the data submission / storage & processing protocols and the membership testing & consistency checking protocol are depicted in Figures 3 and 4, respectively. 
+
+0 Initialization. The data source generates a set of key pairs 
+
+pk DS and sk DS . The server initializes the TEE that generates the key pair pk T and sk T , sets cnt = 0 , buffer and List HC T to 
+
+/0, and contacts the attestation infrastructure to obtain report .
+
+report is a signature over the platform / code integrity mea-surements and pk T , allowing attesting parties to have the 7Table 3: Notations & Definitions                                               
+
+> Notation Definition
+> pk DS ,pk T,pk MPublic key of Data Source, TEE, or Monitor
+> sk DS ,sk T,sk MPrivate key of Data Source, TEE, or Monitor
+> dData item submitted by the data source
+> d′Data item the client is interested in
+> sig dDigital signature over dwith sk DS
+> cnt Counter value maintained by TEE
+> cnt POR Counter value at the time of data submission
+> cnt POP Counter value at the time of membership testing
+> buffer Buffer to store dsubmitted by data sources
+> nMaximum number of dstored in buffer
+> ACK Acknowledgment sent from database
+> POR Proof Of Reception
+> POR ′POR of d′which the client is interested in
+> POP Proof Of Processing
+> HC TTEE’s Hash Chain value
+> List HC TList of past (HC T,cnt )tuples
+> HC MMonitor’s Hash Chain value
+> sig HC MDigital signature over HC Mwith sk M
+> report Attestation report
+> APK A well known Attestation Public Key
+> EM Expected TEE measurement value
+
+assurance that digital signatures that can be verified with 
+
+pk T must be generated via the TEE that runs a certain code. The client obtains APK and EM from a trustworthy source, e.g., by contacting attestation infrastructures and source code repositories. 
+
+U1 Data submission. The data source generates data item d
+
+and a digital signature sig d = Sign sk DS (d), and sends them to the TEE. After receiving the two pieces of data, the TEE first verifies sig d over d. We assume that the TEE is given a set of trusted data source certificates which is used for verification. The TEE subsequently appends d
+
+to its buffer . It then sends the data source a POR =
+
+{Sign sk T (d|| cnt POR || report ), cnt POR , report }, where cnt POR 
+
+is the counter value at the point of receiving d, report the attestation report, || a concatenation operation, and sk T the TEE’s private key. 
+
+U2 Storage and processing. This protocol is triggered when 
+
+buffer is full. The TEE first exports buffer to the database for storage. While the database processes and stores the buffer, the TEE updates HC T with the content of the buffer by contin-uously calculating HC T = HC (HC T || d) for each d in buffer .The database sends the TEE an ACK indicating that it has finished storing the buffer, which then triggers the TEE to add the (HC T , cnt ) tuple to List HC T and increment cnt .Note that the data processing protocol is a blocking exe-cution, i.e., the TEE cannot receive any new d during this period. This is necessary to maintain the total ordering of d.Although this protocol executes relatively fast, we optimize this design in our implementation for even faster processing. 
+
+T1/2 Handover and monitoring. Later on, the client re-ceives d′, which is one of the data items issued by the data source along with its POR . Note here that both pieces of                                               
+
+> Data Source TEE Database
+> {d,sig d}
+> Algorithm 1: Data Submission
+> // Verify sig d
+> if !Verify pk DS (sig d)then return Error ;
+> end
+> // Store dand return POR
+> buffer .append( d);
+> return
+> POR ={Sign sk T(d|| cnt POR || report ),cnt POR ,report };
+> POR
+> Algorithm 2: Process and Store Buffer
+> // Export buffer to database
+> export( buffer );
+> // Update HC Tusing buffer
+> foreach d∈buffer do
+> HC T←Hash (d,HC T)
+> end
+> // Wait until database sends ACK
+> while not ACK do
+> wait
+> end
+> // Add HC Tand cnt tuple to List HC T
+> List HC T.append (( HC T,cnt )) ;
+> // Increment cnt cnt ←cnt +1;
+> buffer
+> ACK
+
+Figure 3: Upload (Data submission and Storage & Process-ing) protocols. These protocol run for every d submitted by a data source. information does not necessarily need to be sent directly from the data source and can be distributed via third party distributors, e.g., content distribution networks. The moni-tor downloads the database and updates HC M by calculating 
+
+HC M = HC (HC M || d) for each d in the database. 
+
+T3/4 Membership testing and consistency check. The client extracts cnt POR and report from POR ′ and checks: • Whether report can be verified using APK .• Whether the code integrity measurement included in 
+
+report matches the expected value EM .• Whether POR ′ can be verified using pk T which is ex-tracted from report .• Whether d′ included in POR ′ matches the data item it received from the data source. If the above check fails at any point, the client discards d′
+
+and deems the data source malicious. The client then requests the monitor’s hash chain value HC M and a digital signature over the value sig HC M and forwards it to the TEE. After re-8TEE Client Monitor                                                          
+
+> {HC M,sig HC M}
+> {HC M,sig HC M}
+> Algorithm 3: TEE-side algorithm
+> // Verify sig HC M
+> if !Verify pk M(sig HC M)then return Error ;
+> end
+> // Look up HC Min List HC T
+> if c=List HC T.lookup (HC M)then
+> cnt POP ←c;
+> else
+> cnt POP ←0;
+> end
+> // Return POP to client
+> return POP ={Sign sk T(cnt POP ),cnt POP };
+> POP
+> Algorithm 4: Client-side algorithm
+> // Conduct remote attestation by verifying report
+> if !Verify APK (report )then return f alse ;
+> end
+> // Verify POR received from data source
+> if !Verify pk T(POR )then return f alse ;
+> end
+> // Verify POP received from TEE
+> if !Verify pk T(POP )then return f alse ;
+> end
+> // Check counter values
+> if cnt POR >cnt POP then return f alse ;
+> end return true ;
+
+Figure 4: Membership testing & Consistency checking pro-tocol. This protocol run only for a limited selection of data items which the client requested from the data source. ceiving this value, the TEE first verifies whether the signature can be verified using the monitor’s public key. The TEE then retrieves the counter value associated with HC M stored in 
+
+List HC T , which is denoted as cnt POP . The TEE then gener-ates POP = {Sign sk T (cnt POP ), cnt POP }, where cnt POP is the counter value mentioned above and sk T the private key of the TEE, and sends it to the client. Subsequently, the client checks whether POP can be verified using pk T . If this check fails or the TEE sends an error, the client discards POP and deems the server malicious. The client then verifies whether cnt ′ 
+
+> POR
+
+< cnt POP . If the above check passes, then the client has assurance that the TEE has processed the buffer that includes d′ and that there is a point in time where the TEE’s and monitor’s view of the database that includes d′ is consistent, i.e., there were no data items removed from the database at that time and the monitor has d′ in its possession. If the check fails, this means that the TEE has not yet processed d′ or the monitor has not pulled the latest content from the database. In this case, the client is recommended to conduct the membership test at a later time or contact other monitors in the hope that they are more synchronized with the database. 
+
+## 5.1 Design Considerations 
+
+In our design, we must consider the following aspects. 
+
+Database acknowledgments. Once the database finishes stor-ing the content of buffer , it sends an ACK to the TEE. How-ever, since the database is hosted on a potentially malicious server, the adversary can forge an ACK . For instance, a ma-licious server can send multiple ACK s in an attempt to in-crement the cnt even though no data was being processed or stored. Therefore, the TEE must discard any ACK s that were sent outside of the storage & processing protocol and only increment cnt once, even if it receives multiple ACK s during a single storage & processing phase. One might ask why we include ACK in the data processing protocol if it can be forged. The reason is that, under legitimate circumstances, ACK allows the TEE to smooth out the rate at which it receives d. Assume that the TEE receives a burst of data submissions and that the speed at which the database stores data items is relatively stable. This allows ACK s to be sent out at a similarly stable rate. As a result, TEEs can even out the burst of incoming submissions, as responses for 
+
+d received during data processing would be delayed. 
+
+Different data reception frequencies. In an ideal scenario, the rate at which the TEE and the monitor receive data is the same, i.e., once the TEE submits buffer to the database, the monitor is immediately updated with the buffer content. However, this requires the monitor to constantly poll for new updates, which puts a substantial load on the database. More-over, since there may be multiple monitors, it is not realistic to require all monitors to be in sync with the TEE. Therefore, it is more realistic to assume that the rate at which monitors are updated with data items is slower compared to the TEE’s. This is the reason why we require the TEE to keep a list of pre-vious HC T as List HC T , in the hope that one of them matches the one provided by the monitor that the client is contacting. Additionally, this is why the actual design deviates slightly from the one described in Section 4. However, this raises the question: how many HC T from the past is the TEE required to store? 
+
+Determining optimal list size. It is not ideal to store the entire list of (HC T , cnt ) tuples generated in the past, as se-cure storage may be limited in some TEEs (e.g., Intel SGX). 9Therefore, it is important to know the theoretical upper limit of the number of tuples that are strictly necessary to be stored, which we denote as N. Assume that the TEE receives data items at a frequency of f req T per second and that the monitor pulls the latest database content at a minimum frequency of 
+
+f req M per second (since there may be multiple monitors, we must match the frequency to the slowest monitor). Assum-ing that the frequencies are stable, N can be calculated as 
+
+N = ⌈ f req T / f req M ⌉ + 1. The intuition behind this equation is that the TEE must store the monitor’s last-known hash chain value in addition to the at most ⌈ f req T / f req M ⌉ newer values. 
+
+## 6 Performance Evaluation 
+
+Implementation. Our implementation focuses on testing the applicability of our proposed system in practice, as well as evaluating real-life performance. We aim to examine the latency and throughput behaviors for different numbers of concurrent clients. To accommodate the high concurrency required to handle large numbers of simultaneous clients, we chose to implement our TEE functionality in Go (1.5K LoC). Gyokuro is based on several configurable parameters, including the buffer size for incoming submissions and the size of the hash chain history maintained by the TEE. The size of the hash chain history has no practical impact on latency and throughput measurements, as it is implemented as a hash table, resulting in constant-time lookups. We leverage Go’s standard library to compute signatures between different entities using ECDSA over the curve SECP256R1, with SHA256 as the hashing primitive, although our solution is not tied to a specific set of cryptographic prim-itives. SQLite3 is used as an in-memory database to store incoming items on the database host. We leverage AMD-SEV as a TEE, although our protocol does not depend on any SEV-specific features and could also be deployed on Intel SGX, Intel TDX, or upcoming TEEs such as Arm CCA, and anticipate that similar performance numbers would be demonstrated. We utilize the Azure ecosystem to simplify the AMD-SEV attestation process by leveraging Microsoft’s Azure Attestation Service. We benchmark the proposed solution on an Azure Cloud environment. The TEE functionalities run on a 16-core AMD-SEV SNP machine (Azure VM type DC16ads v5), while a conventional 32-core VM (D32ads v6) is used to simulate data sources performing data submissions and clients performing membership testing. The database is implemented on an 8-core D8ads v6 VM. All machines run Ubuntu 24.04, with the client and database machines using kernel version 6.11, and the TEE running version 6.8. Simplifying assumptions. For our implementation and subse-quent evaluation, we assume that all public keys have been distributed to the relevant parties beforehand. As such, data sources and clients are considered to have obtained the public key of the TEE, and the TEE is assumed to have obtained the public keys of any potential data sources and monitors involved in the protocol. In practice, these keys would be either distributed by PKI or extracted from the TEE’s attesta-tion report. The existing CT monitoring infrastructure already shows that monitoring large-scale public logs is practical, thus we believe that the same can be applied to our system and therefore did not implement the monitor. Although net-work latency between the client and monitor would slightly increase the membership testing latency, this increase is con-stant and, since it is deployment-dependent, it was excluded from measurements. Implementation optimizations. The proposed protocol can be implemented in multiple ways. As discussed in Section 5, one possible design involves blocking clients while the server pro-cesses a given batch of submissions. To optimize the through-put and latency of our implementation, we avoid blocking clients and immediately acknowledge submissions. The re-turned counter during data submission indicates the batch index to which an item was added. The server keeps track of how many batches have been processed so far and returns that counter to clients as part of the POP . This allows the latency and throughput of our implementation to be independent of the server’s batch size. 
+
+## 6.1 Latency Evaluation 
+
+We report the average network round-trip time (RTT) between the different entities in our deployment, measured in millisec-onds, and averaged over 100 measurements using ICMP echo requests. The TEE and the client machine (used to simulate data sources and membership testing clients) have an aver-age network RTT of 0.5 ± 1.2ms, while the TEE and the database host have an RTT of 0.9 ± 0.5ms. As both Upload and membership testing & consistency checking protocols are independent of database size, the following measurements apply to small and large databases. 
+
+Upload latency. We measure the Upload (data submission and storage & processing) latencies for various numbers of concurrent data sources. Data sources submit a single 4.9 KB-size data item at a time, roughly corresponding to the size of average TLS certificates in PEM format. Note that our implementation supports any data size. Our measurements are averaged over 50 repeated iterations for varying numbers of concurrent data submissions. We benchmark data submission latencies for {16 , 32 , 64 , 128 , 256 , 512 , 1024 } concurrent data submissions. We filter outliers using the 1.5 Interquartile Range (IQR) rule. Measurements are visualized in Fig. 5. Of a total of 350 data points, we filtered out 6 outliers (1.7%). Our results show that Gyokuro can handle a large number of concurrent data submissions with a latency of around 6.5 ms. 
+
+Membership testing and Consistency checking latency. 
+
+10 16 32 64 128 256 512 1024 
+
+> Number of Concurrent Data Submissions (log scale)
+> 3
+> 4
+> 5
+> 6
+> 7
+> Latency (ms)
+
+Figure 5: Upload latency evaluation for various concurrent data sources. We achieve a data submission latency of around 6.5ms when measured over 1024 concurrent clients. 16 32 64 128 256 512 1024 
+
+> Number of Concurrent Membership Tests (log scale)
+> 3
+> 4
+> 5
+> 6
+> 7
+> Latency (ms)
+
+Figure 6: Membership testing and Consistency checking la-tency evaluation for various concurrent clients. Latencies in-clude cryptographic verifications of the POR , POP , and TEE attestation report. We achieve a latency of under 7ms. The membership testing and consistency checking process in-cludes several steps, as described in Fig. 4. We aim to quantify the latency of the entire process, which consists of verifying 
+
+POR , extracting and validating report , fetching POP , and ver-ifying POP 1. We assume that at the start of the process the client has already received POR from the data source and 
+
+{HC M , sig HC M } from the monitor. Measurements are aver-aged over 50 repeated iterations for each concurrent client count ( {16 , 32 , 64 , 128 , 256 , 512 , 1024 }). We visualize our re-sults in Fig. 6. Of the 350 data points, we filtered out 12 outliers ( 3.4% ). Results show Gyokuro can handle large num-ber of concurrent membership testing with minimal latency of around 7 ms. 
+
+Latency breakdown. We measure each operation on the server side, using the same setup that was used for the latency  
+
+> 1POR can be verified before conducting the membership testing process. We include it in the latency measurement to provide the worst-case latency.
+
+evaluation. We use 512 concurrent data sources that submit exactly one certificate and measure the latencies of various server-side components associated with data submissions, averaged over 50 trials. Data submission. The function responsible for handling data submission requests takes 0.29 ± 0.22 ms and is primarily dominated by buffer operations, which require holding a lock ( 0.13 ± 0.20 ) and cryptographic operations such as signing and verifying submission signatures (0 .11 ± 0.04). Processing & storage. The server asynchronously processes data every 32 submissions, forwarding them to the database. Although this does not impact client submission latencies, we include a breakdown of the processing phase for completeness. The processing phase takes, on average, 2.66 ± 1.16 ms and is dominated by the cost of sending items to the database over the network ( 1.03 ± 0.53 ). Waiting for the database to commit and acknowledge the sent items takes 0 .92 ± 0.18 ms. Membership testing & Consistency checking. On the server side, this process is dominated primarily by the verification of sig HC M and the signing operation while generating POP .These operations take 0.11 ± 0.03 and 0.07 ± 0.07 ms, re-spectively. On the client side, TCP network socket operations (5.11 ±0.41 ms) have the greatest impact on latency, followed by attestation verification procedures (0 .25 ± 0.00 ms). 
+
+## 6.2 Throughput Evaluation 
+
+We evaluate the maximum throughput of Gyokuro by mea-suring the maximum number of requests processed when considering C clients submitting back-to-back requests over 5 seconds while varying C. The results are then normalized by dividing the resulting submission rate by 5 and the number of logical cores of the server machine, resulting in submis-sions per second per core. Outliers are filtered with the same methodology as used for latency benchmarks (1.5 IQR). 
+
+Upload throughput. We report a throughput of up to 1021 requests/sec/core for 2048 concurrent clients (see Fig. 7). 
+
+Membership testing throughput. We achieve a throughput of approximately 1432 requests/sec/core for 2048 concurrent clients (see Fig. 8). 
+
+## 6.3 Computation Evaluation 
+
+Server-side computation. The only computation necessary for the server is to verify sig d and generate POR for the data submission protocol and verify sig HC M , retrieve cnt POP , and generate POP . As these operations are independent of the number of entries in the database, the server-side computation is constant. 
+
+Client-side computation. The only computation necessary for the client is to verify report , POR , POP and verify the relationship between cnt POR and cnt POP . As these operations 11 256 512 1024 2048 
+
+> Number of Concurrent Clients
+> 232
+> 345
+> 565
+> 1,021
+> RPS per Core (log scale)
+
+Figure 7: Maximal upload throughput, measured per second per core. On a 16-core machine, our implementation can han-dle approximately 16336 data submissions/sec from 2048 concurrent clients. The submission rate is measured by aver-aging the number of submissions made by concurrent data sources that continuously submit data over a 5-second period. 256 512 1024 2048 
+
+> Number of Concurrent Clients
+> 345
+> 479
+> 777
+> 1,432
+> RPS per Core (log scale)
+
+Figure 8: Maximal membership testing throughput for POP 
+
+requests, measured per second per core. Considering 2048 concurrent clients, using a 16-core server, our implementa-tion can handle approximately 22912 POP requests/sec. The submission rate is measured by averaging the number of sub-missions made by concurrent clients that continuously submit 
+
+POP requests within a 5-second interval. are independent of the number of entries in the database, the client-side computation is constant. 
+
+## 6.4 Certificate Transparency Case Study 
+
+All presented latency and throughput results were obtained using a database containing 3.3 million certificates. 
+
+Upload. Approximately 460,000 certificates are submitted to CT logs per hour (2024, [74]), which is roughly 128 cer-tificates/sec. Since our achieved throughput capacity is 1021 requests/sec/core, this is clearly sufficient to meet real-world requirements. 
+
+Membership testing. Crinchton et al. reported that a user visits on average 163 distinct web pages per day (2023, [33]). Making a conservative assumption where every web page’s certificate visited by the user is logged by a CT log, the user would need to perform 163 membership tests per day, which results in an average of approximately 0.002 web pages per second. For 2048 clients, this will result in approximately 4.1 membership tests per second, and given that Gyokuro 
+
+achieves 1432 requests/sec/core, the system is well capable of handling the load. 
+
+## 7 Security Analysis 7.1 Client Privacy 
+
+We provide a game-based definition for client privacy. 
+
+Privacy game. Let A be the adversary and C be the challenger. 
+
+A corrupts the server, allowing it to observe any data and modify protocol execution arbitrarily. A corrupts the monitor, allowing it to observe execution and messages. A corrupts the TEE, allowing it to leak data used in any non-cryptographic processing. 
+
+A is given access to the Data Submission oracle and it pop-ulates the database with freely-chosen data using the oracle. A
+
+then chooses two data items d0 and d1, populates the database with both items, and sends them to C. C picks a random bit 
+
+b ← { 0, 1} and executes the Membership Testing and Consis-tency Checking protocol for db. A makes guess b′ = {0, 1}. A
+
+wins the game if b = b′.
+
+Definition. An SPMT protocol is private if no A exists that can win the game at a probability better than random guessing. 
+
+Claim. Gyokuro is private for an unbounded number of pro-tocol runs. 
+
+Proof sketch. Messages exchanged between the client and the server, and between the client and the monitor, are indepen-dent of d and the database. Therefore, A observes the same messages for d0 and d1, thus making the protocol executions indistinguishable. 
+
+## 7.2 Correctness 
+
+For correctness, we provide a systematic, but less formal anal-ysis. Correctness means that (1) if the membership testing and consistency checking algorithm outputs true, then the data item must be stored in the database, and (2) the adversary gets caught of its wrongdoings, if any. We analyze the correct-ness guarantee of Gyokuro by first defining an ideal scenario that clearly provides correctness and bringing it closer to our solution step by step to demonstrate that our solution pro-vides correctness. Due to page restrictions, the full analysis is shown in Appendix A. 12 8 Applications 8.1 Gyokuro -supported use-cases 
+
+CT log auditing. Certificate Transparency (CT) logs store certificates that are issued by Certification Authorities (CAs) and are used by domain owners to check whether there are any maliciously issued certificates under their domain. In the context of CT, web browsers ( clients ) are interested in check-ing whether website certificates are issued by valid CAs ( data sources ) and are stored in valid CT logs ( server/database ). In this example, browsers would engage in an SPMT proto-col with the CT log utilizing Signed Certificate Timestamps (source-assisted information ) in addition to the certificate, checking whether the CT log has indeed stored the certificate with the help of CT monitors ( monitors ). 
+
+Supply chain auditing. As the risks associated with supply chain disruptions continue to escalate, it is essential for con-sumers to verify if the products they purchase provide trans-parency regarding their supply chain, enabling third-party inspection. For instance, US pharmaceutical companies must adhere to the Drug Supply Chain Security Act (DSCSA), which mandates that data from supply chain partners ( data sources ) be recorded in public logs ( server/database ) and subsequently inspected by regulatory agencies ( monitors ). In this example, consumers ( clients ) would engage in an SPMT protocol with the public log utilizing information from the supply-chain partners ( source-assisted information ) provided during the purchase of the drug in addition to the drug la-bel, checking whether the public log has indeed stored the supply-chain information with the help of regulatory agencies. This enables consumers to verify if companies comply with regulations, without revealing the purchased product. 
+
+Data provenance verification. In light of the emergence of generative AI, the barrier to entry to creating “deepfaked” photos and videos has decreased significantly. Consequently, it is important for individuals to have the ability to verify the authenticity of the photos and videos they encounter by check-ing if they are publicly logged, thereby enabling third-party inspection. For instance, the Coalition for Content Provenance and Authenticity (C2PA) is an initiative that aims to address the prevailing misleading information in the public domain. A journalist ( data source ) captures an image of a politically sen-sitive incident and records it in a public log ( server/database )hosted by the Content Authenticity Initiative (CAI), which adheres to the C2PA specification and is then inspected by fact-checking organizations ( monitors ). In this example, users (clients ) that view this photo over the Internet would interact with the CAI public log leveraging the SPMT protocol with the information associated with the photo ( source-assisted information ) in addition to the photo itself, verifying whether the CAI public log has stored the photo with the help of fact-checking organizations. 
+
+Public document auditing. Inspecting publicly accessible documents released by governments, corporations, and other entities enables watchdog organizations to oversee their ac-tivities, providing a crucial layer of oversight for powerful entities. For example, governments ( data sources ) are re-quired to publish budget documents on public online records (server/database ) so that they can be inspected by watchdog organizations ( monitors ). In this example, a citizen ( client )who wishes to verify the authenticity of this document would engage in an SPMT protocol with the public online record with the information associated with the document ( source-assisted information ) in addition to the document itself. This allows the citizen to know that the document is available for public scrutiny without revealing the inspected document. 
+
+## 8.2 Unsupported use-cases 
+
+Private DNS resolving. Private DNS resolving allows a client to query a DNS server without revealing the domain name to the DNS name server. This is a use case that is not applicable to our system, as the name server must know the domain name to return the correct IP address. 
+
+Malware detection. When downloading software from the Internet, verifying that the software is not malicious is crucial. Malware detection enables a client to do this by comparing the software’s hash with a list of known malicious software hashes. However, this also reveals which software the client is downloading, which is undesirable. This use case is not applicable to our system, as the server must know the hash of the software to determine that it is not malicious. 
+
+## 9 Conclusion and Future work 
+
+This work identifies and examines the SPMT protocol that is relevant in various use cases such as certificate transparency and supply-chain auditing. By leveraging TEE execution in-tegrity and third-party monitors, we design Gyokuro , a system that does not require the client to disclose their private infor-mation to any external parties while achieving constant-time computation and communication. Our proof-of-concept im-plementation demonstrates that the proposed system achieves data submission and membership testing latencies of under 7 milliseconds and is capable of serving around 1400 requests per second per CPU core. Directions for future work include: (1) Exploring TEE-free design approaches, (2) Extending the design to support ap-plications that require look-ups, and (3) Integrating Gyokuro 
+
+into existing applications. 13 Ethical Considerations 
+
+The implementation and evaluation of this work does not present ethical issues as it did not involve human subjects or measurements that involve in-production services. Our stakeholder-based risk analysis of the entities involved in 
+
+Gyokuro is as follows. • Data Source: As the entity that generates data and sub-mits them to the server, the use of Gyokuro does not present any privacy or security risks to the data source. • Server: There are no risks for the entities that interact with the server. Entities involved in law enforcement agencies may have the risk of being eluded due to the lack of information on the server-side; however, client interests remain present on the client-side which law enforcement agencies can investigate via a valid search warrant. Therefore, we do not consider this to be a sig-nificant risk. • Database Operator: The database operator experiences no risks as it simply stores data items and responds to requests from the monitor. • Client: There are no risks for the client in using Gyokuro 
+
+as their private data is not exposed to any external party. • Monitor: The monitor does not encounter any risks as its activities do not differ from those of an existing monitor. 
+
+## Open Science 
+
+The following artifacts are published at [71]: • The complete server-side logic of Gyokuro for Data sub-mission and Storage & Processing, as well as Member-ship testing & Consistency checking protocols which were used to produce the results shown in Section 6. • A sample database implementation that interacts with the server-side logic to store submitted data. • Client-side scripts used to conduct the evaluation. • Other pieces of data (e.g., server keys) necessary for the server-side to operate. 
+
+## References 
+
+[1] Ahmad Al Badawi, Yuriy Polyakov, Khin Mi Mi Aung, Bharadwaj Veeravalli, and Kurt Rohloff. Implementation and performance evalu-ation of RNS variants of the BFV homomorphic encryption scheme. 9(2):941–956. [2] Fritz Alder, Gianluca Scopelliti, Jo Van Bulck, and Jan Tobias Mühlberg. About time: On the challenges of temporal guarantees in untrusted environments. In Proceedings of the 6th Workshop on System Software for Trusted Execution , SysTEX ’23, page 27–33, New York, NY, USA, 2023. Association for Computing Machinery. [3] AMD. AMD SEV-SNP: Strengthening VM Isolation with Integrity Protection and More. 
+
+https://www.amd.com/system/files/TechDocs/ SEV-SNP-strengthening-vm-isolation-with-integrity-protection-and-more. pdf , 2020. (Accessed on 06/23/2024). [4] AMD. AMD Secure Encrypted Virtualization (SEV). https:// developer.amd.com/sev/ , 2023. Accessed on 06/23/2024. [5] Ittai Anati, Shay Gueron, Simon Johnson, and Vincent Scarlata. Innova-tive technology for CPU based attestation and sealing. In Proceedings of the 2nd international workshop on hardware and architectural sup-port for security and privacy , volume 13, page 7. ACM New York, NY, USA, 2013. [6] Sebastian Angel, Aditya Basu, Weidong Cui, Trent Jaeger, Stella Lau, Srinath T. V. Setty, and Sudheesh Singanamalla. Nimble: Rollback protection for confidential cloud services. In Roxana Geambasu and Ed Nightingale, editors, 17th USENIX Symposium on Operating Sys-tems Design and Implementation, OSDI 2023, Boston, MA, USA, July 10-12, 2023 , pages 193–208. USENIX Association, 2023. [7] Sebastian Angel, Hao Chen, Kim Laine, and Srinath Setty. PIR with compressed queries and amortized query processing. In 2018 IEEE Symposium on Security and Privacy (SP) , pages 962–979. ISSN: 2375-1207. [8] Sebastian Angel and Srinath Setty. Unobservable communication over fully untrusted infrastructure. pages 551–569. [9] Arm. Arm Confidential Compute Architecture. https: //www.arm.com/architecture/security-features/ arm-confidential-compute-architecture , 2024. (Accessed on 06/23/2024). [10] Arm. Arm TrustZone. https://www.arm.com/technologies/ trustzone-for-cortex-a , 2024. (Accessed on 06/23/2024). [11] M. B. Paterson, ,Department of Mathematics, Royal Holloway, Uni-versity of London, Egham, Surrey TW20 0EX, D. R. Stinson, R. Wei, ,David R. Cheriton School of Computer Science, University of Water-loo, Waterloo, ON, N2L 3G1, and ,Department of Computer Science, Lakehead University, hunder Bay, ON, P7B 5E1. Combinatorial batch codes. 3(1):13–27. Publisher: American Institute of Mathematical Sciences (AIMS). [12] Michael Backes, Aniket Kate, Matteo Maffei, and Kim Pecina. Obliviad: Provably secure and practical online behavioral advertis-ing. In IEEE Symposium on Security and Privacy, SP 2012, 21-23 May 2012, San Francisco, California, USA , pages 257–271. IEEE Computer Society, 2012. [13] Amos Beimel, Yuval Ishai, and Tal Malkin. Reducing the servers computation in private information retrieval: PIR with preprocessing. In Mihir Bellare, editor, Advances in Cryptology — CRYPTO 2000 ,pages 55–73. Springer. [14] Joseph Bonneau. Ethiks: Using ethereum to audit a CONIKS key transparency log. In Jeremy Clark, Sarah Meiklejohn, Peter Y. A. Ryan, Dan S. Wallach, Michael Brenner, and Kurt Rohloff, editors, Financial Cryptography and Data Security - FC 2016 International Workshops, BITCOIN, VOTING, and WAHC, Christ Church, Barbados, February 26, 2016, Revised Selected Papers , volume 9604 of Lecture Notes in Computer Science , pages 95–105. Springer, 2016. [15] Elette Boyle, Yuval Ishai, Rafael Pass, and Mary Wootters. Can we access a database both locally and privately? In Yael Kalai and Leonid Reyzin, editors, Theory of Cryptography , pages 662–693. Springer International Publishing. [16] Ferdinand Brasser, Urs Müller, Alexandra Dmitrienko, Kari Kostiainen, Srdjan Capkun, and Ahmad-Reza Sadeghi. Software Grand Expo-sure: SGX Cache Attacks Are Practical. In William Enck and Collin Mulliner, editors, 11th USENIX Workshop on Offensive Technologies, WOOT 2017, Vancouver, BC, Canada, August 14-15, 2017 . USENIX Association, 2017. [17] Samira Briongos, Ghassan Karame, Claudio Soriente, and Annika Wilde. No forking way: Detecting cloning attacks on intel SGX applica-tions. In Annual Computer Security Applications Conference, ACSAC 2023, Austin, TX, USA, December 4-8, 2023 , pages 744–758. ACM, 2023. [18] Jo Van Bulck, Marina Minkin, Ofir Weisse, Daniel Genkin, Baris Kasikci, Frank Piessens, Mark Silberstein, Thomas F. Wenisch, Yu-val Yarom, and Raoul Strackx. Foreshadow: Extracting the Keys to the 
+
+14 Intel SGX Kingdom with Transient Out-of-Order Execution. In 27th USENIX Security Symposium (USENIX Security 18) , page 991–1008, Baltimore, MD, August 2018. USENIX Association. [19] Ran Canetti, Justin Holmgren, and Silas Richelson. Towards doubly efficient private information retrieval. In Yael Kalai and Leonid Reyzin, editors, Theory of Cryptography , pages 694–726. Springer International Publishing. [20] Anita Caudhari and Rajesh Bansode. Securing IoT devices generated data using homomorphic encryption. In Valentina Emilia Balas, Vi-jay Bhaskar Semwal, Anand Khandare, and Megharani Patil, editors, 
+
+Intelligent Computing and Networking , pages 219–226. Springer. [21] Censys. censys. https://search.censys.io/ . [Online] Accessed: 2025-10-08. [22] Hao Chen, Zhicong Huang, Kim Laine, and Peter Rindal. Labeled PSI from fully homomorphic encryption with malicious security. In 
+
+Proceedings of the 2018 ACM SIGSAC Conference on Computer and Communications Security , CCS ’18, pages 1223–1237. Association for Computing Machinery. [23] Hao Chen, Kim Laine, and Peter Rindal. Fast private set intersection from homomorphic encryption. In Proceedings of the 2017 ACM SIGSAC Conference on Computer and Communications Security , CCS ’17, pages 1243–1255. Association for Computing Machinery. [24] Zitai Chen, Georgios Vasilakis, Kit Murdock, Edward Dean, David F. Oswald, and Flavio D. Garcia. VoltPillager: Hardware-based fault injection attacks against Intel SGX Enclaves using the SVID voltage scaling interface. In Michael Bailey and Rachel Greenstadt, editors, 
+
+30th USENIX Security Symposium, USENIX Security 2021, August 11-13, 2021 , pages 699–716. USENIX Association, 2021. [25] Eduardo Chielle, Homer Gamil, and Michail Maniatakos. Real-time private membership test using homomorphic encryption. In Design, Automation & Test in Europe Conference & Exhibition, DATE 2021, Grenoble, France, February 1-5, 2021 , pages 1282–1287. IEEE, 2021. [26] Benny Chor, Niv Gilboa, and Moni Naor. Private Information Retrieval by Keywords. IACR Cryptol. ePrint Arch. , page 3, 1998. [27] Benny Chor, Eyal Kushilevitz, Oded Goldreich, and Madhu Sudan. Private information retrieval. J. ACM , 45(6):965–981, 1998. [28] David Chu, Aditya Balasubramanian, Dee Bao, Natacha Crooks, Heidi Howard, Lucky E. Katahanas, and Soujanya Ponnapalli. Rollbaccine : Herd immunity against storage rollback attacks in tees [technical report], 2025. [29] Laurent Chuat, Pawel Szalachowski, Adrian Perrig, Ben Laurie, and Eran Messeri. Efficient gossip protocols for verifying the consistency of certificate logs. In 2015 IEEE Conference on Communications and Network Security, CNS 2015, Florence, Italy, September 28-30, 2015 ,pages 415–423. IEEE, 2015. [30] Cloudflare. Merkle town. [31] Henry Corrigan-Gibbs, Alexandra Henzinger, and Dmitry Kogan. Single-server private information retrieval with sublinear amortized time. In Orr Dunkelman and Stefan Dziembowski, editors, Advances in Cryptology – EUROCRYPT 2022 , pages 3–33. Springer International Publishing. [32] Henry Corrigan-Gibbs and Dmitry Kogan. Private information retrieval with sublinear online time. In Anne Canteaut and Yuval Ishai, editors, 
+
+Advances in Cryptology – EUROCRYPT 2020 , pages 44–75. Springer International Publishing. [33] Kyle Crichton, Nicolas Christin, and Lorrie Faith Cranor. How do home computer users browse the web? ACM Trans. Web , 16(1):3:1–3:27, 2022. [34] Rasmus Dahlberg, Tobias Pulls, Tom Ritter, and Paul Syverson. Privacy-preserving & incrementally-deployable support for certificate trans-parency in tor. [35] Fergus Dall, Gabrielle De Micheli, Thomas Eisenbarth, Daniel Genkin, Nadia Heninger, Ahmad Moghimi, and Yuval Yarom. CacheQuote: Efficiently Recovering Long-term Secrets of SGX EPID via Cache Attacks. IACR Trans. Cryptogr. Hardw. Embed. Syst. , 2018(2):171– 191, 2018. [36] Joe DeBlasio. How does the certificate transparency check in chrome work? [37] Saba Eskandarian, Eran Messeri, Joseph Bonneau, and Dan Boneh. Certificate transparency with privacy. [38] Brett Hemenway Falk, Daniel Noble, and Rafail Ostrovsky. 3-party distributed ORAM from oblivious set membership. In Clemente Galdi and Stanislaw Jarecki, editors, Security and Cryptography for Networks - 13th International Conference, SCN 2022, Amalfi, Italy, September 12-14, 2022, Proceedings , volume 13409 of Lecture Notes in Computer Science , pages 437–461. Springer, 2022. [39] Marcel Fourné, Daniel De Almeida Braga, Jan Jancar, Mohamed Sabt, Peter Schwabe, Gilles Barthe, Pierre-Alain Fouque, and Yasemin Acar. "these results must be false": A usability evaluation of constant-time analysis tools. In Davide Balzarotti and Wenyuan Xu, editors, 33rd USENIX Security Symposium, USENIX Security 2024, Philadelphia, PA, USA, August 14-16, 2024 . USENIX Association, 2024. [40] Craig Gentry and Zulfikar Ramzan. Single-Database Private Infor-mation Retrieval with Constant Communication Rate. In Luís Caires, Giuseppe F. Italiano, Luís Monteiro, Catuscia Palamidessi, and Moti Yung, editors, Automata, Languages and Programming, 32nd Interna-tional Colloquium, ICALP 2005, Lisbon, Portugal, July 11-15, 2005, Proceedings , volume 3580 of Lecture Notes in Computer Science , pages 803–815. Springer, 2005. [41] Johannes Götzfried, Moritz Eckert, Sebastian Schinzel, and Tilo Müller. Cache Attacks on Intel SGX. In Cristiano Giuffrida and Angelos Stavrou, editors, Proceedings of the 10th European Workshop on Sys-tems Security, EUROSEC 2017, Belgrade, Serbia, April 23, 2017 , pages 2:1–2:6. ACM, 2017. [42] Ardhi Putra Pratama Hartono, Andrey Brito, and Christof Fetzer. CRISP: Confidentiality, rollback, and integrity storage protection for confidential cloud-native computing. [43] Brett Hemenway Falk, Daniel Noble, and Rafail Ostrovsky. Private set intersection with linear communication from general assumptions. In Proceedings of the 18th ACM Workshop on Privacy in the Elec-tronic Society , WPES’19, pages 14–25. Association for Computing Machinery. [44] Alexander Iliev and Sean W. Smith. Protecting client privacy with trusted computing at the server. IEEE Secur. Priv. , 3(2):20–28, 2005. [45] Intel. Intel Trust Domain Extensions. https://www.intel. com/content/www/us/en/developer/articles/technical/ intel-trust-domain-extensions.html , 2024. (Accessed on 06/23/2024). [46] Yuval Ishai, Eyal Kushilevitz, Rafail Ostrovsky, and Amit Sahai. Batch codes and their applications. In Proceedings of the thirty-sixth annual ACM symposium on Theory of computing , STOC ’04, pages 262–271. Association for Computing Machinery. [47] Jan Jancar, Marcel Fourné, Daniel De Almeida Braga, Mohamed Sabt, Peter Schwabe, Gilles Barthe, Pierre-Alain Fouque, and Yasemin Acar. "they’re not that hard to mitigate": What cryptographic library develop-ers think about timing attacks. In 43rd IEEE Symposium on Security and Privacy, SP 2022, San Francisco, CA, USA, May 22-26, 2022 ,pages 632–649. IEEE, 2022. [48] Qin Jiang, Yanjun An, Yong Qi, and Hai Fang. Oblivious data struc-ture for secure multiple-set membership testing. In Chunxiao Xing, Xiaoming Fu, Yong Zhang, Guigang Zhang, and Chaolemen Borjigin, editors, Web Information Systems and Applications - 18th International Conference, WISA 2021, Kaifeng, China, September 24-26, 2021, Pro-ceedings , volume 12999 of Lecture Notes in Computer Science , pages 299–310. Springer, 2021. 
+
+15 [49] Dana Keeler. Certificate transparency is now enforced in firefox on desktop platforms starting with version 135. [50] Paul Kocher, Jann Horn, Anders Fogh, Daniel Genkin, Daniel Gruss, Werner Haas, Mike Hamburg, Moritz Lipp, Stefan Mangard, Thomas Prescher, Michael Schwarz, and Yuval Yarom. Spectre Attacks: Ex-ploiting Speculative Execution. In 2019 IEEE Symposium on Security and Privacy (SP) , pages 1–19, 2019. [51] Dmitry Kogan and Henry Corrigan-Gibbs. Private blocklist lookups with checklist. pages 875–892. [52] Vladimir Kolesnikov, Ranjit Kumaresan, Mike Rosulek, and Ni Trieu. Efficient batched oblivious PRF with applications to private set inter-section. In Proceedings of the 2016 ACM SIGSAC Conference on Computer and Communications Security , CCS ’16, pages 818–829. Association for Computing Machinery. [53] Eyal Kushilevitz and Rafail Ostrovsky. Replication is NOT Needed: SINGLE Database, Computationally-Private Information Retrieval. In 
+
+38th Annual Symposium on Foundations of Computer Science, FOCS ’97, Miami Beach, Florida, USA, October 19-22, 1997 , pages 364–373. IEEE Computer Society, 1997. [54] Ben Laurie. Certificate transparency. 57(10):40–46. [55] Ben Laurie, Adam Langley, Emilia Kasper, Eran Messeri, and Rob Stradling. Certificate transparency version 2.0. Num Pages: 53. [56] Arthur Lazzaretti and Charalampos Papamanthou. Near-optimal pri-vate information retrieval with preprocessing. In Guy Rothblum and Hoeteck Wee, editors, Theory of Cryptography , pages 406–435. Springer Nature Switzerland. [57] Arthur Lazzaretti and Charalampos Papamanthou. TreePIR: Sublinear-time and polylog-bandwidth private information retrieval from DDH. In Helena Handschuh and Anna Lysyanskaya, editors, Advances in Cryptology – CRYPTO 2023 , pages 284–314. Springer Nature Switzer-land. [58] Moritz Lipp, Michael Schwarz, Daniel Gruss, Thomas Prescher, Werner Haas, Anders Fogh, Jann Horn, Stefan Mangard, Paul Kocher, Daniel Genkin, Yuval Yarom, and Mike Hamburg. Meltdown: Reading Kernel Memory from User Space. In 27th USENIX Security Symposium (USENIX Security 18) , pages 973–990, Baltimore, MD, August 2018. USENIX Association. [59] Fangfei Liu, Yuval Yarom, Qian Ge, Gernot Heiser, and Ruby B. Lee. Last-Level Cache Side-Channel Attacks are Practical. In 2015 IEEE Symposium on Security and Privacy , pages 605–622. IEEE, May 2015. [60] Wouter Lueks and Ian Goldberg. Sublinear scaling for multi-client private information retrieval. In Rainer Böhme and Tatsuaki Okamoto, editors, Financial Cryptography and Data Security , pages 168–186. Springer. [61] Sinisa Matetic, Mansoor Ahmed, Kari Kostiainen, Aritra Dhar, David M. Sommer, Arthur Gervais, Ari Juels, and Srdjan Capkun. ROTE: rollback protection for trusted execution. In Engin Kirda and Thomas Ristenpart, editors, 26th USENIX Security Symposium, USENIX Security 2017, Vancouver, BC, Canada, August 16-18, 2017 ,pages 1289–1306. USENIX Association, 2017. [62] Sarah Meiklejohn, Joe DeBlasio, Devon O’Brien, Chris Thompson, Kevin Yeo, and Emily Stark. SoK: SCT auditing in certificate trans-parency. 2022(3):336–353. [63] Merklemap. Merklemap. https://www.merklemap.com/ . [Online] Accessed: 2025-10-08. [64] Tommi Meskanen, Jian Liu, Sara Ramezanian, and Valtteri Niemi. Private membership test for bloom filters. In 2015 IEEE Trust-Com/BigDataSE/ISPA, Helsinki, Finland, August 20-22, 2015, Volume 1, pages 515–522. IEEE, 2015. [65] Meta. Certificate Transparency Monitoring. https://developers. facebook.com/tools/ct/ . [Online] Accessed: 2025-10-08. [66] Ahmad Moghimi, Gorka Irazoqui, and Thomas Eisenbarth. CacheZoom: How SGX Amplifies the Power of Cache Attacks. In Wieland Fischer and Naofumi Homma, editors, Cryptographic Hardware and Embedded Systems - CHES 2017 - 19th International Conference, Taipei, Taiwan, September 25-28, 2017, Proceedings ,volume 10529 of Lecture Notes in Computer Science , pages 69–90. Springer, 2017. [67] Daniel Morales, Isaac Agudo, and Javier López. Private set intersection: A systematic literature review. Comput. Sci. Rev. , 49:100567, 2023. [68] Muhammad Haris Mughees and Ling Ren. Vectorized batch private in-formation retrieval. In 2023 IEEE Symposium on Security and Privacy (SP) , pages 437–452. ISSN: 2375-1207. [69] Muhammad Haris Mughees and Ling Ren. Vectorized Batch Private Information Retrieval. In 44th IEEE Symposium on Security and Privacy, SP 2023, San Francisco, CA, USA, May 21-25, 2023 , pages 437–452. IEEE, 2023. [70] Kit Murdock, David Oswald, Flavio D. Garcia, Jo Van Bulck, Daniel Gruss, and Frank Piessens. Plundervolt: Software-based Fault Injection Attacks against Intel SGX. In 2020 IEEE Symposium on Security and Privacy , pages 1466–1482, 2020. [71] Yoshimichi Nakatsuka, Nicolas Dutly, Kari Kostiainen, and Srdjan Capkun. Spmt. https://github.com/Jumpst3r/Gyokuro-Core ,[n. d.]. (Accessed on 24/03/2026). [72] Hoang-Dung Nguyen, Jorge Guajardo, and Thang Hoang. Client-efficient online-offline private information retrieval. [73] Jianyu Niu, Wei Peng, Xiaokuan Zhang, and Yinqian Zhang. NAR-RATOR: secure and practical state continuity for trusted execution in the cloud. In Heng Yin, Angelos Stavrou, Cas Cremers, and Elaine Shi, editors, Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security, CCS 2022, Los Angeles, CA, USA, November 7-11, 2022 , pages 2385–2399. ACM, 2022. [74] Richard Ostertág and Martin Stanek. Anomaly detection in certificate transparency logs. arXiv preprint arXiv:2405.05206 , 2024. [75] Bryan Parno, Jacob R. Lorch, John R. Douceur, James Mickens, and Jonathan M. McCune. Memoir: Practical State Continuity for Protected Modules. In 2011 IEEE Symposium on Security and Privacy , pages 379–394, May 2011. ISSN: 2375-1207. [76] Benny Pinkas, Mike Rosulek, Ni Trieu, and Avishay Yanai. PSI from PaXoS: Fast, malicious private set intersection. In Anne Canteaut and Yuval Ishai, editors, Advances in Cryptology – EUROCRYPT 2020 ,pages 739–767. Springer International Publishing. [77] Srinivasan Raghuraman and Peter Rindal. Blazing fast PSI from im-proved OKVS and subfield VOLE. In Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security , CCS ’22, pages 2505–2517. Association for Computing Machinery. [78] Sara Ramezanian, Tommi Meskanen, Masoud Naderpour, Ville Jun-nila, and Valtteri Niemi. Private membership test protocol with low communication complexity. Digit. Commun. Networks , 6(3):321–332, 2020. [79] Ankit Singh Rawat, Zhao Song, Alexandros G. Dimakis, and Anna Gál. Batch codes through dense graphs without short cycles. 62(4):1592– 1604. [80] Wang Ren, Xin Tong, Jing Du, Na Wang, Shan Cang Li, Geyong Min, Zhiwei Zhao, and Ali Kashif Bashir. Privacy-preserving using homo-morphic encryption in mobile IoT systems. 165:105–111. [81] Peter Rindal and Phillipp Schoppmann. VOLE-PSI: Fast OPRF and circuit-PSI from vector-OLE. In Anne Canteaut and François-Xavier Standaert, editors, Advances in Cryptology – EUROCRYPT 2021 , pages 901–930. Springer International Publishing. [82] Sectigo. crt.sh. crt.sh . [Online] Accessed: 2025-10-08. 
+
+16 [83] Elaine Shi, Waqar Aqeel, Balakrishnan Chandrasekaran, and Bruce Maggs. Puncturable pseudorandom sets and private information re-trieval with near-optimal online bandwidth and time. In Tal Malkin and Chris Peikert, editors, Advances in Cryptology – CRYPTO 2021 ,pages 641–669. Springer International Publishing. [84] SSLMate. SSLMate Spotter. https://sslmate.com/certspotter/ .[Online] Accessed: 2025-10-08. [85] Raoul Strackx and Frank Piessens. Ariadne: A Minimal Approach to State Continuity. In 25th USENIX Security Symposium (USENIX Security 16) , pages 875–892, Austin, TX, August 2016. USENIX As-sociation. [86] Sandeep Tamrakar, Jian Liu, Andrew Paverd, Jan-Erik Ekberg, Benny Pinkas, and N. Asokan. The circle game: Scalable private membership test using trusted hardware. In Proceedings of the 2017 ACM on Asia Conference on Computer and Communications Security , ASIA CCS ’17, 2017. [87] Alin Tomescu and Srinivas Devadas. Catena: Efficient non-equivocation via bitcoin. In 2017 IEEE Symposium on Security and Privacy, SP 2017, San Jose, CA, USA, May 22-26, 2017 , pages 393–409. IEEE Computer Society, 2017. [88] Adithya Vadapalli, Ryan Henry, and Ian Goldberg. Duoram: A bandwidth-efficient distributed ORAM for 2- and 3-party computation. In Joseph A. Calandrino and Carmela Troncoso, editors, 32nd USENIX Security Symposium, USENIX Security 2023, Anaheim, CA, USA, Au-gust 9-11, 2023 , pages 3907–3924. USENIX Association, 2023. [89] Shuhong Wang, Xuhua Ding, Robert H. Deng, and Feng Bao. Private information retrieval using trusted hardware. In Dieter Gollmann, Jan Meier, and Andrei Sabelfeld, editors, Computer Security - ESORICS 2006, 11th European Symposium on Research in Computer Security, Hamburg, Germany, September 18-20, 2006, Proceedings , volume 4189 of Lecture Notes in Computer Science , pages 49–64. Springer, 2006. [90] Wenhao Wang, Guoxing Chen, Xiaorui Pan, Yinqian Zhang, XiaoFeng Wang, Vincent Bindschaedler, Haixu Tang, and Carl A. Gunter. Leaky Cauldron on the Dark Land: Understanding Memory Side-Channel Hazards in SGX. In Proceedings of the 2017 ACM SIGSAC Conference on Computer and Communications Security , CCS ’17, page 2421–2434, New York, NY, USA, 2017. Association for Computing Machinery. [91] Yuanzhong Xu, Weidong Cui, and Marcus Peinado. Controlled-Channel Attacks: Deterministic Side Channels for Untrusted Operating Systems. In 2015 IEEE Symposium on Security and Privacy , pages 640–656. IEEE, May 2015. [92] Tarun Kumar Yadav, Devashish Gosain, Amir Herzberg, Daniel Zap-pala, and Kent Seamons. Automatic detection of fake key attacks in secure messaging. In Proceedings of the 2022 ACM SIGSAC Con-ference on Computer and Communications Security , CCS ’22, pages 3019–3032. Association for Computing Machinery. [93] Ruiyi Zhang, Albert Cheu, Adrià Gascón, Daniel Moghimi, Phillipp Schoppmann, Michael Schwarz, and Octavian Suciu. Farfetch’d: A side-channel analysis framework for privacy applications on confiden-tial virtual machines. CoRR , abs/2506.15924, 2025. [94] Mingxun Zhou, Wei-Kai Lin, Yiannis Tselekounis, and Elaine Shi. Optimal single-server private information retrieval. In Carmit Hazay and Martijn Stam, editors, Advances in Cryptology – EUROCRYPT 2023 , pages 395–425. Springer Nature Switzerland. [95] Mingxun Zhou, Andrew Park, Wenting Zheng, and Elaine Shi. Piano: Extremely simple, single-server PIR with sublinear server computation. In 2024 IEEE Symposium on Security and Privacy (SP) , pages 4296– 4314. ISSN: 2375-1207. 
+
+## A Full Correctness Analysis A.1 Starting point: Ideal scenario 
+
+We assume an ideal scenario where (1) the communica-tion channel between every entity, (2) the TEE, and (3) the database are “secure”. By “secure”, we mean the following: (1) Secure channel: Total ordering of messages preserved, messages are not delayed or dropped, integrity protected, con-fidential, and authenticated; (2) Secure TEE: No rollback attacks, no forking, no interrupts, no side-channel attacks, and provides confidentiality and execution integrity, remote attes-tation, state continuity; (3) Secure database: No forking and is append-only. Assume the membership testing process as follows: (1) When the data source submits d to the secure TEE, the secure TEE sends cnt POR directly to the client via secure channel, (2) The secure TEE increments cnt once it finishes storing d in the secure database, (3) The client requests and receives cnt POP 
+
+from the secure TEE via secure channel during membership testing, and (4) If cnt POR < cnt POP holds, then the algorithm outputs true; otherwise, false. Such a membership testing process is correct assuming a secure channel, TEE, and database. 
+
+## A.2 Removing secure channels (Step 1) 
+
+In this step, we replace a secure channel with digital sig-natures, losing the total ordering and confidentiality of the messages. The membership testing process is modified as follows: (1) When the data source submits d to the secure TEE, the secure TEE creates a digital signature over cnt POR , d, and report (i.e., 
+
+POR ), (2) The secure TEE increments cnt once it finishes storing d in the secure database, (3) The client requests and receives a digital signature over cnt POP (i.e., POP ) from the secure TEE during membership testing, and (4) If the digital signatures can be verified using the same TEE public key and cnt POR < cnt POP holds, then the algorithm outputs true; otherwise, false. Next, we show that the adversary cannot violate the cor-rectness given the new capabilities provided via the removal of secure channels. 
+
+A.2.1 Tampering messages 
+
+The adversary may change the content of the messages, e.g., change the cnt POR value included in POR . This is easily de-tectable, as the digital signature cannot be verified using the message. 
+
+A.2.2 Dropping messages 
+
+The adversary may discard messages exchanged between entities. Not receiving any information does not affect the 17 correctness of the system. 
+
+A.2.3 Delaying or swapping messages 
+
+This enables the attacker to violate the total order of the ex-changed messages. For instance, for two POR s for two dif-ferent ds, POR 1 and POR 2, where cnt 1 
+
+> POR
+
+< cnt POP < cnt 2
+
+> POR
+
+holds, the adversary may delay the former with the latter in an attempt to convince that cnt POR < cnt POP holds. However, since the POR s are created for different ds, the client will detect this attack by checking whether the POR is for the d it is verifying. 
+
+A.2.4 Replaying POR 
+
+A malicious data source may provide the client with a POR 
+
+that was issued with a smaller cnt POR value for a different d
+
+in an attempt to trick the client into believing that the target d
+
+has been included in the database when it is not. The client can detect this attack, as the provided POR does not match the provided d.
+
+A.2.5 Replaying {d, sig d }
+
+This allows an adversary to produce multiple POR s with different cnt POR for the same target d. Assume the adver-sary generates two POR s, POR 1 and POR 2: the former with counter value cnt 1 
+
+> POR
+
+and the latter with cnt 2 
+
+> POR
+
+where 
+
+cnt 1 
+
+> POR
+
+< cnt POP < cnt 2 
+
+> POR
+
+holds. In an attempt to convince the client that cnt POR < cnt POP holds, they can provide the client POR 1 instead of POR 2. This does not violate the cor-rectness of the system, as d is in fact stored in the database when the system outputs true. 
+
+A.2.6 Replaying POP 
+
+An adversary may replace the correct POP with a different one. However, since the adversary only has access to POP swith cnt POP values less than or equal to cnt POR , they can-not convince the client that cnt POR < cnt POP is true just by replaying POP .
+
+## A.3 Removing secure TEE (Step 2) 
+
+In this step, we replace the secure TEE with a realistic TEE that adheres to the TEE threat model shown in Section ?? .The membership testing process is modified as follows: (1) When the data source submits d to the TEE, the TEE creates a digital signature over cnt POR , d, and report (i.e., 
+
+POR ), (2) The TEE increments cnt once it finishes storing d
+
+in the secure database, (3) The client requests and receives a digital signature over cnt POP (i.e., POP ) from the TEE during membership testing, and (4) If the digital signatures can be verified using the same TEE public key and cnt POR < cnt POP 
+
+holds, then the algorithm outputs true; otherwise, false. Next, we show that the adversary cannot violate the cor-rectness property given the gained new capabilities. 
+
+A.3.1 Leveraging side-channel attacks 
+
+Adversaries may attempt to leverage side-channel attacks to steal secret information from the TEE, enabling the forging of POR s or POP s. This is not possible because we assume that cryptographic operations using TEE signing keys do not leak (Section ?? ). 
+
+A.3.2 Interrupting TEEs 
+
+This enables the malicious server to halt TEEs, preventing d
+
+from being processed and stored in the database. Since halting the TEE halts the progress of cnt , cnt POR < cnt POP will never hold, therefore the algorithm will never output true .
+
+A.3.3 Attacking state-continuity 
+
+This allows an adversary to prevent the TEE state from being passed on after a TEE crash, power-loss, or system-wide re-boot. Similar to interrupting TEEs, this halts the progress of 
+
+cnt and, therefore, the client will never receive true from the algorithm. 
+
+A.3.4 Rolling back TEE state 
+
+After receiving the target d and producing POR , the server may roll the TEE state back before the point it received d
+
+and continue accepting other data items. We assume a TEE rollback protection mechanism that prevents this (Section ?? ). 
+
+A.3.5 Forking TEEs 
+
+A malicious server may create multiple TEE versions through forking, presenting different versions depending on the in-teracting party. For example, when the server is about to re-ceive the target data item d, it can fork the TEE into two versions: T EE 1 and T EE 2. T EE 1 interfaces with the data source to generate a genuine POR for d, while T EE 2 does not receive d. During membership testing, T EE 2 is presented to the client, generating a correct POP that falsely suggests 
+
+cnt POR < cnt POP , even though d is not stored in the database. We assume intra-machine and inter-machine fork detection to prevent this (Section ?? ). 
+
+A.3.6 Impersonating TEEs 
+
+This enables adversaries to fake POR s or POP s or remove d
+
+from the buffer . This attack is prevented because (1) report smust be produced by genuine TEEs; (2) POR must include valid report s; and (3) POP must be verified using the TEE pubic key included in report sent along with POR .18 A.4 Removing secure database (Step 3) 
+
+In this final step, we replace the secure database with a regular database, accumulators, and monitors. The membership testing process is modified as follows. (1) When the data source submits d to the TEE, the TEE creates a digital signature over cnt POR , d, and report (i.e., 
+
+POR ), (2) The TEE updates the accumulator HC T , stores 
+
+HC T and cnt in List HC T , and increments cnt once it finishes storing d in an external database, (3) The monitor updates its accumulator HC M with the database content, (4) The client requests HC M from the monitor, (5) The client sends HC M
+
+to the TEE, the TEE looks up cnt POP associated with HC M
+
+in List HC T , and sends a digital signature over cnt POP (i.e., 
+
+POP ) from the TEE during membership testing, and (6) If the digital signatures can be verified using the same TEE public key and cnt POR < cnt POP holds, then the algorithm outputs true; otherwise, false. This process is equivalent to our solution, except for several primitives that are not related to security, such as the buffer and ACK .Next, we show that the adversary cannot violate the correct-ness property given the gained capabilities, which concludes our analysis. 
+
+A.4.1 Impersonating monitors 
+
+This enables the attacker to produce an HC M that satisfies 
+
+cnt POR < cnt POP although d is not in the database. This at-tack is not valid, as we assume the monitor’s signing key is protected. 
+
+A.4.2 Dropping buffer , d from buffer , or d from database 
+
+An adversary may prevent the buffer that includes a target d
+
+or only d from being sent to the database entirely and send an 
+
+ACK to the TEE to make it seem that it was sent. Since HC M
+
+will not match any HC T or only match HC T created before 
+
+buffer was dropped, cnt POR < cnt POP will never hold. Fur-thermore, if clients notice that neither waiting nor contacting other monitors allows them to receive the correct POP , they can publicize d and POR so that the monitors are aware and can start investigating. 
+
+A.4.3 Forking databases 
+
+This enables an adversary to create multiple versions of the database and show different versions according to whom they are talking to (i.e., split-view attack, see Section 2.2). Since 
+
+HC M will not match the most recent HC T that includes d,
+
+cnt POR < cnt POP will not hold, and therefore the client will not be convinced that d is stored in the database. 
+
+A.4.4 Dropping d after monitoring 
+
+The adversary may drop the target d after the monitor down-loads the database content that includes d. While this may cause HC M to match a HC T value and cause cnt POR < cnt POP 
+
+to hold, this is a violation of correctness, since the monitor is aware of d and the adversary is caught of its wrongdoings. 19

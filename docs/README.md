@@ -6,79 +6,80 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-26
-- 运行时间：2026-03-26 20:41:35 UTC
+- 最新运行日期：2026-03-27
+- 运行时间：2026-03-27 20:09:37 UTC
 - 运行状态：成功
 - 本次总论文数：19
 - 精读区：7
 - 速读区：12
 
 ### 今日简报（AI）
-今日精选 19 篇前沿论文，深度聚焦大模型 RLHF 隐私保护与异构环境下的个性化联邦学习。
-重点推荐解耦奖励建模的隐私 RLHF 方案，以及通过层次对齐解决异构难题的稳定个性化联邦学习框架 HEART-PFL。
-建议关注隐私计算与大模型结合的落地场景，特别是医疗临床推理及联邦公平性分类等实战方向。
-- 详情：[/202603/26/README](/202603/26/README)
+- 今日共生成 19 篇推荐（精读 7 篇，速读 12 篇）
+- 精读：《PAC-DP: Personalized Adaptive Clipping for Differentially Private Federated Learning》（9.0/10）, 《TAMI-MPC:Trusted Acceleration of Minimal-Interaction MPC for Efficient Nonlinear Inference》（9.0/10）
+- 速读：《Beyond TVLA: Anderson-Darling Leakage Assessment for Neural Network Side-Channel Leakage Detection》（7.0/10）, 《Confidential Databases Without Cryptographic Mappings》（7.0/10）, 《Minimax and Adaptive Covariance Matrix Estimation under Differential Privacy》（7.0/10）
+- 这些结果覆盖了当下较热的方向，建议先看精读区论文的关键问题与方法。
+- 详情：[/202603/27/README](/202603/27/README)
 
 ### 精读区论文标签
-1. [Privacy-Preserving Reinforcement Learning from Human Feedback via Decoupled Reward Modeling](/202603/26/2603.22563v1-privacy-preserving-reinforcement-learning-from-human-feedback-via-decoupled-reward-modeling)  
+1. [PAC-DP: Personalized Adaptive Clipping for Differentially Private Federated Learning](/202603/27/2603.24003v1-pac-dp-personalized-adaptive-clipping-for-differentially-private-federated-learning)  
    标签：评分：9.0/10、query:ppml
-   evidence：大语言模型的差分隐私强化学习
-2. [HEART-PFL: Stable Personalized Federated Learning under Heterogeneity with Hierarchical Directional Alignment and Adversarial Knowledge Transfer](/202603/26/2603.24209v1-heart-pfl-stable-personalized-federated-learning-under-heterogeneity-with-hierarchical-directional-alignment-and-adversarial-knowledge-transfer)  
+   evidence：具有自适应裁剪的差分隐私联邦学习
+2. [TAMI-MPC:Trusted Acceleration of Minimal-Interaction MPC for Efficient Nonlinear Inference](/202603/27/2603.24861v1-tami-mpctrusted-acceleration-of-minimal-interaction-mpc-for-efficient-nonlinear-inference)  
    标签：评分：9.0/10、query:ppml
-   evidence：异构环境下的个性化联邦学习
-3. [Incentive-Aware Federated Averaging with Performance Guarantees under Strategic Participation](/202603/26/2603.20873v1-incentive-aware-federated-averaging-with-performance-guarantees-under-strategic-participation)  
+   evidence：用于高效非线性推理和安全比较的可信MPC加速
+3. [Supercharging Federated Intelligence Retrieval](/202603/27/2603.25374v1-supercharging-federated-intelligence-retrieval)  
+   标签：评分：9.0/10、query:ppml
+   evidence：联邦RAG中的机密远程大模型推理
+4. [Combinatorial Privacy: Private Multi-Party Bitstream Grand Sum by Hiding in Birkhoff Polytopes](/202603/27/2603.22808v2-combinatorial-privacy-private-multi-party-bitstream-grand-sum-by-hiding-in-birkhoff-polytopes)  
    标签：评分：8.0/10、query:ppml
-   evidence：具有私有本地数据集的激励感知联邦平均
-4. [Adaptive Federated Fine-Tuning of Self-Supervised Speech Representations](/202603/26/2603.21888v2-adaptive-federated-fine-tuning-of-self-supervised-speech-representations)  
+   evidence：私有多方比特流求和协议
+5. [Privacy-Preserving EHR Data Transformation via Geometric Operators: A Human-AI Co-Design Technical Report](/202603/27/2603.22954v1-privacy-preserving-ehr-data-transformation-via-geometric-operators-a-human-ai-co-design-technical-report)  
    标签：评分：8.0/10、query:ppml
-   evidence：语音任务中联邦学习的隐私保护微调
-5. [A Theoretical Framework for Energy-Aware Gradient Pruning in Federated Learning](/202603/26/2603.22465v1-a-theoretical-framework-for-energy-aware-gradient-pruning-in-federated-learning)  
+   evidence：使用多方计算和几何算子的隐私保护计算
+6. [Gyokuro: Source-assisted Private Membership Testing using Trusted Execution Environments](/202603/27/2603.23226v1-gyokuro-source-assisted-private-membership-testing-using-trusted-execution-environments)  
    标签：评分：8.0/10、query:ppml
-   evidence：联邦学习中的能耗感知梯度剪枝
-6. [Combinatorial Privacy: Private Multi-Party Bitstream Grand Sum by Hiding in Birkhoff Polytopes](/202603/26/2603.22808v1-combinatorial-privacy-private-multi-party-bitstream-grand-sum-by-hiding-in-birkhoff-polytopes)  
+   evidence：使用可信执行环境的私密成员资格测试
+7. [On the Vulnerability of FHE Computation to Silent Data Corruption](/202603/27/2603.23253v1-on-the-vulnerability-of-fhe-computation-to-silent-data-corruption)  
    标签：评分：8.0/10、query:ppml
-   evidence：私有多方比特流求和与基于模拟的安全
-7. [Beyond Theoretical Bounds: Empirical Privacy Loss Calibration for Text Rewriting Under Local Differential Privacy](/202603/26/2603.22968v1-beyond-theoretical-bounds-empirical-privacy-loss-calibration-for-text-rewriting-under-local-differential-privacy)  
-   标签：评分：8.0/10、query:ppml
-   evidence：本地差分隐私下文本重写的经验隐私损失校准
+   evidence：用于隐私保护AI和云服务的全同态加密
 
 ### 速读区论文标签
-1. [PLACID: Privacy-preserving Large language models for Acronym Clinical Inference and Disambiguation](/202603/26/2603.23678v1-placid-privacy-preserving-large-language-models-for-acronym-clinical-inference-and-disambiguation)  
-   标签：评分：8.0/10、query:ppml
-   evidence：端侧部署以确保临床推理中的隐私保护
-2. [Federated fairness-aware classification under differential privacy](/202603/26/2603.24392v1-federated-fairness-aware-classification-under-differential-privacy)  
-   标签：评分：8.0/10、query:ppml
-   evidence：公平感知分类的联邦差分隐私
-3. [Noise-Aware Misclassification Attack Detection in Collaborative DNN Inference](/202603/26/2603.17914v1-noise-aware-misclassification-attack-detection-in-collaborative-dnn-inference)  
+1. [Beyond TVLA: Anderson-Darling Leakage Assessment for Neural Network Side-Channel Leakage Detection](/202603/27/2603.18647v1-beyond-tvla-anderson-darling-leakage-assessment-for-neural-network-side-channel-leakage-detection)  
    标签：评分：7.0/10、query:ppml
-   evidence：协作DNN推理中的攻击检测
-4. [FedTrident: Resilient Road Condition Classification Against Poisoning Attacks in Federated Learning](/202603/26/2603.19101v1-fedtrident-resilient-road-condition-classification-against-poisoning-attacks-in-federated-learning)  
+   evidence：神经网络侧信道泄露检测
+2. [Confidential Databases Without Cryptographic Mappings](/202603/27/2603.18836v2-confidential-databases-without-cryptographic-mappings)  
    标签：评分：7.0/10、query:ppml
-   evidence：道路分类中针对中毒攻击的弹性联邦学习
-5. [Automated Membership Inference Attacks: Discovering MIA Signal Computations using LLM Agents](/202603/26/2603.19375v1-automated-membership-inference-attacks-discovering-mia-signal-computations-using-llm-agents)  
+   evidence：不可信云环境中安全查询的机密数据库设计
+3. [Minimax and Adaptive Covariance Matrix Estimation under Differential Privacy](/202603/27/2603.19703v1-minimax-and-adaptive-covariance-matrix-estimation-under-differential-privacy)  
    标签：评分：7.0/10、query:ppml
-   evidence：机器学习中的成员推理攻击与信息泄露
-6. [Acyclic Graph Pattern Counting under Local Differential Privacy](/202603/26/2603.19671v1-acyclic-graph-pattern-counting-under-local-differential-privacy)  
+   evidence：高维数据分析中的差分隐私估计
+4. [Aggregation Alignment for Federated Learning with Mixture-of-Experts under Data Heterogeneity](/202603/27/2603.21276v1-aggregation-alignment-for-federated-learning-with-mixture-of-experts-under-data-heterogeneity)  
    标签：评分：7.0/10、query:ppml
-   evidence：本地差分隐私下的图模式计数
-7. [A Federated Many-to-One Hopfield model for associative Neural Networks](/202603/26/2603.19902v1-a-federated-many-to-one-hopfield-model-for-associative-neural-networks)  
+   evidence：针对隐私敏感数据的MoE架构大模型联邦学习
+5. [Knowledge Priors for Identity-Disentangled Open-Set Privacy-Preserving Video FER](/202603/27/2603.21387v2-knowledge-priors-for-identity-disentangled-open-set-privacy-preserving-video-fer)  
    标签：评分：7.0/10、query:ppml
-   evidence：用于隐私保护训练的联邦关联记忆框架
-8. [Unveiling the Security Risks of Federated Learning in the Wild: From Research to Practice](/202603/26/2603.20615v1-unveiling-the-security-risks-of-federated-learning-in-the-wild-from-research-to-practice)  
+   evidence：隐私保护视频面部表情识别
+6. [In-network Attack Detection with Federated Deep Learning in IoT Networks: Real Implementation and Analysis](/202603/27/2603.21596v1-in-network-attack-detection-with-federated-deep-learning-in-iot-networks-real-implementation-and-analysis)  
    标签：评分：7.0/10、query:ppml
-   evidence：联邦学习中的安全风险与中毒攻击
-9. [Face anonymization preserving facial expressions and photometric realism](/202603/26/2603.17567v1-face-anonymization-preserving-facial-expressions-and-photometric-realism)  
+   evidence：用于物联网隐私保护异常检测的联邦学习
+7. [Characterizing Linear Alignment Across Language Models](/202603/27/2603.18908v3-characterizing-linear-alignment-across-language-models)  
    标签：评分：6.0/10、query:ppml
-   evidence：用于数据集隐私保护的人脸匿名化
-10. [Growing Alphabets Do Not Automatically Amplify Shuffle Privacy: Obstruction, Estimation Bounds, and Optimal Mechanism Design](/202603/26/2603.18080v1-growing-alphabets-do-not-automatically-amplify-shuffle-privacy-obstruction-estimation-bounds-and-optimal-mechanism-design)  
+   evidence：隐私受限环境下的跨模型对齐
+8. [FedRG: Unleashing the Representation Geometry for Federated Learning with Noisy Clients](/202603/27/2603.19722v1-fedrg-unleashing-the-representation-geometry-for-federated-learning-with-noisy-clients)  
    标签：评分：6.0/10、query:ppml
-   evidence：本地差分隐私和洗牌隐私机制
-11. [Attack by Unlearning: Unlearning-Induced Adversarial Attacks on Graph Neural Networks](/202603/26/2603.18570v1-attack-by-unlearning-unlearning-induced-adversarial-attacks-on-graph-neural-networks)  
+   evidence：带噪声客户端的联邦学习
+9. [LiteAtt: Secure and Seamless IoT Services Using TinyML-based Self-Attestation as a Primitive](/202603/27/2603.19727v1-liteatt-secure-and-seamless-iot-services-using-tinyml-based-self-attestation-as-a-primitive)  
    标签：评分：6.0/10、query:ppml
-   evidence：GNN中的隐私法规与遗忘学习
-12. [A Complexity Hierarchy of Shuffles in Card-Based Protocols](/202603/26/2603.18608v1-a-complexity-hierarchy-of-shuffles-in-card-based-protocols)  
+   evidence：物联网设备上的安全TinyML推理
+10. [Federated Hyperdimensional Computing for Resource-Constrained Industrial IoT](/202603/27/2603.20037v1-federated-hyperdimensional-computing-for-resource-constrained-industrial-iot)  
    标签：评分：6.0/10、query:ppml
-   evidence：用于安全多方计算的卡片协议
+   evidence：资源受限物联网的联邦学习框架
+11. [Voice Privacy from an Attribute-based Perspective](/202603/27/2603.20301v1-voice-privacy-from-an-attribute-based-perspective)  
+   标签：评分：6.0/10、query:ppml
+   evidence：语音隐私与基于属性的保护
+12. [Composition Theorems for Multiple Differential Privacy Constraints](/202603/27/2603.20968v1-composition-theorems-for-multiple-differential-privacy-constraints)  
+   标签：评分：6.0/10、query:ppml
+   evidence：差分隐私约束的组合定理
 
 
 <div class="dpr-home-promo-card">
