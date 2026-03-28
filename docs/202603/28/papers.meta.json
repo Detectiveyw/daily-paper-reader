@@ -1,0 +1,37 @@
+{
+  "label": "2026-03-28",
+  "date": "2026-03-28",
+  "generated_at": "2026-03-28T19:34:35",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202603/28/2603.24904v1-on-the-foundations-of-trustworthy-artificial-intelligence",
+      "section": "deep",
+      "title_en": "On the Foundations of Trustworthy Artificial Intelligence",
+      "authors": "TJ Dunham",
+      "date": "2026-03-26",
+      "pdf": "https://arxiv.org/pdf/2603.24904v1",
+      "score": "8.0",
+      "evidence": "可验证推理与跨架构确定性的整数引擎",
+      "tldr": "本文提出“确定性命题”，认为平台确定性推理是实现可信AI的充要条件。研究通过引入“信任熵”量化非确定性成本，指出IEEE 754浮点运算导致了验证难题。为此，作者开发了一个纯整数推理引擎，实现了跨ARM和x86架构的位级一致性。实验证明，该系统在多地节点和链上验证中表现出零误差，成功将AI信任问题转化为可验证的算术一致性问题。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We prove that platform-deterministic inference is necessary and sufficient for   trustworthy AI. We formalize this as the Determinism Thesis and introduce trust   entropy to quantify the cost of non-determinism, proving that verification failure   probability equals 1 - 2^{-H_T} exactly. We prove a Determinism-Verification   Collapse: verification under determinism requires O(1) hash comparison; without it,   the verifier faces an intractable membership problem. IEEE 754 floating-point   arithmetic fundamentally violates the determinism requirement. We resolve this by   constructing a pure integer inference engine that achieves bitwise identical output   across ARM and x86. In 82 cross-architecture tests on models up to 6.7B parameters,   we observe zero hash mismatches. Four geographically distributed nodes produce   identical outputs, verified by 356 on-chain attestation transactions. Every major   trust property of AI systems (fairness, robustness, privacy, safety, alignment)   presupposes platform determinism. Our system, 99,000 lines of Rust deployed across   three continents, establishes that AI trust is a question of arithmetic.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/28/2603.22011v1-asymptotically-ideal-hierarchical-secret-sharing-based-on-crt-for-integer-ring",
+      "section": "quick",
+      "title_en": "Asymptotically Ideal Hierarchical Secret Sharing Based on CRT for Integer Ring",
+      "authors": "Jian Ding, Cheng Wang, Hongju Li, Cheng Shu, Haifeng Yu",
+      "date": "2026-03-23",
+      "pdf": "https://arxiv.org/pdf/2603.22011v1",
+      "score": "6.0",
+      "evidence": "分级秘密共享协议与理论",
+      "tldr": "针对传统Shamir秘密共享权限均等及现有基于中国剩余定理（CRT）的分级秘密共享（HSS）方案安全性不足或信息率低的问题，本文提出两种基于整数环CRT和单向函数的新型HSS方案（析取型和合取型）。该方案通过优化参数选择实现了渐近理想的信息率，并在保证安全性的前提下，为不同权限等级的参与者提供了灵活的份额分配机制。",
+      "tags": "query:fss-llm",
+      "abstract_en": "In Shamir's secret sharing scheme, all participants possess equal privileges. However, in many practical scenarios, it is often necessary to assign different levels of authority to different participants. To address this requirement, Hierarchical Secret Sharing (HSS) schemes were developed, which partitioned all participants into multiple subsets and assigned a distinct privilege level to each. Existing Chinese Remainder Theorem (CRT)-based HSS schemes benefit from flexible share sizes, but either exhibit security flaws or have an information rate less than $\\frac{1}{2}$. In this work, we propose a disjunctive HSS scheme and a conjunctive HSS scheme by using the CRT for integer ring and one-way functions. Both schemes are asymptotically ideal and are proven to be secure.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
