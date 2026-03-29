@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-03-29 <!--dpr-date:20260329-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202603/29/2603.23364v1-canonical-byte-string-encoding-for-finite-ring-cryptosystems" data-sidebar-item="{&quot;title&quot;: &quot;Canonical Byte-String Encoding for Finite-Ring Cryptosystems&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.23364v1-canonical-byte-string-encoding-for-finite-ring-cryptosystems&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;有限环密码系统和代数加密的规范编码&quot;}">Canonical Byte-String Encoding for Finite-Ring Cryptosystems</a>
   * 2026-03-28 <!--dpr-date:20260328-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202603/28/2603.24904v1-on-the-foundations-of-trustworthy-artificial-intelligence" data-sidebar-item="{&quot;title&quot;: &quot;On the Foundations of Trustworthy Artificial Intelligence&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.24904v1-on-the-foundations-of-trustworthy-artificial-intelligence&quot;, &quot;score&quot;: &quot;8.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;可验证推理与跨架构确定性的整数引擎&quot;}">On the Foundations of Trustworthy Artificial Intelligence</a>

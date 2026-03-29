@@ -6,28 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-28
-- 运行时间：2026-03-28 19:34:25 UTC
+- 最新运行日期：2026-03-29
+- 运行时间：2026-03-29 19:18:16 UTC
 - 运行状态：成功
-- 本次总论文数：2
-- 精读区：1
+- 本次总论文数：1
+- 精读区：0
 - 速读区：1
 
 ### 今日简报（AI）
-今日深挖可信人工智能的底层逻辑，并同步关注分级秘密共享的加密前沿。
-重点剖析了构建安全可靠 AI 的理论框架，以及基于中国剩余定理实现高效数据分权的技术路径。
-建议优先研读可信 AI 综述以把握行业合规趋势，同时关注隐私计算在多层级场景下的安全应用。
-- 详情：[/202603/28/README](/202603/28/README)
+今日聚焦有限环密码系统的规范化编码技术，探索数据转换的标准化路径。
+该研究提出了一种针对有限环的规范字节串编码方案，旨在提升加密协议的互操作性与安全性。
+建议关注后量子密码学或底层协议开发的读者了解该编码标准，以优化系统实现。
+- 详情：[/202603/29/README](/202603/29/README)
 
 ### 精读区论文标签
-1. [On the Foundations of Trustworthy Artificial Intelligence](/202603/28/2603.24904v1-on-the-foundations-of-trustworthy-artificial-intelligence)  
-   标签：评分：8.0/10、query:fss-llm
-   evidence：可验证推理与跨架构确定性的整数引擎
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Asymptotically Ideal Hierarchical Secret Sharing Based on CRT for Integer Ring](/202603/28/2603.22011v1-asymptotically-ideal-hierarchical-secret-sharing-based-on-crt-for-integer-ring)  
+1. [Canonical Byte-String Encoding for Finite-Ring Cryptosystems](/202603/29/2603.23364v1-canonical-byte-string-encoding-for-finite-ring-cryptosystems)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：分级秘密共享协议与理论
+   evidence：有限环密码系统和代数加密的规范编码
 
 
 <div class="dpr-home-promo-card">

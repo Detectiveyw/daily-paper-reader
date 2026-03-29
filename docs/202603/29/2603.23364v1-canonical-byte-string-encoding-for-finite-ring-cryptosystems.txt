@@ -1,0 +1,330 @@
+Title: Canonical Byte-String Encoding for Finite-Ring Cryptosystems
+
+URL Source: https://arxiv.org/pdf/2603.23364v1
+
+Published Time: Wed, 25 Mar 2026 01:39:21 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# Canonical Byte-String Encoding for Finite-Ring Cryptosystems 
+
+Kyrylo Riabov ∗1 and Serhii Kryvyi †1 1Taras Shevchenko National University of Kyiv, Faculty of Computer Science and Cybernetics, Kyiv, Ukraine March 25, 2026 
+
+Abstract 
+
+Ring-mapping protocols need a canonical byte-to-residue layer before any algebraic encryption step can begin. This paper isolates that layer and presents the base-𝑚 -len codec, a canonical map from byte strings of length less than 264 to lists of residues modulo 𝑚 . The encoder builds on and adapts one of the rANS-based systems proposed by Duda [1]. Decoding is exact for all moduli satisfying the paper’s parameter bounds. Because the encoding carries the byte length in its fixed-width header, decoding is also tolerant to appended valid suffix digits. The paper is accompanied by a Rust implementation of the described protocol, a Lean 4 formalization of the abstract codec with machine-checked proofs, and performance benchmarks. The Lean 4 formalization establishes fixed-width prefix inversion and payload-state bounds below 264 ,stream-level roundtrip correctness, and that every emitted symbol is a valid residue modulo 𝑚 .We conclude with a complexity analysis and a discussion of practical considerations arising in real-world use of the codec. 
+
+Keywords: finite-ring cryptography, message representation, base-𝑚 encoding, formal verification 
+
+# 1 Introduction 
+
+Ring-mapping cryptosystems [2], [3] require messages to be represented as elements of ℤ𝑚 before encryption or decryption. In those papers, message preparation is handled by hand-built alphabets and small fixed symbol tables. That is sufficient for illustrating the algebra, but it leaves open the general problem of how arbitrary UTF-8 text or binary data should be represented before the ring-level encryption step begins. This representation problem extends beyond the mentioned papers. Any protocol that operates on plaintext data over ℤ𝑚 must first represent that data as residues in ℤ𝑚 before applying its core transformations. This aspect is also reflected in the ERC project SYMPZON [4], which studies symmetric primitives over integer rings for applications such as format-preserving encryption, multi-party computation, fully homomorphic encryption, and zero-knowledge. The present work provides a concrete representation layer that can support such constructions. This paper defines a canonical byte-to-residue codec for finite-ring cryptosystems. The preferred base-𝑚 -len construction maps each byte string of length less than 264 to a residue stream in ℤ𝑚 . Its wire format 
+
+> ∗kyryl.riabov@gmail.com ; ORCID 0009-0003-4118-8492
+> †sl.krivoi@gmail.com ; ORCID 0000-0003-4231-0691
+
+1
+
+> arXiv:2603.23364v1 [cs.CR] 24 Mar 2026
+
+2 Model, Implementation Scope, and Lean 4 formalization 2consists of three components: a fixed-width base-𝑚 encoding of the byte length and the final payload state, and a payload stream produced by a uniform base-𝑚 transduction. The decoder reconstructs the original bytes exactly and stops after the declared length, so any additional valid suffix digits are ignored. The construction is intended as a representation layer rather than a compression method. For sufficiently large moduli, it may also achieve compression in practice, but this aspect lies outside the scope of the paper. The payload mechanism follows the normalized-state perspective of ANS and rANS, but is used here to obtain a deterministic, self-delimiting residue format rather than a new entropy coder or security primitive [1], [5]. The problem addressed is orthogonal to ring-based lattice cryptography such as NTRU and ML-KEM [6], [7], which rely on different assumptions and target different protocol goals. The paper makes three contributions. 1. It defines a canonical, modulus-parameterized byte-to-residue codec for finite-ring protocols, centered on the base-𝑚 -len wire format. 2. It establishes exact decoding, suffix tolerance, and fixed-width header inversion for supported moduli and byte strings of length less than 264 .3. It provides a reference implementation and formal specification, consisting of a Rust library and a Lean 4 formalization with machine-checked proofs. The remainder of the paper formalizes the model and proof scope, specifies the codec, states the main guarantees, and evaluates its complexity and practical performance. 
+
+# 2 Model, Implementation Scope, and Lean 4 formalization 
+
+2.1 Core definitions and boundaries 
+
+Definition 2.1 (Supported modulus) . A supported modulus is a modulus 𝑚 for which the abstract codec parameters are well-formed, namely 
+
+2 ≤ 𝑚 and 256 ≤ decoderLowerBound (𝑚). 
+
+This definition is formalized in [Params.lean, L49–L53]. 
+
+Definition 2.2 (Admissible byte string) . An admissible byte string is a finite sequence of bytes of length less than 264 . We write 
+
+ByteString 64 = { bytes ∈ {0, 1, … , 255} ∗ ∶ | bytes | < 2 64 } . 
+
+This definition is formalized in [Spec.lean, L16–L18]. For each supported modulus 𝑚 , the abstract codec interface is 
+
+Encode 𝑚 ∶ ByteString 64 → List (Fin (𝑚)), Decode 𝑚 ∶ List (Fin (𝑚)) → Except (Error , ByteString 64 ). 
+
+The encoder produces valid base-𝑚 digits only, and the decoder either reconstructs an admissible byte string or reports failure. The abstract encoder and decoder are formalized in [Spec.lean, L145–L181], while the fact that every emitted symbol lies in [0, 𝑚) is recorded in [Stream.lean, L25–L31]. The core model treats residue digits as elements of Fin (𝑚) from the outset, so malformed raw naturals outside the residue range do not appear inside the proved interface; see [Params.lean, L31–L33] for the digit type and [Spec.lean, L191–L238] for the boundary validators on plain numeric inputs. The zero-length case is explicit as well: if the length prefix decodes to 0, the decoder returns the empty byte string immediately, as in [Spec.lean, L154–L168]. The corresponding zero-length decoding lemmas appear in [Stream.lean, L133–L169]. 3 The Base-m-Len Codec 3
+
+2.2 Implementation and Proof Scope 
+
+The public artifacts consist of a Rust library released as sym -adv -encoding [8] and a Lean 4 formalization with machine-checked proofs in the same project repository [9]. On the Rust side, the main byte-oriented en-try points are encode _bytes _base _m_len and decode _bytes _base _m_len , with UTF-8 frontends above them. On the proof side, Lean formalizes the abstract codec, including supported parameters, fixed-width prefixes, payload transduction, and end-to-end stream properties. The proof scope is intentionally limited to the abstract specification boundary. It does not verify the Rust implementation line by line. Parser hardening, allocation limits, low-level I/O, and other engineering details therefore remain implementation concerns rather than machine-checked theorems. 
+
+# 3 The Base-m-Len Codec 
+
+3.1 Fixed-Width Base-m Headers 
+
+Definition 3.1 (Prefix width) . For a supported modulus 𝑚 , let 
+
+𝑘 = min {𝑗 ∈ ℕ 0 ∶ 𝑚 𝑗 ≥ 2 64 } . 
+
+The fixed-width prefix encoder EncodePrefix 𝑚 represents every 𝑥 < 2 64 as exactly 𝑘 little-endian base-𝑚 
+
+digits. The same width 𝑘 is used for both fixed prefixes in the wire format: the byte length and the final pay-load state. In the Lean 4 formalization, the definition of this width and its least-width property appear in [Params.lean, L72–L90], with bundled forms for parameter packages in [Params.lean, L145–L204]. 
+
+3.2 Uniform Base-m Payload Transduction 
+
+Let 𝐿 denote the decoder lower bound associated with the supported modulus. The payload layer maintains a base-𝑚 state and applies the uniform byte update 
+
+𝑥 ← 256𝑥 + 𝑏. 
+
+In the Lean 4 formalization, the bundled definitions of the decoder lower bound 𝐿 and the encoder thresh-old appear in [Params.lean, L151–L161], and the encoder-side and decoder-side renormalization procedures together with the payload transducer are defined in [Spec.lean, L80–L143]. Operationally, the encoder scans the input bytes from right to left. Before each byte update, it emits base-𝑚 digits until the current state is below the encoder threshold. After the full reverse scan, the emitted payload digits are exposed in FIFO order, so the decoder can read the final wire format from left to right. This mechanism is close in spirit to ANS and rANS, but the purpose is different. Classical ANS work studies entropy coding relative to a probabilistic source model. Here the byte update is uniform, the output alphabet is fixed by the target modulus 𝑚 , and the goal is a deterministic, self-delimiting residue representation that can serve as a canonical message layer for finite-ring protocols [1], [5]. 
+
+3.3 Wire Format and Algorithms 
+
+Definition 3.2 (Wire format) . For every admissible byte string bytes ,
+
+Encode 𝑚 (bytes ) = len ‖ state ‖ payload ,3 The Base-m-Len Codec 4
+
+Algorithm 1: Base-m-len encode 
+
+Input: Admissible byte string bytes , supported modulus 𝑚 
+
+Output: Residues in List (Fin (𝑚))  
+
+> 1
+
+Set 𝑘 ← min {𝑗 ∈ ℕ 0 ∶ 𝑚 𝑗 ≥ 2 64 }; 
+
+> 2
+
+Encode |bytes | as 𝑘 little-endian base-𝑚 digits;  
+
+> 3
+
+Initialize the payload state 𝑥 at the decoder lower bound 𝐿 ; 
+
+> 4
+
+for byte values 𝑏 of bytes in reverse order do  
+
+> 5
+
+While 𝑥 exceeds the encoder threshold, emit 𝑥 mod 𝑚 and set 𝑥 ← ⌊𝑥/𝑚⌋ ; 
+
+> 6
+
+Set 𝑥 ← 256𝑥 + 𝑏 ; 
+
+> 7
+
+end  
+
+> 8
+
+Encode the final state 𝑥 as 𝑘 little-endian base-𝑚 digits;  
+
+> 9
+
+Reverse the emitted payload digits and return len ‖ state ‖ payload ;
+
+Algorithm 2: Base-m-len decode 
+
+Input: Residue stream 𝑑𝑖𝑔𝑖𝑡𝑠 , supported modulus 𝑚 
+
+Output: Except (Error , ByteString 64 ) 
+
+> 1
+
+Set 𝑘 ← min {𝑗 ∈ ℕ 0 ∶ 𝑚 𝑗 ≥ 2 64 }; 
+
+> 2
+
+Read the first 𝑘 digits as the declared byte length ℓ; 
+
+> 3
+
+if ℓ = 0 then  
+
+> 4
+
+Return ok ([]) ; 
+
+> 5
+
+end  
+
+> 6
+
+Read the next 𝑘 digits as the initial payload state 𝑥 ; 
+
+> 7
+
+for 𝑖 = 1 to ℓ do  
+
+> 8
+
+Output 𝑥 mod 256 ; 
+
+> 9
+
+Set 𝑥 ← ⌊𝑥/256⌋ ; 
+
+> 10
+
+While 𝑥 is below the decoder lower bound, consume the next payload digit 𝑑 and set 𝑥 ← 𝑥𝑚 + 𝑑 ; 
+
+> 11
+
+end  
+
+> 12
+
+Ignore any remaining trailing suffix and return the reconstructed bytes; where len = EncodePrefix 𝑚 (| bytes |) , state is the fixed-width encoding of the final payload state, and payload 
+
+is the FIFO base-𝑚 digit stream produced by the payload transducer. In the Lean 4 formalization, this concatenated wire format is the definition of the abstract encoder; see [Spec.lean, L145–L152]. Decoding is staged in the same order. The decoder first reads the length prefix. If that prefix is 0, it returns the empty byte string. Otherwise, it reads the state prefix and then consumes exactly as many payload digits as are needed to reconstruct the declared number of bytes. Any valid digits that remain after those bytes are recovered are left unread. In the Lean 4 formalization, the staged decoder is defined in [Spec.lean, L154–L181]; its immediate zero-length return already appears in [Spec.lean, L154–L168], with dedicated zero-length stream lemmas in [Stream.lean, L133–L169]. The padding-tolerant end-to-end theorem that trailing suffix digits are ignored appears in [Stream.lean, L171–L263]. In the Lean 4 formalization, Algorithms 9 and 12 correspond directly to the definitions in [Spec.lean, L80– L181]. 
+
+Example 3.1 (Worked example for “Hi” at 𝑚 = 50 ). In the Lean 4 formalization, the companion examples in [Examples.lean, L53–L56] evaluate the admissible byte string [72, 105] to the residue stream 
+
+> [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 8, 11, 36, 6, 32, 19, 0, 38, 1, 49, 1, 1, 48]
+
+4 Correctness Guarantees 5Here 𝑘 = 12 . The first 12 digits are the fixed-width encoding of the byte length 2, the next 12 digits encode the stored payload state, and the final two digits form the payload. Decoding returns ok ([72, 105]) , hence the original two-byte input. 
+
+# 4 Correctness Guarantees 
+
+The proof development is split across six Lean files, from parameters and fixed-width prefixes to renormal-ization, payload inversion, and stream-level correctness. 
+
+4.1 Main Theorems 
+
+Theorem 4.1 (Stream correctness) . For every supported modulus 𝑚 and every admissible byte string bytes ∈
+
+ByteString 64 ,
+
+Decode 𝑚 (Encode 𝑚 (bytes )) = ok (bytes ). 
+
+Moreover, for every valid suffix 𝑡 ∈ List (Fin (𝑚)) ,
+
+Decode 𝑚 (Encode 𝑚 (bytes ) ‖ 𝑡) = ok (bytes ). 
+
+Proof. In the Lean 4 formalization, the suffix-tolerant theorem is [Stream.lean, L171–L251], and its empty-suffix specialization is [Stream.lean, L253–L263]. The proof uses the header-parsing lemmas [Stream.lean, L33–L131], the zero-length lemmas [Stream.lean, L133–L169], and the payload roundtrip theorem [Payload.lean, L80–L142]. It first recovers the declared length prefix, then the stored state prefix, and finally applies the pay-load roundtrip theorem to the remaining suffix. The extra-suffix clause follows because decoding stops after reconstructing the declared number of bytes and therefore leaves any remaining valid suffix unread. 
+
+Theorem 4.2 (Header correctness) . For every supported modulus 𝑚 , let 
+
+𝑘 = min {𝑗 ∈ ℕ 0 ∶ 𝑚 𝑗 ≥ 2 64 } . 
+
+Then 
+
+𝑚 𝑘 ≥ 2 64 and ∀𝑗 < 𝑘, 𝑚 𝑗 < 2 64 .
+
+Moreover, for every 𝑥 < 2 64 ,
+
+DecodePrefix 𝑚 (EncodePrefix 𝑚 (𝑥)) = some (𝑥). 
+
+Proof. In the Lean 4 formalization, the least-width property is formalized in [Params.lean, L72–L90], with the bundled statement in [Params.lean, L193–L204]; fixed-width prefix inversion is proved in [Prefix.lean, L64–L86]. Minimality is immediate from the definition of 𝑘 as the least exponent with 𝑚 𝑘 ≥ 2 64 . Once that bound is known, every 𝑥 < 2 64 lies in the domain of the fixed-width base-𝑚 prefix decoder. 
+
+Proposition 4.3 (Payload-state bounds) . For every supported modulus 𝑚 and every admissible byte string 
+
+bytes , the payload encoder returns a state in the normalization window 
+
+𝐿 ≤ state (bytes ) < 𝐿𝑚. 
+
+In particular, 
+
+state (bytes ) < 2 64 .
+
+Proof. In the Lean 4 formalization, the normalization-window bound and its 264 corollary are proved in [Payload.lean, L17–L78]. The first part is the inductive invariant of the payload transducer; the second follows from the global estimate 𝐿𝑚 ≤ 2 64 − 1 .5 Evaluation 6
+
+Table 5.1. Asymptotic payload cost and fixed header size for representative moduli. Modulus 𝑚 Payload digits per byte Header digits 2𝑘 
+
+25 1.723 28 50 1.417 24 257 0.9993 16 
+
+4.2 Proof Idea and Traceability 
+
+The end-to-end proof has three layers. In the Lean 4 formalization, the fixed-width prefix inversion lemmas appear in [Prefix.lean, L29–L86], the renormalization roundtrip theorems in [Renorm.lean, L219–L294], the payload roundtrip theorems in [Payload.lean, L80–L142], and the final stream theorem in [Stream.lean, L171– L263], with the zero-length branch isolated separately in [Stream.lean, L133–L169]. First, fixed-width base-𝑚 
+
+headers invert because the chosen width covers exactly the full 64-bit range. Second, a renormalization block decodes back to the previous state while preserving any untouched suffix. Third, a byte-level induction lifts that state result to the whole payload. The stream theorem then combines the two header inversions with the payload theorem and isolates the zero-length branch. 
+
+# 5 Evaluation 
+
+The evaluation addresses two questions: what the representation costs in theory, and whether the preferred streaming construction is practical in native code. 
+
+5.1 Complexity and Representation Cost 
+
+Let 𝑛 = | bytes | and let 𝑘 = ⌈ log 𝑚 264 ⌉. The two fixed-width headers contribute exactly 2𝑘 digits. The payload contributes a number of digits proportional to the byte length, with asymptotic rate log 𝑚 256 = 8
+
+log 2 𝑚 
+
+digits per byte. Figure 5.1 visualizes this trade-off over the range 25 ≤ 𝑚 ≤ 257 : larger moduli reduce the payload rate smoothly, while the fixed header width drops only when 𝑘 crosses an integer threshold. Since each emitted digit is produced once and each consumed digit is read once, encoding and decoding are linear in the stream length. For every fixed supported modulus 𝑚 , this yields 𝑂(𝑛) time and 𝑂(1) working state beyond the input and output buffers. 
+
+5.2 Native Performance 
+
+The companion Rust code includes Criterion benchmarks for the preferred codec, exact BigUint radix-conversion baselines, and an external ANS reference used only for context. The representative measurements below were recorded on an Apple M3 Pro machine using the existing harness; methodology details are summarized in Section A. Those numbers are included only as practical evidence. 
+
+5.3 Interpretation 
+
+Three conclusions are relevant for protocol design. 1. Small moduli remain usable, but Table 5.1 makes their header and payload overhead explicit instead of 6 Security Role and Implementation Limits 7
+
+Figure 5.1. Representation cost as a function of the modulus 𝑚 over the range 25 ≤ 𝑚 ≤ 257 . The upper panel shows the smooth payload rate log 𝑚 256 , while the lower panel shows the stepwise fixed header cost 
+
+2𝑘 .      
+
+> 25 50 100 150 200 257
+> 1
+> 1.2
+> 1.4
+> 1.6
+> 1.8
+> 16
+> 18
+> 20
+> 22
+> 24
+> 26
+> 28
+> 𝑚 = 25
+> 𝑚 = 50
+> 𝑚 = 257
+> Payload rate
+> Fixed header width
+> log 𝑚  256 2𝑘
+> modulus 𝑚
+
+Table 5.2. Representative throughput measurements in MiB/s. The BigUint baseline is only defined for 
+
+𝑚 ≤ 256 . The ANS reference column provides context only; it does not implement the same length-delimited residue wire format. Workload Native 𝑚 = 65 BigUint 𝑚 = 65 Native 𝑚 = 257 ANS ref. Encode 1 KiB 163.6 25.2 217.0 218.1 Decode 1 KiB 485.9 125.7 640.5 150.9 Encode 64 KiB 188.1 1.285 236.7 226.2 Decode 64 KiB 510.3 3.201 669.1 144.2 hiding it behind ad hoc symbol tables. 2. The preferred streaming construction is not only asymptotically linear but also much faster in practice than exact whole-payload radix conversion on large inputs, which is the meaningful baseline for a canonical ring-level representation. 3. The 𝑚 = 257 configuration is close to one residue per byte while still retaining explicit length recovery and suffix-tolerant decoding. 
+
+# 6 Security Role and Implementation Limits 
+
+This codec should be read as deterministic serialization, not as a security primitive in its own right [10]. Four limitations matter in practice. 1. The codec is public and deterministic, so it provides no confidentiality, integrity, or authenticity before the surrounding cryptographic protocol is applied. 2. The preferred wire format exposes the exact byte length. If length hiding is required, padding must be enforced at the surrounding protocol layer. A Benchmark Methodology 83. The Lean formalization proves the abstract specification boundary rather than the Rust implementation, so low-level parser and allocator behavior remain implementation responsibilities. 4. Because decoding allocates according to the embedded length, implementations should enforce a caller-specified maximum decoded length for untrusted inputs. 
+
+# 7 Related Work 
+
+Two lines of prior work are most directly relevant. First, ring-mapping cryptosystems motivate communication over residue domains such as ℤ𝑚 and 𝐺 𝑚 .The ring-mapping cryptosystems studied in [2], [3] provide the application setting in which byte strings must be transported through finite-ring representations. However, those works treat the representation layer as supporting machinery rather than as a separate codec problem. Second, the payload mechanism used here is structurally close to ANS and rANS [1], [5]. These methods maintain a normalized state and use renormalization while reading or emitting symbols in a fixed radix. The present construction adopts that operational pattern in a uniform byte setting, but uses it for deterministic, self-delimiting transport into a prescribed residue alphabet rather than for entropy coding relative to a source model. Ring-based lattice systems such as NTRU and ML-KEM [6], [7] are related only at a broader structural level. They also work over ring-based algebraic domains, but their main concern is hardness-based encryption and key encapsulation, not canonical byte representation for residue-domain transport. Accordingly, the specific focus of this paper is the byte-to-residue representation layer itself: a fixed-width, self-delimiting codec with explicit correctness theorems and machine-checked proof traceability. 
+
+# 8 Conclusion 
+
+The base-𝑚 -len codec isolates the byte-to-residue representation layer needed by finite-ring protocols. Its wire format consists of a fixed-width length prefix, a fixed-width state prefix, and a uniform base-𝑚 payload stream. For every supported modulus and every admissible byte string of length less than 264 , decoding recovers the original bytes and is tolerant of any valid trailing suffix. The released Rust library [8] and the benchmark suite in the project repository indicate that the construc-tion is practical, while the Lean 4 formalization in the repository [9] establishes fixed-width prefix inver-sion, payload-state bounds, and end-to-end stream correctness. Because the codec outputs canonical residue streams in ℤ𝑚 , it composes directly with the ℤ𝑚 ↔ 𝐺 𝑚 transport layer used in prior ring-mapping cryp-tosystems [2], [3]. More broadly, it contributes a concrete message-representation layer to current work on symmetric cryptography over integer rings, as reflected in the SYMPZON agenda [4]. 
+
+# A Benchmark Methodology 
+
+The Criterion benchmark suite in the project repository [9] is organized into four families. 1. Native byte-transduction benchmarks for encode _bytes _base _m_len and decode _bytes _base _m_len ,evaluated at moduli 2, 3, 13, 65, 251, 257 and input sizes 32 B, 1 KiB, and 64 KiB. 2. UTF-8 smoke benchmarks for the text frontend encode _text _base _m_len and decode _text _base _m_len 
+
+at modulus 𝑚 = 65 , using mixed UTF-8 inputs of size 1 KiB and 64 KiB. 3. Exact BigUint radix-conversion baselines for byte encode/decode at moduli 2, 3, 13, 65, 251 and the References 9same three byte sizes; modulus 257 is excluded because the underlying radix-conversion routine sup-ports moduli only up to 256 .4. Reference ANS encode/decode benchmarks, implemented via the external constriction library, at input sizes 32 B, 1 KiB, and 64 KiB. Unless noted otherwise, the representative throughput values reported in Table 5.2 were obtained on an Apple M3 Pro machine using short Criterion runs with sample size 10 , warm-up time 0.1 s, and measurement time 0.2 s. 
+
+# References 
+
+[1] J. Duda, “Asymmetric numeral systems: Entropy coding combining speed of Huffman coding with com-pression rate of arithmetic coding,” arXiv preprint arXiv:1311.2540 , 2014. doi: 10.48550/arXiv.1311. 2540 arXiv: 1311.2540 [cs.IT] . [Online]. Available: https://arxiv.org/abs/1311.2540v2 
+
+[2] S. L. Kryvyi, V. N. Opanasenko, E. A. Grinenko, and Y. A. Nortman, “Symmetric information ex-change system based on ring isomorphism,” Cybernetics and Systems Analysis , vol. 58, no. 5, 2022. [On-line]. Available: https : / / www . springerprofessional . de / en / symmetric - information -exchange-system-based-on-ring-isomorphism/23785398 
+
+[3] S. Kryvyi and K. Riabov, “Symmetric cryptosystem based on ring images,” in Proceedings of the Workshop on Intelligent Information Technologies (UkrProg-IIT 2025) , ser. CEUR Workshop Proceedings, vol. 4049, CEUR-WS.org, 2025. [Online]. Available: https://ceur-ws.org/Vol-4049/paper1.pdf 
+
+[4] European Commission. “SYMPZON: Getting SYMmetric CryPtography Out of its Comfort ZONe.” ERC Starting Grant, Horizon Europe, grant agreement No. 101160608, 2025–2030. [Online]. Available: https: //cordis.europa.eu/project/id/101160608 
+
+[5] F. Giesen, rANS notes , Practitioner notes on streaming rANS, 2014. [Online]. Available: https : / / fgiesen.wordpress.com/2014/02/02/rans-notes/ 
+
+[6] J. Hoffstein, J. Pipher, and J. H. Silverman, “NTRU: A ring-based public key cryptosystem,” in Algorithmic Number Theory , ser. Lecture Notes in Computer Science, vol. 1423, Springer, 1998, pp. 267–288. doi:  
+
+> 10.1007/BFb0054868
+
+[Online]. Available: https://www.ntru.org/f/hps98.pdf 
+
+[7] National Institute of Standards and Technology, Post-quantum cryptography standards: FIPS 203 (ML-KEM), FIPS 204 (ML-DSA), FIPS 205 (SLH-DSA) , NIST post-quantum cryptography standards overview, Aug. 2024. [8] K. Riabov, Sym-adv-encoding , Rust crate, 2026. [Online]. Available: https://crates.io/crates/ sym-adv-encoding 
+
+[9] K. Riabov. “Phd-symmetric-cryptography: Lean formalization of the base-n-len codec.” GitHub repos-itory. [Online]. Available: https : / / github . com / KyrylR / phd - symmetric - cryptography / tree/main/lean/encoding-dr-1 
+
+[10] C. E. Shannon, “Communication theory of secrecy systems,” Bell System Technical Journal , vol. 28, no. 4, pp. 656–715, 1949. doi: 10.1002/j.1538- 7305.1949.tb00928.x [Online]. Available: https: //pages.cs.wisc.edu/~rist/642-spring-2014/shannon-secrecy.pdf

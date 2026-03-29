@@ -1,0 +1,53 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-29T19:18:00.258224+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.23364v1",
+      "title": "Canonical Byte-String Encoding for Finite-Ring Cryptosystems",
+      "abstract": "Ring-mapping protocols need a canonical byte-to-residue layer before any algebraic encryption step can begin. This paper isolates that layer and presents the base-m length codec, a canonical map from byte strings of length less than 2^64 to lists of residues modulo m. The encoder builds on and adapts an rANS-based system proposed by Duda. Decoding is exact for all moduli satisfying the paper's parameter bounds. Because the encoding carries the byte length in its fixed-width header, decoding is also tolerant to appended valid suffix digits. The paper is accompanied by a Rust implementation of the described protocol, a Lean 4 formalization of the abstract codec with machine-checked proofs, and performance benchmarks. The Lean 4 formalization establishes fixed-width prefix inversion and payload-state bounds below 2^64, stream-level roundtrip correctness, and that every emitted symbol is a valid residue modulo m.   We conclude with a complexity analysis and a discussion of practical considerations arising in real-world use of the codec.",
+      "authors": [
+        "Kyrylo Riabov",
+        "Serhii Kryvyi"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.IT"
+      ],
+      "published": "2026-03-24T15:58:20+00:00",
+      "link": "https://arxiv.org/pdf/2603.23364v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Canonical encoding for finite-ring cryptosystems and algebraic encryption",
+      "llm_evidence_cn": "有限环密码系统和代数加密的规范编码",
+      "llm_evidence": "有限环密码系统和代数加密的规范编码",
+      "canonical_evidence": "有限环密码系统和代数加密的规范编码",
+      "llm_tldr_en": "Provides a formal byte-to-residue encoding layer essential for algebraic cryptographic protocols like FSS.",
+      "llm_tldr_cn": "提供了一个规范的字节到剩余类编码层，这对FSS等代数加密协议至关重要。",
+      "llm_tldr": "提供了一个规范的字节到剩余类编码层，这对FSS等代数加密协议至关重要。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

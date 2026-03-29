@@ -1,0 +1,23 @@
+{
+  "label": "2026-03-29",
+  "date": "2026-03-29",
+  "generated_at": "2026-03-29T19:18:23",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202603/29/2603.23364v1-canonical-byte-string-encoding-for-finite-ring-cryptosystems",
+      "section": "quick",
+      "title_en": "Canonical Byte-String Encoding for Finite-Ring Cryptosystems",
+      "authors": "Kyrylo Riabov, Serhii Kryvyi",
+      "date": "2026-03-24",
+      "pdf": "https://arxiv.org/pdf/2603.23364v1",
+      "score": "6.0",
+      "evidence": "有限环密码系统和代数加密的规范编码",
+      "tldr": "针对有限环密码系统需要将字节串转换为剩余类的问题，本文提出了一种规范的base-m长度编解码器。该方案基于rANS系统，支持长度小于2^64的字节串到模m剩余类列表的映射。研究提供了Rust实现和Lean 4形式化证明，确保了编解码的精确性、前缀反转一致性及状态边界，为环加密协议提供了可靠的底层数据转换层。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Ring-mapping protocols need a canonical byte-to-residue layer before any algebraic encryption step can begin. This paper isolates that layer and presents the base-m length codec, a canonical map from byte strings of length less than 2^64 to lists of residues modulo m. The encoder builds on and adapts an rANS-based system proposed by Duda. Decoding is exact for all moduli satisfying the paper's parameter bounds. Because the encoding carries the byte length in its fixed-width header, decoding is also tolerant to appended valid suffix digits. The paper is accompanied by a Rust implementation of the described protocol, a Lean 4 formalization of the abstract codec with machine-checked proofs, and performance benchmarks. The Lean 4 formalization establishes fixed-width prefix inversion and payload-state bounds below 2^64, stream-level roundtrip correctness, and that every emitted symbol is a valid residue modulo m.   We conclude with a complexity analysis and a discussion of practical considerations arising in real-world use of the codec.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
