@@ -1,0 +1,92 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-31T20:05:37.313848+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.28143v1",
+      "title": "Silent Guardians: Independent and Secure Decision Tree Evaluation Without Chatter",
+      "abstract": "As machine learning as a service (MLaaS) gains increasing popularity, it raises two critical challenges: privacy and verifiability. For privacy, clients are reluctant to disclose sensitive private information to access MLaaS, while model providers must safeguard their proprietary models. For verifiability, clients lack reliable mechanisms to ensure that cloud servers execute model inference correctly. Decision trees are widely adopted in MLaaS due to their popularity, interpretability, and broad applicability in domains like medicine and finance. In this context, outsourcing decision tree evaluation (ODTE) enables both clients and model providers to offload their sensitive data and decision tree models to the cloud securely. However, existing ODTE schemes often fail to address both privacy and verifiability simultaneously. To bridge this gap, we propose $\\sf PVODTE$, a novel two-server private and verifiable ODTE protocol that leverages homomorphic secret sharing and a MAC-based verification mechanism. $\\sf PVODTE$ eliminates the need for server-to-server communication, enabling independent computation by each cloud server. This ``non-interactive'' setting addresses the latency and synchronization bottlenecks of prior arts, making it uniquely suitable for wide-area network (WAN) deployments. To our knowledge, $\\sf PVODTE$ is the first two-server ODTE protocol that eliminates server-to-server communication. Furthermore, $\\sf PVODTE$ achieves security against \\emph{malicious} servers, where servers cannot learn anything about the client's input or the providers' decision tree models, and servers cannot alter the inference result without being detected.",
+      "authors": [
+        "Jinyuan Li",
+        "Liang Feng Zhang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-30T08:07:10+00:00",
+      "link": "https://arxiv.org/pdf/2603.28143v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "privacy and verifiability in machine learning inference",
+      "llm_evidence_cn": "机器学习推理中的隐私与可验证性",
+      "llm_evidence": "机器学习推理中的隐私与可验证性",
+      "canonical_evidence": "机器学习推理中的隐私与可验证性",
+      "llm_tldr_en": "Proposes a secure and verifiable decision tree evaluation protocol for MLaaS to protect data and model privacy.",
+      "llm_tldr_cn": "为MLaaS提出了一种安全且可验证的决策树评估协议，以保护数据和模型隐私。",
+      "llm_tldr": "为MLaaS提出了一种安全且可验证的决策树评估协议，以保护数据和模型隐私。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.26781v1",
+      "title": "Efficient Encrypted Computation in Convolutional Spiking Neural Networks with TFHE",
+      "abstract": "With the rapid advancement of AI technology, we have seen more and more concerns on data privacy, leading to some cutting-edge research on machine learning with encrypted computation. Fully Homomorphic Encryption (FHE) is a crucial technology for privacy-preserving computation, while it struggles with continuous non-polynomial functions, as it operates on discrete integers and supports only addition and multiplication. Spiking Neural Networks (SNNs), which use discrete spike signals, naturally complement FHE's characteristics. In this paper, we introduce FHE-DiCSNN, a framework built on the TFHE scheme, utilizing the discrete nature of SNNs for secure and efficient computations. By leveraging bootstrapping techniques, we successfully implement Leaky Integrate-and-Fire (LIF) neuron models on ciphertexts, allowing SNNs of arbitrary depth. Our framework is adaptable to other spiking neuron models, offering a novel approach to homomorphic evaluation of SNNs. Additionally, we integrate convolutional methods inspired by CNNs to enhance accuracy and reduce the simulation time associated with random encoding. Parallel computation techniques further accelerate bootstrapping operations. Experimental results on the MNIST and FashionMNIST datasets validate the effectiveness of FHE-DiCSNN, with a loss of less than 3\\% compared to plaintext, respectively, and computation times of under 1 second per prediction. We also apply the model into real medical image classification problems and analyze the parameter optimization and selection.",
+      "authors": [
+        "Longfei Guo",
+        "Pengbo Li",
+        "Ting Gao",
+        "Yonghai Zhong",
+        "Haojie Fan",
+        "Jinqiao Duan"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-03-25T03:15:59+00:00",
+      "link": "https://arxiv.org/pdf/2603.26781v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Secure and efficient encrypted computation for neural networks using TFHE",
+      "llm_evidence_cn": "使用TFHE对神经网络进行安全高效的加密计算",
+      "llm_evidence": "使用TFHE对神经网络进行安全高效的加密计算",
+      "canonical_evidence": "使用TFHE对神经网络进行安全高效的加密计算",
+      "llm_tldr_en": "Develops a framework for secure spiking neural network computation using fully homomorphic encryption.",
+      "llm_tldr_cn": "开发了一个使用全同态加密进行安全脉冲神经网络计算的框架。",
+      "llm_tldr": "开发了一个使用全同态加密进行安全脉冲神经网络计算的框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
