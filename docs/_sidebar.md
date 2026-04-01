@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-04-01 <!--dpr-date:20260401-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/01/2603.28622v1-trust-aware-routing-for-distributed-generative-ai-inference-at-the-edge" data-sidebar-item="{&quot;title&quot;: &quot;Trust-Aware Routing for Distributed Generative AI Inference at the Edge&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.28622v1-trust-aware-routing-for-distributed-generative-ai-inference-at-the-edge&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;跨去中心化设备的分布式生成式AI推理&quot;}">Trust-Aware Routing for Distributed Generative AI Inference at the Edge</a>
   * 2026-03-31 <!--dpr-date:20260331-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202603/31/2603.28143v1-silent-guardians-independent-and-secure-decision-tree-evaluation-without-chatter" data-sidebar-item="{&quot;title&quot;: &quot;Silent Guardians: Independent and Secure Decision Tree Evaluation Without Chatter&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.28143v1-silent-guardians-independent-and-secure-decision-tree-evaluation-without-chatter&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;机器学习推理中的隐私与可验证性&quot;}">Silent Guardians: Independent and Secure Decision Tree Evaluation Without Chatter</a>

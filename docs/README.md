@@ -6,29 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-31
-- 运行时间：2026-03-31 20:05:58 UTC
+- 最新运行日期：2026-04-01
+- 运行时间：2026-04-01 19:57:46 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：1
 - 精读区：0
-- 速读区：2
+- 速读区：1
 
 ### 今日简报（AI）
-今日聚焦隐私计算前沿，深入探索了决策树安全评估与加密脉冲神经网络的高效实现。
-重点关注无需频繁通信的决策树保护方案，以及利用 TFHE 优化卷积脉冲神经网络的计算性能。
-建议关注全同态加密在新型神经网络架构中的落地，探索安全与效率的最优平衡。
-- 详情：[/202603/31/README](/202603/31/README)
+今日聚焦边缘侧分布式生成式 AI 推理，探索如何在复杂网络中实现高效的可信路由。
+研究重点在于通过感知信任的路由机制，平衡分布式推理的执行效率与边缘节点的安全性。
+建议关注边缘计算与 AI 安全交叉领域的读者，深入了解其信任度量模型对系统延迟的优化作用。
+- 详情：[/202604/01/README](/202604/01/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Silent Guardians: Independent and Secure Decision Tree Evaluation Without Chatter](/202603/31/2603.28143v1-silent-guardians-independent-and-secure-decision-tree-evaluation-without-chatter)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：机器学习推理中的隐私与可验证性
-2. [Efficient Encrypted Computation in Convolutional Spiking Neural Networks with TFHE](/202603/31/2603.26781v1-efficient-encrypted-computation-in-convolutional-spiking-neural-networks-with-tfhe)  
+1. [Trust-Aware Routing for Distributed Generative AI Inference at the Edge](/202604/01/2603.28622v1-trust-aware-routing-for-distributed-generative-ai-inference-at-the-edge)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：使用TFHE对神经网络进行安全高效的加密计算
+   evidence：跨去中心化设备的分布式生成式AI推理
 
 
 <div class="dpr-home-promo-card">

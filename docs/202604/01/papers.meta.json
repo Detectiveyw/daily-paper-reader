@@ -1,0 +1,23 @@
+{
+  "label": "2026-04-01",
+  "date": "2026-04-01",
+  "generated_at": "2026-04-01T19:57:57",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202604/01/2603.28622v1-trust-aware-routing-for-distributed-generative-ai-inference-at-the-edge",
+      "section": "quick",
+      "title_en": "Trust-Aware Routing for Distributed Generative AI Inference at the Edge",
+      "authors": "Chanh Nguyen, Erik Elmroth",
+      "date": "2026-03-30",
+      "pdf": "https://arxiv.org/pdf/2603.28622v1",
+      "score": "6.0",
+      "evidence": "跨去中心化设备的分布式生成式AI推理",
+      "tldr": "针对边缘计算环境下分布式生成式AI推理面临的设备不可靠和信任缺失问题，本文提出G-TRAC框架。该框架将路由建模为风险受限最短路径问题，结合信任剪枝与Dijkstra算法实现低延迟路径选择，并采用混合信任架构维护全局声誉。实验证明，G-TRAC能有效隔离故障节点，显著提升推理任务的完成率和系统鲁棒性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Emerging deployments of Generative AI increasingly execute inference across decentralized and heterogeneous edge devices rather than on a single trusted server. In such environments, a single device failure or misbehavior can disrupt the entire inference process, making traditional best-effort peer-to-peer routing insufficient. Coordinating distributed generative inference therefore requires mechanisms that explicitly account for reliability, performance variability, and trust among participating peers.   In this paper, we present G-TRAC, a trust-aware coordination framework that integrates algorithmic path selection with system-level protocol design to ensure robust distributed inference. First, we formulate the routing problem as a \\textit{Risk-Bounded Shortest Path} computation and introduce a polynomial-time solution that combines trust-floor pruning with Dijkstra's search, achieving sub-millisecond median routing latency at practical edge scales, and remaining below 10 ms at larger scales. Second, to operationally support the routing logic in dynamic environments, the framework employs a \\textit{Hybrid Trust Architecture} that maintains global reputation state at stable anchors while disseminating lightweight updates to edge peers via background synchronization.   Experimental evaluation on a heterogeneous testbed of commodity devices demonstrates that G-TRAC significantly improves inference completion rates, effectively isolates unreliable peers, and sustains robust execution even under node failures and network partitions.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

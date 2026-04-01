@@ -1,0 +1,54 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-01T19:57:24.717314+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.28622v1",
+      "title": "Trust-Aware Routing for Distributed Generative AI Inference at the Edge",
+      "abstract": "Emerging deployments of Generative AI increasingly execute inference across decentralized and heterogeneous edge devices rather than on a single trusted server. In such environments, a single device failure or misbehavior can disrupt the entire inference process, making traditional best-effort peer-to-peer routing insufficient. Coordinating distributed generative inference therefore requires mechanisms that explicitly account for reliability, performance variability, and trust among participating peers.   In this paper, we present G-TRAC, a trust-aware coordination framework that integrates algorithmic path selection with system-level protocol design to ensure robust distributed inference. First, we formulate the routing problem as a \\textit{Risk-Bounded Shortest Path} computation and introduce a polynomial-time solution that combines trust-floor pruning with Dijkstra's search, achieving sub-millisecond median routing latency at practical edge scales, and remaining below 10 ms at larger scales. Second, to operationally support the routing logic in dynamic environments, the framework employs a \\textit{Hybrid Trust Architecture} that maintains global reputation state at stable anchors while disseminating lightweight updates to edge peers via background synchronization.   Experimental evaluation on a heterogeneous testbed of commodity devices demonstrates that G-TRAC significantly improves inference completion rates, effectively isolates unreliable peers, and sustains robust execution even under node failures and network partitions.",
+      "authors": [
+        "Chanh Nguyen",
+        "Erik Elmroth"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC",
+        "cs.AI",
+        "cs.NI"
+      ],
+      "published": "2026-03-30T16:07:11+00:00",
+      "link": "https://arxiv.org/pdf/2603.28622v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Distributed generative AI inference across decentralized devices",
+      "llm_evidence_cn": "跨去中心化设备的分布式生成式AI推理",
+      "llm_evidence": "跨去中心化设备的分布式生成式AI推理",
+      "canonical_evidence": "跨去中心化设备的分布式生成式AI推理",
+      "llm_tldr_en": "A trust-aware coordination framework for robust distributed generative AI inference at the edge.",
+      "llm_tldr_cn": "一种用于边缘端鲁棒分布式生成式AI推理的信任感知协作框架。",
+      "llm_tldr": "一种用于边缘端鲁棒分布式生成式AI推理的信任感知协作框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
