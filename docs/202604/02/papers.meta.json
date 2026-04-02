@@ -1,0 +1,51 @@
+{
+  "label": "2026-04-02",
+  "date": "2026-04-02",
+  "generated_at": "2026-04-02T19:54:58",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202604/02/2604.00411v1-efficient-dpf-based-error-detecting-information-theoretic-private-information-retrieval-over-rings",
+      "section": "deep",
+      "title_en": "Efficient DPF-based Error-Detecting Information-Theoretic Private Information Retrieval Over Rings",
+      "authors": "Pengzhen Ke, Liang Feng Zhang, Huaxiong Wang, Li-Ping Wang",
+      "date": "2026-04-01",
+      "pdf": "https://arxiv.org/pdf/2604.00411v1",
+      "score": "9.0",
+      "evidence": "使用分布式点函数 (DPF) 在环上实现可检错的隐私信息检索",
+      "tldr": "本研究针对现有认证私有信息检索（APIR）在有限域下 DPF 密钥过大及双密钥设计导致通信开销高的问题，提出了一种基于环的信息论纠错 PIR 方案（itED-PIR）。通过利用素数幂次环上的 itDPF，该方案打破了域结构的限制，并采用单密钥设计将查询通信量减半。该成果为分布式存储和后量子隐私协议提供了更高效、可扩展的恶意抗性 PIR 框架。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Authenticated private information retrieval (APIR) is the state-of-the-art error-detecting private information retrieval (ED-PIR), using Distributed Point Functions (DPFs) for subpolynomial complexity and privacy. However, its finite field structure restricts it to prime-order DPFs, leading to prohibitively large key sizes under information-theoretic settings, while its dual-DPF-key design introduces unnecessary communication overhead, limiting its practicality for large-scale deployments. This paper proposes a novel ring-based information-theoretic ED-PIR (itED-PIR) scheme that overcomes these limitations by leveraging prime-power-order information-theoretic DPFs (itDPFs). Built over a prime-power ring, the proposed scheme breaks APIR's field-induced constraint to enable more efficient DPF utilization, significantly reducing key size growth and rendering the scheme feasible for high-security scenarios. Additionally, a single-itDPF-key design halves query-side communication overhead by eliminating APIR's redundant dual-key setup, without compromising privacy or verifiability. Beyond immediate efficiency gains, this work establishes a lightweight, flexible framework for constructing DPF-based malicious-resilient private information retrieval, opening new avenues for privacy-preserving data retrieval in distributed storage systems and post-quantum privacy protocols.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/02/2604.00169v1-beyond-latency-a-system-level-characterization-of-mpc-and-fhe-for-ppml",
+      "section": "quick",
+      "title_en": "Beyond Latency: A System-Level Characterization of MPC and FHE for PPML",
+      "authors": "Pengzhi Huang, Kiwan Maeng, G. Edward Suh",
+      "date": "2026-03-31",
+      "pdf": "https://arxiv.org/pdf/2604.00169v1",
+      "score": "7.0",
+      "evidence": "隐私保护机器学习中多方计算的系统级特性分析",
+      "tldr": "本研究针对隐私保护机器学习（PPML）中安全多方计算（MPC）和全同态加密（FHE）评估标准碎片化的问题，提出了一种统一的系统级表征方法。通过在多种模型（CNN、Transformer）和网络环境（LAN、WAN）下对比评估三种主流方案，不仅关注推理延迟，还深入分析了能耗、货币成本及离线开销，为 PPML 的部署与优化提供了实证指导。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Privacy protection has become an increasing concern in modern machine learning applications. Privacy-preserving machine learning (PPML) has attracted growing research attention, with approaches such as secure multiparty computation (MPC) and fully homomorphic encryption (FHE) being actively explored. However, existing evaluations of these approaches have frequently been done on a narrow, fragmented setup and only focused on a specific performance metric, such as the online inference latency of a specific batch size. From the existing reports, it is hard to compare different approaches, especially when considering other metrics like energy/cost or broader system setups (various hyperparameters, offline overheads, future hardware/network configurations, etc.).   We present a unified characterization of three popular approaches -- two variants of MPC based on arithmetic/binary sharing conversion and function secret sharing, and FHE -- on their performance and cost in performing privacy-preserving inference on multiple CNN and Transformer models. We study a range of LAN and WAN environments, model sizes, batch sizes, and input sequence lengths. We evaluate not only the performance but also the energy consumption and monetary cost of deploying under a realistic scenario, taking into account their offline and online computation/communication overheads. We provide empirical guidance for selecting, optimizing, and deploying these privacy-preserving compute paradigms, and outline how evolving hardware and network trends are likely to shift trade-offs between the two MPC schemes and FHE. This work provides system-level insights for researchers and practitioners who seek to understand or accelerate PPML workloads.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/02/2603.27551v1-asynchronous-routing-for-multipartite-entanglement-in-quantum-networks",
+      "section": "quick",
+      "title_en": "Asynchronous Routing for Multipartite Entanglement in Quantum Networks",
+      "authors": "Chenliang Tian, Zebo Yang, Raj Jain, Ramana Kompella, Reza Nejabati, Eneet Kaur, Aiman Erbad, Mounir Hamdi, Mohamed Abdallah",
+      "date": "2026-03-29",
+      "pdf": "https://arxiv.org/pdf/2603.27551v1",
+      "score": "6.0",
+      "evidence": "量子秘密共享与多方计算应用",
+      "tldr": "本研究针对量子网络中多方纠缠（如GHZ态）的分发挑战，提出了一种基于树结构的异步路由方案。该方案仅依赖本地链路信息，通过非同步的纠缠交换避免了传统同步操作的等待开销，有效提升了纠缠资源的利用率。实验结果显示，该异步协议在纠缠生成速率上显著优于传统同步方法，且在长相干时间下表现更佳，为多方量子通信提供了高效且可扩展的解决方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "In quantum networks, one way to communicate is to distribute entanglements through swapping at intermediate nodes. Most existing work primarily aims to create efficient two-party end-to-end entanglement over long distances. However, some scenarios also require remote multipartite entanglement for applications such as quantum secret sharing and multi-party computation. Our previous study improved end-to-end entanglement rates using an asynchronous, tree-based routing scheme that relies solely on local knowledge of entanglement links, conserving unused entanglement and avoiding synchronous operations. This article extends this approach to multipartite entanglements, particularly the three-party Greenberger-Horne-Zeilinger (GHZ) states. It shows that our asynchronous protocol outperforms traditional synchronous methods in entanglement rates, especially as coherence times increase. This approach can also be extended to four-party and larger multipartite GHZ states, highlighting the effectiveness and adaptability of asynchronous routing for multipartite scenarios across various network topologies.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
