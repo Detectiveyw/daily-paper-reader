@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-04-04 <!--dpr-date:20260404-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/04/2603.28988v1-attesting-llm-pipelines-enforcing-verifiable-training-and-release-claims" data-sidebar-item="{&quot;title&quot;: &quot;Attesting LLM Pipelines: Enforcing Verifiable Training and Release Claims&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.28988v1-attesting-llm-pipelines-enforcing-verifiable-training-and-release-claims&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;大模型流水线的可验证声明与认证&quot;}">Attesting LLM Pipelines: Enforcing Verifiable Training and Release Claims</a>
   * 2026-04-02 <!--dpr-date:20260402-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/02/2604.00411v1-efficient-dpf-based-error-detecting-information-theoretic-private-information-retrieval-over-rings" data-sidebar-item="{&quot;title&quot;: &quot;Efficient DPF-based Error-Detecting Information-Theoretic Private Information Retrieval Over Rings&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.00411v1-efficient-dpf-based-error-detecting-information-theoretic-private-information-retrieval-over-rings&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;使用分布式点函数 (DPF) 在环上实现可检错的隐私信息检索&quot;}">Efficient DPF-based Error-Detecting Information-Theoretic Private Information Retrieval Over Rings</a>
