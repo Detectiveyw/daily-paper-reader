@@ -6,26 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-04
-- 运行时间：2026-04-04 20:04:10 UTC
+- 最新运行日期：2026-04-05
+- 运行时间：2026-04-05 20:01:29 UTC
 - 运行状态：成功
 - 本次总论文数：1
 - 精读区：0
 - 速读区：1
 
 ### 今日简报（AI）
-今日聚焦大模型全生命周期的可信验证，探索如何为模型训练与发布提供“数字凭证”。
-论文提出了一种验证 LLM 流水线的方法，确保模型训练过程和发布声明真实可信且不可篡改。
-关注模型安全与合规的读者可借此了解如何通过技术手段构建透明、可追溯的 AI 供应链。
-- 详情：[/202604/04/README](/202604/04/README)
+今日聚焦量子-经典广播信道下的单次秘密共享技术，探索通信安全新边界。
+论文揭示了在单次传输场景中，利用单调访问结构实现高效秘密共享的可行性。
+推荐关注量子加密协议与复杂访问控制的读者快速浏览此项研究。
+- 详情：[/202604/05/README](/202604/05/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Attesting LLM Pipelines: Enforcing Verifiable Training and Release Claims](/202604/04/2603.28988v1-attesting-llm-pipelines-enforcing-verifiable-training-and-release-claims)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：大模型流水线的可验证声明与认证
+1. [One-Shot Secret Sharing with Monotone Access Structures over Classical-Quantum Broadcast Channels](/202604/05/2604.02275v1-one-shot-secret-sharing-with-monotone-access-structures-over-classical-quantum-broadcast-channels)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：量子信道上具有单调访问结构和Dealer的秘密共享
 
 
 <div class="dpr-home-promo-card">

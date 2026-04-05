@@ -1,0 +1,23 @@
+{
+  "label": "2026-04-05",
+  "date": "2026-04-05",
+  "generated_at": "2026-04-05T20:01:37",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202604/05/2604.02275v1-one-shot-secret-sharing-with-monotone-access-structures-over-classical-quantum-broadcast-channels",
+      "section": "quick",
+      "title_en": "One-Shot Secret Sharing with Monotone Access Structures over Classical-Quantum Broadcast Channels",
+      "authors": "Truman Welling, Rémi A. Chou, Aylin Yener",
+      "date": "2026-04-02",
+      "pdf": "https://arxiv.org/pdf/2604.02275v1",
+      "score": "7.0",
+      "evidence": "量子信道上具有单调访问结构和Dealer的秘密共享",
+      "tldr": "本研究探讨了在经典-量子广播信道下，具有单调访问结构的单次秘密共享问题。与传统分发方式不同，分发者通过信道传输编码后的秘密，导致用户接收到的份额受信道噪声影响。论文推导出了任意单调访问结构下的单次可达速率及逆界，并进一步给出了二阶和渐近可达速率。在全员恢复秘密的特殊情况下，该结果与经典信道的秘密共享容量一致，为量子通信环境下的信息安全提供了理论基础。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We consider a secret sharing setting with a monotone access structure involving a control node and $L$ users, connected via a classical-quantum broadcast channel whose input is controlled by the control node, referred to as the dealer. Unlike traditional secret sharing settings, where the dealer fully controls the shares given to each user, in our model, the dealer encodes the secret for transmission over the broadcast channel. This means that the shares received by users are perturbed by the channel and are not fully controlled by the dealer. Our main results are achievable one-shot secret sharing rates, as well as converse bounds for arbitrary monotone access structures. We further derive second-order and asymptotic achievable rates for arbitrary monotone access structures. In the special case where all shares are required to recover the secret, we show that our result coincides with the existing secret sharing capacity over classical channels.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

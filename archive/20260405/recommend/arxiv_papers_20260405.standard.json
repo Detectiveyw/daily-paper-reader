@@ -1,0 +1,53 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-05T20:01:12.817601+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2604.02275v1",
+      "title": "One-Shot Secret Sharing with Monotone Access Structures over Classical-Quantum Broadcast Channels",
+      "abstract": "We consider a secret sharing setting with a monotone access structure involving a control node and $L$ users, connected via a classical-quantum broadcast channel whose input is controlled by the control node, referred to as the dealer. Unlike traditional secret sharing settings, where the dealer fully controls the shares given to each user, in our model, the dealer encodes the secret for transmission over the broadcast channel. This means that the shares received by users are perturbed by the channel and are not fully controlled by the dealer. Our main results are achievable one-shot secret sharing rates, as well as converse bounds for arbitrary monotone access structures. We further derive second-order and asymptotic achievable rates for arbitrary monotone access structures. In the special case where all shares are required to recover the secret, we show that our result coincides with the existing secret sharing capacity over classical channels.",
+      "authors": [
+        "Truman Welling",
+        "Rémi A. Chou",
+        "Aylin Yener"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-04-02T17:06:25+00:00",
+      "link": "https://arxiv.org/pdf/2604.02275v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Secret sharing with monotone access structures and a dealer over quantum channels",
+      "llm_evidence_cn": "量子信道上具有单调访问结构和Dealer的秘密共享",
+      "llm_evidence": "量子信道上具有单调访问结构和Dealer的秘密共享",
+      "canonical_evidence": "量子信道上具有单调访问结构和Dealer的秘密共享",
+      "llm_tldr_en": "Analyzes secret sharing rates over classical-quantum broadcast channels with a dealer node.",
+      "llm_tldr_cn": "分析了在包含Dealer节点的经典-量子广播信道上的秘密共享速率和界限。",
+      "llm_tldr": "分析了在包含Dealer节点的经典-量子广播信道上的秘密共享速率和界限。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

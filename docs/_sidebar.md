@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-04-05 <!--dpr-date:20260405-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/05/2604.02275v1-one-shot-secret-sharing-with-monotone-access-structures-over-classical-quantum-broadcast-channels" data-sidebar-item="{&quot;title&quot;: &quot;One-Shot Secret Sharing with Monotone Access Structures over Classical-Quantum Broadcast Channels&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.02275v1-one-shot-secret-sharing-with-monotone-access-structures-over-classical-quantum-broadcast-channels&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;量子信道上具有单调访问结构和Dealer的秘密共享&quot;}">One-Shot Secret Sharing with Monotone Access Structures over Classical-Quantum Broadcast Channels</a>
   * 2026-04-04 <!--dpr-date:20260404-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/04/2603.28988v1-attesting-llm-pipelines-enforcing-verifiable-training-and-release-claims" data-sidebar-item="{&quot;title&quot;: &quot;Attesting LLM Pipelines: Enforcing Verifiable Training and Release Claims&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.28988v1-attesting-llm-pipelines-enforcing-verifiable-training-and-release-claims&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;大模型流水线的可验证声明与认证&quot;}">Attesting LLM Pipelines: Enforcing Verifiable Training and Release Claims</a>
