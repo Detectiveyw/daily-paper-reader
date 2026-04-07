@@ -1,0 +1,1391 @@
+Title: Fine-Tuning Integrity for Modern Neural Networks: Structured Drift Proofs via Norm, Rank, and Sparsity Certificates
+
+URL Source: https://arxiv.org/pdf/2604.04738v1
+
+Published Time: Tue, 07 Apr 2026 02:03:19 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+# Fine-Tuning Integrity for Modern Neural Networks: Structured Drift Proofs via Norm, Rank, and Sparsity Certificates 
+
+# Zhenhang Shang 
+
+The Hong Kong University of Science and Technology Hong Kong, China zshangab@connect.ust.hk 
+
+# Kani Chen 
+
+The Hong Kong University of Science and Technology Hong Kong, China 
+
+## Abstract 
+
+Fine-tuning is now the primary method for adapting large neural networks, but it also introduces new integrity risks. An untrusted party can insert backdoors, change safety behavior, or overwrite large parts of a model while claiming only small updates. Exist-ing verification tools focus on inference correctness or full-model provenance and do not address this problem. We introduce Fine-Tuning Integrity (FTI) as a security goal for controlled model evolution. An FTI system certifies that a fine-tuned model differs from a trusted base only within a policy-defined drift class. We propose Succinct Model Difference Proofs (SMDPs) as a new cryptographic primitive for enforcing these drift constraints. SMDPs provide zero-knowledge proofs that the update to a model is norm-bounded, low-rank, or sparse. The verifier cost depends only on the structure of the drift, not on the size of the model. We give concrete SMDP constructions based on random pro-jections, polynomial commitments, and streaming linear checks. We also prove an information-theoretic lower bound showing that some form of structure is necessary for succinct proofs. Finally, we present architecture-aware instantiations for transformers, CNNs, and MLPs, together with an end-to-end system that aggregates block-level proofs into a global certificate. 
+
+## CCS Concepts 
+
+• Security and privacy → Cryptographic primitives ; Digital signatures ; Formal security models ; • Theory of computation →
+
+Interactive proof systems ; • Computing methodologies →
+
+Machine learning approaches. 
+
+## Keywords 
+
+fine-tuning integrity, structured drift proofs, zero-knowledge proofs, polynomial commitments, model auditing, cryptographic verifica-tion 
+
+ACM Reference Format: 
+
+Zhenhang Shang and Kani Chen. 2026. Fine-Tuning Integrity for Modern Neural Networks: Structured Drift Proofs via Norm, Rank, and Sparsity Certificates. In Proceedings of ACM Conference on Computer and Communi-cations Security (CCS ’26). ACM, New York, NY, USA, 15 pages.  
+
+> Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the full citation on the first page. Copyrights for components of this work owned by others than the author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or republish, to post on servers or to redistribute to lists, requires prior specific permission and/or a fee. Request permissions from permissions@acm.org.
+> CCS ’26, The Hague, The Netherlands
+> ©2026 Copyright held by the owner/author(s). Publication rights licensed to ACM.
+
+## 1 Introduction 
+
+Fine-tuning has become the predominant method for adapting large neural networks to new tasks, domains, and safety regimes [ 2][ 14 ]. Rather than training models from scratch, practitioners start from a pre-trained base model and apply additional gradient updates on datasets that are often proprietary or sensitive [ 38 ]. This work-flow appears across model families including transformer-based language models [ 11 ], vision architectures [ 18 ], and large-scale recommendation systems [ 15 ]. Fine-tuning substantially reduces the cost of deployment, yet it also creates a new attack surface. An adversary controlling the fine-tuning pipeline may inject backdoors while claiming only innocuous modifications [ 33 ], remove safety-aligned components or alignment modules without disclosure [ 17 ], replace large portions of the model while misrepresenting the ex-tent of drift, or produce a model that passes validation but contains strategically placed poisoned regions [ 45 ]. These risks matter most in regulated or high-stakes applications such as content moderation, code generation, and financial decision support, where auditors and customers need clear guarantees that the deployed model remains within a certified family. 
+
+## 1.1 Fine-Tuning Integrity 
+
+We study the problem of fine-tuning integrity (FTI): given a trusted base model and a fine-tuned model, can a prover generate a suc-cinct, zero-knowledge proof that the fine-tuned model differs from the base only within a policy-defined drift class? A policy might stipulate that certain layers must remain unchanged, that other layers may deviate only through low-rank adapters such as LoRA-style updates, that the overall parameter drift must have Frobenius norm at most 𝜀 , or that only 𝑘 parameters or parameter blocks may change, reflecting sparse updates. An FTI proof system must satisfy: (1) the verifier learns only that the drift obeys the policy, and nothing about the weights them-selves; (2) the proof is succinct, with complexity governed by the structure of the drift (rank, sparsity, norm budget) and at most poly-logarithmic in the size of the model; and (3) any policy violation leads to rejection, except with negligible probability. Generic zero-knowledge proof systems could encode the full drift relation as a circuit [ 23 ], but this produces proof sizes and prover costs essentially linear in the parameter count. Such ap-proaches quickly become infeasible for models containing billions of parameters, and they fail to exploit the structural regularities of contemporary fine-tuning practices. 
+
+## 1.2 Our Approach and Contributions 
+
+We adopt a structural view of fine-tuning. The model is decomposed into parameter blocks such as layers, channels, and attention heads.  
+
+> arXiv:2604.04738v1 [cs.CR] 6 Apr 2026 CCS ’26, November 2026, The Hague, The Netherlands Zhenhang Shang and Kani Chen
+
+Each block is assigned a drift class that specifies the admissible modifications. We consider three drift classes: norm-bounded, rank-bounded, and sparse. These classes capture the fine-tuning patterns commonly used in practice [ 40 ] and provide the algebraic structure required for succinct proofs. We then develop Succinct Model Dif-ference Proofs (SMDPs), they are zero-knowledge proofs that certify whether the difference between two models lies within a specified drift class. We present three constructions in this framework. (1) Norm-bounded SMDPs via random projections (NBDP). 
+
+Using concentration of measure, we build a protocol in which the verifier checks random projections of the drift. The verifier’s cost depends on the norm bound and desired statistical accuracy, not on the full model dimension. (2) Low-rank SMDPs via matrix polynomial commitments (MRDP). Weight matrices are encoded as bivariate polynomi-als, and low-rank drift corresponds to sums of separable com-ponents. A random evaluation test yields a certificate whose complexity depends only on the rank constraint. (3) Sparse SMDPs via streaming-style linear proofs (SDIP). By combining linear sketching with zero-knowledge sum checks, we prove that only a bounded number of coordinates differ be-tween the two models. Any additional non-zero drift is detected with high probability. For each construction we prove soundness and zero-knowledge, and we analyze its succinctness. We also establish a lower bound: without structural constraints on drift, any non-interactive proof with negligible soundness error must have size at least Ω(𝑛 ) for a model with 𝑛 parameters. This result motivates the use of structured drift classes. We then show how to instantiate our constructions for transformers, CNNs, and MLPs, and how to compose block-level SMDPs into a complete FTI system suitable for practical fine-tuning pipelines. 
+
+Scope. Our objective is not to address all aspects of model audit-ing or behavioral verification. Instead, we aim to develop a foun-dational cryptographic framework, FTI & SMDPs, to demonstrate efficient and meaningful instantiations for drift classes that are prevalent in practice. 
+
+## 2 Background and Threat Model 2.1 Fine-Tuning in Practice 
+
+We briefly review common fine-tuning patterns used with modern neural architectures. 
+
+Norm-regularized fine-tuning. Training recipes often constrain the magnitude of updates via weight decay, gradient clipping, or explicit regularization.This suggests policies of the form 
+
+∥𝑊 ∗ − 𝑊 0 ∥R ≤ 𝜖 
+
+Low-rank adapters. LoRA and related methods introduce low-rank update matrices 𝐴, 𝐵 to existing weight matrices 𝑊 0 [ 37 ], yield-ing 
+
+𝑊 ∗ = 𝑊 0 + 𝐴𝐵, 
+
+where 𝐴 ∈ R𝑑 ×𝑟 and 𝐵 ∈ R𝑟 ×𝑑 ′
+
+for some small rank 𝑟 . Variants such as Q-LoRA adapt quantized models but preserve the low-rank structure. 
+
+Sparse updates. Prefix-tuning and soft prompts add learnable vectors only at particular positions. Some adapters modify only a small subset of neurons or channels, leading to sparse drift [ 39 ]. In adversarial settings, an attacker may deliberately localize changes to a small subset of parameters to evade naive consistency checks. These patterns motivate our focus on norm, rank, and sparsity as drift structures. 
+
+Why Norm, Rank, and Sparsity? The three drift classes we con-sider are not arbitrary choices; they correspond directly to the dominant fine-tuning paradigms in modern deep learning. Weight decay and gradient clipping enforce norm constraints on parameter updates, making norm-bounded drift a natural certificate for regu-larized fine-tuning. LoRA and related adapter methods [ 37 ] produce updates that are low-rank by construction, so rank-bounded drift captures the algebraic signature of adapter-based methods. Pre-fix tuning, soft prompts, and sparse adapters modify only a small subset of parameters, yielding sparse drift patterns [39]. Beyond this correspondence with training methods, these three properties also carry diagnostic value for distinguishing benign from adversarial modifications. Empirical studies of backdoor at-tacks [ 33 , 45 ] indicate that injecting backdoors or removing safety guardrails typically requires coordinated changes across multiple layers or large-magnitude perturbations to specific weight sub-spaces, resulting in updates with larger norm, higher effective rank, or denser support than those produced by standard fine-tuning with common hyperparameters. Conversely, benign fine-tuning updates tend to have small Frobenius norm relative to the base weights, low effective rank due to the low-dimensional structure of gradi-ent updates on overparameterized models, and sparse modification patterns when adapter-based methods are used. Together, norm, rank, and sparsity cover a wide spectrum of realistic fine-tuning policies. They also provide algebraic structure that is directly exploitable for constructing succinct proofs: norm bounds interact with random projections via concentration inequal-ities, rank constraints translate into polynomial degree conditions, and sparsity enables compressed linear sketches. This combination of practical relevance and mathematical tractability is what makes these three drift classes a natural foundation for the FTI framework. 
+
+## 2.2 Threat Model 
+
+We assume a provider produces a base model 𝑊 0, and a deployer 
+
+fine-tunes it to 𝑊 ∗ on some data, under a policy that constrains the allowable drift between 𝑊 0 and 𝑊 ∗. A verifier has access to commitments to 𝑊 0 and 𝑊 ∗, the policy description, and a purported drift proof. 
+
+Adversary goal. The adversary aims to produce a fine-tuned model that passes integrity checks while having made modifications beyond the declared policy. Concrete adversarial objectives include inserting backdoors into the model, removing safety guardrails or alignment modules, or making unauthorized large-scale weight changes that exceed the permitted drift class. The adversary con-trols the fine-tuning pipeline and can run arbitrary training or manipulation procedures, observe all intermediate weights, choose arbitrary training data, and craft the proof using any computation-ally feasible strategy. Fine-Tuning Integrity for Modern Neural Networks: Structured Drift Proofs via Norm, Rank, and Sparsity Certificates CCS ’26, November 2026, The Hague, The Netherlands 
+
+Victim. The victim is the model deployer, auditor, or end-user who relies on the FTI certificate to trust that the model has been fine-tuned within policy bounds. For example, an enterprise customer receiving a fine-tuned model from a cloud provider must trust that the provider did not exceed the agreed-upon modification scope. Similarly, a regulatory auditor must verify that a deployed model remains within a certified family relative to an approved base model. 
+
+Attack scenario. Consider a concrete attack flow: a cloud fine-tuning service receives a base model 𝑊 0 and a policy stipulating that only LoRA-style updates with rank 𝑟 ≤ 4 are permitted. The service claims to have applied compliant fine-tuning and produces commitments 𝐶 0, 𝐶 ∗ along with an SMDP proof 𝜋 . In reality, the ser-vice has made substantially larger modifications, perhaps inserting a backdoor that requires a rank-20 perturbation or rewriting entire layers. The auditor receives the commitments and proof and must detect this violation. FTI guarantees that the auditor will reject the proof with overwhelming probability whenever the true drift exceeds the declared policy. 
+
+Scope and limitations of FTI.. FTI certifies parametric drift bounds; it does not certify behavioral or semantic safety. A model could still behave unexpectedly or produce harmful outputs within the permitted drift bounds, since small parameter perturbations in non-linear architectures can induce disproportionate functional changes. FTI is therefore complementary to behavioral testing, red-teaming, and output monitoring. Its role is to narrow the space of possible modifications, not to replace semantic evaluation. 
+
+Trust assumptions. The commitment to the base model 𝑊 0 is assumed to be correct and publicly available. The verifier trusts the commitment scheme (binding and hiding properties) and the source of public randomness used in the protocols. No trusted hardware is required in our core constructions. The verifier is computationally bounded and does not see raw weights, but can run polynomial-time verification algorithms. We focus on the cryptographic integrity of the parameter drift relation; system-level concerns such as side-channel attacks, implementation bugs, or compromised randomness sources are outside our current scope but are discussed in Section 10. 
+
+## 3 Fine-Tuning Integrity 3.1 Model Representation and Drift Classes 
+
+We work over the field of real numbers R. A neural network is modeled as a structured collection, 
+
+𝑊 =  𝑊 (1) ,𝑊 (2) , . . . ,𝑊 (𝐿 ) ,
+
+where each block 𝑊 (𝑖 ) is an element of R𝑑 𝑖 ×𝑑 ′ 
+
+> 𝑖
+
+. The dimensions 
+
+(𝑑 𝑖 , 𝑑 ′ 
+
+> 𝑖
+
+) depend on the architecture and may correspond to matrices, tensors flattened into matrices, or vectors represented as 𝑑 𝑖 × 1
+
+blocks. Let 𝑊 0 denote the base model parameters and 𝑊 ∗ the fine-tuned parameters. We define the drift at block 𝑖 as 
+
+Δ(𝑖 ) = 𝑊 ∗( 𝑖 ) − 𝑊 (𝑖 ) 
+
+> 0
+
+,
+
+and the overall drift as Δ = {Δ(𝑖 ) }𝐿 𝑖 =1.A drift class F is a set of admissible drift tensors. Policies are expressed by specifying, for each block 𝑖 , a local drift class F𝑖 , and setting 
+
+F =
+
+> 𝐿
+
+Ö
+
+> 𝑖 =1
+
+F𝑖 .
+
+In this work we focus on three canonical drift classes: 
+
+• Norm-bounded drift. For a matrix 𝑋 , we define the ℓ2 norm as: 
+
+∥𝑋 ∥2 = max   
+
+> ∥𝑣 ∥2=1
+
+∥𝑋𝑣 ∥2.
+
+A norm-bounded policy restricts the drift of a parameter block to stay within a prescribed radius, formally, for a parameter block 𝑖 ,
+
+F (𝑖 ) 
+
+> norm
+
+(𝜖 𝑖 ) = {Δ(𝑖 ) : ∥Δ(𝑖 ) ∥2 ≤ 𝜖 𝑖 }.
+
+• Rank-bounded drift. For matrix blocks, 
+
+F (𝑖 ) 
+
+> rank
+
+(𝑟 𝑖 ) = {Δ(𝑖 ) : rank (Δ(𝑖 ) ) ≤ 𝑟 𝑖 }.
+
+This captures low-rank adapter updates. 
+
+• Sparse drift. For vectorized parameters, with ∥ · ∥ 0 denoting the number of nonzero entries, 
+
+F (𝑖 ) 
+
+> sparse
+
+(𝑘 𝑖 ) = {Δ(𝑖 ) : ∥Δ(𝑖 ) ∥0 ≤ 𝑘 𝑖 }.
+
+Additional drift classes, such as block-sparse updates or group-norm-bounded updates, can be represented as compositions of these basic primitives. 
+
+## 3.2 Commitments 
+
+We assume a binding and hiding commitment scheme [9] 
+
+Com : {0, 1}∗ × { 0, 1}∗ → { 0, 1}𝜆 ,
+
+where 𝜆 is the security parameter, and we write 𝐶 = Com (𝑚 ; 𝑟 )
+
+for the commitment to message 𝑚 with randomness 𝑟 . In practice, 
+
+Com may be a Merkle-based vector commitment or a polynomial commitment. The provider publishes a commitment 𝐶 0 to the base parameters 
+
+𝑊 0, and the deployer publishes 𝐶 ∗ committing to 𝑊 ∗.
+
+## 3.3 FTI Security Definitions 
+
+We now define FTI at the level of a generic proof system for drift compliance. 
+
+Definition 3.1 (Drift compliance relation) . Given a drift class F ,define the NP relation 
+
+𝑅 F = (( 𝐶 0, 𝐶 ∗, F ) ,𝑊 0,𝑊 ∗) : 𝐶 0 = 𝐶𝑜𝑚 (𝑊 0; 𝑟 0),𝐶 ∗ = 𝐶𝑜𝑚 (𝑊 ∗; 𝑟 ∗), 𝑊 ∗ − 𝑊 0 ∈ F .
+
+Definition 3.2. [Fine-Tuning Integrity (FTI)] A proof system Π =
+
+(Prove , Verify ) satisfies FTI for drift class F if it satisfies: 
+
+• Completeness. For all (𝑊 0,𝑊 ∗) with 𝑊 ∗ − 𝑊 0 ∈ F , if 𝐶 0 =
+
+Com (𝑊 0; 𝑟 0) and 𝐶 ∗ = Com (𝑊 ∗; 𝑟 ∗), then 
+
+Pr Verify (𝐶 0, 𝐶 ∗, F , 𝜋 ) = 1 = 1,
+
+where 𝜋 ← Prove (𝑊 0,𝑊 ∗, F ) .
+
+• Soundness. For any PPT adversary A that outputs (𝐶 0, 𝐶 ∗, F , 𝜋 ),
+
+Pr Verify (𝐶 0, 𝐶 ∗, F , 𝜋 ) = 1 ∧¬ (∃ 𝑊 0,𝑊 ∗ : (( 𝐶 0, 𝐶 ∗, F ) ,𝑊 0,𝑊 ∗) ∈ 𝑅 F )  ≤ negl (𝜆 ).CCS ’26, November 2026, The Hague, The Netherlands Zhenhang Shang and Kani Chen 
+
+• Zero-knowledge. There exists a PPT simulator S such that for all 
+
+(𝑊 0,𝑊 ∗) with 𝑊 ∗ − 𝑊 0 ∈ F the distributions 
+
+(𝐶 0, 𝐶 ∗, F , 𝜋 ) and (𝐶 0, 𝐶 ∗, F , S( 𝐶 0, 𝐶 ∗, F )) 
+
+are computationally indistinguishable. 
+
+• Succinctness. The verifier’s running time and the proof size are bounded by 
+
+poly (𝜆, complexity (F ) , log |𝑊 0 |) ,
+
+where |𝑊 0 | is the total model dimension and complexity (F ) cap-tures drift structure, e.g., norm threshold 𝜖 , rank 𝑟 , and sparsity 𝑘 
+
+in 3. 
+
+This abstract definition leaves open how to instantiate Π. We address this via SMDPs. 
+
+## 3.4 Succinct Model Difference Proofs 
+
+We now introduce a primitive that captures the core cryptographic task underlying FTI. 
+
+Definition 3.3 (Succinct Model Difference Proof (SMDP)) . Let 𝑊 0,
+
+𝑊 ∗ be two model parameter tensors and F a drift class. An SMDP for 
+
+F is a proof system SMDP F = (Prove , Verify ) such that: 
+
+• the prover takes (𝑊 0,𝑊 ∗, F ) as input; 
+
+• the verifier takes (𝐶 0, 𝐶 ∗, F ) as input; 
+
+• the system satisfies correctness, soundness, zero-knowledge, and succinctness as defined for FTI 3.2, with respect to the relation 𝑅 F .
+
+## 4 SMDPs for Fundamental Drift Classes 
+
+We construct SMDPs for three fundamental drift classes: norm-bounded drift, low-rank drift, and sparse drift. These classes serve as basic components from which more elaborate drift policies can be assembled. 
+
+## 4.1 Norm-Bounded SMDPs via Random Projections (NBDP) 
+
+Intuition. The key insight is that random projections approxi-mately preserve norms, a consequence of the Johnson-Lindenstrauss phenomenon. Instead of checking the full 𝑛 -dimensional drift vec-tor, the verifier checks a small number of random projections. If the drift norm exceeds the bound, at least one projection will detect this violation with high probability, because the projected value will exceed a calibrated threshold. Conversely, if the drift is within bounds, concentration inequalities guarantee that all projections remain below the threshold. The projections reveal no information about the actual weight values, preserving zero-knowledge. Suc-cinctness follows because the number of projections depends only on the norm bound and the desired confidence level, not on the model dimension. We first describe the SMDP construction for norm-bounded drift. We focus on a single parameter block, multiple blocks can be handled by independent instances. 
+
+4.1.1 Setup and Drift Class. Let 𝑊 0,𝑊 ∗ ∈ R𝑑 ×𝑑 ′
+
+be the parameter matrices of a block, and let 
+
+Δ = 𝑊 ∗ − 𝑊 0.
+
+For a bound 𝜖 > 0, the norm-bounded drift class is 
+
+Fnorm (𝜖 ) =  Δ ∈ R𝑑 ×𝑑 ′
+
+: ∥Δ∥2 ≤ 𝜖 ,
+
+where the spectral norm of any rectangular matrix 𝑋 ∈ R𝑑 ×𝑑 ′
+
+is 
+
+∥𝑋 ∥2 = max   
+
+> ∥𝑣 ∥2=1
+
+∥𝑋𝑣 ∥2.
+
+When commitments require a vector input, we use the vectorization 
+
+vec (𝑋 ) ∈ R𝑑𝑑 ′
+
+,
+
+which stacks the columns of 𝑋 in a fixed order. We assume a binding and hiding vector commitment scheme 
+
+Com [7 ] and a common source of randomness for generating public projection vectors. 
+
+4.1.2 Random Projections. Let 𝑚 be the number of random projec-tions. For each 𝑖 ∈ [ 𝑚 ], let 
+
+𝑟 𝑖 ∈ {− 1, +1}𝑑𝑑 ′
+
+be an independently sampled Rademacher vector, interpreted in the same vectorized order as vec (Δ).Define the projection 
+
+𝑧 𝑖 = ⟨𝑟 𝑖 , vec (Δ)⟩ .
+
+We recall a standard concentration bound. 
+
+Lemma 4.1 (Hoeffding concentration [ 31 ]) . Let Δ ∈ R𝑑 ×𝑑 ′
+
+and let 
+
+𝑟 ∈ {− 1, +1}𝑑𝑑 ′
+
+have independent Rademacher entries. Then for any 
+
+𝑡 > 0,
+
+Pr  |⟨ 𝑟, vec (Δ)⟩| > 𝑡  ≤ 2 exp − 𝑡 2
+
+2∥Δ∥2
+
+> 𝐹
+
+!
+
+,
+
+where the Frobenius norm is 
+
+∥Δ∥𝐹 =
+
+ 𝑑 ∑︁ 
+
+> 𝑖 =1
+> 𝑑 ′
+
+∑︁ 
+
+> 𝑗 =1
+
+Δ2
+
+> 𝑖,𝑗
+
+1/2
+
+.
+
+Since ∥Δ∥2 ≤ ∥ Δ∥𝐹 , the same inequality holds for ∥Δ∥2. In par-ticular, if ∥Δ∥2 ≤ 𝜖 , then 
+
+Pr  |𝑧 𝑖 | > 𝑡  ≤ 2 exp 
+
+
+
+− 𝑡 2
+
+2𝜖 2
+
+
+
+.
+
+4.1.3 Protocol Description. Fix parameters 𝜖 > 0 and 𝛿 ∈ ( 0, 1). Set 
+
+𝑚 = Θ 𝜖 −2 log (1/𝛿 ),
+
+and define 
+
+𝜏 = 𝜖 √︁ 2 log (2𝑚 /𝛿 ).
+
+Public parameters. The public parameters specify the commit-ment scheme Com , the number of projections 𝑚 , the projection vectors 𝑟 1, . . . , 𝑟 𝑚 , and the threshold value 𝜏 .
+
+Commitments. The prover holds the base parameters 𝑊 0 and the fine-tuned parameters 𝑊 ∗. To commit to these tensors, the prover samples randomness 𝑟 0 and 𝑟 ∗ and publishes 
+
+𝐶 0 = Com (vec (𝑊 0); 𝑟 0), 𝐶 ∗ = Com (vec (𝑊 ∗); 𝑟 ∗).Fine-Tuning Integrity for Modern Neural Networks: Structured Drift Proofs via Norm, Rank, and Sparsity Certificates CCS ’26, November 2026, The Hague, The Netherlands 
+
+Proof generation. The prover computes the drift matrix Δ = 𝑊 ∗ −
+
+𝑊 0. For each projection vector 𝑟 𝑖 , the prover computes 
+
+𝑧 𝑖 = ⟨𝑟 𝑖 , vec (Δ)⟩ .
+
+To commit to each 𝑧 𝑖 , the prover samples fresh randomness 𝑠 𝑖 and computes 
+
+𝐶 𝑧 𝑖 = Com (𝑧 𝑖 ; 𝑠 𝑖 ).
+
+For every index 𝑖 , the prover then produces: (1) a zero-knowledge proof 𝜋 lin  
+
+> 𝑖
+
+that the committed value 𝑧 𝑖 satisfies 
+
+𝑧 𝑖 = ⟨𝑟 𝑖 , vec (𝑊 ∗)⟩ − ⟨ 𝑟 𝑖 , vec (𝑊 0)⟩ 
+
+relative to the commitments 𝐶 0, 𝐶 ∗, and 𝐶 𝑧 𝑖 ;(2) a zero-knowledge range proof 𝜋 rng  
+
+> 𝑖
+
+that |𝑧 𝑖 | ≤ 𝜏 .The prover outputs 
+
+𝜋 =  {𝐶 𝑧 𝑖 }𝑚 𝑖 =1, {𝜋 lin  
+
+> 𝑖
+
+, 𝜋 rng  
+
+> 𝑖
+
+}𝑚 𝑖 =1
+
+.
+
+Verification. Given (𝐶 0, 𝐶 ∗, 𝜖, 𝛿 ) and 𝜋 , the verifier: (1) reconstructs 𝑟 1, . . . , 𝑟 𝑚 and 𝜏 ;(2) verifies each 𝜋 lin  
+
+> 𝑖
+
+against 𝐶 0, 𝐶 ∗, and 𝐶 𝑧 𝑖 ;(3) verifies each 𝜋 rng  
+
+> 𝑖
+
+against 𝐶 𝑧 𝑖 and 𝜏 ;(4) accepts if and only if all verifications succeed. 
+
+4.1.4 Security Analysis. 
+
+Theorem 4.2 (FTI-soundness of NBDP). Assume that Com is binding and that the linear-relation and range-proof systems used in NBDP are sound. Let 𝜖 > 0, 𝛿 ∈ ( 0, 1), and choose 𝑚 and 𝜏 as above. Then any PPT adversary that outputs a proof accepted by the verifier with non-negligible probability must either break one of the underlying primitives or satisfy 
+
+∥Δ∥2 ≤ ( 1 + 𝛾 )𝜖 
+
+with probability at least 1 − 𝛿 over the verifier’s randomness, for some absolute constant 𝛾 > 0.
+
+Proof sketch. Suppose ∥Δ∥2 > (1 +𝛾 )𝜖 . By Lemma 4.1 and the relationship between ∥Δ∥2 and ∥Δ∥𝐹 , each projection 𝑧 𝑖 exceeds 𝜏 
+
+in magnitude with probability at least a constant 𝑐 > 0 depending only on 𝛾 . With 𝑚 independent projections, the probability that all |𝑧 𝑖 | ≤ 𝜏 is at most 𝛿 for the specified choice of 𝑚 . Given the binding property of Com , the soundness of the linear-relation and range-proof systems, an adversary cannot produce valid proofs unless the committed 𝑧 𝑖 satisfy both the linear identities and the bounds. Thus an accepting proof implies either that the underlying primitives are broken or that all projections lie within the threshold, which, by the concentration bound, forces ∥Δ∥2 ≤ ( 1 + 𝛾 )𝜖 except with probability at most 𝛿 . □
+
+Zero-knowledge follows from the hiding property of Com to-gether with the zero-knowledge guarantees of the linear and range-proof sub-protocols. 
+
+Theorem 4.3 (Succinctness). For fixed 𝜖 and 𝛿 , the verifier’s running time and the proof size are 𝑂 (𝑚 ) up to polylogarithmic factors in the security parameter. More precisely, both are bounded by 
+
+poly  𝜆, 𝜖 −2 log (1/𝛿 ),
+
+and are independent of the dimensions 𝑑 and 𝑑 ′.
+
+Proof sketch. The proof consists of 𝑚 commitments 𝐶 𝑧 𝑖 and 
+
+𝑚 pairs of auxiliary proofs (𝜋 lin  
+
+> 𝑖
+
+, 𝜋 rng  
+
+> 𝑖
+
+). Each auxiliary proof has size poly (𝜆 ), independent of 𝑑 and 𝑑 ′, so the total proof size is 
+
+𝑂 (𝑚 · poly (𝜆 )) . Verification requires checking 𝑚 linear proofs and 
+
+𝑚 range proofs, each costing poly (𝜆 ) time. No step iterates over the matrix entries, all checks operate on committed scalars and short proofs. Thus the verifier’s running time is 𝑂 (𝑚 · poly (𝜆 )) ,independent of 𝑑 and 𝑑 ′. □
+
+## 4.2 Low-Rank SMDPs via Matrix Polynomial Commitments (MRDP) 
+
+Intuition. We encode each weight matrix as a bivariate polyno-mial, so that matrix rank translates into algebraic degree constraints. Specifically, a low-rank update decomposes into a sum of separable polynomial terms, each being a product of a univariate polynomial in 𝑋 and a univariate polynomial in 𝑌 . The verifier checks this structure via random evaluation points, leveraging the Schwartz-Zippel lemma: if the drift is not genuinely low-rank, the polynomial identity required for verification would need to hold at a random point, which happens with negligible probability over a large field. Succinctness arises because the verifier only checks 𝑂 (𝑟 ) polyno-mial openings at a single random point, independent of the matrix dimensions. We next consider drift classes that constrain the rank of matrix-valued parameters, motivated by low-rank adapters. 
+
+4.2.1 Setup and Drift Class. Let 𝑊 0,𝑊 ∗ denote the base and fine-tuned parameter blocks, and define the drift matrix Δ = 𝑊 ∗ − 𝑊 0.For a prescribed rank bound 𝑟 , the drift class is 
+
+Frank (𝑟 ) = {Δ ∈ R𝑑 ×𝑑 ′
+
+: rank (Δ) ≤ 𝑟 }.
+
+To use polynomial commitments, we represent each real-valued entry by a fixed-point encoding into a finite field F𝑞 . All polynomial arithmetic and commitment operations [ 24 ][ 44 ] are performed over 
+
+F𝑞 . For notational simplicity in the discussion that follows, we write 𝑊 0,𝑊 ∗ ∈ F𝑑 ×𝑑 ′ 
+
+> 𝑞
+
+, with the understanding that they arise from encoding the underlying real-valued matrices. 
+
+4.2.2 Polynomial Encoding of Matrices. Given 𝑊 ∈ F𝑑 ×𝑑 ′ 
+
+> 𝑞
+
+, we as-sociate the bivariate polynomial 
+
+𝑃 𝑊 (𝑋, 𝑌 ) = 
+
+> 𝑑 −1
+
+∑︁  
+
+> 𝑖 =0
+> 𝑑 ′−1
+
+∑︁ 
+
+> 𝑗 =0
+
+𝑊 𝑖,𝑗 𝑋 𝑖 𝑌 𝑗 .
+
+The drift polynomial is 
+
+𝑃 Δ (𝑋, 𝑌 ) = 𝑃 𝑊 ∗ (𝑋, 𝑌 ) − 𝑃 𝑊 0 (𝑋, 𝑌 ).
+
+If rank (Δ) ≤ 𝑟 , then there exist vectors 𝑎 𝑘 ∈ F𝑑 𝑞 and 𝑏 𝑘 ∈ F𝑑 ′
+
+> 𝑞
+
+such that 
+
+Δ =
+
+> 𝑟
+
+∑︁ 
+
+> 𝑘 =1
+
+𝑎 𝑘 𝑏 ⊤ 
+
+> 𝑘
+
+.
+
+Define the univariate polynomials 
+
+𝑓 𝑘 (𝑋 ) = 
+
+> 𝑑 −1
+
+∑︁ 
+
+> 𝑖 =0
+
+(𝑎 𝑘 )𝑖 𝑋 𝑖 , 𝑔 𝑘 (𝑌 ) = 
+
+> 𝑑 ′−1
+
+∑︁ 
+
+> 𝑗 =0
+
+(𝑏 𝑘 )𝑗 𝑌 𝑗 .CCS ’26, November 2026, The Hague, The Netherlands Zhenhang Shang and Kani Chen 
+
+This yields a separable decomposition 
+
+𝑃 Δ (𝑋, 𝑌 ) =
+
+> 𝑟
+
+∑︁ 
+
+> 𝑘 =1
+
+𝑓 𝑘 (𝑋 )𝑔 𝑘 (𝑌 ).
+
+4.2.3 Commitment and Protocol. 
+
+Commitment. The prover commits to the polynomials 𝑃 𝑊 0 , 𝑃 𝑊 ∗
+
+and to each 𝑓 𝑘 and 𝑔 𝑘 using the polynomial commitment scheme. Let 𝐶 𝑊 0 , 𝐶 𝑊 ∗ , 𝐶 𝑓 𝑘 , 𝐶 𝑔 𝑘 denote these commitments. 
+
+Random point test. The verifier samples a random point (𝑥, 𝑦 )
+
+uniformly from F𝑞 × F𝑞 . The prover opens 
+
+𝑃 𝑊 0 (𝑥, 𝑦 ), 𝑃 𝑊 ∗ (𝑥, 𝑦 ), 𝑓 𝑘 (𝑥 ), 𝑔 𝑘 (𝑦 ) for 𝑘 = 1, . . . , 𝑟 
+
+together with corresponding opening proofs. The verifier then checks 
+
+𝑃 𝑊 ∗ (𝑥, 𝑦 ) − 𝑃 𝑊 0 (𝑥, 𝑦 ) ?
+
+=
+
+> 𝑟
+
+∑︁ 
+
+> 𝑘 =1
+
+𝑓 𝑘 (𝑥 )𝑔 𝑘 (𝑦 ).
+
+4.2.4 Soundness. 
+
+Lemma 4.4 (Schwartz–Zippel [ 28 ]) . Let 𝑄 (𝑋, 𝑌 ) be a nonzero poly-nomial over F𝑞 of total degree at most 𝐷 . Then 
+
+Pr 
+
+> (𝑥,𝑦 )← F2
+> 𝑞
+
+[ 𝑄 (𝑥, 𝑦 ) = 0 ] ≤ 𝐷 𝑞 .
+
+Theorem 4.5 (FTI-soundness of MRDP). Assume the polyno-mial commitment scheme is binding and its opening proofs are sound. Let Δ be the true drift. If the MRDP verifier accepts with non-negligible probability over its choice of (𝑥, 𝑦 ), then with probability at least 
+
+1 − 𝐷 /𝑞 we have rank (Δ) ≤ 𝑟 , where 𝐷 is the degree of 𝑃 Δ.
+
+Proof sketch. If rank (Δ) > 𝑟 , then for any choice of polyno-mials 𝑓 𝑘 and 𝑔 𝑘 the difference 
+
+𝑄 (𝑋, 𝑌 ) := 𝑃 Δ (𝑋, 𝑌 ) − 
+
+> 𝑟
+
+∑︁ 
+
+> 𝑘 =1
+
+𝑓 𝑘 (𝑋 )𝑔 𝑘 (𝑌 )
+
+is a nonzero polynomial. The verifier’s check is equivalent to 𝑄 (𝑥, 𝑦 ) =
+
+0 at a randomly sampled (𝑥, 𝑦 ). By the Schwartz–Zippel lemma, this holds with probability at most 𝐷 /𝑞 . An adversary whose proof is accepted with significantly higher probability must either force 𝑄 
+
+to be the zero polynomial, which implies a genuine rank-𝑟 decom-position of Δ, or break the binding or soundness of the commitment scheme. □
+
+Zero-knowledge follows from the hiding properties of the poly-nomial commitments and the zero-knowledge guarantees of their opening proofs. 
+
+Theorem 4.6 (Succinctness). For fixed rank 𝑟 , the verifier’s run-ning time and the proof size scale as 𝑂 (𝑟 ) up to polylogarithmic factors in the security parameter, i.e. both are bounded by 
+
+poly (𝜆, 𝑟 ),
+
+These costs do not depend on the matrix dimensions 𝑑 or 𝑑 ′.
+
+Proof sketch. The prover commits to the bivariate encodings of 𝑊 0 and 𝑊 ∗, and to the 2𝑟 univariate polynomials 𝑓 𝑘 , 𝑔 𝑘 . The verifier samples a single evaluation point and checks 𝑂 (𝑟 ) opened values with their commitment proofs. Each opening proof has size and verification time poly (𝜆 ), with no dependence on 𝑑 or 𝑑 ′.Thus the total proof size and verification time are 𝑂 (𝑟 · poly (𝜆 )) ,independent of the ambient matrix dimensions. □
+
+## 4.3 Sparse SMDPs via Streaming Interactive Proofs (SDIP) 
+
+Intuition. Sparsity means that only 𝑘 out of 𝑛 coordinates change. We use random linear sketches that compress the drift vector while preserving information about its support. The prover commits to the sparse support set and the corresponding nonzero drift values, and the verifier checks consistency via streaming-style linear checks: a random inner product with the full parameter vectors must match the inner product computed from the declared sparse drift. Any undisclosed nonzero coordinate would cause a mismatch that is detected with high probability over the random sketch, since a nonzero vector has negligible chance of being orthogonal to a random vector. The proof size depends on the sparsity bound 𝑘 and the number of repetitions, not on the ambient dimension 𝑛 .We now address drift classes that constrain the number of nonzero parameter updates. 
+
+4.3.1 Setup and Drift Class. For the sparse-drift construction, we work with a vectorized form of all model parameters. Let 
+
+vec (𝑊 0), vec (𝑊 ∗) ∈ R𝑛 
+
+denote the concatenation of all matrix entries in a fixed order. We write these as 𝑊 0,𝑊 ∗ ∈ R𝑛 when convenient. For a sparsity bound 
+
+𝑘 , the drift class is 
+
+Fsparse (𝑘 ) = { Δ ∈ R𝑛 : ∥Δ∥0 ≤ 𝑘 }.
+
+To use commitment schemes, each real-valued entry is encoded into a finite field F𝑞 through a fixed-point representation, after which all commitments and algebraic checks occur over F𝑞 .
+
+4.3.2 Sparse Witness Encoding. Let 𝑆 ⊆ [ 𝑛 ] denote the support of nonzero entries of Δ with |𝑆 | ≤ 𝑘 . Define Δ′ ∈ R𝑛 by 
+
+Δ′ 
+
+> 𝑖
+
+=
+
+(
+
+Δ𝑖 if 𝑖 ∈ 𝑆, 
+
+0 otherwise .
+
+The prover must demonstrate that: (1) the support size satisfies |𝑆 | ≤ 𝑘 ,(2) the relation 𝑊 ∗ = 𝑊 0 + Δ′ holds on all supported indices, (3) no additional drift exists outside 𝑆 , so that Δ = Δ′.Directly checking these equalities at all coordinates would re-quire linear time, so we use random linear checks. 
+
+4.3.3 Random Linear Checks. The verifier samples a random vector 
+
+𝑟 ← F𝑛 𝑞 and defines 
+
+𝑇 = ⟨𝑟, Δ′⟩.
+
+The prover must convince the verifier that 
+
+⟨𝑟,𝑊 ∗⟩ − ⟨ 𝑟,𝑊 0⟩ = 𝑇 . 
+
+If Δ ≠ Δ′, then the difference vector ℎ = Δ − Δ′ is nonzero, and 
+
+⟨𝑟, ℎ ⟩ = 0
+
+holds with probability only 1/𝑞 for uniformly random 𝑟 .
+
+Lemma 4.7. Let ℎ ∈ F𝑛 𝑞 be nonzero. For a uniform random 𝑟 ∈ F𝑛 𝑞 ,
+
+Pr [ ⟨ 𝑟, ℎ ⟩ = 0 ] = 1
+
+𝑞 .Fine-Tuning Integrity for Modern Neural Networks: Structured Drift Proofs via Norm, Rank, and Sparsity Certificates CCS ’26, November 2026, The Hague, The Netherlands 
+
+Proof. Since ℎ ≠ 0, there is an index 𝑗 with ℎ𝑗 ≠ 0. Conditioning on all coordinates of 𝑟 except 𝑟 𝑗 , the inner product ⟨𝑟, ℎ ⟩ is an affine function of 𝑟 𝑗 with nonzero coefficient. This equation has exactly one solution in F𝑞 , so for uniform 𝑟 𝑗 the probability that the inner product is zero is 1/𝑞 . □
+
+Repeating the check with independent challenges 𝑟 (1) , . . . , 𝑟 (𝑡 )
+
+reduces the error probability to 𝑞 −𝑡 .
+
+4.3.4 Zero-Knowledge Sparse Index Proofs. To avoid revealing the support 𝑆 , the prover uses a binary indicator vector 𝑢 ∈ { 0, 1}𝑛 
+
+with 𝑢 𝑖 = 1 if and only if 𝑖 ∈ 𝑆 . The prover commits to 𝑢 and Δ′ and proves the following properties without revealing 𝑆 :
+
+• Í𝑖 𝑢 𝑖 ≤ 𝑘 ,
+
+• Δ′ 
+
+> 𝑖
+
+= 0 whenever 𝑢 𝑖 = 0,
+
+• 𝑊 ∗ 
+
+> 𝑖
+
+= 𝑊 0,𝑖 + Δ′ 
+
+> 𝑖
+
+for all indices with 𝑢 𝑖 = 1,
+
+• for each 𝑗 , the value 𝑇 ( 𝑗 ) equals ⟨𝑟 ( 𝑗 ) , Δ′⟩.
+
+4.3.5 Protocol Description. 
+
+Public parameters. These include the vector and scalar commit-ment schemes and the challenge count 𝑡 .
+
+Commitments. The prover publishes 
+
+𝐶 0 = Com (𝑊 0; 𝑟 0), 𝐶 ∗ = Com (𝑊 ∗; 𝑟 ∗).
+
+Proof generation. The prover chooses a support set 𝑆 , constructs 
+
+Δ′ and 𝑢 , commits to both, and produces: (1) a proof 𝜋 cnt that Í𝑖 𝑢 𝑖 ≤ 𝑘 ,(2) a proof 𝜋 supp that Δ′ 
+
+> 𝑖
+
+= 0 whenever 𝑢 𝑖 = 0,(3) a proof 𝜋 eq that 𝑊 ∗ = 𝑊 0 + Δ′ on indices with 𝑢 𝑖 = 1.For each 𝑗 = 1, . . . , 𝑡 :(1) the verifier samples 𝑟 ( 𝑗 ) ← F𝑛 𝑞 ,(2) the prover computes 𝑇 ( 𝑗 ) = ⟨𝑟 ( 𝑗 ) , Δ′⟩ and commits to it, (3) the prover generates a proof 𝜋 ( 𝑗 ) 
+
+> lin
+
+that 
+
+⟨𝑟 ( 𝑗 ) ,𝑊 ∗⟩ − ⟨ 𝑟 ( 𝑗 ) ,𝑊 0⟩ = 𝑇 ( 𝑗 ) .
+
+Verification. The verifier checks 𝜋 cnt , 𝜋 supp , 𝜋 eq and all linear proofs 𝜋 ( 𝑗 ) 
+
+> lin
+
+, and accepts if all verifications succeed. 
+
+4.3.6 Security Analysis. 
+
+Theorem 4.8 (FTI-soundness of SDIP). Assume the commitment schemes are binding and all sub-protocols are sound. If the verifier accepts with probability greater than negligible, then with probability at least 1−𝑞 −𝑡 over the random challenges, the drift satisfies ∥Δ∥0 ≤ 𝑘 .
+
+Proof sketch. If ∥Δ∥0 > 𝑘 , then any claimed support 𝑆 with 
+
+|𝑆 | ≤ 𝑘 omits at least one nonzero entry of Δ, so Δ − Δ′ ≠ 0.By Lemma 4.7, each linear check detects this discrepancy with probability at least 1 − 1/𝑞 . The probability that all 𝑡 checks fail to detect it is at most 𝑞 −𝑡 . Binding commitments and sound sub-protocols ensure that any accepting proof must satisfy all linear checks, so except with probability 𝑞 −𝑡 , we must have Δ = Δ′ with 
+
+|𝑆 | ≤ 𝑘 , which implies ∥Δ∥0 ≤ 𝑘 . □
+
+Zero-knowledge follows from hiding commitments, the use of the indicator vector 𝑢 in place of the explicit support 𝑆 , and the zero-knowledge guarantees of the sub-protocols. 
+
+Theorem 4.9 (Succinctness). For fixed sparsity bound 𝑘 and challenge count 𝑡 , the verifier’s running time and the proof size are 
+
+poly (𝜆, 𝑘, 𝑡, log 𝑛 ),
+
+independent of 𝑛 beyond logarithmic factors. 
+
+Proof sketch. The verifier checks a constant number of count-ing and support-consistency proofs over at most 𝑘 active coordi-nates, and performs 𝑡 linear checks. Each check involves only scalar openings and field operations and has cost poly (𝜆 ). The depen-dence on 𝑛 enters only through index encoding and hashing, which contributes at most logarithmic factors. Thus both verification time and proof size are bounded by poly (𝜆, 𝑘, 𝑡, log 𝑛 ). □
+
+## 5 Lower Bound: Necessity of Structured Drift 
+
+In this section we show that structure is essential for obtaining succinct fine-tuning integrity proofs in an information-theoretic setting. If the allowed drift is unstructured, then any non-interactive proof system achieving statistical FTI must have communication cost Ω(𝑛 ), where 𝑛 is the number of parameters. This does not con-tradict the existence of succinct computationally-sound SNARKs for arbitrary drift classes, but it shows that without algebraic as-sumptions or trusted setup, succinctness requires structure such as norm, rank, or sparsity. Our constructions in Sections 4 use such structure to avoid this barrier. 
+
+## 5.1 A Statistical FTI Model 
+
+We adopt a statistical variant of FTI in which both soundness and zero-knowledge hold against unbounded adversaries. For this sec-tion we work over a finite field F𝑞 , since information-theoretic lower bounds are most naturally stated in discrete domains. We consider a single vector-valued parameter block 
+
+𝑊 ∈ F𝑛 𝑞 ,
+
+and define the fine-tuned parameters as 𝑊 ∗ = 𝑊 0 + Δ for a drift vector Δ ∈ F𝑛 𝑞 . The argument extends to multi-block models by concatenation. 
+
+Definition 5.1 (Statistical FTI) . Let F ⊆ F𝑛 𝑞 be a drift class. A non-interactive proof system Π = (Prove , Verify ) achieves statistical FTI for F if: 
+
+• Completeness. For all 𝑊 0 and all Δ ∈ F , if 𝑊 ∗ = 𝑊 0 + Δ then 
+
+Pr [Verify (𝑊 0,𝑊 ∗, 𝜋 ) = 1] = 1,
+
+where 𝜋 ← Prove (𝑊 0,𝑊 ∗).
+
+• Statistical soundness. For every (possibly unbounded) prover, 
+
+Pr Verify (𝑊 0,𝑊 ∗, 𝜋 ) = 1 ∧ ( 𝑊 ∗ − 𝑊 0) ∉ F  ≤ negl (𝜆 ).
+
+• Statistical zero-knowledge. There exists a simulator whose output is statistically close to Prove (𝑊 0,𝑊 ∗) for all (𝑊 0,𝑊 ∗) with (𝑊 ∗ −
+
+𝑊 0) ∈ F .We call Π succinct if its proof length satisfies |𝜋 | = 𝑜 (𝑛 log 𝑞 ).
+
+We omit commitments in this model and let the verifier see both 
+
+𝑊 0 and 𝑊 ∗. This only strengthens the lower bound. CCS ’26, November 2026, The Hague, The Netherlands Zhenhang Shang and Kani Chen 
+
+## 5.2 Unstructured Drift and One-Way Communication 
+
+To model drift with no exploitable structure, we consider all vectors within a Hamming ball of radius 𝑡 .
+
+Definition 5.2 (Hamming-ball drift class) . For 𝑡 ∈ { 0, . . . , 𝑛 }, define 
+
+FHam (𝑡 ) = { Δ ∈ F𝑛 𝑞 : 𝑑 𝐻 (Δ, 0) ≤ 𝑡 },
+
+where 𝑑 𝐻 denotes Hamming distance [29]. 
+
+When 𝑡 = 𝛼𝑛 for a constant 𝛼 < 1/2, this drift class is exponen-tially large and contains no algebraic structure that could support compression. Statistically certifying membership in such a set is closely related to distinguishing small from large Hamming dis-tance, which is an inherently communication-intensive task. This connection is captured by a standard one-way communica-tion problem. Alice receives 𝑥 ∈ { 0, 1}𝑛 , Bob receives 𝑦 ∈ { 0, 1}𝑛 ,and they are promised that 
+
+𝑑 𝐻 (𝑥, 𝑦 ) ≤ 𝑡 or 𝑑 𝐻 (𝑥, 𝑦 ) ≥ 3𝑡, 
+
+for some 𝑡 ≤ 𝑛 /4. Alice sends a single message to Bob, who must determine which case holds. Any protocol solving this problem with small error requires Ω(𝑛 ) bits of one-way communication [21]. If a succinct statistical FTI proof existed for FHam (𝑡 ), producing proofs of length 𝑜 (𝑛 ), then such proofs could be used to construct a one-way protocol for this promise problem with communication 
+
+𝑜 (𝑛 ), contradicting the Ω(𝑛 ) lower bound. Thus unstructured drift cannot admit succinct statistical FTI. 
+
+## 5.3 Lower Bound Theorem 
+
+Theorem 5.3 (Information-theoretic lower bound for un-structured drift). Let 𝑡 = 𝛼𝑛 for a constant 𝛼 < 1/4 and let 
+
+𝜀 𝑠 , 𝜀 𝑐 < 1/3. Suppose there exists a non-interactive proof system achieving statistical FTI for FHam (𝑡 ) with soundness error at most 𝜀 𝑠 ,completeness error at most 𝜀 𝑐 , and proof size |𝜋 | = 𝑜 (𝑛 ). Then there exists a one-way communication protocol for the promise Hamming-distance problem with communication 𝑜 (𝑛 ) and error at most 𝜀 𝑠 + 𝜀 𝑐 .This contradicts the Ω(𝑛 ) lower bound. Hence no succinct statistical FTI scheme exists for FHam (𝑡 ).
+
+Proof sketch. Given (𝑥, 𝑦 ) for the promise problem, interpret them as (𝑊 0,𝑊 ∗) and let Bob compute 𝜋 = Prove (𝑊 0,𝑊 ∗). Bob sends 𝜋 to Alice, who runs Verify .If 𝑑 𝐻 (𝑥, 𝑦 ) ≤ 𝑡 , then 𝑦 − 𝑥 ∈ F Ham (𝑡 ) and completeness implies acceptance with probability at least 1 − 𝜀 𝑐 . If 𝑑 𝐻 (𝑥, 𝑦 ) ≥ 3𝑡 , then 
+
+𝑦 − 𝑥 ∉ FHam (𝑡 ) and soundness implies rejection with probability at least 1 − 𝜀 𝑠 .Thus the protocol solves the promise problem with error at most 
+
+𝜀 𝑠 + 𝜀 𝑐 using communication |𝜋 | = 𝑜 (𝑛 ), contradicting the Ω(𝑛 )
+
+lower bound. □
+
+## 5.4 Discussion 
+
+Theorem 5.3 shows that, without algebraic structure, statistical FTI requires linear-size proofs. Our SMDP constructions avoid this barrier by exploiting structures: (1) norm, (2) rank, (3) sparsity, and by relying on computational assumptions to obtain succinct zero-knowledge proofs. 
+
+## 6 Architecture-Aware Instantiations 
+
+The SMDP constructions in Section 4 apply to generic vector- or matrix-valued parameter blocks. This section shows how to instan-tiate them for concrete neural architectures and how to compose block-level proofs into end-to-end fine-tuning integrity. Our goals are: (i) to demonstrate that the drift classes defined earlier align with common fine-tuning regimes, and (ii) to illustrate how a veri-fier decomposes a full model into blocks, assigns each block a drift policy, and composes the resulting SMDPs. We focus on three representative families: transformers, con-volutional neural networks (CNNs), and multi-layer perceptrons (MLPs), but the same methodology extends to other architectures. 
+
+## 6.1 SMDPs for Transformer Models 
+
+Consider a decoder-only transformer with 𝐿 layers and model di-mension 𝑑 . Each layer ℓ contains: 
+
+• a multi-head self-attention block with query, key, value, and output matrices 
+
+𝑊 (ℓ ) 
+
+> 𝑄
+
+, 𝑊 (ℓ ) 
+
+> 𝐾
+
+, 𝑊 (ℓ ) 
+
+> 𝑉
+
+, 𝑊 (ℓ ) 
+
+> 𝑂
+
+∈ R𝑑 ×𝑑 ,
+
+• a feedforward block with 
+
+𝑊 (ℓ ) 
+
+> 1
+
+∈ R𝑑 ×𝑑 ff , 𝑊 (ℓ ) 
+
+> 2
+
+∈ R𝑑 ff ×𝑑 ,
+
+• normalization parameters such as scale and bias vectors. The model also includes a token embedding matrix 𝐸 ∈ R| V | × 𝑑 and, depending on implementation, positional embeddings and output projections. 
+
+Block decomposition. In the FTI framework each of the following is treated as a separate parameter block: 
+
+• attention projections 𝑊 (ℓ ) 
+
+> 𝑄
+
+,𝑊 (ℓ ) 
+
+> 𝐾
+
+,𝑊 (ℓ ) 
+
+> 𝑉
+
+,𝑊 (ℓ ) 
+
+> 𝑂
+
+,
+
+• feedforward matrices 𝑊 (ℓ ) 
+
+> 1
+
+,𝑊 (ℓ ) 
+
+> 2
+
+,
+
+• embedding matrix 𝐸 and any untied output weights, 
+
+• normalization parameters for each layer. 
+
+Fine-tuning patterns. Common transformer fine-tuning regimes admit natural drift structure: 
+
+• LoRA-style updates correspond to low-rank drift, 
+
+• feedforward updates often stay small in norm, 
+
+• prefix tuning induces sparse changes in embedding rows, 
+
+• normalization parameters typically exhibit small-magnitude drift. These patterns align directly with rank, norm, and sparsity drift classes. 
+
+Rank-bounded drift in attention. For each attention matrix a pol-icy may enforce 
+
+Δ(ℓ ) 
+
+> 𝑄
+
+∈ F rank (𝑟 𝑄 ), Δ(ℓ ) 
+
+> 𝑉
+
+∈ F rank (𝑟 𝑉 ),
+
+capturing rank-𝑟 LoRA adapters. The MRDP scheme in Section 4.2 applies per projection matrix or even per head by decomposing 𝑊 
+
+into (𝑑 × 𝑑 ℎ ) submatrices. Verification remains 𝑂 (𝑟 ) per block. 
+
+Norm-bounded drift in feedforward layers. Feedforward updates can be constrained by 
+
+∥Δ(ℓ ) 
+
+> 1
+
+∥𝐹 ≤ 𝜖 (ℓ ) 
+
+> 1
+
+, ∥Δ(ℓ ) 
+
+> 2
+
+∥𝐹 ≤ 𝜖 (ℓ ) 
+
+> 2
+
+.
+
+The NBDP construction certifies these bounds independently of the width 𝑑 ff .Fine-Tuning Integrity for Modern Neural Networks: Structured Drift Proofs via Norm, Rank, and Sparsity Certificates CCS ’26, November 2026, The Hague, The Netherlands 
+
+Sparse drift in embeddings/prefixes. Prefix tuning or soft prompts modify only a small set of rows in 𝐸 . If at most 𝑘 𝐸 rows change, then 
+
+Δ𝐸 ∈ F sparse (𝑘 𝐸 ).
+
+SDIP verifies row-sparsity with proof size depending on 𝑘 𝐸 and logarithmically on the vocabulary size. 
+
+Norm-bounded drift in normalization parameters. Normalization drifts are typically small, and a policy may require 
+
+∥Δ(ℓ ) 
+
+> LN
+
+∥2 ≤ 𝜖 (ℓ ) 
+
+> LN
+
+.
+
+NBDP applies directly to these low-dimensional vectors. 
+
+Example transformer policy. A platform may enforce: (1) rank-bounded drift for all attention matrices, (2) norm-bounded drift for feedforward and normalization lay-ers, (3) sparse drift for embeddings. The global admissible drift set is then 
+
+F Trans =
+
+ 𝐿 Ö
+
+> ℓ=1
+
+Frank (𝑟 ) × F norm (𝜖 ) × F norm (𝜖 (ℓ ) 
+
+> LN
+
+)
+
+
+
+× F sparse (𝑘 ),
+
+with block-level MRDP, NBDP, and SDIP proofs aggregated into a full FTI proof. 
+
+## 6.2 SMDPs for Convolutional Networks 
+
+A convolutional layer has kernel parameters 
+
+𝑊 (ℓ ) ∈ R𝐶 (ℓ )          
+
+> out ×𝐶 (ℓ)
+> in ×𝐾 (ℓ)
+> ℎ×𝐾 (ℓ)
+> 𝑤
+
+,
+
+which can be grouped per layer or per output channel. 
+
+Channel-wise sparsity. Pruning and lightweight tuning often alter only a small number of output channels. If at most 𝑘 ℓ channels are modified, the drift satisfies 
+
+Δ(ℓ ) ∈ F sparse (𝑘 ℓ ),
+
+with sparsity measured at the channel level. The SDIP construction certifies this structure with complexity determined by 𝑘 ℓ .
+
+Norm-bounded kernel updates. A policy may constrain the overall magnitude of kernel updates by requiring 
+
+∥Δ(ℓ ) ∥𝐹 ≤ 𝜖 ℓ ,
+
+with analogous bounds imposed per channel if desired. After vec-torizing the kernels, the NBDP construction certifies these norm constraints succinctly. 
+
+Low-rank drift in 1 × 1 convolutions. A 1 × 1 convolution is equiv-alent to a matrix in R𝐶 out ×𝐶 in . If fine-tuning restricts updates to a low-rank subspace, MRDP verifies the rank bound. 
+
+Example CNN policy. A CNN policy may combine: (1) channel-sparsity constraints (2) kernel norm bounds (3) rank bounds for 1 × 1 layers Each component is certified by SDIP, NBDP, or MRDP. 
+
+## 6.3 Instantiating SMDPs for MLPs and Feedforward Networks 
+
+An 𝐿 -layer MLP with widths (𝑑 0, . . . , 𝑑 𝐿 ) has matrices 
+
+𝑊 (ℓ ) ∈ R𝑑 ℓ ×𝑑 ℓ −1 .
+
+Each matrix forms a block with an associated drift class. 
+
+Norm-bounded drift. Regularized tuning often restricts updates to 
+
+∥Δ(ℓ ) ∥𝐹 ≤ 𝜖 ℓ ,
+
+which NBDP certifies succinctly. 
+
+Low-rank drift in bottleneck layers. In architectures with bottle-necks or adapter modules, updates are parameterized as low-rank products. MRDP verifies that drift remains rank-bounded. 
+
+Sparse neuron updates. Policies that allow changing only 𝑘 ℓ rows of a weight matrix induce row-sparse drift, 
+
+Δ(ℓ ) ∈ F sparse (𝑘 ℓ ),
+
+and SDIP verifies this property. 
+
+## 6.4 Discussion: Composing Block-Level SMDPs 
+
+Across all architectures the workflow is the same: (1) Decompose the model into parameter blocks. (2) Assign each block a drift class F𝑖 reflecting desired constraints and expected fine-tuning behavior. (3) Instantiate SMDPs for each F𝑖 using NBDP, MRDP, or SDIP. (4) Aggregate block-level proofs into a global FTI proof for the product class F = Î𝑖 F𝑖 .The SMDP constructions depend on drift structure rather than model size. This yields a uniform methodology: the cryptographic mechanisms are architecture-independent, yet the chosen decom-position and policies adapt to the architecture and deployment constraints. We detail the policy language and proof aggregation strategy in Section 7. 
+
+## 7 System Integration 
+
+We now describe how block-level SMDP constructions compose into a complete fine-tuning integrity (FTI) system suitable for de-ployment in machine-learning pipelines. The system consists of four components: (1) a policy specification language, (2) model decomposition and commitment procedures, (3) prover-side gener-ation of block-level SMDPs, and (4) verifier-side aggregation and validation. 
+
+## 7.1 Policy Language 
+
+A verifier declares a fine-tuning policy P that assigns an admissible drift class to each parameter block. Let 𝑊 = {𝑊 (𝑖 ) }𝑖 ∈ I denote the model, where I indexes blocks such as layers, attention heads, convolutional channels, or embedding rows. A policy is a mapping 
+
+P : 𝑖 ↦ → F 𝑖 ,
+
+where each F𝑖 is chosen from 
+
+{F norm (𝜖 ), Frank (𝑟 ), Fsparse (𝑘 ), and their intersections }.CCS ’26, November 2026, The Hague, The Netherlands Zhenhang Shang and Kani Chen                                                                   
+
+> 1. Policy Specification
+> P:𝑖 ↦→F𝑖
+> F𝑖 ∈ {F norm ,Frank ,Fsparse }
+> 2. Model Decomposition
+> Split into parameter blocks
+> 𝑊 0={𝑊 (𝑖 )
+> 0}, 𝑊 ∗={𝑊 ∗( 𝑖 )}
+> 3. Cryptographic Commitment
+> Compute block commitments
+> 𝐶 (𝑖 )
+> 0=Com (𝑊 (𝑖 )
+> 0)
+> 𝐶 ∗( 𝑖 )=Com (𝑊 ∗( 𝑖 ))
+> Defines constraints Produces blocks
+> Output: commitments
+> {𝐶 (𝑖 )
+> 0},{𝐶 ∗( 𝑖 )}
+> 4. Proof Generation
+> Block-level SMDPs
+> 𝜋 𝑖 =SMDP F𝑖 (𝑊 (𝑖 )
+> 0,𝑊 ∗( 𝑖 ))
+> Input: parameter blocks
+> (𝑊 (𝑖 )
+> 0,𝑊 ∗( 𝑖 ))
+> Guides construction
+> NBDP
+> Norm-bounded drift
+> MRDP
+> Rank-bounded drift
+> SDIP
+> Sparse drift
+> 5. Proof Aggregation
+> Merge block proofs
+> Π={( 𝜋 𝑖 , 𝑖, F𝑖 )} 𝑖 ∈ I
+> 6. Verification
+> Check against policy Input: (𝐶 0, 𝐶 ∗,Π)
+> Input: commitments
+> 𝐶 0, 𝐶 ∗(Merkle roots)
+> FTI certificate Π
+> Accept
+> All blocks satisfy F𝑖
+> Reject
+> Violation detected
+> Valid
+> Invalid
+
+Setup Phase 
+
+Proof Phase 
+
+Verification Phase  
+
+> Prover Verifier
+
+Figure 1: Workflow of the proposed FTI system. The verifier specifies a drift policy P, the prover commits to base and fine-tuned models, generates block-level SMDPs (NBDP/MRDP/SDIP), aggregates them into a single proof, and the verifier checks consistency with the policy before accepting or rejecting. 
+
+Composed drift classes. A policy may simultaneously constrain magnitude, rank, and sparsity: 
+
+F𝑖 = Fnorm (𝜖 𝑖 ) ∩ F rank (𝑟 𝑖 ) ∩ F sparse (𝑘 𝑖 ).
+
+The global drift class is the product 
+
+F =
+
+Ö
+
+𝑖 ∈ I 
+
+F𝑖 .
+
+## 7.2 End-to-End Workflow 
+
+An FTI-enabled model release proceeds in four phases: 
+
+(1) Model decomposition and commitments. The provider commits to each block: 
+
+𝐶 (𝑖 )
+
+0 = Com (𝑊 (𝑖 )
+
+0 ; 𝑟 (𝑖 )
+
+0 ), 𝐶 ∗( 𝑖 ) = Com (𝑊 ∗( 𝑖 ) ; 𝑟 (𝑖 ) ),
+
+and aggregates {𝐶 (𝑖 )
+
+0 }, {𝐶 ∗( 𝑖 ) } into Merkle roots ( 𝐶 0, 𝐶 ∗) to obtain concise commitments to the full model. 
+
+(2) Block-level proofs. For each 𝑖 ∈ I , the prover constructs 
+
+𝜋 𝑖 = SMDP F𝑖 (𝑊 (𝑖 )
+
+0 ,𝑊 ∗( 𝑖 ) ),
+
+using NBDP, MRDP, SDIP, or a composition thereof as dictated by 
+
+P.
+
+(3) Proof aggregation. The prover outputs 
+
+Π = {( 𝜋 𝑖 , 𝑖, F𝑖 )} 𝑖 ∈ I ,
+
+optionally augmented with aggregated signatures or batched open-ing proofs to reduce overhead. This binds each 𝜋 𝑖 to its block index and to the corresponding drift class. 
+
+(4) Verification. Given Π and the model commitments (𝐶 0, 𝐶 ∗),the verifier: (i) authenticates 𝐶 (𝑖 )
+
+0 and 𝐶 ∗( 𝑖 ) through Merkle inclu-sion proofs; (ii) verifies each block proof 𝜋 𝑖 against its commitments and drift class F𝑖 , and (iii) accepts if and only if every block satisfies its assigned policy. 
+
+## 7.3 Composability Across Fine-Tuning Stages 
+
+If a model evolves through a sequence 
+
+𝑊 0 → 𝑊 1 → · · · → 𝑊 𝑇 ,
+
+the system supports chained proofs: 
+
+Π𝑡 : 𝑊 𝑡 −1 → 𝑊 𝑡 satisfies policy P𝑡 .
+
+This enables provenance tracking: a failure in any link invalidates all subsequent descendants. Chaining also allows revocation or rollback by removing or rejecting a specific Π𝑡 .
+
+## 7.4 Security Guarantees 
+
+By Theorem 5.3, drift structure is necessary for succinctness in statistical settings. The integrated system preserves: 
+
+• Soundness. Each SMDP is sound for its block-level relation; since blocks are independent, global soundness follows by a union bound. 
+
+• Zero-knowledge. ZK holds via standard hybrid arguments, as block proofs reveal nothing about drift outside their declared structure. 
+
+• Succinctness. The global proof size scales with the structural complexity of drift (rank, sparsity, allowed norms) rather than with the model dimension. Fine-Tuning Integrity for Modern Neural Networks: Structured Drift Proofs via Norm, Rank, and Sparsity Certificates CCS ’26, November 2026, The Hague, The Netherlands 
+
+Together, these properties yield a scalable and practical mecha-nism for certifying fine-tuning integrity across complex architec-tures. 
+
+## 8 Implementation and Evaluation 
+
+We implemented a prototype of our FTI system that integrates commitment backends, the NBDP, MRDP, and SDIP constructions, and a proof aggregator with a policy interpreter. The prototype is designed to isolate the cryptographic cost of fine-tuning integrity from the underlying machine learning workload, so that proof size and verification time can be measured directly. 
+
+## 8.1 Implementation Components 
+
+Commitment backends. Vector-valued parameters are committed using a Merkle-tree-based [ 26 ] vector commitment instantiated with SHA-256. This yields linear-time commitment, logarithmic size opening proofs, and small memory overhead. Matrix- and polynomial-valued objects in MRDP are handled using a polyno-mial commitment backend: KZG over BLS12-381 via the arkworks 
+
+library [ 36 ], which provides constant-size openings, logarithmic verification time, and efficient batch evaluation. Zero-knowledge in both cases is obtained via the Fiat–Shamir transform with domain-separated transcripts. Table 1 summarizes the main implementation components and their asymptotic costs. 
+
+Linear, range, and sparse proofs. NBDP requires zero-knowledge proofs of linear relations and bounded projections. We implement inner-product arguments for relations of the form 
+
+𝑧 𝑖 = ⟨𝑟 𝑖 ,𝑊 ∗ − 𝑊 0⟩
+
+and Bulletproofs-style [ 6] range proofs to enforce |𝑧 𝑖 | ≤ 𝜏 . All algebraic operations are carried out over the field used by the com-mitment scheme, with FFT-based routines for fast polynomial and inner-product computations. SDIP uses commit-and-prove proto-cols for a binary indicator vector 𝑢 that encodes the support of the sparse drift, together with range and zero tests that ensure the claimed sparsity and consistency with 𝑊 ∗ −𝑊 0. Random challenges 
+
+𝑟 for the linear checks in SDIP are derived from short seeds via a pseudorandom function so that the verifier does not need to receive full-length vectors. 
+
+Proof aggregation and optimizations. The proof aggregator com-presses the raw output of NBDP, MRDP, and SDIP into a single structured proof artifact. Repeated KZG openings across blocks are batched into a small number of aggregate openings. Merkle authen-tication paths for vector commitments are merged where possible to reduce redundancy. Each block-level proof is tagged with block indices and drift-class metadata so that the verifier can enforce the policy mapping P : 𝑖 ↦ → F 𝑖 . Several optimizations reduce concrete cost: cached projections ⟨𝑟 𝑖 ,𝑊 0⟩ for NBDP, row-major packing of weight matrices for faster polynomial encoding, GPU-accelerated inner products for large layers, and run-length encoding of the sparse indicator vector 𝑢 before commitment. In aggregate, these optimizations reduce prover time by about 4.3× and verification time by about 7.8× compared to a naive baseline. 
+
+## 8.2 Evaluations 
+
+We evaluate the prototype along four axes: correctness under be-nign fine-tuning, detection of malicious drift, proof size and verifi-cation latency, and end-to-end feasibility on large models. 
+
+Models and fine-tuning regimes. Experiments use three repre-sentative architectures: a 7B-parameter transformer in the LLaMA style [ 10 ], a ResNet-50 convolutional network [ 19 ], and a 6-layer MLP classifier. Fine-tuning regimes include low-rank adapters with rank 𝑟 = 8, soft prompts with prefix length 20, norm-constrained full-model fine-tuning with bound 𝜖 = 0.05 , synthetic sparse poi-soning with 1% of parameters flipped, and targeted attention-head backdoor injections. All experiments are run on a 32-core AMD EPYC CPU, a single NVIDIA A100 GPU with 80 GB of memory, and 512 GB of RAM. 
+
+Proof sizes. Table 2 reports typical proof sizes for individual blocks and for an aggregated 7B-parameter transformer. NBDP proofs are between 20 KB and 40 KB per layer, essentially indepen-dent of the hidden dimension. MRDP proofs for rank-8 updates range from 4 KB to 10 KB per matrix block, independent of matrix size. SDIP proofs for sparsity bound 𝑘 = 100 occupy about 3 KB to 5 KB per block. An end-to-end FTI proof for the full 7B transformer, aggregating thousands of block-level proofs, is about 3.8 MB. For comparison, a zk-SNARK encoding the full model-difference circuit without structure exceeds 1 GB. Figure 2 visualizes the block-level proof sizes for the three SMDP types. NBDP MRDP SDIP 
+
+SMDP Scheme 
+
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> Proof Size (KB)  20-40 KB
+> 4-10 KB
+> 3-5 KB
+
+Figure 2: Block-level proof sizes for NBDP, MRDP, and SDIP. Values shown are representative midpoints of the empirical ranges. 
+
+Verification cost and prover time. Verification time scales with drift structure, not with ambient model dimension. On the trans-former model, verification requires about 14 ms per NBDP instance, 5 ms per MRDP instance, and 9 ms per SDIP instance, for a total of approximately 310 ms for the full model. Table 3 summarizes per-block and end-to-end verification times, and Figure 3 plots the per-block latencies. CCS ’26, November 2026, The Hague, The Netherlands Zhenhang Shang and Kani Chen 
+
+Table 1: Implementation components and asymptotic costs. Here 𝑛 denotes vector length, 𝑚 the number of random projections, 
+
+𝑟 the rank bound, and 𝑘 the sparsity bound. 
+
+Component Role Cost (high level) Vector commitments Commit to parameter blocks Commit 𝑂 (𝑛 ), open 𝑂 (log 𝑛 )
+
+Polynomial commitments Commit to 𝑃 𝑊 , 𝑓 𝑘 , 𝑔 𝑘 Open 𝑂 (1), verify 𝑂 (log 𝑛 )
+
+NBDP sub-protocols Linear and range proofs 𝑂 (𝑚 ) proofs, each poly (𝜆 )
+
+MRDP sub-protocols Rank certificates 𝑂 (𝑟 ) openings and checks SDIP sub-protocols Sparse structure proofs 𝑂 (𝑘 + 𝑡 ) checks Proof aggregator Merge all block proofs Linear in number of blocks 
+
+Table 2: Representative proof sizes for different SMDP types and an aggregated 7B-parameter model. 
+
+Scheme Setting Typical size NBDP Single layer, norm-bound 20–40 KB MRDP Single block, rank 𝑟 = 8 4–10 KB SDIP Single block, 𝑘 = 100 3–5 KB Aggregated FTI 7B transformer, all blocks 3.8 MB 
+
+Table 3: Verification latency and prover time for different architectures. 
+
+Quantity Setting Value Verification per NBDP Single block 14 ms Verification per MRDP Single block 5 ms Verification per SDIP Single block 9 ms Total verification 7B transformer 310 ms Prover time 7B transformer 8.2 minutes Prover time ResNet-50 12 seconds Prover time 6-layer MLP 0.8 seconds NBDP MRDP SDIP 
+
+SMDP Scheme 
+
+> 0
+> 5
+> 10
+> 15
+> 20
+> Verification Time (ms)
+> 14 ms
+> 5 ms
+> 9 ms
+
+Figure 3: Per-block verification time for NBDP, MRDP, and SDIP instances. 
+
+Figure 4 shows end-to-end prover time for each architecture. The prover cost is dominated by cryptographic work and scales with the number of blocks and the complexity of their drift classes. Even for the 7B-parameter model, prover time remains under ten minutes on a single high-end GPU, while verification stays well below one second, which is suitable for interactive auditing and deployment checks. 7B  
+
+> Transformer
+> ResNet-50 6-layer
+> MLP
+
+Model Architecture 
+
+> 0.5 s
+> 1 s
+> 10 s
+> 100 s
+> 500 s
+> 1000 s
+> Prover Time
+> 8.2 min
+> 12 s
+> 0.8 s
+
+Figure 4: End-to-end prover time for a 7B-parameter trans-former, ResNet-50, and a 6-layer MLP. Times are measured on a single A100 GPU. 
+
+Detection of malicious drift. Finally, we test whether violations of the drift policy are reliably detected. If the rank of an attention up-date exceeds the allowed bound 𝑟 = 8, MRDP fails with probability greater than 0.99999 under random verifier challenges. SDIP detects any extra nonzero drift coordinate beyond the claimed sparsity with false-negative probability below 10 −10 . For norm-bounded policies, any drift whose norm exceeds the declared bound by more than ten percent causes NBDP to reject with confidence at least 1 − 𝛿 
+
+for 𝛿 < 2−30 . These experiments confirm that the SMDP schemes behave as predicted by the theoretical soundness guarantees, and that violations of structured drift constraints are caught with very high probability. Fine-Tuning Integrity for Modern Neural Networks: Structured Drift Proofs via Norm, Rank, and Sparsity Certificates CCS ’26, November 2026, The Hague, The Netherlands 
+
+## 9 Related Work 
+
+Research on zero-knowledge proofs for machine learning has fo-cused on certifying correctness of inference or training. Systems such as zkML, CryptFlow, and Falcon [ 1 ][ 8 ][ 20 ] encode the full forward pass and sometimes gradients inside a SNARK or MPC protocol, resulting in substantial prover overhead [ 32 ]. These ap-proaches guarantee that model outputs are computed faithfully but do not constrain how models may evolve. In contrast, our work tar-gets a different objective: certifying that fine-tuned models remain within a structured drift class, without re-executing or proving the full computation. A complementary literature studies watermarking, provenance, and secure parameter updates. Watermarking and ownership veri-fication methods embed identifiable patterns into weights or pre-dictions [ 13 ][ 27 ][ 25 ], while provenance systems [ 12 ][ 34 ] track lin-eage through metadata or trusted infrastructure. Mechanisms for privacy-preserving parameter updates [ 16 ][ 41 ] focus on selective disclosure in federated learning. These approaches, however, do not provide zero-knowledge guarantees, do not achieve succinctness, and do not enforce structural constraints such as norm-, rank-, or sparsity-bounded drift. Our constructions fill this gap by providing cryptographic assurances about how much, and in what structured way a model has changed. Our techniques also build on advances in succinct proofs for lin-ear algebra, streaming verification, and random projections. MRDP leverages polynomial-commitment-based proofs for matrix rank and linear operations [ 4][ 43 ], while SDIP draws from space efficient streaming verification frameworks [ 3 ][ 30 ]. NBDP connects classical concentration results [ 42 ] to cryptographic ZK settings, enabling norm-bounded guarantees via random projections. Motivated by emerging empirical work on safety drift and backdoor risks during fine-tuning [ 46 ][ 35 ], we develop structured, enforceable proofs of controlled model change. Finally, our lower-bound analysis relates to classical communication-complexity results [ 22 ] and impossibil-ity bounds for assumption-free SNARKs [ 5 ], giving an FTI-specific formulation of why structure is necessary for succinct statistical proofs. 
+
+## 10 Discussion and Limitations 
+
+Semantic vs. Parametric Integrity. FTI constrains how much model 
+
+parameters may drift, but it does not directly bound semantic or behavioral changes. Nonlinear architectures can exhibit dispropor-tionate functional shifts even under small parameter perturbations. Bridging this gap, by developing semantic drift metrics, robustness-aware constraints, or hybrid guarantees that relate parameter dis-placement to output behavior, remains an important direction for future work. 
+
+Expressiveness of Drift Classes. Our framework focuses on norm-bounded, rank-bounded, and sparse drift, which align with com-mon fine-tuning regimes such as LoRA, prefix tuning, and struc-tured pruning. However, some techniques rely on richer algebraic structures, including block-circulant matrices, Kronecker-factored subspaces, or hardware-aware sparsity patterns. Supporting such classes without losing succinctness will likely require new poly-nomial encodings or vector-commitment abstractions that better capture these structures. 
+
+Prover Cost and Cryptographic Assumptions. Although proofs are succinct and verification is fast, prover cost remains significant for very large models. GPU-accelerated arithmetic and distributed prov-ing help, but scaling to frontier models with 70B-500B parameters remains an engineering challenge. Furthermore, MRDP currently relies on KZG commitments and thus on a structured reference string; while IPA or STARK-style commitments eliminate trusted setup, they increase proof sizes and verifier costs, suggesting an inherent trade-off between transparency and efficiency. We note that the KZG trusted setup can be replaced with universal or trans-parent alternatives. IPA-based commitments, as used in Halo and similar systems [ 6], eliminate the trusted setup at the cost of larger proofs and slower verification. STARK-based approaches offer full transparency but with further proof-size overhead. For deployment scenarios where trust in a setup ceremony is unacceptable, these alternatives provide a viable path, and our SMDP constructions can be adapted to work with any extractable polynomial commitment scheme. The choice between KZG, IPA, and STARK backends is thus a deployment-time decision that does not affect the core structure of our protocols. 
+
+Normal versus Adversarial Drift. An important question is how benign fine-tuning differs structurally from adversarial modifica-tion. Empirical studies show that standard fine-tuning with com-mon hyperparameters produces weight updates with predictable structural properties: small Frobenius norm relative to the base weights, low effective rank due to the low-dimensional structure of gradient updates, and sparse modification patterns when using adapter-based methods. In contrast, adversarial modifications such as backdoor insertion [ 33 ] or safety removal [ 17 ] typically require coordinated changes across multiple layers or large-magnitude per-turbations to specific weight subspaces. FTI exploits this structural gap: by requiring proofs that updates conform to realistic drift classes, it raises the bar for adversaries who must now either (a) confine their attack to the permitted drift class, significantly lim-iting attack effectiveness, or (b) exceed the drift bounds and risk detection. While we do not claim that all attacks are detectable— an adversary operating within the permitted drift class may still cause undesirable behavior—FTI narrows the attack surface and complements behavioral testing and monitoring. 
+
+System and Policy-Level Risks. Our guarantees assume correct implementations of primitives and secure randomness. Malicious randomness, timing leakage, or misconfigured policies fall outside our current threat model. Future work includes integrating stronger RNG validation, hardware isolation, semantic drift monitors, and support for interactive or online fine-tuning workflows. Despite these limitations, FTI offers a principled foundation for cryptographically auditable fine-tuning pipelines and a practical path toward accountable model evolution. 
+
+## 10.1 Choosing Policy Parameters 
+
+Selecting appropriate policy parameters is critical for balancing security against usability. We provide guidance for each drift class. 
+
+Norm bound 𝜀 . The norm bound should be calibrated to the expected magnitude of benign fine-tuning updates. Practitioners can estimate this by running reference fine-tuning experiments on CCS ’26, November 2026, The Hague, The Netherlands Zhenhang Shang and Kani Chen 
+
+representative data and measuring ∥𝑊 ∗ − 𝑊 0 ∥𝐹 across parameter blocks. A common heuristic is to set 𝜀 to two to three times the observed norm of legitimate updates, providing a margin that ac-commodates natural variance across runs while remaining tight enough to detect adversarial modifications. For models fine-tuned with weight decay coefficient 𝜆 wd , the expected drift norm can also be estimated analytically from the learning rate, number of steps, and dataset size. 
+
+Rank bound 𝑟 . For LoRA-based fine-tuning, 𝑟 should match or slightly exceed the adapter rank used in training, which is typically 
+
+𝑟 ∈ { 4, 8, 16 , 32 } depending on the model size and task complexity. Setting 𝑟 too low rejects legitimate updates and forces re-proving after minor adjustments; setting 𝑟 too high weakens the integrity guarantee by allowing an adversary to make richer modifications. When the fine-tuning method is known in advance, the rank bound can be set precisely. When it is not, a conservative choice of 𝑟 =
+
+2𝑟 train provides a reasonable safety margin. 
+
+Sparsity bound 𝑘 . The sparsity bound should reflect the number of parameters expected to change. For prefix tuning, 𝑘 equals the number of prefix tokens multiplied by the embedding dimension. For full fine-tuning of selected layers, 𝑘 equals the total parameter count of those layers. For adapter-based methods that modify only specific modules, 𝑘 should be set to the total number of parameters in the adapted modules plus a small margin for numerical effects. 
+
+General guidance. The policy should be agreed upon before fine-tuning begins and should reflect both the intended training proce-dure and the risk tolerance of the deployer. Tighter bounds provide stronger integrity guarantees but require more careful calibration; overly restrictive policies lead to false rejections that undermine trust in the system. In practice, we recommend an iterative calibra-tion process: run the intended fine-tuning procedure several times, measure the resulting drift statistics, and set policy bounds that comfortably encompass the observed distribution while excluding clearly adversarial modifications. 
+
+## 11 Conclusion 
+
+We introduced fine-tuning integrity as a new cryptographic ob-jective for modern neural networks and presented succinct model difference proofs (SMDPs) as a foundational mechanism for certify-ing controlled and verifiable model evolution. Our constructions support three fundamental drift classes: norm-bounded, low-rank, sparse, and achieve succinct, zero-knowledge guarantees with ver-ifier complexity determined by drift structure rather than model size. We further established that such structural assumptions are not merely convenient but necessary for succinct statistical FTI, and we demonstrated how SMDPs integrate cleanly into real-world architectures and fine-tuning workflows. Together, these results outline a practical path toward crypto-graphically auditable fine-tuning pipelines. We envision FTI as a building block for secure model governance, enabling accountable deployment, provenance tracking, and principled safety constraints. Future work includes extending SMDPs to richer drift classes, bridging parametric and semantic integrity, and integrating FTI into end-to-end training and deployment infrastructures. 
+
+## References 
+
+[1] Mishall Al-Zubaidie and Tuqa Ghani Tregi. 2025. A Quantum Resilient Se-curity System for Smart Power Grid Data: Combining Kyber, FALCON, and Zero-Knowledge Proofs Against Quantum Threats. Applied Data Science and Analysis 2025 (2025), 201–220. [2] DM Anisuzzaman, Jeffrey G Malins, Paul A Friedman, and Zachi I Attia. 2025. Fine-tuning large language models for specialized use cases. Mayo Clinic Proceedings: Digital Health 3, 1 (2025), 100184. [3] Alexander R Block, Justin Holmgren, Alon Rosen, Ron D Rothblum, and Pratik Soni. 2021. Time-and space-efficient arguments from groups of unknown order. In Annual International Cryptology Conference . Springer, 123–152. [4] Dan Boneh, Justin Drake, Ben Fisch, and Ariel Gabizon. 2020. Efficient polynomial commitment schemes for multiple points and polynomials. Cryptology ePrint Archive (2020). [5] Gunnar Brinkmann, Jan Goedgebeur, Jonas Hägglund, and Klas Markström. 2013. Generation and properties of snarks. Journal of Combinatorial Theory, Series B 
+
+103, 4 (2013), 468–488. [6] Benedikt Bünz, Jonathan Bootle, Dan Boneh, Andrew Poelstra, Pieter Wuille, and Greg Maxwell. 2018. Bulletproofs: Short proofs for confidential transactions and more. In 2018 IEEE symposium on security and privacy (SP) . IEEE, 315–334. [7] Dario Catalano and Dario Fiore. 2013. Vector commitments and their applications. In International Workshop on Public Key Cryptography . Springer, 55–72. [8] Bing-Jyue Chen, Suppakit Waiwitlikhit, Ion Stoica, and Daniel Kang. 2024. Zkml: An optimizing system for ml inference in zero-knowledge proofs. In Proceedings of the Nineteenth European Conference on Computer Systems . 560–574. [9] Ivan Damgård and Jesper Buus Nielsen. 2002. Perfect hiding and perfect binding universally composable commitment schemes with constant expansion factor. In 
+
+Annual International Cryptology Conference . Springer, 581–596. [10] Nolan Dey, Daria Soboleva, Faisal Al-Khateeb, Bowen Yang, Ribhu Pathria, He-mant Khachane, Shaheer Muhammad, Robert Myers, Jacob Robert Steeves, Na-talia Vassilieva, et al . 2023. Btlm-3b-8k: 7b parameter performance in a 3b parameter model. arXiv preprint arXiv:2309.11568 (2023). [11] Wei Dong, Xing Zhang, Bihui Chen, Dawei Yan, Zhijun Lin, Qingsen Yan, Peng Wang, and Yang Yang. 2024. Low-rank rescaled vision transformer fine-tuning: A residual design approach. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition . 16101–16110. [12] Kerstin Gierend, Frank Krüger, Sascha Genehr, Francisca Hartmann, Fabian Siegel, Dagmar Waltemath, Thomas Ganslandt, and Atinkut Alamirrew Zeleke. 2024. Provenance information for biomedical data and workflows: Scoping review. 
+
+Journal of medical Internet research 26 (2024), e51297. [13] Junfeng Guo, Yiming Li, Ruibo Chen, Yihan Wu, Heng Huang, et al . 2024. Ze-romark: Towards dataset ownership verification without disclosing watermark. 
+
+Advances in Neural Information Processing Systems 37 (2024), 120468–120500. [14] Zeyu Han, Chao Gao, Jinyang Liu, Jeff Zhang, and Sai Qian Zhang. 2024. Parameter-efficient fine-tuning for large models: A comprehensive survey. arXiv preprint arXiv:2403.14608 (2024). [15] Jiaheng Hu, Rose Hendrix, Ali Farhadi, Aniruddha Kembhavi, Roberto Martín-Martín, Peter Stone, Kuo-Hao Zeng, and Kiana Ehsani. 2025. Flare: Achieving masterful and adaptive robot policies with large-scale reinforcement learning fine-tuning. In 2025 IEEE International Conference on Robotics and Automation (ICRA) . IEEE, 3617–3624. [16] Tyler Hunt, Congzheng Song, Reza Shokri, Vitaly Shmatikov, and Emmett Witchel. 2018. Chiron: Privacy-preserving machine learning as a service. arXiv preprint arXiv:1803.05961 (2018). [17] Samyak Jain, Ekdeep S Lubana, Kemal Oksuz, Tom Joy, Philip Torr, Amartya Sanyal, and Puneet Dokania. 2024. What makes and breaks safety fine-tuning? a mechanistic study. Advances in Neural Information Processing Systems 37 (2024), 93406–93478. [18] Moo Jin Kim, Chelsea Finn, and Percy Liang. 2025. Fine-tuning vision-language-action models: Optimizing speed and success. arXiv preprint arXiv:2502.19645 
+
+(2025). [19] Brett Koonce. 2021. ResNet 50. In Convolutional neural networks with swift for tensorflow: image recognition and dataset categorization . Springer, 63–72. [20] Nishant Kumar, Mayank Rathee, Nishanth Chandran, Divya Gupta, Aseem Ras-togi, and Rahul Sharma. 2020. Cryptflow: Secure tensorflow inference. In 2020 IEEE Symposium on Security and Privacy (SP) . IEEE, 336–353. [21] Ravi Kumar. 2008. The one-way communication complexity of hamming distance. 
+
+Theory of Computing (2008). [22] Eyal Kushilevitz. 1997. Communication complexity. In Advances in Computers .Vol. 44. Elsevier, 331–360. [23] Ryan Lavin, Xuekai Liu, Hardhik Mohanty, Logan Norman, Giovanni Zaarour, and Bhaskar Krishnamachari. 2024. A survey on the applications of zero-knowledge proofs. arXiv preprint arXiv:2408.00243 (2024). [24] Benoît Libert. 2024. Simulation-extractable KZG polynomial commitments and applications to HyperPlonk. In IACR International Conference on Public-Key Cryp-tography . Springer, 68–98. Fine-Tuning Integrity for Modern Neural Networks: Structured Drift Proofs via Norm, Rank, and Sparsity Certificates CCS ’26, November 2026, The Hague, The Netherlands 
+
+[25] Dongdong Lin, Benedetta Tondi, Bin Li, and Mauro Barni. 2024. A cyclegan wa-termarking method for ownership verification. IEEE Transactions on Dependable and Secure Computing (2024). [26] Haojun Liu, Xinbo Luo, Hongrui Liu, and Xubo Xia. 2021. Merkle tree: A funda-mental component of blockchains. In 2021 International Conference on Electronic Information Engineering and Computer Science (EIECS) . IEEE, 556–561. [27] Saraju P Mohanty. 1999. Digital watermarking: A tutorial review. URL: http://www. csee. usf. edu/˜ smohanty/research/Reports/WMSurvey1999Mohanty. pdf (1999). [28] Dana Moshkovitz. 2010. An alternative proof of the Schwartz-Zippel lemma. In 
+
+Electronic Colloquium on Computational Complexity (ECCC) , Vol. 17. 34. [29] Mohammad Norouzi, David J Fleet, and Russ R Salakhutdinov. 2012. Hamming distance metric learning. Advances in neural information processing systems 25 (2012). [30] Christodoulos Pappas and Dimitrios Papadopoulos. 2024. Sparrow: Space-efficient zksnark for data-parallel circuits and applications to zero-knowledge decision trees. In Proceedings of the 2024 on ACM SIGSAC Conference on Computer and Communications Security . 3110–3124. [31] Christos Pelekis and Jan Ramon. 2017. Hoeffding’s inequality for sums of de-pendent random variables. Mediterranean Journal of Mathematics 14, 6 (2017), 243. [32] Zhizhi Peng, Taotao Wang, Chonghe Zhao, Guofu Liao, Zibin Lin, Yifeng Liu, Bin Cao, Long Shi, Qing Yang, and Shengli Zhang. 2025. A survey of zero-knowledge proof based verifiable machine learning. arXiv preprint arXiv:2502.18535 (2025). [33] Jayaram Raghuram, George Kesidis, and David J Miller. 2024. A study of backdoors in instruction fine-tuned language models. arXiv preprint arXiv:2406.07778 (2024). [34] Lianshan Sun, Diandong Liu, Yang Li, and Danni Zhou. 2024. A blockchain-based E-healthcare system with provenance awareness. IEEE Access (2024). [35] Zhen Sun, Tianshuo Cong, Yule Liu, Chenhao Lin, Xinlei He, Rongmao Chen, Xingshuo Han, and Xinyi Huang. 2025. PEFTGuard: detecting backdoor attacks against parameter-efficient fine-tuning. In 2025 IEEE Symposium on Security and Privacy (SP) . IEEE, 1713–1731. [36] Riad S Wahby and Dan Boneh. 2019. Fast and simple constant-time hashing to the BLS12-381 elliptic curve. Cryptology ePrint Archive (2019). [37] Xi Wang, Laurence Aitchison, and Maja Rudolph. 2023. LoRA ensembles for large language model fine-tuning. arXiv preprint arXiv:2310.00035 (2023). [38] Yi Xin, Siqi Luo, Haodi Zhou, Junlong Du, Xiaohong Liu, Yue Fan, Qing Li, and Yuntao Du. 2024. Parameter-efficient fine-tuning for pre-trained vision models: A survey. arXiv e-prints (2024), arXiv–2402. [39] Kuang Xu. 2023. Drift method: from stochastic networks to machine learning. 
+
+URL: https://web. stanford. edu/kuangxu/papers/driftmethod. pdf. Last visited on 3, 09 (2023). [40] Lingling Xu, Haoran Xie, Si-Zhao Joe Qin, Xiaohui Tao, and Fu Lee Wang. 2023. Parameter-efficient fine-tuning methods for pretrained language models: A criti-cal review and assessment. arXiv preprint arXiv:2312.12148 (2023). [41] Wenqiang Yang, Bin Liu, Changlei Lu, and Nenghai Yu. 2020. Privacy preserving on updated parameters in federated learning. In Proceedings of the ACM turing celebration conference-China . 27–31. [42] Wenyuan Yang, Yuguo Yin, Gongxi Zhu, Hanlin Gu, Lixin Fan, Xiaochun Cao, and Qiang Yang. 2023. Fedzkp: Federated model ownership verification with zero-knowledge proof. arXiv preprint arXiv:2305.04507 (2023). [43] Xiao Yang, Chengru Zhang, Mark Ryan, and Gao Meng. 2024. Multivariate Multi-Polynomial Commitment and its Applications. Cryptology ePrint Archive 
+
+(2024). [44] Lin You, Chunjie Guo, and Gengran Hu. 2023. An Efficient Range Proof Based on Polynomial Commitment and Vector Inner Product Commitment. Available at SSRN 4525586 (2023). [45] Shuai Zhao, Leilei Gan, Luu Anh Tuan, Jie Fu, Lingjuan Lyu, Meihuizi Jia, and Jinming Wen. 2024. Defending against weight-poisoning backdoor attacks for parameter-efficient fine-tuning. arXiv preprint arXiv:2402.12168 (2024). [46] Mingli Zhu, Shaokui Wei, Li Shen, Yanbo Fan, and Baoyuan Wu. 2023. Enhancing fine-tuning based backdoor defense with sharpness-aware minimization. In Pro-ceedings of the IEEE/CVF International Conference on Computer Vision . 4466–4477. 
+
+## Open Science Appendix 
+
+This appendix enumerates all artifacts required to evaluate the core contributions of this work, explains how they can be accessed dur-ing double-blind review, and justifies any components that cannot be shared verbatim. 
+
+## A. Artifact Summary 
+
+We provide the following artifacts for reproducibility: 
+
+• Codebase : implementation of vector commitments, poly-nomial commitments (KZG), and all SMDP constructions (NBDP, MRDP, SDIP), plus the proof aggregator and policy interpreter. 
+
+• Configuration files : model-shape specifications, experi-ment scripts, and benchmark settings used in the evaluation section. 
+
+• Synthetic models and datasets : parameter tensors match-ing the dimensions of the transformer, CNN, and MLP used in our experiments, together with synthetic fine-tuning data enabling full reproduction without licensing restrictions. 
+
+• Documentation : a detailed README, installation instruc-tions, and a Jupyter notebook demonstrating end-to-end fine-tuning integrity proofs. 
+
+## B. Access Instructions 
+
+All artifacts are accessible through an anonymous URL hosted on an independent file-sharing service: https://anonymous.4open.science/r/FineTune-Code-6EA9/ The site contains: 
+
+• archive of the full source code, 
+
+• archive of synthetic models and datasets, 
+
+• the README and Jupyter notebook, 
+
+• SHA-256 checksums for integrity verification. No identifying metadata is included. All materials run locally without authentication. 
+
+## C. Non-Shared Artifacts and Justification 
+
+Some real-world artifacts cannot be provided: 
+
+• Proprietary pretrained models (e.g., LLaMA-family) are license-restricted. We instead provide synthetic weight ten-sors with identical shapes, which preserve all cryptographic and performance properties relevant to SMDPs. 
+
+• Real backdoor triggers or poisoning datasets are ex-cluded due to safety concerns. Synthetic analogues with identical structural drift are included. 
+
+• Vendor-specific CUDA kernels cannot be redistributed. Portable CPU and open GPU implementations are supplied, along with benchmark logs. 
+
+• KZG structured reference string (SRS) is regenerated anonymously. A script is provided for reviewers to produce a fresh SRS locally. 
+
+## D. Reproduction Instructions 
+
+Reviewers may reproduce all results using the following workflow: (1) Install dependencies using requirements.txt .(2) Run unit tests: pytest tests/ .(3) Run proof benchmarks: python benchmarks/run_proofs.py .(4) Run malicious drift detection tests: 
+
+python experiments/run_attacks.py .(5) Open the Jupyter notebook fti-demo.ipynb and execute all cells to reproduce NBDP, MRDP, SDIP construction, ag-gregation, and verification.

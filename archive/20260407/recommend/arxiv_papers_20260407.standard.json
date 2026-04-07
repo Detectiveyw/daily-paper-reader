@@ -1,0 +1,203 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-07T20:18:11.312906+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [
+    {
+      "id": "2604.03425v1",
+      "title": "AEGIS: Scaling Long-Sequence Homomorphic Encrypted Transformer Inference via Hybrid Parallelism on Multi-GPU Systems",
+      "abstract": "Fully Homomorphic Encryption (FHE) enables privacy-preserving Transformer inference, but long-sequence encrypted Transformers quickly exceed single-GPU memory capacity because encoded weights are already large and encrypted activations grow rapidly with sequence length. Multi-GPU execution therefore becomes unavoidable, yet scaling remains challenging because communication is jointly induced by application-level aggregation and encryption-level RNS coupling. Existing approaches either synchronize between devices frequently or replicate encrypted tensors across devices, leading to excessive communication and latency.   We present AEGIS, an Application-Encryption Guided Inference System for scalable long-sequence encrypted Transformer inference on multi-GPU platforms. AEGIS derives device placement from ciphertext dependencies jointly induced by Transformer dataflow and CKKS polynomial coupling, co-locating modulus-coherent and token-coherent data so that communication is introduced only when application dependencies require it, while reordering polynomial operators to overlap the remaining collectives with computation.   On 2048-token inputs, AEGIS reduces inter-GPU communication by up to 57.9% in feed-forward networks and 81.3% in self-attention versus prior state-of-the-art designs. On four GPUs, it achieves up to 96.62% scaling efficiency, 3.86x end-to-end speedup, and 69.1% per-device memory reduction. These results establish coordinated application-encryption parallelism as a practical foundation for scalable homomorphic Transformer inference.",
+      "authors": [
+        "Zhaoting Gong",
+        "Ran Ran",
+        "Fan Yao",
+        "Wujie Wen"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.DC"
+      ],
+      "published": "2026-04-03T19:47:26+00:00",
+      "link": "https://arxiv.org/pdf/2604.03425v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Privacy-preserving Transformer inference using homomorphic encryption",
+      "llm_evidence_cn": "使用同态加密的隐私保护Transformer推理",
+      "llm_evidence": "使用同态加密的隐私保护Transformer推理",
+      "canonical_evidence": "使用同态加密的隐私保护Transformer推理",
+      "llm_tldr_en": "Introduces AEGIS for scaling encrypted Transformer inference on multi-GPU systems using hybrid parallelism.",
+      "llm_tldr_cn": "引入AEGIS系统，通过混合并行技术在多GPU系统上扩展加密Transformer推理。",
+      "llm_tldr": "引入AEGIS系统，通过混合并行技术在多GPU系统上扩展加密Transformer推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.04783v1",
+      "title": "GPU Acceleration of TFHE-Based High-Precision Nonlinear Layers for Encrypted LLM Inference",
+      "abstract": "Deploying large language models (LLMs) as cloud services raises privacy concerns as inference may leak sensitive data. Fully Homomorphic Encryption (FHE) allows computation on encrypted data, but current FHE methods struggle with efficient and precise nonlinear function evaluation. Specifically, CKKS-based approaches require high-degree polynomial approximations, which are costly when target precision increases. Alternatively, TFHE's Programmable Bootstrapping (PBS) outperforms CKKS by offering exact lookup-table evaluation. But it lacks high-precision implementations of LLM nonlinear layers and underutilizes GPU resources.   We propose \\emph{TIGER}, the first GPU-accelerated framework for high-precision TFHE-based nonlinear LLM layer evaluation. TIGER offers: (1) GPU-optimized WoP-PBS method combined with numerical algorithms to surpass native lookup-table precision limits on nonlinear functions; (2) high-precision and efficient implementations of key nonlinear layers, enabling practical encrypted inference; (3) batch-driven design exploiting inter-input parallelism to boost GPU efficiency. TIGER achieves 7.17$\\times$, 16.68$\\times$, and 17.05$\\times$ speedups over a CPU baseline for GELU, Softmax, and LayerNorm, respectively.",
+      "authors": [
+        "Guoci Chen",
+        "Xiurui Pan",
+        "Qiao Li",
+        "Bo Mao",
+        "Congming Gao",
+        "Chengying Huan",
+        "Mingzhe Zhang",
+        "Jie Zhang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AR"
+      ],
+      "published": "2026-04-06T15:54:35+00:00",
+      "link": "https://arxiv.org/pdf/2604.04783v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Encrypted LLM inference using TFHE for nonlinear layers",
+      "llm_evidence_cn": "使用TFHE进行非线性层加密LLM推理",
+      "llm_evidence": "使用TFHE进行非线性层加密LLM推理",
+      "canonical_evidence": "使用TFHE进行非线性层加密LLM推理",
+      "llm_tldr_en": "Accelerates high-precision nonlinear layers for encrypted LLM inference using GPU-based TFHE.",
+      "llm_tldr_cn": "利用GPU加速的TFHE技术实现了加密大模型推理中的高精度非线性层计算。",
+      "llm_tldr": "利用GPU加速的TFHE技术实现了加密大模型推理中的高精度非线性层计算。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.03902v1",
+      "title": "Search-Bound Proximity Proofs: Binding Encrypted Geographic Search to Zero-Knowledge Verification",
+      "abstract": "Location-based systems that combine encrypted geographic search with zero-knowledge proximity proofs typically treat the two phases as independent. Under an honest-but-curious server, this leaves an authorization provenance gap: once session state is purged, no forensic procedure can attribute a proof to its originating search session, because the proof's public inputs encode no session-identifying information.   We formalize this gap as the search-authorized proof (SAP) security notion and show via a concrete audit re-association attack that proof-external mechanisms, where authorization evidence remains outside the proof, cannot prevent forensic misattribution when the same drop parameters recur across sessions. Search-Bound Proximity Proofs (SBPP) realize the SAP requirements without modifying the ZKP circuit: session nonce, Merkle-root result-set commitment, and signed receipt are decomposed into independently auditable components, enabling property-level fault isolation in offline audit. Experiments on synthetic and real-world data (110,776 OpenStreetMap POIs) show sub-millisecond absolute overhead on a 125 ms Groth16 baseline.",
+      "authors": [
+        "Yoshiyuki Ootani"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.NI"
+      ],
+      "published": "2026-04-05T00:14:00+00:00",
+      "link": "https://arxiv.org/pdf/2604.03902v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Zero-knowledge verification for encrypted search and proximity proofs",
+      "llm_evidence_cn": "加密搜索与邻近证明的零知识验证",
+      "llm_evidence": "加密搜索与邻近证明的零知识验证",
+      "canonical_evidence": "加密搜索与邻近证明的零知识验证",
+      "llm_tldr_en": "Integrates zero-knowledge proofs with encrypted search to ensure verifiable and private location data.",
+      "llm_tldr_cn": "将零知识证明与加密搜索结合，确保可验证且隐私的地理位置数据。",
+      "llm_tldr": "将零知识证明与加密搜索结合，确保可验证且隐私的地理位置数据。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.04738v1",
+      "title": "Fine-Tuning Integrity for Modern Neural Networks: Structured Drift Proofs via Norm, Rank, and Sparsity Certificates",
+      "abstract": "Fine-tuning is now the primary method for adapting large neural networks, but it also introduces new integrity risks. An untrusted party can insert backdoors, change safety behavior, or overwrite large parts of a model while claiming only small updates. Existing verification tools focus on inference correctness or full-model provenance and do not address this problem.   We introduce Fine-Tuning Integrity (FTI) as a security goal for controlled model evolution. An FTI system certifies that a fine-tuned model differs from a trusted base only within a policy-defined drift class. We propose Succinct Model Difference Proofs (SMDPs) as a new cryptographic primitive for enforcing these drift constraints. SMDPs provide zero-knowledge proofs that the update to a model is norm-bounded, low-rank, or sparse. The verifier cost depends only on the structure of the drift, not on the size of the model.   We give concrete SMDP constructions based on random projections, polynomial commitments, and streaming linear checks. We also prove an information-theoretic lower bound showing that some form of structure is necessary for succinct proofs. Finally, we present architecture-aware instantiations for transformers, CNNs, and MLPs, together with an end-to-end system that aggregates block-level proofs into a global certificate.",
+      "authors": [
+        "Zhenhang Shang",
+        "Kani Chen"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-04-06T15:04:27+00:00",
+      "link": "https://arxiv.org/pdf/2604.04738v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "cryptographic proofs for model integrity and verification",
+      "llm_evidence_cn": "模型完整性与验证的密码学证明",
+      "llm_evidence": "模型完整性与验证的密码学证明",
+      "canonical_evidence": "模型完整性与验证的密码学证明",
+      "llm_tldr_en": "Introduces Succinct Model Difference Proofs to certify fine-tuning integrity against untrusted parties.",
+      "llm_tldr_cn": "引入简洁模型差异证明（SMDPs），用于在不受信任方环境下验证微调完整性。",
+      "llm_tldr": "引入简洁模型差异证明（SMDPs），用于在不受信任方环境下验证微调完整性。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.04833v1",
+      "title": "Cryptanalysis of the Legendre Pseudorandom Function over Extension Fields",
+      "abstract": "The Legendre Pseudorandom Function (PRF) is a highly efficient cryptographic primitive built upon the Legendre symbol, valued for its low multiplicative complexity in Multi-Party Computation (MPC) and Zero-Knowledge Proof (ZKP) protocols. While its security over prime fields $\\mathbb{F}_p$ is well-documented, recent interest has shifted toward instantiations over extension fields $\\mathbb{F}_{p^r}$. This paper presents the first comprehensive cryptanalysis of the single-degree Legendre PRF operating over $\\mathbb{F}_{p^r}$.   First, we analyze polynomial input encoding under a standard passive threat model (sequential additive counter queries). We demonstrate that while the absence of polynomial carry-overs causes an asynchronous \"no-carry fracture\" that neutralizes classical sliding-window collision attacks, the fracture itself is deterministically periodic. By introducing a novel \"Differential Signature\" bucketing technique, we prove that an adversary can systematically group fractured sequences by their structural shapes to bypass this defense, recovering the secret key in $\\mathcal{O}(U \\cdot p^r/M)$ operations, where $U$ is the unicity distance.   Second, we evaluate the PRF under an active Chosen-Query threat model. We demonstrate that an adversary can circumvent the additive fracture by evaluating the PRF along a geometric sequence generated by a primitive polynomial. This structure invokes strict multiplicative homomorphism over $\\mathbb{F}^*_{p^r}$, permitting a direct generalization of state-of-the-art table collision attacks to extract the key in $\\mathcal{O}(p^r/M)$ operations. Finally, we establish the cryptographic boundaries of these attacks, formally proving the necessity of higher-degree key variants ($d \\ge 2$) to achieve exponential security against structural reduction in extension fields.",
+      "authors": [
+        "Daksh Pandey"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "math.NT"
+      ],
+      "published": "2026-04-06T16:35:32+00:00",
+      "link": "https://arxiv.org/pdf/2604.04833v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Cryptanalysis of Legendre PRF used in MPC and ZKP protocols",
+      "llm_evidence_cn": "对MPC和ZKP协议中使用的Legendre伪随机函数的密码分析",
+      "llm_evidence": "对MPC和ZKP协议中使用的Legendre伪随机函数的密码分析",
+      "canonical_evidence": "对MPC和ZKP协议中使用的Legendre伪随机函数的密码分析",
+      "llm_tldr_en": "Analyzes the security of Legendre PRFs, which are efficient primitives for MPC and verifiable protocols.",
+      "llm_tldr_cn": "分析了Legendre伪随机函数的安全性，该函数是MPC和可验证协议的高效原语。",
+      "llm_tldr": "分析了Legendre伪随机函数的安全性，该函数是MPC和可验证协议的高效原语。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
