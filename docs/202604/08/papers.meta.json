@@ -1,0 +1,23 @@
+{
+  "label": "2026-04-08",
+  "date": "2026-04-08",
+  "generated_at": "2026-04-08T20:06:11",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202604/08/2603.29688v1-client-verifiable-and-efficient-federated-unlearning-in-low-altitude-wireless-networks",
+      "section": "quick",
+      "title_en": "Client-Verifiable and Efficient Federated Unlearning in Low-Altitude Wireless Networks",
+      "authors": "Yuhua Xu, Mingtao Jiang, Chenfei Hu, Yinglong Wang, Chuan Zhang, Meng Li, Ming Lu, Liehuang Zhu",
+      "date": "2026-03-31",
+      "pdf": "https://arxiv.org/pdf/2603.29688v1",
+      "score": "6.0",
+      "evidence": "分布式环境中的客户端可验证操作，以确保诚实执行",
+      "tldr": "针对低空无线网络（LAWN）中无人机与感知通信一体化（ISAC）设备的联邦学习场景，为满足“被遗忘权”并解决服务器不可信问题，本文提出了VerFU框架。该框架结合线性同态哈希（LHH）与承诺方案，实现了客户端可验证的联邦卸载，允许设备在不依赖原始数据的情况下验证服务器是否真实删除了其历史贡献，同时保证了高效的并行处理能力。",
+      "tags": "query:fss-llm",
+      "abstract_en": "In low-altitude wireless networks (LAWN), federated learning (FL) enables collaborative intelligence among unmanned aerial vehicles (UAVs) and integrated sensing and communication (ISAC) devices while keeping raw sensing data local. Due to the \"right to be forgotten\" requirements and the high mobility of ISAC devices that frequently enter or leave the coverage region of UAV-assisted servers, the influence of departing devices must be removed from trained models. This necessity motivates the adoption of federated unlearning (FUL) to eliminate historical device contributions from the global model in LAWN. However, existing FUL approaches implicitly assume that the UAV-assisted server executes unlearning operations honestly. Without client-verifiable guarantees, an untrusted server may retain residual device information, leading to potential privacy leakage and undermining trust. To address this issue, we propose VerFU, a privacy-preserving and client-verifiable federated unlearning framework designed for LAWN. It empowers ISAC devices to validate the server-side unlearning operations without relying on original data samples. By integrating linear homomorphic hash (LHH) with commitment schemes, VerFU constructs tamper-proof records of historical updates. ISAC devices ensure the integrity of unlearning results by verifying decommitment parameters and utilizing the linear composability of LHH to check whether the global model accurately removes their historical contributions. Furthermore, VerFU is capable of efficiently processing parallel unlearning requests and verification from multiple ISAC devices. Experimental results demonstrate that our framework efficiently preserves model utility post-unlearning while maintaining low communication and verification overhead.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

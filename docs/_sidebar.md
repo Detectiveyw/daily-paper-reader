@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-04-08 <!--dpr-date:20260408-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/08/2603.29688v1-client-verifiable-and-efficient-federated-unlearning-in-low-altitude-wireless-networks" data-sidebar-item="{&quot;title&quot;: &quot;Client-Verifiable and Efficient Federated Unlearning in Low-Altitude Wireless Networks&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.29688v1-client-verifiable-and-efficient-federated-unlearning-in-low-altitude-wireless-networks&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;分布式环境中的客户端可验证操作，以确保诚实执行&quot;}">Client-Verifiable and Efficient Federated Unlearning in Low-Altitude Wireless Networks</a>
   * 2026-04-07 <!--dpr-date:20260407-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/07/2604.03425v1-aegis-scaling-long-sequence-homomorphic-encrypted-transformer-inference-via-hybrid-parallelism-on-multi-gpu-systems" data-sidebar-item="{&quot;title&quot;: &quot;AEGIS: Scaling Long-Sequence Homomorphic Encrypted Transformer Inference via Hybrid Parallelism on Multi-GPU Systems&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.03425v1-aegis-scaling-long-sequence-homomorphic-encrypted-transformer-inference-via-hybrid-parallelism-on-multi-gpu-systems&quot;, &quot;score&quot;: &quot;8.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;使用同态加密的隐私保护Transformer推理&quot;}">AEGIS: Scaling Long-Sequence Homomorphic Encrypted Transformer Inference via Hybrid Parallelism on Multi-GPU Systems</a>

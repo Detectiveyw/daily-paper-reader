@@ -1,0 +1,58 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-08T20:05:46.101865+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.29688v1",
+      "title": "Client-Verifiable and Efficient Federated Unlearning in Low-Altitude Wireless Networks",
+      "abstract": "In low-altitude wireless networks (LAWN), federated learning (FL) enables collaborative intelligence among unmanned aerial vehicles (UAVs) and integrated sensing and communication (ISAC) devices while keeping raw sensing data local. Due to the \"right to be forgotten\" requirements and the high mobility of ISAC devices that frequently enter or leave the coverage region of UAV-assisted servers, the influence of departing devices must be removed from trained models. This necessity motivates the adoption of federated unlearning (FUL) to eliminate historical device contributions from the global model in LAWN. However, existing FUL approaches implicitly assume that the UAV-assisted server executes unlearning operations honestly. Without client-verifiable guarantees, an untrusted server may retain residual device information, leading to potential privacy leakage and undermining trust. To address this issue, we propose VerFU, a privacy-preserving and client-verifiable federated unlearning framework designed for LAWN. It empowers ISAC devices to validate the server-side unlearning operations without relying on original data samples. By integrating linear homomorphic hash (LHH) with commitment schemes, VerFU constructs tamper-proof records of historical updates. ISAC devices ensure the integrity of unlearning results by verifying decommitment parameters and utilizing the linear composability of LHH to check whether the global model accurately removes their historical contributions. Furthermore, VerFU is capable of efficiently processing parallel unlearning requests and verification from multiple ISAC devices. Experimental results demonstrate that our framework efficiently preserves model utility post-unlearning while maintaining low communication and verification overhead.",
+      "authors": [
+        "Yuhua Xu",
+        "Mingtao Jiang",
+        "Chenfei Hu",
+        "Yinglong Wang",
+        "Chuan Zhang",
+        "Meng Li",
+        "Ming Lu",
+        "Liehuang Zhu"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-03-31T12:45:40+00:00",
+      "link": "https://arxiv.org/pdf/2603.29688v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Client-verifiable operations in distributed environments to ensure honest execution",
+      "llm_evidence_cn": "分布式环境中的客户端可验证操作，以确保诚实执行",
+      "llm_evidence": "分布式环境中的客户端可验证操作，以确保诚实执行",
+      "canonical_evidence": "分布式环境中的客户端可验证操作，以确保诚实执行",
+      "llm_tldr_en": "Introduces a client-verifiable federated unlearning framework for low-altitude wireless networks.",
+      "llm_tldr_cn": "为低空无线网络引入了一种客户端可验证的联邦遗忘学习框架。",
+      "llm_tldr": "为低空无线网络引入了一种客户端可验证的联邦遗忘学习框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
