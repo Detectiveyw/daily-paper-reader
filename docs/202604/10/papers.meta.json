@@ -1,0 +1,23 @@
+{
+  "label": "2026-04-10",
+  "date": "2026-04-10",
+  "generated_at": "2026-04-10T19:31:00",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202604/10/2604.07125v1-ddp-sa-scalable-privacy-preserving-federated-learning-via-distributed-differential-privacy-and-secure-aggregation",
+      "section": "quick",
+      "title_en": "DDP-SA: Scalable Privacy-Preserving Federated Learning via Distributed Differential Privacy and Secure Aggregation",
+      "authors": "Wenjing Wei, Farid Nait-Abdesselam, Alla Jammine",
+      "date": "2026-04-08",
+      "pdf": "https://arxiv.org/pdf/2604.07125v1",
+      "score": "6.0",
+      "evidence": "在分布式学习中使用加法秘密共享进行安全聚合",
+      "tldr": "DDP-SA是一个可扩展的隐私保护联邦学习框架，结合了本地差分隐私（LDP）和加法秘密共享（ASS）。它通过两阶段保护机制——先对梯度添加拉普拉斯噪声，再将其分解为秘密份额分发至多个中间服务器，实现了比单一LDP更高的模型精度和比纯MPC更强的隐私保障，且计算开销可控，支持大规模参与者。",
+      "tags": "query:fss-llm",
+      "abstract_en": "This article presents DDP-SA, a scalable privacy-preserving federated learning framework that jointly leverages client-side local differential privacy (LDP) and full-threshold additive secret sharing (ASS) for secure aggregation. Unlike existing methods that rely solely on differential privacy or on secure multi-party computation (MPC), DDP-SA integrates both techniques to deliver stronger end-to-end privacy guarantees while remaining computationally practical. The framework introduces a two-stage protection mechanism: clients first perturb their local gradients with calibrated Laplace noise, then decompose the noisy gradients into additive secret shares that are distributed across multiple intermediate servers. This design ensures that (i) no single compromised server or communication channel can reveal any information about individual client updates, and (ii) the parameter server reconstructs only the aggregated noisy gradient, never any client-specific contribution. Extensive experiments show that DDP-SA achieves substantially higher model accuracy than standalone LDP while providing stronger privacy protection than MPC-only approaches. The proposed framework scales linearly with the number of participants and offers a practical, privacy-preserving solution for federated learning applications with controllable computational and communication overhead.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-04-10 <!--dpr-date:20260410-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/10/2604.07125v1-ddp-sa-scalable-privacy-preserving-federated-learning-via-distributed-differential-privacy-and-secure-aggregation" data-sidebar-item="{&quot;title&quot;: &quot;DDP-SA: Scalable Privacy-Preserving Federated Learning via Distributed Differential Privacy and Secure Aggregation&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.07125v1-ddp-sa-scalable-privacy-preserving-federated-learning-via-distributed-differential-privacy-and-secure-aggregation&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;在分布式学习中使用加法秘密共享进行安全聚合&quot;}">DDP-SA: Scalable Privacy-Preserving Federated Learning via Distributed Differential Privacy and Secure Aggregation</a>
   * 2026-04-09 <!--dpr-date:20260409-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/09/2604.04833v2-cryptanalysis-of-the-legendre-pseudorandom-function-over-extension-fields" data-sidebar-item="{&quot;title&quot;: &quot;Cryptanalysis of the Legendre Pseudorandom Function over Extension Fields&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.04833v2-cryptanalysis-of-the-legendre-pseudorandom-function-over-extension-fields&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;对MPC和ZKP协议中使用的Legendre伪随机函数的密码分析&quot;}">Cryptanalysis of the Legendre Pseudorandom Function over Extension Fields</a>

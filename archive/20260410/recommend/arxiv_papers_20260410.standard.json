@@ -1,0 +1,54 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-10T19:30:27.684039+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2604.07125v1",
+      "title": "DDP-SA: Scalable Privacy-Preserving Federated Learning via Distributed Differential Privacy and Secure Aggregation",
+      "abstract": "This article presents DDP-SA, a scalable privacy-preserving federated learning framework that jointly leverages client-side local differential privacy (LDP) and full-threshold additive secret sharing (ASS) for secure aggregation. Unlike existing methods that rely solely on differential privacy or on secure multi-party computation (MPC), DDP-SA integrates both techniques to deliver stronger end-to-end privacy guarantees while remaining computationally practical. The framework introduces a two-stage protection mechanism: clients first perturb their local gradients with calibrated Laplace noise, then decompose the noisy gradients into additive secret shares that are distributed across multiple intermediate servers. This design ensures that (i) no single compromised server or communication channel can reveal any information about individual client updates, and (ii) the parameter server reconstructs only the aggregated noisy gradient, never any client-specific contribution. Extensive experiments show that DDP-SA achieves substantially higher model accuracy than standalone LDP while providing stronger privacy protection than MPC-only approaches. The proposed framework scales linearly with the number of participants and offers a practical, privacy-preserving solution for federated learning applications with controllable computational and communication overhead.",
+      "authors": [
+        "Wenjing Wei",
+        "Farid Nait-Abdesselam",
+        "Alla Jammine"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-04-08T14:19:39+00:00",
+      "link": "https://arxiv.org/pdf/2604.07125v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Uses additive secret sharing for secure aggregation in distributed learning",
+      "llm_evidence_cn": "在分布式学习中使用加法秘密共享进行安全聚合",
+      "llm_evidence": "在分布式学习中使用加法秘密共享进行安全聚合",
+      "canonical_evidence": "在分布式学习中使用加法秘密共享进行安全聚合",
+      "llm_tldr_en": "Combines differential privacy and additive secret sharing for scalable and secure federated learning aggregation.",
+      "llm_tldr_cn": "结合差分隐私和加法秘密共享，实现可扩展且安全的联邦学习聚合。",
+      "llm_tldr": "结合差分隐私和加法秘密共享，实现可扩展且安全的联邦学习聚合。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
