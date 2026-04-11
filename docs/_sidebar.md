@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-04-11 <!--dpr-date:20260411-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/11/2604.04696v1-gpir-enabling-practical-private-information-retrieval-with-gpus" data-sidebar-item="{&quot;title&quot;: &quot;GPIR: Enabling Practical Private Information Retrieval with GPUs&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.04696v1-gpir-enabling-practical-private-information-retrieval-with-gpus&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;隐私信息检索与安全分布式计算&quot;}">GPIR: Enabling Practical Private Information Retrieval with GPUs</a>
   * 2026-04-10 <!--dpr-date:20260410-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/10/2604.07125v1-ddp-sa-scalable-privacy-preserving-federated-learning-via-distributed-differential-privacy-and-secure-aggregation" data-sidebar-item="{&quot;title&quot;: &quot;DDP-SA: Scalable Privacy-Preserving Federated Learning via Distributed Differential Privacy and Secure Aggregation&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.07125v1-ddp-sa-scalable-privacy-preserving-federated-learning-via-distributed-differential-privacy-and-secure-aggregation&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;在分布式学习中使用加法秘密共享进行安全聚合&quot;}">DDP-SA: Scalable Privacy-Preserving Federated Learning via Distributed Differential Privacy and Secure Aggregation</a>
