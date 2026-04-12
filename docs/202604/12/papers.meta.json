@@ -1,0 +1,37 @@
+{
+  "label": "2026-04-12",
+  "date": "2026-04-12",
+  "generated_at": "2026-04-12T20:07:38",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202604/12/2604.05793v1-bodhipromptshield-pre-inference-prompt-mediation-for-suppressing-privacy-propagation-in-llmvlm-agents",
+      "section": "quick",
+      "title_en": "BodhiPromptShield: Pre-Inference Prompt Mediation for Suppressing Privacy Propagation in LLM/VLM Agents",
+      "authors": "Bo Ma, Jinsong Wu, Weiqi Yan",
+      "date": "2026-04-07",
+      "pdf": "https://arxiv.org/pdf/2604.05793v1",
+      "score": "6.0",
+      "evidence": "LLM智能体隐私保护与安全符号映射",
+      "tldr": "针对大语言模型（LLM/VLM）智能体中隐私信息在检索、记忆和工具调用等环节跨阶段传播的问题，本文提出了 BodhiPromptShield 框架。该框架通过策略感知的预推理中介机制，利用占位符、语义抽象和安全符号映射对敏感信息进行脱敏，并延迟恢复至授权边界。实验表明，该方法在 CPPB 基准测试中有效抑制了隐私传播，在保持高准确率的同时优于传统脱敏方法。",
+      "tags": "query:fss-llm",
+      "abstract_en": "In LLM/VLM agents, prompt privacy risk propagates beyond a single model call because raw user content can flow into retrieval queries, memory writes, tool calls, and logs. Existing de-identification pipelines address document boundaries but not this cross-stage propagation. We propose BodhiPromptShield, a policy-aware framework that detects sensitive spans, routes them via typed placeholders, semantic abstraction, or secure symbolic mapping, and delays restoration to authorized boundaries. Relative to enterprise redaction, this adds explicit propagation-aware mediation and restoration timing as a security variable. Under controlled evaluation on the Controlled Prompt-Privacy Benchmark (CPPB), stage-wise propagation suppresses from 10.7\\% to 7.1\\% across retrieval, memory, and tool stages; PER reaches 9.3\\% with 0.94 AC and 0.92 TSR, outperforming generic de-identification. These are controlled systems results on CPPB rather than formal privacy guarantees or public-benchmark transfer claims.   The project repository is available at https://github.com/mabo1215/BodhiPromptShield.git.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/12/2604.06284v1-clawless-a-security-model-of-ai-agents",
+      "section": "quick",
+      "title_en": "ClawLess: A Security Model of AI Agents",
+      "authors": "Hongyi Lu, Nian Liu, Shuai Wang, Fengwei Zhang",
+      "date": "2026-04-07",
+      "pdf": "https://arxiv.org/pdf/2604.06284v1",
+      "score": "6.0",
+      "evidence": "针对对抗性AI智能体的形式化验证安全策略",
+      "tldr": "针对大语言模型驱动的自主智能体在信息检索和代码执行中的安全风险，本文提出ClawLess框架。该框架在假设智能体可能具有对抗性的最坏情况下，通过形式化验证的细粒度安全模型（涵盖实体、信任范围和权限）来实施动态策略。利用基于BPF的系统调用拦截技术，ClawLess在用户空间内核中强制执行这些策略，为智能体提供了超越传统训练或提示词约束的底层安全保障。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Autonomous AI agents powered by Large Language Models can reason, plan, and execute complex tasks, but their ability to autonomously retrieve information and run code introduces significant security risks. Existing approaches attempt to regulate agent behavior through training or prompting, which does not offer fundamental security guarantees. We present ClawLess, a security framework that enforces formally verified policies on AI agents under a worst-case threat model where the agent itself may be adversarial. ClawLess formalizes a fine-grained security model over system entities, trust scopes, and permissions to express dynamic policies that adapt to agents' runtime behavior. These policies are translated into concrete security rules and enforced through a user-space kernel augmented with BPF-based syscall interception. This approach bridges the formal security model with practical enforcement, ensuring security regardless of the agent's internal design.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

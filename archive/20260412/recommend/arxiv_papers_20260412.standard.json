@@ -1,0 +1,92 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-12T20:07:08.357961+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2604.05793v1",
+      "title": "BodhiPromptShield: Pre-Inference Prompt Mediation for Suppressing Privacy Propagation in LLM/VLM Agents",
+      "abstract": "In LLM/VLM agents, prompt privacy risk propagates beyond a single model call because raw user content can flow into retrieval queries, memory writes, tool calls, and logs. Existing de-identification pipelines address document boundaries but not this cross-stage propagation. We propose BodhiPromptShield, a policy-aware framework that detects sensitive spans, routes them via typed placeholders, semantic abstraction, or secure symbolic mapping, and delays restoration to authorized boundaries. Relative to enterprise redaction, this adds explicit propagation-aware mediation and restoration timing as a security variable. Under controlled evaluation on the Controlled Prompt-Privacy Benchmark (CPPB), stage-wise propagation suppresses from 10.7\\% to 7.1\\% across retrieval, memory, and tool stages; PER reaches 9.3\\% with 0.94 AC and 0.92 TSR, outperforming generic de-identification. These are controlled systems results on CPPB rather than formal privacy guarantees or public-benchmark transfer claims.   The project repository is available at https://github.com/mabo1215/BodhiPromptShield.git.",
+      "authors": [
+        "Bo Ma",
+        "Jinsong Wu",
+        "Weiqi Yan"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.CV"
+      ],
+      "published": "2026-04-07T12:29:56+00:00",
+      "link": "https://arxiv.org/pdf/2604.05793v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy protection in LLM agents and secure symbolic mapping",
+      "llm_evidence_cn": "LLM智能体隐私保护与安全符号映射",
+      "llm_evidence": "LLM智能体隐私保护与安全符号映射",
+      "canonical_evidence": "LLM智能体隐私保护与安全符号映射",
+      "llm_tldr_en": "Introduces a framework to suppress privacy propagation in LLM/VLM agents via prompt mediation.",
+      "llm_tldr_cn": "引入一种通过提示词调解抑制LLM/VLM智能体隐私传播的框架。",
+      "llm_tldr": "引入一种通过提示词调解抑制LLM/VLM智能体隐私传播的框架。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.06284v1",
+      "title": "ClawLess: A Security Model of AI Agents",
+      "abstract": "Autonomous AI agents powered by Large Language Models can reason, plan, and execute complex tasks, but their ability to autonomously retrieve information and run code introduces significant security risks. Existing approaches attempt to regulate agent behavior through training or prompting, which does not offer fundamental security guarantees. We present ClawLess, a security framework that enforces formally verified policies on AI agents under a worst-case threat model where the agent itself may be adversarial. ClawLess formalizes a fine-grained security model over system entities, trust scopes, and permissions to express dynamic policies that adapt to agents' runtime behavior. These policies are translated into concrete security rules and enforced through a user-space kernel augmented with BPF-based syscall interception. This approach bridges the formal security model with practical enforcement, ensuring security regardless of the agent's internal design.",
+      "authors": [
+        "Hongyi Lu",
+        "Nian Liu",
+        "Shuai Wang",
+        "Fengwei Zhang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-04-07T12:19:55+00:00",
+      "link": "https://arxiv.org/pdf/2604.06284v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Formally verified security policies for adversarial AI agents",
+      "llm_evidence_cn": "针对对抗性AI智能体的形式化验证安全策略",
+      "llm_evidence": "针对对抗性AI智能体的形式化验证安全策略",
+      "canonical_evidence": "针对对抗性AI智能体的形式化验证安全策略",
+      "llm_tldr_en": "Presents ClawLess, a framework enforcing formally verified security policies on potentially adversarial AI agents.",
+      "llm_tldr_cn": "提出ClawLess框架，对可能具有对抗性的AI智能体执行形式化验证的安全策略。",
+      "llm_tldr": "提出ClawLess框架，对可能具有对抗性的AI智能体执行形式化验证的安全策略。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

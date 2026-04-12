@@ -6,26 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-11
-- 运行时间：2026-04-11 19:13:47 UTC
+- 最新运行日期：2026-04-12
+- 运行时间：2026-04-12 20:07:30 UTC
 - 运行状态：成功
-- 本次总论文数：1
+- 本次总论文数：2
 - 精读区：0
-- 速读区：1
+- 速读区：2
 
 ### 今日简报（AI）
-今日聚焦利用 GPU 加速隐私信息检索（PIR），探索提升数据查询隐私保护的实用性方案。
-重点关注 GPIR 如何通过硬件并行化显著降低 PIR 的计算开销，使其在实际应用中更具落地可能。
-建议关注隐私计算与高性能硬件结合的读者，深入了解该方案在处理大规模数据集时的性能表现。
-- 详情：[/202604/11/README](/202604/11/README)
+今日聚焦 AI Agent 的安全治理，重点攻克大模型应用中的隐私泄露与系统性安全漏洞。
+推荐关注 BodhiPromptShield 的推理前隐私抑制技术，以及为智能体量身定制的 ClawLess 安全模型。
+建议开发者在构建 AI 智能体时，优先引入预处理中介机制以强化底层的隐私边界防护。
+- 详情：[/202604/12/README](/202604/12/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [GPIR: Enabling Practical Private Information Retrieval with GPUs](/202604/11/2604.04696v1-gpir-enabling-practical-private-information-retrieval-with-gpus)  
+1. [BodhiPromptShield: Pre-Inference Prompt Mediation for Suppressing Privacy Propagation in LLM/VLM Agents](/202604/12/2604.05793v1-bodhipromptshield-pre-inference-prompt-mediation-for-suppressing-privacy-propagation-in-llmvlm-agents)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：隐私信息检索与安全分布式计算
+   evidence：LLM智能体隐私保护与安全符号映射
+2. [ClawLess: A Security Model of AI Agents](/202604/12/2604.06284v1-clawless-a-security-model-of-ai-agents)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：针对对抗性AI智能体的形式化验证安全策略
 
 
 <div class="dpr-home-promo-card">
