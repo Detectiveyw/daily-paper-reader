@@ -6,29 +6,22 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-12
-- 运行时间：2026-04-12 20:07:30 UTC
+- 最新运行日期：2026-04-13
+- 运行时间：2026-04-13 20:02:31 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：0
 - 精读区：0
-- 速读区：2
+- 速读区：0
 
 ### 今日简报（AI）
-今日聚焦 AI Agent 的安全治理，重点攻克大模型应用中的隐私泄露与系统性安全漏洞。
-推荐关注 BodhiPromptShield 的推理前隐私抑制技术，以及为智能体量身定制的 ClawLess 安全模型。
-建议开发者在构建 AI 智能体时，优先引入预处理中介机制以强化底层的隐私边界防护。
-- 详情：[/202604/12/README](/202604/12/README)
+> 今日无新推荐，系统未产出可展示论文。
+- 详情：[/202604/13/README](/202604/13/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [BodhiPromptShield: Pre-Inference Prompt Mediation for Suppressing Privacy Propagation in LLM/VLM Agents](/202604/12/2604.05793v1-bodhipromptshield-pre-inference-prompt-mediation-for-suppressing-privacy-propagation-in-llmvlm-agents)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：LLM智能体隐私保护与安全符号映射
-2. [ClawLess: A Security Model of AI Agents](/202604/12/2604.06284v1-clawless-a-security-model-of-ai-agents)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：针对对抗性AI智能体的形式化验证安全策略
+- 本次无速读推荐。
 
 
 <div class="dpr-home-promo-card">
