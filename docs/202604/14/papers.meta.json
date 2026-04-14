@@ -1,0 +1,51 @@
+{
+  "label": "2026-04-14",
+  "date": "2026-04-14",
+  "generated_at": "2026-04-14T20:34:18",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202604/14/2604.09975v1-encformer-secure-and-efficient-transformer-inference-over-encrypted-data",
+      "section": "deep",
+      "title_en": "EncFormer: Secure and Efficient Transformer Inference over Encrypted Data",
+      "authors": "Yufan Zhu, Chao Jin, Khin Mi Mi Aung, Xiaokui Xiao",
+      "date": "2026-04-11",
+      "pdf": "https://arxiv.org/pdf/2604.09975v1",
+      "score": "9.0",
+      "evidence": "使用全同态加密和多方计算实现安全高效的Transformer推理",
+      "tldr": "EncFormer是一个针对加密数据下Transformer推理的安全高效框架。针对现有FHE与MPC混合方案中内核效率低、通信开销大及转换成本高等瓶颈，该框架引入了阶段兼容模式优化FHE内核组合，并利用成本分析模型优化FHE-MPC边界。通过改进的CKKS-MPC转换协议和非线性算子MPC协议，结合GPU加速，EncFormer在显著降低通信量和延迟的同时，保持了接近明文的推理精度。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Transformer inference in machine-learning-as-a-service (MLaaS) raises privacy concerns for sensitive user inputs. Prior secure solutions that combine fully homomorphic encryption (FHE) and secure multiparty computation (MPC) are bottlenecked by inefficient FHE kernels, communication-heavy MPC protocols, and expensive FHE-MPC conversions. We present EncFormer, a two-party private Transformer inference framework that introduces Stage Compatible Patterns so that FHE kernels compose efficiently, reducing repacking and conversions. EncFormer also provides a cost analysis model built around a minimal-conversion baseline, enabling principled selection of FHE-MPC boundaries. To further reduce communication, EncFormer proposes a secure complex CKKS-MPC conversion protocol and designs communication-efficient MPC protocols for nonlinearities. With GPU optimizations, evaluations on GPT- and BERT-style models show that EncFormer achieves 1.4x-30.4x lower online MPC communication and 1.3x-9.8x lower end-to-end latency against prior hybrid FHE-MPC systems, and 1.9x-3.5x lower end-to-end latency on BERT-base than FHE-only pipelines under a matched backend, while maintaining near-plaintext accuracy on selected GLUE tasks.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/14/2604.10013v1-toward-exact-convergence-in-byzantine-robust-decentralized-learning-a-statistical-identification-approach",
+      "section": "quick",
+      "title_en": "Toward Exact Convergence in Byzantine-Robust Decentralized Learning: A Statistical Identification Approach",
+      "authors": "Siyuan Zhang, Chengde Qian, Xin Liu, Changliang Zou",
+      "date": "2026-04-11",
+      "pdf": "https://arxiv.org/pdf/2604.10013v1",
+      "score": "6.0",
+      "evidence": "去中心化学习中恶意节点的积极识别与剪枝",
+      "tldr": "针对去中心化学习中拜占庭攻击导致的收敛偏差问题，本文提出DRSGD-ByMI框架。该框架将防御策略从被动聚合转向主动识别，利用基于样本分割评分统计量的检测机制，在无需严格分布假设的情况下实现错误发现率控制并剔除恶意节点。理论证明该方法能恢复正常节点的连通性，使系统在存在攻击时仍能达到与标准去中心化随机一阶方法相同的最优收敛率，实现了精确收敛。",
+      "tags": "query:fss-llm",
+      "abstract_en": "To defend against Byzantine attacks in decentralized learning, most existing methods rely on robust aggregation rules to mitigate the influence of malicious machines. However, these strategies inherently introduce bias, leading to inexact convergence with non-vanishing steady-state errors. In this paper, we propose a strategic shift from passive aggregation to active identification by introducing the Decentralized Rescaled Stochastic Gradient Descent with Byzantine Machine Identification (DRSGD-ByMI) framework. The core of our approach is an identification-based ``detect-then-optimiz'' pipeline, where a p-value-free detection procedure is developed to accurately prune malicious nodes from the network. By leveraging sample-splitting score statistics, this identification mechanism achieves false discovery rate control without requiring restrictive distributional assumptions. We theoretically demonstrate that this precise identification allows the decentralized network to recover sufficient connectivity among the normal nodes, thereby enabling DRSGD-ByMI to match, even in the presence of Byzantine machines, the same order-optimal convergence rate as standard decentralized stochastic first-order methods. Numerical experiments validate our theoretical results and demonstrate the effectiveness of DRSGD-ByMI for decentralized robust learning problems.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/14/2604.10179v1-byzantine-robust-distributed-sgd-a-unified-analysis-and-tight-error-bounds",
+      "section": "quick",
+      "title_en": "Byzantine-Robust Distributed SGD: A Unified Analysis and Tight Error Bounds",
+      "authors": "Boyuan Ruan, Xiaoyu Wang, Ya-Feng Liu",
+      "date": "2026-04-11",
+      "pdf": "https://arxiv.org/pdf/2604.10179v1",
+      "score": "6.0",
+      "evidence": "针对恶意节点的拜占庭容错分布式优化",
+      "tldr": "本文针对分布式SGD中的拜占庭鲁棒性问题，提出了一个考虑数据异构性的统一收敛分析框架。研究分析了带与不带本地动量的鲁棒SGD变体在非凸平滑及PL条件下的收敛率，揭示了随机性和异构性导致的误差下限，并证明本地动量能有效减少随机性误差。通过推导匹配的下界，证明了该分析的紧致性，刻画了拜占庭容错的理论极限。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Byzantine-robust distributed optimization relies on robust aggregation rules to mitigate the influence of malicious Byzantine workers. Despite the proliferation of such rules, a unified convergence analysis framework that accommodates general data heterogeneity is lacking. In this work, we provide a thorough convergence theory of Byzantine-robust distributed stochastic gradient descent (SGD), analyzing variants both with and without local momentum. We establish the convergence rates for nonconvex smooth objectives and those satisfying the Polyak-Lojasiewicz condition under a general data heterogeneity assumption. Our analysis reveals that while stochasticity and data heterogeneity introduce unavoidable error floors, local momentum provably reduces the error component induced by stochasticity. Furthermore, we derive matching lower bounds to demonstrate that the upper bounds obtained in our analysis are tight and characterize the fundamental limits of Byzantine resilience under stochasticity and data heterogeneity. Empirical results support our theoretical findings.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

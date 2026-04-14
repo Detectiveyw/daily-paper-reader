@@ -1,0 +1,129 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-14T20:33:21.742150+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2604.09975v1",
+      "title": "EncFormer: Secure and Efficient Transformer Inference over Encrypted Data",
+      "abstract": "Transformer inference in machine-learning-as-a-service (MLaaS) raises privacy concerns for sensitive user inputs. Prior secure solutions that combine fully homomorphic encryption (FHE) and secure multiparty computation (MPC) are bottlenecked by inefficient FHE kernels, communication-heavy MPC protocols, and expensive FHE-MPC conversions. We present EncFormer, a two-party private Transformer inference framework that introduces Stage Compatible Patterns so that FHE kernels compose efficiently, reducing repacking and conversions. EncFormer also provides a cost analysis model built around a minimal-conversion baseline, enabling principled selection of FHE-MPC boundaries. To further reduce communication, EncFormer proposes a secure complex CKKS-MPC conversion protocol and designs communication-efficient MPC protocols for nonlinearities. With GPU optimizations, evaluations on GPT- and BERT-style models show that EncFormer achieves 1.4x-30.4x lower online MPC communication and 1.3x-9.8x lower end-to-end latency against prior hybrid FHE-MPC systems, and 1.9x-3.5x lower end-to-end latency on BERT-base than FHE-only pipelines under a matched backend, while maintaining near-plaintext accuracy on selected GLUE tasks.",
+      "authors": [
+        "Yufan Zhu",
+        "Chao Jin",
+        "Khin Mi Mi Aung",
+        "Xiaokui Xiao"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-11T01:15:07+00:00",
+      "link": "https://arxiv.org/pdf/2604.09975v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Secure and efficient Transformer inference using FHE and MPC",
+      "llm_evidence_cn": "使用全同态加密和多方计算实现安全高效的Transformer推理",
+      "llm_evidence": "使用全同态加密和多方计算实现安全高效的Transformer推理",
+      "canonical_evidence": "使用全同态加密和多方计算实现安全高效的Transformer推理",
+      "llm_tldr_en": "EncFormer optimizes private Transformer inference by reducing FHE-MPC conversion costs and improving kernel composition.",
+      "llm_tldr_cn": "EncFormer通过减少FHE-MPC转换开销和优化内核组合，实现了高效的隐私Transformer推理。",
+      "llm_tldr": "EncFormer通过减少FHE-MPC转换开销和优化内核组合，实现了高效的隐私Transformer推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.10013v1",
+      "title": "Toward Exact Convergence in Byzantine-Robust Decentralized Learning: A Statistical Identification Approach",
+      "abstract": "To defend against Byzantine attacks in decentralized learning, most existing methods rely on robust aggregation rules to mitigate the influence of malicious machines. However, these strategies inherently introduce bias, leading to inexact convergence with non-vanishing steady-state errors. In this paper, we propose a strategic shift from passive aggregation to active identification by introducing the Decentralized Rescaled Stochastic Gradient Descent with Byzantine Machine Identification (DRSGD-ByMI) framework. The core of our approach is an identification-based ``detect-then-optimiz'' pipeline, where a p-value-free detection procedure is developed to accurately prune malicious nodes from the network. By leveraging sample-splitting score statistics, this identification mechanism achieves false discovery rate control without requiring restrictive distributional assumptions. We theoretically demonstrate that this precise identification allows the decentralized network to recover sufficient connectivity among the normal nodes, thereby enabling DRSGD-ByMI to match, even in the presence of Byzantine machines, the same order-optimal convergence rate as standard decentralized stochastic first-order methods. Numerical experiments validate our theoretical results and demonstrate the effectiveness of DRSGD-ByMI for decentralized robust learning problems.",
+      "authors": [
+        "Siyuan Zhang",
+        "Chengde Qian",
+        "Xin Liu",
+        "Changliang Zou"
+      ],
+      "primary_category": "stat.ME",
+      "categories": [
+        "stat.ME",
+        "math.OC"
+      ],
+      "published": "2026-04-11T03:57:10+00:00",
+      "link": "https://arxiv.org/pdf/2604.10013v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Active identification and pruning of malicious nodes in decentralized learning",
+      "llm_evidence_cn": "去中心化学习中恶意节点的积极识别与剪枝",
+      "llm_evidence": "去中心化学习中恶意节点的积极识别与剪枝",
+      "canonical_evidence": "去中心化学习中恶意节点的积极识别与剪枝",
+      "llm_tldr_en": "A framework to identify and remove malicious nodes in decentralized learning to achieve exact convergence.",
+      "llm_tldr_cn": "一种在去中心化学习中识别并移除恶意节点以实现精确收敛的框架。",
+      "llm_tldr": "一种在去中心化学习中识别并移除恶意节点以实现精确收敛的框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.10179v1",
+      "title": "Byzantine-Robust Distributed SGD: A Unified Analysis and Tight Error Bounds",
+      "abstract": "Byzantine-robust distributed optimization relies on robust aggregation rules to mitigate the influence of malicious Byzantine workers. Despite the proliferation of such rules, a unified convergence analysis framework that accommodates general data heterogeneity is lacking. In this work, we provide a thorough convergence theory of Byzantine-robust distributed stochastic gradient descent (SGD), analyzing variants both with and without local momentum. We establish the convergence rates for nonconvex smooth objectives and those satisfying the Polyak-Lojasiewicz condition under a general data heterogeneity assumption. Our analysis reveals that while stochasticity and data heterogeneity introduce unavoidable error floors, local momentum provably reduces the error component induced by stochasticity. Furthermore, we derive matching lower bounds to demonstrate that the upper bounds obtained in our analysis are tight and characterize the fundamental limits of Byzantine resilience under stochasticity and data heterogeneity. Empirical results support our theoretical findings.",
+      "authors": [
+        "Boyuan Ruan",
+        "Xiaoyu Wang",
+        "Ya-Feng Liu"
+      ],
+      "primary_category": "math.OC",
+      "categories": [
+        "math.OC",
+        "cs.LG"
+      ],
+      "published": "2026-04-11T12:17:24+00:00",
+      "link": "https://arxiv.org/pdf/2604.10179v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Byzantine-robust distributed optimization for malicious workers",
+      "llm_evidence_cn": "针对恶意节点的拜占庭容错分布式优化",
+      "llm_evidence": "针对恶意节点的拜占庭容错分布式优化",
+      "canonical_evidence": "针对恶意节点的拜占庭容错分布式优化",
+      "llm_tldr_en": "Provides convergence analysis for distributed SGD in the presence of malicious Byzantine workers.",
+      "llm_tldr_cn": "提供了存在恶意拜占庭节点情况下的分布式SGD收敛性分析。",
+      "llm_tldr": "提供了存在恶意拜占庭节点情况下的分布式SGD收敛性分析。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
