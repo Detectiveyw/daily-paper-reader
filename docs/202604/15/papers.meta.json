@@ -1,0 +1,93 @@
+{
+  "label": "2026-04-15",
+  "date": "2026-04-15",
+  "generated_at": "2026-04-15T20:08:11",
+  "count": 6,
+  "papers": [
+    {
+      "paper_id": "202604/15/2604.12064v1-llm-redactor-an-empirical-evaluation-of-eight-techniques-for-privacy-preserving-llm-requests",
+      "section": "deep",
+      "title_en": "LLM-Redactor: An Empirical Evaluation of Eight Techniques for Privacy-Preserving LLM Requests",
+      "authors": "Justice Owusu Agyemang, Jerry John Kponyo, Elliot Amponsah, Godfred Manu Addo Boakye, Kwame Opuni-Boachie Obour Agyekum",
+      "date": "2026-04-13",
+      "pdf": "https://arxiv.org/pdf/2604.12064v1",
+      "score": "8.0",
+      "evidence": "评估用于大模型隐私保护请求的多方计算秘密共享和全同态加密技术",
+      "tldr": "本研究针对LLM应用中敏感数据泄露至云端API的问题，系统评估了本地推理、脱敏、语义重述等八种隐私保护技术。通过开发开源中间件并利用1300个样本的基准测试，研究发现单一技术难以兼顾，而结合本地路由、脱敏与重述的组合方案（A+B+C）在保护个人信息（PII）和专有代码方面表现最优，并提出了基于威胁模型和工作负载的决策准则。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Coding agents and LLM-powered applications routinely send potentially sensitive content to cloud LLM APIs where it may be logged, retained, used for training, or subpoenaed. Existing privacy tooling focuses on network-level encryption and organization-level DLP, neither of which addresses the content of prompts themselves. We present a systematic empirical evaluation of eight techniques for privacy-preserving LLM requests: (A) local-only inference, (B) redaction with placeholder restoration, (C) semantic rephrasing, (D) Trusted Execution Environment hosted inference, (E) split inference, (F) fully homomorphic encryption, (G) secret sharing via multi-party computation, and (H) differential-privacy noise. We implement all eight (or a tractable research-stage subset where deployment is not yet feasible) in an open-source shim compatible with MCP and any OpenAI-compatible API. We evaluate the four practical options (A, B, C, H) and their combinations across four workload classes using a ground-truth-labelled leak benchmark of 1,300 samples with 4,014 annotations. Our headline finding is that no single technique dominates: the combination A+B+C (route locally when possible, redact and rephrase the rest) achieves 0.6% combined leak on PII and 31.3% on proprietary code, with zero exact leaks on PII across 500 samples. We present a decision rule that selects the appropriate option(s) from a threat-model budget and workload characterisation. Code, benchmarks, and evaluation harness are released at https://github.com/jayluxferro/llm-redactor.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/15/2604.12168v1-fully-homomorphic-encryption-on-llama-3-model-for-privacy-preserving-llm-inference",
+      "section": "quick",
+      "title_en": "Fully Homomorphic Encryption on Llama 3 model for privacy preserving LLM inference",
+      "authors": "Anes Abdennebi, Nadjia Kara, Laaziz Lahlou",
+      "date": "2026-04-14",
+      "pdf": "https://arxiv.org/pdf/2604.12168v1",
+      "score": "7.0",
+      "evidence": "大模型隐私推理",
+      "tldr": "本研究针对大语言模型在处理敏感数据时的隐私泄露及量子攻击风险，提出了一种基于完全同态加密（FHE）的Llama 3隐私保护推理方案。通过在Transformer架构中集成基于格密码的加密操作，并利用concrete-ml库优化推理流程，该方法在i9 CPU上实现了98%的生成准确率和每秒80个token的高效推理，为安全、抗量子的生成式AI应用提供了可行路径。",
+      "tags": "query:fss-llm",
+      "abstract_en": "The applications of Generative Artificial Intelligence (GenAI) and their intersections with data-driven fields, such as healthcare, finance, transportation, and information security, have led to significant improvements in service efficiency and low latency. However, this synergy raises serious concerns regarding the security of large language models (LLMs) and their potential impact on the privacy of companies and users' data. Many technology companies that incorporate LLMs in their services with a certain level of command and control bear a risk of data exposure and secret divulgence caused by insecure LLM pipelines, making them vulnerable to multiple attacks such as data poisoning, prompt injection, and model theft. Although several security techniques (input/output sanitization, decentralized learning, access control management, and encryption) were implemented to reduce this risk, there is still an imminent risk of quantum computing attacks, which are expected to break existing encryption algorithms, hence, retrieving secret keys, encrypted sensitive data, and decrypting encrypted models. In this extensive work, we integrate the Post-Quantum Cryptography (PQC) based Lattice-based Homomorphic Encryption (HE) main functions in the LLM's inference pipeline to secure some of its layers against data privacy attacks. We modify the inference pipeline of the transformer architecture for the LLAMA-3 model while injecting the main homomorphic encryption operations provided by the concrete-ml library. We demonstrate high text generation accuracies (up to 98%) with reasonable latencies (237 ms) on an i9 CPU, reaching up to 80 tokens per second, which proves the feasibility and validity of our work while running a FHE-secured LLAMA-3 inference model. Further experiments and analysis are discussed to justify models' text generation latencies and behaviours.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/15/2604.12348v1-priveraserverify-efficient-private-and-verifiable-federated-unlearning",
+      "section": "quick",
+      "title_en": "PrivEraserVerify: Efficient, Private, and Verifiable Federated Unlearning",
+      "authors": "Parthaw Goswami, Md Khairul Islam, Ashfak Yeafi",
+      "date": "2026-04-14",
+      "pdf": "https://arxiv.org/pdf/2604.12348v1",
+      "score": "7.0",
+      "evidence": "可验证联邦遗忘学习与隐私保护",
+      "tldr": "针对联邦学习中用户“被遗忘权”的需求，本文提出了PrivEraserVerify (PEV) 框架，旨在解决现有联邦卸载方法在效率、隐私和可验证性方面无法兼顾的问题。PEV通过自适应检查点加速模型重构，利用层自适应差分隐私校准消除特定客户端影响并保持精度，并引入指纹验证机制。实验证明，PEV在保证隐私和可验证性的同时，卸载速度比重新训练快2-3倍，是首个同时实现这三大特性的联邦卸载框架。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Federated learning (FL) enables collaborative model training without sharing raw data, offering a promising path toward privacy preserving artificial intelligence. However, FL models may still memorize sensitive information from participants, conflicting with the right to be forgotten (RTBF). To meet these requirements, federated unlearning has emerged as a mechanism to remove the contribution of departing clients. Existing solutions only partially address this challenge: FedEraser improves efficiency but lacks privacy protection, FedRecovery ensures differential privacy (DP) but degrades accuracy, and VeriFi enables verifiability but introduces overhead without efficiency or privacy guarantees. We present PrivEraserVerify (PEV), a unified framework that integrates efficiency, privacy, and verifiability into federated unlearning. PEV employs (i) adaptive checkpointing to retain critical historical updates for fast reconstruction, (ii) layer adaptive differentially private calibration to selectively remove client influence while minimizing accuracy loss, and (iii) fingerprint based verification, enabling participants to confirm unlearning in a decentralized and noninvasive manner. Experiments on image, handwritten character, and medical datasets show that PEV achieves up to 2 to 3 times faster unlearning than retraining, provides formal indistinguishability guarantees with reduced performance degradation, and supports scalable verification. To the best of our knowledge, PEV is the first framework to simultaneously deliver efficiency, privacy, and verifiability for federated unlearning, moving FL closer to practical and regulation compliant deployment.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/15/2604.09924v1-s3cdm-a-secret-sharing-scheme-based-cyberattack-detection-model-and-its-simulation-implementation",
+      "section": "quick",
+      "title_en": "S3CDM: A secret-sharing-scheme-based cyberattack detection model and its simulation implementation",
+      "authors": "Chi Sing Chum, Jia Lu, Claire Tang, Xiaowen Zhang",
+      "date": "2026-04-10",
+      "pdf": "https://arxiv.org/pdf/2604.09924v1",
+      "score": "6.0",
+      "evidence": "用于安全通信和检测的秘密共享",
+      "tldr": "针对大型组织网络中内部攻击和敏感信息保护的挑战，本文提出了一种基于秘密共享方案的网络攻击检测模型（S3CDM）。该模型结合了Shamir多项式插值和哈希函数方案，通过在多个合法组件间分配秘密来实现多因子身份验证和非法活动检测。研究通过概率分析证明了多组件架构的安全性，并在Google Cloud平台上利用Docker和Python实现了系统原型与路径中断模拟。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We design and develop a secret-sharing-scheme-based cyberattack detection model(S3CDM)that can detect unauthorized or illegal activities (especially insider attacks) and protect sensitive information within complex network infrastructures of large organizations. The model splits a secret among a group of legitimate participants or components for authentication, integration and detection of unauthorized activities. Traditional Shamir's polynomial interpolation based and our own hash function based schemes are utilized in the model, they both are practical and efficient to make sure the communications between different components are secure and any unauthorized activities can be detected. The model offers a flexible multi-factor authentication method to enhance the overall system security. Probability analysis [3] shows that multiple component model is more resistant against cyberattacks than the single component one. To demonstrate the feasibility, we implement the S3CDM in three parts on Google Cloud Platform, i.e., the front end UI (User Interface) running on an HTTP server, the back end individual services written in Python, and a PostgreSQL database. Docker is used to manage the start and stop of individual services and their URLs. We demonstrate how to use the UI with a use case of simulation of broken path in details.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/15/2604.10819v1-differentially-private-verification-of-distribution-properties",
+      "section": "quick",
+      "title_en": "Differentially Private Verification of Distribution Properties",
+      "authors": "Elbert Du, Cynthia Dwork, Pranay Tankala, Linjun Zhang",
+      "date": "2026-04-12",
+      "pdf": "https://arxiv.org/pdf/2604.10819v1",
+      "score": "6.0",
+      "evidence": "不可信证明者的差分隐私验证",
+      "tldr": "本文研究了在不可信证明者辅助下进行差分隐私（DP）分布属性验证的问题。作者探讨了私有硬币与公开硬币交互协议在不同隐私参数下的复杂度，发现在严格隐私限制下两者可等效转化，而在宽松隐私下私有硬币能降低复杂度。此外，研究还给出了针对乘积分布测试的最优Merlin-Arthur证明，填补了隐私保护与证明辅助分布测试结合领域的空白。",
+      "tags": "query:fss-llm",
+      "abstract_en": "A recent line of work initiated by Chiesa and Gur and further developed by Herman and Rothblum investigates the sample and communication complexity of verifying properties of distributions with the assistance of a powerful, knowledgeable, but untrusted prover. In this work, we initiate the study of differentially private (DP) distribution property testing. After all, if we do not trust the prover to help us with verification, why should we trust it with our sensitive sample? We map a landscape of DP prover-aided proofs of properties of distributions. In the non-private case it is known that one-round (two message) private-coin protocols can have substantially lower complexity than public-coin AM protocols, but in the private case, the possibility for improvement depends on the parameter regime and privacy model. Drawing on connections to replicability and techniques for amplification, we show: (1) There exists a reduction from any one-round $(\\varepsilon,δ)$-DP private-coin interactive proof to a one-round public-coin DP interactive proof with the same privacy parameters, for the parameter regime $\\varepsilon=O(1/\\sqrt{n})$ and $δ=O(1/n^{5/2})$, and with the same sample and communication complexities. (2) If the verifier's message in the private-coin interactive proof is $O(1/\\sqrt{\\log n})$ locally DP -- a far more relaxed privacy parameter regime in a different model -- then applying one additional transformation again yields a one-round public-coin protocol with the same privacy bound and the same sample and computational complexities. (3) However, when the privacy guarantee is very relaxed ($\\varepsilon\\inΩ(\\log n)$), private coins indeed reduce complexity. We also obtain a Merlin-Arthur (one-message) proof for privately testing whether samples are drawn from a product distribution, and prove that its sample complexity is optimal.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/15/2604.11659v1-gpu-acceleration-of-sparse-fully-homomorphic-encrypted-dnns",
+      "section": "quick",
+      "title_en": "GPU Acceleration of Sparse Fully Homomorphic Encrypted DNNs",
+      "authors": "Lara D'Agata, Carlos Agulló-Domingo, Óscar Vera-López, Kaustubh Shivdikar, Ardhi W. B. Yudha, Ferhat Yaman, David Kaeli, José L. Abellán, Ian Colbert, José Cano",
+      "date": "2026-04-13",
+      "pdf": "https://arxiv.org/pdf/2604.11659v1",
+      "score": "6.0",
+      "evidence": "深度神经网络中加密矩阵乘法的GPU加速",
+      "tldr": "本研究针对全同态加密（FHE）在深度神经网络中计算开销巨大的挑战，提出了一种基于AMD GPU的稀疏矩阵乘法加速方案。通过利用FIDESlib库并针对操作数的稀疏性进行优化，该方法将密文矩阵乘法的复杂度从三次方降低至半线性。实验表明，该实现在性能上比CPU版本提升了高达3.0倍，显著提高了FHE在机器学习应用中的实用性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Fully homomorphic encryption (FHE) has recently attracted significant attention as both a cryptographic primitive and a systems challenge. Given the latest advances in accelerated computing, FHE presents a promising opportunity for progress, with applications ranging from machine learning to information security. We target the most computationally intensive operation in deep neural networks from a hardware perspective, matrix multiplication (matmul), and adapt it for execution on AMD GPUs. We propose a new optimized method that improves the runtime and complexity of ciphertext matmul by using FIDESlib, a recent open-source FHE library designed specifically for GPUs. By exploiting sparsity in both operands, our sparse matmul implementation outperforms its CPU counterpart by up to $3.0\\times$ and reduces the time complexity from cubic to semi-linear, demonstrating an improvement over existing FHE matmul implementations.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

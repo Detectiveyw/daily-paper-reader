@@ -1,0 +1,252 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-15T20:06:47.481851+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 5,
+    "quick_skim_target": 11,
+    "quick_selected": 5
+  },
+  "deep_dive": [
+    {
+      "id": "2604.12064v1",
+      "title": "LLM-Redactor: An Empirical Evaluation of Eight Techniques for Privacy-Preserving LLM Requests",
+      "abstract": "Coding agents and LLM-powered applications routinely send potentially sensitive content to cloud LLM APIs where it may be logged, retained, used for training, or subpoenaed. Existing privacy tooling focuses on network-level encryption and organization-level DLP, neither of which addresses the content of prompts themselves. We present a systematic empirical evaluation of eight techniques for privacy-preserving LLM requests: (A) local-only inference, (B) redaction with placeholder restoration, (C) semantic rephrasing, (D) Trusted Execution Environment hosted inference, (E) split inference, (F) fully homomorphic encryption, (G) secret sharing via multi-party computation, and (H) differential-privacy noise. We implement all eight (or a tractable research-stage subset where deployment is not yet feasible) in an open-source shim compatible with MCP and any OpenAI-compatible API. We evaluate the four practical options (A, B, C, H) and their combinations across four workload classes using a ground-truth-labelled leak benchmark of 1,300 samples with 4,014 annotations. Our headline finding is that no single technique dominates: the combination A+B+C (route locally when possible, redact and rephrase the rest) achieves 0.6% combined leak on PII and 31.3% on proprietary code, with zero exact leaks on PII across 500 samples. We present a decision rule that selects the appropriate option(s) from a threat-model budget and workload characterisation. Code, benchmarks, and evaluation harness are released at https://github.com/jayluxferro/llm-redactor.",
+      "authors": [
+        "Justice Owusu Agyemang",
+        "Jerry John Kponyo",
+        "Elliot Amponsah",
+        "Godfred Manu Addo Boakye",
+        "Kwame Opuni-Boachie Obour Agyekum"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.SE"
+      ],
+      "published": "2026-04-13T21:05:42+00:00",
+      "link": "https://arxiv.org/pdf/2604.12064v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Evaluation of secret sharing via MPC and FHE for privacy-preserving LLM requests",
+      "llm_evidence_cn": "评估用于大模型隐私保护请求的多方计算秘密共享和全同态加密技术",
+      "llm_evidence": "评估用于大模型隐私保护请求的多方计算秘密共享和全同态加密技术",
+      "canonical_evidence": "评估用于大模型隐私保护请求的多方计算秘密共享和全同态加密技术",
+      "llm_tldr_en": "Evaluates eight privacy techniques including secret sharing and MPC for secure LLM inference.",
+      "llm_tldr_cn": "评估了包括秘密共享和多方计算在内的八种大模型隐私保护推理技术。",
+      "llm_tldr": "评估了包括秘密共享和多方计算在内的八种大模型隐私保护推理技术。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.12168v1",
+      "title": "Fully Homomorphic Encryption on Llama 3 model for privacy preserving LLM inference",
+      "abstract": "The applications of Generative Artificial Intelligence (GenAI) and their intersections with data-driven fields, such as healthcare, finance, transportation, and information security, have led to significant improvements in service efficiency and low latency. However, this synergy raises serious concerns regarding the security of large language models (LLMs) and their potential impact on the privacy of companies and users' data. Many technology companies that incorporate LLMs in their services with a certain level of command and control bear a risk of data exposure and secret divulgence caused by insecure LLM pipelines, making them vulnerable to multiple attacks such as data poisoning, prompt injection, and model theft. Although several security techniques (input/output sanitization, decentralized learning, access control management, and encryption) were implemented to reduce this risk, there is still an imminent risk of quantum computing attacks, which are expected to break existing encryption algorithms, hence, retrieving secret keys, encrypted sensitive data, and decrypting encrypted models. In this extensive work, we integrate the Post-Quantum Cryptography (PQC) based Lattice-based Homomorphic Encryption (HE) main functions in the LLM's inference pipeline to secure some of its layers against data privacy attacks. We modify the inference pipeline of the transformer architecture for the LLAMA-3 model while injecting the main homomorphic encryption operations provided by the concrete-ml library. We demonstrate high text generation accuracies (up to 98%) with reasonable latencies (237 ms) on an i9 CPU, reaching up to 80 tokens per second, which proves the feasibility and validity of our work while running a FHE-secured LLAMA-3 inference model. Further experiments and analysis are discussed to justify models' text generation latencies and behaviours.",
+      "authors": [
+        "Anes Abdennebi",
+        "Nadjia Kara",
+        "Laaziz Lahlou"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-04-14T00:54:24+00:00",
+      "link": "https://arxiv.org/pdf/2604.12168v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "privacy preserving LLM inference",
+      "llm_evidence_cn": "大模型隐私推理",
+      "llm_evidence": "大模型隐私推理",
+      "canonical_evidence": "大模型隐私推理",
+      "llm_tldr_en": "Applies Fully Homomorphic Encryption to Llama 3 for secure and private LLM inference.",
+      "llm_tldr_cn": "将全同态加密应用于Llama 3模型，以实现隐私保护的LLM推理。",
+      "llm_tldr": "将全同态加密应用于Llama 3模型，以实现隐私保护的LLM推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.09924v1",
+      "title": "S3CDM: A secret-sharing-scheme-based cyberattack detection model and its simulation implementation",
+      "abstract": "We design and develop a secret-sharing-scheme-based cyberattack detection model(S3CDM)that can detect unauthorized or illegal activities (especially insider attacks) and protect sensitive information within complex network infrastructures of large organizations. The model splits a secret among a group of legitimate participants or components for authentication, integration and detection of unauthorized activities. Traditional Shamir's polynomial interpolation based and our own hash function based schemes are utilized in the model, they both are practical and efficient to make sure the communications between different components are secure and any unauthorized activities can be detected. The model offers a flexible multi-factor authentication method to enhance the overall system security. Probability analysis [3] shows that multiple component model is more resistant against cyberattacks than the single component one. To demonstrate the feasibility, we implement the S3CDM in three parts on Google Cloud Platform, i.e., the front end UI (User Interface) running on an HTTP server, the back end individual services written in Python, and a PostgreSQL database. Docker is used to manage the start and stop of individual services and their URLs. We demonstrate how to use the UI with a use case of simulation of broken path in details.",
+      "authors": [
+        "Chi Sing Chum",
+        "Jia Lu",
+        "Claire Tang",
+        "Xiaowen Zhang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-10T21:42:46+00:00",
+      "link": "https://arxiv.org/pdf/2604.09924v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "secret sharing for secure communication and detection",
+      "llm_evidence_cn": "用于安全通信和检测的秘密共享",
+      "llm_evidence": "用于安全通信和检测的秘密共享",
+      "canonical_evidence": "用于安全通信和检测的秘密共享",
+      "llm_tldr_en": "Develops a cyberattack detection model using Shamir and hash-based secret sharing schemes.",
+      "llm_tldr_cn": "开发了一种基于Shamir和哈希秘密共享方案的网络攻击检测模型。",
+      "llm_tldr": "开发了一种基于Shamir和哈希秘密共享方案的网络攻击检测模型。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.12348v1",
+      "title": "PrivEraserVerify: Efficient, Private, and Verifiable Federated Unlearning",
+      "abstract": "Federated learning (FL) enables collaborative model training without sharing raw data, offering a promising path toward privacy preserving artificial intelligence. However, FL models may still memorize sensitive information from participants, conflicting with the right to be forgotten (RTBF). To meet these requirements, federated unlearning has emerged as a mechanism to remove the contribution of departing clients. Existing solutions only partially address this challenge: FedEraser improves efficiency but lacks privacy protection, FedRecovery ensures differential privacy (DP) but degrades accuracy, and VeriFi enables verifiability but introduces overhead without efficiency or privacy guarantees. We present PrivEraserVerify (PEV), a unified framework that integrates efficiency, privacy, and verifiability into federated unlearning. PEV employs (i) adaptive checkpointing to retain critical historical updates for fast reconstruction, (ii) layer adaptive differentially private calibration to selectively remove client influence while minimizing accuracy loss, and (iii) fingerprint based verification, enabling participants to confirm unlearning in a decentralized and noninvasive manner. Experiments on image, handwritten character, and medical datasets show that PEV achieves up to 2 to 3 times faster unlearning than retraining, provides formal indistinguishability guarantees with reduced performance degradation, and supports scalable verification. To the best of our knowledge, PEV is the first framework to simultaneously deliver efficiency, privacy, and verifiability for federated unlearning, moving FL closer to practical and regulation compliant deployment.",
+      "authors": [
+        "Parthaw Goswami",
+        "Md Khairul Islam",
+        "Ashfak Yeafi"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-14T06:33:58+00:00",
+      "link": "https://arxiv.org/pdf/2604.12348v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "verifiable federated unlearning and privacy protection",
+      "llm_evidence_cn": "可验证联邦遗忘学习与隐私保护",
+      "llm_evidence": "可验证联邦遗忘学习与隐私保护",
+      "canonical_evidence": "可验证联邦遗忘学习与隐私保护",
+      "llm_tldr_en": "Proposes a framework for efficient, private, and verifiable unlearning in federated environments.",
+      "llm_tldr_cn": "提出一个在联邦学习环境中实现高效、隐私且可验证遗忘学习的框架。",
+      "llm_tldr": "提出一个在联邦学习环境中实现高效、隐私且可验证遗忘学习的框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.10819v1",
+      "title": "Differentially Private Verification of Distribution Properties",
+      "abstract": "A recent line of work initiated by Chiesa and Gur and further developed by Herman and Rothblum investigates the sample and communication complexity of verifying properties of distributions with the assistance of a powerful, knowledgeable, but untrusted prover. In this work, we initiate the study of differentially private (DP) distribution property testing. After all, if we do not trust the prover to help us with verification, why should we trust it with our sensitive sample? We map a landscape of DP prover-aided proofs of properties of distributions. In the non-private case it is known that one-round (two message) private-coin protocols can have substantially lower complexity than public-coin AM protocols, but in the private case, the possibility for improvement depends on the parameter regime and privacy model. Drawing on connections to replicability and techniques for amplification, we show: (1) There exists a reduction from any one-round $(\\varepsilon,δ)$-DP private-coin interactive proof to a one-round public-coin DP interactive proof with the same privacy parameters, for the parameter regime $\\varepsilon=O(1/\\sqrt{n})$ and $δ=O(1/n^{5/2})$, and with the same sample and communication complexities. (2) If the verifier's message in the private-coin interactive proof is $O(1/\\sqrt{\\log n})$ locally DP -- a far more relaxed privacy parameter regime in a different model -- then applying one additional transformation again yields a one-round public-coin protocol with the same privacy bound and the same sample and computational complexities. (3) However, when the privacy guarantee is very relaxed ($\\varepsilon\\inΩ(\\log n)$), private coins indeed reduce complexity. We also obtain a Merlin-Arthur (one-message) proof for privately testing whether samples are drawn from a product distribution, and prove that its sample complexity is optimal.",
+      "authors": [
+        "Elbert Du",
+        "Cynthia Dwork",
+        "Pranay Tankala",
+        "Linjun Zhang"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS",
+        "cs.CC",
+        "cs.LG"
+      ],
+      "published": "2026-04-12T21:17:43+00:00",
+      "link": "https://arxiv.org/pdf/2604.10819v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "differentially private verification with untrusted provers",
+      "llm_evidence_cn": "不可信证明者的差分隐私验证",
+      "llm_evidence": "不可信证明者的差分隐私验证",
+      "canonical_evidence": "不可信证明者的差分隐私验证",
+      "llm_tldr_en": "Investigates the complexity of verifying distribution properties using differentially private proofs.",
+      "llm_tldr_cn": "研究使用差分隐私证明验证分布属性的复杂性。",
+      "llm_tldr": "研究使用差分隐私证明验证分布属性的复杂性。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.11659v1",
+      "title": "GPU Acceleration of Sparse Fully Homomorphic Encrypted DNNs",
+      "abstract": "Fully homomorphic encryption (FHE) has recently attracted significant attention as both a cryptographic primitive and a systems challenge. Given the latest advances in accelerated computing, FHE presents a promising opportunity for progress, with applications ranging from machine learning to information security. We target the most computationally intensive operation in deep neural networks from a hardware perspective, matrix multiplication (matmul), and adapt it for execution on AMD GPUs. We propose a new optimized method that improves the runtime and complexity of ciphertext matmul by using FIDESlib, a recent open-source FHE library designed specifically for GPUs. By exploiting sparsity in both operands, our sparse matmul implementation outperforms its CPU counterpart by up to $3.0\\times$ and reduces the time complexity from cubic to semi-linear, demonstrating an improvement over existing FHE matmul implementations.",
+      "authors": [
+        "Lara D'Agata",
+        "Carlos Agulló-Domingo",
+        "Óscar Vera-López",
+        "Kaustubh Shivdikar",
+        "Ardhi W. B. Yudha",
+        "Ferhat Yaman",
+        "David Kaeli",
+        "José L. Abellán",
+        "Ian Colbert",
+        "José Cano"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.DC",
+        "cs.DS",
+        "cs.LG",
+        "cs.PF"
+      ],
+      "published": "2026-04-13T16:09:26+00:00",
+      "link": "https://arxiv.org/pdf/2604.11659v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "GPU acceleration for encrypted matrix multiplication in deep neural networks",
+      "llm_evidence_cn": "深度神经网络中加密矩阵乘法的GPU加速",
+      "llm_evidence": "深度神经网络中加密矩阵乘法的GPU加速",
+      "canonical_evidence": "深度神经网络中加密矩阵乘法的GPU加速",
+      "llm_tldr_en": "Optimizes FHE-based matrix multiplication on GPUs to improve the efficiency of secure neural network inference.",
+      "llm_tldr_cn": "优化GPU上的FHE矩阵乘法，提高安全神经网络推理的效率。",
+      "llm_tldr": "优化GPU上的FHE矩阵乘法，提高安全神经网络推理的效率。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
