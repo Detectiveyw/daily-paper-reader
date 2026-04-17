@@ -1,0 +1,131 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-17T20:03:37.397535+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2604.11362v1",
+      "title": "How to reconstruct (anonymously) a secret cellular automaton",
+      "abstract": "We consider threshold secret sharing schemes based on cellular automata (CA) that allows for anonymous reconstruction, meaning that the secret can be recovered only as a function of the shares, without knowing the participants' identities. To this end, we revisit the basic characterization of $(2,n)$ threshold schemes based on CA in terms of Mutually Orthogonal Latin Squares (MOLS), and redefine the secret space as the MOLS family itself, showing that the new resulting scheme enables anonymous reconstruction of secret CA rules. Finally, we discuss the trade-off between the number of secret CA that can be shared and the computational complexity of the recovery phase.",
+      "authors": [
+        "Luca Mariot",
+        "Federico Mazzone",
+        "Luca Manzoni",
+        "Alberto Leporati"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "math.CO"
+      ],
+      "published": "2026-04-13T12:04:06+00:00",
+      "link": "https://arxiv.org/pdf/2604.11362v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "threshold secret sharing schemes and anonymous reconstruction",
+      "llm_evidence_cn": "阈值秘密共享方案与匿名重构",
+      "llm_evidence": "阈值秘密共享方案与匿名重构",
+      "canonical_evidence": "阈值秘密共享方案与匿名重构",
+      "llm_tldr_en": "Explores cellular automata-based secret sharing for anonymous reconstruction without participant identities.",
+      "llm_tldr_cn": "研究基于元胞自动机的秘密共享方案，实现无需参与者身份信息的匿名秘密重构。",
+      "llm_tldr": "研究基于元胞自动机的秘密共享方案，实现无需参与者身份信息的匿名秘密重构。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.12431v1",
+      "title": "VeriX-Anon: A Multi-Layered Framework for Mathematically Verifiable Outsourced Target-Driven Data Anonymization",
+      "abstract": "Organisations increasingly outsource privacy-sensitive data transformations to cloud providers, yet no practical mechanism lets the data owner verify that the contracted algorithm was faithfully executed. VeriX-Anon is a multi-layered verification framework for outsourced Target-Driven k-anonymization combining three orthogonal mechanisms: deterministic verification via Merkle-style hashing of an Authenticated Decision Tree, probabilistic verification via Boundary Sentinels near the Random Forest decision boundary and exact-duplicate Twins with cryptographic identifiers, and utility-based verification via Explainable AI fingerprinting that compares SHAP value distributions before and after anonymization using the Wasserstein distance. Evaluated on three cross-domain datasets against Lazy (drops 5 percent of records), Dumb (random splitting, fake hash), and Approximate (random splitting, valid hash) adversaries, VeriX-Anon correctly detected deviations in 11 of 12 scenarios. No single layer achieved this alone. The XAI layer was the only mechanism that caught the Approximate adversary, succeeding on Adult and Bank but failing on the severely imbalanced Diabetes dataset where class imbalance suppresses the SHAP signal, confirming the need for adaptive thresholding. An 11-point k-sweep showed Target-Driven anonymization preserves significantly more utility than Blind anonymization (Wilcoxon $p = 0.000977$, Cohen's $d = 1.96$, mean F1 gap $+0.1574$). Client-side verification completes under one second at one million rows. The threat model covers three empirically evaluated profiles and one theoretical profile (Informed Attacker) aware of trap embedding but unable to defeat the cryptographic salt. Sentinel evasion probability ranges from near-zero for balanced datasets to 0.52 for imbalanced ones, a limitation the twin layer compensates for in every tested scenario.",
+      "authors": [
+        "Miit Daga",
+        "Swarna Priya Ramu"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.DB",
+        "cs.LG"
+      ],
+      "published": "2026-04-14T08:22:18+00:00",
+      "link": "https://arxiv.org/pdf/2604.12431v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "mathematically verifiable outsourced data transformation",
+      "llm_evidence_cn": "数学上可验证的外包数据转换",
+      "llm_evidence": "数学上可验证的外包数据转换",
+      "canonical_evidence": "数学上可验证的外包数据转换",
+      "llm_tldr_en": "A framework for verifying that outsourced data anonymization algorithms were faithfully executed by cloud providers.",
+      "llm_tldr_cn": "一个用于验证云服务商是否忠实执行了外包数据脱敏算法的数学验证框架。",
+      "llm_tldr": "一个用于验证云服务商是否忠实执行了外包数据脱敏算法的数学验证框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.14909v1",
+      "title": "Efficient Fuzzy Private Set Intersection from Secret-shared OPRF",
+      "abstract": "Private set intersection (PSI) enables a sender holding a set $Q$ of size $m$ and a receiver holding a set $W$ of size $n$ to securely compute the intersection $Q \\cap W$. Fuzzy PSI (FPSI) is a PSI variant where the receiver learns the items $q \\in Q$ for which there exists some $w \\in W$ satisfying $\\mathsf{dist}(q, w) \\le δ$ under a given distance metric. Although several FPSI works are proposed for $L_{p}$ distance metrics with $p \\in [1, \\infty]$, they either heavily rely on expensive homomorphic encryptions, or incur undesirable complexity, e.g., exponential to the element dimension, both of which lead to poor practical efficiency.   In this work, we propose efficient FPSI protocols for $L_{p \\in [1, \\infty]}$ distance metrics, primarily leveraging significantly cheaper symmetric-key operations. Our protocols achieve linear communication and computation complexity in the set sizes $m,n$, the dimension $d$, and the distance threshold $δ$. Our core building block is an oblivious programmable PRF with secret-shared outputs, which may be of independent interest. Furthermore, we incorporate a prefix technique that reduces the dependence on the distance threshold $δ$ to logarithmic, which is particularly suitable for large $δ$.   We implement our FPSI protocols and compare them with state-of-the-art constructions. Experimental results demonstrate that our protocols consistently and significantly outperform existing works across all settings. Specifically, our protocols achieve a speedup of $12{\\sim}145\\times$ in running time and a reduction of $3{\\sim}8\\times$ in communication cost compared to Gao et al.~(ASIACRYPT'24) and a speedup of $9{\\sim}80\\times$ in running time and a reduction of $5{\\sim}19\\times$ in communication cost compared to Dang et al.~(CCS'25).",
+      "authors": [
+        "Xinpeng Yang",
+        "Meng Hao",
+        "Chenkai Weng",
+        "Robert H. Deng",
+        "Yonggang Wen",
+        "Tianwei Zhang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-16T11:51:25+00:00",
+      "link": "https://arxiv.org/pdf/2604.14909v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "secret-shared OPRF for secure distance computation",
+      "llm_evidence_cn": "用于安全距离计算的秘密共享OPRF",
+      "llm_evidence": "用于安全距离计算的秘密共享OPRF",
+      "canonical_evidence": "用于安全距离计算的秘密共享OPRF",
+      "llm_tldr_en": "Proposes efficient fuzzy private set intersection using secret-shared OPRF for distance metrics.",
+      "llm_tldr_cn": "提出了一种基于秘密共享OPRF的高效模糊隐私集合交集协议，用于距离度量。",
+      "llm_tldr": "提出了一种基于秘密共享OPRF的高效模糊隐私集合交集协议，用于距离度量。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
