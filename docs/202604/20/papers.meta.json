@@ -1,0 +1,37 @@
+{
+  "label": "2026-04-20",
+  "date": "2026-04-20",
+  "generated_at": "2026-04-20T20:35:56",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202604/20/2604.15499v1-securerouter-encrypted-routing-for-efficient-secure-inference",
+      "section": "deep",
+      "title_en": "SecureRouter: Encrypted Routing for Efficient Secure Inference",
+      "authors": "Yukuan Zhang, Mengxin Zheng, Qian Lou",
+      "date": "2026-04-16",
+      "pdf": "https://arxiv.org/pdf/2604.15499v1",
+      "score": "9.0",
+      "evidence": "利用MPC和加密路由加速安全Transformer推理",
+      "tldr": "针对安全多方计算（MPC）在神经网络推理中因使用固定模型而导致的效率低下问题，本文提出SecureRouter框架。该框架通过加密路由实现输入自适应的模型选择，集成了一个感知MPC成本的安全路由器和经过MPC优化的模型池。在保证数据和模型完全机密的前提下，SecureRouter能够根据输入特征动态选择最优模型，显著提升了加密推理的效率，为可扩展的隐私保护AI推理提供了新路径。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Cryptographically secure neural network inference typically relies on secure computing techniques such as Secure Multi-Party Computation (MPC), enabling cloud servers to process client inputs without decrypting them. Although prior privacy-preserving inference systems co-design network optimizations with MPC, they remain slow and costly, limiting real-world deployment. A major bottleneck is their use of a single, fixed transformer model for all encrypted inputs, ignoring that different inputs require different model sizes to balance efficiency and accuracy. We present SecureRouter, an end-to-end encrypted routing and inference framework that accelerates secure transformer inference through input-adaptive model selection under encryption. SecureRouter establishes a unified encrypted pipeline that integrates a secure router with an MPC-optimized model pool, enabling coordinated routing, inference, and protocol execution while preserving full data and model confidentiality. The framework includes training-phase and inference-phase components: an MPC-cost-aware secure router that predicts per-model utility and cost from encrypted features, and an MPC-optimized model pool whose architectures and quantization schemes are co-trained to minimize MPC communication and computation overhead. Compared to prior work, SecureRouter achieves a latency reduction by 1.95x with negligible accuracy loss, offering a practical path toward scalable and efficient secure AI inference. Our open-source implementation is available at: https://github.com/UCF-ML-Research/SecureRouter",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/20/2604.15728v1-privacy-preserving-llms-routing",
+      "section": "quick",
+      "title_en": "Privacy-Preserving LLMs Routing",
+      "authors": "Xidong Wu, Yukuan Zhang, Yuqiong Ji, Reza Shirkavand, Qian Lou, Shangqian Gao",
+      "date": "2026-04-17",
+      "pdf": "https://arxiv.org/pdf/2604.15728v1",
+      "score": "7.0",
+      "evidence": "使用多方安全计算技术的大模型隐私保护推理",
+      "tldr": "LLM路由技术在平衡性能与成本的同时带来了隐私风险，而传统加密计算方案开销巨大。本文提出PPRoute框架，通过MPC友好型算子优化编码器推理、多步训练算法维持路由质量，并引入$O(1)$通信复杂度的Top-k算法加速模型搜索。实验表明，PPRoute在保持与明文相当性能的同时，比原生MPC实现提速约20倍，实现了高效且隐私保护的LLM路由。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large language model (LLM) routing has emerged as a critical strategy to balance model performance and cost-efficiency by dynamically selecting services from various model providers. However, LLM routing adds an intermediate layer between users and LLMs, creating new privacy risks to user data. These privacy risks have not been systematically studied. Although cryptographic techniques such as Secure Multi-Party Computation (MPC) enable privacy-preserving computation, their protocol design and implementation remain under-explored, and naïve implementations typically incur prohibitive computational overhead. To address this, we propose a privacy-preserving LLM routing framework (PPRoute). PPRoute includes multiple strategies to speed up encoder inference and nearest neighbor search under the MPC and maintain the quality of LLM routing. First, PPRoute uses MPC-friendly operations to boost the encoder inference. Second, PPRoute uses a multiple-step model training algorithm to maintain routing quality despite the constraints of the encrypted domain. Third, PPRoute proposes an unsorted Top-k algorithm with $O(1)$ communication complexity for secure sorting in model search, significantly reducing communication latency. Across different datasets, PPRoute achieves the performance of plaintext counterparts, while achieving approximately a 20$\\times$ speedup over naïve MPC implementations.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

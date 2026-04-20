@@ -1,6 +1,11 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-04-20 <!--dpr-date:20260420-->
+    * 精读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/20/2604.15499v1-securerouter-encrypted-routing-for-efficient-secure-inference" data-sidebar-item="{&quot;title&quot;: &quot;SecureRouter: Encrypted Routing for Efficient Secure Inference&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.15499v1-securerouter-encrypted-routing-for-efficient-secure-inference&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;利用MPC和加密路由加速安全Transformer推理&quot;}">SecureRouter: Encrypted Routing for Efficient Secure Inference</a>
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/20/2604.15728v1-privacy-preserving-llms-routing" data-sidebar-item="{&quot;title&quot;: &quot;Privacy-Preserving LLMs Routing&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.15728v1-privacy-preserving-llms-routing&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;使用多方安全计算技术的大模型隐私保护推理&quot;}">Privacy-Preserving LLMs Routing</a>
   * 2026-04-19 <!--dpr-date:20260419-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/19/2604.13474v1-secure-and-privacy-preserving-vertical-federated-learning" data-sidebar-item="{&quot;title&quot;: &quot;Secure and Privacy-Preserving Vertical Federated Learning&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.13474v1-secure-and-privacy-preserving-vertical-federated-learning&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;用于分布式模型聚合和隐私保护联邦学习的MPC协议&quot;}">Secure and Privacy-Preserving Vertical Federated Learning</a>
