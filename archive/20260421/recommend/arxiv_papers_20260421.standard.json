@@ -1,0 +1,196 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-21T19:48:17.962877+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [
+    {
+      "id": "2604.17238v1",
+      "title": "Breaking Euston: Recovering Private Inputs from Secure Inference by Exploiting Subspace Leakage",
+      "abstract": "In the 47th IEEE Symposium on Security and Privacy (IEEE S&P 2026), Gao et al. proposed an efficient and user-friendly secure transformer inference framework, namely Euston. In Euston, a singular value decomposition-based matrix transmission protocol is designed to efficiently transmit input matrices, reducing communication bandwidth by approximately 2.8 times. In this manuscript, we show that this transmission protocol introduces subspace leakage of random masks, enabling the model owner to recover private samples easily. We further validate the effectiveness of the recovery attack through simple experiments on image and language datasets, highlighting a fundamental privacy risk of the protocol design.",
+      "authors": [
+        "Jiaqi Zhao",
+        "Fengwei Wang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-19T03:49:38+00:00",
+      "link": "https://arxiv.org/pdf/2604.17238v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Analysis of privacy risks in secure transformer inference frameworks",
+      "llm_evidence_cn": "安全Transformer推理框架中的隐私风险分析",
+      "llm_evidence": "安全Transformer推理框架中的隐私风险分析",
+      "canonical_evidence": "安全Transformer推理框架中的隐私风险分析",
+      "llm_tldr_en": "Identifies a subspace leakage vulnerability in the Euston secure transformer inference protocol.",
+      "llm_tldr_cn": "发现了Euston安全Transformer推理协议中的子空间泄漏漏洞。",
+      "llm_tldr": "发现了Euston安全Transformer推理协议中的子空间泄漏漏洞。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.18179v1",
+      "title": "Committed SAE-Feature Traces for Audited-Session Substitution Detection in Hosted LLMs",
+      "abstract": "Hosted-LLM providers have a silent-substitution incentive: advertise a stronger model while serving cheaper replies. Probe-after-return schemes such as SVIP leave a parallel-serve side-channel, since a dishonest provider can route the verifier's probe to the advertised model while serving ordinary users from a substitute. We propose a commit-open protocol that closes this gap. Before any opening request, the provider commits via a Merkle tree to a per-position sparse-autoencoder (SAE) feature-trace sketch of its served output at a published probe layer. A verifier opens random positions, scores them against a public named-circuit probe library calibrated with cross-backend noise, and decides with a fixed-threshold joint-consistency z-score rule. We instantiate the protocol on three backbones -- Qwen3-1.7B, Gemma-2-2B, and a 4.5x scale-up to Gemma-2-9B with a 131k-feature SAE. Of 17 attackers spanning same-family lifts, cross-family substitutes, and rank-<=128 adaptive LoRA, all are rejected at a shared, scale-stable threshold; the same attackers all evade a matched SVIP-style parallel-serve baseline. A white-box end-to-end attack that backpropagates through the frozen SAE encoder does not close the margin, and a feature-forgery attacker that never runs M_hon is bounded in closed form by an intrinsic-dimension argument. Commitment adds <=2.1% to forward-only wall-clock at batch 32.",
+      "authors": [
+        "Ziyang Liu"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-04-20T12:34:56+00:00",
+      "link": "https://arxiv.org/pdf/2604.18179v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Verifiable feature-trace sketches for hosted LLM auditing",
+      "llm_evidence_cn": "托管大模型审计的可验证特征追踪草图",
+      "llm_evidence": "托管大模型审计的可验证特征追踪草图",
+      "canonical_evidence": "托管大模型审计的可验证特征追踪草图",
+      "llm_tldr_en": "Proposes a commit-open protocol using Merkle trees to verify that hosted LLMs are not silently substituted.",
+      "llm_tldr_cn": "提出一种使用默克尔树的承诺-公开协议，用于验证托管大模型是否被静默替换。",
+      "llm_tldr": "提出一种使用默克尔树的承诺-公开协议，用于验证托管大模型是否被静默替换。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.16606v1",
+      "title": "SafeLM: Unified Privacy-Aware Optimization for Trustworthy Federated Large Language Models",
+      "abstract": "Large language models (LLMs) are increasingly deployed in high-stakes domains, yet a unified treatment of their overlapping safety challenges remains lacking. We present SafeLM, a framework that jointly addresses four pillars of LLM safety: privacy, security, misinformation, and adversarial robustness. SafeLM combines federated training with gradient smartification and Paillier encryption for privacy, integrates defenses against training and inference-time attacks, employs contrastive grounding with calibrated decoding to reduce hallucinations, and introduces alignment-aware binarized aggregation to enhance robustness while maintaining bounded reconstruction quality. Across benchmarks on factuality, toxicity, and membership inference, SafeLM achieves 98.0% harmful content detection accuracy, reduces communication by 96.9%, and lowers gradient inversion PSNR from 31.7 dB to 15.1 dB. Ablations show that each component contributes independently, whereas their integration yields a strong privacy utility efficiency trade-off for deploying trustworthy LLMs.",
+      "authors": [
+        "Noor Islam S. Mohammad",
+        "Uluğ Bayazıt"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-04-17T18:00:58+00:00",
+      "link": "https://arxiv.org/pdf/2604.16606v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy-aware optimization and encryption for LLM inference",
+      "llm_evidence_cn": "大模型推理的隐私感知优化与加密",
+      "llm_evidence": "大模型推理的隐私感知优化与加密",
+      "canonical_evidence": "大模型推理的隐私感知优化与加密",
+      "llm_tldr_en": "SafeLM integrates Paillier encryption and federated learning to secure LLM training and inference.",
+      "llm_tldr_cn": "SafeLM 结合同态加密与联邦学习，保障大模型的训练与推理安全。",
+      "llm_tldr": "SafeLM 结合同态加密与联邦学习，保障大模型的训练与推理安全。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.16834v1",
+      "title": "Towards Deep Encrypted Training: Low-Latency, Memory-Efficient, and High-Throughput Inference for Privacy-Preserving Neural Networks",
+      "abstract": "Privacy-preserving machine learning (PPML) has become increasingly important in applications where sensitive data must remain confidential. Homomorphic Encryption (HE) enables computation directly on encrypted data, allowing neural network inference without revealing raw inputs. While prior works have largely focused on inference over a single encrypted image, batch processing of encrypted inputs lags behind, despite being critical for high-throughput inference scenarios and training-oriented workloads.   In this work, we address this gap by developing optimized algorithms for batched HE-friendly neural networks. We also introduced a pipeline architecture designed to maximize resource efficiency for different batch size execution. We implemented these algorithms and evaluated our work using HE-friendly ResNet-20 and ResNet-34 models on encrypted CIFAR-10 and CIFAR-100 datasets, respectively.   For ResNet-20, our approach achieves an amortized inference time of 8.86 seconds per image when processing a batch of 512 encrypted images, with a peak memory usage of 98.96 GB. These results represent a 1.78x runtime improvement and a 3.74x reduction in memory usage compared to the state-of-the-art design. For the deeper ResNet-34 model, we achieve an amortized inference time of 28.14 on a batch of 256 encrypted images using 246.78GB of RAM",
+      "authors": [
+        "Nges Brian Njungle",
+        "Eric Jahns",
+        "Michel A. Kinsy"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-04-18T04:54:57+00:00",
+      "link": "https://arxiv.org/pdf/2604.16834v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy-preserving neural network inference using encryption",
+      "llm_evidence_cn": "使用加密技术的隐私保护神经网络推理",
+      "llm_evidence": "使用加密技术的隐私保护神经网络推理",
+      "canonical_evidence": "使用加密技术的隐私保护神经网络推理",
+      "llm_tldr_en": "Optimizes homomorphic encryption for high-throughput, low-latency neural network inference.",
+      "llm_tldr_cn": "优化同态加密以实现高吞吐量、低延迟的神经网络推理。",
+      "llm_tldr": "优化同态加密以实现高吞吐量、低延迟的神经网络推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.17816v1",
+      "title": "Privacy-Preserving Product-Quantized Approximate Nearest Neighbor Search Framework for Large-scale Datasets via A Hybrid of Fully Homomorphic Encryption and Trusted Execution Environment",
+      "abstract": "A nearest-neighbor framework is a fundamental tool for various applications involving Large Language Models (LLMs) and Visual Language Models (VLMs). Vectors used for nearest-neighbor searches have richer information for similarity searches. This information leads to security risks, such as embedding inversion and membership attacks. Therefore, Privacy-Preserving Approximate Nearest-Neighbor (PP-ANN) approaches are necessary for highly confidential data. However, conventional PP-ANN approaches based on a Trusted Execution Environment (TEE) or Fully Homomorphic Encryption (FHE) do not achieve practical security or performance. Additionally, conventional approaches focus on the search process rather than database generation for nearest-neighbor. To address these issues, we propose a Privacy-Preserving Product-Quantization Approximate Nearest Neighbor (PPPQ-ANN) framework. PPPQ-ANN provides a multi-layered security structure for vectors based on a hybrid of FHE and TEE. Additionally, PPPQ-ANN minimizes FHE ciphertext computations by combining Product-Quantization (PQ) with optimized data packing. We demonstrate the performance of PPPQ-ANN on million-scale datasets. As a result, PPPQ-ANN achieves database generation in less than 2 hours and more than 50 QPS in a sequential search while preserving privacy. Therefore, PPPQ-ANN optimizes the trade-off between security and performance by utilizing a hybrid of FHE and TEE, achieving practical performance while preserving privacy.",
+      "authors": [
+        "Shozo Saeki",
+        "Minoru Kawahara",
+        "Hirohisa Aman"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-20T05:14:40+00:00",
+      "link": "https://arxiv.org/pdf/2604.17816v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy-preserving nearest neighbor search for LLMs using FHE and TEE",
+      "llm_evidence_cn": "使用FHE和TEE的大模型隐私保护近邻搜索",
+      "llm_evidence": "使用FHE和TEE的大模型隐私保护近邻搜索",
+      "canonical_evidence": "使用FHE和TEE的大模型隐私保护近邻搜索",
+      "llm_tldr_en": "Develops a hybrid FHE-TEE framework for secure approximate nearest neighbor search in LLM applications.",
+      "llm_tldr_cn": "开发了一个结合FHE和TEE的混合框架，用于大模型应用中的安全近邻搜索。",
+      "llm_tldr": "开发了一个结合FHE和TEE的混合框架，用于大模型应用中的安全近邻搜索。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

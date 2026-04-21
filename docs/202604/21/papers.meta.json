@@ -1,0 +1,79 @@
+{
+  "label": "2026-04-21",
+  "date": "2026-04-21",
+  "generated_at": "2026-04-21T19:49:17",
+  "count": 5,
+  "papers": [
+    {
+      "paper_id": "202604/21/2604.17238v1-breaking-euston-recovering-private-inputs-from-secure-inference-by-exploiting-subspace-leakage",
+      "section": "deep",
+      "title_en": "Breaking Euston: Recovering Private Inputs from Secure Inference by Exploiting Subspace Leakage",
+      "authors": "Jiaqi Zhao, Fengwei Wang",
+      "date": "2026-04-19",
+      "pdf": "https://arxiv.org/pdf/2604.17238v1",
+      "score": "9.0",
+      "evidence": "安全Transformer推理框架中的隐私风险分析",
+      "tldr": "本研究针对 IEEE S&P 2026 提出的高效安全 Transformer 推理框架 Euston 进行了安全性分析。Euston 通过基于奇异值分解（SVD）的矩阵传输协议显著降低了通信带宽，但本文发现该协议存在随机掩码的子空间泄露漏洞。研究者利用该漏洞设计了一种攻击方法，使模型所有者能够轻松恢复用户的私有输入数据。通过在图像和语言数据集上的实验，验证了该攻击的有效性，揭示了 Euston 协议设计中存在的根本性隐私风险。",
+      "tags": "query:fss-llm",
+      "abstract_en": "In the 47th IEEE Symposium on Security and Privacy (IEEE S&P 2026), Gao et al. proposed an efficient and user-friendly secure transformer inference framework, namely Euston. In Euston, a singular value decomposition-based matrix transmission protocol is designed to efficiently transmit input matrices, reducing communication bandwidth by approximately 2.8 times. In this manuscript, we show that this transmission protocol introduces subspace leakage of random masks, enabling the model owner to recover private samples easily. We further validate the effectiveness of the recovery attack through simple experiments on image and language datasets, highlighting a fundamental privacy risk of the protocol design.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/21/2604.18179v1-committed-sae-feature-traces-for-audited-session-substitution-detection-in-hosted-llms",
+      "section": "quick",
+      "title_en": "Committed SAE-Feature Traces for Audited-Session Substitution Detection in Hosted LLMs",
+      "authors": "Ziyang Liu",
+      "date": "2026-04-20",
+      "pdf": "https://arxiv.org/pdf/2604.18179v1",
+      "score": "7.0",
+      "evidence": "托管大模型审计的可验证特征追踪草图",
+      "tldr": "针对托管LLM服务商用廉价模型替换高性能模型的欺诈行为，本文提出一种基于稀疏自编码器（SAE）特征轨迹的承诺-开启协议。服务商需预先提交特征轨迹的Merkle树承诺，验证者通过随机抽检并利用探针库评分。该方案能有效检测跨家族替换及自适应LoRA攻击，且推理延迟增加仅约2.1%。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Hosted-LLM providers have a silent-substitution incentive: advertise a stronger model while serving cheaper replies. Probe-after-return schemes such as SVIP leave a parallel-serve side-channel, since a dishonest provider can route the verifier's probe to the advertised model while serving ordinary users from a substitute. We propose a commit-open protocol that closes this gap. Before any opening request, the provider commits via a Merkle tree to a per-position sparse-autoencoder (SAE) feature-trace sketch of its served output at a published probe layer. A verifier opens random positions, scores them against a public named-circuit probe library calibrated with cross-backend noise, and decides with a fixed-threshold joint-consistency z-score rule. We instantiate the protocol on three backbones -- Qwen3-1.7B, Gemma-2-2B, and a 4.5x scale-up to Gemma-2-9B with a 131k-feature SAE. Of 17 attackers spanning same-family lifts, cross-family substitutes, and rank-<=128 adaptive LoRA, all are rejected at a shared, scale-stable threshold; the same attackers all evade a matched SVIP-style parallel-serve baseline. A white-box end-to-end attack that backpropagates through the frozen SAE encoder does not close the margin, and a feature-forgery attacker that never runs M_hon is bounded in closed form by an intrinsic-dimension argument. Commitment adds <=2.1% to forward-only wall-clock at batch 32.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/21/2604.16606v1-safelm-unified-privacy-aware-optimization-for-trustworthy-federated-large-language-models",
+      "section": "quick",
+      "title_en": "SafeLM: Unified Privacy-Aware Optimization for Trustworthy Federated Large Language Models",
+      "authors": "Noor Islam S. Mohammad, Uluğ Bayazıt",
+      "date": "2026-04-17",
+      "pdf": "https://arxiv.org/pdf/2604.16606v1",
+      "score": "6.0",
+      "evidence": "大模型推理的隐私感知优化与加密",
+      "tldr": "SafeLM是一个统一的联邦学习框架，旨在解决大语言模型在隐私、安全、误导信息和对抗鲁棒性方面的多重挑战。该框架通过结合梯度智能化、Paillier加密、对比接地、校准解码以及对齐感知二值化聚合等技术，在保证模型性能的同时，显著提升了隐私保护能力并降低了通信开销。实验表明，SafeLM在有害内容检测和防御梯度反推攻击方面表现优异，为部署可信LLM提供了高效的隐私-效用平衡方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large language models (LLMs) are increasingly deployed in high-stakes domains, yet a unified treatment of their overlapping safety challenges remains lacking. We present SafeLM, a framework that jointly addresses four pillars of LLM safety: privacy, security, misinformation, and adversarial robustness. SafeLM combines federated training with gradient smartification and Paillier encryption for privacy, integrates defenses against training and inference-time attacks, employs contrastive grounding with calibrated decoding to reduce hallucinations, and introduces alignment-aware binarized aggregation to enhance robustness while maintaining bounded reconstruction quality. Across benchmarks on factuality, toxicity, and membership inference, SafeLM achieves 98.0% harmful content detection accuracy, reduces communication by 96.9%, and lowers gradient inversion PSNR from 31.7 dB to 15.1 dB. Ablations show that each component contributes independently, whereas their integration yields a strong privacy utility efficiency trade-off for deploying trustworthy LLMs.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/21/2604.16834v1-towards-deep-encrypted-training-low-latency-memory-efficient-and-high-throughput-inference-for-privacy-preserving-neural-networks",
+      "section": "quick",
+      "title_en": "Towards Deep Encrypted Training: Low-Latency, Memory-Efficient, and High-Throughput Inference for Privacy-Preserving Neural Networks",
+      "authors": "Nges Brian Njungle, Eric Jahns, Michel A. Kinsy",
+      "date": "2026-04-18",
+      "pdf": "https://arxiv.org/pdf/2604.16834v1",
+      "score": "6.0",
+      "evidence": "使用加密技术的隐私保护神经网络推理",
+      "tldr": "针对隐私保护机器学习中同态加密（HE）推理在批量处理和高吞吐量场景下的不足，本文提出了一套优化的批处理算法和流水线架构。通过改进HE友好的神经网络计算流程，显著降低了内存消耗并提升了推理速度。在ResNet-20和ResNet-34模型上的实验表明，该方法在保持高吞吐量的同时，大幅减少了峰值内存使用，为深度加密训练和高效推理奠定了基础。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Privacy-preserving machine learning (PPML) has become increasingly important in applications where sensitive data must remain confidential. Homomorphic Encryption (HE) enables computation directly on encrypted data, allowing neural network inference without revealing raw inputs. While prior works have largely focused on inference over a single encrypted image, batch processing of encrypted inputs lags behind, despite being critical for high-throughput inference scenarios and training-oriented workloads.   In this work, we address this gap by developing optimized algorithms for batched HE-friendly neural networks. We also introduced a pipeline architecture designed to maximize resource efficiency for different batch size execution. We implemented these algorithms and evaluated our work using HE-friendly ResNet-20 and ResNet-34 models on encrypted CIFAR-10 and CIFAR-100 datasets, respectively.   For ResNet-20, our approach achieves an amortized inference time of 8.86 seconds per image when processing a batch of 512 encrypted images, with a peak memory usage of 98.96 GB. These results represent a 1.78x runtime improvement and a 3.74x reduction in memory usage compared to the state-of-the-art design. For the deeper ResNet-34 model, we achieve an amortized inference time of 28.14 on a batch of 256 encrypted images using 246.78GB of RAM",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/21/2604.17816v1-privacy-preserving-product-quantized-approximate-nearest-neighbor-search-framework-for-large-scale-datasets-via-a-hybrid-of-fully-homomorphic-encryption-and-trusted-execution-environment",
+      "section": "quick",
+      "title_en": "Privacy-Preserving Product-Quantized Approximate Nearest Neighbor Search Framework for Large-scale Datasets via A Hybrid of Fully Homomorphic Encryption and Trusted Execution Environment",
+      "authors": "Shozo Saeki, Minoru Kawahara, Hirohisa Aman",
+      "date": "2026-04-20",
+      "pdf": "https://arxiv.org/pdf/2604.17816v1",
+      "score": "6.0",
+      "evidence": "使用FHE和TEE的大模型隐私保护近邻搜索",
+      "tldr": "针对大模型向量检索中的隐私泄露风险，本文提出PPPQ-ANN框架。该框架结合全同态加密（FHE）与可信执行环境（TEE），通过乘积量化（PQ）和优化的数据打包技术，在保障隐私的同时显著提升了百万级数据集下的数据库生成与检索效率，实现了安全与性能的平衡。",
+      "tags": "query:fss-llm",
+      "abstract_en": "A nearest-neighbor framework is a fundamental tool for various applications involving Large Language Models (LLMs) and Visual Language Models (VLMs). Vectors used for nearest-neighbor searches have richer information for similarity searches. This information leads to security risks, such as embedding inversion and membership attacks. Therefore, Privacy-Preserving Approximate Nearest-Neighbor (PP-ANN) approaches are necessary for highly confidential data. However, conventional PP-ANN approaches based on a Trusted Execution Environment (TEE) or Fully Homomorphic Encryption (FHE) do not achieve practical security or performance. Additionally, conventional approaches focus on the search process rather than database generation for nearest-neighbor. To address these issues, we propose a Privacy-Preserving Product-Quantization Approximate Nearest Neighbor (PPPQ-ANN) framework. PPPQ-ANN provides a multi-layered security structure for vectors based on a hybrid of FHE and TEE. Additionally, PPPQ-ANN minimizes FHE ciphertext computations by combining Product-Quantization (PQ) with optimized data packing. We demonstrate the performance of PPPQ-ANN on million-scale datasets. As a result, PPPQ-ANN achieves database generation in less than 2 hours and more than 50 QPS in a sequential search while preserving privacy. Therefore, PPPQ-ANN optimizes the trade-off between security and performance by utilizing a hybrid of FHE and TEE, achieving practical performance while preserving privacy.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
