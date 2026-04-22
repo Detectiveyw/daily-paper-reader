@@ -1,0 +1,23 @@
+{
+  "label": "2026-04-22",
+  "date": "2026-04-22",
+  "generated_at": "2026-04-22T20:26:01",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202604/22/2604.17808v1-enabling-ai-asics-for-zero-knowledge-proof",
+      "section": "quick",
+      "title_en": "Enabling AI ASICs for Zero Knowledge Proof",
+      "authors": "Jianming Tong, Jingtian Dang, Simon Langowski, Tianhao Huang, Asra Ali, Jeremy Kun, Jevin Jiang, Srinivas Devadas, Tushar Krishna",
+      "date": "2026-04-20",
+      "pdf": "https://arxiv.org/pdf/2604.17808v1",
+      "score": "6.0",
+      "evidence": "零知识证明与可验证计算的硬件加速",
+      "tldr": "针对零知识证明（ZKP）中MSM和NTT计算开销巨大的问题，本文提出了MORPH框架，首次将ZKP算子重构以适配AI ASIC（如TPU）的矩阵计算特性。通过引入硬件感知的Big-T复杂度模型，MORPH在算术层利用扩展RNS延迟归约将高精度模运算转化为密集低精度GEMM，在数据流层优化了布局驻留的Pippenger MSM和NTT，显著降低了内存重组开销。实验表明，MORPH在TPU上实现了远超现有方案的性能。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Zero-knowledge proof (ZKP) provers remain costly because multi-scalar multiplication (MSM) and number-theoretic transforms (NTTs) dominate runtime as they need significant computation. AI ASICs such as TPUs provide massive matrix throughput and SotA energy efficiency. We present MORPH, the first framework that reformulates ZKP kernels to match AI-ASIC execution. We introduce Big-T complexity, a hardware-aware complexity model that exposes heterogeneous bottlenecks and layout-transformation costs ignored by Big-O. Guided by this analysis, (1) at arithmetic level, MORPH develops an MXU-centric extended-RNS lazy reduction that converts high-precision modular arithmetic into dense low-precision GEMMs, eliminating all carry chains, and (2) at dataflow level, MORPH constructs a unified-sharding layout-stationary TPU Pippenger MSM and optimized 3/5-step NTT that avoid on-TPU shuffles to minimize costly memory reorganization. Implemented in JAX, MORPH enables TPUv6e8 to achieve up-to 10x higher throughput on NTT and comparable throughput on MSM than GZKP. Our code: https://github.com/EfficientPPML/MORPH.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

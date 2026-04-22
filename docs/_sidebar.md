@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-04-22 <!--dpr-date:20260422-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/22/2604.17808v1-enabling-ai-asics-for-zero-knowledge-proof" data-sidebar-item="{&quot;title&quot;: &quot;Enabling AI ASICs for Zero Knowledge Proof&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.17808v1-enabling-ai-asics-for-zero-knowledge-proof&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;零知识证明与可验证计算的硬件加速&quot;}">Enabling AI ASICs for Zero Knowledge Proof</a>
   * 2026-04-21 <!--dpr-date:20260421-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202604/21/2604.17238v1-breaking-euston-recovering-private-inputs-from-secure-inference-by-exploiting-subspace-leakage" data-sidebar-item="{&quot;title&quot;: &quot;Breaking Euston: Recovering Private Inputs from Secure Inference by Exploiting Subspace Leakage&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2604.17238v1-breaking-euston-recovering-private-inputs-from-secure-inference-by-exploiting-subspace-leakage&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;安全Transformer推理框架中的隐私风险分析&quot;}">Breaking Euston: Recovering Private Inputs from Secure Inference by Exploiting Subspace Leakage</a>
