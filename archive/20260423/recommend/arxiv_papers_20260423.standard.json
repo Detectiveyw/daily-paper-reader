@@ -1,0 +1,94 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-23T20:35:31.955932+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2604.19890v1",
+      "title": "Efficient Arithmetic-and-Comparison Homomorphic Encryption with Space Switching",
+      "abstract": "Fully homomorphic encryption (FHE) enables computation on encrypted data without decryption, making it central to privacy-preserving applications. However, no existing scheme efficiently supports both arithmetic and comparison operations in a unified framework. Prior approaches such as scheme switching and polynomial approximation face serious limitations: switching incurs prohibitive overhead for large inputs, while approximation methods introduce errors near critical points, restricting use in accuracy-sensitive tasks. We propose space switching method to integrate arithmetic and comparison computation seamlessly within FV-style schemes. Our approach identifies that the two types of operations require different plaintext spaces and introduces two procedures: a reduction step to transition from the number space $\\mathbb{Z}_{p^r}$ to the digit space $\\mathbb{Z}_{p}$, and a modulus-raising step to map results back to $\\mathbb{Z}_{p^r}$. This design enables continuous evaluation of arithmetic and comparison within the same scheme. Experiments show that our method achieves up to $17\\times$ faster performance than scheme switching and $15\\times$ faster than direct comparison on database workloads, demonstrating its practicality for real-world privacy-preserving computation. Code and artifacts are available at https://github.com/UCF-Lou-Lab-PET/Universal-BGV.",
+      "authors": [
+        "Erwin Eko Wahyudi",
+        "Yan Solihin",
+        "Qian Lou"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-21T18:12:37+00:00",
+      "link": "https://arxiv.org/pdf/2604.19890v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Efficient arithmetic and comparison operations in homomorphic encryption",
+      "llm_evidence_cn": "同态加密中高效的算术和比较运算",
+      "llm_evidence": "同态加密中高效的算术和比较运算",
+      "canonical_evidence": "同态加密中高效的算术和比较运算",
+      "llm_tldr_en": "Proposes space switching to unify arithmetic and comparison operations in homomorphic encryption schemes.",
+      "llm_tldr_cn": "提出空间切换方法，统一同态加密方案中的算术和比较运算。",
+      "llm_tldr": "提出空间切换方法，统一同态加密方案中的算术和比较运算。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Distributed Comparison Function",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.17701v1",
+      "title": "WISV: Wireless-Informed Semantic Verification for Distributed Speculative Decoding in Device-Edge LLM Inference",
+      "abstract": "While distributed device-edge speculative decoding enhances resource utilization across heterogeneous nodes, its performance is often bottlenecked by conventional token-level verification strategies. Such rigid alignment leads to excessive rejections, significantly diminishing the accepted sequence length and increasing interaction rounds under fluctuating wireless conditions. In this paper, we propose WISV (Wireless-Informed Semantic Verification), a novel distributed speculative decoding framework that goes beyond strict token-level matching via a channel-aware semantic acceptance policy. WISV integrates a lightweight decision head into the edge-side target LLM to dynamically evaluate speculative tokens by synthesizing high-dimensional hidden representations with instantaneous channel state information (CSI). To optimize the trade-off between verification fidelity and communication overhead, we further design two tailored communication protocols: full-hidden upload and mismatch-first selective-hidden upload. Extensive simulations using a 1B drafter and an 8B target model demonstrate that WISV achieves up to a 60.8% increase in accepted length, a 37.3% reduction in interaction rounds, and a 31.4% improvement in end-to-end latency compared to vanilla speculative decoding across tested settings, while maintaining a negligible task accuracy drop (<1%). Finally, we validate WISV on a hardware testbed comprising an NVIDIA Jetson AGX Orin and an A40-equipped server, confirming its real-world efficacy in accelerating edge-deployed LLM inference.",
+      "authors": [
+        "Zixuan Liu",
+        "Zhiyong Chen",
+        "Nan Xue",
+        "Shengkang Chen",
+        "Jiangchao Yao",
+        "Meixia Tao",
+        "Wenjun Zhang"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT",
+        "cs.AI"
+      ],
+      "published": "2026-04-20T01:29:56+00:00",
+      "link": "https://arxiv.org/pdf/2604.17701v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Distributed speculative decoding for device-edge LLM inference",
+      "llm_evidence_cn": "用于设备-边缘大模型推理的分布式投机解码",
+      "llm_evidence": "用于设备-边缘大模型推理的分布式投机解码",
+      "canonical_evidence": "用于设备-边缘大模型推理的分布式投机解码",
+      "llm_tldr_en": "Introduces a semantic verification policy to improve distributed speculative decoding for LLM inference.",
+      "llm_tldr_cn": "引入语义验证策略，改进大模型推理的分布式投机解码性能。",
+      "llm_tldr": "引入语义验证策略，改进大模型推理的分布式投机解码性能。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
