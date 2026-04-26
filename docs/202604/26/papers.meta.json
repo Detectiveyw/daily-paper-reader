@@ -1,0 +1,37 @@
+{
+  "label": "2026-04-26",
+  "date": "2026-04-26",
+  "generated_at": "2026-04-26T19:37:30",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202604/26/2604.19053v1-chronos-a-hardware-assisted-phase-decoupled-framework-for-secure-federated-learning-in-iot",
+      "section": "quick",
+      "title_en": "CHRONOS: A Hardware-Assisted Phase-Decoupled Framework for Secure Federated Learning in IoT",
+      "authors": "Hung Dang",
+      "date": "2026-04-21",
+      "pdf": "https://arxiv.org/pdf/2604.19053v1",
+      "score": "6.0",
+      "evidence": "硬件辅助的基于秘密共享的安全联邦学习",
+      "tldr": "CHRONOS是一个针对物联网环境设计的硬件辅助联邦学习安全框架。它通过ARM TrustZone将复杂的加密设置与模型训练阶段解耦，在设备空闲时预先生成密钥并利用Shamir秘密共享处理掉线问题。该框架实现了单轮通信梯度聚合，在保证OS级抗攻击能力的同时，显著降低了训练延迟，为资源受限的IoT设备提供了高效且安全的隐私保护方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We propose CHRONOS, a hardware-assisted framework that decouples the cryptographic setup required for private gradient aggregation from the active training phase. CHRONOS executes a once-per-epoch server-relayed Diffie-Hellman key exchange during a device's idle window. It generates ephemeral keypairs and derives PRG keys entirely within an ARM TrustZone enclave, ensuring private keys never exist in Normal World memory. Pairwise secrets are sealed in the enclave, and Shamir secret shares of the ephemeral private key are distributed to peers. During training, clients mask gradients with a single stream-cipher evaluation and transmit them in one communication round. A hardware-backed round counter enforces single-use freshness. If clients drop out mid-round, the server reconstructs their masks from peer-held Shamir shares, preserving correct aggregation without repeating the round.   Evaluation on Rock Pi 4 devices using OP-TEE demonstrates that CHRONOS achieves OS-level compromise resistance and thwarts state-of-the-art gradient inversion attacks. It reduces active-phase aggregation latency by up to 74% compared to synchronous secure aggregation for 20 clients. The system maintains a persistent Secure World storage footprint of fewer than 700 bytes per device, scaling independently of model dimension.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/26/2604.21072v1-distributed-generative-inference-of-llm-at-internet-scales-with-multi-dimensional-communication-optimization",
+      "section": "quick",
+      "title_en": "Distributed Generative Inference of LLM at Internet Scales with Multi-Dimensional Communication Optimization",
+      "authors": "Jiu Chen, Shuangyan Yang, Xu Xiong, Hexiao Duan, Xinran Zhang, Jie Ren, Dong Li",
+      "date": "2026-04-22",
+      "pdf": "https://arxiv.org/pdf/2604.21072v1",
+      "score": "6.0",
+      "evidence": "大模型的分布式生成式推理",
+      "tldr": "针对互联网规模下异构节点去中心化大模型推理面临的低带宽瓶颈，本文提出BloomBee框架。该框架通过多维度通信优化，整合了层分配、微批处理和张量卸载，并利用动态规划求解最优配置。此外，结合无损压缩和投机解码技术，显著提升了推理性能。实验表明，BloomBee在吞吐量和延迟方面均优于现有最先进系统，且已开源。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Decentralized LLM inference distributes computation among heterogeneous nodes across the internet, offering a performant and cost-efficient solution, alternative to traditional centralized inference. However, the low cross-node network bandwidth makes communication the primary bottleneck. In this paper, we introduce BloomBee, an internet-scale distributed LLM inference framework. BloomBee integrates LLM-layer assignment, micro-batching and tensor offloading to optimize communication from multiple dimensions. Additionally, BloomBee formulates the coordination of these techniques as an optimization problem and solves it using dynamic programming. BloomBee also customizes lossless compression and speculative decoding according to low-bandwidth network settings to reduce communication overhead. We evaluate BloomBee across a spectrum of network environments and show that it improves service throughput by up to 1.76x. It also reduces average latency by up to 43.20% compared to state-of-the-art decentralized LLM inference systems. BloomBee is open-sourced.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

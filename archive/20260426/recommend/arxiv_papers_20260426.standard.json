@@ -1,0 +1,92 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-26T19:37:07.596303+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2604.19053v1",
+      "title": "CHRONOS: A Hardware-Assisted Phase-Decoupled Framework for Secure Federated Learning in IoT",
+      "abstract": "We propose CHRONOS, a hardware-assisted framework that decouples the cryptographic setup required for private gradient aggregation from the active training phase. CHRONOS executes a once-per-epoch server-relayed Diffie-Hellman key exchange during a device's idle window. It generates ephemeral keypairs and derives PRG keys entirely within an ARM TrustZone enclave, ensuring private keys never exist in Normal World memory. Pairwise secrets are sealed in the enclave, and Shamir secret shares of the ephemeral private key are distributed to peers. During training, clients mask gradients with a single stream-cipher evaluation and transmit them in one communication round. A hardware-backed round counter enforces single-use freshness. If clients drop out mid-round, the server reconstructs their masks from peer-held Shamir shares, preserving correct aggregation without repeating the round.   Evaluation on Rock Pi 4 devices using OP-TEE demonstrates that CHRONOS achieves OS-level compromise resistance and thwarts state-of-the-art gradient inversion attacks. It reduces active-phase aggregation latency by up to 74% compared to synchronous secure aggregation for 20 clients. The system maintains a persistent Secure World storage footprint of fewer than 700 bytes per device, scaling independently of model dimension.",
+      "authors": [
+        "Hung Dang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.DC"
+      ],
+      "published": "2026-04-21T04:00:49+00:00",
+      "link": "https://arxiv.org/pdf/2604.19053v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Hardware-assisted secure federated learning with secret sharing",
+      "llm_evidence_cn": "硬件辅助的基于秘密共享的安全联邦学习",
+      "llm_evidence": "硬件辅助的基于秘密共享的安全联邦学习",
+      "canonical_evidence": "硬件辅助的基于秘密共享的安全联邦学习",
+      "llm_tldr_en": "Uses TEEs and Shamir secret sharing to secure gradient aggregation in federated learning for IoT.",
+      "llm_tldr_cn": "利用可信执行环境和秘密共享技术，保障物联网联邦学习中的梯度聚合安全。",
+      "llm_tldr": "利用可信执行环境和秘密共享技术，保障物联网联邦学习中的梯度聚合安全。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.21072v1",
+      "title": "Distributed Generative Inference of LLM at Internet Scales with Multi-Dimensional Communication Optimization",
+      "abstract": "Decentralized LLM inference distributes computation among heterogeneous nodes across the internet, offering a performant and cost-efficient solution, alternative to traditional centralized inference. However, the low cross-node network bandwidth makes communication the primary bottleneck. In this paper, we introduce BloomBee, an internet-scale distributed LLM inference framework. BloomBee integrates LLM-layer assignment, micro-batching and tensor offloading to optimize communication from multiple dimensions. Additionally, BloomBee formulates the coordination of these techniques as an optimization problem and solves it using dynamic programming. BloomBee also customizes lossless compression and speculative decoding according to low-bandwidth network settings to reduce communication overhead. We evaluate BloomBee across a spectrum of network environments and show that it improves service throughput by up to 1.76x. It also reduces average latency by up to 43.20% compared to state-of-the-art decentralized LLM inference systems. BloomBee is open-sourced.",
+      "authors": [
+        "Jiu Chen",
+        "Shuangyan Yang",
+        "Xu Xiong",
+        "Hexiao Duan",
+        "Xinran Zhang",
+        "Jie Ren",
+        "Dong Li"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-04-22T20:36:47+00:00",
+      "link": "https://arxiv.org/pdf/2604.21072v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "distributed generative inference of LLM",
+      "llm_evidence_cn": "大模型的分布式生成式推理",
+      "llm_evidence": "大模型的分布式生成式推理",
+      "canonical_evidence": "大模型的分布式生成式推理",
+      "llm_tldr_en": "Optimizes communication for internet-scale decentralized LLM inference using dynamic programming.",
+      "llm_tldr_cn": "通过动态规划优化互联网规模下去中心化大模型推理的通信效率。",
+      "llm_tldr": "通过动态规划优化互联网规模下去中心化大模型推理的通信效率。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
