@@ -1,0 +1,37 @@
+{
+  "label": "2026-04-27",
+  "date": "2026-04-27",
+  "generated_at": "2026-04-27T19:59:52",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202604/27/2604.19422v1-secure-storage-and-privacy-preserving-scanpath-comparison-via-garbled-circuits-in-eye-tracking",
+      "section": "quick",
+      "title_en": "Secure Storage and Privacy-Preserving Scanpath Comparison via Garbled Circuits in Eye Tracking",
+      "authors": "Suleyman Ozdel, Amr Nader, Yasmeen Abdrabou, Enkelejda Kasneci",
+      "date": "2026-04-21",
+      "pdf": "https://arxiv.org/pdf/2604.19422v1",
+      "score": "6.0",
+      "evidence": "通过混淆电路进行隐私保护比较",
+      "tldr": "随着VR和移动平台眼动追踪技术的普及，注视数据的隐私保护变得至关重要。本文提出一种基于混淆电路（GC）的隐私保护方案，支持在半诚实模型下进行安全的扫描路径存储与比对。该方案涵盖两方计算和服务器辅助两种模式，实现了MultiMatch等主流算法的加密计算。实验证明，该方法在保持高保真度的同时，计算和通信开销在实际应用中是可接受的。",
+      "tags": "query:fss-llm",
+      "abstract_en": "With the growing use of eye tracking on VR and mobile platforms, gaze data is increasing. While scanpath comparison is important to gaze behavior analysis, existing methods lack privacy-preserving capabilities for real-world use. We present a garbled-circuit (GC)-based approach enabling secure storage and privacy-preserving scanpath comparison under the semi-honest model. It supports two configurations: (1) a two-party setting where the data owner and processor jointly compute similarity scores without revealing their inputs, and (2) a server-assisted setting where encrypted scanpaths are stored and processed while the data owner remains offline. All decryption and comparison operations are executed inside the GC. Experiments on three eye-tracking datasets evaluate fidelity, runtime, and communication, and show secure results for MultiMatch, ScanMatch, and SubsMatch closely match plaintext outcomes, with manageable runtime and communication overhead. Tests under various network conditions indicate that the design remains feasible for real-world privacy-preserving scanpath analysis and can be extended to other GC-based behavioral algorithms.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/27/2604.22505v1-information-theoretic-authenticated-pir-from-pir-rv-to-apir",
+      "section": "quick",
+      "title_en": "Information-Theoretic Authenticated PIR: From PIR-RV To APIR",
+      "authors": "Pengzhen Ke, Yuxuan Qin, Liang Feng Zhang",
+      "date": "2026-04-24",
+      "pdf": "https://arxiv.org/pdf/2604.22505v1",
+      "score": "6.0",
+      "evidence": "针对恶意服务器的信息论结果验证与完整性保护",
+      "tldr": "本研究针对恶意服务器环境下私有信息检索（PIR）的安全性问题，提出了无条件安全的信息论认证PIR（itAPIR）框架。通过定义具备统计隐私和抗选择性失败攻击能力的安全性标准，并形式化itAPIR与结果验证PIR（itPIR-RV）之间的层级关系，证明了itPIR-RV可无损升级为itAPIR。该成果填补了理论空白，简化了协议设计，为抗量子攻击的恶意服务器PIR提供了重要支撑。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Private Information Retrieval (PIR) allows clients to retrieve database entries without leaking retrieval indices, yet malicious servers seriously compromise retrieval correctness. Existing Authenticated PIR (APIR) schemes resist selective-failure attacks but rely on computational hardness assumptions. In contrast, information-theoretic PIR with Result Verification (itPIR-RV) achieves integrity without computational assumptions, yet only provides relaxed query privacy with no defense against selective-failure attacks. This paper focuses on unconditionally secure information-theoretic APIR (itAPIR) constructions. We propose the rigorous information-theoretic security definition for itAPIR with statistical privacy against selective-failure attacks and integrity as core properties, formalize the hierarchical relation between itAPIR and itPIR-RV as a relaxed variant with identical integrity but basic query privacy, and prove a conversion theorem that valid itPIR-RV schemes can be directly upgraded to secure itAPIR with no extra overhead. Our work bridges the theoretical gap, simplifies itAPIR design, and enables quantum-resistant PIR in malicious server environments.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
