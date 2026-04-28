@@ -1,0 +1,322 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-28T21:01:42.796791+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 7,
+    "quick_skim_target": 11,
+    "quick_selected": 7
+  },
+  "deep_dive": [
+    {
+      "id": "2604.24385v1",
+      "title": "Information-Theoretic Distributed Point Functions with Shorter Keys",
+      "abstract": "A t-private n-server Information-Theoretic Distributed Point Function ((t,n)-ITDPF) allows one to convert any point function f_{alpha,beta}(x): [N] -> G into n shares (secret keys), such that each server can compute an additive share of f_{alpha,beta}(x) with a key while any <= t servers learn absolutely no information about the function. This paper constructs a novel share conversion based on the private information retrieval (PIR) of Ghasemi, Kopparty, and Sudan (STOC 2025) and proposes a perfectly secure 1-private ITDPF with output group G = Z_p, where p can be any prime. Compared with the existing perfectly secure ITDPFs for the same output group, the proposed ITDPF is more efficient with asymptotically shorter secret keys.",
+      "authors": [
+        "Hang Deng",
+        "Liang Feng Zhang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-27T12:17:05+00:00",
+      "link": "https://arxiv.org/pdf/2604.24385v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Information-Theoretic Distributed Point Functions with shorter keys",
+      "llm_evidence_cn": "具有更短密钥的信息论分布式点函数",
+      "llm_evidence": "具有更短密钥的信息论分布式点函数",
+      "canonical_evidence": "具有更短密钥的信息论分布式点函数",
+      "llm_tldr_en": "Constructs efficient ITDPFs with shorter secret keys using a novel share conversion based on PIR.",
+      "llm_tldr_cn": "利用基于PIR的新型份额转换，构建了具有更短密钥的高效信息论分布式点函数。",
+      "llm_tldr": "利用基于PIR的新型份额转换，构建了具有更短密钥的高效信息论分布式点函数。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Distributed Point Functions (DPF) in FSS",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.22935v1",
+      "title": "Secure eFPGA-Enabled Edge LLM Inference: Architectural and Hardware Countermeasures",
+      "abstract": "Edge deployment of transformer-based models increasingly relies on ASIC accelerators due to their high performance and energy efficiency, achieved through optimized dataflows, specialized architectures, low-bitwidth computation, and efficient memory hierarchies. However, these advantages come with significant security vulnerabilities. ASIC-based DNN accelerators are susceptible to side-channel attacks (e.g., power, electromagnetic, and timing analysis) and fault injection attacks (e.g., voltage manipulation, clock glitches, and memory perturbations), which can lead to model extraction or compromised inference integrity. Furthermore, threats introduced during design and fabrication, such as hardware Trojans or untrusted third-party IPs, further expand the attack surface. To address these challenges, we explore a hybrid ASIC+eFPGA architecture that combines the efficiency of ASICs with the flexibility of reconfigurable logic. The integrated eFPGA enables security-oriented mechanisms such as adaptive runtime monitoring, side-channel mitigation and post-deployment patching. By leveraging these capabilities, the proposed approach enhances system resilience against both runtime and supply-chain attacks, while preserving the performance benefits of ASIC-based transformer inference.",
+      "authors": [
+        "Voktho Das",
+        "M Zafir Sadik Khan",
+        "Jafar Vafaei",
+        "Kimia Azar",
+        "Hadi Kamali"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-24T18:13:32+00:00",
+      "link": "https://arxiv.org/pdf/2604.22935v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "secure edge LLM inference and hardware countermeasures",
+      "llm_evidence_cn": "安全边缘LLM推理与硬件对策",
+      "llm_evidence": "安全边缘LLM推理与硬件对策",
+      "canonical_evidence": "安全边缘LLM推理与硬件对策",
+      "llm_tldr_en": "Explores hardware-level security for edge LLM inference against side-channel and fault injection attacks.",
+      "llm_tldr_cn": "探讨边缘LLM推理的硬件级安全性，防御侧信道和故障注入攻击。",
+      "llm_tldr": "探讨边缘LLM推理的硬件级安全性，防御侧信道和故障注入攻击。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.18231v1",
+      "title": "AgenTEE: Confidential LLM Agent Execution on Edge Devices",
+      "abstract": "Large Language Model (LLM) agents provide powerful automation capabilities, but they also create a substantially broader attack surface than traditional applications due to their tight integration with non-deterministic models and third-party services. While current deployments primarily rely on cloud-hosted services, emerging designs increasingly execute agents directly on edge devices to reduce latency and enhance user privacy. However, securely hosting such complex agent pipelines on edge devices remains challenging. These deployments must protect proprietary assets (e.g., system prompts and model weights) and sensitive runtime state on heterogeneous platforms that are vulnerable to software attacks and potentially controlled by malicious users.   To address these challenges, we present AgenTEE, a system for deploying confidential agent pipelines on edge devices. AgenTEE places the agent runtime, inference engine, and third-party applications into independently attested confidential virtual machines (cVMs) and mediates their interaction through explicit, verifiable communication channels. Built on Arm Confidential Compute Architecture (CCA), a recent extension to Arm platforms, AgenTEE enforces strong system-level isolation of sensitive assets and runtime state. Our evaluation shows that such multi-cVMs system is practical, achieving near-native performance with less than 5.15% runtime overhead compared to commodity OS multi-process deployments.",
+      "authors": [
+        "Sina Abdollahi",
+        "Mohammad M Maheri",
+        "Javad Forough",
+        "Amir Al Sadi",
+        "Josh Millar",
+        "David Kotz",
+        "Marios Kogias",
+        "Hamed Haddadi"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.OS"
+      ],
+      "published": "2026-04-20T13:13:31+00:00",
+      "link": "https://arxiv.org/pdf/2604.18231v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Confidential LLM execution and private inference on edge devices",
+      "llm_evidence_cn": "边缘设备上的机密大模型执行与隐私推理",
+      "llm_evidence": "边缘设备上的机密大模型执行与隐私推理",
+      "canonical_evidence": "边缘设备上的机密大模型执行与隐私推理",
+      "llm_tldr_en": "Secures LLM agent execution on edge devices using TEEs to protect model weights and state.",
+      "llm_tldr_cn": "利用可信执行环境保护边缘设备上的大模型智能体执行，防止权重和状态泄露。",
+      "llm_tldr": "利用可信执行环境保护边缘设备上的大模型智能体执行，防止权重和状态泄露。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.19015v1",
+      "title": "FedProxy: Federated Fine-Tuning of LLMs via Proxy SLMs and Heterogeneity-Aware Fusion",
+      "abstract": "Federated fine-tuning of Large Language Models (LLMs) is obstructed by a trilemma of challenges: protecting LLMs intellectual property (IP), ensuring client privacy, and mitigating performance loss on heterogeneous data. Existing methods like Offsite-Tuning (OT) secure the LLMs IP by having clients train only lightweight adapters, yet our analysis reveals they suffer from a fundamental performance bottleneck, leaving a significant gap compared to centralized training. To bridge this gap, we introduce FedProxy, a new federated adaptation framework. FedProxy replaces weak adapters with a unified, powerful Proxy Small Language Model (SLM), compressed from the proprietary LLM, to serve as a high-fidelity surrogate for collaborative fine-tuning. Our framework systematically resolves the trilemma through a three-stage architecture: (i) Efficient Representation via server-guided compression to create a resource-friendly proxy; (ii) Robust Optimization through an interference-mitigating aggregation strategy to handle data heterogeneity; and (iii) Effortless Fusion via a training-free \"plug-in\" mechanism to integrate learned knowledge back into the LLM. Experiments show FedProxy significantly outperforms OT methods and approaches centralized performance, establishing a new benchmark for secure and high-performance federated LLM adaptation.",
+      "authors": [
+        "Tao Fan",
+        "Guoqiang Ma",
+        "Yuanfeng Song",
+        "Lixin Fan",
+        "Kai Chen",
+        "Qiang Yang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-04-21T03:06:24+00:00",
+      "link": "https://arxiv.org/pdf/2604.19015v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "federated fine-tuning of LLMs with privacy and IP protection",
+      "llm_evidence_cn": "具有隐私和IP保护的LLM联邦微调",
+      "llm_evidence": "具有隐私和IP保护的LLM联邦微调",
+      "canonical_evidence": "具有隐私和IP保护的LLM联邦微调",
+      "llm_tldr_en": "Introduces FedProxy for secure federated fine-tuning of LLMs using proxy models to protect IP and privacy.",
+      "llm_tldr_cn": "引入FedProxy，通过代理模型实现LLM的安全联邦微调，保护IP和隐私。",
+      "llm_tldr": "引入FedProxy，通过代理模型实现LLM的安全联邦微调，保护IP和隐私。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.20793v2",
+      "title": "Fresh Masking Makes NTT Pipelines Composable: Machine-Checked Proofs for Arithmetic Masking in PQC Hardware",
+      "abstract": "Post-quantum cryptographic (PQC) accelerators for ML-KEM (FIPS 203) and ML-DSA (FIPS 204) rely on pipelined Number Theoretic Transform (NTT) stages over $\\mathbb{Z}_q$. Our prior work established structural dependency analysis at scale [1] and quantified the security margin of partial NTT masking [2]. Whether per-stage arithmetic masking guarantees pipeline-level security had no prior machine-checked answer for the r-bearing case: composition frameworks (ISW, t-SNI, PINI, DOM) were formalized exclusively for Boolean masking over $\\mathrm{GF}(2)$; no proof assistant artifact addresses the NTT butterfly over $\\mathbb{Z}_q$. We present three machine-checked results in Lean 4 with Mathlib, all zero sorry. First, we close a stated limitation of prior work: value-independence implies constant marginal distribution under fresh randomness (via an algebraic MutualInfoZero proxy). Second, butterfly per-context uniformity: for any Cooley-Tukey butterfly with fresh output mask over $\\mathbb{Z}/q\\mathbb{Z}$ ($q > 0$), each output wire has exactly one mask value producing each output, a uniform marginal independent of secrets, universal over all moduli, twiddle factors, and inputs. Third, a k-stage NTT pipeline with fresh per-stage masking satisfies per-context uniformity at every stage under the ISW first-order probing model. We document a named warning: pointwise value-independence is false for butterfly outputs. The Adams Bridge accelerator (CHIPS Alliance Caliptra) fails the fresh masking hypothesis, masking active only in INTT round 0, architecturally explaining its structural insecurity. Artifact: nine theorems, 1,738 build jobs, zero sorry. Composition for nonlinear gadgets (Barrett) is addressed in forthcoming manuscripts proving Barrett's PF-PINI(2) satisfaction (one-bit barrier) [3] and k-stage composition for PF-PINI gadgets under fresh-mask renewal [4].",
+      "authors": [
+        "Ray Iskander",
+        "Khaled Kirah"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-22T17:19:22+00:00",
+      "link": "https://arxiv.org/pdf/2604.20793v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Arithmetic masking and machine-checked proofs for cryptographic hardware",
+      "llm_evidence_cn": "密码硬件的算术掩码和机器验证证明",
+      "llm_evidence": "密码硬件的算术掩码和机器验证证明",
+      "canonical_evidence": "密码硬件的算术掩码和机器验证证明",
+      "llm_tldr_en": "Provides machine-checked proofs for arithmetic masking in PQC hardware, relevant to verifiable security.",
+      "llm_tldr_cn": "为后量子密码硬件中的算术掩码提供机器验证证明，与可验证安全性相关。",
+      "llm_tldr": "为后量子密码硬件中的算术掩码提供机器验证证明，与可验证安全性相关。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing supporting floating point operations and verifiable security",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.23245v1",
+      "title": "Training Machine Learning Models on Encrypted Data: A Privacy-Preserving Framework using Homomorphic Encryption",
+      "abstract": "The use of Machine Learning (ML) for data-driven decision-making often relies on access to sensitive datasets, which introduces privacy challenges. Traditional encryption methods protect data at rest or in transit but fail to secure it during processing, exposing it to unauthorized access. Homomorphic encryption emerges as a transformative solution, enabling computations on encrypted data without decryption, thus preserving confidentiality throughout the ML pipeline. This paper addresses the challenge of training ML models on encrypted data while maintaining accuracy and efficiency by proposing a proof-of-concept for a privacy-preserving framework that leverages Cheon-Kim-Kim-Song (CKKS) for approximate real-number arithmetic. Also, it demonstrates the feasibility of training K-Nearest Neighbors (KNN) and linear regression models on encrypted data, and evaluates encrypted inference for a basic Multilayer Perceptron (MLP) architecture. Experimental results show that models trained under Homomorphic encryption achieve performance metrics comparable to plaintext-trained models, validating the approach. However, challenges such as computational overhead, noise management, and limited support for non-polynomial operations persist. This work lays the groundwork for broader adoption of privacy-preserving ML in real-world applications, balancing security with computational feasibility.",
+      "authors": [
+        "Alexandre Marques",
+        "Beatriz Sá",
+        "Rui Botelho",
+        "Pedro Pinto"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-04-25T10:50:41+00:00",
+      "link": "https://arxiv.org/pdf/2604.23245v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy-preserving ML using homomorphic encryption for real-number computation",
+      "llm_evidence_cn": "使用同态加密进行实数运算的隐私保护机器学习",
+      "llm_evidence": "使用同态加密进行实数运算的隐私保护机器学习",
+      "canonical_evidence": "使用同态加密进行实数运算的隐私保护机器学习",
+      "llm_tldr_en": "Proposes a framework using CKKS homomorphic encryption for secure machine learning on encrypted real-number data.",
+      "llm_tldr_cn": "提出一个利用CKKS同态加密在加密实数数据上进行安全机器学习的框架。",
+      "llm_tldr": "提出一个利用CKKS同态加密在加密实数数据上进行安全机器学习的框架。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.23413v1",
+      "title": "Beyond Local vs. External: A Game-Theoretic Framework for Trustworthy Knowledge Acquisition",
+      "abstract": "Cloud-hosted Large Language Models (LLMs) offer unmatched reasoning capabilities and dynamic knowledge, yet submitting raw queries to these external services risks exposing sensitive user intent. Conversely, relying exclusively on trusted local models preserves privacy but often compromises answer quality due to limited parameter scale and knowledge. To resolve this dilemma, we propose Game-theoretic Trustworthy Knowledge Acquisition (GTKA), a framework that formulates the trade-off between knowledge utility and privacy as a strategic game. GTKA consists of three components: (i) a privacy-aware sub-query generator that decomposes sensitive intent into generalized, low-risk fragments; (ii) an adversarial reconstruction attacker that attempts to infer the original query from these fragments, providing adaptive leakage signals; and (iii) a trusted local integrator that synthesizes external responses within a secure boundary. By training the generator and attacker in an alternating adversarial manner, GTKA optimizes the sub-query generation policy to maximize knowledge acquisition accuracy while minimizing the reconstructability of the original sensitive intent. To validate our approach, we construct two sensitive-domain benchmarks in the biomedical and legal fields. Extensive experiments demonstrate that GTKA significantly reduces intent leakage compared to state-of-the-art baselines while maintaining high-fidelity answer quality.",
+      "authors": [
+        "Rujing Yao",
+        "Yufei Shi",
+        "Yang Wu",
+        "Ang Li",
+        "Zhuoren Jiang",
+        "XiaoFeng Wang",
+        "Haixu Tang",
+        "Xiaozhong Liu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-04-25T19:08:51+00:00",
+      "link": "https://arxiv.org/pdf/2604.23413v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "privacy-aware sub-query generator for cloud-hosted LLMs",
+      "llm_evidence_cn": "云端大语言模型的隐私感知子查询生成器",
+      "llm_evidence": "云端大语言模型的隐私感知子查询生成器",
+      "canonical_evidence": "云端大语言模型的隐私感知子查询生成器",
+      "llm_tldr_en": "Proposes a game-theoretic framework to balance knowledge utility and privacy for external LLM queries.",
+      "llm_tldr_cn": "提出一个博弈论框架，以平衡外部LLM查询中的知识效用与隐私保护。",
+      "llm_tldr": "提出一个博弈论框架，以平衡外部LLM查询中的知识效用与隐私保护。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.23437v1",
+      "title": "Scalable and Verifiable Federated Learning for Cross-Institution Financial Fraud Detection",
+      "abstract": "The global financial ecosystem confronts a critical asymmetry: while fraud syndicates operate as borderless, distributed networks, banking institutions remain constrained by regulatory data silos, limiting visibility into cross-institutional threat patterns under strict privacy laws such as GDPR. Although Federated Learning (FL) enables collaborative training, existing protocols impose a trade-off among scalability, privacy, and integrity. Homomorphic encryption schemes are computationally expensive, while pairwise masking protocols require O(N^2) key exchanges and lack mechanisms to detect malformed updates. Existing defenses also remain vulnerable to gradient inversion attacks that can reconstruct sensitive transaction data.   To address these limitations, we propose Dynamic Sharded Federated Learning (DSFL), a verifiable secure aggregation framework for cross-institution financial fraud detection. DSFL replaces mesh topologies with Dynamic Stochastic Sharding, reducing communication complexity from O(N^2) to O(N m), where m is a fixed shard size, achieving linear scalability. To mitigate insider threats, we introduce Linear Integrity Tags, an additive-homomorphic commitment mechanism that enables probabilistic verification of submitted updates without the overhead of zero-knowledge proofs, while not enforcing semantic correctness. Additionally, the Active Neighborhood Recovery protocol ensures robust aggregation under participant dropouts. Empirical evaluation on the Credit Card Fraud Detection Dataset (ULB) demonstrates an approximately 33x latency reduction compared to Paillier-based secure aggregation, while maintaining strong resilience under simulated failures. These results position DSFL as a practical foundation for scalable and privacy-preserving collaborative fraud detection.",
+      "authors": [
+        "Prajwal Panth",
+        "Nishant Nigam"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-04-25T20:49:22+00:00",
+      "link": "https://arxiv.org/pdf/2604.23437v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Verifiable federated learning for privacy and integrity in financial fraud detection",
+      "llm_evidence_cn": "金融欺诈检测中兼顾隐私与完整性的可验证联邦学习",
+      "llm_evidence": "金融欺诈检测中兼顾隐私与完整性的可验证联邦学习",
+      "canonical_evidence": "金融欺诈检测中兼顾隐私与完整性的可验证联邦学习",
+      "llm_tldr_en": "Develops a scalable and verifiable federated learning protocol to detect fraud while preserving data privacy.",
+      "llm_tldr_cn": "开发了一种可扩展且可验证的联邦学习协议，在保护数据隐私的同时检测欺诈行为。",
+      "llm_tldr": "开发了一种可扩展且可验证的联邦学习协议，在保护数据隐私的同时检测欺诈行为。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

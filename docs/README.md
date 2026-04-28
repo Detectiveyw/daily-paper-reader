@@ -6,29 +6,44 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-27
-- 运行时间：2026-04-27 19:59:41 UTC
+- 最新运行日期：2026-04-28
+- 运行时间：2026-04-28 21:02:40 UTC
 - 运行状态：成功
-- 本次总论文数：2
-- 精读区：0
-- 速读区：2
+- 本次总论文数：8
+- 精读区：1
+- 速读区：7
 
 ### 今日简报（AI）
-今日聚焦隐私计算前沿，深入探讨了眼动追踪轨迹的安全比对与可验证私有信息检索（PIR）协议。
-研究重点展示了利用混淆电路保护生物特征隐私，以及通过 APIR 方案提升云端数据检索的身份验证安全性。
-建议关注隐私增强技术在敏感生物数据存储与安全云检索领域的交叉应用。
-- 详情：[/202604/27/README](/202604/27/README)
+今日聚焦密码学底层原语的重大优化，重点攻克了分布式点函数（DPF）的密钥长度瓶颈。
+- 详情：[/202604/28/README](/202604/28/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [Information-Theoretic Distributed Point Functions with Shorter Keys](/202604/28/2604.24385v1-information-theoretic-distributed-point-functions-with-shorter-keys)  
+   标签：评分：10.0/10、query:fss-llm
+   evidence：具有更短密钥的信息论分布式点函数
 
 ### 速读区论文标签
-1. [Secure Storage and Privacy-Preserving Scanpath Comparison via Garbled Circuits in Eye Tracking](/202604/27/2604.19422v1-secure-storage-and-privacy-preserving-scanpath-comparison-via-garbled-circuits-in-eye-tracking)  
+1. [Secure eFPGA-Enabled Edge LLM Inference: Architectural and Hardware Countermeasures](/202604/28/2604.22935v1-secure-efpga-enabled-edge-llm-inference-architectural-and-hardware-countermeasures)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：安全边缘LLM推理与硬件对策
+2. [AgenTEE: Confidential LLM Agent Execution on Edge Devices](/202604/28/2604.18231v1-agentee-confidential-llm-agent-execution-on-edge-devices)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：通过混淆电路进行隐私保护比较
-2. [Information-Theoretic Authenticated PIR: From PIR-RV To APIR](/202604/27/2604.22505v1-information-theoretic-authenticated-pir-from-pir-rv-to-apir)  
+   evidence：边缘设备上的机密大模型执行与隐私推理
+3. [FedProxy: Federated Fine-Tuning of LLMs via Proxy SLMs and Heterogeneity-Aware Fusion](/202604/28/2604.19015v1-fedproxy-federated-fine-tuning-of-llms-via-proxy-slms-and-heterogeneity-aware-fusion)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：针对恶意服务器的信息论结果验证与完整性保护
+   evidence：具有隐私和IP保护的LLM联邦微调
+4. [Fresh Masking Makes NTT Pipelines Composable: Machine-Checked Proofs for Arithmetic Masking in PQC Hardware](/202604/28/2604.20793v2-fresh-masking-makes-ntt-pipelines-composable-machine-checked-proofs-for-arithmetic-masking-in-pqc-hardware)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：密码硬件的算术掩码和机器验证证明
+5. [Training Machine Learning Models on Encrypted Data: A Privacy-Preserving Framework using Homomorphic Encryption](/202604/28/2604.23245v1-training-machine-learning-models-on-encrypted-data-a-privacy-preserving-framework-using-homomorphic-encryption)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：使用同态加密进行实数运算的隐私保护机器学习
+6. [Beyond Local vs. External: A Game-Theoretic Framework for Trustworthy Knowledge Acquisition](/202604/28/2604.23413v1-beyond-local-vs-external-a-game-theoretic-framework-for-trustworthy-knowledge-acquisition)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：云端大语言模型的隐私感知子查询生成器
+7. [Scalable and Verifiable Federated Learning for Cross-Institution Financial Fraud Detection](/202604/28/2604.23437v1-scalable-and-verifiable-federated-learning-for-cross-institution-financial-fraud-detection)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：金融欺诈检测中兼顾隐私与完整性的可验证联邦学习
 
 
 <div class="dpr-home-promo-card">
