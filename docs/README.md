@@ -6,44 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-28
-- 运行时间：2026-04-28 21:02:40 UTC
+- 最新运行日期：2026-04-29
+- 运行时间：2026-04-29 20:09:31 UTC
 - 运行状态：成功
-- 本次总论文数：8
-- 精读区：1
-- 速读区：7
+- 本次总论文数：2
+- 精读区：0
+- 速读区：2
 
 ### 今日简报（AI）
-今日聚焦密码学底层原语的重大优化，重点攻克了分布式点函数（DPF）的密钥长度瓶颈。
-- 详情：[/202604/28/README](/202604/28/README)
+今日聚焦分布式系统中的隐私安全，深入探讨了同态加密优化与 TEE 驱动的隐私审计技术。
+重点展示了异构步长下的加密随机优化方案，以及利用 TEE 实现可扩展、实用化审计的“代理见证”机制。
+建议关注隐私计算在分布式协作与合规审计中的落地，权衡加密开销与系统性能的平衡点。
+- 详情：[/202604/29/README](/202604/29/README)
 
 ### 精读区论文标签
-1. [Information-Theoretic Distributed Point Functions with Shorter Keys](/202604/28/2604.24385v1-information-theoretic-distributed-point-functions-with-shorter-keys)  
-   标签：评分：10.0/10、query:fss-llm
-   evidence：具有更短密钥的信息论分布式点函数
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Secure eFPGA-Enabled Edge LLM Inference: Architectural and Hardware Countermeasures](/202604/28/2604.22935v1-secure-efpga-enabled-edge-llm-inference-architectural-and-hardware-countermeasures)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：安全边缘LLM推理与硬件对策
-2. [AgenTEE: Confidential LLM Agent Execution on Edge Devices](/202604/28/2604.18231v1-agentee-confidential-llm-agent-execution-on-edge-devices)  
+1. [Privacy-Preserving Distributed Stochastic Optimization with Homomorphic Encryption and Heterogeneous Stepsizes](/202604/29/2604.21381v1-privacy-preserving-distributed-stochastic-optimization-with-homomorphic-encryption-and-heterogeneous-stepsizes)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：边缘设备上的机密大模型执行与隐私推理
-3. [FedProxy: Federated Fine-Tuning of LLMs via Proxy SLMs and Heterogeneity-Aware Fusion](/202604/28/2604.19015v1-fedproxy-federated-fine-tuning-of-llms-via-proxy-slms-and-heterogeneity-aware-fusion)  
+   evidence：无需信任邻居的隐私保护分布式优化
+2. [Agentic Witnessing: Pragmatic and Scalable TEE-Enabled Privacy-Preserving Auditing](/202604/29/2604.24203v1-agentic-witnessing-pragmatic-and-scalable-tee-enabled-privacy-preserving-auditing)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：具有隐私和IP保护的LLM联邦微调
-4. [Fresh Masking Makes NTT Pipelines Composable: Machine-Checked Proofs for Arithmetic Masking in PQC Hardware](/202604/28/2604.20793v2-fresh-masking-makes-ntt-pipelines-composable-machine-checked-proofs-for-arithmetic-masking-in-pqc-hardware)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：密码硬件的算术掩码和机器验证证明
-5. [Training Machine Learning Models on Encrypted Data: A Privacy-Preserving Framework using Homomorphic Encryption](/202604/28/2604.23245v1-training-machine-learning-models-on-encrypted-data-a-privacy-preserving-framework-using-homomorphic-encryption)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：使用同态加密进行实数运算的隐私保护机器学习
-6. [Beyond Local vs. External: A Game-Theoretic Framework for Trustworthy Knowledge Acquisition](/202604/28/2604.23413v1-beyond-local-vs-external-a-game-theoretic-framework-for-trustworthy-knowledge-acquisition)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：云端大语言模型的隐私感知子查询生成器
-7. [Scalable and Verifiable Federated Learning for Cross-Institution Financial Fraud Detection](/202604/28/2604.23437v1-scalable-and-verifiable-federated-learning-for-cross-institution-financial-fraud-detection)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：金融欺诈检测中兼顾隐私与完整性的可验证联邦学习
+   evidence：基于TEE的隐私保护审计与证明推理
 
 
 <div class="dpr-home-promo-card">

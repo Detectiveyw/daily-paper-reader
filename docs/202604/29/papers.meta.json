@@ -1,0 +1,37 @@
+{
+  "label": "2026-04-29",
+  "date": "2026-04-29",
+  "generated_at": "2026-04-29T20:09:39",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202604/29/2604.21381v1-privacy-preserving-distributed-stochastic-optimization-with-homomorphic-encryption-and-heterogeneous-stepsizes",
+      "section": "quick",
+      "title_en": "Privacy-Preserving Distributed Stochastic Optimization with Homomorphic Encryption and Heterogeneous Stepsizes",
+      "authors": "Haoqiang Zhou, Chi Chen, Yongfeng Zhi, Huan Gao",
+      "date": "2026-04-23",
+      "pdf": "https://arxiv.org/pdf/2604.21381v1",
+      "score": "6.0",
+      "evidence": "无需信任邻居的隐私保护分布式优化",
+      "tldr": "针对分布式随机优化中的隐私泄露问题，本文提出一种结合Paillier同态加密与异构时变随机步长的分布式随机梯度下降算法。该方法无需信任邻居节点，即可抵御内部好奇节点和外部窃听者的攻击。通过引入衰减因子有效降低了加密过程中的量化误差，在确保隐私的同时实现了全局最优解的几乎处处收敛，有效平衡了计算效率与优化精度。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Distributed stochastic optimization enables multi-agent collaboration in applications such as distributed learning and sensor networks, but also raises critical privacy concerns due to the involvement of sensitive data. While existing privacy-preserving approaches often face limitations in balancing accuracy with efficiency, we propose a novel distributed stochastic gradient descent algorithm that integrates Paillier homomorphic encryption with heterogeneous and time-varying random stepsizes. The proposed algorithm provides inherent privacy protection against both internal honest-but-curious agents and external eavesdroppers, without relying on any trusted neighbors. Furthermore, we incorporate an attenuation factor to effectively mitigate quantization error induced by the encryption process, ensuring almost sure convergence to the optimal solution while maintaining privacy preservation. Numerical simulations demonstrate the effectiveness and efficiency of the proposed approach.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202604/29/2604.24203v1-agentic-witnessing-pragmatic-and-scalable-tee-enabled-privacy-preserving-auditing",
+      "section": "quick",
+      "title_en": "Agentic Witnessing: Pragmatic and Scalable TEE-Enabled Privacy-Preserving Auditing",
+      "authors": "Antony Rowstron",
+      "date": "2026-04-27",
+      "pdf": "https://arxiv.org/pdf/2604.24203v1",
+      "score": "6.0",
+      "evidence": "基于TEE的隐私保护审计与证明推理",
+      "tldr": "针对专有数据审计中透明度与隐私权的冲突，本文提出 Agentic Witnessing 框架。该框架利用可信执行环境（TEE）隔离基于大语言模型（LLM）的审计代理，将验证从“证明执行”转向“证明推理”。通过布尔查询和加密转录，实现了在不泄露原始数据的情况下对非结构化定性属性（如代码逻辑）的隐私保护审计，为复杂数据的合规性检查提供了可扩展的解决方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Auditing the semantic properties of proprietary data creates a fundamental tension: verification requires transparent access, while proprietary rights demand confidentiality. While Zero-Knowledge Proofs (ZKPs) ensure privacy, they are typically limited to precise algebraic constraints and are ill-suited for verifying qualitative, unstructured properties, such as the logic within a codebase. We propose {\\em Agentic Witnessing}, a framework that moves verification from attested execution to {\\em attested reasoning}. The system is composed of three agents: a Verifier (who wants to check properties of a dataset), a Prover (who owns the dataset) and an Auditor (that inspects the dataset). The Verifier is allowed to ask a limited number of simple binary true/false questions to the auditor. By isolating an LLM-based Auditor within a Trusted Execution Environment (TEE), the system enables the Verifier to query a Prover's private data via simple Boolean queries, without exposing the raw dataset. The Auditor uses the Model Context Protocol (MCP) to dynamically inspect the target dataset, producing a yes/no verdict accompanied by a cryptographic transcript: a signed hash chain binding the reasoning trace to both the original dataset and the TEE's hardware root of trust. We demonstrate this architecture by automating the artifact evaluation process for 21 peer-reviewed computer science papers with released codebases on GitHub (e.g. Does the codebase implement the system described in the paper?). We verified five high-level properties of these codebases described in the corresponding publications, treating the source code as private. Our results show that TEE-enabled agentic auditing provides a mechanism for privacy-preserving oversight, effectively decoupling qualitative verification from the need for data disclosure.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
