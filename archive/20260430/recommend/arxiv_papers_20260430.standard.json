@@ -1,0 +1,162 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-30T20:17:43.583647+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2604.23516v1",
+      "title": "Time-Delayed Publicly Verifiable Quantum Computation for Classical Verifiers",
+      "abstract": "Publicly verifiable delegation is a well-known problem involving a user who wishes to outsource a resource-intensive computational task to a more powerful but potentially untrusted server such that any other party is able to efficiently check the veracity of the computation's result. This problem has been extensively studied in the classical domain where the user and server are both non-quantum machines. However, the problem becomes more challenging when the classical user wants to delegate a quantum circuit to a single prover with quantum-computing capabilities. Previous solutions have resorted to using impractical or non-standard cryptographic solutions (e.g. indistinguishability obfuscation) to achieve this requirement. In this work, we relax the requirement to have time-delayed publicly verifiable proofs, where the verification key is made known to the public only when the computation (and its proof) are guaranteed to have been completed. We propose a practical non-interactive scheme leveraging commitment schemes and time-lock puzzles, which can be efficiently realized through well-established and standard post-quantum assumptions. The main idea of our technique lies in using time-lock puzzles to compile a 2-round privately verifiable scheme into a non-interactive publicly verifiable scheme with timestamped proofs, outsourcing not only the quantum computation but the puzzle solving as well. Security is proven in the quantum random oracle model with a common reference string (CRS).",
+      "authors": [
+        "Ameer Mohammed",
+        "Aydin Abadi",
+        "Jaffer Mahdi"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-26T03:42:54+00:00",
+      "link": "https://arxiv.org/pdf/2604.23516v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "publicly verifiable delegation of computation",
+      "llm_evidence_cn": "计算任务的公开可验证委派",
+      "llm_evidence": "计算任务的公开可验证委派",
+      "canonical_evidence": "计算任务的公开可验证委派",
+      "llm_tldr_en": "Explores publicly verifiable quantum computation delegation for classical verifiers to check results.",
+      "llm_tldr_cn": "探索了经典验证者检查量子计算委派结果的公开可验证方法。",
+      "llm_tldr": "探索了经典验证者检查量子计算委派结果的公开可验证方法。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.25878v1",
+      "title": "Prime-Field PINI: Machine-Checked Composition Theorems for Post-Quantum NTT Masking",
+      "abstract": "This is Paper 6 of a series of formally-verified analyses of masked NTT hardware for post-quantum cryptography; Paper 1 [1] established structural dependency analysis of the QANARY platform, and Paper 2 [2] quantified security margins under partial NTT masking. Boolean masking composition is well-understood through NI, SNI, and PINI. Arithmetic masking over $\\mathbb{Z}_q$ for prime $q$, the foundation of NTT-based post-quantum cryptography, has lacked an analogous theory. We prove, to our knowledge, the first machine-checked composition theorems for arithmetic masking over prime fields. Our key insight is the renewal argument: when a fresh random mask is applied between two pipeline stages, the intermediate wire becomes perfectly uniform regardless of Stage 1's security parameter. For two PF-PINI gadgets with parameters $k_1$ and $k_2$, the composed two-stage pipeline with fresh masking satisfies PF-PINI($k_2$), Stage 1's multiplicity is completely erased from the composed output. Without fresh masking, intermediate wires have multiplicity up to $k_1$, creating a necessary condition for differential power analysis. We formalize both theorems in Lean 4 with 18 machine-checked proofs and zero sorry stubs. We formally bridge the algebraic and hardware-faithful arithmetic models of Barrett reduction, and instantiate the theorems to formally diagnose Microsoft's Adams Bridge PQC accelerator: its absence of fresh inter-stage masking leaves Barrett output wires non-uniform under the first-order probing model, the same architectural flaw that two independent empirical analyses [3, 4] and our own prior structural analysis [1] identified. Computational evidence further suggests the 1-Bit Barrier is universal across Barrett and Montgomery reductions.",
+      "authors": [
+        "Ray Iskander",
+        "Khaled Kirah"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-04-28T17:21:20+00:00",
+      "link": "https://arxiv.org/pdf/2604.25878v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Machine-checked composition theorems for arithmetic masking over prime fields",
+      "llm_evidence_cn": "素数域上算术掩码的机器检查组合定理",
+      "llm_evidence": "素数域上算术掩码的机器检查组合定理",
+      "canonical_evidence": "素数域上算术掩码的机器检查组合定理",
+      "llm_tldr_en": "Provides formally verified composition theorems for arithmetic masking, supporting verifiable secure computation.",
+      "llm_tldr_cn": "提供算术掩码的形式化验证组合定理，支持可验证的安全计算。",
+      "llm_tldr": "提供算术掩码的形式化验证组合定理，支持可验证的安全计算。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing supporting floating point operations and verifiable security",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.26344v1",
+      "title": "On the Capacity of Hierarchical Secure Aggregation with Groupwise Keys",
+      "abstract": "We study the hierarchical secure aggregation problem with groupwise keys. The problem consists of an aggregation server, $U$ relays, and $UV$ users, where each relay serves $V$ disjoint users, and each subset of $G$ users shares an independent groupwise key. Two security requirements are imposed: relay security and server security. Specifically, each relay must not learn any information about the users' inputs, and the server must not learn any additional information beyond the recovered sum of all inputs.   We first show that the problem is infeasible when $G = 1$. For the feasible regime $1 < G \\le UV$, we fully characterize the optimal rate region. In particular, we prove that both each user and each relay must transmit at least one symbol per input symbol. Furthermore, we characterize the minimum required groupwise key rate as $\\max\\left\\{\\frac{V}{\\binom{UV}{G} - \\binom{(U-1)V}{G}},\\; \\frac{U - 1}{\\binom{UV}{G} - U \\binom{V}{G}}\\right\\},$ where the two terms correspond to the constraints imposed by relay security and server security, respectively.   For achievability, we propose an explicit linear coding scheme based on structured precoding matrices, and show that it satisfies both correctness and security requirements. The construction avoids permutation-based symmetrization by leveraging sufficiently generic matrix designs over large fields. Finally, we establish a matching converse, thereby characterizing the optimal rate region.",
+      "authors": [
+        "Minyang Lu",
+        "Zhou Li",
+        "Haiqiang Chen",
+        "Min Xie"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-04-29T06:52:14+00:00",
+      "link": "https://arxiv.org/pdf/2604.26344v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "hierarchical secure aggregation with groupwise keys",
+      "llm_evidence_cn": "基于分组密钥的分层安全聚合",
+      "llm_evidence": "基于分组密钥的分层安全聚合",
+      "canonical_evidence": "基于分组密钥的分层安全聚合",
+      "llm_tldr_en": "Analyzes the capacity and security of hierarchical secure aggregation in distributed networks.",
+      "llm_tldr_cn": "分析了分布式网络中分层安全聚合的容量和安全性。",
+      "llm_tldr": "分析了分布式网络中分层安全聚合的容量和安全性。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.26391v1",
+      "title": "Multi-Server Secure Aggregation with Arbitrary Collusion and Heterogeneous Security Constraints",
+      "abstract": "We study the fundamental limits of multi-server secure aggregation over a two-hop network where multiple servers, each connected to a disjoint subset of users, jointly compute the sum of all users' inputs. The goal is to ensure that no server can infer any information about prescribed subsets of inputs beyond the desired aggregate, even when colluding with an arbitrary subset of users.   Existing works largely focus on homogeneous security requirements, where all inputs are protected against colluding sets up to a given size. Such formulations are insufficient to capture more general scenarios in which different subsets of inputs may require protection against different collusion patterns.   In this paper, we consider a general model with heterogeneous security requirements and arbitrary user collusion. We characterize the communication rates for all parameter regimes, and determine the minimum key rate required for secure aggregation in most regimes. In particular, we establish tight information-theoretic lower bounds and matching achievable schemes in a broad class of regimes. For the remaining regime, we derive a general lower bound together with an achievable scheme that attains it within a bounded gap. Our results reveal how the interplay between network topology and heterogeneous security constraints fundamentally determines the communication and key generation requirements, and generalize existing results on secure aggregation.",
+      "authors": [
+        "Zhou Li",
+        "Xiang Zhang",
+        "Jiguang He",
+        "Giuseppe Caire"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-04-29T08:00:40+00:00",
+      "link": "https://arxiv.org/pdf/2604.26391v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Multi-server secure aggregation for distributed computation",
+      "llm_evidence_cn": "用于分布式计算的多服务器安全聚合",
+      "llm_evidence": "用于分布式计算的多服务器安全聚合",
+      "canonical_evidence": "用于分布式计算的多服务器安全聚合",
+      "llm_tldr_en": "Explores fundamental limits of secure aggregation in multi-server networks with heterogeneous security constraints.",
+      "llm_tldr_cn": "研究了具有异构安全约束的多服务器网络中安全聚合的基础理论极限。",
+      "llm_tldr": "研究了具有异构安全约束的多服务器网络中安全聚合的基础理论极限。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
