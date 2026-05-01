@@ -1,0 +1,93 @@
+{
+  "label": "2026-05-01",
+  "date": "2026-05-01",
+  "generated_at": "2026-05-01T20:45:48",
+  "count": 6,
+  "papers": [
+    {
+      "paper_id": "202605/01/2604.27666v1-vow-verifiable-and-oblivious-watermark-detection-for-large-language-models",
+      "section": "deep",
+      "title_en": "VOW: Verifiable and Oblivious Watermark Detection for Large Language Models",
+      "authors": "Xiaokun Luan, Yihao Zhang, Pengcheng Su, Feiran Lei, Meng Sun",
+      "date": "2026-04-30",
+      "pdf": "https://arxiv.org/pdf/2604.27666v1",
+      "score": "8.0",
+      "evidence": "基于两方计算的LLM可验证且不经意水印检测",
+      "tldr": "VOW 是一种针对大语言模型的水印检测协议，旨在解决现有方法中用户隐私泄露和检测结果不可信的问题。该方案将水印检测建模为安全两方计算问题，利用可验证不经意伪随机函数（VOPRF）实现。它允许用户在不泄露文本内容的情况下进行检测，同时确保提供者的检测结果具有密码学可验证性。实验证明 VOW 在短文本上表现高效，并能有效抵御现代改写攻击。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large Language Model (LLM) watermarking is crucial for establishing the provenance of machine-generated text, but most existing methods rely on a centralized trust model. This model forces users to reveal potentially sensitive text to a provider for detection and offers no way to verify the integrity of the result. While asymmetric schemes have been proposed to address these issues, they are either impractical for short texts or lack formal guarantees linking watermark insertion and detection. We propose VOW, a new protocol that achieves both privacy-preserving and cryptographically verifiable watermark detection with high efficiency. Our approach formulates detection as a secure two-party computation problem, instantiating the watermark's core logic with a Verifiable Oblivious Pseudorandom Function (VOPRF). This allows the user and provider to perform detection without the user's text being revealed, while the provider's result is verifiable. Our comprehensive evaluation shows that VOW is practical for short texts and provides a crucial reassessment of watermark robustness against modern paraphrasing attacks.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/01/2604.27132v1-trust-a-framework-for-decentralized-ai-service-v01",
+      "section": "quick",
+      "title_en": "TRUST: A Framework for Decentralized AI Service v.0.1",
+      "authors": "Yu-Chao Huang, Zhen Tan, Mohan Zhang, Pingzhi Li, Zhuo Zhang, Tianlong Chen",
+      "date": "2026-04-29",
+      "pdf": "https://arxiv.org/pdf/2604.27132v1",
+      "score": "7.0",
+      "evidence": "大推理模型的去中心化审计",
+      "tldr": "针对大推理模型和多智能体系统在中心化审计中面临的鲁棒性差、不可扩展、不透明及隐私泄露等问题，本文提出TRUST去中心化框架。该框架通过分层有向无环图分解推理过程，利用DAAN协议进行因果归因，并结合多层级共识机制确保审计的正确性。实验表明，TRUST在提高准确率的同时显著降低了成本，并能有效抵御恶意攻击，为安全可信的AI部署提供了去中心化审计方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large Reasoning Models (LRMs) and Multi-Agent Systems (MAS) in high-stakes domains demand reliable verification, yet centralized approaches suffer four limitations: (1) Robustness, with single points of failure vulnerable to attacks and bias; (2) Scalability, as reasoning complexity creates bottlenecks; (3) Opacity, as hidden auditing erodes trust; and (4) Privacy, as exposed reasoning traces risk model theft. We introduce TRUST (Transparent, Robust, and Unified Services for Trustworthy AI), a decentralized framework with three innovations: (i) Hierarchical Directed Acyclic Graphs (HDAGs) that decompose Chain-of-Thought reasoning into five abstraction levels for parallel distributed auditing; (ii) the DAAN protocol, which projects multi-agent interactions into Causal Interaction Graphs (CIGs) for deterministic root-cause attribution; and (iii) a multi-tier consensus mechanism among computational checkers, LLM evaluators, and human experts with stake-weighted voting that guarantees correctness under 30% adversarial participation. We prove a Safety-Profitability Theorem ensuring honest auditors profit while malicious actors incur losses. All decisions are recorded on-chain, while privacy-by-design segmentation prevents reconstruction of proprietary logic. Across multiple LLMs and benchmarks, TRUST attains 72.4% accuracy (4-18% above baselines) and remains resilient against 20% corruption. DAAN reaches 70% root-cause attribution (vs. 54-63% for standard methods) with 60% token savings. Human studies validate the design (F1 = 0.89, Brier = 0.074). The framework supports (A1) decentralized auditing, (A2) tamper-proof leaderboards, (A3) trustless data annotation, and (A4) governed autonomous agents, pioneering decentralized AI auditing for safe, accountable deployment of reasoning-capable systems.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/01/2604.23564v1-dynamic-key-post-quantum-encrypted-control-against-system-identification-attacks",
+      "section": "quick",
+      "title_en": "Dynamic-Key Post-Quantum Encrypted Control Against System Identification Attacks",
+      "authors": "Jungjin Park, Kiminao Kogiso",
+      "date": "2026-04-26",
+      "pdf": "https://arxiv.org/pdf/2604.23564v1",
+      "score": "6.0",
+      "evidence": "加密控制与同态运算",
+      "tldr": "本文提出了一种基于动态密钥学习错误（LWE）加密方案的后量子加密控制系统，旨在抵御系统辨识攻击。通过开发私钥与密文的同步更新机制，该方法实现了动态加密控制，并详细分析了同态运算中的误差增长及解密准确性条件。研究还提出了基于安全指标的设计流程，并通过数值仿真证明了该系统在保障控制性能的同时，能有效提升对抗系统辨识攻击的安全性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "This study proposes post-quantum encrypted control systems based on dynamic-key Learning with Errors (LWE) encryption schemes. The proposed method develops update maps that simultaneously update the private key and ciphertexts within the LWE framework, enabling dynamic-key encrypted control resistant to system identification attacks. The growth of errors induced by homomorphic operations is analyzed, and sufficient parameter conditions guaranteeing correct decryption at each control step are clarified. Furthermore, a design procedure for the encrypted control systems is presented based on security metrics such as sample-identifying complexity and deciphering time. A numerical example demonstrates that the proposed control systems achieve secure control against the considered system identification attack.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/01/2604.25777v1-specfed-accelerating-federated-llm-inference-with-speculative-decoding-and-compressed-transmission",
+      "section": "quick",
+      "title_en": "SpecFed: Accelerating Federated LLM Inference with Speculative Decoding and Compressed Transmission",
+      "authors": "Ce Zheng, Xinghan Wang, Jiahong Ning, Yuxuan Shi, Ning Huang, Tingting Yang",
+      "date": "2026-04-28",
+      "pdf": "https://arxiv.org/pdf/2604.25777v1",
+      "score": "6.0",
+      "evidence": "联邦大模型推理与分布式部署",
+      "tldr": "针对边缘计算中联邦大模型推理存在的自回归解码速度慢和通信开销大的挑战，本文提出 SpecFed 框架。该框架通过引入投机解码实现并行化处理，并设计了 Top-K 压缩传输方案及两种服务端重构策略。理论分析证明了该方法在重构误差和聚合偏差方面的鲁棒性，实验表明其在保持高生成质量的同时显著降低了通信延迟，提升了推理效率。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Federated inference enhances LLM performance in edge computing through weighted averaging of distributed model predictions. However, autoregressive LLM inference requires frequent full-model forward passes across workers, severely limiting decoding throughput. Distributed deployment further aggravates this due to a communication bottleneck: each worker must transmit full token probability distributions per draft token, dominating end-to-end latency. To address these challenges, we introduce speculative decoding to enable parallel LLM processing and propose a top-K compressed transmission scheme with two server-side reconstruction strategies. We theoretically analyze the robustness of our method in terms of local reconstruction error, aggregation bias, and acceptance-rate bias, and derive corresponding bounds. Experiments demonstrate that our scheme achieves high generation fidelity while significantly reducing communication overhead.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/01/2604.26525v1-prag-end-to-end-privacy-preserving-retrieval-augmented-generation",
+      "section": "quick",
+      "title_en": "PRAG End-to-End Privacy-Preserving Retrieval-Augmented Generation",
+      "authors": "Zhijun Li, Minghui Xu, Huayi Qi, Wenxuan Yu, Tingchuang Zhang, Qiao Zhang, GuangYong Shang, Zhen Ma, Xiuzhen Cheng",
+      "date": "2026-04-29",
+      "pdf": "https://arxiv.org/pdf/2604.26525v1",
+      "score": "6.0",
+      "evidence": "大语言模型的隐私保护检索与推理",
+      "tldr": "PRAG是一个端到端的隐私保护检索增强生成（RAG）系统，旨在解决云端RAG面临的敏感数据泄露风险。它通过双模式架构（非交互式PRAG-I和交互式PRAG-II）以及操作误差估计（OEE）机制，在保证文档和查询端到端机密性的同时，实现了与非隐私RAG相当的检索精度和实用延迟，为大规模安全RAG提供了可行方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Retrieval-Augmented Generation (RAG) is essential for enhancing Large Language Models (LLMs) with external knowledge, but its reliance on cloud environments exposes sensitive data to privacy risks. Existing privacy-preserving solutions often sacrifice retrieval quality due to noise injection or only provide partial encryption. We propose PRAG, an end-to-end privacy-preserving RAG system that achieves end-to-end confidentiality for both documents and queries without sacrificing the scalability of cloud-hosted RAG. PRAG features a dual-mode architecture: a non-interactive PRAG-I utilizes homomorphic-friendly approximations for low-latency retrieval, while an interactive PRAG-II leverages client assistance to match the accuracy of non-private RAG. To ensure robust semantic ordering, we introduce Operation-Error Estimation (OEE), a mechanism that stabilizes ranking against homomorphic noise. Experiments on large-scale datasets demonstrate that PRAG achieves competitive recall (72.45%-74.45%), practical retrieval latency, and strong resilience against graph reconstruction attacks while maintaining end-to-end confidentiality. This work confirms the feasibility of secure, high-performance RAG at scale.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/01/2604.26525v2-prag-end-to-end-privacy-preserving-retrieval-augmented-generation",
+      "section": "quick",
+      "title_en": "PRAG: End-to-End Privacy-Preserving Retrieval-Augmented Generation",
+      "authors": "Zhijun Li, Minghui Xu, Huayi Qi, Wenxuan Yu, Tingchuang Zhang, Qiao Zhang, GuangYong Shang, Zhen Ma, Xiuzhen Cheng",
+      "date": "2026-04-29",
+      "pdf": "https://arxiv.org/pdf/2604.26525v2",
+      "score": "6.0",
+      "evidence": "使用同态友好近似的大模型隐私保护检索增强生成",
+      "tldr": "针对检索增强生成（RAG）在云端部署时的隐私泄露风险，本文提出PRAG系统。该系统通过双模式架构（非交互式PRAG-I和交互式PRAG-II）实现了文档和查询的端到端加密。PRAG引入了运算误差估计（OEE）机制来抵消同态加密噪声，确保语义排序的准确性。实验证明，PRAG在保持高召回率和低延迟的同时，能有效抵御图重构攻击，为大规模安全RAG提供了可行方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Retrieval-Augmented Generation (RAG) is essential for enhancing Large Language Models (LLMs) with external knowledge, but its reliance on cloud environments exposes sensitive data to privacy risks. Existing privacy-preserving solutions often sacrifice retrieval quality due to noise injection or only provide partial encryption. We propose PRAG, an end-to-end privacy-preserving RAG system that achieves end-to-end confidentiality for both documents and queries without sacrificing the scalability of cloud-hosted RAG. PRAG features a dual-mode architecture: a non-interactive PRAG-I utilizes homomorphic-friendly approximations for low-latency retrieval, while an interactive PRAG-II leverages client assistance to match the accuracy of non-private RAG. To ensure robust semantic ordering, we introduce Operation-Error Estimation (OEE), a mechanism that stabilizes ranking against homomorphic noise. Experiments on large-scale datasets demonstrate that PRAG achieves competitive recall (72.45%-74.45%), practical retrieval latency, and strong resilience against graph reconstruction attacks while maintaining end-to-end confidentiality. This work confirms the feasibility of secure, high-performance RAG at scale.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
