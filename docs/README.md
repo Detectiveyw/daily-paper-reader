@@ -6,40 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-01
-- 运行时间：2026-05-01 20:45:38 UTC
+- 最新运行日期：2026-05-02
+- 运行时间：2026-05-02 20:19:43 UTC
 - 运行状态：成功
-- 本次总论文数：6
-- 精读区：1
-- 速读区：5
+- 本次总论文数：2
+- 精读区：0
+- 速读区：2
 
 ### 今日简报（AI）
-今日深度解析大模型水印检测技术 VOW，同步覆盖去中心化 AI 框架与联邦推理加速等 6 项前沿进展。
-重点关注 VOW 协议在实现隐蔽且可验证版权保护上的突破，以及 TRUST 框架对去中心化 AI 服务生态的初步构建。
-建议关注 AI 生成内容的合规性检测工具，并留意分布式推理技术如何降低大模型的使用门槛。
-- 详情：[/202605/01/README](/202605/01/README)
+今日聚焦素数域满足问题求解与量子匿名秘密共享，探索计算逻辑与量子通信的前沿。
+重点关注通过协同方法提升素数域 SMT 求解效率，以及利用置换不变码实现的量子匿名秘密共享方案。
+建议关注形式化验证与量子加密交叉领域的读者，深入了解这两项提升计算效率与通信隐私的新技术。
+- 详情：[/202605/02/README](/202605/02/README)
 
 ### 精读区论文标签
-1. [VOW: Verifiable and Oblivious Watermark Detection for Large Language Models](/202605/01/2604.27666v1-vow-verifiable-and-oblivious-watermark-detection-for-large-language-models)  
-   标签：评分：8.0/10、query:fss-llm
-   evidence：基于两方计算的LLM可验证且不经意水印检测
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [TRUST: A Framework for Decentralized AI Service v.0.1](/202605/01/2604.27132v1-trust-a-framework-for-decentralized-ai-service-v01)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：大推理模型的去中心化审计
-2. [Dynamic-Key Post-Quantum Encrypted Control Against System Identification Attacks](/202605/01/2604.23564v1-dynamic-key-post-quantum-encrypted-control-against-system-identification-attacks)  
+1. [An Effective Orchestral Approach to Satisfiability Modulo Prime Fields](/202605/02/2604.26709v1-an-effective-orchestral-approach-to-satisfiability-modulo-prime-fields)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：加密控制与同态运算
-3. [SpecFed: Accelerating Federated LLM Inference with Speculative Decoding and Compressed Transmission](/202605/01/2604.25777v1-specfed-accelerating-federated-llm-inference-with-speculative-decoding-and-compressed-transmission)  
+   evidence：素数域上零知识证明的形式化验证
+2. [Quantum Anonymous Secret Sharing with Permutation Invariant Codes](/202605/02/2604.27284v1-quantum-anonymous-secret-sharing-with-permutation-invariant-codes)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：联邦大模型推理与分布式部署
-4. [PRAG End-to-End Privacy-Preserving Retrieval-Augmented Generation](/202605/01/2604.26525v1-prag-end-to-end-privacy-preserving-retrieval-augmented-generation)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：大语言模型的隐私保护检索与推理
-5. [PRAG: End-to-End Privacy-Preserving Retrieval-Augmented Generation](/202605/01/2604.26525v2-prag-end-to-end-privacy-preserving-retrieval-augmented-generation)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：使用同态友好近似的大模型隐私保护检索增强生成
+   evidence：量子秘密共享协议与信息泄露理论
 
 
 <div class="dpr-home-promo-card">

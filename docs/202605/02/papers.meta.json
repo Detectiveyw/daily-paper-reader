@@ -1,0 +1,37 @@
+{
+  "label": "2026-05-02",
+  "date": "2026-05-02",
+  "generated_at": "2026-05-02T20:19:51",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202605/02/2604.26709v1-an-effective-orchestral-approach-to-satisfiability-modulo-prime-fields",
+      "section": "quick",
+      "title_en": "An Effective Orchestral Approach to Satisfiability Modulo Prime Fields",
+      "authors": "Miguel Isabel, Enric Rodríguez-Carbonell, Clara Rodríguez-Núñez, Albert Rubio",
+      "date": "2026-04-29",
+      "pdf": "https://arxiv.org/pdf/2604.26709v1",
+      "score": "6.0",
+      "evidence": "素数域上零知识证明的形式化验证",
+      "tldr": "零知识证明（ZKP）在区块链安全中至关重要，其核心是素数域上的多项式方程组。为验证ZKP协议的正确性，本文提出一种基于DPLL(T)框架的新型SMT求解方法。该方法通过理论求解器协调多个在效率和完备性间权衡的模块，有效处理大素数域约束。实验表明，该原型在ZKP编译器验证和算术电路基准测试中均优于现有最先进工具。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Zero-knowledge proofs (ZKPs) are an emerging technology that has become the solution to efficiently provide security and privacy along with the transparency requirement of blockchains. ZKPs are usually expressed by means of arithmetic circuits and, more generally, systems of polynomial equations in a large prime field (commonly ranging from 64-bit to 256-bit values).   An increasing interest to apply formal verification techniques to ensure soundness and completeness properties of ZKP protocols has shown the need of developing powerful SMT solvers able to handle such constraint systems.   In this paper we consider the problem of deciding the satisfiability of existentially quantified first-order formulas defined over polynomial equations on a prime field. We present a new DPLL($T$)-based approach in which the theory solver orchestrates several modules with different trade-offs between completeness and efficiency. We have implemented the proposed techniques in a prototype that already shows better results than existing state-of-the-art tools on both benchmarks from the domain of ZKP compiler correctness and new benchmarks coming from the verification of arithmetic circuits for ZKPs. \\keywords{SMT \\and Finite field \\and Polynomials \\and Zero-Knowledge Proofs.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/02/2604.27284v1-quantum-anonymous-secret-sharing-with-permutation-invariant-codes",
+      "section": "quick",
+      "title_en": "Quantum Anonymous Secret Sharing with Permutation Invariant Codes",
+      "authors": "Varin Sikand, Andrew Nemec",
+      "date": "2026-04-30",
+      "pdf": "https://arxiv.org/pdf/2604.27284v1",
+      "score": "6.0",
+      "evidence": "量子秘密共享协议与信息泄露理论",
+      "tldr": "本研究提出了一种基于置换不变量子纠错码的量子匿名秘密共享方案。通过结合匿名量子传输算法，该方案在秘密解码过程中实现了发送者匿名性。研究还利用量子条件最小熵量化了渐变式量子秘密共享方案中的信息泄露，并将其与Knill-Laflamme纠错条件联系起来。最后，通过对多种置换不变码的评估，揭示了中间份额的信息泄露特性，为构建更安全的量子通信协议提供了理论支持。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Quantum secret sharing schemes are a family of quantum cryptographic protocols which provide secure quantum encodings, mapping one secret to multiple shares of information such that the original secret cannot be accessed without an authorized set of shares present for decoding. In this work, we describe a protocol that enables sender-anonymity during the secret decoding process. By using permutation-invariant QEC codes along with a set of anonymous quantum transmission algorithms, we construct a quantum anonymous secret sharing scheme that achieves sender-anonymity. We quantify information leakage in ramp quantum secret sharing schemes via the quantum conditional min-entropy, justifying it as a valid measure of leaked information by relating it to the Knill-Laflamme quantum error correction conditions. Finally, we evaluate several permutation-invariant codes using this measure to make observations on the information leakage of intermediate shares for each quantum anonymous secret sharing scheme.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
