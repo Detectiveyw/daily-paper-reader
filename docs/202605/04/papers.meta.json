@@ -1,0 +1,51 @@
+{
+  "label": "2026-05-04",
+  "date": "2026-05-04",
+  "generated_at": "2026-05-04T20:26:36",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202605/04/2604.23554v1-adaptive-swin-transformer-partitioning-over-ai-ran-networks",
+      "section": "quick",
+      "title_en": "Adaptive Swin Transformer Partitioning over AI-RAN Networks",
+      "authors": "Tam Thanh Nguyen, Yong Hao Pua, Tuan Van Ngo, Mao V. Ngo, Jihong Park, Binbin Chen, Tony Q. S. Quek",
+      "date": "2026-04-26",
+      "pdf": "https://arxiv.org/pdf/2604.23554v1",
+      "score": "6.0",
+      "evidence": "基于Transformer的网络拆分推理",
+      "tldr": "本研究探讨了在动态5G AI-RAN网络中实现基于Swin Transformer的实时视频目标检测。通过将吞吐量感知的自适应拆分技术从CNN扩展到Transformer架构，并引入高效的激活压缩流水线以减少上行负载，实现了无需重训练的分布式推理。系统在NVIDIA Aerial测试平台上完成端到端验证，结合分布式UPF显著降低了延迟并优化了能效，为边缘AI部署提供了新方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "This paper demonstrates the feasibility of transformer-based split inference for real-time video object detection over dynamic 5G AI-RAN networks. We extend throughput-aware adaptive splitting from CNNs to a Swin Transformer backbone and show that practical split execution is achievable for transformer-based vision models without retraining. To address the large intermediate activations inherent to transformers, we introduce an efficient, accuracy-preserving activation compression pipeline that substantially reduces uplink payload. The complete system -- including adaptive split selection, transformer inference, and compression -- is implemented and validated end-to-end on a real-time detection workload, with distributed UPF (dUPF) integration further reducing user-plane latency and improving runtime stability. Extensive measurements on an NVIDIA Aerial-based AI-RAN testbed jointly account for inference and 5G communication energy, quantifying the latency-energy-privacy trade-offs in realistic deployments.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/04/2604.24670v2-machine-checked-cardinality-bounds-for-masked-barrett-reduction-a-1-bit-side-channel-leakage-barrier-in-post-quantum-cryptographic-hardware",
+      "section": "quick",
+      "title_en": "Machine-Checked Cardinality Bounds for Masked Barrett Reduction: A 1-Bit Side-Channel Leakage Barrier in Post-Quantum Cryptographic Hardware",
+      "authors": "Ray Iskander, Khaled Kirah",
+      "date": "2026-04-27",
+      "pdf": "https://arxiv.org/pdf/2604.24670v2",
+      "score": "6.0",
+      "evidence": "算术掩码的机器检查特性描述",
+      "tldr": "本研究针对后量子密码（PQC）硬件实现中的Barrett约减，解决了其在算术掩码下的侧信道泄露量化难题。通过Lean 4形式化验证，证明了Barrett内部线路映射的预原像基数不超过2，即“1比特屏障”，意味着每条内部线路最多损失1比特最小熵。研究引入了PF-PINI安全属性，为ML-KEM和ML-DSA等算法的掩码实现提供了首个通用的、经机器验证的基数界限，填补了现有组合框架在素数域上的空白。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Barrett reduction is the nonlinear core of every practical NTT-based post-quantum cryptography implementation. Existing composition frameworks (ISW, t-SNI, PINI, DOM) address Boolean masking over GF(2); none provides a machine-checked characterization of Barrett's leakage under first-order arithmetic masking and the first-order probing model over prime fields. Building on our prior series, QANARY [15], partial-NTT-masking margins [14], algebraic foundations [16], and butterfly composition [18], we close this gap. We prove a trichotomy: for any $q > 0$ and shift $s$, the Barrett internal wire map $f_x(m) = ((x + 2^s - m) \\bmod 2^s) \\bmod q$ has preimage cardinality in $\\{0, 1, 2\\}$, never more. We call this the 1-Bit Barrier: max-multiplicity 2 implies at most 1 bit of min-entropy loss per internal wire, universal over all moduli. The count-zero cases, unreachable output values, reveal that actual leakage is often strictly less than 1 bit, making the bound conservative. We introduce PF-PINI (Prime-Field PINI): Barrett satisfies PF-PINI(2); the Cooley-Tukey butterfly satisfies PF-PINI(1). We observe (not yet proved) that with fresh inter-stage masking, the composed pipeline has max-multiplicity $\\max(k_1, k_2)$, so the 1-Bit Barrier propagates. The trichotomy, the PF-PINI instantiations, and cardinality results are machine-checked in Lean 4 with Mathlib: 12 proved results, zero sorry, universal over all $q > 0$ (the min-entropy bound follows by standard definitions). Adams Bridge lacks fresh inter-stage masking, violating PF-PINI composition and explaining why Papers 1 [15] and 2 [14] found vulnerabilities. NIST IR 8547 recommends formal methods for PQC implementation validation. The 1-Bit Barrier provides the first universal machine-checked cardinality bound for masked Barrett reduction in ML-KEM (FIPS 203) and ML-DSA (FIPS 204), with a corresponding 1-bit leakage interpretation.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/04/2605.00487v1-zero-knowledge-model-checking",
+      "section": "quick",
+      "title_en": "Zero-Knowledge Model Checking",
+      "authors": "Pascal Berrang, Mirco Giacobbe, Jacob Swales, Xiao Yang",
+      "date": "2026-05-01",
+      "pdf": "https://arxiv.org/pdf/2605.00487v1",
+      "score": "6.0",
+      "evidence": "用于秘密系统形式化验证的零知识证明",
+      "tldr": "本文提出了一种零知识模型检测技术，旨在不泄露软件系统内部逻辑的前提下，形式化验证其是否满足时序规范。研究结合了演绎模型检测生成的正确性证书与零知识证明（ZKP）技术，开发了针对迁移图的显式状态方案和针对线性守卫命令的符号化方案。通过多项式承诺、Farkas引理及Sigma协议，外部验证者可在不获知系统细节的情况下确认其合规性。该方法在保护系统机密性的同时确保了功能正确性，为安全敏感领域提供了有效的验证手段。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We introduce a technology to formally verify that a software system satisfies a temporal specification of functional correctness, without revealing the system itself. Our method combines a deductive approach to model checking to obtain a formal certificate of correctness for the system, with zero-knowledge proofs to convince an external verifier that the system -- kept secret -- complies with its specification of correctness -- made public. We consider proof certificates represented as ranking functions, and introduce both an explicit-state and a symbolic scheme for model checking in zero knowledge. Our explicit-state scheme assumes systems represented as transition graphs. We use polynomial commitments to convince the verifier that the public proof certificates correspond to the secret transition relation. Our symbolic scheme assumes systems specified as linear guarded commands and uses piecewise-linear ranking functions. We apply Farkas' lemma to obtain a witness for the validity of the ranking function with public and secret components, and employ sigma protocols for matrix multiplication and range proofs to convince the verifier of the witness's existence. We built a prototype to demonstrate the practical efficacy of our two schemes on linear temporal logic verification examples. Our technology enables formal verification in domains where both the safety and the confidentiality of the system under analysis are critical.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
