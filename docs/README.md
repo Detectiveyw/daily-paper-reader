@@ -6,32 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-04
-- 运行时间：2026-05-04 20:26:29 UTC
+- 最新运行日期：2026-05-05
+- 运行时间：2026-05-05 21:05:03 UTC
 - 运行状态：成功
 - 本次总论文数：3
 - 精读区：0
 - 速读区：3
 
 ### 今日简报（AI）
-今日聚焦 AI-RAN 网络优化、后量子硬件安全及零知识模型检测三大前沿领域。
-重点关注 Swin Transformer 在边缘网络中的自适应切分方案，以及针对 PQC 硬件侧信道泄露的机器验证技术。
-建议关注形式化验证与零知识证明在提升未来计算系统安全性与隐私性中的关键作用。
-- 详情：[/202605/04/README](/202605/04/README)
+今日聚焦分布式安全计算与大模型效率优化，涵盖环形网络通信、Transformer 显存节省及全同态计算新特性。
+重点推荐环形网络下安全聚合的最优通信率研究，以及通过折叠张量与序列并行提升 Transformer 训练推理效率的方案。
+建议开发者关注大规模模型训练中的并行优化策略，并了解隐私计算中“合理推诿”机制的最新进展。
+- 详情：[/202605/05/README](/202605/05/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Adaptive Swin Transformer Partitioning over AI-RAN Networks](/202605/04/2604.23554v1-adaptive-swin-transformer-partitioning-over-ai-ran-networks)  
+1. [Optimal Communication Rate of Secure Aggregation over Ring Networks with Pairwise Keys](/202605/05/2605.01849v1-optimal-communication-rate-of-secure-aggregation-over-ring-networks-with-pairwise-keys)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：在安全聚合中消除对密钥服务器的需求
+2. [Folding Tensor and Sequence Parallelism for Memory-Efficient Transformer Training & Inference](/202605/05/2604.26294v1-folding-tensor-and-sequence-parallelism-for-memory-efficient-transformer-training--inference)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：基于Transformer的网络拆分推理
-2. [Machine-Checked Cardinality Bounds for Masked Barrett Reduction: A 1-Bit Side-Channel Leakage Barrier in Post-Quantum Cryptographic Hardware](/202605/04/2604.24670v2-machine-checked-cardinality-bounds-for-masked-barrett-reduction-a-1-bit-side-channel-leakage-barrier-in-post-quantum-cryptographic-hardware)  
+   evidence：Transformer推理的并行执行策略
+3. [Plausible Deniability in Fully Homomorphic Computation](/202605/05/2605.01985v1-plausible-deniability-in-fully-homomorphic-computation)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：算术掩码的机器检查特性描述
-3. [Zero-Knowledge Model Checking](/202605/04/2605.00487v1-zero-knowledge-model-checking)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：用于秘密系统形式化验证的零知识证明
+   evidence：外包计算与同态方案中的隐私
 
 
 <div class="dpr-home-promo-card">
