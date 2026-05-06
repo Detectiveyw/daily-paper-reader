@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-05-06 <!--dpr-date:20260506-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202605/06/2605.01849v2-optimal-communication-rate-of-secure-aggregation-over-ring-networks-with-pairwise-keys" data-sidebar-item="{&quot;title&quot;: &quot;Optimal Communication Rate of Secure Aggregation over Ring Networks with Pairwise Keys&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2605.01849v2-optimal-communication-rate-of-secure-aggregation-over-ring-networks-with-pairwise-keys&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;消除安全分布式聚合中的可信密钥服务器&quot;}">Optimal Communication Rate of Secure Aggregation over Ring Networks with Pairwise Keys</a>
   * 2026-05-05 <!--dpr-date:20260505-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202605/05/2605.01849v1-optimal-communication-rate-of-secure-aggregation-over-ring-networks-with-pairwise-keys" data-sidebar-item="{&quot;title&quot;: &quot;Optimal Communication Rate of Secure Aggregation over Ring Networks with Pairwise Keys&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2605.01849v1-optimal-communication-rate-of-secure-aggregation-over-ring-networks-with-pairwise-keys&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;在安全聚合中消除对密钥服务器的需求&quot;}">Optimal Communication Rate of Secure Aggregation over Ring Networks with Pairwise Keys</a>
