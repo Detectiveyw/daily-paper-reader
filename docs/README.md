@@ -6,26 +6,31 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-06
-- 运行时间：2026-05-06 20:43:07 UTC
+- 最新运行日期：2026-05-07
+- 运行时间：2026-05-07 20:35:37 UTC
 - 运行状态：成功
-- 本次总论文数：1
-- 精读区：0
-- 速读区：1
+- 本次总论文数：3
+- 精读区：1
+- 速读区：2
 
 ### 今日简报（AI）
-今日聚焦环形网络下安全聚合的通信效率，探索隐私保护与传输速率的最优平衡。
-核心结论明确了在两两配对密钥机制下，环形拓扑实现安全聚合的理论最优通信速率。
-建议关注分布式学习或网络安全协议优化的读者深入了解其数学推导。
-- 详情：[/202605/06/README](/202605/06/README)
+今日深度评估 Transformer 安全推理机制，重点剖析隐私计算防御的实战安全性。
+研究揭示了 Transformer 洗牌防御方案的潜在漏洞，并系统对比了主流机器学习加密计算技术的优劣。
+建议开发者在部署安全推理时警惕“洗牌”类防御的局限性，优先选择经过严谨论证的加密计算方案。
+- 详情：[/202605/07/README](/202605/07/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [On the (In-)Security of the Shuffling Defense in the Transformer Secure Inference](/202605/07/2605.04901v1-on-the-in-security-of-the-shuffling-defense-in-the-transformer-secure-inference)  
+   标签：评分：9.0/10、query:fss-llm
+   evidence：Transformer模型的密码学安全推理及非线性层效率
 
 ### 速读区论文标签
-1. [Optimal Communication Rate of Secure Aggregation over Ring Networks with Pairwise Keys](/202605/06/2605.01849v2-optimal-communication-rate-of-secure-aggregation-over-ring-networks-with-pairwise-keys)  
+1. [A Pragmatic Comparison of Cryptographic Computation Technologies for Machine Learning](/202605/07/2605.04858v1-a-pragmatic-comparison-of-cryptographic-computation-technologies-for-machine-learning)  
    标签：评分：7.0/10、query:fss-llm
-   evidence：消除安全分布式聚合中的可信密钥服务器
+   evidence：安全机器学习计算中SMPC与FHE的对比分析
+2. [Private Contiguous-Block Retrieval](/202605/07/2605.05169v1-private-contiguous-block-retrieval)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：从非共谋服务器的副本消息中进行隐私检索
 
 
 <div class="dpr-home-promo-card">

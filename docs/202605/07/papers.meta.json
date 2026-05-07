@@ -1,0 +1,51 @@
+{
+  "label": "2026-05-07",
+  "date": "2026-05-07",
+  "generated_at": "2026-05-07T20:35:46",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202605/07/2605.04901v1-on-the-in-security-of-the-shuffling-defense-in-the-transformer-secure-inference",
+      "section": "deep",
+      "title_en": "On the (In-)Security of the Shuffling Defense in the Transformer Secure Inference",
+      "authors": "Zhengyi Li, Yakai Wang, Kang Yang, Yu Yu, Jiaping Gui, Yu Feng, Ning Liu, Minyi Guo, Jingwen Leng",
+      "date": "2026-05-06",
+      "pdf": "https://arxiv.org/pdf/2605.04901v1",
+      "score": "9.0",
+      "evidence": "Transformer模型的密码学安全推理及非线性层效率",
+      "tldr": "本文研究了Transformer安全推理中打乱防御（Shuffling Defense）的安全性。为了平衡效率与隐私，现有方案常将打乱后的中间激活值暴露给客户端，以加速非线性层计算。作者提出一种新颖的攻击方法，通过将不同打乱顺序的激活值对齐到统一排列，成功实现了模型权重的逆向提取。实验表明，该攻击能以极低成本高精度恢复Pythia和GPT-2的模型权重，证明了打乱防御在保护模型隐私方面的局限性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "For Transformer models, cryptographically secure inference ensures that the client learns only the final output, while the server learns nothing about the client's input. However, securely computing nonlinear layers remains a major efficiency bottleneck due to the substantial communication rounds and data transmission required. To address this issue, prior works reveal intermediate activations to the client, allowing nonlinear operations to be computed in plaintext. Although this approach significantly improves efficiency, exposing activations enables adversaries to extract model weights. To mitigate this risk, existing works employ a shuffling defense that reveals only randomly permuted activations to the client. In this work, we show that the shuffling defense is not as robust as previously claimed. We propose an attack that aligns differently shuffled activations to a common permutation and subsequently exploits them to extract model weights. Experiments on Pythia-70m and GPT-2 demonstrate that the proposed attack can align shuffled activations with mean squared errors ranging from $10^{-9}$ to $10^{-6}$. With a query cost of approximately \\$1, the adversary can recover model weights with L1-norm differences ranging from $10^{-4}$ to $10^{-2}$ compared to the oracle weights.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/07/2605.04858v1-a-pragmatic-comparison-of-cryptographic-computation-technologies-for-machine-learning",
+      "section": "quick",
+      "title_en": "A Pragmatic Comparison of Cryptographic Computation Technologies for Machine Learning",
+      "authors": "Marcus Taubert, Adam Skuta, Thomas Loruenser",
+      "date": "2026-05-06",
+      "pdf": "https://arxiv.org/pdf/2605.04858v1",
+      "score": "7.0",
+      "evidence": "安全机器学习计算中SMPC与FHE的对比分析",
+      "tldr": "随着安全需求增加，安全计算技术在机器学习中愈发重要，但从业者常面临技术选择难题。本文对比分析了安全多方计算（SMPC）和全同态加密（FHE）两大主流范式，总结了其理论优劣及开源实现。通过对多种机器学习模型进行广泛基准测试，揭示了不同技术在回归分析、简单密集网络及复杂卷积神经网络（CNN）中的性能差异，为从业者提供了实用的技术选择指南。",
+      "tags": "query:fss-llm",
+      "abstract_en": "As security demands increase, the importance of secure computation technologies grows, yet these technologies can often seem overwhelming to practitioners. Furthermore, many approaches focus only on a single technology, potentially overlooking superior alternatives. This work aims to address the issue of selecting the right technology for secure computation by presenting a comparative analysis of two highly relevant cryptographic methods and their software implementations, with a particular focus on machine learning. Firstly, we provide a theoretical summary and comparison of the secure computation paradigms of secure multi-party computation (SMPC) and fully homomorphic encryption (FHE). We outline the advantages and limitations of the protocols, as well as the relevant open-source software implementations. Secondly, we present the results of extensive benchmarking of the main software frameworks identified for machine learning operations and models. Regarding the current state of the art in FHE, we observe that it outperforms SMPC for regressions. Additionally it may be faster for simple dense networks using GPUs or Hybrid Models. Conversely, SMPC showed superior performance for complex models such as CNNs. Our results should pave the way for more technology-agnostic benchmarking of secure computation technologies for machine learning, providing guidance for practitioners looking to adopt these technologies.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/07/2605.05169v1-private-contiguous-block-retrieval",
+      "section": "quick",
+      "title_en": "Private Contiguous-Block Retrieval",
+      "authors": "Maha Issa, Anoosheh Heidarzadeh",
+      "date": "2026-05-06",
+      "pdf": "https://arxiv.org/pdf/2605.05169v1",
+      "score": "6.0",
+      "evidence": "从非共谋服务器的副本消息中进行隐私检索",
+      "tldr": "本文提出了私有连续块检索（PCBR）问题，旨在从 N 个非共谋服务器中检索 D 个索引连续的消息，同时保护请求块的隐私。该研究受存储和流媒体系统启发，通过利用请求的连续性结构，建立了平衡 {0,1}-线性方案的检索率上限和子分组化水平下限。作者提出了一种率最优方案，在保持与多消息私有信息检索（MPIR）相同最优率的同时，显著降低了子分组化水平，提高了检索效率。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We introduce the \\emph{Private Contiguous-Block Retrieval (PCBR)} problem, where a user retrieves a block of $D$ messages with contiguous indices from $K$ replicated messages stored across $N$ non-colluding servers, while hiding the identity of the requested block from each server. This problem is motivated by storage and streaming systems where files are split into ordered segments. Unlike multi-message Private Information Retrieval (MPIR), where any $D$-subset may be requested, PCBR restricts the demand family to contiguous blocks. This relaxation raises a natural question: Can this structure be exploited to improve retrieval efficiency? We answer this question for balanced $\\{0,1\\}$-linear schemes. We establish an upper bound on the achievable retrieval rate for all problem parameters, derive a lower bound on the subpacketization level required by any scheme achieving the rate upper bound, and construct a rate-optimal scheme whose subpacketization level matches the lower bound for a broad range of problem parameters. Although the optimal PCBR rate coincides with the best-known MPIR rate converse bound, existing MPIR schemes can be suboptimal for PCBR and can require a much larger subpacketization level. In contrast, our scheme exploits the contiguous-block structure to achieve the optimal rate with reduced subpacketization.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,1027 @@
+Title: On the (In-)Security of the Shuffling Defense in the Transformer Secure Inference
+
+URL Source: https://arxiv.org/pdf/2605.04901v1
+
+Published Time: Thu, 07 May 2026 00:59:16 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+# On the (In-)Security of the Shuffling Defense in the Transformer Secure Inference 
+
+Zhengyi Li 1, Yakai Wang 1, Kang Yang 3,Yu Yu 1,2 , Jiaping Gui 1, Yu Feng 1, Ning Liu 1, Minyi Guo 1,2 , Jingwen Leng 1,2 
+
+> 1
+
+Shanghai Jiao Tong University, 2Shanghai Qizhi Institute, 
+
+> 3
+
+State Key Laboratory of Cryptology  
+
+> Correspondence: jgui@sjtu.edu.cn, yangk@sklc.org, ningliu@sjtu.edu.cn
+
+Abstract 
+
+For Transformer models, cryptographically se-cure inference ensures that the client learns only the final output, while the server learns nothing about the client’s input. However, se-curely computing nonlinear layers remains a major efficiency bottleneck due to the substan-tial communication rounds and data transmis-sion required. To address this issue, prior works reveal intermediate activations to the client, al-lowing nonlinear operations to be computed in plaintext. Although this approach significantly improves efficiency, exposing activations en-ables adversaries to extract model weights. To mitigate this risk, existing works employ a shuf-fling defense that reveals only randomly per-muted activations to the client. In this work, we show that the shuffling defense is not as ro-bust as previously claimed. We propose an at-tack that aligns differently shuffled activations to a common permutation and subsequently exploits them to extract model weights. Experi-ments on Pythia-70m and GPT-2 demonstrate that the proposed attack can align shuffled acti-vations with mean squared errors ranging from 
+
+10 −9 to 10 −6. With a query cost of approx-imately $1, the adversary can recover model weights with L1-norm differences ranging from 
+
+10 −4 to 10 −2 compared to the oracle weights. 
+
+1 Introduction 
+
+The rapid advancement of the Generative Pre-trained Transformer (GPT) (Cohen and Gokaslan, 2020) has led to various applications in the real world. Machine Learning as a Service (MLaaS) is a primary way for clients to access intelligent applications. In MLaaS, a server hosting a private Transformer model provides a public API, allowing the client to submit data and receive inference re-sults. This raises privacy concerns for both clients and servers, as each party is unwilling to share their data with the other. Secure inference using multi-party computation (MPC) or homomorphic encryption (HE) offers a privacy-preserving solution for both parties. Full-model encryption (FME) inference operates en-tirely on encrypted data, ensuring that the client only learns the inference result while the server learns nothing. However, employing cryptographic protocols incurs substantial costs (Huang et al., 2022; Knott et al., 2021). One major bottleneck arises from nonlinear layers. Secure computation of nonlinear layers typically utilizes piecewise poly-nomial approximations or iterative methods, which require multiple calls for secure multiplication, truncation, and comparison. These operations in-volve tens of communication rounds and large data transmission. Compared to linear layers, which require only a single multiplication and truncation, nonlinear layers contribute most to the overall la-tency. For example, prior studies report that the secure computation of nonlinear layers accounts for 75% ∼ 90% of the total latency (Cho et al., 2022; Li et al., 2023; Pang et al., 2024). To mitigate the bottleneck on nonlinear layers, some works reveal intermediate activations to the client to evaluate nonlinear layers in plaintext. This approach is referred to as linear-only encryption (LOE) inference. Even for complex nonlinear lay-ers such as softmax , GELU , and layernorm , their evaluation can be completed in two rounds of com-munication. Existing works report tens of times speedup for Transformer models, making LOE inference practically feasible. However, reveal-ing activations to the client introduces potential leakage of model weights as a trade-off. Early at-tempts to mitigate these risks, such as limiting the number of queries (Zhang et al., 2018) or using Bayesian networks (Xie et al., 2019), have been proven insufficient(Wong et al., 2020). More re-cent research (Zheng et al., 2022; Yuan et al., 2023; Zheng et al., 2024; Liu et al., 2024; Luo et al., 2025) introduces the insight that computing nonlinear lay-ers is independent of the positions of values in the activation tensor. This insight enables a more ro-
+
+> arXiv:2605.04901v1 [cs.CR] 6 May 2026
+
+bust defense by revealing shuffled intermediate acti-vations to the client. When permuting a tensor with 
+
+d elements, the probability that a client correctly guesses the permutation is 1/(d!) , which is negli-gibly small for Transformer models with hundreds of dimensions. Consequently, shuffled activations are considered difficult to exploit by adversaries to exploit in existing black-box attacks (Carlini et al., 2020, 2024). This work challenges the security claims of the shuffling defense applied to Transformer models. We show that model weights can be extracted as long as the adversarial client is able to align differently shuffled activation vectors to a com-mon permutation, even when this permutation re-mains unknown. To achieve this, the adversary queries the Transformer to generate activation vec-tors that are differently shuffled but numerically close. Since shuffling preserves the values, this proximity enables the recovery of element-wise correspondences across vectors. The aligned acti-vations can then be used to extract model weights by solving a linear system. As the true permuta-tion is unknown to the adversary, the recovered weights differ from the original weights by row-wise and column-wise permutations. Despite this discrepancy, we show that the extracted weights preserve computational correctness during forward propagation. The extracted weights are useful for several rea-sons. First, they closely approximate the origi-nal weights and can be used to analyze the private model. Second, they strengthen existing black-box attacks, such as by serving as effective initializa-tion for surrogate models. Overall, the proposed attack reveals information leakage beyond what is assumed under the shuffling defense, calling for a reevaluation of its security in secure inference and related privacy-preserving settings (Shen et al., 2022; Meehan et al., 2021). Our contributions are summarized as follows: • We demonstrate that an adversary can success-fully align activation vectors that are shuffled dif-ferently but have close values. Moreover, to ad-dress the issue of discrete inputs in Transformer models that cannot generate intermediate activa-tions with close values, we leverage the proba-bilistic errors inherent in the secure truncation protocol to inject the desired perturbation. • With the aligned activations, we theoretically show that the adversary can extract model weights that differ from the original weights up to row-wise and column-wise shuffling. De-spite the row and column shuffling, the extracted weights perform the same forward propagation as the original weights, even if the adversary does not know the specific permutation. • We evaluate the effectiveness of the proposed attack on two Transformer architectures widely used in secure inference, Pythia-70m and GPT-2. Experimental results show that we can align the shuffled activations with mean squared errors ranging from 10 −9 to 10 −6. With a total query cost of approximately one dollar, the adversary can extract model weights whose L1-norm dif-ferences from the original weights range from 
+
+10 −4 to 10 −2.
+
+2 Preliminaries 
+
+This work examines the secure inference of the Generative Pre-trained Transformer (GPT) (Cohen and Gokaslan, 2020). There is a client with a pri-vate input and a service provider (server) with a private model. The model architecture is required to be known by both parties to interactively execute the protocols. The server aims to hide the model weights, while the client wants to protect the input. 
+
+2.1 Full-model-Encryption Secure Inference 
+
+Privacy goal of the FME. Secure inference based on homomorphic encryption (HE) and multi-party computation (MPC) provides a solution to protect the privacy of both servers and clients. Secure in-ference with full-model encryption (FME) achieves the following privacy goals: the client P1 only learns the inference results, while the server P0
+
+knows nothing about the client’s input. 
+
+Explain FME Inference. Figure 1 illustrates the FME secure inference (Li et al., 2024; Kei and Chow, 2025; Park et al., 2025; Moon et al., 2025) that operates entirely on encrypted inputs and model weights, and only the final output is revealed to the client. Each layer’s inputs and out-puts are additive secret shares [·]i, allowing for flexible linkage of different layers. The additive secret share (Ito et al., 1989) over the ring Z2ℓ is defined as follows: for a given value x ∈ Z2ℓ ,the client and server each hold two random shares 
+
+[x]0 ∈ Z2ℓ and [x]1 ∈ Z2ℓ such that x = [ x]0 +[ x]1
+
+mod 2 ℓ holds. To convert the floating-point value 
+
+xf of the model to the ring value x, it is scaled by a large factor and rounded to the nearest integer: Linear -only Encryption                  
+
+> Secure Inference
+> Full -model Encryption
+> Secure Inference
+> Linear
+> Input
+> 𝐱 (𝑙 )
+> 1
+> 𝐱 (𝑙 )
+> 0
+> 𝑋 𝑛 −11
+> Output
+> 𝑋 𝑛 −10
+> P𝟏
+> P𝟎
+> 𝐱 (𝐿 )
+> 1
+> 𝐱 (𝐿 )
+> 0
+> P𝟏
+> NonLinear
+> 𝐱 (𝑙 +1)
+> 1
+> 𝐱 (𝑙 +1)
+> 0
+> Linear
+> Linear
+> Input
+> 𝑋 𝑛 −12𝑋 𝑛 −11
+> P𝟏
+> NonLinear
+> 𝑠𝑓 (𝐱 𝑙 )
+> P𝟎 P𝟏
+> 𝐱 (𝑙 )
+> 1
+> 𝐱 (𝑙 )
+> 0
+> 𝐱 (0)
+> 1
+> 𝐱 (0)
+> 0
+> 𝐱 (𝐿 )
+> 1
+> 𝐱 (𝐿 )
+> 0
+> 𝐱 (2)
+> 1
+> 𝐱 (𝑙 +1)
+> 0
+> SecGraph
+> 𝐘
+> 𝐗
+> NLinear
+> Shuffle
+> sf 𝐘 ⊙1+𝑵
+> sf (ℎ෠𝐘 )
+> ℎ(𝐘 )
+> P𝟎
+> 3
+> 2
+> 1
+> 4
+> Output
+> Shuffle
+> Reorder
+> Shuffle
+> 𝑠𝑓 (𝐱 𝑙 +1)
+> 𝐱 (𝑙 +1)
+> 1
+
+Figure 1: The red locked part is private to the owner or invisible for both parties, and the green unlocked part is revealed to the client. FME inference only reveals the final output to the client. LOE inference also reveals shuffled activations to the client. 
+
+x = ⌊xf · 2p⌉ for p-bit precision. The decoding of 
+
+x is computed as xf = x/ 2p.
+
+Nonlinear Layers as the Bottleneck. The primary efficiency bottleneck for cryptographic methods lies in nonlinear layers. In contrast to linear lay-ers, which typically require only two rounds of communication, nonlinear layers usually demand dozens of rounds of communication along with a significant amount of data transmission. In secure computations, the costs associated with commu-nication rounds and data transmission are the pri-mary bottleneck. Consequently, the considerable communication overhead makes nonlinear layers become the major bottleneck in secure inference, accounting for approximately 75% ∼ 90% of the communication (Cho et al., 2022; Li et al., 2023; Pang et al., 2024), especially under suboptimal net-work conditions. 
+
+2.2 Linear-only-Encryption Secure Inference 
+
+Explain LOE Inference. Despite numerous ef-forts (Rathee et al., 2020, 2021; Pang et al., 2024; Li et al., 2024) to enhance protocol efficiency or re-place nonlinear layers with cryptography-friendly alternatives (Mishra et al., 2020; Cho et al., 2022; Chen et al., 2022a; Li et al., 2023), nonlinear layers remain the major bottleneck. Another category of works aim to find a balance between performance and privacy. They propose linear-only encryption (LOE) inference, which reveals intermediate acti-vations to the client, enabling the computation of nonlinear layers in plaintext (Zhang et al., 2018; Xie et al., 2019; Zheng et al., 2022; Liu et al., 2024; Luo et al., 2025). This approach allows nonlinear layers to require only two rounds of communica-tion, regardless of their complexity. LOE inference shows tens of times speedup compared to FME inference, effectively advancing secure inference to a practical solution. 
+
+Shuffling defense. As a trade-off for perfor-mance, revealing activations to the client may ex-pose model weights. In a typical deep neural net-work model, which consists of interleaved linear and nonlinear layers, revealing activations makes both the input and output of the linear layers ac-cessible to the client. Consequently, the weights can be extracted by solving a linear system. Early attempts to mitigate this risk, such as limiting the number of queries (Zhang et al., 2018) or using Bayesian networks (Xie et al., 2019), have proven insufficient(Wong et al., 2020). Later works propose the shuffling de-fense (Zheng et al., 2022; Liu et al., 2024; Zheng et al., 2024; Luo et al., 2025) to enhance the performance-privacy trade-off, as illustrated in Figure 1. They provide insight that correctly computing nonlinear layers is independent of the positions of values in the activation tensor. Some nonlinear layers, such as ReLU and GELU , support shuffling across the entire activation tensor. Other nonlinear layers, like softmax and LayerNorm ,support only row-wise shuffling due to information reduction along the last dimension. Based on this insight, the activations are randomly shuffled before being revealed to the client. The results of nonlinear layers are then re-shared and reordered among the parties. The shuffling defense does not introduce extra communication overhead since shuffling and reordering can be performed locally. 
+
+Prior security analysis. Prior works claim (Zheng et al., 2022; Liu et al., 2024; Zheng et al., 2024) recovering the shuffling is practically impossible when the number of elements is not too small. For a vector with hidden dimension h, there are 
+
+h! possible permutations. In Transformer models, where h ≥ 100 , there are at least 100! ≈ 10 157 
+
+possible permutations. Thus, the probability of correctly guessing the permutation is negligible. These works also show original activations and shuffled activations have minimal correlation, and thus existing black-box attacks fail to exploit the destroyed information for meaningful attack. Note prior works do not regard permutation among dif-ferent vectors as a defense. For example, the inter-mediate activation in the GPT decoding only con-tains one vector. In other Transformer applications, the adversary can also bypass the permutation in this dimension by feeding a single token as input. 
+
+2.3 Transformer Model 
+
+This work focuses on the Transformer (Vaswani et al., 2017) models, especially the widely used GPT model (Cohen and Gokaslan, 2020). The main body of Transformer models comprises stacked Transformer encoders/decoders, each containing an attention module and a feed-forward network (FFN) module. Existing LOE works (Zheng et al., 2024; Yuan et al., 2023; Luo et al., 2025) allow the softmax , GELU , and layernorm layers to be evaluated in plaintext. 
+
+Attention Module. The attention module starts with a linear layer Linear qkv , which projects the input into three independent activation tensors: Q,
+
+K, and V. The multi-head attention mechanism splits them into H heads and parallelly compute all heads. The hth head is computed as: 
+
+Attn (Qh, Kh, Vh) = softmax 
+
+ QhKhT
+
+> √dk
+
+
+
+Vh,
+
+(1) where dk is the hidden dimension of the Kh. The outputs of all heads are concatenated and fed into another linear layer Linear o. Finally, a residual connection and a normalization layer are applied to generate the module’s output. The K and V of prefix tokens are cached as the KV cache to save the redundant computation (Shi et al., 2024). 
+
+FFN Module. The FFN module consists of two linear layers and one activation layer, structured as: 
+
+FFN (X) = Linear h2 (ACT (Linear h1 (X))) , (2) where ACT is the activation function, such as 
+
+GELU and ReLU . Similar to the attention mod-ule, the output incorporates a residual connection and a normalization layer. 
+
+3 Problem Formulation 
+
+Notations. We use bold lowercase letters to rep-resent vectors, such as the input of the lth linear layer x(l), and the output probability distribution 
+
+y. The bold uppercase letters represent the matrix, such as the weights of the lth linear layer W(l).The permutation matrix is a square matrix obtained by permuting the rows (or columns) of the iden-tity matrix (Strang, 2022). Shuffling columns of a vector or matrix is represented by multiplying a permutation matrix π on the right, denoted as 
+
+sf (x, π ) = xπ. For simplicity, we denote it as C
+
+> L
+> I
+> E
+> N
+> T
+> S
+> E
+> R
+> V
+> E
+> R
+> Figure 2: The interface of LOE inference.
+
+sf (x) when the specific permutation is not impor-tant in the context. 
+
+MPC Setup. We follow the semi-honest threat model, which is widely used in both FME and LOE secure inference (Mohassel and Rindal, 2018; Zheng et al., 2022; Liu et al., 2024; Pang et al., 2024; Hao et al., 2022). In this threat model, the client and server are curious about each other’s information but strictly adhere to cryptographic protocols. The shuffling defense in LOE inference works in either a 2-party or 3-party setting and can be generalized to different cryptographic protocols. The proposed attack is also applicable to different numbers of parties and cryptographic protocols. Later discussion focuses on the 2-party setting and protocols commonly used in prior LOE works as an example (Liu et al., 2024; Zheng et al., 2024). 
+
+Threat Model. We use the GPT to illustrate our attack. We define the LOE inference’s interface to the model by O, as illustrated in Figure 2. It func-tions as 
+
+h
+
+sf (x(1)  
+
+> i
+
+, π (1)  
+
+> i
+
+), sf (x(2)  
+
+> i
+
+, π (2)  
+
+> i
+
+), · · · , yi
+
+i
+
+=
+
+O(Si), where i is the query index. The input S
+
+is a prefix that includes the client prompt and pre-viously generated tokens. The client obtains the shuffled activation vector sf (x(l) 
+
+> i
+
+, π (l) 
+
+> i
+
+) of all linear layers, along with the final probability yi of the generated token. Note that for activation vectors at the same layer depth, the applied permutations are random for different model inputs. Other re-quirements follow those commonly used in existing model attacks, such as allowing free choice of input and permitting a mild number of queries. 
+
+4 Extraction Attack of the LOE Inference 
+
+Section 4.1 introduces the proposed attack that aligns distinct shuffled activation vectors without knowing the actual permutation. Furthermore, Sec-tion 4.2 addresses the unique challenges associated 𝑌 𝑏  𝑌 𝑎          
+
+> 𝐱 𝑎
+> ′[3]𝐱 𝑎
+> ′[2]𝐱 𝑏
+> ′[1]𝐱 𝑏
+> ′[3]𝐱 𝑏
+> ′
+> 𝐱 𝑎
+> ′
+> Sort on the axis
+> 𝐱 𝑎
+> ′[0]𝐱 𝑏
+> ′[2]Figure 3: Aligning two shuffled vectors based on the closest distance. Three out of four pairs of elements are drawn to illustrate their correspondence for two sufficiently close vectors.
+
+with alignment in Transformer models. Finally, Section 4.3 demonstrates that the aligned vectors enable the extraction of model weights that perform the same functionality as the original model. The complete attacking algorithm is in Appendix A. 
+
+4.1 Breaking shuffling by Vector Alignment 
+
+Alignment Definition. Suppose the adversarial client holds two distinct shuffled activation vectors 
+
+x′ 
+
+> a
+
+= sf (xa, π a) and x′ 
+
+> b
+
+= sf (xb, π b). The objec-tive of the alignment is to rearrange the elements in vectors such that the corresponding elements are matched up, even though the adversary remains unaware of specific permutations πa and πb. The alignment can be mathematically formalized as transforming the permutation πb of x′ 
+
+> b
+
+to πa of 
+
+x′ 
+
+> a
+
+through a transformation matrix M, which is also a permutation matrix (Strang, 2022), such that 
+
+πa = πb ∗ M or sf (xb, π a) = sf (xb, π b) ∗ M.
+
+Aligning Close Activation Vectors. Directly guess-ing the transformation matrix M of two unrelated activation vectors requires enumerating all possible permutation matrices. This is impractical and the adversary cannot verify whether a transformation matrix is correct. In contrast, the proposed attack considers the alignment of vectors xa and xb that are ϵ-close, such that ∥xa - xb∥ < ϵ . With the closely aligned activation vectors, the proposed at-tack solves M by leveraging the proximity between corresponding elements, as illustrated in Figure 3. The elements of the two shuffled vectors are posi-tioned along the axis, with similar colors indicating correspondences between elements. Since shuf-fling preserves the original values, when the two original vectors are sufficiently close, the distance between corresponding elements in the shuffled vectors remains much smaller than the distance between non-corresponding elements. With this property, solving the transformation matrix M is equivalent to minimizing the following objective 
+
+min  
+
+> M
+
+∥x′ 
+
+> a
+
+− x′ 
+
+> b
+
+∗ M∥2. (3) An extreme case is when the two ϵ-close model inputs have ϵ = 0 , enabling trivial alignment by matching elements with identical values. In gen-eral cases when ϵ > 0, solving M using Equation (3) is difficult as the elements in M are discrete. Therefore, we reformulate it as follows and defer the proof of equivalence to Appendix B. 
+
+min 
+
+> M
+
+X
+
+> i,j ∈H
+
+M[i, j ] ⊙ D[i, j ]
+
+s.t. X
+
+> i∈H
+
+M[i, j ] = 1 for j ∈ H ,
+
+X
+
+> j∈H
+
+M[i, j ] = 1 for i ∈ H 
+
+(4) The operator ⊙ denotes the Hadamard product. Suppose both vectors contain h elements, and 
+
+H = {1, 2, · · · h} is the set of possible values of 
+
+i and j. D ∈ Rh×h is a matrix whose element 
+
+D[i, j ] = ( x′
+
+> a
+
+[i] − x′
+
+> b
+
+[j]) 2. The constraint is be-cause M is a permutation matrix. Each element 
+
+M[i, j ] ∈ { 0, 1} can be interpreted as whether the 
+
+ith element of x′ 
+
+> b
+
+corresponds to the jth element of x′
+
+> a
+
+. This is a standard assignment problem that can be optimally solved using the Hungarian algo-rithm (Crouse, 2016). 
+
+4.2 Vector Alignment in GPT 
+
+This section details how the proposed alignment works in a real Transformer model. We describe the alignment of differently shuffled activation vectors at a certain layer depth, and the procedure is equally applicable to activations at other layer depths. 
+
+Constructing Close Activation vectors. To con-struct the close intermediate activation vectors re-quired by the proposed alignment, we exploit the Lipschitz continuity of neural network models (Vir-maux and Scaman, 2018). Given two ϵ-close model inputs S1 and S2, such that ∥S1 - S2∥ < ϵ , the fol-lowing inequality holds: 
+
+∥xa − xb∥ ≤ L∥ Sa − Sb∥ < Lϵ, (5) where L is the Lipschitz constant. It bounds the dif-ference between intermediate activations x1 and x2
+
+based on the difference between the model inputs 
+
+S1 and S2.In this way, the adversarial client initiates the attack by querying the Transformer model with 
+
+n model inputs that are ϵ-close to each other. When generating the next token, at a certain layer depth, the client acquires n activation vec-tors sf (x1, π 1), sf (x2, π 2), · · · , sf (xn, π n) that ex-hibit similar magnitudes ( ∥xi − xj ∥ < Lϵ for any i, j ∈ {1, 2, · · · , n }) but distinct permuta-tions. The client then selects an arbitrary k ∈{1, · · · , n } and uses permutation πk of sf (xk, π k)
+
+as the reference. Aligning the remaining vec-tors to the chosen vector can be represented as 
+
+sf (x1, π 1), sf (x2, π 2), · · · , sf (xn, π n) Alignment 
+
+−−−−−−−→
+
+sf (x1, π k), sf (x2, π k), · · · , sf (xn, π k). The vec-tors aligned with the common permutation πk are organized into an matrix Xπk with n rows, which is later used for model weight extraction. It is cru-cial to emphasize that the specific permutation πk
+
+remains unknown to the client. The extraction of model weights does not require explicit knowledge of πk, which we explain in Section 4.3. 
+
+Challenge of Constructing Close Inputs in GPT. The alignment process in Transformer mod-els presents unique challenges in constructing ϵ-close model inputs. Transformer models accept discrete token indices as inputs, which are trans-formed into floating-point hidden vectors through the embedding layer. This constraint fails the adver-sary’s ability to manipulate model inputs freely to achieve the desired ϵ-close conditions. Moreover, directly manipulating intermediate activations and redistributing them among parties is infeasible, as this approach violates the semi-honest threat model assumed in existing LOE frameworks, thus make the attack trivial. To overcome this limitation, we exploit a seem-ingly innocuous property of secure inference to construct close intermediate activations. To execute secure inference protocols, floating-point values in Transformer models are encoded as fixed-point val-ues on the ring, and a truncation step is necessary to reset the fixed-point precision after multiplica-tion. To maintain model accuracy, secure infer-ence frameworks typically employ high precision; for example, the SecretFlow-SPU framework (Ma et al., 2023) defaults to 18-bit precision. We no-tice existing secure truncation protocols introduce a stochastic 1-bit error (Mohassel and Rindal, 2018; Rathee et al., 2020; Ma et al., 2023). Then such 1-bit error manifests as a perturbation of magnitude 
+
+2−18 , which we strategically exploit to generate close intermediate activations. Consequently, as the adversary repeatedly feeds the same prompt, the truncation process inherently introduces the desired minor perturbations into the intermediate activations. 
+
+4.3 Exposing Model Weights 
+
+With the aligned activation vectors, this section ex-plains how the adversary derives weights of linear layers. For the lth linear layer, its weights satisfy the following equation 
+
+X(l+1) = X(l)W(l), (6) where W(l) ∈ R hin ×hout is the weight of lth linear layer. The standard way to solve weight is through 
+
+W(l) = X(l)−
+
+X(l+1) , where X(l)−
+
+is the inverse of X(l). To guarantee a meaningful inverse matrix, the adversary needs at least hin input-output vector pairs (assuming full-rank weight matrix). In the proposed attack, the adversary obtains inputs and outputs in the form of X(l)π(l) and 
+
+X(l+1) π(l+1) . Using these aligned matrices, the adversary extracts weights by    
+
+> W(l)′
+> =π(l)−
+> X(l)−
+> X(l+1) π(l+1) =π(l)−
+> W(l)π(l+1) .
+
+(7) The appendix D also addresses the case when the matrix multiplication of activations in the attention module is privately computed. 
+
+Functionality Invariance to Shuffling. In equa-tion (7) , the adversary’s solved weights W(l)′
+
+differ from the original weights W(l) by row-wise and column-wise shuffling. Importantly, the stolen per-muted weights perform the same functionality as the original weights. This is because the weight matrices of the neural network are inherently invari-ant to such shuffling (Carlini et al., 2020; Jagielski et al., 2020). For solved weight matrices of consec-utive layers, as long as the output dimension of the former layer and the input dimension of the latter layer follow the same permutation, the function-ality of forward propagation remains correct. We provide a detailed explanation in the Appendix C. 
+
+Handling the Ill-conditioned Problem. Although Equation (7) is theoretically solvable, practical computation introduces additional considerations. The proximity of the aligned activation vectors makes the computation of the inverse of the input matrix X(l)π(l) ill-conditioned (Neumaier, 1998). The ill-conditioning is measured by the condition number σmax /σ min , where σmax and σmin repre-sent the maximum and minimum singular values of the input matrix. A large condition number indi-cates that numerical errors from the machine during computation are amplified, leading to significant inaccuracies when computing the matrix inverse. To mitigate such inaccuracies, the adversary needs to manually set an upper bound C on the condi-tion number. Consequently, when computing the pseudo-inverse of the input matrix X(l)π(l), singu-lar values smaller than σmax /C are discarded to ensure a stable approximation. In future work, the accuracy of the solution can be further enhanced by utilizing higher machine precision or adopting iterative methods (Richardson, 1911). 
+
+Query Complexity. The attack complexity of the query number is highly efficient at O(N ), where 
+
+N is the largest rank of the weight matrix in the model, typically corresponding to the dimension of the FFN module. The efficient linear complexity is because 1) our attack finally reduces to solving a linear system, where the minimum number of required vectors exceeds the weight matrix rank, and 2) each query simultaneously gathers one acti-vation vector for all layer depths. 
+
+5 Evaluation 
+
+5.1 Experimental Setup 
+
+Victim Transformer Models. We validate the pro-posed attack on two Transformer models: Pythia-70m (Biderman et al., 2023) and GPT-2 (Radford et al., 2019). These model scales have been widely employed in prior works on secure Transformer in-ference (Chen et al., 2022a; Luo et al., 2025; Pang et al., 2024; Li et al., 2024). We demonstrate the weight stealing results of all types of linear layers in the Transformer model, including Wqkv , Wo,
+
+Wh1, and Wh2.
+
+Query Number. Theoretically, the number of re-quired queries to compute the input matrix inverse is the weight’s dimension. In our experiments, due to the ill-conditioned problem, we set the query number to 16 times the model’s maximum dimen-sion to improve the accuracy of the matrix inverse in numerical computation. The query count for Pythia-70m with the maximum dimension 2048 is 32768. The query count for GPT-2 with the max-imum dimension 3072 is 49512. Most GPT APIs charge users on a per-token basis. Since our at-tack is independent of response length or content, the adversary can feed a query that receives very short responses, such as having the model respond only "yes" or "no". Using the commercial API pricing (OpenAI, 2025), the estimated costs for the attack on both Pythia-70m and GPT-2 remain under one dollar, demonstrating practical feasibility. 
+
+Fixed-point (FXP) Precision. In secure infer-ence, fixed-point precision of the ring number is 
+
+Table 1: For input and output of the layer, the table lists counts of correctly corresponded elements and mean squared errors of aligned vectors compared to the oracle-aligned vectors.                                                         
+
+> (Input,Output) Fxp Input Output Dimension Pre. Count Error Count Error (512,2048) 14 508 9.4E-07 1996 1.2E-06 16 511 1.2E-08 2040 9.1E-08 18 512 0.0E+00 2046 4.0E-08 (2048,512) 14 2004 3.0E-06 504 5.9E-06 16 2038 3.6E-07 510 1.2E-07 18 2046 5.5E-08 511 1.5E-08 (768,3072) 14 756 6.0E-07 3052 1.2E-07 16 766 2.4E-08 3066 6.4E-09 18 766 2.5E-08 3070 3.7E-09 (3072,768) 14 3056 2.5E-07 762 5.8E-08 16 3068 1.0E-08 764 1.9E-08 18 3070 1.2E-08 764 5.0E-09
+
+originally intended to ensure the fixed-point errors within the tolerance of the model. For such an in-nocuous property, our attack algorithm strategically exploits the fixed-point error to construct close ac-tivation vectors. Thus, the choice of fixed-point precision impacts the effectiveness of the attack algorithm. In the well-established secure inference framework, such as SecretFlow-SPU (Ma et al., 2023), the default precision of 18 bits is sufficient to maintain computational accuracy. To further evaluate the robustness of our attack, we examine smaller precisions, specifically 14 and 16 bits. 
+
+5.2 Alignment Error 
+
+Table 1 presents the counts of correctly corre-sponded elements and mean squared errors (MSE) compared to the oracle-aligned activation vec-tors. The evaluation focuses on the Linear h1 and 
+
+Linear h2 of Pythia-70m and GPT-2 at a certain depth. They are selected because their input di-mensions represent the maximum and minimum cases among all linear layer types, corresponding to the highest and lowest difficulty. The results are averaged across the results of all obtained activa-tion vectors. For all precisions, less than 2% of the elements are mismatched, with higher fixed-point precision resulting in a higher correct alignment ra-tio. This is due to increased precision reducing per-turbations in the intermediate activations, enabling more accurate element matching. The magnitudes of MSE range from 10 −9 to 10 −6, primarily caused by rare mismatches and occur only when the mis-matched element is close to the correct correspond-ing element. This accurate alignment builds a solid 0 1 2 3 4 5                                                                                                  
+
+> 0
+> 2
+> 4
+> Recovery difference  1e 2
+> 0.0026 0.0047 0.0035
+> 0.0107
+> 0.0253
+> 0.0162
+> Pythia-70m: Wqkv
+> FXP Precision 14
+> FXP Precision 16
+> FXP Precision 18
+> 012345
+> 2
+> 4
+> 1e 3
+> 0.0008 0.0009
+> 0.0003
+> 0.0009 0.0010 0.0008
+> Pythia-70m: Wo
+> 012345
+> 0.5
+> 1.0
+> 1e 2
+> 0.0011
+> 0.0026 0.0018 0.0019 0.0013 0.0011
+> Pythia-70m: Wh1
+> 012345
+> 0.5
+> 1.0
+> 1.5
+> 2.0
+> 2.5 1e 2
+> 0.0089
+> 0.0115 0.0123 0.0113
+> 0.0136
+> 0.0169
+> Pythia-70m: Wh20246810
+> 0
+> 2
+> 4
+> 6
+> Recovery difference  1e 2
+> 0.003
+> 0.019 0.018
+> 0.013 0.012
+> 0.006 0.006 0.009 0.007 0.004 0.005 0.006
+> GPT-2: Wqkv
+> FXP Precision 14
+> FXP Precision 16
+> FXP Precision 18
+> 0246810
+> 0
+> 1
+> 2
+> 3
+> 4
+> 1e 2
+> 0.002 0.001 0.002 0.002 0.003 0.002 0.003 0.002 0.004 0.006 0.006 0.007
+> GPT-2: Wo
+> 0246810
+> 2
+> 4
+> 6
+> 81e 2
+> 0.034
+> 0.008
+> 0.019
+> 0.014 0.012 0.011 0.009 0.011 0.010 0.009 0.009 0.007
+> GPT-2: Wh1
+> 0246810
+> 0.5
+> 1.0
+> 1e 1
+> 0.034 0.031
+> 0.047
+> 0.021 0.027 0.032 0.030 0.031 0.031 0.035
+> 0.049
+> 0.077
+> GPT-2: Wh2
+
+Figure 4: The attacking results on Pythia-70m and GPT-2. The x-axis indicates the depth of the decoders, and the y-axis indicates the L1-norm difference between the original and extracted weights (up to a row and column shuffling). Different colors correspond to different fixed-point precisions. 
+
+foundation for later extracting weights. 
+
+5.3 Results on Extracted Model Weights 
+
+Figure 4 shows the L1-norm difference between the original and extracted weights. The extracted weights differ from the original ones by a random permutation of a row and column, hence we report the difference between each value in the extracted weights and its counterpart in the original weights. The results indicate our attack successfully extracts weights with minor errors. This provides an accu-rate approximation of the original weights for ma-licious usage. For example, the extracted weights can be directly used to analyze model information or as an initialization for training the surrogate model. Below, we analyze the attack results in detail. In most cases, our attack successfully ex-tracts weights with L1-norm difference ranging from 10 −4 to 10 −2. We find the smaller model Pythia-70m consistently exhibits lower L1-norm differences compared to GPT-2. A common in-tuition regarding neural network attacks is that the difficulty of the attack increases with model size (Carlini et al., 2020, 2024). The same princi-ple applies to our attack, as the difficulty to extract a weight depends on its input dimension. Simi-larly, the L1-norm differences for Wh1 with input dimension of dmodel are generally smaller than that for Wh2 with input dimension of 4 ∗ dmodel .Higher precision generally results in smaller L1-norm differences. This is because higher precision leads to more accurate alignment, which benefits solving the linear system. However, there are cases where a lower precision of 14 results in smaller errors. This occurs because lower precision means more diverse vectors in the input matrix and re-lieves the ill condition of the problem, leading to improved approximations of the matrix inverse 0 500 1000 1500 2000 
+
+Index of Sorted Singular Value 
+
+10 4
+
+10 1
+
+10 2
+
+> Magnitude
+
+=1e5: 0.0174 
+
+=1e6: 
+
+0.0171 =1e7: 
+
+0.0153 =1e8: 
+
+0.0161 =1e9: 
+
+0.0183 
+
+Figure 5: The curve indicates the magnitude of sorted singular values. We annotate five thresholds of the con-dition number, with the corresponding L1-norm differ-ences of the solved model weights. 
+
+when numerically solving the linear system. 
+
+5.4 Singular Value Analysis 
+
+As Section 4.3 shows, the proximity in activa-tion matrices results in a high condition number 
+
+σmax /σ min , which means inaccuracies of matrix inverse and solved weights. To deal with it, an up-per threshold of the condition number is set as C,meaning that singular values σ lower than σmax /C
+
+are truncated. Figure 5 shows the magnitude of the sorted singular values of the certain layer of Pythia-70m. Five thresholds (1e5, 1e6, 1e7, 1e8, and 1e9) and the corresponding L1-norm differ-ence of the solved model weights compared to the original weight are annotated on the curve. As the threshold is gradually increased to retain more singular values, the L1-norm difference decreases. However, further increasing of the threshold causes the difference to grow instead, as numerical errors begin to counteract the benefits. We choose C as 1e7 throughout the experiments, which we find yields the most accurate solution in most cases. Table 2: Perplexity on the Wikitext dataset. Lower perplexity indicates better performance.       
+
+> Original Model Stolen Model Finetuned Stolen Model Pythia-70m 31.81 44.46 32.43 GPT-2 21.11 47.92 21.15
+
+5.5 Perplexity of Extracted Model Weights 
+
+To evaluate how the recovered weights perform on real tasks, we compare the perplexity of the extracted model weights with that of the victim models on the wikitext dataset (Merity et al., 2017). Our results show that the extracted weights can already serve as an effective proxy model for down-stream black-box attacks. After a short fine-tuning stage (at most 6 minutes), the recovered model closely matches the victim model’s perplexity and can effectively substitute it. Such near-lossless recovery substantially increases the attack sever-ity, as it enables the attacker to obtain a model that behaves almost identically to the original and transform the following attacks into a white-box manner. 
+
+6 Related Work 
+
+Cryptography-based Secure Inference of Trans-former Models. Due to the rapidly growing con-cerns about data privacy in Transformer-based ap-plications, numerous works have investigated two-party secure inference for the Transformer model. Secure computation of nonlinear layers is signif-icantly slower than that of linear layers (Li et al., 2023; Chen et al., 2022a; Zheng et al., 2022; Hao et al., 2022; Zhang et al., 2024), and thus becomes the major performance bottleneck. This is because evaluating a nonlinear layer generally involves polynomial approximations or complex protocols, necessitating multiple communication rounds and extensive data transmission. The optimization of full-model encryption inference can be categorized into two main aspects as follows. One type of work optimizes cryptographic pro-tocols to improve the efficiency of secure infer-ence. CryptFlow2 (Rathee et al., 2020) proposes a faster millionaire protocol to reduce the commu-nication size of the comparison operation. Some methods (Rathee et al., 2021; Gupta et al., 2023; Pang et al., 2024) optimize secure lookup tables. Another type of work modifies the Transformer model to tailor the cryptographic protocols. Since accurate piecewise polynomials to approximate the nonlinear layers (Dong et al., 2023; Lu et al., 2023) is costly, some works (Chen et al., 2022b; Zeng et al., 2023; Li et al., 2023) use aggressive approx-imations of Softmax and GELU . However, such aggressive approximations lead to noticeable ac-curacy loss, even when employing knowledge dis-tillation to mitigate the decline in accuracy. Later works adopt fully homomorphic encryption and use GPU acceleration (Zhang et al., 2025; Park et al., 2025; Moon et al., 2025). Despite these optimiza-tions, nonlinear layers remain the main bottleneck. 
+
+Plaintext Nonlinear Layer Computation. Due to the nonlinear layers being inherently unfriendly to cryptographic protocols, a workaround is to let the client evaluate the nonlinear layer in plain-text (Zhang et al., 2018; Xie et al., 2019; Wong et al., 2020; Zheng et al., 2022; Liu et al., 2024; Zheng et al., 2024). These works allow the client to access intermediate activations for evaluating nonlinear layers. To prevent the exploitation of such activations, early approaches (Zhang et al., 2018; Xie et al., 2019) restrict query access or employ Bayesian neural networks; however, they remain vulnerable to extraction attacks given suf-ficient queries (Wong et al., 2020). Subsequent works (Zheng et al., 2022; Liu et al., 2024; Zheng et al., 2024; Luo et al., 2025) observe that non-linear computations are invariant to the positions of values in the activation tensor, and thus pro-pose revealing shuffled activations to the client. Although shuffling disrupts activation structure and is widely considered secure in practice, this work demonstrates an attack that can still recover model weights (up to symmetries). 
+
+7 Conclusion 
+
+Shuffling defense in the LOE inference demon-strates great potential for balancing security and performance within the Transformer model. This work revisits the shuffling defense by introducing an attack that aligns shuffled activations and sub-sequently extracts model weights. Through both theoretical analysis and experimental results, we demonstrate that our method can successfully ex-tract model weights, with the L1-norm difference from the original weights ranging from 10 −4 to 
+
+10 −2. By addressing these issues early, we aim to understand the limitations of the shuffling de-fense and contribute to its improvement, ultimately enhancing its security and reliability. Limitations 
+
+While our approach theoretically guarantees the feasibility of weight extraction and has been suc-cessfully validated on small-scale models, it re-mains subject to the inherent limitations of neu-ral network-based attacks with respect to model scale. Specifically, as the target model size in-creases, the fidelity of the extracted weights tends to degrade—resulting in reduced recovery accuracy. However, it is important to emphasize that the goal of this work is not to facilitate malicious model extraction, but rather to expose previously over-looked vulnerabilities in existing defense mecha-nisms. From this perspective, successful validation on small-scale models is sufficient to fulfill our objective. 
+
+Acknowledgements 
+
+This work was supported by the Shanghai Com-mittee of Science and Technology, China (Grant No. 24BC3200900), the Shanghai Academy of Future Internet Technology, the National Natural Science Foundation of China (NSFC) (Grant No. 62532006), and the Shanghai Qi Zhi Institute Inno-vation Program (SQZ202316). 
+
+References 
+
+Stella Biderman, Hailey Schoelkopf, Quentin Anthony, Herbie Bradley, Kyle O’Brien, Eric Hallahan, Mo-hammad Aflah Khan, Shivanshu Purohit, USVSN Sai Prashanth, Edward Raff, Aviya Skowron, Lintang Sutawika, and Oskar Van Der Wal. 2023. Pythia: a suite for analyzing large language models across training and scaling. In Proceedings of the 40th Inter-national Conference on Machine Learning , ICML’23. JMLR.org. Nicholas Carlini, Matthew Jagielski, and Ilya Mironov. 2020. Cryptanalytic extraction of neural network models. In Annual International Cryptology Confer-ence , pages 189–218. Springer. Nicholas Carlini, Daniel Paleka, Krishnamurthy Dj Dvi-jotham, Thomas Steinke, Jonathan Hayase, A Feder Cooper, Katherine Lee, Matthew Jagielski, Milad Nasr, Arthur Conmy, and 1 others. 2024. Stealing part of a production language model. arXiv preprint arXiv:2403.06634 .Tianyu Chen, Hangbo Bao, Shaohan Huang, Li Dong, Binxing Jiao, Daxin Jiang, Haoyi Zhou, Jianxin Li, and Furu Wei. 2022a. The-x: Privacy-preserving transformer inference with homomorphic encryption. In Findings of the Association for Computational Linguistics: ACL 2022 , pages 3510–3520. Tianyu Chen, Hangbo Bao, Shaohan Huang, Li Dong, Binxing Jiao, Daxin Jiang, Haoyi Zhou, Jianxin Li, and Furu Wei. 2022b. The-x: Privacy-preserving transformer inference with homomorphic encryption. 
+
+arXiv preprint arXiv:2206.00216 .Minsu Cho, Ameya Joshi, Brandon Reagen, Siddharth Garg, and Chinmay Hegde. 2022. Selective network linearization for efficient private inference. In In-ternational Conference on Machine Learning , pages 3947–3961. PMLR. Vanya Cohen and Aaron Gokaslan. 2020. Opengpt-2: Open language models and implications of generated text. XRDS: Crossroads, The ACM Magazine for Students , 27(1):26–30. David F Crouse. 2016. On implementing 2d rectan-gular assignment algorithms. IEEE Transactions on Aerospace and Electronic Systems , 52(4):1679–1696. Ye Dong, Wen-jie Lu, Yancheng Zheng, Haoqi Wu, Derun Zhao, Jin Tan, Zhicong Huang, Cheng Hong, Tao Wei, and Wenguang Cheng. 2023. Puma: Secure inference of llama-7b in five minutes. arXiv preprint arXiv:2307.12533 .Kanav Gupta, Neha Jawalkar, Ananta Mukherjee, Nis-hanth Chandran, Divya Gupta, Ashish Panwar, and Rahul Sharma. 2023. Sigma: Secure gpt inference with function secret sharing. Cryptology ePrint Archive .Meng Hao, Hongwei Li, Hanxiao Chen, Pengzhi Xing, Guowen Xu, and Tianwei Zhang. 2022. Iron: Pri-vate inference on transformers. Advances in Neural Information Processing Systems , 35:15718–15731. Zhicong Huang, Wen-jie Lu, Cheng Hong, and Jian-sheng Ding. 2022. Cheetah: Lean and fast secure two-party deep neural network inference. IACR Cryp-tol. ePrint Arch. , 2022:207. Mitsuru Ito, Akira Saito, and Takao Nishizeki. 1989. Secret sharing scheme realizing general access struc-ture. Electronics and Communications in Japan (Part III: Fundamental Electronic Science) , 72(9):56–64. Matthew Jagielski, Nicholas Carlini, David Berthelot, Alex Kurakin, and Nicolas Papernot. 2020. High ac-curacy and high fidelity extraction of neural networks. In Proceedings of the 29th USENIX Conference on Security Symposium , pages 1345–1362. Andes YL Kei and Sherman SM Chow. 2025. Shaft: Secure, handy, accurate, and fast transformer infer-ence. In Network and Distributed System Security Symposium, NDSS , volume 2025. Brian Knott, Shobha Venkataraman, Awni Hannun, Shubho Sengupta, Mark Ibrahim, and Laurens van der Maaten. 2021. Crypten: Secure multi-party computation meets machine learning. Advances in Neural Information Processing Systems , 34:4961– 4973. Dacheng Li, Hongyi Wang, Rulin Shao, Han Guo, Eric Xing, and Hao Zhang. 2023. MPCFORMER: FAST, PERFORMANT AND PRIVATE TRANSFORMER INFERENCE WITH MPC. In The Eleventh Interna-tional Conference on Learning Representations .Zhengyi Li, Kang Yang, Jin Tan, Wen-jie Lu, Haoqi Wu, Xiao Wang, Yu Yu, Derun Zhao, Yancheng Zheng, Minyi Guo, and 1 others. 2024. Nimbus: Secure and efficient two-party inference for transformers. arXiv preprint arXiv:2411.15707 .Qingxiu Liu, Qun Huang, Xiang Chen, Sa Wang, Wenhao Wang, Shujie Han, and Patrick PC Lee. 2024. Pp-stream: Toward high-performance privacy-preserving neural network inference via distributed stream processing. In Proceedings of the 40th IEEE International Conference on Data Engineering (ICDE 2024) .Wen-jie Lu, Zhicong Huang, Zhen Gu, Jingyu Li, Jian Liu, Kui Ren, Cheng Hong, Tao Wei, and WenGuang Chen. 2023. Bumblebee: Secure two-party inference framework for large transformers. Cryptology ePrint Archive .Jinglong Luo, Guanzhong Chen, Yehong Zhang, Shiyu Liu, Hui Wang, Yue Yu, Xun Zhou, Yuan Qi, and Zenglin Xu. 2025. Centaur: bridging the impossi-ble trinity of privacy, efficiency, and performance in privacy-preserving transformer inference. In Pro-ceedings of the 63rd Annual Meeting of the Associa-tion for Computational Linguistics (Volume 1: Long Papers) , pages 22751–22770. Junming Ma, Yancheng Zheng, Jun Feng, Derun Zhao, Haoqi Wu, Wenjing Fang, Jin Tan, Chaofan Yu, Benyu Zhang, and Lei Wang. 2023. {SecretFlow-SPU }: A performant and {User-Friendly } framework for {Privacy-Preserving } machine learning. In 2023 USENIX Annual Technical Conference (USENIX ATC 23) , pages 17–33. Casey Meehan, Amrita Roy Chowdhury, Kamalika Chaudhuri, and Somesh Jha. 2021. Privacy impli-cations of shuffling. In International Conference on Learning Representations .Stephen Merity, Caiming Xiong, James Bradbury, and Richard Socher. 2017. Pointer sentinel mixture mod-els. In International Conference on Learning Repre-sentations .Pratyush Mishra, Ryan Lehmkuhl, Akshayaram Srini-vasan, Wenting Zheng, and Raluca Ada Popa. 2020. Delphi: A cryptographic inference service for neu-ral networks. In 29th USENIX Security Symposium (USENIX Security 20) , pages 2505–2522. Payman Mohassel and Peter Rindal. 2018. Aby3: A mixed protocol framework for machine learning. In 
+
+Proceedings of the 2018 ACM SIGSAC conference on computer and communications security , pages 35–52. Jungho Moon, Dongwoo Yoo, Xiaoqian Jiang, and Mi-ran Kim. 2025. Thor: Secure transformer inference with homomorphic encryption. In Proceedings of the 2025 ACM SIGSAC Conference on Computer and Communications Security , pages 3765–3779. Arnold Neumaier. 1998. Solving ill-conditioned and singular linear systems: A tutorial on regularization. 
+
+SIAM review , 40(3):636–666. OpenAI. 2025. Api pricing. Qi Pang, Jinhao Zhu, Helen Möllering, Wenting Zheng, and Thomas Schneider. 2024. Bolt: Privacy-preserving, accurate and efficient inference for trans-formers. In 2024 IEEE Symposium on Security and Privacy (SP) , pages 130–130. IEEE Computer Soci-ety. Dongjin Park, Eunsang Lee, and Joon-Woo Lee. 2025. Powerformer: Efficient and high-accuracy privacy-preserving language model with homomorphic en-cryption. In Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Vol-ume 1: Long Papers) , pages 11090–11111. Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, Ilya Sutskever, and 1 others. 2019. Language models are unsupervised multitask learn-ers. OpenAI blog , 1(8):9. Deevashwer Rathee, Mayank Rathee, Rahul Kranti Ki-ran Goli, Divya Gupta, Rahul Sharma, Nishanth Chandran, and Aseem Rastogi. 2021. Sirnn: A math library for secure rnn inference. In 2021 IEEE Sym-posium on Security and Privacy (SP) , pages 1003– 1020. IEEE. Deevashwer Rathee, Mayank Rathee, Nishant Kumar, Nishanth Chandran, Divya Gupta, Aseem Rastogi, and Rahul Sharma. 2020. Cryptflow2: Practical 2-party secure inference. In Proceedings of the 2020 ACM SIGSAC Conference on Computer and Commu-nications Security , pages 325–342. Lewis Fry Richardson. 1911. Ix. the approximate arith-metical solution by finite differences of physical prob-lems involving differential equations, with an applica-tion to the stresses in a masonry dam. Philosophical Transactions of the Royal Society of London. Series A, Containing Papers of a Mathematical or Physical Character , 210(459-470):307–357. Tianxiang Shen, Ji Qi, Jianyu Jiang, Xian Wang, Siyuan Wen, Xusheng Chen, Shixiong Zhao, Sen Wang, Li Chen, Xiapu Luo, and 1 others. 2022. {SOTER }:Guarding black-box inference for general neural net-works at the edge. In 2022 USENIX Annual Technical Conference (USENIX ATC 22) , pages 723–738. Luohe Shi, Hongyi Zhang, Yao Yao, Zuchao Li, and Hai Zhao. 2024. Keep the cost down: A review on methods to optimize llm’s kv-cache consumption. 
+
+arXiv preprint arXiv:2407.18003 .Gilbert Strang. 2022. Introduction to linear algebra .SIAM. Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia Polosukhin. 2017. Attention is all you need. Advances in neural information processing systems , 30. Aladin Virmaux and Kevin Scaman. 2018. Lipschitz regularity of deep neural networks: analysis and ef-ficient estimation. Advances in Neural Information Processing Systems , 31. Harry W. H. Wong, Jack P. K. Ma, Donald P. H. Wong, Lucien K. L. Ng, and Sherman S. M. Chow. 2020. Learning model with error – exposing the hidden model of bayhenn. In Proceedings of the Twenty-Ninth International Joint Conference on Artificial Intelligence, IJCAI-20 , pages 3529–3535. Interna-tional Joint Conferences on Artificial Intelligence Organization. Main track. Peichen Xie, Bingzhe Wu, and Guangyu Sun. 2019. Bayhenn: Combining bayesian deep learning and homomorphic encryption for secure dnn inference. 
+
+arXiv preprint arXiv:1906.00639 .Mu Yuan, Lan Zhang, and Xiang-Yang Li. 2023. Secure transformer inference. arXiv preprint arXiv:2312.00025 .Wenxuan Zeng, Meng Li, Wenjie Xiong, Tong Tong, Wen-jie Lu, Jin Tan, Runsheng Wang, and Ru Huang. 2023. Mpcvit: Searching for accurate and efficient mpc-friendly vision transformer with heterogeneous attention. In Proceedings of the IEEE/CVF Interna-tional Conference on Computer Vision , pages 5052– 5063. Jiawen Zhang, Xinpeng Yang, Lipeng He, Kejia Chen, Wen-jie Lu, Yinghao Wang, Xiaoyang Hou, Jian Liu, Kui Ren, and Xiaohu Yang. 2025. Secure transformer inference made non-interactive. In NDSS .Qiao Zhang, Cong Wang, Hongyi Wu, Chunsheng Xin, and Tran V Phuong. 2018. Gelu-net: A globally encrypted, locally unencrypted deep neural network for privacy-preserved learning. In IJCAI , pages 3933– 3939. Yancheng Zhang, Mengxin Zheng, Yuzhang Shang, Xun Chen, and Qian Lou. 2024. Heprune: Fast private training of deep neural networks with encrypted data pruning. Advances in Neural Information Processing Systems , 37:51063–51084. Fei Zheng, Chaochao Chen, Zhongxuan Han, and Xi-aolin Zheng. 2024. Permllm: Private inference of large language models within 3 seconds under wan. 
+
+arXiv preprint arXiv:2405.18744 .Fei Zheng, Chaochao Chen, Xiaolin Zheng, and Mingjie Zhu. 2022. Towards secure and practical machine learning via secret sharing and random permutation. 
+
+Knowledge-Based Systems , 245:108609. 
+
+Algorithm 1 Weight Extraction Attack 
+
+Input: Sequence S;{Prepare aligned dataset}  
+
+> 1:
+
+Initialize n as an appropriate value greater than hidden dimension h; 
+
+> 2:
+
+for i = 1 to n do  
+
+> 3:
+
+sf (x(1)  
+
+> i
+
+, π (i)1 ), sf (x(2)  
+
+> i
+
+, π (i)2 ), · · · , y(L) 
+
+> i
+
+=
+
+Oπ(S); 
+
+> 4:
+
+end for  
+
+> 5:
+
+for l = 1 to L − 1 do  
+
+> 6:
+
+Align the dataset {sf (x(l) 
+
+> i
+
+, π (l) 
+
+> i
+
+)} using π(l)
+
+> k
+
+as the reference permutation and obtain 
+
+{sf (x(l) 
+
+> i
+
+, π (l) 
+
+> k
+
+)}; 
+
+> 7:
+
+X(l)π(l) 
+
+> k
+
+= concate ({{ sf (x(l) 
+
+> i
+
+, π (l) 
+
+> k
+
+)}); 
+
+> 8:
+
+Compute the pseudo-inverse π(l)− 
+
+> k
+
+X(l)−
+
+; 
+
+> 9:
+
+W(l)′
+
+= π(l)− 
+
+> k
+
+X(l)−
+
+X(l+1) π(l+1)  
+
+> k
+
+=
+
+π(l)− 
+
+> k
+
+W(l)π(l+1)  
+
+> k
+
+, where W(l) is the origi-nal weights;  
+
+> 10:
+
+end for Output: Weight set {W(l)′
+
+} of all linear layers; 
+
+A Appendix A Complete Attack Algorithm 
+
+With the insight of breaking shuffling defense and constructing proximate inputs through random truncation error, we formally describe the attack algorithm that can extract the model weights of the Transformer model. The adversary first decides the number of queries 
+
+n. Note that the query number should be at least the greatest size of the model, i.e., 4∗dmodel , which is the dimension of the FFN module. This is be-cause solving the linear system requires computing the inverse of the aligned input vectors. Thus, n
+
+should be greater than 4∗dmodel for accurate matrix inverse (line 1). Then, the adversary keeps feeding the model with the same prompt S. Due to the secure trun-cation, in operations such as the LayerNorm in the embedding layer, a small perturbation is introduced to the activation vectors, which the adversary ex-pects to construct close activations. In this way, the client collects a dataset that includes the shuf-fled intermediate activations of all linear layers 
+
+{sf (x(l) 
+
+> i
+
+, π (l) 
+
+> i
+
+)}, for i ∈ [n] and l ∈ [L] (lines 2-4). Note that the model may generate many tokens in a response. We only collect tokens at the same generation step. With the dataset, the adversary can align them us-ing the method in Section 4. For each layer, the ad-versary arbitrarily selects the permutation scheme of a vector as the reference, which we refer to as 
+
+π(l) 
+
+> k
+
+, and then aligns the other vectors according to π(l) 
+
+> k
+
+. The aligned vectors are then concatenated as a matrix. The model weights can be computed using the inverse of the input matrix (lines 5-10). Although the obtained weights W(l)′
+
+differ from the original weights W(l) up to a row and column shuffling and this shuffling is unknown to the adver-sary, the solved weights still perform the original functionality as the consecutive layer adopts the same shuffling scheme. 
+
+B Proof of the Equivalence between Equation (3) and Equation (4) 
+
+This section demonstrates the equivalence between Equation (3) and Equation (4). We first recall some notations. x′
+
+> a
+
+, x′ 
+
+> b
+
+∈ Rh are two differently shuffled but value-close activation vectors. M ∈ { 0, 1}h×h
+
+is a permutation matrix that has only single one in each row or column. We begin from the Equation (3) 
+
+∥x′ 
+
+> a
+
+− x′
+
+> b
+
+M∥22 = Phi=1 
+
+
+
+x′
+
+> a
+
+[i] − Phj=1 x′
+
+> b
+
+[j]M[j, i ]
+
+2
+
+.
+
+(8) Since M only has single one in each column, we have Phj=1 x′
+
+> b
+
+[j]M[j, i ] = x′
+
+> b
+
+[σ(i)] , where σ(i) is an index function indicates the row index of 1 in 
+
+ith column of M. Then Equation (8) becomes               
+
+> hX
+> i=1
+>  x′
+> a[i]−x′
+> b[σ(i)] 2
+> =
+> hX
+> i=1
+>  x′
+> a[i]−x′
+> b[σ(i)] 2+ 0 ∗
+> hX
+> j=1 ,j ̸=i
+>  x′
+> a[j]−x′
+> b[σ(j)] 2
+> 
+> =X
+> i,j ∈H
+> M[i, j ]·(x′
+> a[i]−x′
+> b[j]) 2.
+
+(9) This is exact the objective P 
+
+> i,j ∈H
+
+M[i, j ]⊙D[i, j ]
+
+in Equation (4). □
+
+C Equivalent Functionality of Shuffled Weights 
+
+As stated in Section 4.3, for shuffled weights of consecutive layers, functional equivalence with the original weights is preserved if the output dimen-sion of the preceding layer and the input dimension of the subsequent layer adhere to the same permu-tation. We use two consecutive layers to illustrate this and the same idea can be extended to the entire model. Let W(l) and W(l+1) denote the weights of two consecutive layers. For a given input vector x(l) to layer l, the forward propagation is expressed as 
+
+x(l+2) = g(x(l)W(l))W(l+1) (10) The g(·) are nonlinear layers, such as the GELU ,
+
+Softmax , or Layernorm .In the proposed attack, the solved weights differ from the original weights up to a row-wise and column-wise shuffling, which are 
+
+W(l)′
+
+= π(l)−
+
+W(l)π(l+1) and W(l+1) ′
+
+=
+
+π(l+1) −
+
+W(l+1) π(l+2) . The input to W(l) is 
+
+x(l)π(l) since the output channel of prior weights 
+
+W(l−1) ′
+
+= π(l−1) −
+
+W(l−1) π(l) is also shuffled. Then the forward propagation using the equivalent weights is 
+
+g(x(l)π(l)W(l)′
+
+)W(l+1) ′
+
+=g(x(l)π(l)π(l)−
+
+W(l)π(l+1) )π(l+1) −
+
+W(l+1) π(l+2) 
+
+=g(x(l)W(l))π(l+1) π(l+1) −
+
+W(l+1) π(l+2) 
+
+=g(x(l)W(l))W(l+1) π(l+2) 
+
+=x(l+2) π(l+2) 
+
+(11) The equality in the third line is because the permu-tation invariance property of the activation function 
+
+g(·), allowing the permutation matrix π(l+1) to be factored out. Subsequently, the permuted output 
+
+x(l+2) π(l+2) serves as input to the next shuffled weight matrix W(l+2) ′
+
+= π(l+2) −1
+
+W(l+2) π(l+3) .This formulation ensures that the same permutation between the output dimension of W(l) and the in-put dimension of W(l+1) preserves the functional equivalence of the shuffled weight matrices. 
+
+D Dealing with the Multi-head Attention 
+
+Recovering weights becomes more complicated when the matrix multiplication of activations in the attention module is privately computed in some studies (Zheng et al., 2024). In such a case, al-though the adversary cannot directly obtain the in-put and output of the linear layer, the activation ma-trix multiplication still preserves the linear system, allowing for the derivation of equivalent weights that function identically to the original linear lay-ers. However, the multi-head attention mechanism increases the complexities of the linear system, as detailed below. For ease of discussion, we first define additional notations. The weight of layer Linear qkv is decomposed into weights Wq, Wk,and Wv. For the token being generated, the input and output of Wq are x and q. For prompt and already generated tokens, the input matrix of Wk
+
+and Wv are denoted by Xpre with output K and 
+
+V, which are known as the KV cache. 
+
+Equivalent Weights of Wq and Wk. For the hth 
+
+attention head, we define the equivalent weights 
+
+Whqk = Whq WhkT . Different heads represent the independent sub-problems that can be solved in the same way. The adversary holds the input x
+
+to Wq, the prefix input Xpre to Wk, and the in-put s of the softmax (override the notation mean-ing model input in prior sections). According to Equation (1) , their relationship is formulated as 
+
+sh = xW hq WhkT XTpre . The problem is still a lin-ear problem through the transformation: 
+
+sh = xW hqk XTpre = ( Xpre ⊗ x)T vec( Whqk ),
+
+(12) where the ⊗ is the Kronecker product and vec( ·)
+
+means vectorizing the matrix. The adversary can first compute the Kronecker product, resulting in a matrix with a hidden dimension equal to the square of the model’s hidden dimension. Then, it becomes the same linear system as Equation (6) to solve the equivalent weight Whqk .
+
+Equivalent Weights of Wv and Wo. The equiv-alent weight for Wv and Wo is given by Wvo =
+
+W1
+
+> v
+
+W1
+
+> o
+
+W2
+
+> v
+
+W2
+
+> o
+
+· · · 
+
+WHv WHo
+
+, where the superscripts indicate the head index. In this case, the adversary holds the prefix input Xpre to Wv, the softmax out-put p, and the Wo output o. Due to the multi-head mechanism, the original relationship o =
+
+p · Xpre Wv · Wo in Equation (1) transforms into:                            
+
+> o=Concat (head 1, . . . , head H)∗Wo
+> =p1Xpre W1
+> v|p2Xpre W2
+> v|. . . |pHXpre WHv
+> ∗Wo
+> =p1Xpre |p2Xpre |. . . |pHXpre
+> ∗
+> 
+> W1
+> vW1
+> o
+> W2
+> vW2
+> o
+> · · ·
+> WHvWHo
+> 
+
+(13) Note that the p1Xpre | . . . | pH Xpre 
+
+ is a vector whose dimension is H times the model dimension. Finally, the equivalent weight Wvo is solved in the same way as Section 4.3. 
+
+Evaluation. Figure 6 shows the results when the activation matrix multiplications are privately com-puted. Results are presented only for the equivalent weight Wvo . The L1-norm differences for Pythia-70m are smaller than 0.004 and the differences for GPT-2 are smaller than 0.14. The larger differences in GPT-2 are due to its relatively higher number of attention heads (12), making the linear system more challenging to solve. Recovering equivalent weights Wqk remains a challenge. Computing the Kronecker product makes the input dimension in Equation (12) become the square of the model di-mension, such as 768 2. We leave this for future work. 
+
+E Possible Defenses 
+
+Our attack identifies the weaknesses of the shuf-fling defense in the existing LOE inference. We also briefly list corresponding defense that can mit-igate the proposed attack. 
+
+Noise Addition. The first defense strategy is to in-crease the alignment error by adding noise. Adding noise is a common technique used in neural net-work defense to obscure leaked information. How-ever, noise addition is generally constrained within a threshold to prevent degradation of model ac-curacy, meaning this approach can only partially mitigate the attack. 
+
+Partial Plaintext Nonlinear Layer Computa-tion. The second strategy is to make only part of the nonlinear layers publicly computed. We ob-serve that the primary computational cost mainly arises from the Softmax and GELU layers, while the Layernorm is much faster. This is because the nonlinear operation, the reciprocal square root, of the Layernorm only computes once per vector (Lu et al., 2023; Pang et al., 2024). The defender can tolerate a slight increase in latency to make the 
+
+Layernorm is computed privately. This approach ensures that for all types of linear layers in the Transformer decoder, either the input or output re-mains unknown to the adversary, making weight recovery impossible. 0 1 2 3 4 5
+
+1
+
+2
+
+3
+
+4
+
+5
+
+> Recovery difference
+
+1e 3 
+
+> 0.0017
+> 0.0028
+> 0.0040 0.0041
+> 0.0011
+> 0.0018
+
+Pythia-70m: Wvo 
+
+FXP Precision 14 
+
+FXP Precision 16 
+
+FXP Precision 18 0 2 4 6 8 10 
+
+0.5 
+
+1.0 
+
+1.5 
+
+> Recovery difference
+
+1e 1     
+
+> 0.030
+> 0.054 0.048 0.047 0.053 0.052
+> 0.075 0.072
+> 0.081
+> 0.100
+> 0.111
+> 0.140
+
+GPT-2: Wvo 
+
+FXP Precision 14 
+
+FXP Precision 16 
+
+FXP Precision 18 Figure 6: The attacking results on the equivalent weights Wvo .

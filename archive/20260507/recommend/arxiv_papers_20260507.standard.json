@@ -1,0 +1,131 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-07T20:34:41.619595+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2605.04901v1",
+      "title": "On the (In-)Security of the Shuffling Defense in the Transformer Secure Inference",
+      "abstract": "For Transformer models, cryptographically secure inference ensures that the client learns only the final output, while the server learns nothing about the client's input. However, securely computing nonlinear layers remains a major efficiency bottleneck due to the substantial communication rounds and data transmission required. To address this issue, prior works reveal intermediate activations to the client, allowing nonlinear operations to be computed in plaintext. Although this approach significantly improves efficiency, exposing activations enables adversaries to extract model weights. To mitigate this risk, existing works employ a shuffling defense that reveals only randomly permuted activations to the client. In this work, we show that the shuffling defense is not as robust as previously claimed. We propose an attack that aligns differently shuffled activations to a common permutation and subsequently exploits them to extract model weights. Experiments on Pythia-70m and GPT-2 demonstrate that the proposed attack can align shuffled activations with mean squared errors ranging from $10^{-9}$ to $10^{-6}$. With a query cost of approximately \\$1, the adversary can recover model weights with L1-norm differences ranging from $10^{-4}$ to $10^{-2}$ compared to the oracle weights.",
+      "authors": [
+        "Zhengyi Li",
+        "Yakai Wang",
+        "Kang Yang",
+        "Yu Yu",
+        "Jiaping Gui",
+        "Yu Feng",
+        "Ning Liu",
+        "Minyi Guo",
+        "Jingwen Leng"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-05-06T13:31:15+00:00",
+      "link": "https://arxiv.org/pdf/2605.04901v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "cryptographically secure inference for Transformer models and nonlinear layer efficiency",
+      "llm_evidence_cn": "Transformer模型的密码学安全推理及非线性层效率",
+      "llm_evidence": "Transformer模型的密码学安全推理及非线性层效率",
+      "canonical_evidence": "Transformer模型的密码学安全推理及非线性层效率",
+      "llm_tldr_en": "Evaluates the security of shuffling defenses in secure Transformer inference against weight extraction attacks.",
+      "llm_tldr_cn": "评估了Transformer安全推理中混淆防御在对抗权重提取攻击时的安全性。",
+      "llm_tldr": "评估了Transformer安全推理中混淆防御在对抗权重提取攻击时的安全性。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2605.04858v1",
+      "title": "A Pragmatic Comparison of Cryptographic Computation Technologies for Machine Learning",
+      "abstract": "As security demands increase, the importance of secure computation technologies grows, yet these technologies can often seem overwhelming to practitioners. Furthermore, many approaches focus only on a single technology, potentially overlooking superior alternatives. This work aims to address the issue of selecting the right technology for secure computation by presenting a comparative analysis of two highly relevant cryptographic methods and their software implementations, with a particular focus on machine learning. Firstly, we provide a theoretical summary and comparison of the secure computation paradigms of secure multi-party computation (SMPC) and fully homomorphic encryption (FHE). We outline the advantages and limitations of the protocols, as well as the relevant open-source software implementations. Secondly, we present the results of extensive benchmarking of the main software frameworks identified for machine learning operations and models. Regarding the current state of the art in FHE, we observe that it outperforms SMPC for regressions. Additionally it may be faster for simple dense networks using GPUs or Hybrid Models. Conversely, SMPC showed superior performance for complex models such as CNNs. Our results should pave the way for more technology-agnostic benchmarking of secure computation technologies for machine learning, providing guidance for practitioners looking to adopt these technologies.",
+      "authors": [
+        "Marcus Taubert",
+        "Adam Skuta",
+        "Thomas Loruenser"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-05-06T12:54:32+00:00",
+      "link": "https://arxiv.org/pdf/2605.04858v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Comparison of SMPC and FHE for secure machine learning computation",
+      "llm_evidence_cn": "安全机器学习计算中SMPC与FHE的对比分析",
+      "llm_evidence": "安全机器学习计算中SMPC与FHE的对比分析",
+      "canonical_evidence": "安全机器学习计算中SMPC与FHE的对比分析",
+      "llm_tldr_en": "Provides a comparative analysis of SMPC and FHE paradigms specifically for secure machine learning applications.",
+      "llm_tldr_cn": "针对安全机器学习应用，对安全多方计算（SMPC）和全同态加密（FHE）范式进行了对比分析。",
+      "llm_tldr": "针对安全机器学习应用，对安全多方计算（SMPC）和全同态加密（FHE）范式进行了对比分析。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.05169v1",
+      "title": "Private Contiguous-Block Retrieval",
+      "abstract": "We introduce the \\emph{Private Contiguous-Block Retrieval (PCBR)} problem, where a user retrieves a block of $D$ messages with contiguous indices from $K$ replicated messages stored across $N$ non-colluding servers, while hiding the identity of the requested block from each server. This problem is motivated by storage and streaming systems where files are split into ordered segments. Unlike multi-message Private Information Retrieval (MPIR), where any $D$-subset may be requested, PCBR restricts the demand family to contiguous blocks. This relaxation raises a natural question: Can this structure be exploited to improve retrieval efficiency? We answer this question for balanced $\\{0,1\\}$-linear schemes. We establish an upper bound on the achievable retrieval rate for all problem parameters, derive a lower bound on the subpacketization level required by any scheme achieving the rate upper bound, and construct a rate-optimal scheme whose subpacketization level matches the lower bound for a broad range of problem parameters. Although the optimal PCBR rate coincides with the best-known MPIR rate converse bound, existing MPIR schemes can be suboptimal for PCBR and can require a much larger subpacketization level. In contrast, our scheme exploits the contiguous-block structure to achieve the optimal rate with reduced subpacketization.",
+      "authors": [
+        "Maha Issa",
+        "Anoosheh Heidarzadeh"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-05-06T17:37:59+00:00",
+      "link": "https://arxiv.org/pdf/2605.05169v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Private retrieval from replicated messages across non-colluding servers",
+      "llm_evidence_cn": "从非共谋服务器的副本消息中进行隐私检索",
+      "llm_evidence": "从非共谋服务器的副本消息中进行隐私检索",
+      "canonical_evidence": "从非共谋服务器的副本消息中进行隐私检索",
+      "llm_tldr_en": "Investigates Private Contiguous-Block Retrieval to improve efficiency in multi-server PIR settings.",
+      "llm_tldr_cn": "研究了私有连续块检索，以提高多服务器PIR设置中的效率。",
+      "llm_tldr": "研究了私有连续块检索，以提高多服务器PIR设置中的效率。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
