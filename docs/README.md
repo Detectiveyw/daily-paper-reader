@@ -6,31 +6,35 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-07
-- 运行时间：2026-05-07 20:35:37 UTC
+- 最新运行日期：2026-05-08
+- 运行时间：2026-05-08 20:43:50 UTC
 - 运行状态：成功
-- 本次总论文数：3
-- 精读区：1
-- 速读区：2
+- 本次总论文数：4
+- 精读区：0
+- 速读区：4
 
 ### 今日简报（AI）
-今日深度评估 Transformer 安全推理机制，重点剖析隐私计算防御的实战安全性。
-研究揭示了 Transformer 洗牌防御方案的潜在漏洞，并系统对比了主流机器学习加密计算技术的优劣。
-建议开发者在部署安全推理时警惕“洗牌”类防御的局限性，优先选择经过严谨论证的加密计算方案。
-- 详情：[/202605/07/README](/202605/07/README)
+今日深入探讨了 AI 隐私保护与安全架构，重点覆盖视频识别加密、智能体机密计算及工作流验证三大前沿方向。
+最值得关注的是兼顾压缩效率的视频动作识别加密方案，以及针对 Agent 处理敏感数据时的机密计算防御体系。
+建议读者关注如何在保障模型性能的同时，利用硬件级安全技术与新型加密算法构建端到端的隐私 AI 应用。
+- 详情：[/202605/08/README](/202605/08/README)
 
 ### 精读区论文标签
-1. [On the (In-)Security of the Shuffling Defense in the Transformer Secure Inference](/202605/07/2605.04901v1-on-the-in-security-of-the-shuffling-defense-in-the-transformer-secure-inference)  
-   标签：评分：9.0/10、query:fss-llm
-   evidence：Transformer模型的密码学安全推理及非线性层效率
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [A Pragmatic Comparison of Cryptographic Computation Technologies for Machine Learning](/202605/07/2605.04858v1-a-pragmatic-comparison-of-cryptographic-computation-technologies-for-machine-learning)  
+1. [CFE-PPAR: Compression-friendly encryption for privacy-preserving action recognition leveraging video transformers](/202605/08/2605.05692v1-cfe-ppar-compression-friendly-encryption-for-privacy-preserving-action-recognition-leveraging-video-transformers)  
    标签：评分：7.0/10、query:fss-llm
-   evidence：安全机器学习计算中SMPC与FHE的对比分析
-2. [Private Contiguous-Block Retrieval](/202605/07/2605.05169v1-private-contiguous-block-retrieval)  
+   evidence：基于加密的视频Transformer隐私保护推理
+2. [Certified Purity for Cognitive Workflow Executors: From Static Analysis to Cryptographic Attestation](/202605/08/2605.01037v2-certified-purity-for-cognitive-workflow-executors-from-static-analysis-to-cryptographic-attestation)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：从非共谋服务器的副本消息中进行隐私检索
+   evidence：认知工作流的密码学证明与可验证执行
+3. [When Agents Handle Secrets: A Survey of Confidential Computing for Agentic AI](/202605/08/2605.03213v1-when-agents-handle-secrets-a-survey-of-confidential-computing-for-agentic-ai)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：用于安全智能体AI和LLM推理的机密计算
+4. [Private Structured-Subset Retrieval](/202605/08/2605.05160v1-private-structured-subset-retrieval)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：从复制的非共谋服务器中进行隐私检索
 
 
 <div class="dpr-home-promo-card">

@@ -1,0 +1,163 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-08T20:43:31.000260+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.05692v1",
+      "title": "CFE-PPAR: Compression-friendly encryption for privacy-preserving action recognition leveraging video transformers",
+      "abstract": "Privacy-preserving action recognition (PPAR) enables machines to understand human activities in videos without revealing sensitive visual content. Among the various strategies for PPAR, encryption-based methods achieve strong privacy protection while maintaining high recognition performance. However, these methods lead to a catastrophic decrease in recognition performance and visual quality when the encrypted videos are compressed. That is, the previous methods are not compression-friendly. To address these issues, in this paper, we propose the first compression-friendly encryption method for PPAR, called CFE-PPAR. In CFE-PPAR, videos encrypted with secret keys can be directly recognized by a video transformer, which uses parameters transformed by the same keys as those used for video encryption. In experiments, it is verified that CFE-PPAR outperforms previous methods on the UCF101 and HMDB51 datasets under Motion-JPEG and H.264 compression.",
+      "authors": [
+        "Haiwei Lin",
+        "Shoko Imaizumi",
+        "Hitoshi Kiya"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.CR"
+      ],
+      "published": "2026-05-07T05:32:37+00:00",
+      "link": "https://arxiv.org/pdf/2605.05692v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Encryption-based privacy-preserving inference for video transformers",
+      "llm_evidence_cn": "基于加密的视频Transformer隐私保护推理",
+      "llm_evidence": "基于加密的视频Transformer隐私保护推理",
+      "canonical_evidence": "基于加密的视频Transformer隐私保护推理",
+      "llm_tldr_en": "Introduces a compression-friendly encryption method for private action recognition using video transformers.",
+      "llm_tldr_cn": "为视频Transformer引入了一种压缩友好的加密方法，用于隐私保护的动作识别。",
+      "llm_tldr": "为视频Transformer引入了一种压缩友好的加密方法，用于隐私保护的动作识别。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.01037v2",
+      "title": "Certified Purity for Cognitive Workflow Executors: From Static Analysis to Cryptographic Attestation",
+      "abstract": "We present a certified purity architecture that converts governance enforcement in cognitive workflow systems from a runtime convention into a structural capability boundary. A prior three-layer governance architecture proves governance completeness, provenance completeness, and the impossibility of ungoverned effects, conditional on the pure module constraint: that step executors cannot perform effects. That constraint was enforced by module import graph analysis, which is insufficient against adversarial bypass on the BEAM virtual machine. This paper closes the gap through four mechanisms: (1) a restricted WebAssembly compilation target where effect-producing instructions are structurally absent; (2) purity certificates, cryptographically signed proofs binding executor binaries to their import classifications; (3) a runtime verification gate that rejects uncertified executors before they enter the governance pipeline; and (4) portable governance credentials via remote attestation for cross-organizational verification. We prove four theorems: structural purity by construction, bypass elimination for all five BEAM bypass classes, certificate integrity, and gate completeness. The guarantee holds relative to an explicit Trusted Computing Base. Evaluation on four implemented executors shows verification latency of 39--42 us, full plan cycle under 400 us, runtime overhead under 0.4% of a 100 ms HTTP request, and zero determinism divergences across repeated invocations.",
+      "authors": [
+        "Alan L. McCann"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.PL"
+      ],
+      "published": "2026-05-01T19:04:37+00:00",
+      "link": "https://arxiv.org/pdf/2605.01037v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Cryptographic attestation and verifiable execution for cognitive workflows",
+      "llm_evidence_cn": "认知工作流的密码学证明与可验证执行",
+      "llm_evidence": "认知工作流的密码学证明与可验证执行",
+      "canonical_evidence": "认知工作流的密码学证明与可验证执行",
+      "llm_tldr_en": "Develops a certified purity architecture using cryptographic attestation for secure workflow execution.",
+      "llm_tldr_cn": "开发了一种使用密码学证明的认证纯度架构，用于安全的工作流执行。",
+      "llm_tldr": "开发了一种使用密码学证明的认证纯度架构，用于安全的工作流执行。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.03213v1",
+      "title": "When Agents Handle Secrets: A Survey of Confidential Computing for Agentic AI",
+      "abstract": "Agentic AI systems, specifically LLM-driven agents that plan, invoke tools, maintain persistent memory, and delegate tasks to peer agents via protocols such as MCP and A2A, introduce a threat surface that differs materially from standalone model inference. Agents accumulate sensitive context, hold credentials, and operate across pipelines no single party fully controls, enabling prompt injection, context exfiltration, credential theft, and inter-agent message poisoning. Current defenses operate entirely within the software stack and can be silently bypassed by a sufficiently privileged adversary such as a compromised cloud operator. Confidential computing (CC) offers a hardware-rooted alternative: Trusted Execution Environments (TEEs) isolate agent code and data from privileged system software, while remote attestation enables verifiable trust across distributed deployments. This survey synthesizes the design space in four parts: (i) a unified taxonomy of six TEE platforms (Intel SGX, Intel TDX, AMD SEV-SNP, ARM TrustZone, ARM CCA, and NVIDIA H100 CC) covering deployment roles and performance tradeoffs; (ii) an agent-centric threat model spanning perception, planning, memory, action, and coordination layers mapped to nine security goals; (iii) a comparative survey of CC-based defenses distinguishing findings that transfer from single-call inference versus what requires new agentic designs; and (iv) six open challenges including compound attestation for multi-hop agent chains and GPU-TEE performance at LLM scale. While several hardware trust primitives appear mature enough for targeted deployments, no broadly established end-to-end framework yet binds them into a coherent security substrate for production agentic AI.",
+      "authors": [
+        "Javad Forough",
+        "Marios Kogias",
+        "Hamed Haddadi"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-05-04T23:09:16+00:00",
+      "link": "https://arxiv.org/pdf/2605.03213v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "confidential computing for secure agentic AI and LLM inference",
+      "llm_evidence_cn": "用于安全智能体AI和LLM推理的机密计算",
+      "llm_evidence": "用于安全智能体AI和LLM推理的机密计算",
+      "canonical_evidence": "用于安全智能体AI和LLM推理的机密计算",
+      "llm_tldr_en": "Surveys hardware-rooted confidential computing (TEEs) to protect secrets in LLM-driven agentic systems.",
+      "llm_tldr_cn": "调研了基于硬件的机密计算（TEE）在保护LLM驱动的智能体系统秘密方面的应用。",
+      "llm_tldr": "调研了基于硬件的机密计算（TEE）在保护LLM驱动的智能体系统秘密方面的应用。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.05160v1",
+      "title": "Private Structured-Subset Retrieval",
+      "abstract": "We introduce the \\emph{Private Structured-Subset Retrieval (PSSR)} problem, where a user retrieves $D$ messages from a database of $K$ messages replicated across $N$ non-colluding servers, and the demand is restricted to a known structured family of $D$-subsets. This formulation generalizes classical Private Information Retrieval (PIR) and multi-message PIR (MPIR), and captures settings where the demand space is constrained by application-specific structure. Focusing on balanced ${\\{0,1\\}}$-linear schemes, we derive converse bounds on the maximum retrieval rate and minimum subpacketization level, and develop an optimization-based framework for constructing schemes for general structured demand families. Our results show that, for certain families, the PSSR rate converse bound can exceed the best-known MPIR rate upper bound; when this PSSR bound is achievable, MPIR rate-optimal schemes become suboptimal for those families. By exploiting demand structure, our PSSR schemes achieve higher retrieval rates for many families and never underperform the best-known balanced ${\\{0,1\\}}$-linear MPIR schemes. Our results also show that demand structure can reduce the required subpacketization even when the optimal rate is unchanged. Our parallel work on contiguous-demand families further illustrates the scope of this framework by yielding rate-optimal schemes with substantially smaller subpacketization and no field-size restrictions, improving upon MPIR-based schemes.",
+      "authors": [
+        "Maha Issa",
+        "Anoosheh Heidarzadeh"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-05-06T17:30:40+00:00",
+      "link": "https://arxiv.org/pdf/2605.05160v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Private retrieval from replicated non-colluding servers",
+      "llm_evidence_cn": "从复制的非共谋服务器中进行隐私检索",
+      "llm_evidence": "从复制的非共谋服务器中进行隐私检索",
+      "canonical_evidence": "从复制的非共谋服务器中进行隐私检索",
+      "llm_tldr_en": "Generalizes Private Information Retrieval for structured subsets across non-colluding servers.",
+      "llm_tldr_cn": "推广了非共谋服务器上结构化子集的隐私信息检索技术。",
+      "llm_tldr": "推广了非共谋服务器上结构化子集的隐私信息检索技术。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
