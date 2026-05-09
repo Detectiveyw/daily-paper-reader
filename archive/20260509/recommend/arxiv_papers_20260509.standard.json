@@ -1,0 +1,90 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-09T20:39:02.906710+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.03213v2",
+      "title": "When Agents Handle Secrets: A Survey of Confidential Computing for Agentic AI",
+      "abstract": "Agentic AI systems, specifically LLM-driven agents that plan, invoke tools, maintain persistent memory, and delegate tasks to peer agents via protocols such as MCP and A2A, introduce a threat surface that differs materially from standalone model inference. Agents accumulate sensitive context, hold credentials, and operate across pipelines no single party fully controls, enabling prompt injection, context exfiltration, credential theft, and inter-agent message poisoning. Current defenses operate entirely within the software stack and can be silently bypassed by a sufficiently privileged adversary such as a compromised cloud operator. Confidential computing (CC) offers a hardware-rooted alternative: Trusted Execution Environments (TEEs) isolate agent code and data from privileged system software, while remote attestation enables verifiable trust across distributed deployments. This survey synthesizes the design space in four parts: (i) a unified taxonomy of six TEE platforms (Intel SGX, Intel TDX, AMD SEV-SNP, ARM TrustZone, ARM CCA, and NVIDIA H100 CC) covering deployment roles and performance tradeoffs; (ii) an agent-centric threat model spanning perception, planning, memory, action, and coordination layers mapped to nine security goals; (iii) a comparative survey of CC-based defenses distinguishing findings that transfer from single-call inference versus what requires new agentic designs; and (iv) six open challenges including compound attestation for multi-hop agent chains and GPU-TEE performance at LLM scale. While several hardware trust primitives appear mature enough for targeted deployments, no broadly established end-to-end framework yet binds them into a coherent security substrate for production agentic AI.",
+      "authors": [
+        "Javad Forough",
+        "Marios Kogias",
+        "Hamed Haddadi"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-05-04T23:09:16+00:00",
+      "link": "https://arxiv.org/pdf/2605.03213v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "confidential computing and TEEs for secure agentic AI and LLM inference",
+      "llm_evidence_cn": "用于安全智能体AI和大模型推理的机密计算与TEE",
+      "llm_evidence": "用于安全智能体AI和大模型推理的机密计算与TEE",
+      "canonical_evidence": "用于安全智能体AI和大模型推理的机密计算与TEE",
+      "llm_tldr_en": "Surveys confidential computing and TEEs as hardware-rooted solutions for securing LLM-driven agentic systems.",
+      "llm_tldr_cn": "综述了机密计算和TEE作为硬件根源方案在保障大模型驱动智能体系统安全中的应用。",
+      "llm_tldr": "综述了机密计算和TEE作为硬件根源方案在保障大模型驱动智能体系统安全中的应用。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.05751v1",
+      "title": "A Privacy-Preserving Machine Learning Framework for Edge Intelligence: An Empirical Analysis",
+      "abstract": "As Edge Intelligence (EI) becomes increasingly prevalent in domains such as smart healthcare, manufacturing, and critical infrastructure, ensuring data privacy while maintaining system efficiency is a growing challenge. This paper presents a new privacy-preserving machine learning (PPML) framework tailored for EI applications, including a four-layer system architecture and training and inference algorithms. We focus on three leading approaches: Differential Privacy (DP), Secure Multi-party Computation (SMC), and Fully Homomorphic Encryption (FHE), and assess their impact on key performance metrics, including model accuracy, response time, and energy consumption. Results from real implementation and extensive trace-based simulations of inference tasks show that DP generally preserves throughput and latency close to plaintext baselines, while accuracy drops with model complexity (up to 35 percent on AlexNet and under 18 percent on LeNet for FordA). SMC performance is driven by communication; network bandwidth and round complexity determine end-to-end latency. For AlexNet, increasing link capacity from 250 Mbps to 500 Mbps reduces latency by about 30 percent. FHE is highly sensitive to model structure and numerical precision bit width, with tighter parameters imposing substantial compute overhead; we observe roughly a 1000 times increase in response time compared to DP. Beyond efficiency, DP shifts the privacy-utility-extractability frontier by reducing the attacker's data efficiency in black-box model stealing, whereas SMC and FHE, while protecting inputs and parameters during inference, require complementary output controls to achieve similar resistance to extraction. These findings provide critical insights into the trade-offs between privacy, performance, and resource efficiency in edge computing scenarios.",
+      "authors": [
+        "Quoc Lap Trieu",
+        "Bahman Javadi",
+        "Jim Basilakis"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-05-07T06:43:51+00:00",
+      "link": "https://arxiv.org/pdf/2605.05751v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "PPML framework using SMC and FHE for inference",
+      "llm_evidence_cn": "使用SMC和FHE进行推理的隐私保护机器学习框架",
+      "llm_evidence": "使用SMC和FHE进行推理的隐私保护机器学习框架",
+      "canonical_evidence": "使用SMC和FHE进行推理的隐私保护机器学习框架",
+      "llm_tldr_en": "Evaluates SMC and FHE for private inference, providing a methodological bridge for secure computation protocols.",
+      "llm_tldr_cn": "评估了用于隐私推理的SMC和FHE，为安全计算协议提供了方法论桥梁。",
+      "llm_tldr": "评估了用于隐私推理的SMC和FHE，为安全计算协议提供了方法论桥梁。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
