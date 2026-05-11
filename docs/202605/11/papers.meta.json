@@ -1,0 +1,23 @@
+{
+  "label": "2026-05-11",
+  "date": "2026-05-11",
+  "generated_at": "2026-05-11T20:55:49",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202605/11/2605.02187v1-when-alignment-isnt-enough-response-path-attacks-on-llm-agents",
+      "section": "quick",
+      "title_en": "When Alignment Isn't Enough: Response-Path Attacks on LLM Agents",
+      "authors": "Mingyu Luo, Zihan Zhang, Zesen Liu, Yuchong Xie, Zhixiang Zhang, Dung Hiu Hilton Yeung, Wai Ip Lai, Ping Chen, Ming Wen, Dongdong She",
+      "date": "2026-05-04",
+      "pdf": "https://arxiv.org/pdf/2605.02187v1",
+      "score": "6.0",
+      "evidence": "LLM 智能体架构中的完整性缺陷",
+      "tldr": "本研究探讨了LLM智能体在BYOK架构下的安全风险，发现恶意第三方中继可在模型生成后、执行前篡改响应，从而绕过模型对齐机制。作者提出了中继篡改攻击（RTA），通过策略性重写和隐蔽恢复手段操控智能体。实验表明RTA在多个基准测试中成功率高达99.1%，且现有防御效果有限。为此，研究提出了一种基于时间的检测防御方案，以增强智能体系统的安全性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Bring-Your-Own-Key (BYOK) agent architectures let users route LLM traffic through third-party relays, creating a critical integrity gap: a malicious relay can modify an aligned LLM response after generation but before agent execution. We formalize this post-alignment tampering threat and show that, without end-to-end integrity, the relay can observe, suppress, or replace downstream messages, making even perfectly aligned LLMs ineffective against such attacks. We instantiate this threat as the Relay Tampering Attack (RTA), which performs multi-round strategic rewriting, minimal security-critical edits, and stealth restoration by resubmitting tampered outputs to the upstream LLM. Across AgentDojo and ASB with six LLMs, RTA achieves up to 99.1% attack success, outperforming prompt-injection baselines with modest overhead. Case studies on OpenClaw and Claude Code demonstrate real-world feasibility, and evaluations of four defenses show that none fully prevent RTA. Finally, we propose a time-based detection defense that mitigates RTA while preserving agent utility.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

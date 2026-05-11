@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-05-11 <!--dpr-date:20260511-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202605/11/2605.02187v1-when-alignment-isnt-enough-response-path-attacks-on-llm-agents" data-sidebar-item="{&quot;title&quot;: &quot;When Alignment Isn&#x27;t Enough: Response-Path Attacks on LLM Agents&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2605.02187v1-when-alignment-isnt-enough-response-path-attacks-on-llm-agents&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;LLM 智能体架构中的完整性缺陷&quot;}">When Alignment Isn&#x27;t Enough: Response-Path Attacks on LLM Agents</a>
   * 2026-05-09 <!--dpr-date:20260509-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202605/09/2605.03213v2-when-agents-handle-secrets-a-survey-of-confidential-computing-for-agentic-ai" data-sidebar-item="{&quot;title&quot;: &quot;When Agents Handle Secrets: A Survey of Confidential Computing for Agentic AI&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2605.03213v2-when-agents-handle-secrets-a-survey-of-confidential-computing-for-agentic-ai&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;用于安全智能体AI和大模型推理的机密计算与TEE&quot;}">When Agents Handle Secrets: A Survey of Confidential Computing for Agentic AI</a>

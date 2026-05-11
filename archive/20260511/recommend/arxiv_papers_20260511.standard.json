@@ -1,0 +1,61 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-11T20:55:24.764208+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.02187v1",
+      "title": "When Alignment Isn't Enough: Response-Path Attacks on LLM Agents",
+      "abstract": "Bring-Your-Own-Key (BYOK) agent architectures let users route LLM traffic through third-party relays, creating a critical integrity gap: a malicious relay can modify an aligned LLM response after generation but before agent execution. We formalize this post-alignment tampering threat and show that, without end-to-end integrity, the relay can observe, suppress, or replace downstream messages, making even perfectly aligned LLMs ineffective against such attacks. We instantiate this threat as the Relay Tampering Attack (RTA), which performs multi-round strategic rewriting, minimal security-critical edits, and stealth restoration by resubmitting tampered outputs to the upstream LLM. Across AgentDojo and ASB with six LLMs, RTA achieves up to 99.1% attack success, outperforming prompt-injection baselines with modest overhead. Case studies on OpenClaw and Claude Code demonstrate real-world feasibility, and evaluations of four defenses show that none fully prevent RTA. Finally, we propose a time-based detection defense that mitigates RTA while preserving agent utility.",
+      "authors": [
+        "Mingyu Luo",
+        "Zihan Zhang",
+        "Zesen Liu",
+        "Yuchong Xie",
+        "Zhixiang Zhang",
+        "Dung Hiu Hilton Yeung",
+        "Wai Ip Lai",
+        "Ping Chen",
+        "Ming Wen",
+        "Dongdong She"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-05-04T03:35:17+00:00",
+      "link": "https://arxiv.org/pdf/2605.02187v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "integrity gap in LLM agent architectures",
+      "llm_evidence_cn": "LLM 智能体架构中的完整性缺陷",
+      "llm_evidence": "LLM 智能体架构中的完整性缺陷",
+      "canonical_evidence": "LLM 智能体架构中的完整性缺陷",
+      "llm_tldr_en": "Identifies and demonstrates tampering attacks on LLM agents due to lack of end-to-end integrity.",
+      "llm_tldr_cn": "揭示了由于缺乏端到端完整性保护，LLM 智能体易受中继篡改攻击的问题。",
+      "llm_tldr": "揭示了由于缺乏端到端完整性保护，LLM 智能体易受中继篡改攻击的问题。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
