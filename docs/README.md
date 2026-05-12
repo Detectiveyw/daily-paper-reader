@@ -6,26 +6,31 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-11
-- 运行时间：2026-05-11 20:55:42 UTC
+- 最新运行日期：2026-05-12
+- 运行时间：2026-05-12 20:57:39 UTC
 - 运行状态：成功
-- 本次总论文数：1
-- 精读区：0
-- 速读区：1
+- 本次总论文数：3
+- 精读区：1
+- 速读区：2
 
 ### 今日简报（AI）
-今日聚焦 LLM Agent 的安全隐患，揭示即便经过对齐的模型也难逃“响应路径攻击”。
-研究指出 Agent 在执行任务时存在新型攻击路径，证明了现有对齐机制在复杂交互场景下的局限性。
-建议关注智能体安全防御的开发者，需重新评估多步交互中的潜在注入风险。
-- 详情：[/202605/11/README](/202605/11/README)
+今日聚焦分布式 AI 安全前沿，深度解析了纵向联邦学习在时间序列推理中的隐私保护方案。
+重点推荐 8.0 分论文对私密时序推理的突破，并同步关注多智能体 LLM 在恶意攻击下的鲁棒性研究。
+建议开发者优先探索如何在保障数据合规的前提下，构建更稳健的多 Agent 协作系统。
+- 详情：[/202605/12/README](/202605/12/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [Private Vertical Federated Inference for Time-Series](/202605/12/2605.08343v1-private-vertical-federated-inference-for-time-series)  
+   标签：评分：8.0/10、query:fss-llm
+   evidence：基于MPC的Transformer架构安全推理
 
 ### 速读区论文标签
-1. [When Alignment Isn't Enough: Response-Path Attacks on LLM Agents](/202605/11/2605.02187v1-when-alignment-isnt-enough-response-path-attacks-on-llm-agents)  
+1. [TENNOR: Trustworthy Execution for Neural Networks through Obliviousness and Retrievals](/202605/12/2605.07160v1-tennor-trustworthy-execution-for-neural-networks-through-obliviousness-and-retrievals)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：LLM 智能体架构中的完整性缺陷
+   evidence：用于神经网络安全执行的遗忘原语
+2. [Robust Multi-Agent LLMs under Byzantine Faults](/202605/12/2605.09076v1-robust-multi-agent-llms-under-byzantine-faults)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：针对拜占庭容错的去中心化大模型协议
 
 
 <div class="dpr-home-promo-card">

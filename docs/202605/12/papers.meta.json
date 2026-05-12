@@ -1,0 +1,51 @@
+{
+  "label": "2026-05-12",
+  "date": "2026-05-12",
+  "generated_at": "2026-05-12T20:57:47",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202605/12/2605.08343v1-private-vertical-federated-inference-for-time-series",
+      "section": "deep",
+      "title_en": "Private Vertical Federated Inference for Time-Series",
+      "authors": "Lucas Fenaux, Larris Xie, Aditya Bang, Alex Zhang, Kevin Wilson, Florian Kerschbaum",
+      "date": "2026-05-08",
+      "pdf": "https://arxiv.org/pdf/2605.08343v1",
+      "score": "8.0",
+      "evidence": "基于MPC的Transformer架构安全推理",
+      "tldr": "针对时间序列数据的纵向联邦推理，传统多方计算在处理大规模Transformer时开销巨大且存在隐私泄露风险。本文提出PPHH-VFL架构，通过将模型头拆分为公共明文部分和私有MPC部分，并结合对抗训练，在保证隐私的同时大幅提升了推理效率和模型性能，实现了通信量和延迟的显著降低。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Institutions may benefit from collaborative inference on time-series data. In settings where privacy is necessary, multi-party computation (MPC) is a straightforward approach to providing strong guarantees, yet it remains prohibitively expensive and scales poorly with modern transformer architectures. Vertical Federated Learning (VFL) offers efficiency but suffers from privacy leakage at the embedding level, and securing the entire VFL model head via MPC remains prohibitively slow and communication-heavy for larger models. To enable practical, secure inference at scale, we propose \"Public/Private Hybrid Head-VFL\" (PPHH-VFL). This hybrid architecture splits the model head into an efficient plaintext public head and a secure, lightweight MPC private head. By applying adversarial training to the public embeddings, we mitigate privacy leakage; concurrently, the small private head securely preserves the flow of sensitive information needed for high downstream utility. Empirical evaluations on models ranging up to 86 million parameters demonstrate that PPHH-VFL accelerates inference by up to six orders of magnitude compared to end-to-end MPC. Compared to a standard VFL+MPC baseline, our approach scales significantly better, achieving a speedup of up to 44.4x in WAN and a 91.2x reduction in communication costs (dropping from 1.7 GB to 19 MB per batch), while simultaneously improving downstream classification accuracy by 2.50% and regression RMSE by 40.7%.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/12/2605.07160v1-tennor-trustworthy-execution-for-neural-networks-through-obliviousness-and-retrievals",
+      "section": "quick",
+      "title_en": "TENNOR: Trustworthy Execution for Neural Networks through Obliviousness and Retrievals",
+      "authors": "Zifan Qu, Vasileios P. Kemerlis, Giuseppe Ateniese, Evgenios M. Kornaropoulos",
+      "date": "2026-05-08",
+      "pdf": "https://arxiv.org/pdf/2605.07160v1",
+      "score": "6.0",
+      "evidence": "用于神经网络安全执行的遗忘原语",
+      "tldr": "TENNOR 针对在不可信云环境中训练宽神经网络的隐私泄露问题，提出了一种结合双重不确定性原语与自适应稀疏化的系统。它将稀疏神经元激活转化为局部敏感哈希（LSH）检索问题，并引入 MP-WTA 机制大幅降低存储开销。该系统在 Intel TDX 环境下实现了显著的性能提升，在保证隐私的同时解决了内存访问模式泄露的难题。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Training wide neural networks on sensitive data in untrusted cloud environments requires simultaneously achieving computational efficiency and rigorous privacy guarantees. Sparsification techniques, essential for scalable training of wide layers, expose input-dependent memory-access patterns (i.e., leakage) that are visible and can be exploited by a host OS/hypervisor, even when computation is protected by a Trusted Execution Environment.   We present TENNOR, a system that resolves this tension by co-designing the neural network training pipeline with doubly oblivious primitives, eliminating access-pattern leakage while also utilizing adaptive sparsification. TENNOR recasts sparse neuron activation as a locality-sensitive hashing (LSH) retrieval problem, reducing secure sparsification to doubly oblivious accesses over an LSH data structure. To eliminate the prohibitive storage cost of ``multi-table'' LSH, we introduce Multi-Probe Winner-Take-All (MP-WTA): the first multi-probe scheme for rank-based LSH, achieving a 50x reduction in (hash table) memory while preserving model accuracy. We evaluate TENNOR on extreme multi-label classification benchmarks with output layers of up to 325K neurons inside an Intel TDX Trusted Domain, achieving speedups of 13x--470x over a Path ORAM baseline and reducing a 208-hour run to about 26 minutes.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/12/2605.09076v1-robust-multi-agent-llms-under-byzantine-faults",
+      "section": "quick",
+      "title_en": "Robust Multi-Agent LLMs under Byzantine Faults",
+      "authors": "Haejoon Lee, Vincent-Daniel Yun, Hyeonho Oh, Dimitra Panagou, Sai Praneeth Karimireddy",
+      "date": "2026-05-09",
+      "pdf": "https://arxiv.org/pdf/2605.09076v1",
+      "score": "6.0",
+      "evidence": "针对拜占庭容错的去中心化大模型协议",
+      "tldr": "针对多智能体大语言模型（LLM-MAS）在对等网络协作中易受拜占庭故障（恶意或不可靠智能体）攻击的问题，本文提出了一种去中心化的自锚定共识（SAC）协议。该协议通过迭代式的“过滤与优化”机制，使智能体能自主识别并剔除干扰信息。实验证明，SAC在多种拓扑结构下均能有效抑制恶意攻击，显著提升了系统的鲁棒性和推理性能。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large language model (LLM) agents increasingly collaborate over peer-to-peer networks to improve their reliability. However, these same interactions can also become a source of vulnerability, as unreliable or Byzantine agents may sway neighboring agents toward incorrect conclusions and degrade overall system performance. Existing methods rely on leader-based coordination or self-reported confidence, both of which are susceptible to adversarial manipulation. We study decentralized LLM multi-agent systems (LLM-MAS) and propose Self-Anchored Consensus (SAC), a fully decentralized iterative filter-and-refine protocol in which agents iteratively exchange responses, locally evaluate and filter unreliable messages, and refine their own outputs. We present $(F{+}1)$-robustness conditions for the communication graph that ensure honest agents preserve and propagate reliable information despite Byzantine influence. Experiments on mathematical and commonsense reasoning benchmarks show that SAC effectively suppresses Byzantine influence and consistently improves performance across diverse communication topologies, whereas prior methods degrade under adversarial conditions.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

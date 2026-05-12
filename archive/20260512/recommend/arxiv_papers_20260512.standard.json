@@ -1,0 +1,135 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-12T20:56:50.113652+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2605.08343v1",
+      "title": "Private Vertical Federated Inference for Time-Series",
+      "abstract": "Institutions may benefit from collaborative inference on time-series data. In settings where privacy is necessary, multi-party computation (MPC) is a straightforward approach to providing strong guarantees, yet it remains prohibitively expensive and scales poorly with modern transformer architectures. Vertical Federated Learning (VFL) offers efficiency but suffers from privacy leakage at the embedding level, and securing the entire VFL model head via MPC remains prohibitively slow and communication-heavy for larger models. To enable practical, secure inference at scale, we propose \"Public/Private Hybrid Head-VFL\" (PPHH-VFL). This hybrid architecture splits the model head into an efficient plaintext public head and a secure, lightweight MPC private head. By applying adversarial training to the public embeddings, we mitigate privacy leakage; concurrently, the small private head securely preserves the flow of sensitive information needed for high downstream utility. Empirical evaluations on models ranging up to 86 million parameters demonstrate that PPHH-VFL accelerates inference by up to six orders of magnitude compared to end-to-end MPC. Compared to a standard VFL+MPC baseline, our approach scales significantly better, achieving a speedup of up to 44.4x in WAN and a 91.2x reduction in communication costs (dropping from 1.7 GB to 19 MB per batch), while simultaneously improving downstream classification accuracy by 2.50% and regression RMSE by 40.7%.",
+      "authors": [
+        "Lucas Fenaux",
+        "Larris Xie",
+        "Aditya Bang",
+        "Alex Zhang",
+        "Kevin Wilson",
+        "Florian Kerschbaum"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CR",
+        "cs.DC"
+      ],
+      "published": "2026-05-08T18:00:13+00:00",
+      "link": "https://arxiv.org/pdf/2605.08343v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "MPC-based secure inference for transformer architectures",
+      "llm_evidence_cn": "基于MPC的Transformer架构安全推理",
+      "llm_evidence": "基于MPC的Transformer架构安全推理",
+      "canonical_evidence": "基于MPC的Transformer架构安全推理",
+      "llm_tldr_en": "Proposes a hybrid MPC architecture to enable practical and secure inference for large transformer models.",
+      "llm_tldr_cn": "提出一种混合MPC架构，旨在实现大型Transformer模型的高效安全推理。",
+      "llm_tldr": "提出一种混合MPC架构，旨在实现大型Transformer模型的高效安全推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2605.07160v1",
+      "title": "TENNOR: Trustworthy Execution for Neural Networks through Obliviousness and Retrievals",
+      "abstract": "Training wide neural networks on sensitive data in untrusted cloud environments requires simultaneously achieving computational efficiency and rigorous privacy guarantees. Sparsification techniques, essential for scalable training of wide layers, expose input-dependent memory-access patterns (i.e., leakage) that are visible and can be exploited by a host OS/hypervisor, even when computation is protected by a Trusted Execution Environment.   We present TENNOR, a system that resolves this tension by co-designing the neural network training pipeline with doubly oblivious primitives, eliminating access-pattern leakage while also utilizing adaptive sparsification. TENNOR recasts sparse neuron activation as a locality-sensitive hashing (LSH) retrieval problem, reducing secure sparsification to doubly oblivious accesses over an LSH data structure. To eliminate the prohibitive storage cost of ``multi-table'' LSH, we introduce Multi-Probe Winner-Take-All (MP-WTA): the first multi-probe scheme for rank-based LSH, achieving a 50x reduction in (hash table) memory while preserving model accuracy. We evaluate TENNOR on extreme multi-label classification benchmarks with output layers of up to 325K neurons inside an Intel TDX Trusted Domain, achieving speedups of 13x--470x over a Path ORAM baseline and reducing a 208-hour run to about 26 minutes.",
+      "authors": [
+        "Zifan Qu",
+        "Vasileios P. Kemerlis",
+        "Giuseppe Ateniese",
+        "Evgenios M. Kornaropoulos"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-05-08T02:46:24+00:00",
+      "link": "https://arxiv.org/pdf/2605.07160v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "oblivious primitives for secure neural network execution",
+      "llm_evidence_cn": "用于神经网络安全执行的遗忘原语",
+      "llm_evidence": "用于神经网络安全执行的遗忘原语",
+      "canonical_evidence": "用于神经网络安全执行的遗忘原语",
+      "llm_tldr_en": "Eliminates access-pattern leakage in neural network training using doubly oblivious primitives.",
+      "llm_tldr_cn": "利用双重遗忘原语消除了神经网络训练中的访问模式泄露。",
+      "llm_tldr": "利用双重遗忘原语消除了神经网络训练中的访问模式泄露。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.09076v1",
+      "title": "Robust Multi-Agent LLMs under Byzantine Faults",
+      "abstract": "Large language model (LLM) agents increasingly collaborate over peer-to-peer networks to improve their reliability. However, these same interactions can also become a source of vulnerability, as unreliable or Byzantine agents may sway neighboring agents toward incorrect conclusions and degrade overall system performance. Existing methods rely on leader-based coordination or self-reported confidence, both of which are susceptible to adversarial manipulation. We study decentralized LLM multi-agent systems (LLM-MAS) and propose Self-Anchored Consensus (SAC), a fully decentralized iterative filter-and-refine protocol in which agents iteratively exchange responses, locally evaluate and filter unreliable messages, and refine their own outputs. We present $(F{+}1)$-robustness conditions for the communication graph that ensure honest agents preserve and propagate reliable information despite Byzantine influence. Experiments on mathematical and commonsense reasoning benchmarks show that SAC effectively suppresses Byzantine influence and consistently improves performance across diverse communication topologies, whereas prior methods degrade under adversarial conditions.",
+      "authors": [
+        "Haejoon Lee",
+        "Vincent-Daniel Yun",
+        "Hyeonho Oh",
+        "Dimitra Panagou",
+        "Sai Praneeth Karimireddy"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-05-09T17:37:43+00:00",
+      "link": "https://arxiv.org/pdf/2605.09076v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "decentralized LLM protocol for Byzantine robustness",
+      "llm_evidence_cn": "针对拜占庭容错的去中心化大模型协议",
+      "llm_evidence": "针对拜占庭容错的去中心化大模型协议",
+      "canonical_evidence": "针对拜占庭容错的去中心化大模型协议",
+      "llm_tldr_en": "Proposes a decentralized protocol for LLM agents to maintain consensus under Byzantine faults and adversarial manipulation.",
+      "llm_tldr_cn": "提出了一种去中心化协议，使大模型代理在拜占庭故障和对抗性操纵下保持共识。",
+      "llm_tldr": "提出了一种去中心化协议，使大模型代理在拜占庭故障和对抗性操纵下保持共识。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
