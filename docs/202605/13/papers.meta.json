@@ -1,0 +1,65 @@
+{
+  "label": "2026-05-13",
+  "date": "2026-05-13",
+  "generated_at": "2026-05-13T20:40:32",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202605/13/2605.10974v1-vertex-softmax-tight-transformer-verification-via-exact-softmax-optimization",
+      "section": "quick",
+      "title_en": "Vertex-Softmax: Tight Transformer Verification via Exact Softmax Optimization",
+      "authors": "Navid Rezazadeh, Arash Gholami Davoodi",
+      "date": "2026-05-08",
+      "pdf": "https://arxiv.org/pdf/2605.10974v1",
+      "score": "7.0",
+      "evidence": "Transformer验证与Softmax优化",
+      "tldr": "本文针对Transformer注意力机制的鲁棒性验证问题，提出了Vertex-Softmax方法。研究证明了在预Softmax得分的区间约束下，目标函数的最优解必在约束框的顶点处取得。通过建立阈值结构定理，该方法能以对数线性复杂度找到全局最优解，从而实现理论上最紧致的Softmax验证。实验表明，该方法在提升认证率的同时显著降低了计算开销。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Certified verification of transformer attention requires bounding the softmax function over interval constraints on the pre-softmax scores. Existing verifiers relax softmax ndependently of the downstream objective, leaving avoidable slack. We prove that the exact optimum of this score-box problem is attained at a vertex of the constraint box, and establish a threshold structure theorem showing that, after sorting the objective coefficients, the optimum lies among only linearly many candidates, yielding the Vertex-Softmax primitive with log-linear complexity in the sequence length. We further prove a formal optimality result showing that Vertex-Softmax is the tightest sound bound obtainable from score intervals alone, characterizing precisely what additional structure (score correlations, score-value coupling) is needed for further improvement. Integrated into a CROWN Convex Relaxation based Optimization for Worst-case Neurons)-style verifier with a formal soundness guarantee, Vertex-Softmax significantly improves certified rates and substantially tightens lower bounds across MNIST, Fashion-MNIST, and CIFAR-10 attention models, while consistently matching or outperforming alpha-CROWN and branch-and-bound baselines at a fraction of their cost.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/13/2605.05160v3-private-structured-subset-retrieval",
+      "section": "quick",
+      "title_en": "Private Structured-Subset Retrieval",
+      "authors": "Maha Issa, Anoosheh Heidarzadeh",
+      "date": "2026-05-06",
+      "pdf": "https://arxiv.org/pdf/2605.05160v3",
+      "score": "6.0",
+      "evidence": "从非共谋服务器进行私有信息检索 (PIR)",
+      "tldr": "本文引入了私有结构化子集检索（PSSR）问题，研究用户如何从N个非共谋服务器中私密地检索K个消息中的D个特定结构子集。该研究泛化了多消息私有信息检索（MPIR），并针对平衡{0,1}-线性方案推导了检索率和分包级别的逆界。通过提出的优化框架，PSSR能够利用需求空间的结构特征，在提高检索率的同时显著降低分包复杂度，为特定应用场景下的高效私密检索提供了理论支撑和构造方法。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We introduce the \\emph{Private Structured-Subset Retrieval (PSSR)} problem, where a user retrieves $D$ messages from a database of $K$ messages replicated across $N$ non-colluding servers, and the demand is restricted to a known structured family of $D$-subsets. This formulation generalizes Multi-message Private Information Retrieval (MPIR) and captures settings where the demand space is constrained by application-specific structure. Focusing on balanced ${\\{0,1\\}}$-linear schemes, a class that includes several best-known MPIR schemes, we derive converse bounds on the maximum retrieval rate and minimum subpacketization level required to achieve any given rate. We also develop an optimization-based framework to construct schemes for general structured demand families, providing flexibility in optimizing the retrieval rate or the subpacketization level. When specialized to the full demand family, this framework recovers known balanced $\\{0,1\\}$-linear MPIR constructions; for more restricted demand families, it can exploit the demand structure to increase the retrieval rate, reduce the subpacketization level, or both. We demonstrate this through a structured-demand example in which the proposed PSSR scheme simultaneously achieves a higher rate and requires a smaller subpacketization than the best-known MPIR scheme for the same parameters $N$, $K$, and $D$. Our parallel work on contiguous-demand families further illustrates the scope of this framework by yielding rate-optimal schemes with substantially smaller subpacketization and no field-size restrictions, improving upon MPIR-based schemes.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/13/2605.10499v1-privacy-preserving-chunk-scheduling-in-a-bittorrent-implementation-of-federated-learning",
+      "section": "quick",
+      "title_en": "Privacy-preserving Chunk Scheduling in a BitTorrent Implementation of Federated Learning",
+      "authors": "Naicheng Li, Javad Dogani, Rui Wang, Kaitai Liang, Nikolaos Laoutaris",
+      "date": "2026-05-11",
+      "pdf": "https://arxiv.org/pdf/2605.10499v1",
+      "score": "6.0",
+      "evidence": "具有隐私保护块调度的无服务器联邦学习",
+      "tldr": "针对联邦学习中中心化服务器的瓶颈与去中心化方案的隐私风险，本文提出FLTorrent。它利用BitTorrent协议进行模型分发，并通过预热阶段（混淆、随机延迟、非所有者优先调度）实现源不可链接性。实验表明，FLTorrent在保持BitTorrent级别效率的同时，显著提升了隐私保护能力，且在大规模模型（如Llama-3.3-70B）上表现出极低的额外开销。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Traditional federated learning (FL) relies on a central aggregator server, which can create performance bottlenecks and privacy risks. Decentralized mix-and-forward designs remove the server, but repeated local mixing can attenuate global information under heterogeneity and exposes peer-to-peer neighborhoods as a privacy attack surface. To preserve FedAvg-style aggregation semantics (over updates reconstructable by the round deadline) while scaling dissemination, we present FLTorrent, a BitTorrent-based dissemination layer for serverless FL with a short warm-up. Warm-up hardens within-round source unlinkability -- a dissemination-layer goal orthogonal to content protections (e.g., DP or secure aggregation) -- via (i) pre-round obfuscation, (ii) randomized lags, and (iii) coordination-only non-owner-first scheduling (tracker off the data path), before switching to vanilla BitTorrent swarming. We upper-bound the per-transfer attribution posterior by the fraction of owner chunks in a sender's eligible cover set, and derive a tighter high-probability bound that improves with early non-owner mass. A simple heuristic, GreedyFastestFirst, attains approximately 92% of a bandwidth-optimal max-flow upper bound, while warm-up remains a stable approximately 12% share of a round across 100--500 peers. Under an observation-only local adversary, FLTorrent drives attribution success close to neighborhood-level random guessing for typical nodes, improves with network size, and remains robust under collusion. In LLM-scale stress tests (Gemma-7B, DeepSeek-R1-14B, Qwen2.5-32B, and Llama-3.3-70B) over 7--10 Gbps access links, FLTorrent adds only approximately 6--10% end-to-end overhead relative to BitTorrent-only. Overall, FLTorrent shows that within-round unlinkability and BitTorrent-level efficiency can co-exist with predictable, low overheads at scale.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/13/2605.11443v1-experimental-examination-of-secure-two-party-controller-computation",
+      "section": "quick",
+      "title_en": "Experimental Examination of Secure Two-Party Controller Computation",
+      "authors": "Kaoru Teranishi, Jihoon Suh, Takashi Tanaka",
+      "date": "2026-05-12",
+      "pdf": "https://arxiv.org/pdf/2605.11443v1",
+      "score": "6.0",
+      "evidence": "基于秘密共享的分布式控制安全两 party 计算",
+      "tldr": "本研究针对动态控制器的安全运行，探讨了基于秘密共享的安全双方计算（2PC）协议。相比传统的同态加密方案，该协议支持无限时长的控制器运行，无需状态解密或重置。研究者在商业云平台上部署了该协议，并通过倒立摆实验台进行了实证。结果证明，尽管双方计算引入了额外的在线通信开销，该方案仍能实现实时稳定的控制，验证了其在工业控制场景中的可行性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "A secure two-party computation protocol for running dynamic controllers over secret sharing has recently been proposed. Unlike encrypted control schemes based on homomorphic encryption, this protocol enables operating dynamic controllers for an infinite time horizon without controller-state decryption, controller-state reset, or input re-encryption. However, the two-party setting introduces additional online communication between the computing parties, which may hinder real-time feasibility. In this study, we demonstrate the feasibility of the protocol through implementation on a commercial cloud platform with an inverted pendulum testbed. Experimental results show that the proposed protocol successfully stabilized the pendulum despite the online communication overhead.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,1113 @@
+Title: Vertex-Softmax: Tight Transformer Verification via Exact Softmax Optimization
+
+URL Source: https://arxiv.org/pdf/2605.10974v1
+
+Published Time: Wed, 13 May 2026 00:01:27 GMT
+
+Number of Pages: 21
+
+Markdown Content:
+# Vertex-Softmax: Tight Transformer Verification via Exact Softmax Optimization ∗
+
+Navid Rezazadeh † Arash Gholami Davoodi ‡
+
+## Abstract 
+
+Certified verification of transformer attention requires bounding the softmax func-tion over interval constraints on the pre-softmax scores. Existing verifiers relax softmax independently of the downstream objective, leaving avoidable slack. We prove that the exact optimum of this score-box problem is attained at a vertex of the constraint box, and establish a threshold structure theorem showing that, after sorting the objective coefficients, the optimum lies among only linearly many candidates, yielding the Vertex-Softmax primitive with log-linear complexity in the sequence length. We further prove a formal optimality result showing that Vertex-Softmax is the tightest sound bound obtainable from score intervals alone, characterizing precisely what additional structure (score correlations, score-value coupling) is needed for further improvement. Integrated into a CROWN (Convex Relaxation based Optimization for Worst-case Neurons)-style verifier with a formal soundness guarantee, Vertex-Softmax significantly improves certified rates and substantially tightens lower bounds across MNIST, Fashion-MNIST, and CIFAR-10 attention models, while consistently matching or outperforming alpha-CROWN and branch-and-bound baselines at a fraction of their cost. 
+
+## 1 Introduction 
+
+Certified verifiers for feedforward networks have matured into practical tools. Transformers remain stubbornly harder—and softmax attention is the reason. The normalized exponential couples all tokens, and existing verifiers must relax it at a cost in certificate tightness: every input where the relaxation is too loose is an input the verifier cannot certify. Closing that gap, making attention verification tighter without sacrificing scalability, is the motivation for this work. CROWN/LiRPA-style verifiers propagate affine bounds through neural networks at scale [Zhang et al., 2018, Xu et al., 2020], but attention introduces a normalized exponential map 
+
+a(s) = softmax( s), aj (s) = exp( sj )
+
+PKr=1 exp( sr ) . (1) After a score-bounding pass, a verifier often knows only an independent score box 
+
+B =
+
+> K
+
+Y
+
+> j=1
+
+[ℓj , u j ] (2) and a direction c ∈ RK induced by value-side bounds or by a downstream margin. The verifier’s task at each attention row thus reduces to optimizing a linear objective over softmax outputs, constrained only by these independent score intervals: 
+
+min  
+
+> s∈B
+
+c⊤ softmax( s). (3)      
+
+> ∗Code: https://github.com/navidrezazad/VertexSoftmax .
+> †University of California, Irvine, nrezazad@uci.edu .‡Carnegie Mellon University, agholami@andrew.cmu.edu .Preprint.
+> arXiv:2605.10974v1 [cs.LG] 8 May 2026
+
+Table 1: Comparison of verification methods at the softmax interface. The timing column gives representative wall-clock seconds per trial from selected small-attention experiments in Section 5; it is not the full-block hybrid runtime, which is broken down separately in Appendix Table 11. Method Treatment Exact? Corr.? Sec./trial CROWN / auto_LiRPA Affine relaxation before contraction with c
+
+No Partial † 0.1–0.2
+
+Wei-LSE Convex softmax bounds, then contracted with c
+
+No No 0.06 –2.0
+
+GaLileo-style Linear softmax relaxation No No 1.8–19 .2
+
+α-CROWN Optimized relaxation slopes over full graph No Partial ‡ 1.5–3.7
+
+ABCrown-BaB Branch-and-bound with verifier at nodes No § Yes 268 –395 
+
+Vertex-CROWN Solves min s∈[ℓ,u ] c⊤softmax( s)
+
+exactly Yes No 0.03 –0.07  
+
+> †
+
+Before interval abstraction only. ‡ Through optimized graph relaxations. § Not as a local score-box primitive; gains correlations through domain splitting. Generic softmax relaxations first relax the vector map s 7 → softmax( s) and only then contract with c.We instead solve the direction-dependent scalar problem directly. The result is exact and small. The minimum over the continuous score box is attained at a vertex of the constraint box. The intuition is that an optimizer trading off mass against cost can always push each coordinate to an endpoint without increasing the objective. After sorting c, the optimal vertex puts upper endpoints on the m smallest coefficients and lower endpoints on the rest, for some threshold m ∈ { 0, . . . , K }. A naïve search examines 2K vertices. We show that sorting the objective coefficients collapses this to exactly K + 1 candidates—one sort and one prefix-sum sweep. We call this primitive Vertex-Softmax .This also identifies the information surface of the score-box interface. Any sound lower-bound procedure whose inputs are only (c, ℓ, u ) cannot return a value larger than the exact minimum in (3) .Tighter certificates must use information discarded before this interface, such as score correlations, score–value coupling, or a reachable score set smaller than the independent box. 
+
+Contributions. 
+
+• We prove vertex exactness and K + 1 threshold exactness for (3) , giving an O(K log K)
+
+exact solver for the weighted-softmax box problem. • We derive a score-box information optimality statement: Vertex-Softmax is the tightest sound bound obtainable from independent score intervals alone. • We integrate the primitive into Vertex-CROWN, a sound CROWN-style attention verifier, and show large certified-rate improvements on MNIST and Fashion-MNIST patch-attention models, competitive or improved certificates against alpha-CROWN and branch-and-bound baselines on selected attention blocks, and full-block gains on attention–residual–MLP models with a CROWN-suffix hybrid. 
+
+Positioning. Scalable neural-network verifiers based on affine bound propagation, including CROWN, auto_LiRPA, and α, β -CROWN [Zhang et al., 2018, Xu et al., 2020, Wang et al., 2021], have been extended to transformer attention layers [Shi et al., 2020, Bonaert et al., 2021]. Within this line, recent softmax-focused relaxations tighten the vector-valued softmax bounds used inside the verifier. The convex bounds of Wei et al. [2023] and the GaLileo relaxation of Zhang et al. [2024a] are representative; both relax softmax rather than solve the direction-dependent score-box objective exactly. On the other end of the precision–cost spectrum, exact methods such as MILP, MIQCP, SMT, and nonlinear branch-and-bound [Tjeng et al., 2019, Katz et al., 2019, Shi et al., 2025] can give complete answers on small instances but do not scale to dense softmax attention. Our contribution sits between 2Table 2: Key notation used throughout the paper. Symbol Definition 
+
+X Input perturbation set, usually an ℓ∞ pixel box 
+
+m(x) Target margin to certify 
+
+K Number of keys/tokens in one attention row 
+
+s ∈ RK Pre-softmax score vector for one row 
+
+a(s) softmax( s)
+
+c ∈ RK Fixed downstream coefficient vector 
+
+ℓ, u ∈ RK Certified lower/upper score bounds 
+
+B Score box [ℓ1, u 1] × · · · × [ℓK , u K ]
+
+Fc(s) Directional softmax objective c⊤softmax( s)
+
+yj Exponentiated score esj
+
+Lj , U j Exponentiated bounds eℓj , e uj
+
+R(y) Linear-fractional objective (c⊤y) / (1⊤y)
+
+τm Threshold-vertex value after sorting cLbox Exact lower bound min s∈B Fc(s)
+
+LVC Vertex-CROWN margin lower bound 
+
+Lhyb Per-target max of CROWN and Vertex-CROWN bounds these extremes: Vertex-Softmax solves the recurring score-box subproblem exactly in O(K log K)
+
+time, complementing both relaxation-based and search-based approaches. A broader discussion of related work, including LLM-scale statistical and runtime-monitoring approaches, is in Appendix A. The exactness claim is local to the score-box interface; remaining sources of verifier looseness are discussed in Section 6. Table 1 summarizes the landscape. 
+
+## 2 Problem Setup 
+
+We now formalize the interface between a CROWN-style score-bounding pass and the softmax layer, and define the scalar optimization problem that Vertex-Softmax solves. Table 2 collects the key notation. Let X be an input box and let m : X → R be a scalar margin. Certification means proving m(x) ≥ 0
+
+for all x ∈ X , usually by computing a sound lower bound on min x∈X m(x). For one attention row, write 
+
+si(x) ∈ RK , ai(x) = softmax( si(x)) . (4) When a backward bound pass reaches this row, the downstream contribution at this interface is sum-marized by a fixed vector ci ∈ RK , so the row certificate needs a lower bound on c⊤ 
+
+> i
+
+softmax( si(x)) .The same pass supplies sound elementwise score bounds 
+
+ℓij ≤ sij (x) ≤ uij , j = 1 , . . . , K, x ∈ X , (5) forming a product interval Bi = QKj=1 [ℓij , u ij ]. Dropping the row index, define 
+
+Fc(s) = c⊤ softmax( s) = 
+
+PKj=1 cj esj
+
+PKj=1 esj
+
+, Lbox (c, ℓ, u ) = min  
+
+> s∈B
+
+Fc(s). (6) The matching upper bound is Ubox (c, ℓ, u ) = −Lbox (−c, ℓ, u ), so we state lower bounds only. Throughout, K ≥ 1, intervals are finite, degenerate intervals are allowed, and c is fixed with respect to 
+
+s. Equation (6) is exact for the product box, not necessarily for the reachable set {s(x) : x ∈ X } ⊆ B .
+
+## 3 Exact Score-Box Softmax Optimization 
+
+Set yj = esj , Lj = eℓj , and Uj = euj . The map s 7 → y sends B bijectively to By = QKj=1 [Lj , U j ],and 
+
+Fc(s) = R(y) := 
+
+PKj=1 cj yj
+
+PKj=1 yj
+
+. (7) 3Algorithm 1 Vertex-Softmax threshold solver  
+
+> 1:
+
+Input: coefficients c, score lower/upper bounds ℓ, u  
+
+> 2:
+
+Sort indices so c(1) ≤ · · · ≤ c(K) 
+
+> 3:
+
+Set a = max j uj 
+
+> 4:
+
+Compute Lj = exp( ℓj − a) and Uj = exp( uj − a) 
+
+> 5:
+
+Compute prefix sums of U(j) and c(j)U(j) 
+
+> 6:
+
+Compute suffix sums of L(j) and c(j)L(j) 
+
+> 7:
+
+Evaluate all ratios τm in (10)  
+
+> 8:
+
+return min m τm
+
+Thus the softmax problem is a bounded linear-fractional optimization problem over a positive box. The vertex property of linear-fractional programs over boxes is classical [Dinkelbach, 1967]; the contribution here is the K + 1 threshold reduction and its integration into attention verification. Full proofs are in Appendix B. 
+
+Theorem 3.1 (Score-box vertex exactness) . Let K ≥ 1, c ∈ RK , and finite intervals ℓj ≤ uj . Then 
+
+min  
+
+> s∈B
+
+Fc(s) = min  
+
+> v∈Vert( B)
+
+Fc(v), (8) 
+
+and the analogous equality holds for the maximum. 
+
+The one-coordinate reason is simple: fixing all coordinates except yi, the ratio has form (ciyi +
+
+A)/(yi + D) and its derivative has constant sign. Therefore each coordinate can be pushed to an endpoint without increasing the objective. Sort the coefficients ascending, c(1) ≤ · · · ≤ c(K), and reindex L, U accordingly. For m ∈{0, . . . , K } define 
+
+y(m)(j) =
+
+U(j), j ≤ m, L(j), j > m, (9) and 
+
+τm = R(y(m)) = 
+
+P 
+
+> j≤m
+
+c(j)U(j) + P 
+
+> j>m
+
+c(j)L(j)
+
+P 
+
+> j≤m
+
+U(j) + P 
+
+> j>m
+
+L(j)
+
+. (10) 
+
+Theorem 3.2 (Threshold exactness) . For every c ∈ RK and every finite box B,
+
+Lbox (c, ℓ, u ) = min  
+
+> s∈B
+
+Fc(s) = min  
+
+> m=0 ,...,K
+
+τm. (11) 
+
+Consequently Lbox (c, ℓ, u ) can be evaluated in O(K log K) time. 
+
+The intuition is that the optimizer trades off mass against cost: to minimize the weighted softmax, it maximizes the exponentiated scores on the coordinates with the smallest c coefficients (making them as heavy as possible) and minimizes the scores on the most expensive coordinates. Because 
+
+c is sorted, the optimal split between “heavy-cheap” and “light-expensive” coordinates is always a contiguous threshold. The stability shift in Algorithm 1 rescales every numerator and denominator by the same positive factor, so it preserves all ratios and avoids overflow. A proof-producing interval-arithmetic evaluation path is described in Appendix D. 
+
+Corollary 3.3 (Score-box optimality) . Let G(c, ℓ, u ) be any lower-bound procedure depending only on c and the independent intervals. If 
+
+G(c, ℓ, u ) ≤ Fc(s) ∀s ∈ B , (12) 
+
+then 
+
+G(c, ℓ, u ) ≤ Lbox (c, ℓ, u ). (13) 
+
+Vertex-Softmax therefore exhausts the information available at the score-box interface: any tighter certificate must exploit score correlations, score–value coupling, or a reachable score set smaller than the independent box. 
+
+4Input perturbation set X
+
+x′ ∈ [x − ϵ, x + ϵ]1
+
+Attention block affine bounds 
+
+pre-activations and intermediate bounds 
+
+2
+
+Per-row score boxes and value-side coefficient bounds 
+
+sr ∈ [ℓr , u r ], zLr ≤ zr (x)
+
+3
+
+Vertex-Softmax row solver 
+
+min / max c⊤ softmax( sr ), sr ∈ [ℓr , u r ]4
+
+Exact at fixed-coefficient score-box interface 
+
+Certified attention row output bounds 
+
+tight rowwise lower/upper bounds 
+
+5
+
+Compose with remaining verifier 
+
+rows, heads, residual, and MLP bounds 
+
+6
+
+Final lower bound on class margin 
+
+mt(x′) = fy (x′) − ft(x′); certified if > 07
+
+Figure 1: Integration of Vertex-Softmax into the verification pipeline. Input perturbations are propagated to independent score boxes and value-side coefficient lower bounds for each attention row. Vertex-Softmax computes exact directional softmax bounds at this rowwise score-box interface, which are then composed with the remaining verifier to obtain a certified lower bound on the final class margin. 
+
+## 4 Vertex-CROWN Attention Bound 
+
+The previous section provides an exact solver for a single softmax row given fixed coefficients and score intervals. To turn this into a working verifier, we need to extract those quantities from a CROWN/LiRPA backward pass and compose the row-level certificates into an end-to-end margin bound. Vertex-CROWN is the resulting interface. Figure 1 illustrates where the Vertex-Softmax primitive fits in the overall verification pipeline. Suppose a scalar margin satisfies 
+
+m(x) ≥ b + X
+
+> iK
+
+X
+
+> j=1
+
+ai(x)j zij (x) ∀x ∈ X , (14) where ai(x) = softmax( si(x)) . Assume sound score and value-side lower bounds 
+
+ℓij ≤ sij (x) ≤ uij , zLij ≤ zij (x) ∀x ∈ X . (15) For proof references we also name the two parts separately: 
+
+ℓij ≤ sij (x) ≤ uij ∀x ∈ X , (16) 
+
+zLij ≤ zij (x) ∀x ∈ X . (17) Let Bi = Q 
+
+> j
+
+[ℓij , u ij ] and 
+
+Li = Lbox (zLi , ℓ i, u i) = min 
+
+> si∈B i
+> K
+
+X
+
+> j=1
+
+softmax( si)j zLij . (18) The layer bound is 
+
+LVC = b + X
+
+> i
+
+Li. (19) 5Algorithm 2 Vertex-CROWN attention bound  
+
+> 1:
+
+Input: input set X , scalar margin m, attention row scores si 
+
+> 2:
+
+Use CROWN/LiRPA to obtain sound row score bounds (ℓi, u i) 
+
+> 3:
+
+Obtain lower value coefficients zLi and affine lower term b satisfying (14)–(17)  
+
+> 4:
+
+for each query row i do  
+
+> 5:
+
+Li ← Lbox (zLi , ℓ i, u i) using Algorithm 1  
+
+> 6:
+
+end for  
+
+> 7:
+
+return LVC = b + P 
+
+> i
+
+Li
+
+Proposition 4.1 (Soundness of Vertex-CROWN) . Under (14) , (16) , and (17) , Algorithm 2 returns a sound lower bound: 
+
+LVC ≤ m(x) ∀x ∈ X . (20) In practice, if LVC > 0, the model’s prediction is provably unchanged under every perturbation in X . Tighter lower bounds certify more inputs and give a more informative picture of the model’s robustness. 
+
+Self-attention and suffix instantiation. For the ViT-style blocks in the experiments, token embed-dings H(x) produce affine queries, keys, and values 
+
+Qhi = W hQHi + bhQ, Khj = W hK Hj + bhK , V hj = W hV Hj + bhV , (21) with scores 
+
+shij (x) = d−1/2 
+
+> h
+
+⟨Qhi (x), K hj (x)⟩ + μhij . (22) The score intervals can be obtained by CROWN/McCormick bounds on this scalar score module, or by the interval-product fallback in Appendix C. For a target margin, let H+ 
+
+> i
+
+(x) = Hi(x) + bO + P 
+
+> h
+
+W hO
+
+P 
+
+> j
+
+ahij (x)V hj (x) be the post-attention residual state. If the downstream suffix gives 
+
+mt(x) ≥ βt + X
+
+> i
+
+γ⊤ 
+
+> ti
+
+H+ 
+
+> i
+
+(x), (23) then the induced row coefficients are lower bounds of (W hO )⊤γti contracted with V hj (x), and the Vertex path has form 
+
+LVC ,t = b′ 
+
+> t
+
++ X
+
+> h,i
+
+Lbox (ctih :, ℓ ih :, u ih :). (24) The target-wise hybrid uses 
+
+Lhyb ,t = max {LCROWN ,t , L VC ,t }, (25) which is sound because both terms lower-bound the same target margin. The two paths complement each other: direct CROWN propagates tighter affine relaxations through the full computation graph, while Vertex-CROWN solves the softmax subproblem exactly but relies on looser value-side and suffix bounds. Taking the per-target maximum captures the best of both without sacrificing soundness. Details, coefficient formulas, and the per-target algorithm are in Appendix C. The oracle cost is 
+
+O(BT HRK log K) for batch size B, targets T , heads H, query rows R, and keys K, excluding score/value/suffix bound construction. 
+
+## 5 Experiments 
+
+The experiments test whether the exact score-box primitive sharpens attention certificates at the verifier interface. We progress from validating the solver itself, to scalable softmax comparisons on synthetic score boxes, to real-data patch-attention models, to full attention–residual–MLP blocks, and finally to comparisons against stronger optimized and search-based baselines. Certified-rate denominators differ by benchmark. Synthetic rows are computed over all generated trials. Patch-attention rows in Table 4 are conditional on clean-correct examples. Full-block rows in Table 5 are end-to-end certified accuracies over the listed evaluation prefixes, with clean-incorrect 64 8 16 32 64 128      
+
+> Sequence length K
+> 0.6
+> 0.5
+> 0.4
+> 0.3
+> 0.2
+> Mean certified lower bound
+> Bound Tightness at eps=0.02
+> 4816 32 64 128
+> Sequence length K
+> 0.45
+> 0.50
+> 0.55
+> 0.60
+> 0.65
+> Attack gap (lower is better)
+> Gap To Best Attack at eps=0.02
+> Wei-LSE
+> GaLileo-style
+> Vertex
+
+Figure 2: Scalable attention sweep at ϵ = 0 .02 . Vertex-Softmax gives the highest mean certified lower bound and the smallest gap to the best attack across the tested sequence lengths. GaLileo-style implementation baseline results for K ≤ 16 are in Appendix Table 8. Table 3: Scalable sweep at ϵ = 0 .02 over three seeds and 600 total trials per row. Vertex-Softmax gives the best mean lower bound and smallest attack gap at every tested K. Runtime is aggregate wall time. An independent GaLileo-style implementation baseline for K ≤ 16 is in Appendix Table 8 (the original GaLileo code is not publicly available). 
+
+K Method Cert. rate Mean lower Gap Time (s) 4 Wei-LSE 0.128 -0.2702 0.5245 0.1080 4 Vertex 0.180 -0.2020 0.4563 0.0298 8 Wei-LSE 0.023 -0.4284 0.5891 0.0645 8 Vertex 0.053 -0.3367 0.4973 0.0299 16 Wei-LSE 0.000 -0.5392 0.6323 0.1012 16 Vertex 0.007 -0.4280 0.5211 0.0302 32 Wei-LSE 0.000 -0.5868 0.6532 0.8202 32 Vertex 0.000 -0.4659 0.5323 0.1391 64 Wei-LSE 0.000 -0.6391 0.6705 1.4836 64 Vertex 0.000 -0.5091 0.5405 0.1133 128 Wei-LSE 0.000 -0.6665 0.6772 2.0094 128 Vertex 0.000 -0.5321 0.5428 0.0838 examples counted as uncertified. The exactness claim applies only to the fixed-coefficient independent score-box subproblem, not to end-to-end transformer verification. The reported lower bound is the mean margin lower bound; and the gap is best attack margin minus certified lower bound. All reported verifier tables use standard floating-point PyTorch/auto_LiRPA unless explicitly marked otherwise; the mathematical soundness statements are real-arithmetic statements, with interval-oracle checks in Appendix D. Protocol and numerical-status records are in Appendix Tables 6 and 7. 
+
+Solver and scalable softmax checks. The threshold solver agrees with exhaustive vertex enu-meration up to numerical tolerance for K ≤ 16 and remains practical at K = 512 ; Appendix Table 9 and Figure 4 give the timing details. Table 3 shows the main scalable-softmax compar-ison. Vertex-Softmax gives the best mean lower bound and smallest attack gap for every tested 
+
+K ∈ { 4, 8, 16 , 32 , 64 , 128 }, while also being 3–24 × faster than Wei-LSE (e.g., 0.08 s vs. 2.0s at 
+
+K = 128 ). 
+
+Image attention certificates. Table 4 evaluates small real-data patch-attention classifiers. The strongest signal appears in high-uncertainty regimes: at ϵ = 0 .03 , Vertex-CROWN raises binary MNIST certification from 20 .3% to 77 .8% with 16 tokens and from 46 .5% to 92 .5% with 49 tokens. These are regimes where standard CROWN leaves most inputs uncertified; replacing the softmax relaxation with the exact solver recovers the majority of them. The 10-class setting is harder, 7Table 4: Real-data MNIST patch-attention certificates. Binary rows use classes 0 vs. 1; 10-class rows use all MNIST classes. The 16-token model uses 7 × 7 patches, and the 49-token model uses 4 × 4
+
+patches. Certification rates are conditional on clean-correct examples: verification is run on up to the protocol’s listed N correctly classified test examples per seed, so these rates are not end-to-end certified accuracies. Results are averaged over three seeds for the 16-token rows and two seeds for the 49-token row. Benchmark ϵ CROWN cert. Vertex-CROWN cert. CROWN lower Vertex lower Binary, 16 tokens 0.02 0.738 0.916 1.915 4.552 Binary, 16 tokens 0.03 0.203 0.778 -8.263 2.426 Binary, 16 tokens 0.05 0.002 0.260 -74.505 -2.142 Binary, 49 tokens 0.02 0.840 0.972 3.788 6.482 Binary, 49 tokens 0.03 0.465 0.925 -3.354 4.934 10-class, 16 tokens 0.02 0.033 0.129 -8.931 -2.895 10-class, 16 tokens 0.03 0.001 0.012 -30.785 -7.375 s4,d16,eps=0.03 
+
+> s4,d16,eps=0.05
+> s4,d32,eps=0.03
+> s6,d16,eps=0.03
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> Certified rate
+> alpha-CROWN comparison
+> s4,d16,eps=0.05
+> s4,d32,eps=0.03
+> Fixed-budget ABCrown-BaB comparison
+> CROWN
+> alpha-CROWN
+> Vertex
+> ABCrown-BaB, 600s
+
+Figure 3: Comparison against alpha-CROWN and fixed-budget ABCrown-BaB on selected small attention blocks. Vertex-CROWN is competitive with alpha-CROWN across settings and outperforms it in higher-epsilon and higher-dimensional configurations, while running 30 –100 × faster. ABCrown-BaB uses a 600s per-instance budget; unknown, timeout, OOM, and internal-error outcomes are counted as uncertified. but Vertex-CROWN still improves both certified rate and mean lower bound at ϵ ∈ { 0.02 , 0.03 };Appendix Table 13 reports seed-resampling stability checks for the main rate improvements. 
+
+Full attention–residual–MLP blocks. Table 5 tests whether the primitive’s gains survive a nonlin-ear suffix. The CROWN-suffix hybrid improves Fashion-MNIST end-to-end certified rates and mean lower bounds across the robustness curve: at ϵ = 0 .02 it raises certification from 5.6% to 14 .0% 
+
+and improves the mean lower bound from −7.784 to −1.382 ; at ϵ = 0 .03 the mean lower bound improves by over 33 points. CIFAR-10 grayscale, included as a low-accuracy stress setting, shows the same tightness direction. Appendix Tables 12, 13, and 11 give paired deltas, seed-resampling stability checks, and runtime accounting. The sort/sweep oracle is negligible relative to score, value, and suffix-bound construction. 
+
+Stronger baselines. Against alpha-CROWN and fixed-budget ABCrown-BaB on selected small attention blocks, Vertex-CROWN matches or exceeds alpha-CROWN at K = 4 , d = 16 , ϵ = 0 .03 
+
+and K = 6 , d = 16 , ϵ = 0 .03 , outperforms it in higher-epsilon and higher-dimensional K = 4 
+
+settings, and trails it on the residual block at ϵ = 0 .03 where optimizable slopes have more room to help. With a 600 second ABCrown-BaB budget, Vertex-CROWN certifies 62 .5% versus 50 .0% on 
+
+K = 4 , d = 16 , ϵ = 0 .05 and 50 .0% versus 29 .2% on K = 4 , d = 32 , ϵ = 0 .03 . Notably, Vertex-CROWN achieves these results in 0.03 –0.07 s per trial, compared to 1.5–3.7s for alpha-CROWN and 
+
+268 –395 s for ABCrown-BaB. Figure 3 and Appendix Tables 14 and 15 give paired, aggregate, and fixed-budget details. 8Table 5: Full attention–residual–MLP block results. Cert. entries are end-to-end certified accuracies, reported as CROWN / Hybrid over the first 100 evaluation examples per seed with clean-incorrect examples counted as uncertified. Lower columns show CROWN / Hybrid mean margin lower bounds on the clean-correct examples from the same evaluation prefix. ∆ is the paired mean lower-bound improvement of Hybrid over CROWN. All rows use five seeds. Dataset Setting ϵ Clean Cert. Lower ∆
+
+Fashion-MNIST d = 32 , h = 4 , m = 64 0.01 0.708 0.456 / 0.484 1.153 / 1.368 0.215 Fashion-MNIST d = 32 , h = 4 , m = 64 0.02 0.708 0.056 / 0.140 -7.784 / -1.382 6.402 Fashion-MNIST d = 32 , h = 4 , m = 64 0.03 0.708 0.000 / 0.058 -38.191 / -4.583 33.608 Fashion-MNIST d = 16 , h = 2 , m = 64 0.02 0.672 0.096 / 0.252 -5.228 / -0.620 4.608 CIFAR-10 gray d = 32 , h = 4 , m = 64 0.005 0.346 0.126 / 0.150 -0.280 / -0.098 0.182 CIFAR-10 gray d = 32 , h = 4 , m = 64 0.01 0.346 0.004 / 0.026 -6.041 / -1.520 4.521 
+
+Practical guidance. Vertex-CROWN is most effective when the softmax relaxation is the binding source of certificate looseness: high-uncertainty regimes with wider score boxes, settings where alpha-CROWN’s slope optimization has limited room, and architectures where the attention layer dominates the verification gap. When suffix or value-bound looseness dominates instead, the hybrid strategy can still recover the better of the two paths, but full-block use incurs the substantial bound-construction cost quantified in Appendix Table 11. 
+
+## 6 Limitations 
+
+Vertex-Softmax eliminates one source of looseness, the softmax relaxation inside the score-box subproblem, but the full verification pipeline has several other sources of slack that the primitive does not address. Understanding these is important both for interpreting the experimental results and for identifying where future work can have the most impact. Vertex-Softmax is exact only after the verifier has reduced an attention row to fixed coefficients and independent score intervals. The remaining looseness comes from the surrounding verifier, not from the weighted-softmax box oracle. First, independent score boxes discard score correlations; if those correlations rule out the worst threshold vertex, exact box optimization is still conservative for the reachable set. Second, value lower bounds discard score–value coupling; nonnegative softmax weights preserve soundness, but weak value bounds can dominate the final certificate. Third, row-wise minimization can combine worst cases that no single input attains simultaneously. Fourth, nonlinear suffixes require additional relaxations, so the CROWN-suffix hybrid in Table 5 is tighter but slower than direct CROWN and still depends on suffix-bound quality. The experiments are one-block ViT-style models rather than deep transformers with layer normalization and many interacting blocks. Appendix Table 10 gives controlled slack-decomposition diagnostics, and Appendix Table 11 separates oracle cost from surrounding bound-construction cost. 
+
+## 7 Conclusion 
+
+Vertex-Softmax exactly solves min s∈B c⊤ softmax( s) at the independent score-box interface. The optimum is attained by one of K + 1 sorted threshold vertices, giving an exact O(K log K) primitive that replaces objective-agnostic softmax relaxations with a direction-aware row solver. Integrated into Vertex-CROWN, it produces large certified-rate improvements on patch-attention and full attention–residual–MLP models, and is competitive with or improves upon alpha-CROWN and branch-and-bound baselines on selected attention blocks. The threshold structure also clarifies where further progress must come from. Because Vertex-Softmax exhausts the information at the independent score-box interface, tighter end-to-end certificates require exploiting score correlations, score–value coupling, joint row composition, or tighter nonlinear suffix bounds. Extending the exact-optimization perspective to these richer interfaces, for instance solving correlated score polytopes or jointly optimizing over scores and values, is a natural next step toward closing the gap between local softmax exactness and global verifier tightness. 9References 
+
+Gregory Bonaert, Dimitar I. Dimitrov, Maximilian Baader, and Martin T. Vechev. Fast and precise certification of transformers. In Proceedings of the ACM SIGPLAN Conference on Programming Language Design and Implementation , pages 466–481, 2021. doi: 10.1145/3453483.3454056. Isha Chaudhary, Qian Hu, Manoj Kumar, Morteza Ziyadi, Rahul Gupta, and Gagandeep Singh. Certifying counterfactual bias in LLMs. In International Conference on Learning Representations ,2025. J. J. Cherian et al. Large language model validity via enhanced conformal prediction methods. arXiv preprint arXiv:2406.09714 , 2024. Werner Dinkelbach. On nonlinear fractional programming. Management Science , 13(7):492–498, 1967. Guy Katz, Derek A. Huang, Duligur Ibeling, Kyle Julian, Christopher Lazarus, Rachel Lim, Parth Shah, Shantanu Thakoor, Haoze Wu, Aleksandar Zelji´ c, David L. Dill, Mykel J. Kochenderfer, and Clark Barrett. The marabou framework for verification and analysis of deep neural networks. In 
+
+Computer Aided Verification , pages 443–452. Springer, 2019. Aounon Kumar, Chirag Agarwal, Suraj Srinivas, Aaron Jiaxun Li, Soheil Feizi, and Himabindu Lakkaraju. Certifying LLM safety against adversarial prompting. In Conference on Language Modeling , 2024. Brian Hsuan Cheng Liao, Chih Hong Cheng, Hasan Esen, and Alois Knoll. Are transformers more robust? towards exact robustness verification for transformers. In Computer Safety, Reliability, and Security , pages 89–103. Springer, 2023. Zhouxing Shi, Huan Zhang, Kai-Wei Chang, Minlie Huang, and Cho-Jui Hsieh. Robustness verifica-tion for transformers. In International Conference on Learning Representations , 2020. Zhouxing Shi, Qirui Jin, Zico Kolter, Suman Jana, Cho-Jui Hsieh, and Huan Zhang. Neural network verification with branch-and-bound for general nonlinearities. In Tools and Algorithms for the Construction and Analysis of Systems , pages 315–335. Springer, 2025. Vincent Tjeng, Kai Y. Xiao, and Russ Tedrake. Evaluating robustness of neural networks with mixed integer programming. In International Conference on Learning Representations , 2019. Hoang-Dung Tran et al. NNV: The neural network verification tool for deep neural networks and learning-enabled cyber-physical systems. In Computer Aided Verification , pages 3–17. Springer, 2020. Haoyu Wang, Christopher M. Poskitt, Jiali Wei, and Jun Sun. ProbGuard: Probabilistic runtime monitoring for LLM agent safety. arXiv preprint arXiv:2508.00500 , 2025a. Haoyu Wang et al. AgentSpec: Customizable runtime enforcement for safe and reliable LLM agents. 
+
+arXiv preprint arXiv:2503.18666 , 2025b. Shiqi Wang, Huan Zhang, Kaidi Xu, Xue Lin, Suman Jana, Cho-Jui Hsieh, and J. Zico Kolter. Beta-crown: Efficient bound propagation with per-neuron split constraints for neural network robustness verification. In Advances in Neural Information Processing Systems , 2021. Dennis Wei, Haoze Wu, Min Wu, Pin-Yu Chen, Clark Barrett, and Eitan Farchi. Convex bounds on the softmax function with applications to robustness verification. In Proceedings of the 26th International Conference on Artificial Intelligence and Statistics , volume 206 of Proceedings of Machine Learning Research , pages 6853–6878. PMLR, 2023. Kaidi Xu, Zhouxing Shi, Huan Zhang, Yihan Wang, Kai-Wei Chang, Minlie Huang, Bhavya Kailkhura, Xue Lin, and Cho-Jui Hsieh. Automatic perturbation analysis for scalable certified robustness and beyond. In Advances in Neural Information Processing Systems , 2020. Huan Zhang, Tsui-Wei Weng, Pin-Yu Chen, Cho-Jui Hsieh, and Luca Daniel. Efficient neural network robustness certification with general activation functions. In Advances in Neural Information Processing Systems , 2018. 10 Yedi Zhang, Yi Emma Sun, Annabelle Jia En Lee, and Jin Song Dong. RvLLM: LLM runtime verification with domain knowledge. arXiv preprint arXiv:2505.18585 , 2025. Yunruo Zhang, Lujia Shen, Shanqing Guo, and Shouling Ji. Galileo: General linear relaxation framework for tightening robustness certification of transformers. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 38, pages 21797–21805, 2024a. Zhexin Zhang et al. SafetyBench: Evaluating the safety of large language models. arXiv preprint arXiv:2309.07045 , 2024b. Kaijie Zhu et al. PromptBench: A unified library for evaluation of large language models. Journal of Machine Learning Research , 2024. 
+
+## A Extended Related Work 
+
+At LLM scale, the verification literature shifts toward different kinds of guarantees. Erase-and-Check certifies wrapper behavior against bounded adversarial prompting [Kumar et al., 2024]; distributional and conformal approaches give statistical guarantees over prompt distributions [Chaudhary et al., 2025, Cherian et al., 2024]; empirical suites such as PromptBench and SafetyBench search for failures but are not sound certificates [Zhu et al., 2024, Zhang et al., 2024b]; and runtime monitors such as AgentSpec, RvLLM, and ProbGuard enforce explicit trace or action predicates during deployment [Wang et al., 2025b, Zhang et al., 2025, Wang et al., 2025a]. These approaches are practically important for frontier LLM systems, but they certify wrappers, distributions, tests, or traces rather than the worst-case white-box semantics of the transformer computation graph. Vertex-Softmax is complementary to all of these: it contributes a local exact primitive at the score-box interface, not an end-to-end system for any of the above guarantee types. For transformers specifically, the exact MIQCP result of Liao et al. [2023] applies to sparsemax attention rather than standard softmax attention. Set-based reachability methods [Tran et al., 2020] can provide complete answers but have not yet been demonstrated at dense softmax scale. 
+
+## B Proof Details 
+
+This appendix proves Theorems 3.1 and 3.2, derives Corollary 3.3 from them, and finally establishes the soundness statement in Proposition 4.1. Throughout we use the change of variables yj = esj ,
+
+Lj = eℓj , Uj = euj , so that Fc(s) = R(y) with R as in (7) , and y ranges over the positive box 
+
+By = QKj=1 [Lj , U j ] ⊂ (0 , ∞)K . Because the map s 7 → y is a coordinatewise bijection that sends vertices of B to vertices of By , every statement below transfers to Fc on B without change. 
+
+B.1 Proof of Theorem 3.1 
+
+We show that R attains its minimum over By at a vertex of By . The maximum statement follows by applying the same argument with c replaced by −c.
+
+Proof of Theorem 3.1. Step 1: one-dimensional reduction. If K = 1 , then R(y) = c1 is constant on 
+
+By , so every point is a minimizer; in particular, both endpoints, which are vertices, are minimizers. Thus the claim is immediate. Assume K ≥ 2.Fix any index i ∈ { 1, . . . , K } and any choice of values yj ∈ [Lj , U j ] for j̸ = i. Write 
+
+A = X 
+
+> j̸=i
+
+cj yj , D = X 
+
+> j̸=i
+
+yj . (26) Since yj > 0 for every j, we have D > 0. Along the ith coordinate, R takes the one-dimensional form 
+
+ϕi(yi) = ciyi + Ayi + D , yi ∈ [Li, U i]. (27) Differentiating, 
+
+ϕ′
+
+> i
+
+(yi) = ci(yi + D) − (ciyi + A)(yi + D)2 = ciD − A
+
+(yi + D)2 . (28) 11 The denominator is strictly positive and the numerator is independent of yi, so ϕi is either monotone on [Li, U i] or constant there. In every case, at least one of Li or Ui attains min [Li,U i] ϕi.
+
+Step 2: coordinate-by-coordinate pushing. Since R is continuous and By is compact, the min-imum R⋆ = min By R is attained. Pick any minimizer y⋆ ∈ B y and define a finite sequence 
+
+y(0) , y (1) , . . . , y (K) by y(0) = y⋆ and, for i = 1 , . . . , K , choose y(i) 
+
+> i
+
+to be an endpoint of [Li, U i]
+
+that minimizes (27) with all other coordinates fixed at their values in y(i−1) , setting y(i) 
+
+> j
+
+= y(i−1)  
+
+> j
+
+for 
+
+j̸ = i. By Step 1, each replacement satisfies R(y(i)) ≤ R(y(i−1) ). Iterating, 
+
+R⋆ ≤ R(y(K)) ≤ R(y(0) ) = R⋆, (29) so R(y(K)) = R⋆. By construction y(K) 
+
+> j
+
+∈ { Lj , U j } for every j, and therefore y(K) is a vertex of 
+
+By . Pulling back through s 7 → y yields a vertex of B attaining the minimum of Fc.Degenerate intervals ℓj = uj require no modification: the corresponding coordinate is forced to its common endpoint, which is still a vertex. 
+
+B.2 Proof of Theorem 3.2 
+
+By Theorem 3.1, it suffices to minimize R over the 2K vertices of By . We show that at least one of those minimizers has threshold form in the sense of (9) , which narrows attention to the K + 1 
+
+candidates y(0) , . . . , y (K).Reindex so that c1 ≤ c2 ≤ · · · ≤ cK , and denote the associated bounds by Lj , U j . This is the sorted order c(j), L(j), U(j) used in the main text, and the value of R is invariant under this reindexing. 
+
+Proof of Theorem 3.2. Step 1: linearization at the optimum. For every ρ ∈ R and every y ∈ B y , the common denominator S(y) = P 
+
+> j
+
+yj is strictly positive, and 
+
+R(y) − ρ =
+
+PKj=1 (cj − ρ)yj
+
+S(y) . (30) Let y⋆ ∈ B y be any minimizer of R and set ρ = R(y⋆). Then (30) at y⋆ gives P 
+
+> j
+
+(cj − ρ)y⋆j = 0 .For every y ∈ B y , minimality of y⋆ gives R(y) ≥ ρ, so 
+
+> K
+
+X
+
+> j=1
+
+(cj − ρ)yj ≥ 0 = 
+
+> K
+
+X
+
+> j=1
+
+(cj − ρ)y⋆j . (31) Thus y⋆ minimizes the linear functional y 7 → P 
+
+> j
+
+(cj − ρ)yj over By .
+
+Step 2: a linear minimizer has threshold form. The linear problem in (31) separates across coordinates. For each j,
+
+y⋆j ∈ arg min    
+
+> yj∈[Lj,U j]
+
+(cj − ρ)yj , (32) and so necessarily 
+
+y⋆j =
+
+
+
+Uj , cj < ρ, Lj , cj > ρ, 
+
+any point in [Lj , U j ], cj = ρ. 
+
+(33) Define m− = |{ j : cj < ρ }| and m+ = |{ j : cj ≤ ρ}| . Since the coefficients are sorted, cj < ρ 
+
+exactly for j ≤ m− and cj > ρ exactly for j > m +. On the tied block {m− + 1 , . . . , m +} the linear functional contributes zero, so replacing y⋆ on that block by any other feasible values preserves P 
+
+> j
+
+(cj − ρ)yj = 0 and hence preserves R(y) = ρ by (30). In particular, define a threshold vertex ˜y
+
+by 
+
+˜yj =
+
+Uj , j ≤ m+,Lj , j > m +. (34) Then ˜y is exactly the threshold pattern (9) with m = m+, and R(˜ y) = R(y⋆) = min By R.12 Step 3: K + 1 candidates suffice. By Step 2, some index m ∈ { 0, 1, . . . , K } satisfies R(y(m)) = min By R. Therefore 
+
+min  
+
+> s∈B
+
+Fc(s) = min 
+
+> y∈B y
+
+R(y)= min  
+
+> m=0 ,...,K
+
+R y(m) = min  
+
+> m=0 ,...,K
+
+τm, (35) which is the claimed exactness identity. 
+
+Step 4: complexity. Sorting c takes O(K log K). With the sorted order fixed, a left-to-right pass computes prefix sums of U(j) and c(j)U(j), and a right-to-left pass computes suffix sums of L(j) and 
+
+c(j)L(j), each in O(K) time. Given these four arrays, every τm in (10) is a ratio of two O(1) lookups, so the full sweep over m = 0 , . . . , K costs O(K). The total is therefore O(K log K), dominated by the sort. For numerical stability, replacing (ℓj , u j ) by (ℓj − a, u j − a) rescales every yj by e−a, and therefore scales both the numerator and the denominator of every τm by the same factor. Choosing a = max j uj
+
+enforces yj ∈ (0 , 1] for all j and prevents overflow. 
+
+B.3 Proof of Corollary 3.3 
+
+Proof of Corollary 3.3. Let G be any sound score-box-only lower-bound procedure. By soundness, 
+
+G(c, ℓ, u ) ≤ Fc(s) ∀ s ∈ B . (36) The right-hand side does not depend on G, so we may take the infimum over s ∈ B :
+
+G(c, ℓ, u ) ≤ inf  
+
+> s∈B
+
+Fc(s). (37) The box B is compact and Fc is continuous, so the infimum is attained and equals min s∈B Fc(s). By Theorem 3.2, 
+
+min  
+
+> s∈B
+
+Fc(s) = min  
+
+> m=0 ,...,K
+
+τm = Lbox (c, ℓ, u ). (38) Combining the displays gives G(c, ℓ, u ) ≤ Lbox (c, ℓ, u ).Algorithm 1 is itself a concrete sound score-box-only procedure whose output equals Lbox (c, ℓ, u ),so the inequality in Corollary 3.3 is attained. Among all sound procedures whose only inputs are c
+
+and the independent intervals, Vertex-Softmax is therefore pointwise optimal at every (c, ℓ, u ), not merely worst-case optimal. 
+
+B.4 Proof of Proposition 4.1 
+
+Proof of Proposition 4.1. Fix an arbitrary x ∈ X and a row i. By (16) , si(x) ∈ B i, so si(x) is feasible for the minimization defining Li. Therefore 
+
+Li ≤
+
+> K
+
+X
+
+> j=1
+
+softmax( si(x)) j zLij . (39) The entries of softmax( si(x)) are nonnegative, and by (17) we have zLij ≤ zij (x) for every j.Multiplying termwise by the softmax weights and summing preserves the inequality: 
+
+> K
+
+X
+
+> j=1
+
+softmax( si(x)) j zLij ≤
+
+> K
+
+X
+
+> j=1
+
+softmax( si(x)) j zij (x). (40) Combining (39) and (40) , Li lower-bounds the signed row contribution at input x. Summing over rows then gives 
+
+LVC = b + X
+
+> i
+
+Li
+
+≤ b + X
+
+> iK
+
+X
+
+> j=1
+
+softmax( si(x)) j zij (x) ≤ m(x), (41) where the last inequality is exactly the margin interface (14) . Since x ∈ X was arbitrary, LVC ≤ m(x)
+
+throughout X . If LVC > 0, then m(x) > 0 for all x ∈ X , certifying the margin. 13 C Vertex-CROWN Construction Details 
+
+For the architectures used in our experiments, the input image is first mapped to token embeddings 
+
+H(x) ∈ RR×d. For head h, the queries, keys, and values are affine maps 
+
+Qhi (x) = W hQHi(x) + bhQ,Khj (x) = W hK Hj (x) + bhK ,V hj (x) = W hV Hj (x) + bhV .
+
+(42) The attention score is 
+
+shij (x) = 1
+
+√dh
+
+⟨Qhi (x), K hj (x)⟩ + μhij , (43) where μhij is a fixed mask or positional score term. The experiments compute [ℓhij , u hij ] by applying auto_LiRPA/CROWN to (43) . A simple fallback is interval product bounding: from scalar bounds 
+
+qhir ∈ [qhir , q hir ] and khjr ∈ [khjr , k hjr ], set 
+
+phijr = min {q k, q k, q k, q k }, (44) 
+
+phijr = max {q k, q k, q k, q k }, (45) where the four products use the corresponding (i, j, r, h ) bounds. Then 
+
+ℓhij = μhij + 1
+
+√dh
+
+X
+
+> r
+
+phijr , uhij = μhij + 1
+
+√dh
+
+X
+
+> r
+
+phijr (46) is sound. CROWN/McCormick multiplication relaxations can be substituted; Vertex-Softmax only needs the certified scalar intervals. Let the attention-residual state after the output projection be 
+
+H+ 
+
+> i
+
+(x) = Hi(x) + bO + X
+
+> h
+
+W hO Ohi (x),Ohi (x) = X
+
+> j
+
+ahij (x)V hj (x). (47) For a target margin mt(x), suppose the downstream classifier or CROWN suffix gives an affine lower bound 
+
+mt(x) ≥ βt + X
+
+> i
+
+γ⊤ 
+
+> ti
+
+H+ 
+
+> i
+
+(x) ∀x ∈ X . (48) Substituting (47) produces attention coefficients 
+
+ηtih = ( W hO )⊤γti , ctihj ≤ η⊤
+
+> tih
+
+V hj (x) ∀x ∈ X . (49) When V hj (x) is affine in an input box x ∈ [xL, x U ], the lower bound in (49) is 
+
+LB x∈[xL,x U ][w⊤x + b] = ( w+)⊤xL + ( w−)⊤xU + b, (50) with w+ = max( w, 0) and w− = min( w, 0) . The non-attention pieces are gathered into 
+
+b′ 
+
+> t
+
+= βt + LB x∈X 
+
+"X
+
+> i
+
+γ⊤ 
+
+> ti
+
+Hi(x) + X
+
+> i
+
+γ⊤ 
+
+> ti
+
+bO
+
+#
+
+. (51) The target-wise Vertex-CROWN lower bound is 
+
+LVC ,t = b′ 
+
+> t
+
++ X
+
+> h,i
+
+Lbox (ctih :, ℓ ih :, u ih :) . (52) 
+
+Proposition C.1 (Soundness with affine suffix lower bounds) . Fix a target class t. Suppose the suffix of an attention block admits a sound affine lower bound (48) ; the attention scores satisfy 
+
+ℓhij ≤ shij (x) ≤ uhij for all x ∈ X ; and the value-side coefficients satisfy (49) . Then LVC ,t in (52) is a sound lower bound. If LCROWN ,t is any other sound lower bound on the same target margin, then 
+
+max {LCROWN ,t , L VC ,t } is sound as well. 
+
+14 Algorithm 3 Target-wise CROWN/Vertex hybrid  
+
+> 1:
+
+Input: input box X , true class y, target set T = {t : t̸ = y} 
+
+> 2:
+
+for each target t ∈ T do  
+
+> 3:
+
+Compute direct CROWN margin lower bound LCROWN ,t  
+
+> 4:
+
+Construct score boxes (ℓih :, u ih :) for all rows and heads  
+
+> 5:
+
+Construct suffix affine lower bound (βt, γ t) over H+ 
+
+> 6:
+
+Convert γt to value coefficients ctihj using (49)  
+
+> 7:
+
+LVC ,t ← b′ 
+
+> t
+
++ P 
+
+> h,i
+
+Lbox (ctih :, ℓ ih :, u ih :) 
+
+> 8:
+
+Lhyb ,t ← max {LCROWN ,t , L VC ,t } 
+
+> 9:
+
+end for  
+
+> 10:
+
+return certified iff min t∈T Lhyb ,t > 0
+
+Proof. Start from (48) and substitute (47) . The non-attention affine terms are lower-bounded by b′
+
+> t
+
+in (51). For each head h and row i, softmax weights are nonnegative and sum to one, so (49) gives 
+
+X
+
+> j
+
+ahij (x)η⊤
+
+> tih
+
+V hj (x) ≥ X
+
+> j
+
+ahij (x)ctihj . (53) The score vector shi (x) is feasible for the score box [ℓih :, u ih :], so Theorem 3.2 yields 
+
+X
+
+> j
+
+ahij (x)ctihj ≥ Lbox (ctih :, ℓ ih :, u ih :) . (54) Summing over rows and heads recovers (52) . The maximum of two lower bounds on the same scalar margin is again a lower bound. 
+
+## D Numerical Evaluation and Certificate Soundness 
+
+The exactness statements are real-arithmetic statements. The optimized implementation used in our experiments evaluates Algorithm 1 with standard floating-point PyTorch operations, including the stability shift a = max j uj . This is the usual implementation path for empirically comparing verifier bounds, but it is not by itself a proof-carrying floating-point certificate. For proof-producing use, the same K + 1 threshold structure can be evaluated conservatively with outward-rounded interval arithmetic. After the stability shift, compute intervals bLj and bUj enclosing 
+
+exp( ℓj − a) and exp( uj − a). For each threshold m, form interval enclosures for 
+
+Nm = X
+
+> j≤m
+
+c(j)U(j) + X
+
+> j>m
+
+c(j)L(j), (55) 
+
+Dm = X
+
+> j≤m
+
+U(j) + X
+
+> j>m
+
+L(j). (56) Because Dm > 0, interval division yields an enclosure [τ m, τ m] of the exact threshold value. Then 
+
+Lbox = min  
+
+> m=0 ,...,K
+
+τ m ≤ Lbox (c, ℓ, u ) (57) is a conservative lower bound for the score-box subproblem. A high-precision reference implementa-tion based on Python Decimal arithmetic with outward padding is provided in the supplementary material. The reported GPU certified rates and lower bounds use the faster PyTorch implementation unless explicitly marked as interval-certified. 15 E Additional Experimental Evidence 
+
+This appendix collects the supporting evidence behind the main experimental claims. To help navigate the material, here is a brief guide to what each subsection addresses and the key tables within it: • Protocol and numerical status (Tables 6–7): Can these results be reproduced, and are the floating-point outputs trustworthy? • GaLileo-style baseline (Table 8): How does Vertex-Softmax compare to the closest prior method on the same score-box problem? • Solver correctness and slack (Tables 9–10): Does the K+1 threshold solver match brute-force enumeration, and once softmax is solved exactly, where does the remaining looseness come from? • Runtime accounting (Table 11): Is the hybrid verifier too expensive relative to direct CROWN? • Paired improvements and stability (Tables 12–13): Are the gains broad-based across images, and do they hold across training seeds? • Strong-baseline details (Tables 14–15): Full per-trial comparisons with alpha-CROWN and ABCrown-BaB. 
+
+E.1 Protocol and numerical status 
+
+A natural concern with any verifier comparison is whether the evaluation is fair and the floating-point outputs are trustworthy. Table 6 records the evaluation protocol, denominators, and hardware for each benchmark so that results can be reproduced. Table 7 addresses numerical soundness: it separates the proof-producing interval-oracle checks for the Vertex-Softmax primitive from the standard floating-point verifier outputs used for GPU-scale experiments. The interval-oracle checks confirm that the Vertex-Softmax primitive produces correct results to within numerical tolerance. For the GPU-scale experiments, no certified margins fall in the near-zero band where floating-point rounding could flip a certification decision. 
+
+E.2 GaLileo-style implementation baseline 
+
+Table 8 reports the GaLileo-style implementation baseline for K ≤ 16 . Because the original GaLileo code is not publicly available, these results are from our independent reimplementation and are reported only as an implementation baseline, not as an official reproduction. Vertex-Softmax is tighter in every tested case. 
+
+E.3 Exact solver and slack diagnostics 
+
+Two questions arise about the Vertex-Softmax primitive: does the K + 1 threshold solver actually match exhaustive enumeration, and once it solves the softmax subproblem exactly, how much looseness remains from other sources? Table 9 addresses the first: the threshold solver agrees with exhaustive search to within 5 × 10 −7 for all tested K, while running orders of magnitude faster at 
+
+K ≥ 16 . Table 10 addresses the second by decomposing the total verification gap on controlled tiny instances into its constituent sources. The slack decomposition confirms that once the softmax subproblem is solved exactly, the dominant remaining sources of looseness are value-bound slack and, when present, suffix relaxation. This supports the claim that Vertex-Softmax removes the most accessible source of avoidable looseness at the score-box interface. 
+
+E.4 Runtime accounting 
+
+A practical concern is whether the Vertex-CROWN hybrid is too expensive relative to direct CROWN. Table 11 breaks down the wall time for the full-block MNIST setting. The Vertex-Softmax sort/sweep itself is negligible ( 0.02% of total time); the cost of the hybrid comes almost entirely from constructing the score, value, and suffix bounds that feed into the oracle. 16 Table 6: Experiment protocol summary. All image inputs use clipped pixel ℓ∞ boxes in [0 , 1] . Unless otherwise noted, score boxes are computed via auto_LiRPA/CROWN on the scalar score module, and all reported certificates are standard floating-point verifier outputs. Hardware is RTX 5090 except where marked “mixed.” For learned patch-attention rows and conditional appendix rows, the listed N
+
+is the number of clean-correct examples selected for certification per seed. For the Fashion/CIFAR full-block certificates in Table 5, N is the first 100 evaluation examples per seed and clean-incorrect examples are counted as uncertified. Synthetic rows compute rates over all listed trials. Benchmark Score / suffix method Seeds N / seed Clean acc. 
+
+Synthetic score boxes 
+
+Scalable sweep interval-product; no learned suffix 3 200 trials n/a 
+
+α/ABCrown blocks synthetic blocks; CROWN score boxes 3 selected n/a 
+
+Learned patch-attention models 
+
+MNIST binary, 16 tok. CROWN; linear classifier 3 1000 0.992 MNIST binary, 49 tok. CROWN; linear classifier 2 500 0.993 MNIST 10-class, 16 tok. CROWN; linear classifier 3 500 0.875 Residual MHA CROWN; output proj. + linear 3 500 0.998 
+
+Full attention–residual–MLP blocks 
+
+MNIST block CROWN; target-wise suffix over H+
+
+3–5 200 0.749 Fashion-MNIST block CROWN; target-wise suffix over H+
+
+5 100 eval 0.708/0.672 †
+
+CIFAR-10 gray block CROWN; target-wise suffix over H+
+
+5 100 eval 0.346  
+
+> †
+
+0.708 for d=32 , h =4 ; 0.672 for d=16 , h =2 . ABCrown-BaB uses a fixed 600s per-instance budget. Runtime claims use RTX 5090 rows only; Fashion/CIFAR rows use mixed GPUs. 
+
+E.5 Paired improvements and seed-resampling stability 
+
+The main-text tables report aggregate certified rates and mean lower bounds. Here we ask two finer-grained questions: does the hybrid improve bounds on most individual images (not just on average), and are the headline improvements stable across training seeds? Table 12 reports paired improvements from the same exact evaluation-denominator reruns as Table 5. At ϵ = 0 .02 on Fashion-MNIST, the hybrid improves the lower bound on 99 .7% of clean-correct evaluated images, with a median improvement of 4.26 points, confirming that the gains are broad-based rather than driven by a few outliers. Table 13 gives seed-resampling intervals for the main certified-rate improvements. Because several rows have only two or three seeds, these intervals are descriptive stability checks rather than formal significance tests; nonetheless, the resampled intervals are comfortably above zero in every case. 
+
+E.6 Strong-baseline details 
+
+The main text reports that Vertex-CROWN is competitive with alpha-CROWN and outperforms ABCrown-BaB in selected settings. Tables 14 and 15 provide the full per-trial details behind those claims. Table 14 shows paired diagnostics: on the two settings where Vertex-CROWN most clearly outper-forms alpha-CROWN ( K = 4 , d = 16 , ϵ = 0 .05 and K = 4 , d = 32 , ϵ = 0 .03 ), Vertex-CROWN produces a higher lower bound on 21 –23 out of 24 trials. The “V-only” column shows instances certified only by Vertex-CROWN and not by alpha-CROWN; in both settings, Vertex-CROWN certifies several instances that alpha-CROWN misses, while the reverse is rare. Table 15 consolidates the full certified rates, lower bounds, and runtimes across all tested settings and methods, including 17 Table 7: Numerical status checks. The oracle interval rows validate the Vertex-Softmax threshold primitive itself. The Fashion-MNIST rows use the exact evaluation-denominator full-block rerun at ϵ = 0 .02 : FP cert. is counted over 500 evaluation examples, while near-zero counts inspect the clean-correct margins that were actually bounded. These checks do not on their own constitute end-to-end outward-rounded LiRPA certificates. Check Scope N FP cert. Near-zero 
+
+(0 , 10 −6]
+
+Near-zero 
+
+(0 , 10 −4]
+
+Decimal interval regression random score boxes, K ≤ 8 360 n/a 0 violations 0 violations Decimal interval regression large dynamic range score box 1 n/a 0 violations 0 violations Fashion-MNIST 
+
+ϵ = 0 .02 
+
+CROWN image margins 500 28 0 0Fashion-MNIST 
+
+ϵ = 0 .02 
+
+Vertex-CROWN image margins 500 70 0 0Fashion-MNIST 
+
+ϵ = 0 .02 
+
+Hybrid image margins 500 70 0 0Table 8: GaLileo-style implementation baseline at ϵ = 0 .02 , three seeds, 600 trials per row. These results are from our independent reimplementation (original code not publicly available). 
+
+K Method Cert. rate Mean lower Gap Time (s) 4 GaLileo-style 0.165 -0.2164 0.4707 1.8171 4 Vertex 0.180 -0.2020 0.4563 0.0298 8 GaLileo-style 0.037 -0.3623 0.5230 4.9151 8 Vertex 0.053 -0.3367 0.4973 0.0299 16 GaLileo-style 0.002 -0.4604 0.5534 19.2317 16 Vertex 0.007 -0.4280 0.5211 0.0302 the residual-MHA block where alpha-CROWN’s optimizable slopes give it an advantage at ϵ = 0 .03 
+
+but not at ϵ = 0 .05 .18 8 12 16 32 64 128 256 512 
+
+> Attention row length K
+> 10 0
+> 10 1
+> Runtime per benchmark batch (ms)
+
+Exact Vertex-Softmax Runtime Scaling 
+
+> Threshold solver
+> Exhaustive vertices
+
+Figure 4: Runtime scaling for the exact Vertex-Softmax threshold solver. Exhaustive enumeration is shown only where feasible. Table 9: Threshold solver exactness and runtime. Exhaustive enumeration is shown only where feasible. 
+
+K Threshold (s) Exhaustive (s) Max diff. 8 0.00046 0.00144 3.6×10 −7
+
+12 0.00033 0.00725 2.4×10 −7
+
+16 0.00037 0.11383 4.8×10 −7
+
+64 0.00162 – –128 0.00453 – –Table 10: Slack-decomposition diagnostics on controlled tiny instances. Entries are mean lower-bound gaps over random seeds; larger values mean more looseness from that source. The softmax gap is Vertex-Softmax minus Wei-LSE on the same score boxes. Grid-based gaps use a dense two-dimensional input grid and are diagnostics rather than proof-producing certificates. Diagnostic ϵ Softmax Score box Value Row-wise Suffix Final single-row attention 0.20 0.048 0.048 0.157 – – 0.205 two-row residual 0.20 0.168 0.228 – 0.151 – 0.379 ReLU suffix 0.20 – – – – 0.625 0.625 Table 11: Coarse runtime accounting for the RTX 5090 full-block MNIST setting d = 32 , h =4, m = 64 , ϵ = 0 .02 . Direct CROWN, Vertex path, and Hybrid totals are averaged over three seed runs with 200 certified images per seed. The Vertex-Softmax sort/sweep entry is estimated by scaling the measured K = 16 threshold microbenchmark to 9 targets, 4 heads, and 16 query rows; the remaining Vertex-path time is therefore attributed to score, value, and suffix-bound construction. Component Sec./img Fraction Direct CROWN 0.1058 0.094 Score/value/suffix bounds 1.0147 0.899 Vertex sort/sweep 0.0002 0.000 Hybrid overhead 0.0081 0.007 Total hybrid 1.1288 1.000 19 Table 12: Paired lower-bound improvements for the non-MNIST full-block rows from the exact evaluation-denominator reruns. Mean ∆ is seed-averaged to match Table 5; median ∆ and fraction improved are computed over the clean-correct evaluated images whose margins were bounded. Dataset / setting ϵ N Mean ∆ Median ∆ Fraction improved Fashion-MNIST d = 32 , h = 4 , m = 64 0.01 358 0.215 0.000 0.307 Fashion-MNIST d = 32 , h = 4 , m = 64 0.02 358 6.402 4.256 0.997 Fashion-MNIST d = 32 , h = 4 , m = 64 0.03 358 33.608 27.577 1.000 Fashion-MNIST d = 16 , h = 2 , m = 64 0.02 344 4.608 2.254 0.971 CIFAR-10 gray d = 32 , h = 4 , m = 64 0.005 188 0.182 0.000 0.277 CIFAR-10 gray d = 32 , h = 4 , m = 64 0.01 188 4.521 2.680 1.000 Table 13: Seed-resampling stability checks for selected certified-rate improvements using stored summaries. Rows marked e2e use exact evaluation-denominator rates; the remaining learned image-model rows use conditional rates on clean-correct certification subsets. The intervals are percentile resampling intervals over training/evaluation seeds; rows with two or three seeds should be read as descriptive stability checks rather than formal significance tests. Setting ϵ Seeds CROWN (%) Method (%) ∆ pp Resampled interval pp MNIST patch attention, 
+
+K = 16 (Vertex) 0.03 3 20.3 77.8 +57.5 [+39.2, +67.4] MNIST patch attention, 
+
+K = 49 (Vertex) 0.03 2 46.5 92.5 +46.0 [+32.6, +59.4] MNIST 10-class patch attention (Vertex) 0.02 3 3.3 12.9 +9.5 [+6.0, +12.0] MNIST full block, 
+
+d = 32 , h = 4 , m = 64 
+
+(Hybrid) 0.02 3 10.2 14.3 +4.2 [+2.5, +5.5] Fashion full block, 
+
+d = 32 , h = 4 , m = 64 (e2e Hybrid) 0.02 5 5.6 14.0 +8.4 [+5.8, +11.2] Fashion full block, 
+
+d = 16 , h = 2 , m = 64 (e2e Hybrid) 0.02 5 9.6 25.2 +15.6 [+14.2, +16.6] CIFAR-gray full block, 
+
+d = 32 , h = 4 , m = 64 (e2e Hybrid) 0.01 5 0.4 2.6 +2.2 [+0.8, +3.8] Table 14: Paired strong-baseline diagnostics from the long-budget small-attention detail CSVs. Alpha-CROWN and Vertex-CROWN lower bounds are compared on the same trials. ABCrown-BaB reports status under a 600 second per-instance budget; unknown, OOM, and internal-error outcomes are counted as uncertified. Setting N α cert. V cert. ABC safe Mean ∆ Med. ∆ V> α V-only /
+
+α-only ABC un-known / error 
+
+K = 4 , d =16 , ϵ = 0 .05 
+
+24 12 15 12 0.164 0.139 21/24 4/1 10/2 
+
+K = 4 , d =32 , ϵ = 0 .03 
+
+24 6 12 7 0.250 0.232 23/24 6/0 15/2 20 Table 15: Selected strong-baseline results used in Figure 3. ABCrown-BaB uses a 600 second per-instance budget and reports status, so no scalar lower bound is shown for those rows. Residual-MHA rows use the residual multi-head block from the main comparison. Setting Method Cert. Lower Sec./trial 
+
+K = 4 , d = 16 , ϵ = 0 .03 alpha-CROWN 0.742 0.2912 1.662 Vertex-CROWN 0.742 0.2809 0.042 
+
+K = 4 , d = 16 , ϵ = 0 .05 CROWN 0.125 -1.0350 0.158 alpha-CROWN 0.500 -0.0311 1.537 Vertex-CROWN 0.625 0.1327 0.033 ABCrown-BaB 0.500 – 267.806 
+
+K = 4 , d = 32 , ϵ = 0 .03 CROWN 0.083 -1.2730 0.190 alpha-CROWN 0.250 -0.1853 1.752 Vertex-CROWN 0.500 0.0645 0.037 ABCrown-BaB 0.292 – 395.091 
+
+K = 6 , d = 16 , ϵ = 0 .03 alpha-CROWN 0.583 0.1219 1.678 Vertex-CROWN 0.591 0.1255 0.042 Residual MHA, ϵ = 0 .03 CROWN 0.313 -3.901 0.177 Vertex-CROWN 0.337 -2.631 0.071 alpha-CROWN 0.410 -0.455 3.729 Residual MHA, ϵ = 0 .05 CROWN 0.000 -39.475 0.169 Vertex-CROWN 0.163 -13.054 0.070 alpha-CROWN 0.067 -16.334 3.672 21

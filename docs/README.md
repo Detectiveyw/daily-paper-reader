@@ -6,31 +6,35 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-12
-- 运行时间：2026-05-12 20:57:39 UTC
+- 最新运行日期：2026-05-13
+- 运行时间：2026-05-13 20:40:24 UTC
 - 运行状态：成功
-- 本次总论文数：3
-- 精读区：1
-- 速读区：2
+- 本次总论文数：4
+- 精读区：0
+- 速读区：4
 
 ### 今日简报（AI）
-今日聚焦分布式 AI 安全前沿，深度解析了纵向联邦学习在时间序列推理中的隐私保护方案。
-重点推荐 8.0 分论文对私密时序推理的突破，并同步关注多智能体 LLM 在恶意攻击下的鲁棒性研究。
-建议开发者优先探索如何在保障数据合规的前提下，构建更稳健的多 Agent 协作系统。
-- 详情：[/202605/12/README](/202605/12/README)
+今日聚焦 Transformer 形式化验证的精度突破，并深入探讨联邦学习与数据检索中的隐私保护方案。
+Vertex-Softmax 通过精确优化 Softmax 层实现了更紧致的验证边界，而 BitTorrent 架构则为联邦学习的隐私调度提供了新思路。
+建议关注模型安全验证的开发者重点研读 Vertex-Softmax，隐私计算从业者可参考分布式调度的新范式。
+- 详情：[/202605/13/README](/202605/13/README)
 
 ### 精读区论文标签
-1. [Private Vertical Federated Inference for Time-Series](/202605/12/2605.08343v1-private-vertical-federated-inference-for-time-series)  
-   标签：评分：8.0/10、query:fss-llm
-   evidence：基于MPC的Transformer架构安全推理
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [TENNOR: Trustworthy Execution for Neural Networks through Obliviousness and Retrievals](/202605/12/2605.07160v1-tennor-trustworthy-execution-for-neural-networks-through-obliviousness-and-retrievals)  
+1. [Vertex-Softmax: Tight Transformer Verification via Exact Softmax Optimization](/202605/13/2605.10974v1-vertex-softmax-tight-transformer-verification-via-exact-softmax-optimization)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：Transformer验证与Softmax优化
+2. [Private Structured-Subset Retrieval](/202605/13/2605.05160v3-private-structured-subset-retrieval)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：用于神经网络安全执行的遗忘原语
-2. [Robust Multi-Agent LLMs under Byzantine Faults](/202605/12/2605.09076v1-robust-multi-agent-llms-under-byzantine-faults)  
+   evidence：从非共谋服务器进行私有信息检索 (PIR)
+3. [Privacy-preserving Chunk Scheduling in a BitTorrent Implementation of Federated Learning](/202605/13/2605.10499v1-privacy-preserving-chunk-scheduling-in-a-bittorrent-implementation-of-federated-learning)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：针对拜占庭容错的去中心化大模型协议
+   evidence：具有隐私保护块调度的无服务器联邦学习
+4. [Experimental Examination of Secure Two-Party Controller Computation](/202605/13/2605.11443v1-experimental-examination-of-secure-two-party-controller-computation)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：基于秘密共享的分布式控制安全两 party 计算
 
 
 <div class="dpr-home-promo-card">

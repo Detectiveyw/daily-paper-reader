@@ -1,0 +1,738 @@
+Title: Experimental Examination of Secure Two-Party Controller Computation
+
+URL Source: https://arxiv.org/pdf/2605.11443v1
+
+Published Time: Wed, 13 May 2026 00:32:32 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+© 2026 the authors. This work has been accepted to IFAC for publication under a Creative Commons Licence CC-BY-NC-ND. 
+
+> arXiv:2605.11443v1 [eess.SY] 12 May 2026
+
+# Experimental Examination of Secure Two-Party Controller Computation ⋆
+
+Kaoru Teranishi ∗ Jihoon Suh ∗∗ Takashi Tanaka ∗∗ ∗ Department of Information and Physical Sciences, Graduate School of Information Science and Technology, The University of Osaka, Osaka, Japan (e-mail: k-teranishi@ist.osaka-u.ac.jp)  
+
+> ∗∗
+
+School of Aeronautics and Astronautics, Purdue University, West Lafayette, IN 47907 USA (e-mail: suh95@purdue.edu, tanaka16@purdue.edu) 
+
+Abstract: A secure two-party computation protocol for running dynamic controllers over secret sharing has recently been proposed. Unlike encrypted control schemes based on homomorphic encryption, this protocol enables operating dynamic controllers for an infinite time horizon without controller-state decryption, controller-state reset, or input re-encryption. However, the two-party setting introduces additional online communication between the computing parties, which may hinder real-time feasibility. In this study, we demonstrate the feasibility of the protocol through implementation on a commercial cloud platform with an inverted pendulum testbed. Experimental results show that the proposed protocol successfully stabilized the pendulum despite the online communication overhead. 
+
+Keywords: Cyber-physical systems, encrypted control, multi-party computation, privacy, security 1. INTRODUCTION Encrypted control has emerged as a promising framework for enhancing the security of networked control systems (Kogiso and Fujita, 2015; Darup et al., 2021). Beyond se-cure communication, it enables secure computation with-out revealing controller inputs, outputs, or parameters even when the controller computation is outsourced to an untrusted third party, such as a public cloud. This is achieved by leveraging homomorphic encryption, which allows arithmetic operations to be performed directly on encrypted data. A major challenge in encrypted control is avoiding overflow in the encrypted controller states when implementing dy-namic controllers (Cheon et al., 2018). In a single-server setting, previous studies have attempted to address this problem by decrypting controller states at every time step (Kogiso and Fujita, 2015), employing fully homomorphic encryption with bootstrapping (Kim et al., 2016), peri-odically resetting controller states (Murguia et al., 2020), or reformulating controller representations. The controller-reformulation approach includes approximating a con-troller using a finite impulse response filter (Schl¨ uter et al., 2021), transforming a controller via re-encrypted control inputs so that it has an integer state matrix (Kim et al., 2023), and representing controller states using historical input and output data (Teranishi et al., 2024; Lee et al., 2025). Although these approaches prevent overflow, the underlying difficulty stems from the intrinsic limitation  
+
+> ⋆This work was supported by AFOSR Award FA9550-25-1-0347 and DARPA Award HR0011-25-3-0210.
+
+that homomorphic encryption supports only addition and multiplication. To overcome this limitation, a recent study has explored a two-party setting and applied secure multi-party compu-tation to realize encrypted control (Teranishi and Tanaka, 2025). Instead of relying on homomorphic encryption, this approach employs secret sharing and constructs multipli-cation and truncation protocols. The truncation protocol effectively prevents state overflow without requiring state decryption, state reset, or input re-encryption. Compared with single-server methods, the two-party protocol sim-plifies system configuration, reduces the computational cost for the client, and improves security guarantees. Despite these theoretical advantages, the two-party set-ting requires additional online communication between the servers. This additional communication requirement raises questions about its practicality as the protocol has not been tested empirically. Motivated by these concerns, this study experimentally ex-amines the feasibility of the two-party controller computa-tion protocol. We begin by presenting a vectorized variant of the two-party computation to simplify the computation and yield a protocol more amenable to implementation. Building on this variant, we implement the protocol on a commercial cloud platform and conduct experiments using an inverted pendulum testbed. The experimental results demonstrate that the protocol successfully stabilizes the pendulum despite the online communication overhead im-posed by the two-party setting. Our main contributions are summarized as follows: • We clarify a sufficient condition for the modulus bit length in secret sharing that guarantees the vector-ized two-party controller computation protocol avoids state overflow. This condition provides a practical guideline for selecting system parameters when im-plementing the protocol. 
+
+• We demonstrate the practicality of secure multi-party computation in an actual control system. To the best of our knowledge, this is the first implementation of secure multi-party computation for real-time control systems on a commercial computing service. 
+
+• We provide a detailed evaluation of the processing times of the subprotocols that compose the controller computation protocol. The measurements reveal the primary bottleneck in processing time and offer in-sights for further optimization of secure controller computation in real-time applications. The remainder of this paper is organized as follows. Sec-tion 2 introduces secret sharing, matrix triples, and the subprotocols for multiplication and truncation. It also presents a vectorized variant of the two-party controller computation protocol. Section 3 describes the experimen-tal setup and results. Section 4 concludes the paper and discusses future work. 
+
+Notation: The sets of integers, positive integers, and real numbers are denoted by Z, N, and R, respectively. For 
+
+k ∈ N, Z⟨k⟩ := {− 2k−1, . . . , 2k−1 − 1} denotes the set of k-bit integers. For k, ℓ ∈ N such that k > ℓ , Q⟨k,ℓ ⟩ := {2−ℓz |
+
+z ∈ Z⟨k⟩} denotes the set of k-bit fixed-point numbers with an ℓ-bit fractional part. For q ≥ 2, Zq := Z ∩ [−q/ 2, q/ 2) denotes the set of integers within [ −q/ 2, q/ 2). For z ∈ Z,
+
+z mod q := z −⌊ z+q/ 2 
+
+> q
+
+⌋q denotes the reduction of z modulo 
+
+q over Zq , where ⌊x⌋ := max {z ∈ Z | z ≤ x} is the floor function. The rounding function is also defined by 
+
+⌈x⌋ := ⌊x + 1 /2⌋. For vectors and matrices, ( · mod q), ⌊·⌋ ,and ⌈·⌋ are performed element-wise. 2. TWO-PARTY CONTROLLER COMPUTATION This section presents a vectorized variant of the two-party protocol for controller computation. Consider the discrete-time linear time-invariant controller 
+
+xt+1 = Ax t + By t,ut = Cx t + Dy t,
+
+where t = 0 , 1, 2, . . . is the time index, xt ∈ Rn is the state, ut ∈ Rm is the control input, and yt ∈ Rp is the sensor measurement. The controller can be represented in the form of a matrix-vector product, 
+
+ψt = Φ ξt, (1) where 
+
+ψt := 
+
+xt+1 
+
+ut
+
+
+
+, Φ := 
+
+A B C D 
+
+
+
+, ξt := 
+
+xt
+
+yt
+
+
+
+.
+
+We assume that the controller parameters, initial state, and sensor measurement at each time step are given by fixed-point numbers. Note that this assumption is reason-able in practice because real numbers can be approximated by fixed-point numbers with desired precision. 
+
+Assumption 1. The parameter matrix, initial state, and sensor measurement in (1) satisfy Φ ∈ Q(n+m)×(n+p) 
+
+> ⟨k,ℓ ⟩
+
+,
+
+x0 ∈ Qn
+
+> ⟨k,ℓ ⟩
+
+, and yt ∈ Qp
+
+> ⟨k,ℓ ⟩
+
+.Our goal is to securely implement the controller computa-tion (1) on untrusted servers. To achieve this, we employ a two-party protocol in Teranishi and Tanaka (2025) with modifications. In what follows, we denote the computing parties as Pi, i ∈ { 0, 1}.
+
+2.1 Secret Sharing 
+
+The two-party protocol guarantees security by splitting the controller (1) into two randomized controllers and computing each of the controllers separately (Teranishi and Tanaka, 2025). Such randomization is performed using a cryptographic primitive called secret sharing. 
+
+Definition 2. A (vectorized) secret sharing scheme over Zq
+
+with a prime q consists of two polynomial-time algorithms 
+
+Share and Reconst :
+
+• JXK ← Share (X): The share generation algorithm takes a secret X ∈ Zd1×d2 
+
+> q
+
+as input and outputs shares JXK = (JXK0, JXK1) = (R, X − R mod q), where R ∈ Zd1×d2 
+
+> q
+
+is a random matrix. 
+
+• X ← Reconst (JXK): The reconstruction algorithm takes shares JXK as input and outputs X = JXK0 +
+
+JXK1 mod q.In our two-party setting, the party Pi receives the share 
+
+JXKi. Each share JXKi is distributed over Zd1×d2 
+
+> q
+
+uniformly at random, and each share reveals no information about a secret X to Pi. The secret X can be reconstructed by combining both shares, i.e., 
+
+Reconst (Share (X)) = X. 
+
+Moreover, by construction, the secret sharing scheme al-lows (constant) addition/subtraction, 
+
+JXK ± Y := ( JXK0 ± Y mod q, JXK1),
+
+JXK ± JY K := ( JXK0 ± JY K0 mod q, JXK1 ± JY K1 mod q),
+
+and constant multiplication, 
+
+kJXK := ( kJXK0 mod q, k JXK1 mod q),
+
+JXKZ := ( JXK0Z mod q, JXK1Z mod q),
+
+where X, Y ∈ Zd1×d2 
+
+> q
+
+, Z ∈ Zd2×d3 
+
+> q
+
+, and k ∈ Zq . The computations can be performed locally and satisfy 
+
+JXK ± Y = JXK ± JY K = JX ± Y mod qK,kJXK = JkX mod qK,
+
+JXKZ = JXZ mod qK.
+
+We also define X ± JY K and XJZK in a similar way. 
+
+2.2 Matrix Triple 
+
+Recall that we aim to implement the matrix-vector prod-uct (1) over secret sharing. Unlike addition and subtrac-tion, however, matrix multiplication between two shares 
+
+JXK and JY K (of appropriate dimensions) is not straight-forward. This is because it requires computing cross terms 
+
+JXK0JY K1 and JXK1JY K0, which include all shares of both 
+
+X and Y , and thus discloses the secrets to the parties. To overcome this difficulty, the two-party protocol applies Beaver triples (Beaver, 1992) to construct a subprotocol for multiplication. We use matrix triples in Mohassel and Zhang (2017), which are vectorized Beaver triples. Here, a matrix triple over Zq is a triplet ( JU K, JV K, JW K) that comprises the shares of random matrices U ∈ Zd1×d2 
+
+> q
+
+,
+
+V ∈ Zd2×d3 
+
+> q
+
+, and W ∈ Zd1×d3 
+
+> q
+
+such that W = U V mod q.Protocol 1 Matrix multiplication ( Mult )
+
+Input: Shares JXK of X ∈ Zd1×d2 
+
+> q
+
+, shares JY K of Y ∈
+
+Zd2×d3 
+
+> q
+
+, and a matrix triple ( JU K, JV K, JW K). 
+
+Output: Shares JZK = JXY mod qK. 
+
+> 1:
+
+JSKi ← JXKi − JU Ki mod q, JT Ki ← JY Ki − JV Ki mod q 
+
+> 2:
+
+S ← Reconst (JSK), T ← Reconst (JT K) 
+
+> 3:
+
+JZKi ← JU KiT + SJV Ki + JW Ki + i · ST mod q
+
+Let X ∈ Zd1×d2 
+
+> q
+
+and Y ∈ Zd2×d3 
+
+> q
+
+. Protocol 1 computes the shares JZK of Z = XY mod q ∈ Zd1×d3 
+
+> q
+
+using a matrix triple. Suppose the party Pi has JXKi, JY Ki, and (JU Ki, JV Ki, JW Ki). Each party randomizes its own shares 
+
+JXKi and JY Ki as JSKi = JXKi − JU Ki mod q and JT Ki =
+
+JY Ki − JV Ki mod q, respectively. The parties then open the randomized shares and reconstruct S and T . Each party computes and outputs JZKi = JU KiT + SJV Ki + JW Ki + i ·
+
+ST mod q. The output shares satisfy 
+
+Reconst (JZK) = JZK0 + JZK1 mod q, 
+
+= U T + SV + W + ST mod q, 
+
+= U (Y −V )+( X −U )V +U V +( X −U )( Y −V ) mod q, 
+
+= XY mod q, 
+
+which implies JZK = JXY mod qK. We denote JXKJ Y K := 
+
+Mult (JXK, JY K) for notational convenience. 
+
+2.3 Bit Truncation 
+
+Assumption 1 implies that the parameter matrix and input/output vectors in (1) are represented by fixed-point numbers. To apply the multiplication protocol to X ∈
+
+Qd1×d2 
+
+> ⟨k,ℓ ⟩
+
+and Y ∈ Qd2×d3 
+
+> ⟨k,ℓ ⟩
+
+, we need to encode them into integer matrices over Zq . When Z⟨k⟩ ⊂ Zq , the encoding and corresponding decoding processes are respectively performed by 
+
+Ecd (X, ℓ ) := ¯X = 2 ℓX, Dcd ( ¯X, ℓ ) := 2 −ℓ ¯X. 
+
+The multiplication of shares of ¯X = Ecd (X, ℓ ) and ¯Y =
+
+Ecd (Y, ℓ ) is then given by J ¯XKJ ¯Y K = J22ℓXY mod qK. This increases the fractional part of the resulting matrix by 
+
+ℓ bits. The controller state xt is recursively multiplied by 
+
+A in the computation (1), and thus, the fractional part of the encoded state reaches the data size k (i.e., overflow) at a certain finite time step whenever A is not an integer matrix (Cheon et al., 2018). To avoid this issue, the two-party protocol adopted the truncation protocol in Escudero et al. (2020). A vectorized version of the truncation protocol is shown in Protocol 2. Let λ ∈ N be a security parameter of the protocol. Suppose that κ = ⌊log 2 q⌋ − λ − 1 > ℓ , and the party 
+
+Pi has the share JXKi of X ∈ Zd1×d2 
+
+> ⟨κ⟩
+
+and the pair of shares ( JRKi, JR′Ki) of random matrices R ∈ Zd1×d2 
+
+> ⟨κ−ℓ+λ⟩
+
+and 
+
+R′ ∈ Zd1×d2 
+
+> ⟨ℓ⟩
+
+. Each party randomizes its own share JXKi
+
+as JY Ki = JXKi + 2 ℓJRKi + JR′Ki + i · 2ℓ−1J mod q, where 
+
+J is the d1-by-d2 matrix of ones. The party P0 sends its randomized share to P1, and then P1 reconstructs Y . Each party computes and outputs JZKi = 2 −ℓ(JXKi + JR′Ki −
+
+i · (Y − 2ℓ−1J mod 2 ℓ)) mod q. Here, note that 2 −ℓ is the modular inverse of 2 ℓ modulo q. As a result, the output shares represent shares of a matrix obtained by truncating the least ℓ bits of X, with an error W ∈ {− 1, 0, 1}d1×d2 .
+
+Protocol 2 Bit truncation ( Trunc )
+
+Input: Shares JXK of X ∈ Zd1×d2 
+
+> ⟨κ⟩
+
+, shares ( JRK, JR′K) of random matrices R ∈ Zd1×d2 
+
+> ⟨κ−ℓ+λ⟩
+
+and R′ ∈ Zd1×d2 
+
+> ⟨ℓ⟩
+
+, and bit length ℓ ∈ N, where κ = ⌊log 2 q⌋ − λ − 1 > ℓ , and 
+
+λ ∈ N is a security parameter. 
+
+Output: Shares JZK = J⌈X/ 2ℓ⌋ + W K with W ∈ Zd1×d2 
+
+> 3
+
+. 
+
+> 1:
+
+JY Ki ← JXKi + 2 ℓJRKi + JR′Ki + i · 2ℓ−1J mod q 
+
+> 2:
+
+Y ← Reconst (JY K) 
+
+> 3:
+
+JZKi ← 2−ℓ(JXKi+JR′Ki−i·(Y −2ℓ−1J mod 2 ℓ)) mod q
+
+Protocol 3 Two-party controller computation 
+
+Input: Controller parameter Φ ∈ Q(n+m)×(n+p) 
+
+> ⟨k,ℓ ⟩
+
+, initial state x0 ∈ Qn
+
+> ⟨k,ℓ ⟩
+
+, sensor measurement yt ∈ Qp
+
+> ⟨k,ℓ ⟩
+
+, bit lengths k, ℓ ∈ N, modulus q, and security parameter 
+
+λ ∈ N.
+
+Output: Control input ut ∈ Rm. 
+
+> 1:
+
+▷ Client  
+
+> 2:
+
+¯Φ ← Ecd (Φ , ℓ ), J ¯ΦK ← Share ( ¯Φ)  
+
+> 3:
+
+¯x0 ← Ecd (x0, ℓ ), J¯x0K ← Share (¯ x0) 
+
+> 4:
+
+Send J ¯ΦKi and J¯x0Ki to Pi 
+
+> 5:
+
+for all t = 0 , 1, 2, . . .  
+
+> 6:
+
+▷ Client  
+
+> 7:
+
+¯yt ← Ecd (yt, ℓ ), J¯ytK ← Share (¯ yt) 
+
+> 8:
+
+Send J¯ytKi to Pi 
+
+> 9:
+
+Generate ( JUtK, JVtK, JWtK) and ( JRtK, JR′
+
+> t
+
+K) 
+
+> 10:
+
+Send ( JUtKi, JVtKi, JWtKi), and ( JRtKi, JR′
+
+> t
+
+Ki) to Pi 
+
+> 11:
+
+▷ Parties  
+
+> 12:
+
+J ¯ξtK ← [J¯xtK⊤ J¯ytK⊤]⊤, J ¯ψtK ← Mult (J ¯ΦK, J ¯ξtK) 
+
+> 13:
+
+[J˜xt+1 K⊤ J¯utK⊤]⊤ ← J ¯ψtK, J¯xt+1 K ← Trunc (J˜xt+1 K, ℓ ) 
+
+> 14:
+
+Send J¯utK to the client  
+
+> 15:
+
+▷ Client  
+
+> 16:
+
+¯ut ← Reconst (J¯utK), ut ← Dcd (¯ ut, 2ℓ)
+
+Lemma 3. Suppose q is a prime. Let κ, ℓ, λ ∈ N such that 
+
+κ = ⌊log 2 q⌋ − λ − 1 > ℓ . It holds that, for all X ∈ Zd1×d2 
+
+> ⟨κ⟩
+
+,
+
+Reconst (Trunc (JXK, ℓ )) = 
+
+ X
+
+2ℓ
+
+
+
++ W, 
+
+where JXK ← Share (X) and W ∈ {− 1, 0, 1}d1×d2 .
+
+Proof. The proof is obtained by adopting Lemma 1 in Teranishi and Tanaka (2025) for each element of X.
+
+2.4 Controller Computation 
+
+Using the multiplication and truncation protocols, we now present a controller computation protocol (Protocol 3). The protocol consists of the offline phase (lines 1–4) and online phase (lines 5–16). Fig. 1 illustrates the data flow of the protocol, where the dotted arrows represent communication of the intermediate messages ( JStKi, JTtKi)and JYtK0 in the subprotocols. We refer to the entities corresponding to the gray, blue, and orange boxes as a client, P0, and P1, respectively. In what follows, the dimensions d1, d2, and d3 in Protocol 1 are set to n + m,
+
+n + p, and 1, respectively. The dimensions d1 and d2 in Protocol 2 are also set to n and 1, respectively. In the offline phase, the client generates shares of the parameter matrix Φ and the initial state x0 as P0      
+
+> P1
+> Plant Ecd Share Dcd Reconst
+> z−1
+> Mult
+> Trunc
+> z−1
+> Mult
+> Trunc
+> ¯ututyt¯yt
+> J¯xtK0
+> J¯ytK0J¯utK0
+> J˜xt+1 K0
+> J¯xtK1
+> J¯ytK1J¯utK1
+> J˜xt+1 K1
+> JStKi,JTtKiJYtK0
+
+Fig. 1. Data flow of Protocol 3. 
+
+J ¯ΦK ← Share ( ¯Φ) , J¯x0K ← Share (¯ x0), (2) where ¯Φ := Ecd (Φ , ℓ ) = 2 ℓΦ ∈ Z(n+m)( n+p) 
+
+> ⟨k⟩
+
+,
+
+¯x0 := Ecd (x0, ℓ ) = 2 ℓx0 ∈ Zn
+
+> ⟨k⟩
+
+.
+
+The client then sends J ¯ΦKi and J¯x0Ki to Pi who stores the received shares. In the online phase, for every t, the client reads the sensor measurement yt and generates its shares by 
+
+J¯ytK ← Share (¯ yt), ¯yt := Ecd (yt, ℓ ) = 2 ℓyt ∈ Zp
+
+> ⟨k⟩
+
+. (3) Here, note that ¯yt is always a k-bit integer vector thanks to Assumption 1. It also generates a matrix triple (JUtK, JVtK, JWtK) and a pair of random shares (JRtK, JR′
+
+> t
+
+K). The client sends J¯ytKi, ( JUtKi, JVtKi, JWtKi), and ( JRtKi, JR′
+
+> t
+
+Ki) to Pi. The parties compute 
+
+J ¯ψtK ← Mult (J ¯ΦK, J ¯ξtK), J ¯ξtK := 
+
+J¯xtKJ¯ytK
+
+
+
+(4) by Protocol 1 using the matrix triple. Then, the parties compute 
+
+J¯xt+1 K ← Trunc (J˜xt+1 K, ℓ ),
+
+J˜xt+1 KJ¯utK
+
+
+
+:= J ¯ψtK (5) by Protocol 2 using the random shares. Finally, each party 
+
+Pi separately returns J¯utKi to the client who obtains the control input by 
+
+ut = Dcd (¯ ut, 2ℓ), ¯ut := Reconst (J¯utK). (6) The following theorem provides a bit length of the modulus 
+
+q required for the correct operation of Protocol 3. 
+
+Theorem 4. Consider the controller (1) under Assump-tion 1. Assume that A is Schur stable. Let λ ∈ N be a security parameter. If the bit lengths k, ℓ and the modulus 
+
+q satisfy k − ℓ ≥ 2 and log 2 q ≥ 3k − ℓ + λ + 2 + ⌊log 2 f (n, p, c, γ )⌋,f (n, p, c, γ ) = max {n, p } (1 + p)√n c
+
+1 − γ ,
+
+then the controller that consists of (2), (4), and (5) holds ¯xt+1 = ⌈A¯xt + B ¯yt⌋ + wt,
+
+¯ut = ¯C ¯xt + ¯D¯yt,
+
+for all t = 0 , 1, 2, . . . , where ¯ xt = Reconst (J¯xtK), ¯ yt and ¯ ut
+
+are respectively defined in (3) and (6), wt ∈ {− 1, 0, 1}n,
+
+c ≥ 1 and γ ∈ (0 , 1) are constants such that ∥At∥ ≤ cγ t
+
+for all t, and ∥·∥ is the induced 2-norm. 
+
+Proof. See Appendix A. θ
+
+> α
+
+Fig. 2. System architecture of the testbed. The theorem guarantees that, when choosing a sufficiently large modulus q, Protocol 3 securely runs the encoded version of (1) for an infinite time horizon without state decryption, state reset, or input re-encryption. The se-lection of q involves a trade-off, as a larger q allows for increasing the fixed-point precision or the security level, although it increases the communication overhead. While the encoded controller is not equivalent to the original one due to the rounding error and wt imposed by the truncation protocol, their effects can be negligible in terms of control performance. We will confirm this by experiment in the next section. 
+
+Remark 5. (Security). Protocol 3 inherits the security guarantees of the original two-party controller computa-tion protocol. The communication channels are protected via standard symmetric-key encryption, preventing any data leakage to network eavesdroppers. Moreover, the computing parties obtain no information beyond their input and output shares as long as they are semi-honest and do not collude, thereby achieving λ-bit statistical security. Statistical security is a stronger security notion than computational security because it does not restrict adversary’s computational capability to polynomial time. See Teranishi and Tanaka (2025) for more details on the protocol security. 3. EXPERIMENTS This section examines the controller computation protocol through experiments conducted on a laboratory testbed. Fig. 2 illustrates the system architecture of the developed testbed. The controlled plant was a rotary inverted pendu-lum (Quanser Inc.), shown in Fig. 3, connected to a laptop computer (Windows 11, Intel(R) Core(TM) Ultra 7 165U, 32 GB RAM) as the client. Two Amazon EC2 instances (t3.micro, us-east-2) were deployed as the parties P0 and 
+
+P1, and the protocol was implemented using Python 3.12 on these servers. The laptop computer communicated with the servers via TCP over a Wi-Fi connection through an access point. The objective of the experiment was to stabilize the pen-dulum around its upright equilibrium. Let θ and α denote the encoder measurements of the arm and pendulum an-gles, respectively. Given that the encoder resolutions are Fig. 3. Rotary inverted pendulum. 4096 counts per revolution, we assumed yt = [ θt αt]⊤ ∈
+
+(−180 , 180] 2 and yt ∈ Q2
+
+> ⟨18 ,9⟩
+
+. The sampling time was set to 40 ms, and the plant was treated as a one-step input-delayed system, as we verified that the communication delay remained within this interval in our implementation. That is, the control input computed at time step t was applied to the plant at the next time step t + 1. Here, the control input corresponds to the voltage applied to the motor mounted on the arm. We designed the controller as 
+
+A =
+
+" 0 0 00 0 0
+
+k3 k4 k5
+
+#
+
+, B =
+
+"−50 00 −50 
+
+k1 k2
+
+#
+
+,C = [ k3 k4 k5] , D = [ k1 k2] , x0 = [0 0 0] ⊤ ,
+
+where 
+
+k1 = 33 .022125244140625 , k2 = −51 .49261474609375 ,k3 = 0 .6586151123046875 , k4 = −0.7884063720703125 ,k5 = −0.5822296142578125 .
+
+The controller consists of pseudo-differentiators for esti-mating the angular velocities of the arm and the pen-dulum, denoted by ˙θ and ˙α, respectively, and the state-feedback 
+
+ut = k1θt + k2αt + k3 ˙θt + k4 ˙αt + k5ut−1.
+
+Since all controller parameters are in Q⟨23 ,16 ⟩, the bit lengths were set to k = 64 and ℓ = 32 to satisfy Assumption 1. Furthermore, the bit length of q was set to 256 bits, satisfying the lower bound of 248 bits required by Theorem 4 with c = 2 .34, γ = 0 .59, and λ = 80. Figs. 4(a) and (b) show the control input and the pendu-lum angle in the experiment, respectively. After activating Protocol 3, we manually moved the pendulum from the downright position to the upright position. The automatic control began at approximately 3 .5 s, as indicated by the dashed line. These results confirm that the proposed protocol successfully stabilizes the pendulum around its upright equilibrium using the commercial cloud platform even with rounding errors and the errors imposed by the truncation protocol. Next, we evaluate the processing times of the subproto-cols. For each protocol, we measured the round-trip time from when the client sent the input shares to when it re-ceived the output shares. Each measurement was repeated 100 times, and the minimum, mean, and maximum times were recorded. Fig. 5(a) depicts the processing times of Protocol 1 for dimensions d1 = d2 = 10 , 20 , . . . , 100. Simi-larly, Fig. 5(b) depicts the processing times of Protocol 2 for dimensions d1 = 10 , 20 , . . . , 100. In both figures, the 0 10 20 30 40     
+
+> Time (s)
+> −3
+> −2
+> −1
+> 0
+> 1
+> 2
+> 3
+> u (V)
+> (a) Input voltage. 010 20 30 40
+> Time (s)
+> −10
+> −5
+> 0
+> 5
+> 10
+> ® (deg)
+> (b) Pendulum angle.
+
+Fig. 4. Experimental results. light green shaded areas represent the 99 % confidence intervals. The results indicate that the processing times of both subprotocols remain on the order of milliseconds even for large dimensions. Furthermore, although the processing time of Protocol 1 increases with the dimensions, the processing time of Protocol 2 remains almost constant. These findings suggest that the proposed protocol is ap-plicable to systems with shorter sampling times, provided that the implementation of Protocol 1 is optimized and wired communication is used to reduce the communication delays between the client and the parties. 4. CONCLUSION We presented an experimental evaluation of a secure two-party computation protocol for dynamic controllers. The protocol was implemented on a commercial cloud plat-form and validated using an inverted pendulum testbed. The experimental results demonstrated that the protocol successfully stabilized the pendulum despite the online communication overhead between the computing parties. Furthermore, the processing times of the multiplication and truncation subprotocols remained on the order of milliseconds even for large input sizes, with the primary bottleneck arising from the multiplication protocol. These results confirm the real-time feasibility of the protocol under the experimental conditions. Future work includes optimizing the protocol implementation in C/C++ and evaluating the achievable control performance in practical systems. Appendix A. PROOF OF THEOREM 4 Note first that the constants c and γ exist if A is Schur stable, and they satisfy c/ (1 −γ) > 1. Let κ = ⌊log 2 q⌋− λ−
+
+1, then Z⟨κ⟩ ⊂ Zq and κ ≥ 2k + ( k − ℓ) + log 2 f (n, p, c, γ ) >10 20 30 40 50 60 70 80 90 100              
+
+> Dimension d1=d2
+> 0
+> 50
+> 100
+> 150
+> 200
+> 250
+> Processing time (ms)  Min
+> Mean
+> Max (a) Protocol 1. 10 20 30 40 50 60 70 80 90 100
+> Dimension d1
+> 0
+> 10
+> 20
+> 30
+> 40
+> Processing time (ms)
+> Min
+> Mean
+> Max
+> (b) Protocol 2.
+
+Fig. 5. Processing times of the subprotocols. 
+
+ℓ, where k − ℓ ≥ 1. If ¯A¯xt + ¯Bt ¯yt ∈ Zn 
+
+> ⟨κ⟩
+
+and ¯C ¯xt +¯Dt ¯yt ∈ Zp
+
+> ⟨κ⟩
+
+, Lemma 3 implies that ¯xt+1 = Reconst (Trunc (J˜xt+1 K, ℓ )) = ⌈A¯xt + B ¯yt⌋ + wt,
+
+¯ut = Reconst (J¯utK) = ¯C ¯xt + ¯D¯yt,
+
+where J˜xt+1 K = J ¯AKJ ¯xtK + J ¯BKJ ¯ytK = J ¯A¯xt + ¯B ¯ytK and 
+
+J¯utK = J ¯CKJ ¯xtK + J ¯DKJ ¯ytK = J ¯C ¯xt + ¯D¯ytK hold since 
+
+Z⟨κ⟩ ⊂ Zq , and wt ∈ {− 1, 0, 1}n. Hence, the claim holds if ¯A¯xt + ¯B ¯yt ∈ Zn 
+
+> ⟨κ⟩
+
+and ¯C ¯xt + ¯D¯yt ∈ Zp 
+
+> ⟨κ⟩
+
+for all t.For t = 0, it follows that max  ¯A¯x0 + ¯B ¯y0 ∞, ¯C ¯x0 + ¯D¯y0 ∞
+
+≤ 2k−1 max {n, p } (∥¯x0∥∞ + ∥¯y0∥∞),
+
+≤ 22k−1 max {n, p },< 22k+( k−ℓ)−2f (n, p, c, γ ) = 2 κ−2 < 2κ−1 − 1,
+
+which means ¯A¯x0 + ¯B ¯y0 ∈ Zn 
+
+> ⟨κ⟩
+
+and ¯C ¯x0 + ¯D¯y0 ∈ Zp
+
+> ⟨κ⟩
+
+.Here, ∥·∥ ∞ denotes the infinity norm. Suppose that ¯A¯xt + ¯B ¯yt ∈ Zn 
+
+> ⟨κ⟩
+
+and ¯C ¯xt + ¯D¯yt ∈ Zp 
+
+> ⟨κ⟩
+
+hold for all t = 0 , . . . , τ −1 with τ ∈ N. This yields the following expression for ¯ xτ ,¯xτ = ⌈A¯xτ −1 + B ¯yτ −1⌋ + wτ −1,
+
+= Aτ ¯x0 + 
+
+> τ−1
+
+X
+
+> s=0
+
+AsB ¯yτ −1−s + 
+
+> τ−1
+
+X
+
+> s=0
+
+As(eτ −1−s + wτ −1−s),
+
+where eτ −1−s ∈ (−1/2, 1/2] n. It then holds that 
+
+∥¯xτ ∥∞ ≤
+
+
+
+2k−1 + 2 k−ℓ−1p · 2k−1 + 32
+
+ τX
+
+> s=0
+
+As
+
+> ∞
+
+,< 22( k−1) −ℓ(1 + p)√n c
+
+1 − γ ,
+
+where we used k−ℓ ≥ 2 and ∥Pτs=0 As∥∞ ≤ √n∥Pτs=0 As∥
+
+< √n P∞ 
+
+> s=0
+
+∥As∥ = c√n/ (1 − γ). This implies that max  ¯A¯xτ + ¯B ¯yτ ∞, ¯C ¯xτ + ¯D¯yτ ∞
+
+≤ 2k−1 max {n, p } (∥¯xτ ∥∞ + ∥¯yτ ∥∞),< 2k−1 max {n, p }
+
+
+
+22( k−1) −ℓ(1 + p)√n c
+
+1 − γ + 2 k−1
+
+
+
+,< 22k+( k−ℓ)−2f (n, p, c, γ ) < 2κ−1 − 1,
+
+which concludes ¯A¯xτ + ¯B ¯yτ ∈ Zn 
+
+> ⟨κ⟩
+
+and ¯C ¯xτ + ¯D¯yτ ∈ Zp
+
+> ⟨κ⟩
+
+.REFERENCES Beaver, D. (1992). Efficient multiparty protocols using circuit randomization. In Advances in Cryptology – CRYPTO ’91 , 420–432. Springer Berlin Heidelberg. Cheon, J.H., Han, K., Kim, H., Kim, J., and Shim, H. (2018). Need for controllers having integer coefficients in homomorphically encrypted dynamic system. In IEEE Conference on Decision and Control , 5020–5025. Darup, M.S., Alexandru, A.B., Quevedo, D.E., and Pap-pas, G.J. (2021). Encrypted control for networked systems: An illustrative introduction and current chal-lenges. IEEE Control Systems Magazine , 41(3), 58–78. Escudero, D., Ghosh, S., Keller, M., Rachuri, R., and Scholl, P. (2020). Improved primitives for MPC over mixed arithmetic-binary circuits. In Advances in Cryp-tology – CRYPTO 2020 , 823–852. Springer International Publishing. Kim, J., Lee, C., Shim, H., Cheon, J.H., Kim, A., Kim, M., and Song, Y. (2016). Encrypting controller using fully homomorphic encryption for security of cyber-physical systems. IFAC-PapersOnLine , 49(22), 175–180. Kim, J., Shim, H., and Han, K. (2023). Dynamic controller that operates over homomorphically encrypted data for infinite time horizon. IEEE Transactions on Automatic Control , 68(2), 660–672. Kogiso, K. and Fujita, T. (2015). Cyber-security enhance-ment of networked control systems using homomorphic encryption. In IEEE Conference on Decision and Con-trol , 6836–6843. Lee, J., Lee, D., Kim, J., and Shim, H. (2025). Encrypted dynamic control exploiting limited number of multipli-cations and a method using RLWE-based cryptosystem. 
+
+IEEE Transactions on Systems, Man, and Cybernetics: Systems , 55(1), 158–169. Mohassel, P. and Zhang, Y. (2017). SecureML: A system for scalable privacy-preserving machine learning. In 
+
+2017 IEEE Symposium on Security and Privacy , 19–38. Murguia, C., Farokhi, F., and Shames, I. (2020). Secure and private implementation of dynamic controllers using semi-homomorphic encryption. IEEE Transactions on Automatic Control , 65(9), 3950–3957. Schl¨ uter, N., Neuhaus, M., and Darup, M.S. (2021). En-crypted dynamic control with unlimited operating time via FIR filters. In European Control Conference , 952– 957. Teranishi, K., Sadamoto, T., and Kogiso, K. (2024). Input-output history feedback controller for encrypted con-trol with leveled fully homomorphic encryption. IEEE Transactions on Control of Network Systems , 11(1), 271–283. Teranishi, K. and Tanaka, T. (2025). Client-aided secure two-party computation of dynamic controllers. IEEE Transactions on Control of Network Systems , 12(4), 2967–2979.
