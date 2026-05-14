@@ -1,0 +1,65 @@
+{
+  "label": "2026-05-14",
+  "date": "2026-05-14",
+  "generated_at": "2026-05-14T20:53:54",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202605/14/2605.13708v1-disagg-distributed-aggregators-for-efficient-secure-aggregation-in-federated-learning",
+      "section": "quick",
+      "title_en": "DisAgg: Distributed Aggregators for Efficient Secure Aggregation in Federated Learning",
+      "authors": "Haaris Mehmood, Giorgos Tatsis, Dimitrios Alexopoulos, Karthikeyan Saravanan, Jie Xu, Anastasios Drosou, Mete Ozay",
+      "date": "2026-05-13",
+      "pdf": "https://arxiv.org/pdf/2605.13708v1",
+      "score": "7.0",
+      "evidence": "基于秘密共享的分布式聚合，无需中心Dealer进行安全计算",
+      "tldr": "联邦学习中的安全聚合常面临通信轮数多、计算开销大及客户端掉线处理难的问题。本文提出DisAgg协议，通过引入小型客户端委员会（聚合器）来执行聚合任务。客户端将更新向量进行秘密共享给聚合器，由其计算部分和并返回服务器重构。该方法消除了本地掩码和昂贵的同态加密，在保证隐私的同时显著降低了端侧计算压力，相比现有最优协议OPA实现了4.6倍的加速。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Federated learning enables collaborative model training across distributed clients, yet vanilla FL exposes client updates to the central server. Secure-aggregation schemes protect privacy against an honest-but-curious server, but existing approaches often suffer from many communication rounds, heavy public-key operations, or difficulty handling client dropouts. Recent methods like One-Shot Private Aggregation (OPA) cut rounds to a single server interaction per FL iteration, yet they impose substantial cryptographic and computational overhead on both server and clients. We propose a new protocol called DisAgg that leverages a small committee of clients called Aggregators to perform the aggregation itself: each client secret-shares its update vector to Aggregators, which locally compute partial sums and return only aggregated shares for server-side reconstruction. This design eliminates local masking and expensive homomorphic encryption, reducing endpoint computation while preserving privacy against a curious server and a limited fraction of colluding clients. By leveraging optimal trade-offs between communication and computation costs, DisAgg processes 100k-dimensional update vectors from 100k 5G clients with a 4.6x speedup compared to OPA, the previous best protocol.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/14/2605.08646v1-paac-privacy-aware-agentic-device-cloud-collaboration",
+      "section": "quick",
+      "title_en": "PAAC: Privacy-Aware Agentic Device-Cloud Collaboration",
+      "authors": "Liangqi Yuan, Wenzhi Fang, Shiqiang Wang, Christopher G. Brinton",
+      "date": "2026-05-09",
+      "pdf": "https://arxiv.org/pdf/2605.08646v1",
+      "score": "6.0",
+      "evidence": "大模型端云协作隐私保护",
+      "tldr": "PAAC是一个隐私感知的端云协作智能体框架，旨在解决云端模型推理能力强但隐私泄露、端侧模型隐私性好但能力受限的矛盾。该框架将规划者-执行者架构与端云边界对齐，使云端在处理脱敏占位符的同时进行逻辑推理，而端侧负责敏感信息识别与任务执行。实验表明，PAAC在多个基准测试中显著提升了任务准确率并大幅降低了隐私泄露风险。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large language model (LLM) agents face a structural tension: cloud agents provide strong reasoning but expose user data, while on-device agents preserve privacy at the cost of overall capability. Existing device-cloud designs treat this boundary as a compute split rather than a trust boundary suited to agentic workloads, and existing sanitizers force a choice between policy flexibility and the structural fidelity tool calls require. In this work, we develop PAAC, a privacy-aware agentic framework that aligns planner--executor decomposition with the device-cloud boundary so that role specialization itself becomes the privacy mechanism. The cloud agent reasons over typed placeholder tokens that preserve each sensitive value's reasoning role while discarding its content, while the on-device agent identifies sensitive spans and distills each step's execution outcome into compact key findings. Sanitization confines the on-device LLM to proposing which spans to mask, while a deterministic registry performs all substitution and reversal, keeping actions directly executable on device. On three agentic benchmarks under strict privacy settings, PAAC dominates the Pareto frontier of privacy and accuracy, improving average accuracy by 15-36\\% and reducing average leakage by 2-6$\\times$ over state-of-the-art device-cloud baselines, with the largest margins on privacy targets outside fixed entity taxonomies. We find consistent improvements on 17 additional benchmarks spanning 10 domains, including math, science, and finance.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/14/2605.09872v1-multi-prover-interactive-proof-systems-with-leakage",
+      "section": "quick",
+      "title_en": "Multi-Prover Interactive Proof Systems with Leakage",
+      "authors": "Vahid R. Asadi, Atsuya Hasegawa, François Le Gall",
+      "date": "2026-05-11",
+      "pdf": "https://arxiv.org/pdf/2605.09872v1",
+      "score": "6.0",
+      "evidence": "多证明者交互式证明系统与泄露",
+      "tldr": "本研究探讨了多证明者交互式证明系统（MIP）在证明者之间存在有限信息泄漏（通信）时的鲁棒性。传统MIP假设证明者互不通信，本文首次研究了通信受限的情况，并提出了基于并行重复定理和低错误率PCP转换的两种技术。结果表明，针对NEXP、RE和NP类问题的MIP协议在一定比特的信息泄漏下仍能保持其计算能力，并探讨了其与PCP领域滑动比例猜想的关系。",
+      "tags": "query:fss-llm",
+      "abstract_en": "It is known that there exist multi-prover interactive protocols ($\\mathsf{MIP}$ protocols) for the complexity class $\\mathsf{NEXP}$, succinct $\\mathsf{MIP}$ protocols for $\\mathsf{NP}$ and multi-prover interactive protocols with shared entanglement ($\\mathsf{MIP}^\\ast$ protocols) for $\\mathsf{RE}$. This extraordinary power of multi-prover interactive proof systems comes from the assumption that provers do not communicate with each other during the protocols. If they are allowed to communicate freely, the setting is the same as in the single-prover case, and the computational power of the system becomes significantly weaker.   In this paper, we investigate for the first time the setting where communication (i.e., leakage of information) between provers is allowed but bounded. We introduce two techniques to approach this question and show that multi-prover interactive proof systems are robust against some amount of leakage. Our first technique is based on parallel repetition theorems. We apply it to show that for any polynomial $p$, we can construct two-prover one-round $\\mathsf{MIP}$ and $\\mathsf{MIP}^\\ast$ protocols for $\\mathsf{NEXP}$ and $\\mathsf{RE}$, respectively, that are robust against $p(n)$ bits of leakage. We further derive our second technique to convert any low-soundness PCP construction to a two-prover one-round $\\mathsf{MIP}$ protocol for $\\mathsf{NP}$ robust against leakage. We also discuss the relation between robustness against leakage in multi-prover interactive proof systems and the Sliding Scale Conjecture in the PCP literature.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/14/2605.13526v1-verifying-exact-samplers-for-continuous-distributions-with-a-discrete-program-logic",
+      "section": "quick",
+      "title_en": "Verifying Exact Samplers for Continuous Distributions with a Discrete Program Logic",
+      "authors": "Markus de Medeiros, Puming Liu, Kwing Hei Li, Alejandro Aguirre, Lars Birkedal, Joseph Tassarotti",
+      "date": "2026-05-13",
+      "pdf": "https://arxiv.org/pdf/2605.13526v1",
+      "score": "6.0",
+      "evidence": "验证连续分布采样器及浮点数问题",
+      "tldr": "针对连续分布采样中浮点数带来的舍入误差和安全风险，本文提出了一种名为 Continuous-Eris 的高阶分离逻辑。该逻辑旨在验证基于可计算实数的精确采样算法，这些算法通过延迟生成位来达到任意精度。研究者利用该逻辑在 Rocq 证明助手中成功验证了均匀分布、高斯分布和拉普拉斯分布的采样器及其算术库，为构建高可靠的概率程序提供了形式化保障。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Most implementations of sampling algorithms for continuous distributions use floating-point numbers, which introduce round-off errors and approximations. These errors can be difficult to analyze, and can cause security issues when used in algorithms for differential privacy. An alternative is to use exact sampling algorithms based on computable reals, which can lazily generate the digits of a continuous sample to arbitrary precision. However, these algorithms are intricate, and implementing and using them involves a combination of semantically challenging language features, such as probabilistic choice, higher-order functions, and dynamically-allocated mutable state.   In this paper we present Continuous-Eris, a higher-order separation logic for verifying the correctness of exact sampling algorithms for computable distributions. To demonstrate Continuous-Eris, we verify the correctness of computable samplers for the uniform, Gaussian, and Laplace distributions, as well as a library for exact real arithmetic for working with generated samples. All of the results in this paper have been verified in the Rocq proof assistant.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

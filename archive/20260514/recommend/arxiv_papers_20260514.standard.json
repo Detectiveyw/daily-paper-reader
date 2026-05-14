@@ -1,0 +1,174 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-14T20:53:07.713736+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.13708v1",
+      "title": "DisAgg: Distributed Aggregators for Efficient Secure Aggregation in Federated Learning",
+      "abstract": "Federated learning enables collaborative model training across distributed clients, yet vanilla FL exposes client updates to the central server. Secure-aggregation schemes protect privacy against an honest-but-curious server, but existing approaches often suffer from many communication rounds, heavy public-key operations, or difficulty handling client dropouts. Recent methods like One-Shot Private Aggregation (OPA) cut rounds to a single server interaction per FL iteration, yet they impose substantial cryptographic and computational overhead on both server and clients. We propose a new protocol called DisAgg that leverages a small committee of clients called Aggregators to perform the aggregation itself: each client secret-shares its update vector to Aggregators, which locally compute partial sums and return only aggregated shares for server-side reconstruction. This design eliminates local masking and expensive homomorphic encryption, reducing endpoint computation while preserving privacy against a curious server and a limited fraction of colluding clients. By leveraging optimal trade-offs between communication and computation costs, DisAgg processes 100k-dimensional update vectors from 100k 5G clients with a 4.6x speedup compared to OPA, the previous best protocol.",
+      "authors": [
+        "Haaris Mehmood",
+        "Giorgos Tatsis",
+        "Dimitrios Alexopoulos",
+        "Karthikeyan Saravanan",
+        "Jie Xu",
+        "Anastasios Drosou",
+        "Mete Ozay"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.DC",
+        "cs.LG"
+      ],
+      "published": "2026-05-13T15:56:12+00:00",
+      "link": "https://arxiv.org/pdf/2605.13708v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Secret-sharing based distributed aggregation without a central dealer for secure computation",
+      "llm_evidence_cn": "基于秘密共享的分布式聚合，无需中心Dealer进行安全计算",
+      "llm_evidence": "基于秘密共享的分布式聚合，无需中心Dealer进行安全计算",
+      "canonical_evidence": "基于秘密共享的分布式聚合，无需中心Dealer进行安全计算",
+      "llm_tldr_en": "Proposes a distributed aggregator protocol for secure aggregation in federated learning.",
+      "llm_tldr_cn": "提出了一种用于联邦学习安全聚合的分布式聚合器协议。",
+      "llm_tldr": "提出了一种用于联邦学习安全聚合的分布式聚合器协议。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.08646v1",
+      "title": "PAAC: Privacy-Aware Agentic Device-Cloud Collaboration",
+      "abstract": "Large language model (LLM) agents face a structural tension: cloud agents provide strong reasoning but expose user data, while on-device agents preserve privacy at the cost of overall capability. Existing device-cloud designs treat this boundary as a compute split rather than a trust boundary suited to agentic workloads, and existing sanitizers force a choice between policy flexibility and the structural fidelity tool calls require. In this work, we develop PAAC, a privacy-aware agentic framework that aligns planner--executor decomposition with the device-cloud boundary so that role specialization itself becomes the privacy mechanism. The cloud agent reasons over typed placeholder tokens that preserve each sensitive value's reasoning role while discarding its content, while the on-device agent identifies sensitive spans and distills each step's execution outcome into compact key findings. Sanitization confines the on-device LLM to proposing which spans to mask, while a deterministic registry performs all substitution and reversal, keeping actions directly executable on device. On three agentic benchmarks under strict privacy settings, PAAC dominates the Pareto frontier of privacy and accuracy, improving average accuracy by 15-36\\% and reducing average leakage by 2-6$\\times$ over state-of-the-art device-cloud baselines, with the largest margins on privacy targets outside fixed entity taxonomies. We find consistent improvements on 17 additional benchmarks spanning 10 domains, including math, science, and finance.",
+      "authors": [
+        "Liangqi Yuan",
+        "Wenzhi Fang",
+        "Shiqiang Wang",
+        "Christopher G. Brinton"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL",
+        "cs.DC"
+      ],
+      "published": "2026-05-09T03:29:20+00:00",
+      "link": "https://arxiv.org/pdf/2605.08646v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy-aware LLM device-cloud collaboration",
+      "llm_evidence_cn": "大模型端云协作隐私保护",
+      "llm_evidence": "大模型端云协作隐私保护",
+      "canonical_evidence": "大模型端云协作隐私保护",
+      "llm_tldr_en": "Develops PAAC, a framework for privacy-preserving collaboration between on-device and cloud-based LLM agents.",
+      "llm_tldr_cn": "开发了PAAC，一个用于端侧和大模型云端代理之间隐私保护协作的框架。",
+      "llm_tldr": "开发了PAAC，一个用于端侧和大模型云端代理之间隐私保护协作的框架。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.09872v1",
+      "title": "Multi-Prover Interactive Proof Systems with Leakage",
+      "abstract": "It is known that there exist multi-prover interactive protocols ($\\mathsf{MIP}$ protocols) for the complexity class $\\mathsf{NEXP}$, succinct $\\mathsf{MIP}$ protocols for $\\mathsf{NP}$ and multi-prover interactive protocols with shared entanglement ($\\mathsf{MIP}^\\ast$ protocols) for $\\mathsf{RE}$. This extraordinary power of multi-prover interactive proof systems comes from the assumption that provers do not communicate with each other during the protocols. If they are allowed to communicate freely, the setting is the same as in the single-prover case, and the computational power of the system becomes significantly weaker.   In this paper, we investigate for the first time the setting where communication (i.e., leakage of information) between provers is allowed but bounded. We introduce two techniques to approach this question and show that multi-prover interactive proof systems are robust against some amount of leakage. Our first technique is based on parallel repetition theorems. We apply it to show that for any polynomial $p$, we can construct two-prover one-round $\\mathsf{MIP}$ and $\\mathsf{MIP}^\\ast$ protocols for $\\mathsf{NEXP}$ and $\\mathsf{RE}$, respectively, that are robust against $p(n)$ bits of leakage. We further derive our second technique to convert any low-soundness PCP construction to a two-prover one-round $\\mathsf{MIP}$ protocol for $\\mathsf{NP}$ robust against leakage. We also discuss the relation between robustness against leakage in multi-prover interactive proof systems and the Sliding Scale Conjecture in the PCP literature.",
+      "authors": [
+        "Vahid R. Asadi",
+        "Atsuya Hasegawa",
+        "François Le Gall"
+      ],
+      "primary_category": "quant-ph",
+      "categories": [
+        "quant-ph",
+        "cs.CC"
+      ],
+      "published": "2026-05-11T01:58:44+00:00",
+      "link": "https://arxiv.org/pdf/2605.09872v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Multi-prover interactive proof systems and leakage",
+      "llm_evidence_cn": "多证明者交互式证明系统与泄露",
+      "llm_evidence": "多证明者交互式证明系统与泄露",
+      "canonical_evidence": "多证明者交互式证明系统与泄露",
+      "llm_tldr_en": "Investigates multi-prover interactive proof systems where bounded communication between provers is allowed.",
+      "llm_tldr_cn": "研究允许证明者之间存在有限通信的多证明者交互式证明系统。",
+      "llm_tldr": "研究允许证明者之间存在有限通信的多证明者交互式证明系统。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.13526v1",
+      "title": "Verifying Exact Samplers for Continuous Distributions with a Discrete Program Logic",
+      "abstract": "Most implementations of sampling algorithms for continuous distributions use floating-point numbers, which introduce round-off errors and approximations. These errors can be difficult to analyze, and can cause security issues when used in algorithms for differential privacy. An alternative is to use exact sampling algorithms based on computable reals, which can lazily generate the digits of a continuous sample to arbitrary precision. However, these algorithms are intricate, and implementing and using them involves a combination of semantically challenging language features, such as probabilistic choice, higher-order functions, and dynamically-allocated mutable state.   In this paper we present Continuous-Eris, a higher-order separation logic for verifying the correctness of exact sampling algorithms for computable distributions. To demonstrate Continuous-Eris, we verify the correctness of computable samplers for the uniform, Gaussian, and Laplace distributions, as well as a library for exact real arithmetic for working with generated samples. All of the results in this paper have been verified in the Rocq proof assistant.",
+      "authors": [
+        "Markus de Medeiros",
+        "Puming Liu",
+        "Kwing Hei Li",
+        "Alejandro Aguirre",
+        "Lars Birkedal",
+        "Joseph Tassarotti"
+      ],
+      "primary_category": "cs.LO",
+      "categories": [
+        "cs.LO"
+      ],
+      "published": "2026-05-13T13:39:31+00:00",
+      "link": "https://arxiv.org/pdf/2605.13526v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Verifying samplers for continuous distributions and floating-point issues",
+      "llm_evidence_cn": "验证连续分布采样器及浮点数问题",
+      "llm_evidence": "验证连续分布采样器及浮点数问题",
+      "canonical_evidence": "验证连续分布采样器及浮点数问题",
+      "llm_tldr_en": "Presents a logic for verifying exact samplers to avoid security issues from floating-point approximations.",
+      "llm_tldr_cn": "提出一种验证精确采样器的逻辑，以避免浮点近似带来的安全问题。",
+      "llm_tldr": "提出一种验证精确采样器的逻辑，以避免浮点近似带来的安全问题。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing supporting floating point operations and verifiable security",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
