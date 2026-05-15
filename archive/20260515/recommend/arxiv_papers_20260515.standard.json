@@ -1,0 +1,309 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-15T21:22:50.307198+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 8,
+    "quick_skim_target": 11,
+    "quick_selected": 8
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.14015v1",
+      "title": "Distributed Statistical Zero-Knowledge Proofs via Sumcheck",
+      "abstract": "We study distributed zero-knowledge proofs, introduced by Bick, Kol, and Oshman (SODA 2022). While distributed interactive proofs have advanced rapidly, general-purpose techniques for distributed zero-knowledge remain limited and mostly problem-specific. We address this gap by introducing distributed statistical zero-knowledge, requiring that each node's view be simulatable within negligible statistical distance, and by lifting the classical Sumcheck protocol (Lund, Fortnow, Karloff, and Nisan, FOCS 1990) into a modular primitive for distributed zero-knowledge proofs.   Our main contribution is a distributed zero-knowledge implementation of Sumcheck. Given oracle access to a polynomial F over a finite field $\\mathbb{F}$ with N variables, we design a protocol verifying claims of the form $\\sum_{x\\in\\mathbb{F}} F(x)=a$ using $O(N)$ rounds of $O(\\log |\\mathbb{F}|)$-bit messages, while achieving statistical zero-knowledge and small soundness error.   We apply this primitive to two problems. For non-k-colorability, we obtain an $O(n)$-round distributed statistical zero-knowledge proof deciding whether a graph is not k-colorable, for any constant k, using $O(log^{1+o(1)} n)$-bit messages. This is the first nontrivial distributed interactive proof for this problem, even without zero-knowledge guarantees. For Subgraph Counting, we obtain an $O(k \\log n)$-round, $O(k \\log n)$-bit distributed statistical zero-knowledge proof for counting copies of a given k-node pattern, improving previous distributed interactive proofs while additionally providing statistical zero-knowledge. Finally, we show that additional round compression of Sumcheck is problem-dependent: for non-3-colorability on constant-degree graphs, we prove a lower bound excluding $o(n/\\log n)$ rounds under polynomial-time local computation.",
+      "authors": [
+        "Benjamin Jauregui",
+        "Masayuki Miyamoto"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-05-13T18:27:32+00:00",
+      "link": "https://arxiv.org/pdf/2605.14015v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "distributed zero-knowledge proofs for verifiable computation",
+      "llm_evidence_cn": "用于可验证计算的分布式零知识证明",
+      "llm_evidence": "用于可验证计算的分布式零知识证明",
+      "canonical_evidence": "用于可验证计算的分布式零知识证明",
+      "llm_tldr_en": "Introduces a distributed statistical zero-knowledge Sumcheck protocol for verifiable distributed proofs.",
+      "llm_tldr_cn": "引入分布式统计零知识Sumcheck协议，用于实现可验证的分布式证明。",
+      "llm_tldr": "引入分布式统计零知识Sumcheck协议，用于实现可验证的分布式证明。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.09297v1",
+      "title": "Enforcing Attestable Workflows across Untrusted Networks",
+      "abstract": "Confidential high-performance computing orchestrates workloads across federated domains, yet existing frameworks rely on high-overhead user-space library operating systems or assume single-host execution. We propose \\codename, an architecture federating Trusted Execution Environments via a split Trusted Computing Base (TCB) design. It couples a hardware-isolated Control Plane executing Mutually Attested Key Exchange (\\make) with a measured guest-resident extended Berkeley Packet Filter (eBPF) Data Plane. By anchoring cryptographic key release to hardware measurements and executing enforcement in the kernel, \\codename\\ achieves native-speed encrypted routing. Empirical evaluation demonstrates a steady-state enforcement cost of $6\\,μ$s per packet, imposing a $13$--$15\\,μ$s absolute latency overhead. On distributed pipelines, \\codename\\ incurs just a $6.1\\%$ execution penalty over plaintext baselines, bypassing the $62\\%$ penalty of user-space counterparts. The system initializes a 100-node cluster in under 1.5 seconds, providing an efficient confidential interconnect for long-running workflows.",
+      "authors": [
+        "Hung Dang",
+        "Tue Nguyen"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.DC"
+      ],
+      "published": "2026-05-10T03:45:22+00:00",
+      "link": "https://arxiv.org/pdf/2605.09297v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Attestable workflows in untrusted networks using TEE",
+      "llm_evidence_cn": "在不可信网络中使用 TEE 的可验证工作流",
+      "llm_evidence": "在不可信网络中使用 TEE 的可验证工作流",
+      "canonical_evidence": "在不可信网络中使用 TEE 的可验证工作流",
+      "llm_tldr_en": "Proposes an architecture for federating Trusted Execution Environments with hardware-anchored attestation.",
+      "llm_tldr_cn": "提出了一种通过硬件锚定认证来联合可信执行环境（TEE）的架构。",
+      "llm_tldr": "提出了一种通过硬件锚定认证来联合可信执行环境（TEE）的架构。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.14294v1",
+      "title": "Precise Verification of Transformers through ReLU-Catalyzed Abstraction Refinement",
+      "abstract": "Formal verification of transformers has become increasingly important due to their widespread deployment in safety-critical applications. Compared to classic neural networks, the inferences of transformers involve highly complex computations, such as dot products in self-attention layers, rendering their verification extremely difficult. Existing approaches explored over-approximation methods by constructing convex constraints to bound the output ranges of transformers, which can achieve high efficiency. However, they may sacrifice verification precision, and consequently introduce significant approximation error that leads to frequent occurrences of false alarms. In this paper, we propose a transformer verification approach that can achieve improved precision. At the core of our approach is a novel usage of ReLU, by which we represent a precise but non-linear bound for dot products such that we can further exploit the rich body of literature for convex relaxation of ReLU to derive precise bounds. We extend two classic approaches to the context of transformers, a rule-based one and an optimization-based one, resulting in two new frameworks for efficient and precise verification. We evaluate our approaches on different model architectures and robustness properties derived from two datasets about sentiment analysis, and compare with the state-of-the-art baseline approach. Compared to the baseline, our approach can achieve significant precision improvement for most of the verification tasks with acceptable compromise of efficiency, which demonstrates the effectiveness of our approach.",
+      "authors": [
+        "Hengjie Liu",
+        "Zhenya Zhang",
+        "Jianjun Zhao"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-05-14T02:55:53+00:00",
+      "link": "https://arxiv.org/pdf/2605.14294v1",
+      "tags": [
+        "keyword:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Formal verification of transformer inference and complex computations",
+      "llm_evidence_cn": "Transformer推理的正式验证与复杂计算",
+      "llm_evidence": "Transformer推理的正式验证与复杂计算",
+      "canonical_evidence": "Transformer推理的正式验证与复杂计算",
+      "llm_tldr_en": "Proposes a ReLU-catalyzed abstraction refinement approach for precise formal verification of Transformer models.",
+      "llm_tldr_cn": "提出一种ReLU催化的抽象精化方法，用于Transformer模型的精确形式化验证。",
+      "llm_tldr": "提出一种ReLU催化的抽象精化方法，用于Transformer模型的精确形式化验证。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.09368v1",
+      "title": "Secure and Private Structured-Subset Retrieval: Fundamental Limits and Achievable Schemes",
+      "abstract": "This work introduces the \\emph{Secure and Private Structured-Subset Retrieval (SPSSR)} problem. In SPSSR, a user wishes to retrieve one subset from an arbitrary family of size-$D$ subsets from $K$ messages replicated across $N$ non-colluding servers that share randomness unknown to the user. The privacy requirement ensures that no server learns which subset is requested, while the security requirement ensures that the user learns nothing about the messages outside the requested subset. This generalizes Symmetric Multi-message Private Information Retrieval (SMPIR), where the candidate demand sets consist of all size-$D$ subsets. We show that, for every candidate demand family, the maximum achievable retrieval rate is equal to ${1-1/N}$. We also show that the minimum ratio between the size of the shared randomness and the message size required to achieve this rate is ${D/(N-1)}$, and that, for balanced linear SPSSR schemes, the minimum required subpacketization level is ${(N-1)/\\gcd(D,N-1)}$; both quantities are independent of the demand family. Our converse proof for the maximum achievable retrieval rate applies to arbitrary demand families, unlike the existing proof for SMPIR, which is tailored to the full demand family. For achievability, we construct a single SPSSR scheme that applies uniformly to every demand family, achieves the optimal retrieval rate with the optimal shared-randomness ratio, and requires the optimal subpacketization level among balanced linear schemes. This subpacketization level is no larger than that of known SMPIR schemes in any parameter regime and is smaller in some regimes.",
+      "authors": [
+        "Maha Issa",
+        "Anoosheh Heidarzadeh"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-05-10T06:40:49+00:00",
+      "link": "https://arxiv.org/pdf/2605.09368v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Secure and private retrieval from replicated servers",
+      "llm_evidence_cn": "从复制服务器进行安全私密检索",
+      "llm_evidence": "从复制服务器进行安全私密检索",
+      "canonical_evidence": "从复制服务器进行安全私密检索",
+      "llm_tldr_en": "Studies fundamental limits of secure structured-subset retrieval across non-colluding servers.",
+      "llm_tldr_cn": "研究了跨非共谋服务器进行安全结构化子集检索的基本限制。",
+      "llm_tldr": "研究了跨非共谋服务器进行安全结构化子集检索的基本限制。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.14421v1",
+      "title": "MemLineage: Lineage-Guided Enforcement for LLM Agent Memory",
+      "abstract": "We introduce MemLineage, a defense for LLM agent memory that attaches both cryptographic provenance and LLM-mediated derivation lineage to every entry. Recent and concurrent work shows that untrusted content can be written into persistent agent state and re-enter later sessions as an instruction; the remaining systems question is how to preserve useful memory recall while preventing such state from justifying sensitive actions. MemLineage treats this as a chain-of-custody problem rather than a filtering problem. It is a six-module design around an RFC-6962 Merkle log over per-principal Ed25519-signed entries: a weighted derivation DAG records which retrieved entries influenced each new memory, and a max-of-strong-edges propagation rule makes Untrusted-Path Persistence hold for any chain whose attribution edges remain above threshold. The sensitive-action gate then refuses dispatches whose active justification descends from an external ancestor, while still allowing benign recall. We evaluate three defense cells against three memory-poisoning workloads on a deterministic mechanism-isolation harness; MemLineage is the only configuration in that harness that drives all three columns to zero ASR, while sub-millisecond per-operation overhead keeps it well below the noise floor of any LLM call. A Codex-backed AgentDojo bridge further separates strong-model behavior from defense-layer behavior: under an intentionally vulnerable tool-output profile, no-defense and signature-only baselines fail on all six banking pairs, while all MemLineage rows reduce strict AgentDojo ASR to zero. The core deterministic artifacts are byte-equal CI-verified; hosted-model AgentDojo and live-model sweeps are recorded as auditable logs rather than byte-pinned artifacts.",
+      "authors": [
+        "Ciyan Ouyang",
+        "Rui Hou"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-05-14T06:07:54+00:00",
+      "link": "https://arxiv.org/pdf/2605.14421v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Cryptographic provenance and verifiable lineage for LLM memory",
+      "llm_evidence_cn": "LLM内存的加密溯源与可验证谱系",
+      "llm_evidence": "LLM内存的加密溯源与可验证谱系",
+      "canonical_evidence": "LLM内存的加密溯源与可验证谱系",
+      "llm_tldr_en": "Enforces LLM agent memory security using Merkle logs and cryptographic provenance for verifiable recall.",
+      "llm_tldr_cn": "利用Merkle日志和加密溯源强制执行LLM代理内存安全，实现可验证召回。",
+      "llm_tldr": "利用Merkle日志和加密溯源强制执行LLM代理内存安全，实现可验证召回。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.09368v2",
+      "title": "Secure and Private Structured-Subset Retrieval: Fundamental Limits and Achievable Schemes",
+      "abstract": "This work introduces the \\emph{Secure and Private Structured-Subset Retrieval (SPSSR)} problem. In SPSSR, a user wishes to retrieve one subset from an arbitrary family of size-$D$ subsets from $K$ messages replicated across $N$ non-colluding servers that share randomness unknown to the user. The privacy requirement ensures that no server learns which subset is requested, while the security requirement ensures that the user learns nothing about the messages outside the requested subset. This generalizes Symmetric Multi-message Private Information Retrieval (SMPIR), where the candidate demand sets consist of all size-$D$ subsets. We show that, for every candidate demand family, the maximum achievable retrieval rate is equal to ${1-1/N}$. We also show that the minimum ratio between the size of the shared randomness and the message size required to achieve this rate is ${D/(N-1)}$, and that, for balanced linear SPSSR schemes, the minimum required subpacketization level is ${(N-1)/\\gcd(D,N-1)}$; both quantities are independent of the demand family. Our converse proof for the maximum achievable retrieval rate applies to arbitrary demand families, unlike the existing proof for SMPIR, which is tailored to the full demand family. For achievability, we construct a single SPSSR scheme that applies uniformly to every demand family, achieves the optimal retrieval rate with the optimal shared-randomness ratio, and requires the optimal subpacketization level among balanced linear schemes. This subpacketization level is no larger than that of known SMPIR schemes in any parameter regime and is smaller in some regimes.",
+      "authors": [
+        "Maha Issa",
+        "Anoosheh Heidarzadeh"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-05-10T06:40:49+00:00",
+      "link": "https://arxiv.org/pdf/2605.09368v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Private retrieval from replicated servers with shared randomness",
+      "llm_evidence_cn": "具有共享随机性的多服务器私有检索",
+      "llm_evidence": "具有共享随机性的多服务器私有检索",
+      "canonical_evidence": "具有共享随机性的多服务器私有检索",
+      "llm_tldr_en": "Explores limits of secure and private retrieval, sharing theoretical foundations with FSS-based PIR.",
+      "llm_tldr_cn": "探讨安全私有检索的极限，与基于FSS的私有信息检索具有共同的理论基础。",
+      "llm_tldr": "探讨安全私有检索的极限，与基于FSS的私有信息检索具有共同的理论基础。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.13163v1",
+      "title": "LoREnc: Low-Rank Encryption for Securing Foundation Models and LoRA Adapters",
+      "abstract": "Foundation models and low-rank adapters enable efficient on-device generative AI but raise risks such as intellectual property leakage and model recovery attacks. Existing defenses are often impractical because they require retraining or access to the original dataset. We propose LoREnc, a training-free framework that secures both FMs and adapters via spectral truncation and compensation. LoREnc suppresses dominant low-rank components of FM weights, compensates for the missing information in authorized adapters, and further applies orthogonal reparameterization to obscure structural fingerprints of the protected adapter. Unauthorized users produce structurally collapsed outputs, while authorized users recover exact performance. Experiments demonstrate that LoREnc provides strong protection against model recovery with under 1% computational overhead.",
+      "authors": [
+        "Beomjin Ahn",
+        "Jungmin Kwon",
+        "Chanyong Jung",
+        "Jaewook Chung"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-05-13T08:27:23+00:00",
+      "link": "https://arxiv.org/pdf/2605.13163v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Securing foundation models and adapters via encryption",
+      "llm_evidence_cn": "通过加密保护基础模型和适配器",
+      "llm_evidence": "通过加密保护基础模型和适配器",
+      "canonical_evidence": "通过加密保护基础模型和适配器",
+      "llm_tldr_en": "Introduces LoREnc to secure foundation models and adapters using low-rank encryption techniques.",
+      "llm_tldr_cn": "引入LoREnc，利用低秩加密技术保护基础模型和适配器的安全。",
+      "llm_tldr": "引入LoREnc，利用低秩加密技术保护基础模型和适配器的安全。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.13319v2",
+      "title": "PipeSD: An Efficient Cloud-Edge Collaborative Pipeline Inference Framework with Speculative Decoding",
+      "abstract": "Speculative decoding can significantly accelerate LLM inference, especially given that its cloud-edge collaborative deployment offers cloud workload offloading, offline robustness, and privacy enhancement. However, existing collaborative inference frameworks with speculative decoding are constrained by (i) sequential token generation and communication with low resource utilization, and (ii) inflexible cloud non-autoregressive verification (NAV) triggering that induces premature verification or costly rollbacks. In this paper, we propose PipeSD, an efficient cloud-edge collaborative pipeline inference framework with speculative decoding. PipeSD overlaps token generation and communication by a token-batch pipeline scheduling mechanism optimized by dynamic programming, and improves verification flexibility through a dual-threshold NAV triggering mechanism with a lightweight Bayesian optimization autotuner. We implement PipeSD using llama-cpp-python, PyTorch, and FastAPI, and evaluate it on a real-world cloud-edge testbed with two draft-target model pairs across four scenarios. Results show that PipeSD consistently outperforms state-of-the-art baselines, achieving 1.16x-2.16x speedup and reducing energy consumption by 14.3%-25.3%.",
+      "authors": [
+        "Yunhe Han",
+        "Yunqi Gao",
+        "Bing Hu",
+        "Mahdi Boloursaz Mashhadi",
+        "Yitong Duan",
+        "Pei Xiao",
+        "Yanfeng Zhang"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-05-13T10:34:04+00:00",
+      "link": "https://arxiv.org/pdf/2605.13319v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Cloud-edge collaborative pipeline inference for LLMs with privacy enhancement",
+      "llm_evidence_cn": "具有隐私增强的大模型云边协作流水线推理",
+      "llm_evidence": "具有隐私增强的大模型云边协作流水线推理",
+      "canonical_evidence": "具有隐私增强的大模型云边协作流水线推理",
+      "llm_tldr_en": "Introduces PipeSD, a framework for efficient cloud-edge collaborative LLM inference with privacy considerations.",
+      "llm_tldr_cn": "引入PipeSD框架，用于高效且兼顾隐私的云边协作大模型推理。",
+      "llm_tldr": "引入PipeSD框架，用于高效且兼顾隐私的云边协作大模型推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
