@@ -1,0 +1,95 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-16T20:26:53.677704+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.07961v1",
+      "title": "Graph Representation Learning Augmented Model Manipulation on Federated Fine-Tuning of LLMs",
+      "abstract": "Federated fine-tuning (FFT) has emerged as a privacy-preserving paradigm for collaboratively adapting large language models (LLMs). Built upon federated learning, FFT enables distributed agents to jointly refine a shared pretrained LLM by aggregating local LLM updates without sharing local raw data. However, FFT-based LLMs remain vulnerable to model manipulation threats, in which adversarial participants upload manipulated LLM updates that corrupt the aggregation process and degrade the performance of the global LLM. In this paper, we propose an Augmented Model maniPulation (AugMP) strategy against FFT-based LLMs. Specifically, we design a novel graph representation learning framework that captures feature correlations among benign LLM updates to guide the generation of malicious updates. To enhance manipulation effectiveness and stealthiness, we develop an iterative manipulation algorithm based on an augmented Lagrangian dual formulation. Through this formulation, malicious updates are optimized to embed adversarial objectives while preserving benign-like parameter characteristics. Experimental results across multiple LLM backbones demonstrate that the AugMP strategy achieves the strongest manipulation performance among all competing baselines, reducing the global LLM accuracy by up to 26% and degrading the average accuracy of local LLM agents by up to 22%. Meanwhile, AugMP maintains high statistical and geometric consistency with benign updates, enabling it to evade conventional distance- and similarity-based defense methods.",
+      "authors": [
+        "Hanlin Cai",
+        "Kai Li",
+        "Houtianfu Wang",
+        "Haofan Dong",
+        "Yichen Li",
+        "Falko Dressler",
+        "Ozgur B. Akan"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CR",
+        "cs.NI"
+      ],
+      "published": "2026-05-08T16:24:54+00:00",
+      "link": "https://arxiv.org/pdf/2605.07961v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "malicious model manipulation in federated LLM fine-tuning",
+      "llm_evidence_cn": "联邦大模型微调中的恶意模型篡改",
+      "llm_evidence": "联邦大模型微调中的恶意模型篡改",
+      "canonical_evidence": "联邦大模型微调中的恶意模型篡改",
+      "llm_tldr_en": "Proposes a defense against adversarial model manipulation in federated fine-tuning of large language models.",
+      "llm_tldr_cn": "针对大语言模型联邦微调中的对抗性模型篡改提出了一种防御策略。",
+      "llm_tldr": "针对大语言模型联邦微调中的对抗性模型篡改提出了一种防御策略。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.14848v1",
+      "title": "Construction of Minimal Ternary Linear Codes with Dimension $n+2$",
+      "abstract": "Recently, minimal linear codes have been extensively studied due to their applications in secret sharing schemes, secure two-party computations, and so on. Constructing minimal linear codes violating the Ashikhmin-Barg condition and then determining their weight distributions have been interesting in coding theory and cryptography. In this paper, a generic construction for ternary linear codes with dimension $m+2$ is presented, where $m$ is an integer, and a necessary and sufficient condition for this ternary linear code to be minimal is derived. Based on this condition and exponential sums, a new class of minimal ternary linear codes violating the Ashikhmin-Barg condition are obtained, and then their complete weight enumerators are determined.",
+      "authors": [
+        "Haibo Liu",
+        "Xin Guo",
+        "Qunying Liao"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-05-14T13:56:15+00:00",
+      "link": "https://arxiv.org/pdf/2605.14848v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "linear codes for secret sharing and secure computation",
+      "llm_evidence_cn": "用于秘密共享和安全计算的线性码",
+      "llm_evidence": "用于秘密共享和安全计算的线性码",
+      "canonical_evidence": "用于秘密共享和安全计算的线性码",
+      "llm_tldr_en": "Constructs minimal ternary linear codes applicable to secret sharing and secure two-party computation.",
+      "llm_tldr_cn": "构造了适用于秘密共享和安全两方计算的极小三元线性码。",
+      "llm_tldr": "构造了适用于秘密共享和安全两方计算的极小三元线性码。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
