@@ -1,0 +1,129 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-18T20:39:32.248877+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.15694v1",
+      "title": "Going Beyond the Edge: Distributed Inference of Transformer Models on Ultra-Low-Power Wireless Devices",
+      "abstract": "Transformer models are rapidly becoming a cornerstone of modern Internet of Things (IoT) applications, yet their computational and memory demands far exceed the capabilities of a single typical ultra-low-power IoT device. We present CATS, a framework for distributed transformer inference on ultra-low-power wireless devices, enabling multiple devices to collaboratively execute models far larger than what a single device can sustain. At its core, CATS is a communication-aware distributed transformer inference scheme co-designed across transformer partitioning, wireless communication and training. It employs SomeGather, a new pruned communication primitive that selectively broadcasts activation columns to reduce communication bandwidth and RAM usage without sacrificing model accuracy. Building on SomeGather, we design a partitioning method that exploits this primitive for efficient model parallelism. To cope with unreliable wireless communication, CATS employs message-dropout during training, which mimics packet losses and yields models that are robust to message loss during inference. In real-world experiments, we show that CATS brings distributed transformer inference to ultra-low-power wireless devices for the first time, with deployments on up to 16 devices that collaboratively execute transformer models up to 14 times larger than what a single device can run.",
+      "authors": [
+        "Alexander Gräfe",
+        "Ding Huo",
+        "Johannes Berger",
+        "Marco Zimmerling",
+        "Sebastian Trimpe"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-05-15T07:33:53+00:00",
+      "link": "https://arxiv.org/pdf/2605.15694v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Distributed inference of Transformer models on multiple devices",
+      "llm_evidence_cn": "多设备上的Transformer模型分布式推理",
+      "llm_evidence": "多设备上的Transformer模型分布式推理",
+      "canonical_evidence": "多设备上的Transformer模型分布式推理",
+      "llm_tldr_en": "Presents CATS, a framework for distributed transformer inference on ultra-low-power wireless devices.",
+      "llm_tldr_cn": "提出CATS框架，用于在超低功耗无线设备上进行分布式Transformer推理。",
+      "llm_tldr": "提出CATS框架，用于在超低功耗无线设备上进行分布式Transformer推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.13319v1",
+      "title": "PipeSD: An Efficient Cloud-Edge Collaborative Pipeline Inference Framework with Speculative Decoding",
+      "abstract": "Speculative decoding can significantly accelerate LLM inference, especially given that its cloud-edge collaborative deployment offers cloud workload offloading, offline robustness, and privacy enhancement. However, existing collaborative inference frameworks with speculative decoding are constrained by (i) sequential token generation and communication with low resource utilization, and (ii) inflexible cloud non-autoregressive verification (NAV) triggering that induces premature verification or costly rollbacks. In this paper, we propose PipeSD, an efficient cloud-edge collaborative pipeline inference framework with speculative decoding. PipeSD overlaps token generation and communication by a token-batch pipeline scheduling mechanism optimized by dynamic programming, and improves verification flexibility through a dual-threshold NAV triggering mechanism with a lightweight Bayesian optimization autotuner. We implement PipeSD using llama-cpp-python, PyTorch, and FastAPI, and evaluate it on a real-world cloud-edge testbed with two draft-target model pairs across four scenarios. Results show that PipeSD consistently outperforms state-of-the-art baselines, achieving 1.16x-2.16x speedup and reducing energy consumption by 14.3%-25.3%.",
+      "authors": [
+        "Yunhe Han",
+        "Yunqi Gao",
+        "Bing Hu",
+        "Mahdi Boloursaz Mashhadi",
+        "Yitong Duan",
+        "Pei Xiao",
+        "Yanfeng Zhang"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-05-13T10:34:04+00:00",
+      "link": "https://arxiv.org/pdf/2605.13319v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Cloud-edge collaborative LLM inference with privacy enhancement",
+      "llm_evidence_cn": "具有隐私增强功能的云边协作大模型推理",
+      "llm_evidence": "具有隐私增强功能的云边协作大模型推理",
+      "canonical_evidence": "具有隐私增强功能的云边协作大模型推理",
+      "llm_tldr_en": "Proposes PipeSD to accelerate collaborative LLM inference using speculative decoding and pipeline scheduling.",
+      "llm_tldr_cn": "提出PipeSD，通过投机解码和流水线调度加速云边协作的大模型推理。",
+      "llm_tldr": "提出PipeSD，通过投机解码和流水线调度加速云边协作的大模型推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.15774v1",
+      "title": "Beyond Controlled Noise: Achieving Symmetric FHE through Dynamic Position Shifting",
+      "abstract": "Traditional Fully Homomorphic Encryption (FHE) schemes often suffer from prohibitive computational overhead and complex noise management. In this paper, we propose a novel symmetric FHE through a mechanism of plaintext fragmentation and dynamic interposition. Our approach is built upon a modular encryption foundation, c = mk + rp, which is naturally additive but typically limited by exponential noise growth during multiplication. To resolve this, we introduce an interposition framework where the plaintext is partitioned into multiple fragments across distinct logical positions. We introduce a dual-regulator system to govern the multiplication process; exponent regulators (t_i) redirect the product of fragments to a new target position, preventing the accumulation of secret key exponents, while coefficient regulators (d_i) normalize the resulting scalars. Security is established through a binding mechanism where exponents and coefficients are mutually dependent, shielding the secret key k from algebraic manipulation and substitution attacks.",
+      "authors": [
+        "Mostefa Kara"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-05-15T09:28:31+00:00",
+      "link": "https://arxiv.org/pdf/2605.15774v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Symmetric FHE for secure distributed computation without complex noise management",
+      "llm_evidence_cn": "用于安全分布式计算的对称全同态加密，无需复杂噪声管理",
+      "llm_evidence": "用于安全分布式计算的对称全同态加密，无需复杂噪声管理",
+      "canonical_evidence": "用于安全分布式计算的对称全同态加密，无需复杂噪声管理",
+      "llm_tldr_en": "Proposes a symmetric FHE scheme using plaintext fragmentation to reduce computational overhead.",
+      "llm_tldr_cn": "提出一种利用明文分段降低计算开销的对称全同态加密方案。",
+      "llm_tldr": "提出一种利用明文分段降低计算开销的对称全同态加密方案。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

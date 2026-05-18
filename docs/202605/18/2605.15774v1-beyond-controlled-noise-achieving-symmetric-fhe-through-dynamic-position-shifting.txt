@@ -1,0 +1,1140 @@
+Title: Beyond Controlled Noise: Achieving Symmetric FHE through Dynamic Position Shifting
+
+URL Source: https://arxiv.org/pdf/2605.15774v1
+
+Published Time: Mon, 18 May 2026 00:46:33 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# Beyond Controlled Noise: Achieving Symmetric FHE through Dynamic Position Shifting 
+
+Mostefa Kara 
+
+LIAP Laboratory, University of El Oued, PO Box 789, El Oued, 39000, Algeria 
+
+karamostefa@univ-eloued.dz 
+
+Abstract —Traditional Fully Homomorphic Encryption (FHE) schemes often suffer from prohibitive computational overhead and complex noise management. In this paper, we propose a novel symmetric FHE through a mechanism of plaintext fragmentation and dynamic interposition. Our approach is built upon a modular encryption foundation, c = mk + rp , which is naturally additive but typically limited by exponential noise growth during multipli-cation. To resolve this, we introduce an interposition framework where the plaintext is partitioned into multiple fragments across distinct logical positions. We introduce a dual-regulator system to govern the multiplication process; exponent regulators ( ti)redirect the product of fragments to a new target position, preventing the accumulation of secret key exponents, while coefficient regulators ( di) normalize the resulting scalars. Security is established through a binding mechanism where exponents and coefficients are mutually dependent, shielding the secret key k
+
+from algebraic manipulation and substitution attacks. 
+
+Index Terms —FHE, Trivial Encryption, Noise Management, Regulator Keys, Lightweight Cryptography. 
+
+I. I NTRODUCTION 
+
+Fully Homomorphic Encryption (FHE) has emerged as one of the most powerful paradigms in modern cryptography, enabling computations to be performed directly on encrypted data without revealing the underlying plaintext. Since the seminal work of Gentry [1], numerous constructions have been proposed to improve the practicality of FHE, ranging from lattice-based designs [2], [3] to schemes optimized for machine learning and privacy-preserving cloud computing [4], [5]. Despite their theoretical elegance, existing FHE systems remain computationally heavy and resource-intensive, which limits their deployment in lightweight or real-time scenarios such as IoT and WSN [6]. A promising alternative direction is to explore symmetric FHE constructions, which can offer simpler operations and reduced overhead compared to public-key approaches [7]. However, naive symmetric designs suffer from significant lim-itations [8]. For example, the trivial encryption method defined by c = mk , where m is the message and k is the secret key, is an additive homomorphism but rapidly accumulates noise when ciphertexts are multiplied. This uncontrolled growth renders the scheme impractical for applications requiring mul-tiplicative depth. To address these challenges, we propose a novel symmetric FHE scheme that combines plaintext fragmentation with an interposition mechanism. The core idea is to divide the mes-sage into smaller fragments and use regulator public keys that control the growth of key exponents during homomorphic mul-tiplication. By substituting the positions of plaintext fragments under carefully chosen regulators, the scheme preserves the correctness of multiplicative operations while avoiding noise amplification. This design provides a lightweight and efficient symmetric alternative to conventional FHE models. The development of FHE has followed several key trajec-tories. Early works such as Gentry’s lattice-based blueprint [1] introduced the concept of bootstrapping to control noise, inspiring follow-up schemes like BGV [2] and FV [3]. These schemes improved efficiency but still relied on complex lattice operations. More recently, TFHE [4] and CKKS [9] tailored FHE to specific domains, supporting fast Boolean circuits or approximate arithmetic, respectively. In parallel, research on symmetric or lightweight FHE has remained relatively limited. Some studies examined secret-key homomorphic constructions for specialized tasks [10], [11], but most suffer from scalability or noise-related issues. To the best of our knowledge, no prior work has investigated the use of interposition and plaintext fragmentation to regulate cipher-text growth in symmetric FHE. Our proposal therefore fills this gap by introducing a regulator-assisted mechanism that ensures feasible multiplicative homomorphism in a symmetric setting. As a result, this paper introduces a novel symmetric FHE scheme that leverages plaintext fragmentation and interpo-sition to enable efficient homomorphic properties (addition, multiplication); formalizes the role of regulator public keys in controlling the exponents of the secret key, thereby addressing the noise growth problem inherent in trivial encryption; ana-lyzes the correctness and security of the scheme, showing how it maintains confidentiality while supporting valid homomor-phic operations; and provides an illustrative implementation and example, demonstrating the potential of the scheme as a lightweight alternative to traditional FHE constructions. Preprint, 2026 
+
+> arXiv:2605.15774v1 [cs.CR] 15 May 2026
+
+II. P ROPOSAL 
+
+In the proposed symmetric FHE scheme, a regulator is a publicly known auxiliary key element designed to govern the evolution of the secret key’s exponent during homomorphic multiplication. Formally, a regulator is a value derived from the secret key k and specific positional scalars such that its application mathematically redirects or repositions fragments of the plaintext within the ciphertext domain. The primary purpose of regulators is to ensure that the product of two ciphertexts does not lead to the uncontrolled exponential growth of k or the accumulation of scalar coefficients. By managing these two vectors, the regulators preserve both the correctness of decryption and the structural stability of the ciphertext across recursive operations. Since providing a direct multiplicative inverse of kx+y
+
+would compromise the secret key, the interposition mech-anism avoids this by randomly splitting the plaintext into parts and employing a cyclic shift. In a typical multiplication 
+
+mikx × m′
+
+> i
+
+ky , rather than attempting to reduce the result back to the original position i (which would require a risky inverse regulator), we redirect the result to a new target position 
+
+j using a regulator kz , where kx+y kz̸ = 1. This ensures that while the exponent is transformed, the secret k remains algebraically protected. The proposal is naturally probabilistic; even for the same message m, the encryption results Enc 1(m)
+
+and Enc 2(m) will differ due to the random fragmentation of the plaintext during the initial encoding. The interposition process can operate in two distinct modes. In the random mode, the product of positions PiPj via a regulator is mapped to an arbitrary position Pl. In the regular mode, which is adopted in this work with P = 3 positions, the mapping follows a deterministic function l = f (i, j ).Specifically, we define a cyclic flow: if i = j, the result moves to l = i + 1 (mod P ); if i̸ = j, the result moves to 
+
+l = j + 1 (mod P ) (it targets the remaining third position in our case, P = 3). This creates a closed-loop system where fragments are perpetually reshuffled but never lost or exponentially expanded. To achieve total stability, we utilize a dual-regulator archi-tecture consisting of exponent regulators ( ti) and coefficient regulators ( di). While the exponent regulators manage the power of k, the coefficient regulators normalize the resulting scalar products. Without this normalization, the internal coeffi-cients ai would square and grow with each multiplication. By applying di, we perform a coefficient reset that transforms the scalar of the product back into the standard form required for the target position. This dual-binding ensures that an attacker cannot isolate k by manipulating one regulator without being thwarted by the unknown parameters of the other. The specific interposition mechanism for the three-fragment model ( m1, m 2, m 3) is suggested as follows:  
+
+> •
+
+P1 × P1 × Reg t1,d 2 −→ P2 
+
+> •
+
+P2 × P2 × Reg t2,d 3 −→ P3 
+
+> •
+
+P3 × P3 × Reg t3,d 1 −→ P1 (cyclic return)  
+
+> •
+
+P1 × P2 × Reg t4,d 3 −→ P3 
+
+> •
+
+P2 × P3 × Reg t6,d 1 −→ P1 (cyclic return)  
+
+> •
+
+P1 × P3 × Reg t5,d 2 −→ P2Position1      
+
+> multiplication
+> goto position
+> m1m2m3
+> Position2 Position3
+> Fig. 1. A global overview of the interposition mechanism.
+
+Therefore, six regulators are needed for three fragments (Algorithm 1). 
+
+Algorithm 1 KeyGen (p, q, R 1, R 2)
+
+Require: Primes p, q; sampling bounds R1 < R 2
+
+Ensure: Secret key (k1, k 2, k 3); public key 
+
+(n, t 1, . . . , t 6, d 1, d 2, d 3) 
+
+> 1:
+
+n ← p · q▷ Coefficient scalars  
+
+> 2:
+
+Sample a1, a 2, a 3, b 1, b 2, b 3$
+
+←− [R1, R 2) 
+
+> 3:
+
+b4 ← a2 · b2 · (a1)−1 (mod p) 
+
+> 4:
+
+b5 ← a1 · b1 · (a3)−1 (mod p) 
+
+> 5:
+
+b6 ← a3 · b3 · (a2)−1 (mod p)
+
+▷ Secret key and exponents  
+
+> 6:
+
+Sample k, e 1, e 2, e 3$
+
+←− [R1, R 2)
+
+▷ Position keys ki = ai · kei + r · p (mod n) 
+
+> 7:
+
+for i ← 1 to 3 do  
+
+> 8:
+
+Sample r $
+
+←− [R1, R 2) 
+
+> 9:
+
+ki ←  ai · kei mod p + r · p (mod n) 
+
+> 10:
+
+end for 
+
+▷ Exponent regulators ti = bi · kx + r · p (mod n) 
+
+> 11:
+
+Sample r; t1 ← b1 · k(e2−2e1) + r · p (mod n) 
+
+> 12:
+
+Sample r; t2 ← b2 · k(e3−2e2) + r · p (mod n) 
+
+> 13:
+
+Sample r; t3 ← b3 · k(e1−2e3) + r · p (mod n) 
+
+> 14:
+
+Sample r; t4 ← b4 · k(e3−e1−e2) + r · p (mod n) 
+
+> 15:
+
+Sample r; t5 ← b5 · k(e2−e1−e3) + r · p (mod n) 
+
+> 16:
+
+Sample r; t6 ← b6 · k(e1−e2−e3) + r · p (mod n)
+
+▷ Coefficient regulators  
+
+> 17:
+
+d1 ← a1 · (a23 · b3)−1 (mod p) 
+
+> 18:
+
+d2 ← a2 · (a21 · b1)−1 (mod p) 
+
+> 19:
+
+d3 ← a3 · (a22 · b2)−1 (mod p) 
+
+> 20:
+
+return (k1, k 2, k 3, t 1, . . . , t 6, d 1, d 2, d 3, n )Algorithm 2 Enc (m, k 1, k 2, k 3, p, n, R 1, R 2)
+
+Require: Plaintext m; position keys k1, k 2, k 3; moduli p, n;bounds R1, R 2
+
+Ensure: Ciphertext (c1, c 2, c 3) 
+
+> 1:
+
+Sample m1, m 2$
+
+←− [R1, R 2) 
+
+> 2:
+
+m3 ← (m − m1 − m2) mod n ▷ Ensures 
+
+m1 + m2 + m3 = m; encoding is probabilistic  
+
+> 3:
+
+for i ← 1 to 3 do  
+
+> 4:
+
+Sample r $
+
+←− [R1, R 2) 
+
+> 5:
+
+ci ← mi · ki + r · p (mod n) ▷ c i ≡ mi · ki
+
+(mod p); noise vanishes mod p 
+
+> 6:
+
+end for  
+
+> 7:
+
+return (c1, c 2, c 3)
+
+Algorithm 3 Dec (c1, c 2, c 3, k −11 , k −12 , k −13 , p )
+
+Require: Ciphertext (c1, c 2, c 3); modular inverses k−1 
+
+> i
+
+=(ki mod p)−1 (mod p); prime p
+
+Ensure: Plaintext m 
+
+> 1:
+
+for i ← 1 to 3 do  
+
+> 2:
+
+mi ← ci · k−1 
+
+> i
+
+(mod p) ▷ Noise term r · p ≡ 0(mod p), so it vanishes  
+
+> 3:
+
+end for  
+
+> 4:
+
+m ← (m1 + m2 + m3) (mod p) 
+
+> 5:
+
+return m
+
+Algorithm 4 HAdd (c1, c 2, c 3, c ′
+
+> 1
+
+, c ′
+
+> 2
+
+, c ′
+
+> 3
+
+, n )
+
+Require: Two ciphertexts (c1, c 2, c 3), (c′
+
+> 1
+
+, c ′
+
+> 2
+
+, c ′
+
+> 3
+
+); modulus n
+
+Ensure: Ciphertext (c′′  
+
+> 1
+
+, c ′′  
+
+> 2
+
+, c ′′  
+
+> 3
+
+) encrypting m + m′ 
+
+> 1:
+
+for i ← 1 to 3 do  
+
+> 2:
+
+c′′  
+
+> i
+
+← (ci + c′
+
+> i
+
+) mod n ▷ (mi + m′
+
+> i
+
+) · ki (mod p);position and exponent unchanged  
+
+> 3:
+
+end for  
+
+> 4:
+
+return (c′′  
+
+> 1
+
+, c ′′  
+
+> 2
+
+, c ′′  
+
+> 3
+
+)
+
+Algorithm 5 HMul (c1, c 2, c 3, c ′
+
+> 1
+
+, c ′
+
+> 2
+
+, c ′
+
+> 3
+
+, t 1, . . . , t 6, d 1, d 2, d 3, n )
+
+Require: Two ciphertexts (c1, c 2, c 3), (c′
+
+> 1
+
+, c ′
+
+> 2
+
+, c ′
+
+> 3
+
+); exponent regulators t1, . . . , t 6; coefficient regulators d1, d 2, d 3;modulus n
+
+Ensure: Ciphertext (c′′  
+
+> 1
+
+, c ′′  
+
+> 2
+
+, c ′′  
+
+> 3
+
+) encrypting m · m′
+
+▷ Each output position accumulates the products whose interposition map targets it. di normalises the resulting coefficient so decryption yields the correct fragment.  
+
+> 1:
+
+c′′  
+
+> 1
+
+←  c3c′
+
+> 3
+
+t3 + c2c′
+
+> 3
+
+t6 + c3c′
+
+> 2
+
+t6
+
+ · d1 (mod n) ▷
+
+Targets P1: same-pos P3 × P3 via t3; cross-pos P2 × P3
+
+(both orders) via t6 
+
+> 2:
+
+c′′  
+
+> 2
+
+←  c1c′
+
+> 1
+
+t1 + c1c′
+
+> 3
+
+t5 + c3c′
+
+> 1
+
+t5
+
+ · d2 (mod n) ▷
+
+Targets P2: same-pos P1 × P1 via t1; cross-pos P1 × P3
+
+(both orders) via t5 
+
+> 3:
+
+c′′  
+
+> 3
+
+←  c2c′
+
+> 2
+
+t2 + c1c′
+
+> 2
+
+t4 + c2c′
+
+> 1
+
+t4
+
+ · d3 (mod n) ▷
+
+Targets P3: same-pos P2 × P2 via t2; cross-pos P1 × P2
+
+(both orders) via t4 
+
+> 4:
+
+return (c′′  
+
+> 1
+
+, c ′′  
+
+> 2
+
+, c ′′  
+
+> 3
+
+)
+
+III. S ECURITY ANALYSIS 
+
+A. Preliminaries and Notation 
+
+Let λ denote the security parameter. We write negl (λ)
+
+for any negligible function and poly (λ) for an unspecified polynomial. All algorithms are PPT unless stated otherwise. 
+
+a) Scheme parameters:  
+
+> •
+
+p, q : distinct primes of bit-length ≈ λ; n = pq . 
+
+> •
+
+[R1, R 2): deployment-defined sampling range with ∆ := 
+
+R2 − R1 ≥ 2λ (super-polynomial in λ).  
+
+> •
+
+Plaintext space: m ∈ Zp; fragments satisfy m1 + m2 +
+
+m3 ≡ m (mod p) with m1, m 2$
+
+←− Z∗
+
+> p
+
+, m3 := m−m1 −
+
+m2 mod p. 
+
+> •
+
+Secret key k, exponents ei, scalars ai, b i: all sampled from [R1, R 2). 
+
+> •
+
+Position keys: ki ≡ ai · kei (mod p), embedded in Zn
+
+with masking noise rip. 
+
+> •
+
+Ciphertext of fragment mi: ci = miki + rip (mod n),so ci ≡ miki (mod p).
+
+B. Hardness Assumptions 
+
+We identify the precise assumptions on which the IND-CPA proof rests. 
+
+Assumption 1 (Multiplicative Masking Assumption ( MMA p)) .
+
+Let p be a λ-bit prime and ki ∈ Z∗ 
+
+> p
+
+be a fixed (secret) group element. For a uniformly random u $
+
+←− Z∗
+
+> p
+
+, the distribution of u · ki mod p is computationally indistinguishable from the uniform distribution on Z∗ 
+
+> p
+
+for any PPT adversary that does not know ki. Formally, for all PPT A:
+
+Pr A(p, u ·ki mod p) = 1 −Pr A(p, v ) = 1 | v $
+
+←− Z∗
+
+> p
+
+ = negl (λ).
+
+MMA p holds unconditionally when ki is secret and u
+
+is uniform: multiplication by a fixed nonzero element is a bijection on Z∗
+
+> p
+
+, so u · ki is identically distributed to u when 
+
+ki is unknown and u is uniform. The assumption, therefore, reduces to the secrecy of ki, which in turn rests on DLA (recovering ki from public information requires solving a discrete logarithm). We state it as a named assumption for modularity, but note that once ki is secret, the masking is information-theoretically perfect on Z∗
+
+> p
+
+.
+
+Assumption 2 (Hidden Modulus Indistinguishability (HMP n)) . Let n = pq with p, q unknown λ-bit primes. For a uniformly random x $
+
+←− Z∗ 
+
+> p
+
+and uniformly random 
+
+r $
+
+←− [R1, R 2), the distribution 
+
+c = x + r · p (mod n)
+
+is computationally indistinguishable from the uniform distri-bution on Zn for any PPT adversary that does not know p.Formally, for all PPT A:
+
+Pr A(n, c ) = 1  − Pr A(n, w ) = 1 | w $
+
+←− Zn
+
+ = negl (λ).C. IND-CPA Security 1) Security Game: 
+
+Definition 1 (IND-CPA Game) . The experiment 
+
+Exp IND -CPA Π,A (λ):
+
+1) Setup. Run KeyGen (λ) to obtain sk = ( k1, k 2, k 3) and 
+
+pk = ( n, t 1, . . . , t 6, d 1, d 2, d 3).
+
+2) Learning. A(pk ) queries Enc (sk , ·) polynomially many times. 
+
+3) Challenge. A outputs (m0, m 1). Challenger samples 
+
+b $
+
+←− { 0, 1}, returns c∗ ← Enc (sk , m b).
+
+4) Guess. A outputs b′.
+
+Adv IND -CPA Π (A) := Pr[ b′ = b] − 12 .
+
+2) Main Theorem: 
+
+Theorem 1 (IND-CPA Security under MMA p and HMP n).
+
+For every PPT adversary A,
+
+Adv IND -CPA Π (A) ≤ 3 · Adv MMA (A′) + Adv HMP (A′′ )
+
+where A′, A′′ are PPT algorithms derived from A. In par-ticular, if MMA p and HMP n hold, then Adv IND -CPA Π (A) = 
+
+negl (λ).Proof. We proceed via four hybrid games. Let Pr i denote the probability that A outputs b′ = b in game Gi.
+
+a) Game G0: Real experiment. The challenge ciphertext is c∗ = Enc (sk , m b):
+
+m∗
+
+> 1
+
+, m ∗
+
+> 2$
+
+←− Z∗
+
+> p
+
+, m∗ 
+
+> 3
+
+:= mb − m∗ 
+
+> 1
+
+− m∗ 
+
+> 2
+
+mod p, c∗ 
+
+> i
+
+= m∗ 
+
+> i
+
+ki + rip (mod n), ri
+
+> $
+
+←− [R1, R 2).
+
+b) Game G1: Re-randomize fragments, preserving the sum. Replace the fragment triple with a freshly sampled one, subject to the same sum constraint: 
+
+u1, u 2$
+
+←− Z∗
+
+> p
+
+, u3 := mb − u1 − u2 mod p. 
+
+Compute c∗∗  
+
+> i
+
+= uiki + r′
+
+> i
+
+p (mod n), r′
+
+> i
+> $
+
+←− [R1, R 2). Transi-tion G0 → G1 is exact. The distribution of (m∗
+
+> 1
+
+, m ∗
+
+> 2
+
+, m ∗
+
+> 3
+
+) in 
+
+G0 and of (u1, u 2, u 3) in G1 are identical both are uniform over the affine subspace {(x1, x 2, x 3) ∈ (Z∗
+
+> p
+
+)3 : x1 +x2 +x3 =
+
+mb}. The noises ri, r ′ 
+
+> i
+
+are also identically distributed. Hence 
+
+G0 and G1 are perfectly indistinguishable: 
+
+Pr  
+
+> 0
+
+− Pr  
+
+> 1
+
+= 0 .
+
+c) Game G2: Replace uiki mod p with uniform ele-ments. For each i = 1 , 2, 3, replace uiki mod p with an independently uniform vi
+
+> $
+
+←− Z∗
+
+> p
+
+, producing c∗∗∗  
+
+> i
+
+= vi + r′′  
+
+> i
+
+p (mod n).Transition G1 → G2 reduces to MMA p. Fix i ∈ { 1, 2, 3}.In G1, the value uiki mod p is the product of a uniformly random ui ∈ Z∗ 
+
+> p
+
+with the secret group element ki ∈ Z∗
+
+> p
+
+.By MMA p (Assumption 1), this product is computationally indistinguishable from a uniform element of Z∗ 
+
+> p
+
+for any PPT adversary that does not know ki.Formally, suppose A distinguishes G1 from G2 with ad-vantage ϵi on component i. We build a PPT algorithm A′
+
+that receives a MMA p challenge (p, w ), where w is either 
+
+u·ki for uniform u, or uniform v, and simulates the remaining components honestly. Then A′ breaks MMA p with the same advantage ϵi.A union bound over the three components gives: 
+
+Pr  
+
+> 1
+
+− Pr  
+
+> 2
+
+≤ 3 · Adv MMA (A′).
+
+d) Game G3: Refresh the noise. Re-sample r′′ 
+
+> i
+> $
+
+←− [R1, R 2) independently. Since r′′  
+
+> i
+
+is already uniform and independent of vi, the distribution of c∗∗∗  
+
+> i
+
+is unchanged: 
+
+Pr  
+
+> 2
+
+− Pr  
+
+> 3
+
+= 0 .
+
+e) Game G4: Replace ciphertext components with uni-form elements of Zn.Replace each c∗∗∗  
+
+> i
+
+= vi + r′′  
+
+> i
+
+p (mod n) with a uniformly random wi
+
+> $
+
+←− Zn.Transition G3 → G4 reduces to HMP n. In G3, each c∗∗∗ 
+
+> i
+
+has the form vi + rp mod n with vi
+
+> $
+
+←− Z∗ 
+
+> p
+
+and r $
+
+←− [R1, R 2).This is precisely the distribution considered in Assumption 2. A distinguisher A that separates G3 from G4 on component i
+
+directly yields a PPT algorithm A′′ breaking HMP n, because 
+
+A′′ can forward the HMP n challenge c as the i-th ciphertext component and simulate the rest honestly. A union bound over three components gives: 
+
+Pr  
+
+> 3
+
+− Pr  
+
+> 4
+
+≤ 3 · Adv HMP (A′′ ).
+
+The factor 3 is absorbed into the Adv HMP term by a standard hybrid over components. Therefore, in G4, each ciphertext component is uniform and independent in Zn, carrying no information about b. Hence 
+
+Pr 4 = 1 /2. Chaining: 
+
+Adv IND -CPA Π (A) = Pr  
+
+> 0
+
+− 12
+
+≤ Pr  
+
+> 0
+
+− Pr  
+
+> 1
+
++ Pr  
+
+> 1
+
+− Pr  
+
+> 2
+
++ Pr  
+
+> 2
+
+− Pr  
+
+> 3
+
++ Pr  
+
+> 3
+
+− Pr  
+
+> 4
+
++ Pr  
+
+> 4
+
+− 12
+
+≤ 0 + 3 · Adv MMA (A′) + 0 + 3 · Adv HMP (A′′ ) + 0 . □
+
+3) Probabilistic Encryption and Ciphertext Unlinkability: 
+
+Corollary 1 (Ciphertext Unlinkability) . For any fixed m and two independent calls c1 ← Enc (sk , m ), c2 ← Enc (sk , m ),no PPT adversary can distinguish the pair (c1, c2) from two independent encryptions of different messages, except with advantage negl (λ).Proof. Any such distinguisher A yields an IND-CPA adver-sary A′: on receiving challenge c∗, A′ generates a fresh c2 ← Enc (sk , m 0) and feeds (c∗, c2) to A. If A can link c∗ to 
+
+m0 or m1, A′ recovers b, breaking IND-CPA. The advantage of A′ equals that of A.
+
+D. Key Recovery Analysis 
+
+The IND-CPA proof above treats ki as an opaque secret group element. This part analyses how hard it is to recover 
+
+ki, k, ei, or ai from the public key, grounding secrecy of ki
+
+in DLA. 
+
+Proposition 1 (Hardness of Position Key Recovery) . Any PPT adversary that recovers ki mod p from the secret key with non-negligible probability solves DLA in Z∗
+
+> p
+
+.Proof. The secret key contains ki mod n, not ki mod p di-rectly; extracting ki mod p requires computing ki mod p =(ki mod n) mod p, which requires knowing p, hence factoring 
+
+n (IFA). Assuming p is known (or factored), recovering the base k from ki ≡ aikei (mod p) requires computing adiscrete logarithm with an unknown coefficient ai, at least as hard as DLA. 
+
+Proposition 2 (Exponent Hiding by Regulators) . The exponent regulators {ti} do not leak the exponents {ei} under DLA in 
+
+Z∗
+
+> p
+
+.Proof. Each regulator satisfies ti ≡ bj · kx (mod p), where x
+
+is a private linear combination of e1, e 2, e 3, and bj is a secret scalar. Recovering x requires solving DLA with an unknown coefficient, strictly harder than standard DLA. 
+
+Proposition 3 (Dual-Binding Security) . No PPT adversary can forge a valid pair (t∗ 
+
+> i
+
+, d ∗ 
+
+> i
+
+) with (t∗ 
+
+> i
+
+, d ∗ 
+
+> i
+
+)̸ = ( ti, d i) that pro-duces correct decryption after homomorphic multiplication, without solving DLA. Proof. Forging t∗ 
+
+> i
+
+to pass decryption requires inducing the same exponent offset on k, i.e. kx∗
+
+= kx, forcing x∗ = x
+
+in Z∗
+
+> p
+
+, a DLA instance. Independently forging d∗ 
+
+> i
+
+requires knowledge of the secret scalars (aj , b j ) embedded inside 
+
+kj and tj , whose extraction also reduces to DLA. The two constraints are independent, so simultaneous forgery requires solving DLA twice. Dual binding is a defense against exponent cancellation. Without di, an adversary who can set ti = k−(ea+eb)
+
+could cancel the exponent entirely after multiplication, re-ducing the product ciphertext to mamb · aaab, a purely algebraic (non-hidden) quantity. The coefficient regulator 
+
+di = ai(a2 
+
+> j
+
+bj )−1 mod p prevents this; correct normalization requires aj and bj , both secrets. 
+
+E. IND-CCA Insecurity 
+
+Corollary 2 (The Scheme is NOT IND-CCA Secure) . Π does not achieve IND-CCA2 security. Proof. Given challenge c∗ = Enc (sk , m b), the adversary com-putes c∗∗ = HAdd (c∗, Enc (sk , 0)) (a differently distributed ciphertext), queries the decryption oracle on c∗∗ (which is not 
+
+c∗), recovers mb, and wins with advantage 1.This is the expected behavior for any homomorphic scheme; the homomorphic property is a form of controlled malleability, which is definitionally incompatible with CCA security. All standard FHE schemes (BGV, BFV, CKKS, GSW) are IND-CPA but not IND-CCA. If CCA security is required in a specific application, a standard CPA-to-CCA transform (e.g., Fujisaki-Okamoto) can be applied at the application layer. 
+
+F. Homomorphic Correctness and Plaintext Capacity 1) Correctness of Addition: After HAdd , each component satisfies c′′  
+
+> i
+
+≡ (mi + m′
+
+> i
+
+)ki (mod p). Summing the recovered fragments gives m + m′. Addition is exact in Zp; the additive noise rip vanishes upon reduction mod p.
+
+2) Correctness of Multiplication: Working mod p, the output of HMul at position P1 is verified as: 
+
+c3c′
+
+> 3
+
+t3 ≡ m3m′ 
+
+> 3
+
+· a23b3 · ke1 ,
+
+and, using b6 = a3b3a−12 mod p:
+
+c2c′
+
+> 3
+
+t6 ≡ m2m′ 
+
+> 3
+
+· a23b3 · ke1 , c3c′
+
+> 2
+
+t6 ≡ m3m′ 
+
+> 2
+
+· a23b3 · ke1 .
+
+Applying d1 = a1(a23b3)−1 mod p:
+
+c′′  
+
+> 1
+
+≡ a1ke1 · (m3m′ 
+
+> 3
+
++ m2m′ 
+
+> 3
+
++ m3m′
+
+> 2
+
+).
+
+Summing c′′  
+
+> 1
+
++ c′′  
+
+> 2
+
++ c′′  
+
+> 3
+
+across all positions recovers m · m′
+
+exactly. Positions P2 and P3 follow by the same calculation with indices permuted. 
+
+3) Plaintext Capacity and Multiplicative Depth: 
+
+Proposition 4 (Unbounded Multiplicative Depth up to Plain-text Capacity) . The scheme correctly evaluates any arithmetic circuit of multiplication depth L, for any L ≥ 1, subject only to LY
+
+> j=1
+
+m(j) < p. 
+
+Proof. All homomorphic operations are exact in Zp: noise vanishes mod p at every step, and there is no stochastic error term. The result of L multiplications is the exact integer product M = Q 
+
+> j
+
+m(j). Decryption recovers M mod p = M
+
+whenever M < p . No other constraint on L exists. Unlike LWE-based schemes, there is no noise budget, no modulus switching, and no bootstrapping required. The constraint Q 
+
+> j
+
+m(j) < p is deterministic and fully predictable from the plaintext values. It is controlled by (i) choosing p
+
+large relative to the expected product, and (ii) restricting the plaintext domain to m ∈ [1 , B ] with BL < p for depth-L
+
+circuits. The sampling range [R1, R 2) for key material affects only the statistical security of the fragment distribution; it has no influence on multiplicative depth or correctness. 
+
+G. Resistance to Specific Attacks 1) Known-Plaintext Attack: Given (m(j), c(j)): recovering 
+
+ki from c(j) 
+
+> i
+
+= m(j) 
+
+> i
+
+ki + r(j) 
+
+> i
+
+p mod n requires knowing m(j)
+
+> i
+
+individually, not just the total m(j), which requires solving an underdetermined system (2 unknowns, 1 equation per ciphertext). Even with m(j) 
+
+> i
+
+, recovering ki from Zn requires 
+
+HMP n, and recovering k from ki requires DLA. TABLE I SUMMARY TABLE                                                   
+
+> Property Status Basis
+> IND-CPA Yes MMA p+HMP n
+> IND-CCA No Inherent; homomorphic malleability Ciphertext unlinkability Yes IND-CPA reduction Position key secrecy Yes DLA + HMP n
+> Exponent hiding ( ti)Yes DLA Coefficient hiding ( di)Yes DLA Dual-binding (joint ti, d i)Yes DLA Resistance to KPA Yes Underdetermined + DLA + HMP n
+> Resistance to linear fragment attack Yes Underdetermined for all L
+> Exact homomorphic addition Yes Exact in Zp
+> Exact homomorphic multiplication Yes Algebraically verified Unbounded multiplicative depth Yes ∗∗Subject to Qm(j)< p
+> No noise accumulation Yes Noise vanishes mod p
+> Post-quantum security No Shor breaks DLA and IFA
+> Proof rests on: MMA p(masking) +HMP n(hidden modulus) ⇐DLA +IFA (classical).
+
+2) Linear Algebraic Attack on Fragments: With L ci-phertexts of m: c(ℓ) 
+
+> i
+
+≡ m(ℓ) 
+
+> i
+
+ki (mod p) gives L equations per position in 2L unknowns (m(ℓ)1 , m (ℓ)2 ). The system is underdetermined for all finite L, so the attack fails regardless of the number of observed ciphertexts. 
+
+3) Regulator Manipulation: Captured formally by the Dual-Binding proposition (Section III-D). 
+
+4) Chinese Remainder Theorem (CRT) / Hidden Modulus Attack: Zn ∼= Zp×Zq by CRT. Separating the two components requires knowing p, i.e. solving HMP n. Without p, the coset structure ci ∈ miki + pZn is computationally hidden. 
+
+5) Quantum Attacks: The scheme relies on the secrecy of 
+
+ki, which is protected by DLA and IFA/HMP. Shor’s algorithm solves DLA and IFA in polynomial quantum time, breaking both MMA p (by revealing ki) and HMP n (by factoring n). Thus, the scheme is not post-quantum secure (Table I). IV. P ERFORMANCE 
+
+Information about the benchmarked schemes is taken from [12]–[14]. For BGV and BFV, the parameters are set to 
+
+N = 8192 and log( q) = 218 . For our proposal, the modulus size is n = 3072 bits, corresponding to the 128-bit classical security level. The implementation was carried out on an Intel(R) Core(TM) i7-10700 CPU running at 2.90 GHz under Windows. Table II summarizes the performance and features of several well-established FHE schemes compared to our proposal. Existing lattice-based schemes such as BFV and BGV provide strong asymptotic security but suffer from large ciphertext sizes (hundreds of KB) and require costly bootstrapping or relinearization for noise management. CKKS supports approx-imate arithmetic but incurs significant overhead and suffers from precision loss, while TFHE is extremely fast for single-bit operations but inefficient for large-scale arithmetic. In contrast, the proposed scheme demonstrates lightweight performance. The encryption time is approximately 0.02 ms, and addition is nearly negligible ( 0.002 ms), with a ciphertext size of only 9 KB. Noise is controlled efficiently through the regulator-based interposition mechanism rather than costly bootstrapping. The main limitation is that the scheme is symmetric, and its security ultimately depends on the hardness of integer factorization, implying potential vulnerability in the post-quantum setting. Nevertheless, within the classical model it provides a highly efficient alternative for applications that prioritize speed and compactness. V. C ONCLUSION 
+
+In this paper, we proposed a novel symmetric fully homo-morphic encryption scheme that leverages plaintext fragmenta-tion and an interposition mechanism based on regulator values to enable efficient homomorphic addition and multiplication. The design builds upon the lightweight trivial encryption technique while overcoming its main limitation of uncon-trolled noise growth under multiplication. We analyzed the correctness and security of the construction, showing that its confidentiality reduces to the hardness of integer factorization. Furthermore, our performance evaluation demonstrates that the scheme achieves significant improvements compared to established lattice-based approaches, and noise is efficiently managed without expensive bootstrapping. The main limitation is that the scheme is symmetric and relies on the classical hard-ness of factoring, which leaves potential vulnerability in the post-quantum setting. As future work, we plan to investigate post-quantum variants of the interposition mechanism. REFERENCES [1] C. Gentry, “Fully homomorphic encryption using ideal lattices,” in        
+
+> Proceedings of the forty-first annual ACM symposium on Theory of computing , 2009, pp. 169–178. [2] Z. Brakerski, C. Gentry, and V. Vaikuntanathan, “(leveled) fully ho-momorphic encryption without bootstrapping,” ACM Transactions on Computation Theory (TOCT) , vol. 6, no. 3, pp. 1–36, 2014. [3] J. Fan and F. Vercauteren, “Somewhat practical fully homomorphic encryption,” Cryptology ePrint Archive , 2012. [4] I. Chillotti, N. Gama, M. Georgieva, and M. Izabach` ene, “Tfhe: fast fully homomorphic encryption over the torus,” Journal of Cryptology ,vol. 33, no. 1, pp. 34–91, 2020. [5] L. Bergerat, I. Chillotti, D. Ligier, J.-B. Orfila, A. Roux-Langlois, and S. Tap, “New secret keys for enhanced performance in (t) fhe,” in
+> Proceedings of the 2024 on ACM SIGSAC Conference on Computer and Communications Security , 2024, pp. 2547–2561.
+
+TABLE II PERFORMANCE AND FEATURE COMPARISON OF SELECTED FHE S CHEMES (MS )
+
+Scheme / Feature KeyGen Enc Dec Add Mlt Cipher- size Noise Control Limitation 
+
+YASHE NA 16 15 0.7 18 NA Bootstrapping Computationally expensive BFV 3.003 3.269 1.179 0.144 11.66 446 KB Relinearization Large ciphertext size BGV 11.42 3.137 0.992 0.079 6.673 446 KB Bootstrapping Large ciphertext size TFHE NA 29.1 1.8 2,308,697 9.7 KB Bootstrapping Inefficient for extensive arithmetic CKKS NA 3344 1182 915.1 500 KB Rescaling, Precision loss Inexact results; requires precision management 
+
+Proposal 20.3 0.02 0.051 0.002 0.22 9 KB Interposition / Regulator Symmetric; quantum vulnerability [6] A. Habib, A. Laouid, and M. Kara, “Secure consensus clock synchro-nization in wireless sensor networks,” in 2021 International Conference on Artificial Intelligence for Cyber Security Systems and Privacy (AI-CSP) . IEEE, 2021, pp. 1–6. [7] M. Kara, A. Laouid, R. Euler, M. A. Yagoub, A. Bounceur, M. Ham-moudeh, and S. Medileh, “A homomorphic digit fragmentation en-cryption scheme based on the polynomial reconstruction problem,” in 
+
+Proceedings of the 4th International Conference on Future Networks and Distributed Systems , 2020, pp. 1–6. [8] H. Aissaoua, A. Laouid, M. Kara, A. Bounceur, M. Hammoudeh, and K. Chait, “Integrating homomorphic encryption in iot healthcare blockchain systems,” Ingenierie des Systemes d’Information , vol. 29, no. 5, p. 1667, 2024. [9] J. H. Cheon, A. Kim, M. Kim, and Y. Song, “Homomorphic encryption for arithmetic of approximate numbers,” in International conference on the theory and application of cryptology and information security .Springer, 2017, pp. 409–437. [10] F. Armknecht, C. Boyd, C. Carr, K. Gjøsteen, A. J¨ aschke, C. A. Reuter, and M. Strand, “A guide to fully homomorphic encryption,” Cryptology ePrint Archive , 2015. [11] D. Catalano, E. Giunta, and F. Migliaro, “Anamorphic encryption: New constructions and homomorphic realizations,” in Annual International Conference on the Theory and Applications of Cryptographic Tech-niques . Springer, 2024, pp. 33–62. [12] T. V. T. Doan, M.-L. Messai, G. Gavin, and J. Darmont, “A survey on implementations of homomorphic encryption schemes,” The Journal of Supercomputing , vol. 79, pp. 15 098–15 139, 2023. [13] H. Jorge, C. Wanzeller, and J. Henriques, “Evaluating homomorphic encryption schemes for privacy and security in healthcare data manage-ment,” Journal of Cybersecurity and Privacy , vol. 25, no. 153, p. 74728, 2025. [14] A. Acar, H. Aksu, A. S. Uluagac, and M. Conti, “A survey on homomorphic encryption schemes: Theory and implementation,” ACM Computing Surveys (Csur) , vol. 51, no. 4, pp. 1–35, 2018.

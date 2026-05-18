@@ -6,29 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-16
-- 运行时间：2026-05-16 20:27:09 UTC
+- 最新运行日期：2026-05-18
+- 运行时间：2026-05-18 20:39:49 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：3
 - 精读区：0
-- 速读区：2
+- 速读区：3
 
 ### 今日简报（AI）
-今日聚焦大语言模型联邦微调的图增强优化及三元线性码的数学构造。
-重点关注如何利用图表示学习提升联邦学习中的模型操控性能，以及高维极小三元线性码的新型构建方法。
-建议关注分布式大模型训练安全与编码理论在信息安全中的前沿交叉应用。
-- 详情：[/202605/16/README](/202605/16/README)
+今日聚焦边缘智能与安全推理，探索超低功耗设备上的 Transformer 分布式部署与云边高效协作。
+重点推荐超低功耗无线环境下的分布式推理方案，以及结合投机解码提升云边协同效率的 PipeSD 框架。
+建议关注资源受限终端的大模型落地路径，并留意全同态加密在动态移位技术下的安全新突破。
+- 详情：[/202605/18/README](/202605/18/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Graph Representation Learning Augmented Model Manipulation on Federated Fine-Tuning of LLMs](/202605/16/2605.07961v1-graph-representation-learning-augmented-model-manipulation-on-federated-fine-tuning-of-llms)  
+1. [Going Beyond the Edge: Distributed Inference of Transformer Models on Ultra-Low-Power Wireless Devices](/202605/18/2605.15694v1-going-beyond-the-edge-distributed-inference-of-transformer-models-on-ultra-low-power-wireless-devices)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：多设备上的Transformer模型分布式推理
+2. [PipeSD: An Efficient Cloud-Edge Collaborative Pipeline Inference Framework with Speculative Decoding](/202605/18/2605.13319v1-pipesd-an-efficient-cloud-edge-collaborative-pipeline-inference-framework-with-speculative-decoding)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：联邦大模型微调中的恶意模型篡改
-2. [Construction of Minimal Ternary Linear Codes with Dimension $n+2$](/202605/16/2605.14848v1-construction-of-minimal-ternary-linear-codes-with-dimension-n2)  
+   evidence：具有隐私增强功能的云边协作大模型推理
+3. [Beyond Controlled Noise: Achieving Symmetric FHE through Dynamic Position Shifting](/202605/18/2605.15774v1-beyond-controlled-noise-achieving-symmetric-fhe-through-dynamic-position-shifting)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：用于秘密共享和安全计算的线性码
+   evidence：用于安全分布式计算的对称全同态加密，无需复杂噪声管理
 
 
 <div class="dpr-home-promo-card">
