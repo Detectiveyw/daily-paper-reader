@@ -1,0 +1,758 @@
+Title: Approximate Distributed Coded Computing: Polynomial Codes and Randomized Sketching
+
+URL Source: https://arxiv.org/pdf/2605.16744v1
+
+Published Time: Tue, 19 May 2026 00:28:25 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+> 1
+
+# Approximate Distributed Coded Computing: Polynomial Codes and Randomized Sketching 
+
+Neophytos Charalambides (ncharalambides@ucsd.edu), Arya Mazumdar (arya@ucsd.edu) Department of CSE and Halicio˘ glu Data Science Institute, University of California, San Diego 
+
+Abstract —Coded computing is a distributed paradigm that uses coding theory to introduce re-dundancy and overcome bottlenecks in large-scale systems. In the same vein, randomized numerical linear algebra employs probabilistic methods to 
+
+compress and accelerate linear algebraic opera-tions, addressing challenges in high-dimensional data analysis. This article reviews the foundations of both fields and presents distributed schemes that combine techniques from both to speed up optimization and machine learning algorithms, in the presence of slow or non-responsive servers. Along the way, we touch on various related topics and mathematical concepts. 
+
+I. I NTRODUCTION 
+
+The advent of massive datasets has made dis-tributed computing essential for modern data-intensive applications, enabling mathematical programming and large-scale machine learning to scale with data size. Consequently, such sys-tems often suffer from slow or failing servers, known as stragglers . To alleviate latencies, coding-theoretic techniques have emerged as tools for recovering exact or approximate re-sults in the presence of stragglers. On the other hand, speeding up computations via randomized dimensionality reduction has been a promising alternative for efficient approximations over the past two decades. These two paradigms, coded computing 
+
+(CC) [1], [2] and randomized numerical linear algebra (RandNLA or “Sketching”) [3], [4], tackle large-scale problems in complementary ways. CC introduces redundancy through cod-ing theory, while sketching induces compres-sion , leveraging randomness and sampling. In information-theoretic terms, they mirror channel and source coding, and at a high level, CC and sketching address complementary bottlenecks: 
+
+reliability vs. efficiency . Recent works bridge the two through approximate CC (ACC), com-bining redundancy, compression, and approxi-mation. Specifically, ACC arises while relax-ing the requirement of exact recovery, an as-sumption that is often unnecessary in modern machine learning, where approximate compu-tations typically suffice. This enables the inte-gration of sketching techniques to trade a small loss in accuracy for significant gains in compu-tational and communication efficiency. The purpose of this article is to outline the foundational techniques of CC and sketching, and to present hybrid schemes that integrate both. We also note that there is a vast litera-ture on CC, with another major theme beyond approximate computation focusing on privacy and security [2, Chapter 4]. The remainder of this article can be viewed through the following lens: we first present the core primitives of CC and sketching, then review exact schemes based on redundancy, and finally present approximate methods that trade exact recovery for efficiency. Another important distinction we should point out is that while CC typically operates over fields of finite characteristic; i.e. F = FQ, many sketching algorithms in numerical linear algebra operate over fields of characteristic zero; i.e. F ∈{C, R}. We note, however, that sketching in a broader sense is not restricted to such fields, and includes settings over finite fields and Boolean domains, e.g. connections to coding theory and group testing. Nonetheless, practical implemen-tations of CC operate over R or C, as is shown in III-A, which can lead to numerical instability. Designing numerically stable and efficient codes over R remains challenging [5]. 
+
+A. Conceptual View 
+
+At a high level, CC and sketching methods can be understood through the interacting axes: (a) redundancy vs. compression, (b) exact vs. approximate recovery, (c) structure vs. randomness. 
+
+> arXiv:2605.16744v1 [cs.DC] 16 May 2026 2
+
+Early CC works emphasized redundancy to ensure exact recovery in the presence of strag-glers, leading to schemes with strong reliabil-ity guarantees but increased computational and storage overhead. In contrast, sketching empha-sizes compression , reducing problem’s size, at the cost of introducing controlled error. This naturally leads to a second axis: exact vs. 
+
+approximate computation. While exact recov-ery is central in coding-theoretic formulations, many modern machine learning and optimiza-tion tasks tolerate approximation. This observa-tion has driven the development of ACC, where redundancy and compression are combined to balance accuracy and efficiency. Finally, methods differ in whether they rely on structure or randomness . Structured ap-proaches, such as polynomial codes as ex-panders, offer deterministic guarantees and symmetry. In contrast, randomized approaches, such as sampling, provide flexibility and sim-plicity, often with probabilistic guarantees. This article can be interpreted through this lens: exact CC schemes emphasize redundancy and structure; sketching emphasizes compres-sion and randomness; and approximate methods bridge these viewpoints by combining elements of both to navigate trade-offs between reliability, efficiency, and accuracy. 
+
+B. Significance of Coded Computing 
+
+Coded computing has emerged from infor-mation theory, and has been extensively stud-ied over the past decade. By enabling effi-cient, secure, and erasure-tolerant distributed computation with coding techniques, it allevi-ates communication bottlenecks, reduces redun-dancy, and enhances security. Initially developed to accelerate algebraic tasks like matrix multiplication (MM), polyno-mial evaluation, and data shuffling, CC faces challenges when applied to general machine learning tasks. To address such general purpose tasks, a method called gradient coding (GC) has been developed [6]. In Figures 1 and 2 we provide schematics of GC and coded matrix-multiplication (CMM), the two most prominent applications of CC. In a CC scheme there are generally three main steps:           
+
+> Fig. 1. GC Schematic: In an iterative first-order algorithm like gradient descent, the central server sends the current parameter vector x[t]to all nservers at iteration t. Server
+> jholds a partition of the dataset A, indexed by Ij, and computes the partial gradient based on its local data and
+> x[t]. The servers then encode their gradients and transmit the encoded messages to the central server. Once any f
+> encoded responses are received, the central server decodes them to recover the full gradient.
+
+1) encoding of the data, which, depending on the application, takes place at the central server or the n computational nodes, 2) computation task , that is the distributed nodes performing a computation on the raw or encoded data, and 3) decoding , which the central server performs as soon as f := n − s out of n computations have been received, where s is the number of tolerable stragglers. The parameter f is known as the recovery threshold , which is the minimum number of node responses required for a suc-cessful decoding step in CC. Over time, as with many machine learning algorithms, it became clear that exact recovery is often an unnecessary and overly stringent requirement. Enforcing it introduces significant overhead in storage and server resources due to the redundancy inherent in erasure codes. In turn, this motivated the use of sketching in ACC. 
+
+C. Significance of Sketching 
+
+As a standalone subject, sketching is also of interest to the information theory commu-nity, as it provides methods for efficiently compressing data while preserving key struc-tures. Broadly speaking, sketching consists of dimensionality reduction techniques that bal-ance compression with approximation accuracy, while enabling efficient storage and computa-tion over large-scale datasets. Many such meth-ods are rooted in the Johnson–Lindenstrauss 3             
+
+> Fig. 2. CMM Schematic: In scenarios requiring the com-putation of matrix products C=AB , the coordinator en-codes the inputs as fi(A,B). These are then distributed to the servers, who compute an intermediate result Wibased on fi(A,B), which is sent back. Once any fresponses are collected, decoding permits recovery of C.
+
+(JL) lemma, which states that a set of points in a high-dimensional space can be embedded into a lower-dimensional space while approxi-mately preserving pairwise distances. This foun-dational result has influenced numerous areas over the past decades and is fundamental to the study of dimension reduction and geometric preservation. Since its emergence, sketching has found applications in numerical stability, matrix factorizations and decompositions, eigenvalue problems, and graph analysis. This article focuses on the role of sketching in accelerating numerical linear algebra and opti-mization, especially in approximate matrix mul-tiplication (AMM) by leveraging matrix com-pression that preserves its column space with high probability. These applications tie what we will present back to CC, specifically to the subareas of CMM and GC. In linear sketching we apply a carefully cho-sen oblivious or cognizant S ∈ Rq×N on each matrix, where q ≪ N to reduce its size. By then applying a deterministic algorithm to the sketched surrogate problem, the overall com-plexity of running the algorithm is reduced, at the cost of recovering a high quality approxima-tion. For instance, when computing the product of A ∈ RL×N and B ∈ RN ×M , we apply S to obtain the approximation (AS )⊤(SB ) ≈ AB ,which is quantified in terms of the residual norm 
+
+∥AB − A(S⊤S)B∥ξ for ξ ∈ { 2, F } respec-tively denoting the ℓ2 and Frobenius norms. From a conceptual standpoint, the sections that follow explore how redundancy and com-pression are used to address scalability in dis-tributed systems. Section II introduces the core primitives underlying coded computing and sketching. Section III focuses on exact coded computing, where redundancy ensures reliable recovery in the presence of stragglers. In con-trast, Sections IV and V consider approximate regimes, where strict recovery is relaxed and sketching enables improved efficiency. This pro-gression reflects the central trade-off between reliability and computational cost. To provide a unifying perspective, Table I summarizes the main approaches we discuss, highlighting core ideas and trade-offs between redundancy, compression, and approximation. II. P RELIMINARY BACKGROUND AND SETUP 
+
+A. Gradient Coding 
+
+The GC problem was first considered in [6], which proposed a construction based on “Fractional Repetition Codes ” (FRCs). Con-sider a central server with a dataset D =(A(i), b i) Ni=1 ⊊ R d × R of N samples, where 
+
+A(i) represents the features and bi the label of the ith sample, who can distribute D among n
+
+other computational server nodes, to solve: 
+
+x⋆ = arg min 
+
+> x∈Rd
+
+L(D; x) (1) where L(D; x) = PNi=1 ℓ(A(i), b i; x) is a pre-determined loss function. A common approach to solving (1) is to employ gradient descent. The central server distributes dataset D with a certain level of redundancy, to recover the gradi-ent based on D, in the presence of stragglers. At first, D is partitioned into k parts {D j }kj=1 each of size N/k . The gradient is g := ∇xL(D; x) = Pkj=1 gj , whose summands gj := ∇xℓ(Dj ; x)
+
+are referred to as partial gradients .In the distributed setting, each server returns a linear combination of its assigned partial gra-dients. Since stragglers are present, the central server receives a set of only f completed tasks; indexed by I ⊊ [n] := {1, . . . , n }, ignoring the slowest s nodes. Upon receiving any set of f responses, the server decodes the encoded partial gradients to recover g.Gradient coding is comprised of an encoding 
+
+G ∈ Rn×k, and a decoding aI ∈ Rf or aI ∈4            
+
+> Fig. 3. Overview of CC and randomized sketching for large-scale matrix computation. Coded computing adds redundancy across distributed servers to tolerate stragglers and erasures, whereas sketching compresses the data to reduce computational cost, for instance through the approximation A⊤B≈(SA )⊤(SB ), where S∈Rq×Nand q≪N. The combination of these viewpoints provides a foundation for scalable, resilient, and approximate coded matrix computation.
+
+Rn depending on the scheme; determined by I.Each row of G represents a server’s encoding vector with support size w, and each column corresponds to a data partition Dj , each assigned to ˜d servers. The submatrix GI ∈ R|I|× k in-cludes only the rows indexed by I, and Gij ̸ = 0 
+
+if and only if Dj is assigned to server i.The ith server, i ∈ [n], is assigned a subset 
+
+Ji ⊊ [k] of w partial gradients to compute. The servers return an encoded linear combination of the partial gradients corresponding to their assignments. For g ∈ Rk×d be the matrix whose rows are the transposed partial gradients g⊤ 
+
+> i
+
+, the central server receives encodings comprised of the rows of GI g. The gradient g of (1) is then recoverable by applying aI :
+
+g⊤ = a⊤I (GI g) = 11×kg = Xkj=1 g⊤ 
+
+> j
+
+. (2) Hence, the encoding matrix GI must satisfy 
+
+a⊤I GI = 11×k for all  ns
+
+ possible index sets I.Once g is obtained, an iteration of the gradient based descent algorithm is performed. 
+
+B. Coded Matrix Multiplication 
+
+Similar to GC, CMM [7] introduces redun-dancy in distributed systems to ensure recovery in the presence of stragglers. Depending on the scheme, in CMM, each server either receives encoded data; which it computes over, or per-forms local computations pre-encoding. A key advantage of CMM is that encoding can be applied to A and B at the central server before distributing the tasks, as illustrated in Fig. 2, of-fering improved recovery thresholds and greater flexibility in code design compared to GC. In contrast, depending on L(D; x), GC gen-erally does not permit pre-computation encod-ing. For general loss functions, encoding must occur post-computation. However, for the least squares loss, approximation schemes permit pre-computation encoding. Moreover, in a GC setup with homogeneous data assignment, and 5
+
+Conceptual Overview of Coded Computing and Sketching Approaches Category Core Idea Trade-off 
+
+Exact GC & CMM Redundancy via coding Exact recovery, high overhead 
+
+Graph-based AGC Expanders, random graphs Reduced redundancy, small error 
+
+Design-based AGC Block designs, structured codes Symmetry, limited flexibility 
+
+Sketching Randomized compression Fast computation, approximation error 
+
+Sampling & Weighting Leverage scores, CR -CMM Improved accuracy vs. complexity 
+
+Iterative Sketching Fresh randomness per iteration Reduced bias, no decoding 
+
+Hybrid (Sketching + Coding) CodedSketch, OverSketch Lower cost, approximate recovery 
+
+Compression-informed CC Exploit the input’s structure Reduced threshold, model-dependent    
+
+> TABLE I SUMMARY OF THE MAIN APPROACHES DISCUSSED IN THIS ARTICLE ,HIGHLIGHTING THEIR CORE IDEAS AND TRADE -OFFS BETWEEN REDUNDANCY ,COMPRESSION ,AND APPROXIMATION .
+
+differentiable and additively separable losses, a pigeonhole argument shows that the optimal re-covery threshold is n − s. In contrast, CMM, the recovery threshold is more difficult to character-ize analytically due to uneven data partitioning and nonuniform encoding structures. 
+
+C. RandNLA and Sketching 
+
+There are numerous surveys on RandNLA and sketching. An accessible monograph with clear pseudocode is [3]. For more in-depth proof techniques and a comprehensive contemporary overview, see [4]. Throughout this article, we focus on two key applications: AMM and ℓ2-subspace embedding (ℓ2-s.e.). Given A ∈ FL×N and B ∈ FN ×M , we aim to approximate AB via a sketch A(S⊤S)B ≈
+
+AB , where S ∈ Rq×N is an appropriate sketch-ing matrix. For this to hold exactly, we need 
+
+S⊤S = IN . This though is not possible, as 
+
+rank( S⊤S) ⩽ q ≪ N . Therefore, we re-sort to matrices which are isotropic in expec-tation, i.e. E[S⊤S] = IN . When F = R, the “BasicMatrixMultiplication ” algorithm (Algo-rithm 3 below) samples column-row pairs of 
+
+A and B with replacement (w.r.), using prob-abilities proportional to the product of their norms. We denote by {πi}Ni=1 and {pi}Ni=1 ar-bitrary and concrete sampling distributions, re-spectively. Let M(i) and M(j) denote the ith row and jth column of a matrix M. Then, we sample 
+
+q ≪ N row pairs (A(i), B(i)) where AB =
+
+PNj=1 A(j)B(j), according to the distribution: 
+
+pi = ∥A(i)∥ · ∥ B(i)∥ϕ (3) where ϕ := PNj=1 ∥A(j)∥ · ∥ B(j)∥.For S a multiset of q sampled indices, with possible repetitions, the approximate product is: 
+
+AB ≈ P  
+
+> j∈S A(j)
+> √qp j
+
+· B(j) 
+
+> √qp j
+
+, and the sketches 
+
+bA := AS ⊤ and bB := SB , satisfy ∥AB −
+
+bA bB∥F = O(∥A∥F ∥B∥F /√q). If we do not know the exact {pi}Ni=1 but an approximation 
+
+{˜pi}Ni=1 where ˜pi ⩾ βp i for all i and β ∈ (0 , 1] ,the bound is obtained by oversampling by 1/β .The main proof technique used to prove guar-antees that the above algorithm ensures AB −
+
+bA bB 2 ⩽ ϵ∥A∥2∥B∥2, use Bernstein or Cher-noff type concentration inequalities. A formal such statement is provided in Theorem 1. Alter-native proofs minimize the variance of the esti-mate bA bB when ξ = F , by showing optimality of (3). The second application of interest is preserv-ing the subspace spanned by the columns of 
+
+A ∈ FN ×d, where N ≫ d. This is captured by the ℓ2-s.e. property: 
+
+∥Id − bUH bU∥2 ⩽ ϵ for bU := SU (4) where U ∈ FN ×d is a left orthonormal basis of 
+
+A, and S ∈ Rq×N where N ≫ q ⩾ d, which is equivalent to preserving norms: 
+
+(1 − ϵ)∥y∥ ⩽ ∥Sy ∥ ⩽ (1 + ϵ)∥y∥ (5) also known as an approximate isometry or iso-metric embedding . By bUH, we denote the Her-6
+
+mitian transpose of the sketched basis bU.Optimal sampling for an ℓ2-s.e. is through the 
+
+leverage scores {ℓi}Ni=1 of A ∈ RN ×d, which are defined as ℓi := ∥U(i)∥2. These scores identify the most influential rows for tasks such as linear regression, and their corresponding sampling distribution is: 
+
+pi := ℓi
+
+ X Nj=1 ℓj = ℓi/d. (6) which extends to the complex case F = C.We conclude this section by outlining a gen-eral pseudocode for sketching algorithms based on row sampling with replacement . Choosing 
+
+{πi}Ni=1 according to either (3) or (6), we respec-tively obtain the BasicMatrixMultiplication and leverage score sampling algorithms. 
+
+Algorithm 1: Row Sampling 
+
+Input: A ∈ FN ×d, distribution {πι}Nι=1 
+
+Output: bA := SA ∈ Fq×d
+
+Initialize : S = 0q×N
+
+for j ← 1 to q do      
+
+> sample w.r. ij←NN, according to {πι}
+
+Sj,i j = 1 /√qπ ij
+
+end 
+
+D. Sketching for Subspace Embeddings 
+
+Next, we turn to subspace embeddings, which preserve a matrix’s column space and are typ-ically built through random projections and/or row-sampling. We summarize the main con-structions of such matrices S, which reduce the ambient dimension of A ∈ RN ×d from N to q.
+
+Gaussian Sketch : Closely related to the JL-lemma, it applies a JL-transform on the left of 
+
+A. It is defined though Θ where Θij ∼ N (0 , 1) ,which is then rescaled to obtain S = 1√q Θ.
+
+Leverage Score Sampling : This method is cognizant and sensitive to the geometry of A.It is constructed via Algorithm 1, using the leverage score sampling distribution (6). 
+
+Subsampled Hadamard Transform (SRHT) :Similar to the Gaussian sketch, the SRHT is also oblivious and has ties to the JL-lemma. It is comprised of three matrices, a uniform sampling and rescaling matrix of q rows; Ω,the normalized Hadamard matrix of order 
+
+2⌊log 2(N )⌋; ˆHN , and a random signature matrix; 
+
+D. Specifically, the SRHT is defined as: 
+
+S = Ω · ˆHN · D ∈ { ±1/√N }q×N .
+
+CountSketch : Among the many equivalent variants of CountSketch, the “map-reduce” style implementation is well-suited for distributed settings, and is outlined in Algorithm 2. Given 
+
+A ∈ RN ×d, each column is hashed uniformly to one of q buckets, multiplied by a uniformly random ±1 sign, and summed with the other columns mapped to the same bucket. 
+
+Algorithm 2: CountSketch 
+
+Input: A ∈ RN ×d
+
+Output: bA ∈ Rq×d
+
+Initialize : bA = 0q×d
+
+for i ← 1 to N do 
+
+sample ij from Nr and s from {±1},each uniformly at random 
+
+bA(ij ) ← bA(ij ) + s · A(i)
+
+end 
+
+E. A Guarantee via Matrix Concentration 
+
+Next, we present a new representative theo-rem for BasicMatrixMultiplication over F = C.Algorithm 3 samples q pairs (A(i), B(i)) from 
+
+A ∈ FL×N , B ∈ FN ×M w.r. according to (3). The sketch is A(S⊤S)B, where S ∈ Rq×N has exactly one nonzero entry per row. 
+
+Algorithm 3: BasicMatrixMultiplication 
+
+Input: A ∈ FN ×L and B ∈ FN ×M
+
+Run Algorithm 1 with {πι}Nι=1 from (3) Obtain S ∈ Rq×N
+
+> ⩾0
+
+Output: (SA )H(SB ) ∈ FL×M
+
+Theorem 1. Let ϵ, δ > 0, and S ∈ Rq×N
+
+> ⩾0
+
+be the sketching matrix of Algorithm 3. Then, for q = Θ
+
+ log(( M +L)/δ ) 
+
+> ϵ2
+
+· ˜Ψ
+
+
+
+where ˜Ψ is a constant depending on A and B, we have: 
+
+Pr 
+
+ ∥AB − A(S⊤S)B)∥2
+
+∥A∥ · ∥ B∥ ⩽ ϵ
+
+
+
+> 1 − δ. 
+
+(7) Theorem 1 extends to block-wise sam-pling [8]–[10], where A ∈ FL×N and B ∈
+
+FN ×M are partitioned across the columns of A7
+
+> Fig. 4. MM Schematics: partitioning by (8) and (9).
+
+and the rows of B, respectively. That is: 
+
+A =
+
+> h
+
+A1 · · · Aki
+
+, B =
+
+> h
+
+B⊤ 
+
+> 1
+
+· · · B⊤
+
+> k
+> i⊤
+
+(8) where Ai ∈ FL×τ and Bi ∈ Fτ ×M , with 
+
+τ = N/k for k ∈ Z+. The sampling distribu-tion is defined over block-pairs {(Ai, Bi)}ki=1 
+
+according to pi ∝ ∥ Ai∥F · ∥ Bi∥F . The only difference is that the sample complexity will now have a factor of 1/τ .Some CC schemes adopt the partitioning: 
+
+A =
+
+> h
+
+A⊤ 
+
+> 1
+
+· · · A⊤
+
+> k
+> i⊤
+
+, B =
+
+> h
+
+B1 · · · Bki
+
+(9) which results in different trade-offs in recovery threshold and bandwidth. In (8), each product yields AiBi ∈ FL×M , whereas in (9), it yields 
+
+Aj Bj ∈ Fl×m, where l = L/k , m = M/k – a visualization is provided in Fig. 4. These trade-offs are studied in [11], which also considers AMM through unequal error protection codes. III. E XACT CC S CHEMES 
+
+We now turn to exact CC schemes, which aim to guarantee perfect recovery of the desired computation despite the presence of stragglers. These methods achieve robustness by introduc-ing structured redundancy through coding, often at the cost of increased computation and storage overhead. The constructions presented in this section form the baseline upon which approxi-mate schemes are developed. As most ACC schemes are based on exact re-covery schemes, we briefly discuss exact CC in this section. We start off with polynomial based GC methods, which fall into two categories: (1) Fixed Coefficient Decoding : uses a prede-termined linear combination of the re-ceived computations, (2) Optimal Coefficient Decoding : solves aleast squares problem to determine aI .Similarly, CMM methods for computing C =
+
+AB are classified based on how they recover C:(1) Coefficient Based : C corresponds to a co-efficient of the decoding polynomial, (2) Point Based : C is reconstructed from eval-uations of the decoding polynomial at two new points. The key in CMM is to encode data so that the desired output is a coefficient or evaluation on a polynomial curve, enabling efficient decoding, 
+
+e.g. via the Berlekamp-Welch algorithm. Before presenting a plethora of CMM schemes, we first detail a simpler GC scheme from [12], which illustrates key polynomial cod-ing ideas. Here, encoding is done by the server nodes after the computations take place, and the scheme relies on Lagrange interpolation; a fundamental tool in polynomial error correction. 
+
+A. Balanced Reed-Solomon Codes for GC 
+
+Through Lagrange interpolation, [12] con-structs a “ Balanced Reed-Solomon ” ( BRS ) en-coding matrix, in which each column G(j) cor-responds to a polynomial pj (x), evaluated at a set of points B = {γj }nj=1 , where γi is assigned to the ith server. That is, Gij = pj (γi) for 
+
+(i, j ) ∈ Nn × Nk, where pj (x) are defined over a finite field FQ and satisfy deg (pj ) ⩽ ∥G(j)∥0.To construct these polynomials, one first deter-mines a mask matrix M ∈ { 0, 1}n×k [12, Alg.1] that is both sparsest and balanced , enabling the sparsest possible G for the fixed parameters n, s 
+
+and k. Given M, the polynomials {pj (x)}kj=1 
+
+are then constructed to satisfy pj (γi) = 0 if and only if Mij = 0 , ensuring that the sparsity pat-tern of G matches that of M. The polynomials corresponding to each column G(j) are: 
+
+pj (x) := Y 
+
+> i:Mij =0
+
+ x − γi
+
+γj − γi
+
+
+
+=
+
+> k
+
+X
+
+> ι=1
+
+pj,ι xι−1.
+
+The points comprising B must be distinct to guarantee unique reconstruction, and are typi-cally chosen as powers of a primitive element in FQ, to maximize distance and enable efficient correction. For our setting, we can select a prim-itive generator of (F∗
+
+> Q
+
+, ·) and set γj = γj for each j. Since the data lies in R, we may identify 
+
+F∗ 
+
+> Q
+
+with a subgroup of the complex circle group. 8
+
+This encoding matrix G admits the decom-position G = HP , where H ∈ Fn×kQ is Van-dermonde with Hij = γi(j − 1) and Pij =
+
+pj,i for P ∈ (F∗
+
+> Q
+
+)k×k. Furthermore, pj (x) is defined by P(j), and evaluates as pj (γi) =
+
+Pkι=1 pj,ι γι−1 
+
+> i
+
+= ⟨H(i), P(j)⟩. A normalization is applied so that the constant term of every polynomial is 1, i.e. P(1) =⃗ 1. This ensures that for any I, the decoding vector aI is simply  H−1
+
+> I
+
+
+
+> (1)
+
+, which is constructable in O(f 2). To visualize the resulting encoding matrix, we pro-vide a concrete example with parameters n = 8 ,
+
+k = 4 , ˜d = 6 , and w = 3 :
+
+G =
+
+
+
+p1(γ1) p2(γ1) p3(γ1) 0
+
+p1(γ2) p2(γ2) p3(γ2) 0
+
+p1(γ3) p2(γ3) 0 p4(γ3)
+
+p1(γ4) p2(γ4) 0 p4(γ4)
+
+p1(γ5) 0 p3(γ5) p4(γ5)
+
+p1(γ6) 0 p3(γ6) p4(γ6)0 p2(γ7) p3(γ7) p4(γ7)0 p2(γ8) p3(γ8) p4(γ8)
+
+
+
+.
+
+B. MatDot Codes for CMM 
+
+“MatDot CMM” [13] exploits (8), to define encoding polynomials pA(x) = Pkj=1 Aj xk−1
+
+and pB(x) = Pkj=1 Bj xk−j , which are evalu-ated at distinct elements {γi}ni=1 ⊊ F Q; as in [12]. Each server i receives pA(γi) and pB(γi)
+
+and returns the degree 2( k − 2) product poly-nomial C(γi) = pA(γi)pB(γi). From this, the coefficient of xk−1 in pA(x)pB(x) is the desired product AB = Pkj=1 Aj Bj .Once any 2k − 1 evaluations of C(x) are received, polynomial interpolation or Reed-Solomon decoding recovers AB . Follow up work also showed that this recovery threshold of 2k − 1 is optimal. As we will see, this con-struction has also been extended to approximate CMM (ACMM) via sketching [8], [9]. 
+
+C. Polynomial Codes for CMM 
+
+Unlike MatDot Codes, “Polynomial CMM Codes” [14] rely on the partitioning (9), where 
+
+A and B are divided into row and column blocks, respectively. The servers compute the product of their encoded blocks and return the result, and the coordinator’s decoding is done via a Vandermonde matrix inversion once enough responses are collected. Given a, b ∈ Z+, the (a, b )-polynomial code is defined by ˜Aai = Pkj=1 Aj γ(j−1) ai
+
+and ˜Bbi = Pkj=1 Bj γ(j−1) bi , and each server i computes Wi = ˜Aai · ˜Bbi =
+
+Pkj=1 
+
+Pkl=1 Aj Bj γ(j−1) a+( l−1) bi . To ensure re-covery from any k2 responses, (a, b ) are chosen so that all exponents are distinct. A canonical choice is (a, b ) = (1 , k ), yielding h(x) =Pkj=1 
+
+Pkl=1 Aj Blx(j−1)+( l−1) k, where the co-efficient of each monomial corresponds to a unique submatrix of C = AB . With distinct evaluation points {γi}ni=1 , any k2 evaluations suffice to interpolate h(x) and recover C, since deg (h) = k2 − 1.As an example, let n = 5 and s = 1.Similar to BRS GC, both encoding and decoding here rely on the Vandermonde structure of the evaluation points. Each server computes Wi =
+
+A1B1 + γiA2B1 + γ2 
+
+> i
+
+A1B2 + γ3 
+
+> i
+
+A2B2, by evaluating a degree 3 matrix polynomial at γi.A system defined by a Vandermonde matrix 
+
+Γ =  γj−1
+
+> i
+
+ for (i, j ) ∈ Nn × N(n−s) is formed by appending the Wi’s. A single straggler cor-responds to erasing its corresponding row in Γ,but the remaining system is square and full-rank due to the MDS property of Γ. Hence, C is recoverable by directly inverting this reduced system, ensuring decodability. 
+
+D. Entangled Polynomial Codes for CMM 
+
+“Entangled Polynomial Codes” [15] general-ize and improve upon PolyDot Codes [13] by enabling arbitrary partitioning of the input ma-trices while achieving a strictly lower recovery threshold, by a factor of 2. This improvement is realized through the use of structured redun-dancy that is specifically designed to exploit the bilinear nature of matrix multiplication. In the case where A and B are respectively partitioned across their rows and columns by k1, k2 and k2,
+
+k3, then Entangled Polynomial Codes achieve a recovery threshold of k1k2(k3 + 1) − 1.Similar to a (a, b )-polynomial codes [13], Entangled Polynomial Codes introduce an addi-tional parameter θ, giving rise to the notion of a 
+
+(a, b, θ )-polynomial code . Rather than present-ing the full construction explicitly, we illustrate the concept with a simplified example, to high-9
+
+light the role of entanglement. Consider a scenario where n = 5 and s = 1 .In the corresponding encodings of the Entangled Polynomial Code, both A and B are partitioned into two across one dimension (for this simple example, we do not partition across the other dimension). Each server j ∈ N5 receives their two corresponding coded submatrices ˜Ai := 
+
+A0 +γiA1 and ˜Bi := γiB0 +B1, and computes: 
+
+˜Ai ˜Bi = A0B1 + γi(AB 0 + A1B1) + γ2 
+
+> i
+
+A1B0
+
+which when aggregated comprise the system whose Vandermonde matrix is of size 5 × 3.Therefore, any two erasures are permissible and we will have an invertible square system, i.e. we can tolerate s = 2 stragglers. IV. A PPROXIMATE GRADIENT CODING 
+
+While the schemes in the previous section ensure exact recovery, such guarantees are of-ten stronger than necessary in many large-scale learning and optimization tasks. Enforc-ing exactness can introduce significant redun-dancy and computational overhead, motivating the consideration of approximate alternatives. In this section we turn to such schemes, where recovery constraints are relaxed and ideas from sketching are incorporated to achieve improved efficiency while maintaining controlled error. This area, of ACC, is vast and rapidly evolv-ing, and has gained significant traction fol-lowing advances in exact CC. In this section and Sec. V, we present approximation schemes that build upon the exact constructions dis-cussed thus far, highlighting their connections to sketching. We also discuss representative ap-proaches that rely on similar principles, illus-trating the diversity of techniques used in ACC. Similar to Sec. III, this section focuses on ap-proximate GC (AGC), while the next section focuses on ACMM. In contrast to exact gradient coding, AGC relaxes the requirement of perfect recovery in favor of improved efficiency and flexibility. The goal is to tolerate stragglers while allow-ing for controlled approximation error, aligning naturally with principles from sketching. The schemes presented in this section illustrate how this relaxation enables new design approaches that reduce overhead while maintaining strong performance guarantees. 
+
+A. Gradient Coding from Expanders 
+
+Recall that the GC condition requires co-designing an encoding-decoding pair (G, aI )
+
+such that a⊤I GI = 11×k for all subsets of I
+
+of size f . In AGC, this condition is relaxed to 
+
+a⊤I GI ≈ 11×k, enabling a reduced decoding overhead at each iteration, aligning with com-mon practices which permit approximate gradi-ents. The first work to consider AGC [16] formal-ized this relaxation, using the metric: 
+
+max 
+
+> I∈
+
+( [n]
+
+> n−s
+
+)
+
+n
+
+∥a⊤I GI − 11×k∥2
+
+o
+
+⩽ ϵ (10) for a small ϵ > 0. This work, proposed set-ting G as the normalized adjacency matrix of a sparse, connected, ∆-regular expander graph on n nodes, with k = n data partitions. The decoding vector aI is then defined entry-wise as (aI )l = nn−s if l ∈ I , and zero otherwise. Under this construction, the estimate’s error is bounded by ϵ ⩽ λ
+
+> ∆
+
+q ns n−s , where λ is a bound on the second-largest eigenvalue of G.To minimize λ and improve the accuracy, Ramanujan graphs were leveraged; as they are optimal expanders that satisfy λ ⩽ 2√∆ − 1 + 
+
+on(1) . These graphs can be explicitly con-structed and offer near-optimal spectral gap properties, leading to tighter guarantees in (10). It is worth noting that additional construc-tions based on expanders were proposed in [17], extending existing analysis and techniques to alleviate both random and adversarial stragglers. These constructions highlight how spectral properties of graphs can be leveraged to control approximation error, providing a structured al-ternative to random sketching. 
+
+B. GC from Sparse Random Graphs 
+
+Following [16], leveraging random construc-tions appeared to be a promising approach for addressing the AGC problem. This was pre-cisely what [18], as they used random graphs to design simpler codes for the random and adver-sarial straggler models. For a given encoding G,they considered two decoding strategies: 
+
+(i) One-Step : a⊤I = ρ11×k for ρ fixed and all I,10 
+
+(ii ) Optimal : a⋆      
+
+> I= arg min ∥a⊤IGI−11×k∥2.
+
+where (ii ) yields the best possible decoding vector per iteration via a⋆ 
+
+> I
+
+= 11×kG†I , while (i)
+
+is a fixed rule. Although binary FRCs [6] achieve low decod-ing error under random stragglers when using 
+
+(ii ), their performance degrades under adver-sarial straggler selection. To address this, [18] proposed “Bernoulli GCs”, whose encoding is 
+
+G ∈ { 0, 1}n×k with entries Gij iid 
+
+∼ Bern (s/k ).Compared to the Ramanujan based encodings of [16], which offer strong guarantees but are difficult to construct, Bernoulli GCs provide a simple and practical alternative. Moreover, [18] proved NP-hardness of the ad-versarial straggler selection problem for general codes, via reductions to the k-densest subgraph problem, motivating follow up works [19], [20]. Constructions based on random graphs fur-ther demonstrate how randomness can simplify code design while retaining guarantees, closely mirroring the role of randomness in sketching methods. 
+
+C. GC Based on Block Designs 
+
+Another class of AGC schemes for mitigat-ing adversarial stragglers through graph con-structions, are based on balanced incomplete block designs (BIBDs) [19], which are highly symmetric incidence structures. A (v, b, f, r, λ )-BIBD consists of v points and b blocks of size 
+
+k, such that each point appears in r blocks, and every pair of points is contained in exactly λ
+
+blocks. The incidence matrix G ∈ {0, 1}v×b
+
+where Gij = 1 if and only if point i is in block j,defines the encoding matrix (n, k, w, ˜d)-BIBD GC by setting n = v k = b, w = f , ˜d = r,and has an optimal decoding vector of a⊤I =
+
+ρ11×(n−s), with ρ = ww+λ(n−s−1) for any set I.Since BIBDs exist only for limited parameter sets, subsequent work [20] introduced “Soft-BIBD GC”, which relaxes the strict BIBD con-straints while ensuring that w and ˜d are satisfied in expectation. In this construction, a probability distribution p(xn) is defined over G’s columns, which G is generated by sampling each of its 
+
+k columns i.i.d. from p(xn). Ensuring BIBD-like behavior reduces to solving a linear system 
+
+Γp = b for p ⩾ 0, where Γ is shown to be the generator matrix of an order 2 Reed–Muller code. As in [18], [19], this work also sug-gested decoding via a∗I . This work also pro-posed “Product GC”, in which Kronecker prod-ucts of simpler GC encoding matrices generate new codes. These offer scalability and reduced density while maintaining error performance similar to their component codes. More recently, [21] introduced “Sparse Gaus-sian GC”, another approximate version of BIBD GC. The encoding is G = X ⊙ B, where 
+
+Bij ∼ Bern (γ) and each column of X is sam-pled i.i.d. from N (μ, Σ), with μ = a1n and 
+
+Σ = c1n1⊤ 
+
+> n
+
++ ( b − c)In. This construction also mimics BIBD properties in expectation, while allowing significantly more flexibility in the parameter selection. These constructions emphasize the role of combinatorial structure in achieving balanced redundancy, offering a deterministic counterpart to randomized approaches. 
+
+D. Weighted Gradient Coding 
+
+In contrast to the AGC schemes discussed thus far, the scheme in [22] does not rely on random graph constructions, but instead utilizes weighting on top of sampling; with BRS GC. Their goal is to integrate ℓ2-s.e. via block lever-age score sampling into GC, yielding approxi-mate gradients through two stages of compres-sion. A generalization of leverage scores (6) was defined, where if U is partitioned across its rows into k blocks, then Πi = ∥Ui∥2 
+
+> F
+
+/d defines a distribution over the corresponding blocks of A.Then, sampling is performed w.r. until r = q/τ 
+
+distinct blocks are selected, each rescaled by p1/(rΠij ).The central server tracks which r blocks were sampled and how often, which information is encoded in a weight vector ˜w ∈ Z1×r 
+
+> +
+
+. The compressed matrix ˜A = [ ˜A1 . . . ˜Ar] ∈ Rq×d
+
+and label vector ˜b ∈ Rq are constructed ac-cordingly. Unlike exact GC, the objective of this scheme is to find a pair ( ˜G, aI ) satisfying 
+
+a⊤I ˜GI = ˜ w for all I. To achieve this, “Weighed AGC” exploits the structure of the BRS GC, by defining ˜G := G · diag( ˜ w) with k ← r. The decoding step is identical to that of BRS GC. Two features distinguishing this scheme are 11 
+
+that more sampling trials take place, and the resulting gradient matches that of a sketched version of the problem, leading to superior ap-proximation and convergence guarantees com-pared to naive sampling. In the schemes of this subsection, we observe a connection making explicit the link between GC and sketching, where importance sampling plays a central role in improving approximation quality. 
+
+E. AGC Based on Iterative Sketching 
+
+As we have seen, most GC and AGC schemes rely on a decoding step and a strict recovery threshold to obtain the gradient at each iteration. Furthermore, decoding is generally expensive and becomes a bottleneck when applied repeat-edly. To this end, the works of [23], [24] intro-duce schemes for linear regression via ℓ2-s.e. to bypass decoding altogether, while also allowing flexibility in the number of stragglers. In [23], block leverage score sampling (with-out weighting) from [22] was adopted, and stragglers were interpreted as erasures in a com-munication channel model, i.e. straggling out-puts are treated as “erasures”, and were modeled probabilistically as in [1]. Assuming homoge-neous servers, this is equivalent to the central server uniformly sampling the requested com-putations at each iteration. In the encoding stage the blocks are replicated based on their block leverage scores and desired response time which are appropriately rescaled, and the central server receives a fresh sketched gradient at each itera-tion. Since encoding mimics updated sketching pre-computation, no decoding is necessary in order to recover a satisfactory approximation, so the server simply aggregates all available computations once enough have been received. To incorporate security and further simplify this scheme, [24] introduced a pre-processing step where a random projection Π ∈ RN ×N
+
+is applied to A and b, yielding ˜A = ΠA and 
+
+˜b = Πb , which are partitioned and distributed to the n servers. The application of Π masks the raw data, ensuring privacy, while simul-taneously flattening the block leverage scores, similar to the SRHT; permitting uniform sam-pling for an ℓ2-s.e. In this scheme, each block is assigned to a single server. A drawback is the potential overhead in generating and applying 
+
+Π, and a trade-off emerges where faster random projections offer lower security, and vice versa. A major benefit of these AGC approaches is that they implicitly generate a new sketch of the data at each iteration via a fresh ran-dom subset of servers, avoiding the bias of the “sketch-and-solve” paradigm, where a sin-gle sketch is used to approximate the surrogate problem x⋆ ≈ arg min x∈Rd ∥S(Ax −b)∥22. This “iterative sketching” approach has been shown to be superior experimentally and theoretically. Moreover, these techniques extend to New-ton’s method, enabling unbiased estimation of both gradients and Hessians at each iteration. In ℓ2-s.e. based AGC schemes, it has also been shown that the gradient error (10) can be directly quantified by the ℓ2-s.e. error ϵ (4). These approaches highlight a shift toward sketching-driven designs, where repeated ran-domization replaces explicit decoding while maintaining strong guarantees. 
+
+F. Encoding through ETFs, and the RIP 
+
+Another line of work, initiated by [25], intro-duces redundancy via equiangular tight frames 
+
+(ETFs) and partitions the system into smaller linear problems whose solutions gradients are locally computed by the computational nodes. In contrast to GC schemes [6], [12], [16], re-dundancy here is embedded directly in the opti-mization formulation. Inspired by sketching, the data is linearly encoded and distributed across the n nodes, which solve local subproblems independently, ignoring stragglers. The objective function of (1) is now encoded through an ETF matrix eS = ˜SH 
+
+> 1
+
+· · · ˜SH
+
+> n
+
+H,where each ˜Si ∈ F˜q×N is the encoding of the 
+
+ith node with ˜q ≪ N . The global objective be-comes LeS(A, b; x) := ∥eS(Ax − b)∥22, which is equal to the summation of the locally minimized objective functions: Pni=1 ∥˜Si(Ax − b)∥22. For 
+
+I the set of non-stragglers, the aggregated ob-jective is LeSI (A, b; x) := P 
+
+> i∈I
+
+∥˜Si(Ax −
+
+b)∥22. At each iteration, the central server col-lects f local gradients to perform a descent step. ETFs are well-suited for this setting as they introduce redundancy, ensure maximal informa-12 
+
+tion diversity across vectors, and enable exact reconstruction in the absence of stragglers. The construction of eS in [25] uses Paley graphs, which are self-complementary strongly regu-lar graphs defined over FQ with Q ≡ 1(mod 4) , whose Seidel adjacency matrices yield real ETFs. Specifically, entries of the adjacency matrix G ∈ { 0, 1}Q×Q are nonzero only if the difference i − j is a quadratic residue in FQ.Similar to other constructions we have seen, this construction is limited by number-theoretic constraints, and its existence hinges on the avail-ability of finite fields of certain orders. Despite these constraints and not knowing when Paley graphs exist, several open problems arise from generalizing their structure; or using them in areas such as coding, design and frame theory. ETFs are also linked to the restricted isometry property (RIP), a key concept in compressed sensing. A matrix Φ ∈ Rp×q where p < q,satisfies the order-κ RIP if, for all κ-sparse x:
+
+(1 − δκ)∥x∥ ⩽ ∥Φx ∥ ⩽ (1 + δκ)∥x∥
+
+for δκ ∈ (0 , 1) , which mirrors the norm-preservation property of the ℓ2-s.e. condition (5). The RIP ensures that sparse vectors re-main distinguishable under projection; acting like an isometry, while also resembling the ℓ2-s.e. property. Moreover, ETFs minimize coher-ence, i.e. the maximum absolute inner product between frame vectors, making them nearly or-thogonal on sparse supports. Both random and deterministic constructions satisfying RIP have been extensively studied in the literature. In this context, ETFs can serve as structured surrogates for small κ, offering deterministic constructions with behavior similar to the RIP. These constructions illustrate how geometric properties of embeddings can be used to encode redundancy, bridging ideas from compressed sensing and coded computation. 
+
+Summary of Section IV : Across the AGC schemes we presented, a unifying theme is the relaxation of exact recovery in favor of bounded approximations, enabling reduced redundancy and improved efficiency. This perspective is particularly well-aligned with modern machine learning applications, where exact computations are rarely required and often intractable at scale, especially in deep learning settings. The methods discussed reflect different trade-offs between decoding complexity, approximation error, and robustness to stragglers. V. A PPROXIMATE CODED MM In contrast to AGC, which focuses on itera-tive optimization, ACMM targets the efficient computation of core linear algebra subroutines involving one or multiple matrix products. The goal is to reduce computational and communi-cation costs while maintaining accurate approx-imations, making sketching techniques particu-larly effective in this setting. In this section, we review a variety of such ACMM schemes, illus-trating how sampling, compression, and coding can be combined to enable scalable AMM com-putations. 
+
+A. CMM by Random Sampling 
+
+The work of [8] was the first to propose ACMM, doing so by developing two schemes which combined Algorithm 3 with MatDot Codes, and by through their developments de-termined a trade-off between approximation er-ror and recovery threshold. Both their schemes randomly sample r pairs (Aj , Bj ) from the partitioning in (8); indexed by I, and consider the approximation error of bC ≈ AB , which is quantified via bounds on E∥AB − bC∥2
+
+> F
+
+.Their first scheme, “Coded Set-wise Sam-pling”, samples I of size r (without replace-ment) w.p. PI . The sampled submatrices are en-coded through ˜A(x) = Prj=1 AIj xj−1/√cP I
+
+and ˜B(x) = Prj=1 BIj xK−j /√cP I , where c =
+
+ kr
+
+·r/k . These polynomials are evaluated at dis-tinct points {γi}ni=1 ⊊ F Q which evaluations are sent to the servers, who compute ˜A(γi) ˜B(γi).By the MatDot decoding step, the approxima-tion bCI = Prl=1   
+
+> AIlBIl
+> cP I
+
+is recovered once 
+
+2r − 1 responses are collected. A caveat though is that calculating the optimal probabilities PI
+
+costs more than computing AB , so the authors resort to uniform sampling. Their second scheme, “Coded Independent Sampling”, samples w.r. each index Iι ∈ Nk
+
+independently for each ι ∈ Nr. The encodings are through ˜A(x) = P 
+
+> j∈I
+
+Aj xj−1/prP Ij and 13 
+
+˜B(x) = P 
+
+> j∈I
+
+Bj xr−i/prP Ij , and as before; each server computes ˜A(γi) ˜B(γi). Upon re-ceiving 2r − 1 responses, the approximation 
+
+bCI = Prl=1   
+
+> AIlBIl
+> cP I
+
+is recovered through Mat-Dot decoding. In contrast to the aforementioned scheme, this approach allows repeated indices in 
+
+I, and the sampling complexity is reduced. These schemes directly reflect classical sketching ideas, where sampling reduces com-putational cost at the expense of controlled ap-proximation error. 
+
+B. Weighted CR -CMM 
+
+A drawback of the schemes in [8] is that they either rely on expensive to compute distri-butions, or do not specify the distribution. To address these shortcomings, the work of [9], which also utilizes Algorithm 3 (also referred to as “ CR -MM”) and MatDot Codes, proposes a more practical and effective approach. More-over, the block sampling sketching scheme de-veloped in [9], offers the best accuracy vs. run-time trade-off [10]. The “CR -CMM” approach samples pairs 
+
+(Ai, Bi) w.p. proportional to ∥Ai∥2 
+
+> F
+
+· ∥ Bi∥2 
+
+> F
+
+,generalizing its row sampling counterpart (3). Although the optimal distribution which is pro-portional to ∥AiBi∥2 
+
+> F
+
+yields better approxima-tions, it is more expensive to compute than di-rectly evaluating AB , a shortcoming of [8]. The sampling in CR -CMM is performed w.r. until r distinct block pairs have been obtained, as in Weighted GC [22]. Let w ∈ Z1×K 
+
+> ⩾0
+
+de-note the weight vector where wi counts how many times pair (Ai, Bi) was sampled. Unused block pairs are discarded, and the sampled ones are assembled into ˜A = [ AI1 · · · AIr ] and 
+
+˜B = [BI1 · · · BIr ]. After rearranging the nonzero weights wIj to match the order in ˜A
+
+and ˜B, we define ˜w ∈ Z1×r 
+
+> +
+
+. MatDot coding is then applied to ( ˜A, ˜B), through the modified encoding polynomials p ˜A(x) = Prj=1 
+
+p ˜wj ·
+
+˜Aj xr−1 = Prj=1 
+
+√wIj · AIj xr−1 and p ˜B(x) = 
+
+Prj=1 
+
+p ˜wj · ˜Bj xr−j = Prj=1 
+
+√wIj · BIj xr−j .The MatDot decoding step remains intact. A key advantage of this scheme is that, for the same level of sketching compression, it performs more sampling trials than other ACMM schemes based on Algorithm 3, yielding stronger approximation guarantees. This ben-efit stems from the use of weighting, similar to the AGC approach of [22]. Moreover, the error bound of this scheme is sharpened by the block variant of Theorem 7, improving upon the guarantees provided in [9]. This scheme further reinforces the connec-tion to sketching, as weighted schemes improve accuracy by providing additional compression compared to the schemes of [8]. 
+
+C. CodedSketch 
+
+The “CodedSketch scheme” [26] presents an ACMM framework that merges Entangled Poly-nomial Codes and CountSketch. The core idea is to replace the exact product with a compressed approximation, using hash based sketching. Instead of directly performing MM, CodedS-ketch leverages hash functions to compress rows and columns of the input matrices, representing the result through what they define as sketch polynomials . These polynomials encode the data in a compact form, which are evaluated and mul-tiplied at the computational servers. Using tech-niques from polynomial coding and Lagrange CC, the central server aggregates the responses and interpolates the final result. A median based decoding procedure is then applied to recover approximate submatrices of the product, which are aggregated to produce an approximation. This scheme exemplifies a tight integration of coding and sketching, combining structured redundancy with hash-based compression. 
+
+D. OverSketch 
+
+The “OverSketch” scheme [27] introduces re-dundancy in distributed MM using additional CountSketches to mitigate the effect of strag-glers. Specifically, it computes ˘A = AS and 
+
+˘B = S⊤B via a CountSketch matrix S, which sketches are partitioned into b × b blocks. Each 
+
+b × b block of the product C = AB is then approximated by multiplying a row-block of ˘A
+
+with a column-block of ˘B, where each multipli-cation is assigned to a single server. Unlike CodedSketch, OverSketch computes each block submatrix of C independently, and does not exploit coding gains across differ-ent blocks, i.e. each server’s computation con-14 
+
+tributes only to a single block. Nonetheless, OverSketch has been extended to distributed Newton sketching for solving convex optimiza-tion problems, broadening its applicability. In contrast to CodedSketch, this approach pri-oritizes scalability by decoupling computation across blocks, trading coding gains for simpler parallelization. 
+
+E. Compression-Informed Coded Computing 
+
+A distinct direction proposed in [28] utilizes linear dependencies in the input matrices for CC tasks. In prior work, the authors introduced a scheme for computing any homogeneous poly-nomial g(x) by constructing a univariate poly-nomial p(z) through scaled versions of k input points. Interpolating g(p(z)) allows exact recov-ery of g(·) at the original points, reducing the number of required servers compared to input-oblivious approaches. This idea was extended to exploit coordinate-wise dependencies, enabling computation even when the input points are independent in some coordinates. In the case of CMM, the scheme of [28] ap-plies this principle using a grid partitioning of A
+
+and B, i.e. partition them across both rows and columns. The approximate product bC ≈ AB 
+
+is constructed from sampled submatrix pairs, using probabilities analogous to (3). Crucially, sketching introduces linear dependencies across the coordinates, which this method exploits to lower the recovery threshold. This shows how structured sampling and coding tools that utilize dependencies can jointly improve the efficiency and robustness of ACC. This scheme provides a perspective in which exploiting structure in the data itself can further reduce redundancy, extending the benefits of sketching beyond purely random constructions. 
+
+Summary of Section V : Across the ACMM schemes we presented, a unifying theme is the use of sampling and coding to efficiently approximate matrix products, where sketching reduces the dimensionality of the computa-tion while redundancy mitigates the impact of stragglers. This is particularly well-suited for large-scale linear algebra workloads, where ma-trix multiplication is a core bottleneck and ex-act computation is often computationally pro-hibitive. The methods discussed reflect different trade-offs between approximation accuracy, re-covery threshold, and computational and com-munication complexity. VI. C ONCLUSION 
+
+This article surveyed key polynomial-based CC schemes for GC and CMM, as well as 
+
+approximate schemes that draw on ideas and techniques from sketching. At a high level, CC and sketching represent two complementary ap-proaches to scalability: while CC introduces re-dundancy to ensure erasure-tolerance, sketching constructs compressed representations of data and matrices to reduce computational and com-munication costs. Approximate CC bridges these paradigms by relaxing exact recovery require-ments, enabling efficient and scalable solutions that balance accuracy with system efficiency. After motivating both areas and presenting exact 
+
+CC schemes, we outlined approximate schemes that combine ideas from both fields, showcasing their synergy and potential for scalable and re-silient computation. Rather than individual constructions, a central takeaway from this survey is the unifying role of redundancy and compression in enabling scalable distributed computations. Across the methods discussed, CC and sketching offer complementary mechanisms for addressing system bottlenecks, with approximate schemes bridging the two by relaxing exact recovery in favor of efficiency. Understanding these methods through this common lens helps clarify their respective strengths, limitations, and applicability across a range of large-scale optimization and linear algebra tasks. 
+
+Neophytos Charalambides is a postdoctoral fellow at the CSE department of UCSD, and re-ceived his PhD from the University of Michigan. 
+
+Arya Mazumdar is a professor at UCSD in the School of Computing, Information and Data Sciences. His research interests include mathe-matical statistics, information theory, learning, and coding theory. 15 
+
+REFERENCES 
+
+[1] K. Lee, M. Lam, R. Pedarsani, D. Papailiopoulos, and K. Ramchandran, “Speeding Up Distributed Machine Learning Using Codes,” IEEE Transactions on Infor-mation Theory , vol. 64, no. 3, pp. 1514–1529, 2018. [2] S. Li and S. Avestimehr, “Coded Computing: Miti-gating Fundamental Bottlenecks in Large-Scale Dis-tributed Computing and Machine Learning,” Founda-tions and Trends® in Communications and Informa-tion Theory , vol. 17, no. 1, pp. 1–148, 2020. [3] S. Wang, “A Practical Guide to Randomized Ma-trix Computations with MATLAB Implementations,” 
+
+arXiv preprint arXiv:1505.07570 , 2015. [4] R. Murray, J. Demmel, M. W. Mahoney, a. N. B. Erichson, M. Melnichenko, O. A. Malik, L. Grigori, P. Luszczek, M. Derezi´ nski, M. E. Lopes et al. , “Ran-domized Numerical Linear Algebra: A Perspective on the Field With an Eye to Software,” arXiv preprint arXiv:2302.11474 , 2023. [5] A. Ramamoorthy and L. Tang, “Numerically stable coded matrix computations via circulant and rota-tion matrix embeddings,” in 2021 IEEE International Symposium on Information Theory (ISIT) , 2021. [6] R. Tandon, Q. Lei, A. G. Dimakis, and N. Karam-patziakis, “Gradient Coding: Avoiding Stragglers in Distributed Learning,” in International Conference on Machine Learning , 2017, pp. 3368–3376. [7] K. Lee, C. Suh, and K. Ramchandran, “High-Dimensional Coded Matrix Multiplication,” in IEEE International Symposium on Information Theory (ISIT) . IEEE, 2017, pp. 2418–2422. [8] W.-T. Chang and R. Tandon, “Random Sampling for Distributed Coded Matrix Multiplication,” in ICASSP 2019-2019 IEEE International Conference on Acous-tics, Speech and Signal Processing (ICASSP) . IEEE, 2019, pp. 8187–8191. [9] N. Charalambides, M. Pilanci, and A. O. Hero III, “Approximate Weighted CR Coded Matrix Multipli-cation,” in ICASSP 2021 - 2021 IEEE International Conference on Acoustics, Speech and Signal Process-ing (ICASSP) , 2021, pp. 5095–5099. [10] C. Yang and C. Musco, “Efficient Block Ap-proximate Matrix Multiplication,” in 31st Annual European Symposium on Algorithms (ESA 2023) .Schloss Dagstuhl–Leibniz-Zentrum für Informatik, 2023, pp. 103–1. [11] B. Tegin, E. E. Hernandez, S. Rini, and T. M. Du-man, “Straggler Mitigation Through Unequal Error Protection for Distributed Approximate Matrix Mul-tiplication,” IEEE Journal on Selected Areas in Com-munications , vol. 40, no. 2, pp. 468–483, 2022. [12] W. Halbawi, N. Azizan, F. Salehi, and B. Has-sibi, “Improving Distributed Gradient Descent Using Reed-Solomon Codes,” in 2018 IEEE International Symposium on Information Theory (ISIT) . IEEE, 2018, pp. 2027–2031. [13] S. Dutta, M. Fahim, F. Haddadpour, H. Jeong, V. Cadambe, and P. Grover, “On the Optimal Re-covery Threshold of Coded Matrix Multiplication,” 
+
+IEEE Transactions on Information Theory , vol. 66, no. 1, pp. 278–301, 2019. [14] Q. Yu, M. Maddah-Ali, and S. Avestimehr, “Poly-nomial Codes: an Optimal Design for High-Dimensional Coded Matrix Multiplication,” in Ad-vances in Neural Information Processing Systems ,2017, pp. 4403–4413. [15] Q. Yu, M. A. Maddah-Ali, and A. S. Avestimehr, “Straggler Mitigation in Distributed Matrix Multi-plication: Fundamental Limits and Optimal Coding,” 
+
+IEEE Transactions on Information Theory , vol. 66, no. 3, pp. 1920–1933, 2020. [16] N. Raviv, I. Tamo, R. Tandon, and A. G. Dimakis, “Gradient Coding from Cyclic MDS Codes and Ex-pander Graphs,” IEEE Transactions on Information Theory , vol. 66, no. 12, pp. 7475–7489, 2020. [17] M. Glasgow and M. Wootters, “Approximate Gradi-ent Coding with Optimal Decoding,” IEEE Journal on Selected Areas in Information Theory , vol. 2, no. 3, pp. 855–866, 2021. [18] Z. Charles, D. Papailiopoulos, and J. Ellenberg, “Approximate Gradient Coding via Sparse Random Graphs,” arXiv preprint arXiv:1711.06771 , 2017. [19] S. Kadhe, O. O. Koyluoglu, and K. Ramchandran, “Gradient Coding Based on Block Designs for Miti-gating Adversarial Stragglers,” in IEEE International Symposium on Information Theory (ISIT) , 2019. [20] A. Sakorikar and L. Wang, “Soft BIBD and Product Gradient Codes,” IEEE Journal on Selected Areas in Information Theory , vol. 3, no. 2, pp. 229–240, 2022. [21] Y. Jiang, W. Zhang, Y. Luo, and L. Wang, “Sparse Gaussian Gradient Code,” in 2024 IEEE Interna-tional Symposium on Information Theory (ISIT) ,2024, pp. 1367–1372. [22] N. Charalambides, M. Pilanci, and A. O. Hero, “Weighted Gradient Coding with Leverage Score Sampling,” in ICASSP 2020 - 2020 IEEE Interna-tional Conference on Acoustics, Speech and Signal Processing (ICASSP) . IEEE, 2020, pp. 5215–5219. [23] ——, “Gradient Coding with Iterative Block Lever-age Score Sampling,” IEEE Transactions on Informa-tion Theory , vol. 70, no. 9, pp. 6639–6664, 2024. [24] N. Charalambides, H. Mahdavifar, M. Pilanci, and A. O. Hero, “Iterative Sketching for Secure Coded Regression,” IEEE Journal on Selected Areas in In-formation Theory , vol. 5, pp. 148–161, 2024. [25] C. Karakus, Y. Sun, and S. Diggavi, “Encoded Dis-tributed Optimization,” in 2017 IEEE International Symposium on Information Theory (ISIT) . IEEE, 2017, pp. 2890–2894. [26] T. Jahani-Nezhad and M. A. Maddah-Ali, “CodedS-ketch: A Coding Scheme for Distributed Computa-tion of Approximated Matrix Multiplication,” IEEE Transactions on Information Theory , vol. 67, no. 6, pp. 4185–4196, 2021. [27] V. Gupta, S. Wang, T. Courtade, and K. Ramchan-dran, “OverSketch: Approximate Matrix Multipli-cation for the Cloud,” in 2018 IEEE International Conference on Big Data . IEEE, 2018, pp. 298–304. [28] M. Rudow, N. Charalambides, A. O. Hero III, and K. Rashmi, “Compression-Informed Coded Comput-ing,” in 2023 IEEE International Symposium on In-formation Theory (ISIT) , 2023, pp. 2177–2182.

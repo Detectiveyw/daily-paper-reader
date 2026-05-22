@@ -1,0 +1,2496 @@
+Title: Information-Theoretic Decentralized Secure Aggregation with User Dropouts
+
+URL Source: https://arxiv.org/pdf/2605.22261v1
+
+Published Time: Fri, 22 May 2026 00:56:45 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+> 1
+
+# Information-Theoretic Decentralized Secure Aggregation with User Dropouts 
+
+Zhou Li, Member, IEEE , Xiang Zhang, Member, IEEE , Yizhou Zhao, Member, IEEE , Han Yu, Member, IEEE ,and Giuseppe Caire, Fellow, IEEE 
+
+Abstract —This paper investigates the fundamental limits of information-theoretic decentralized secure aggregation (DSA) with user dropouts. We consider a fully decentralized network where K users communicate over broadcast channels without a trusted aggregation server. Each user holds a private input and aims to recover the sum of the surviving users’ inputs (users may drop) while ensuring that no additional information about individual inputs is revealed to that user, even if it can collude with other users. A two-round communication protocol is considered, where we assume at least U users survive and each user can collude with at most T other users. For this setting, the optimal communication rate region is fully characterized: we show that DSA is infeasible if U ≤ T + 1 ; otherwise, the optimal rate region is given by R1 ≥ 1 and R2 ≥ 1   
+
+> U−T−1
+
+, where 
+
+R1 and R2 denote the first- and second-round communication rates, respectively. The proposed aggregation scheme is based on correlated secret keys constructed from (T +1) -private maximum distance separable (MDS) matrices, which simultaneously provide robustness against user dropouts and security against collusion. We also derive tight converse bounds that establish the optimality of the proposed scheme. Our result shows that the optimal second-round communication rate depends only on the effective redundancy level U − T − 1 regardless the total number of users. 
+
+Index Terms —Secure aggregation, decentralized, security, dropout, collusion, federated learning 
+
+I. I NTRODUCTION 
+
+The rapid growth of distributed learning and collaborative computation has significantly accelerated the development of federated learning (FL) and related distributed optimization frameworks [1]–[5]. In these systems, users collaboratively compute global statistics or train machine learning models while keeping their local datasets private. A fundamental primitive enabling such privacy-preserving computation is 
+
+secure aggregation (SA) [6], [7], where the sum of users’ inputs (e.g., local models in FL) is computed by an aggregation server while the server is prevented from inferring individual inputs beyond the desired sum. The information-theoretic for-mulation of secure aggregation was first studied by Zhao and Sun [8]. Since then, substantial efforts have been devoted to improving robustness, communication efficiency, and privacy 
+
+Z. Li is with the Guangxi Key Laboratory of Multimedia Communications and Network Technology, Guangxi University, Nanning 530004, China (e-mail: lizhou@gxu.edu.cn). X. Zhang, H. Yu, and G. Caire are with the Department of Electrical Engi-neering and Computer Science, Technical University of Berlin, 10623 Berlin, Germany (e-mail: {xiang.zhang, caire }@tu-berlin.de, han.yu.1@campus.tu-berlin.de). Y. Zhao is with the College of Electronic and Information Engineering, Southwest University, Chongqing, China (e-mail: onezhou@swu.edu.cn). 
+
+guarantees [9]–[15]. Most existing works focus on centralized architectures in which a server coordinates the aggregation process. Recently, decentralized secure aggregation (DSA) [16]– [18] has attracted increasing attention, motivated by scenarios where relying on a trusted server is undesirable due to scala-bility, privacy, or communication constraints. In decentralized systems, users communicate directly with one another and collaboratively recover the desired aggregation. Compared with the centralized setting, DSA introduces new challenges because every user simultaneously acts as both a transmit-ter and a decoder. A major practical challenge in DSA is robustness against user dropouts [19]–[23], where users may fail due to unreliable communication links, device failures, or asynchronous participation. Since the set of surviving users is generally unknown in advance, the aggregation protocol must guarantee reliable input sum recovery under arbitrary dropout patterns. Another important challenge is security under col-lusion [17], [18], [24], where multiple users may collude to infer information about non-colluding users’ private inputs. Motivated by the above considerations, this paper studies the fundamental communication limits of information-theoretic DSA with user dropouts. We consider a fully connected network consisting of K users connected through broadcast channels. Communication takes place in two rounds . In the first round, each user broadcasts a message generated from its input and secret keys. Due to user dropouts, only asubset U1 ⊆ { 1, · · · , K } of users successfully survives the first round. In the second round, additional dropouts may also occur, resulting in a surviving set U2 ⊆ U 1. After the two rounds, every user in U2 aims to recover the aggregate P 
+
+> k∈U 1
+
+Wk, where Wk denotes the private input of user k.The goal of this work is to characterize the optimal com-munication rates of DSA under user dropout and collusion constraints. We establish a feasibility threshold showing that DSA is feasible if and only if U > T + 1 . In this regime, we characterize the optimal communication rate region which consists of all achievable rates tuples of the two rounds. In particular, we show that the optimal first-round communication rate is R∗ 
+
+> 1
+
+= 1. while the optimal second-round commu-nication rate is R∗ 
+
+> 2
+
+= 1   
+
+> U−T−1
+
+. Our achievable scheme is based on vector linear coding and correlated keys generated using (T + 1) -private MDS matrices. The converse proofs rely on entropy inequalities and Shannon-theoretic secrecy arguments [25]–[27]. Compared with existing secure aggre-gation protocols [28]–[34], the proposed framework provides information-theoretic security guarantees while explicitly cap-
+
+> arXiv:2605.22261v1 [cs.IT] 21 May 2026 2
+
+turing decentralized communication, arbitrary user dropout, and collusion resistance within a unified framework. 
+
+A. Summary of Contributions 
+
+The main contributions of this paper are:  
+
+> •
+
+We study a two-round DSA problem with information-theoretic security guarantee under user dropout and collu-sion. Unlike conventional centralized secure aggregation systems that rely on a trusted server to coordinate de-coding, the considered decentralized model requires each surviving user to simultaneously act as both a transmitter and a decoder through peer-to-peer broadcast communi-cations. This fundamentally changes the structure of the problem, since robustness against dropout and collusion must now be guaranteed for all surviving users without the presence of a centralized aggregation server.  
+
+> •
+
+We characterize the feasibility condition of DSA with dropout. Specifically, we prove that secure aggregation is feasible if and only if U > T + 1 . The result reveals a sharp threshold determined by the interplay between the minimum number of surviving users and the collusion level. In the feasible regime, we completely characterize the optimal communication rate region by deriving matching achievability and converse bounds.  
+
+> •
+
+We develop an optimal achievable scheme based on vector linear coding and correlated keys generated from 
+
+(T +1) -private MDS matrices. The proposed construction enables every surviving user to recover the desired aggre-gation despite arbitrary dropout patterns, while simulta-neously preserving information-theoretic privacy against colluding users. The converse proofs combine entropy inequalities and Shannon-theoretic secrecy arguments to establish the optimality of the proposed communication rates.  
+
+> •
+
+Our results show that the optimal communication effi-ciency depends only on the effective redundancy level 
+
+U − T − 1, and is independent of the total number of users K. This provides a new insight into DSA: scalability does not affect the optimal communication cost, whereas the balance between dropout tolerance and collusion resistance completely determines the achievable efficiency. II. P ROBLEM STATEMENT 
+
+We consider a DSA problem with K ≥ 3 users, where each user is connected to all others via an error-free broadcast chan-nel, as illustrated in Fig. 1. Each user k ∈ [K] ≜ {1, 2, . . . , K }
+
+holds an input vector Wk and a key variable Zk. The inputs 
+
+{Wk}k∈[K] are mutually independent, and each Wk is an L×1
+
+vector whose entries are i.i.d. uniformly distributed over Fq .Furthermore, {Wk}k∈[K] is independent of {Zk}k∈[K], i.e., 
+
+H  {Wk}k∈[K], {Zk}k∈[K]
+
+
+
+= X
+
+> k∈[K]
+
+H(Wk) + H {Zk}k∈[K]
+
+ , (1) 
+
+H(Wk) = L (in q-ary units ), ∀k ∈ [K]. (2) 
+
+Fig. 1: DSA with K = 4 , U = 3 , and T = 0 . In the first round, each user k broadcasts Xk to all other users. In this example, User 3 drops out over first round, and hence the set of surviving user is U1 = {1, 2, 4}. In the second round, each surviving user k ∈ U 1 broadcasts Y U1 
+
+> k
+
+. From the received messages and its own input and secret key, each surviving user must recover W1 + W2 + W4 while learn nothing more. To enable the computation of the desired sum, we consider the following two-round communication protocol. 
+
+First Round: Each user k ∈ [K] broadcasts a message Xk,consisting of LX symbols over Fq , which is a deterministic function of its local input and key: 
+
+H(Xk | Wk, Z k) = 0 , ∀k ∈ [K]. (3) Due to possible user dropouts 1, the set of users whose trans-missions are successfully received is denoted by U1 ⊆ [K],where |U 1| ≥ U 2 and 1 ≤ U ≤ K − 1. The set U1 is arbitrary subject to the cardinality constraint. Each user u ∈ [K]
+
+observes the messages {Xk}k∈U 1\{ u}.
+
+Second Round: Each user determines its participation status based on its first-round observations. A user that fails to receive the required messages declares itself as dropped out and remains silent; otherwise, it is active and can infer the surviving set U1. Only users in U1 participate in the second round. Upon identifying U1, each user k ∈ U 1 broadcasts a message Y U1 
+
+> k
+
+of length LY over Fq , satisfying 
+
+H
+
+
+
+Y U1 
+
+> k
+
+Wk, Z k
+
+
+
+= 0 , ∀k ∈ U 1, ∀U 1 ⊆ [K] : |U 1| ≥ U. 
+
+(4) Further dropouts may occur in the second round, and the set of surviving users is denoted by U2, where U2 ⊆ U 1 and |U 2| ≥ 
+
+U . Each user u ∈ U 2 receives the messages {Y U1 
+
+> k
+
+}k∈U 2\{ u}.
+
+Correctness: From the messages received in both rounds from surviving users, together with its own information, each user u ∈ U2 must be able to decode the desired sum  
+
+> 1A user is said to drop out if it fails to participate in the broadcast phase, i.e., it neither transmits nor receives any message.
+> 2Uis a design parameter specifying the minimum number of users required for successful decoding. 3
+
+P 
+
+> k∈U 1
+
+Wk with zero error 3. Formally, for all U2 ⊆ U 1 ⊆ [K]
+
+with |U 2| ≥ U ,[Correctness] H X
+
+> k∈U 1
+
+Wk {Xk}k∈U 1\{ u}, {Y U1 
+
+> k
+
+}k∈U 2\{ u},Wu, Z u
+
+!
+
+= 0 , ∀u ∈ U 2. (5) 
+
+Security: We require that security holds for any user u ∈
+
+[K]4, even if it observes all transmitted messages and may collude with any set of at most T users, where 1 ≤ T ≤
+
+K − 2. Specifically, user u should not learn any additional information about {Wk}k∈[K] beyond the sum P 
+
+> k∈U 1
+
+Wk and the information available from colluding users. Formally, for any U1, T ⊆ [K] with |U 1| ≥ U and |T | ≤ T ,[Security] I {Wk}k∈[K]; {Xk}k∈[K]\{ u}, {Y U1 
+
+> k
+
+}k∈U 1\{ u}
+
+X
+
+> k∈U 1
+
+Wk, {Wk, Z k}k∈T ∪{ u}
+
+!
+
+= 0 , ∀u ∈ [K].
+
+(6) 
+
+Remark 1 (Delayed Message Availability at User u): In the security constraint, user u is assumed to have access to all first-round messages, including those from users that subsequently drop out, as well as all second-round messages from surviving users. This models a delayed message availability scenario in which messages from dropped users may eventually become available, resulting in a strictly stronger security requirement. 
+
+Rates: The communication rates are defined as 
+
+R1 ≜ LX
+
+L , R2 ≜ LY
+
+L , (7) where R1 and R2 denote the first-round and second-round message rates, respectively. A rate pair (R1, R 2) is said to be achievable if there exists a secure aggregation scheme, i.e., a design of the secret keys {Zk}k∈[K] and encoding functions for {Xk}k∈[K] and {Y U1 
+
+> k
+
+}k∈[K], that achieves the rates R1
+
+and R2 simultaneously while satisfying the correctness and security constraints in (5) and (6). The optimal rate region R∗
+
+is defined as the closure of all achievable rate pairs. III. M AIN RESULT 
+
+Theorem 1 characterizes the optimal communication rate region for the two-round DSA problem. 
+
+Theorem 1: Consider the DSA problem with K ≥ 3 users, where at least U users remain active and at most T users may collude, with 1 ≤ U ≤ K − 1 and 0 ≤ T ≤ K − 3. The optimal rate region is given by 
+
+R∗ =
+
+(∅ if U ≤ T + 1 ,
+
+(R1, R 2) : R1 ≥ 1, R 2 ≥ 1   
+
+> U−T−1
+
+if U > T + 1 .
+
+(8)    
+
+> 3The results also hold under vanishing error and leakage, i.e., when 0 is replaced by o(L)in (5) and (6).
+> 4The adversary can be any user, regardless of whether it belongs to the surviving set U1.
+
+From Theorem 1 and its proof (see Section IV for achiev-ability and Section V for converse), we provide the following interpretations: 
+
+1) Infeasibility: Theorem 1 reveals a feasibility threshold. When U ≤ T + 1 , secure aggregation in the information-theoretic sense is infeasible. Intuitively, in this regime, the number of potentially colluding users is too large relative to the minimum number of users required for correct decoding. As a result, any scheme that guarantees correctness inevitably exposes additional information beyond the desired sum, mak-ing it impossible to simultaneously satisfy the correctness and security requirements. 
+
+2) Optimal Rates: When U > T + 1 , secure aggregation becomes feasible and admits a particularly structured optimal solution. The optimal communication strategy takes a simple form: each user sends one symbol in the first round, and the second round requires 1   
+
+> U−T−1
+
+symbols per input symbol. The first-round rate must be at least one because a user may drop out in the second round, while its input must still be recoverable as part of the desired aggregation. Consequently, sufficient information about each user’s input must already be conveyed in the first-round transmission. This shows that the communication cost is determined by the effective redundancy level U − T − 1, which measures the remaining degree of cooperation after accounting for worst-case collusion. A larger value of U − T − 1 implies more available redundancy among active users, and therefore directly reduces the communication overhead in the second round. Finally, we note that the optimal communication rate does not depend on the number of users K. This indicates that the scalability of the system does not affect the fundamental communication efficiency; instead, feasibility and efficiency are determined solely by the relative values of U and T .IV. A CHIEVABILITY PROOF OF THEOREM 1We now present the achievability proof of Theorem 1. The proof is first illustrated through two representative examples, which highlight the main ingredients of the construction in a transparent setting. Based on these examples, we then generalize the scheme to arbitrary system parameters, followed by the analysis of correctness, security, and achievable rates. 
+
+A. Example 1: K = 4 , U = 3 , T = 0 
+
+We illustrate the main ideas using a simple instance of the DSA problem with K = 4 users, where at least U = 3 users survive and there are no colluding users, i.e., T = 0 . We choose the input length as L = U − T − 1 = 2 . Accordingly, each user input is given by Wk =  Wk(1) , W k(2) ⊤ ∈ F2×1 
+
+> q
+
+.Next, we define the correlated keys. Each user k ∈ [4] has two independent and uniformly distributed random vectors over 
+
+Fq : Nk =  Nk(1) , N k(2) ⊤ ∈ F2×1 
+
+> q
+
+, and Sk ∈ Fq . Based on these local random variables, we construct additional shared keys through linear combinations. Specifically, for each user 
+
+k, the secret keys are given by 
+
+Zk =
+
+
+
+Nk, (Ni(1) , N i(2) , S i) · αk i∈[4] 
+
+
+
+. (9) 4
+
+Before specifying the coefficient vectors αk, we introduce the maximum distance separable (MDS) matrix used in the construction. A matrix α ∈ F3×4 
+
+> q
+
+is called an MDS matrix if any 3 × 3 submatrix is invertible over Fq , i.e., any three columns are linearly independent. This property ensures that, given any three linear combinations corresponding to a subset of users of size three, each user can uniquely recover the underlying keys. We construct α as a Vandermonde matrix over Fq ,
+
+α =
+
+
+
+1 β1 β21 β31
+
+1 β2 β22 β32
+
+1 β3 β23 β33
+
+ ,
+
+where {β1, β 2, β 3} ⊂ Fq are distinct nonzero elements. Then, for each user k, the coefficient vector αk ∈ F3×1
+
+> q
+
+is taken as the k-th column of α. The inner product of a 3-dimensional row vector with αk produces a scalar used in the linear combination for each k.
+
+Explicit instantiation: We can choose αk = 1, 2k−1, 3k−1⊤, provided that the multiplicative orders of 2, 3, 4 in Fq are all greater than k, so that the powers remain distinct. In particular, q must be an odd prime or odd prime power, i.e., q̸ = 2m, to avoid degeneracy in characteristic 2. This construction ensures that each user has access to both private and globally mixed linear combinations of the keys, which is essential for achieving the desired security and recoverability properties. For example, for each user k ∈ [4] , the keys are 
+
+Z1 =
+
+
+
+N1,N 1(1) + N1(2) + S1,N2(1) + N2(2) + S2,N3(1) + N3(2) + S3,N4(1) + N4(2) + S4
+
+
+
+,Z2 =
+
+
+
+N2,N 1(1) + 2 N1(2) + 3 S1,N2(1) + 2 N2(2) + 3 S2,N3(1) + 2 N3(2) + 3 S3,N4(1) + 2 N4(2) + 3 S4
+
+
+
+,Z3 =
+
+
+
+N3,N 1(1) + 2 2N1(2) + 3 2S1,N2(1) + 2 2N2(2) + 3 2S2,N3(1) + 2 2N3(2) + 3 2S3,N4(1) + 2 2N4(2) + 3 2S4
+
+
+
+,Z4 =
+
+
+
+N4,N 1(1) + 2 3N1(2) + 3 3S1,N2(1) + 2 3N2(2) + 3 S2,N3(1) + 2 3N3(2) + 3 3S3,N4(1) + 2 3N4(2) + 3 3S4
+
+
+
+. (10) We have now completed the design of the correlated secret keys. We next describe how the messages are constructed over the two communication rounds. 
+
+First round: Each user broadcasts the message Xk
+
+Xk = Wk + Nk, ∀k ∈ [4] . (11) After the first round, based on the received messages, each user can determine the set of surviving users U1. Then, each user proceeds to the second-round transmission accordingly. 
+
+Second round: For each surviving user k ∈ U 1, we set 
+
+Y U1 
+
+> k
+
+= X
+
+> i∈U 1
+
+
+
+(Ni(1) , N i(2) , S i) · αk
+
+
+
+= X
+
+> i∈U 1
+
+
+
+Ni(1) + 2 k−1Ni(2) + 3 k−1Si
+
+
+
+. (12) For example, if U1 = {1, 2, 4}, we have 
+
+Y U1 
+
+> 1
+
+=N1(1) + N1(2) + S1+
+
+N2(1) + N2(2) + S2+
+
+N4(1) + N4(2) + S4,Y U1 
+
+> 2
+
+=N1(1) + 2 N1(2) + 3 S1+
+
+N2(1) + 2 N2(2) + 3 S2+
+
+N4(1) + 2 N4(2) + 3 S4,Y U1 
+
+> 4
+
+=N1(1) + 2 3N1(2) + 3 3S1+
+
+N2(1) + 2 3N2(2) + 3 3S2+
+
+N4(1) + 2 3N4(2) + 3 3S4. (13) We next analyze the achievable rates and prove correctness and security. 
+
+Rate: Finally, we specify the communication rates of the proposed scheme. The first-round rate is given by RX = 
+
+> LX
+> L
+
+= 1 . For the second round, we have RY = LY 
+
+> L
+
+= 12 .
+
+Equivalently, the second-round rate can be expressed in terms of the system parameters as RY = 1   
+
+> U−T−1
+
+. With these rates, the proposed scheme satisfies both the correctness and the security requirements, as shown below. 
+
+Correctness: Let U1 = {1, 2, 4} denote the set of surviving users after the first round, and let U2 = {1, 2, 4} denote the set of surviving users in the second round. Since U = 3 ,it follows that |U 1| ≥ U and |U 2| ≥ U , ensuring that at least U users survive in both rounds. From the second-round messages {Y U1 
+
+> k
+
+}k∈U 2 , each user can recover the aggrega-tion keys P 
+
+> k∈U 1
+
+Nk =  P  
+
+> k∈U 1
+
+Nk(1) , P 
+
+> k∈U 1
+
+Nk(2)  and P 
+
+> k∈U 1
+
+Sk with zero error, since the precoding matrices in (9) are MDS. Combining this with the sum of the first-round messages, X1 + X2 + X4 = P
+
+> k∈U 1
+
+ Wk + Nk
+
+, each user can cancel P 
+
+> k∈U 1
+
+Nk and successfully decode the desired sum P 
+
+> k∈U 1
+
+Wk.
+
+Security: When U1 = U2 = {1, 2, 4}, we verify that the security constraint (6) is satisfied. Consider user 1, we have 
+
+I
+
+
+
+X2, X 3, X 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+; {Wk}k∈[4] 
+
+W1 + W2 + W4, W 1, Z 1
+
+
+
+(14) 
+
+=H
+
+
+
+X2, X 3, X 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+W1 + W2 + W4, W 1, Z 1
+
+
+
+− H
+
+
+
+X2, X 3, X 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+{Wk}k∈[4] , Z 1
+
+
+
+(15) 
+
+=H
+
+
+
+X2, X 3, X 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+, W 1 + W2 + W4, W 1, Z 1
+
+5
+
+− H
+
+
+
+W1 + W2 + W4, W 1, Z 1
+
+
+
+− H
+
+
+
+N2, N 3, N 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+{Wk}k∈[4] , Z 1
+
+
+
+(16) 
+
+=H
+
+
+
+X2, X 3, X 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+, W 1, Z 1
+
+
+
+− H
+
+
+
+W1 + W2 + W4, W 1, Z 1
+
+
+
+−
+
+
+
+H(N2, N 3, N 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+, Z 1) − H(Z1)
+
+
+
+(17) 
+
+=H
+
+
+
+X2, X 3, X 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+, W 1, Z 1
+
+
+
+− H(W1 + W2 + W4, W 1, Z 1)
+
+− (H(N1, N 2, N 3, N 4, S 1, S 2, S 3, S 4) − H(Z1)) (18) 
+
+=16 − 10 − (12 − 6) = 0 . (19) The equality in (16) follows from substituting Xk =
+
+Wk + Zk in (11), which removes the dependence on {Wk}k∈[4] and reduces the random variables to 
+
+(N2, N 3, N 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+). In (17), the first term follows since W1 + W2 + W4 can be expressed as a determin-istic function of X2, X 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+, W 1, Z 1. The equality in (18) follows from the structure of the key design in (9). In particular, given (N2, N 3, N 4, Z 1), the full keys 
+
+(N1, N 2, N 3, N 4, S 1, S 2, S 3, S 4) can be reconstructed. Finally, substituting the entropy values yields zero mutual information, which implies that no additional information about {Wk}k∈[4] 
+
+is leaked. Hence, the security constraint is satisfied. 
+
+B. Example 2: K = 4 , U = 3 , T = 1 
+
+We consider the DSA problem with K = 4 users, where at least U = 3 users survive and there is T = 1 colluding user. We choose the input length as L = U − T − 1 = 1 .Accordingly, each user input is given by Wk ∈ Fq . Next, we define the correlated keys. Each user k ∈ [4] has two independent and uniformly distributed random variables over 
+
+Fq : Nk ∈ Fq , and Sk =  Sk(1) , S k(2) ⊤ ∈ F2×1 
+
+> q
+
+. Based on these local random variables, we construct K = 4 linearly independent linear combinations, which are used to encode additional keys accessible to each user. Specifically, for each user k, the available keys is defined as 
+
+Zk =
+
+
+
+Nk, (Ni, S i(1) , S i(2)) · αk i∈[4] 
+
+
+
+. (20) Before specifying the coefficient vectors αk, we define the MDS matrix used in the construction. A matrix α ∈ F3×4 
+
+> q
+
+is called an MDS matrix if any 3 × 3
+
+submatrix is invertible over Fq , i.e., any three columns are linearly independent. This guarantees that any three linear combinations determine the remaining keys components. We construct α as a Vandermonde matrix over Fq ,
+
+α =
+
+
+
+1 β1 β21 β31
+
+1 β2 β22 β32
+
+1 β3 β23 β33
+
+ ,
+
+where {β1, β 2, β 3} ⊂ Fq are distinct nonzero elements. Then, for each user k, the coefficient vector αk ∈ F4×1 
+
+> q
+
+is taken as the k-th column of α.
+
+Explicit instantiation: We can choose 
+
+αk =  1, 2k−1, 3k−1⊤,
+
+provided that the multiplicative orders of 2, 3, 4 in Fq are suffi-ciently large so that the powers remain distinct. In particular, q
+
+is chosen as an odd prime or odd prime power, i.e., q̸ = 2 m, to avoid degeneracy in characteristic 2. This construction ensures that each user has access to both private keys and globally mixed linear combinations, which are essential for security and recoverability. For example, the keys of the users are 
+
+Z1 =
+
+
+
+N1,N 1 + S1(1) + S1(2) ,N2 + S2(1) + S2(2) ,N3 + S3(1) + S3(2) ,N4 + S4(1) + S4(2) 
+
+
+
+,Z2 =
+
+
+
+N2,N 1 + 2 S1(1) + 3 S1(2) ,N2 + 2 S2(1) + 3 S2(2) ,N3 + 2 S3(1) + 3 S3(2) ,N4 + 2 S4(1) + 3 S4(2) 
+
+
+
+,Z3 =
+
+
+
+N3,N 1 + 2 2S1(1) + 3 2S1(2) ,N2 + 2 2S2(1) + 3 2S2(2) ,N3 + 2 2S3(1) + 3 2S3(2) ,N4 + 2 2S4(1) + 3 2S4(2) 
+
+
+
+,Z4 =
+
+
+
+N4,N 1 + 2 3S1(1) + 3 3S1(2) ,N2 + 2 3S2(1) + 3 3S2(2) ,N3 + 2 3S3(1) + 3 3S3(2) ,N4 + 2 3S4(1) + 3 3S4(2) 
+
+
+
+. (21) We now describe the communication scheme. 
+
+First round: Each user broadcasts the message 
+
+Xk = Wk + Nk, ∀k ∈ [4] . (22) After the first round, each user can determine the surviving set U1. Based on U1, users proceed to the second round. 
+
+Second round: For each surviving user k ∈ U 1, we set 
+
+Y U1 
+
+> k
+
+= X
+
+> i∈U 1
+
+
+
+(Ni, S i(1) , S i(2)) · αk
+
+
+
+= X
+
+> i∈U 1
+
+
+
+Ni + 2 k−1Si(1) + 3 k−1Si(2) 
+
+
+
+. (23) For example, if U1 = {1, 2, 4}, we have 
+
+Y U1 
+
+> 1
+
+=N1 + S1(1) + S1(2)+ 
+
+N2 + S2(1) + S2(2)+ 
+
+N4 + S4(1) + S4(2) ,Y U1 
+
+> 2
+
+=N1 + 2 S1(1) + 3 S1(2)+ 
+
+N2 + 2 S2(1) + 3 S2(2)+ 
+
+N4 + 2 S4(1) + 3 S4(2) ,Y U1 
+
+> 4
+
+=N1 + 2 3S1(1) + 3 3S1(2)+ 6
+
+N2 + 2 3S2(1) + 3 3S2(2)+ 
+
+N4 + 2 3S4(1) + 3 3S4(2) . (24) 
+
+Rate: The first-round rate is RX = 1 . The second-round rate is RY = 1 , which is equivalently expressed as RY = 1   
+
+> U−T−1
+
+.
+
+These rates satisfy the requirements of the scheme. We next prove correctness and security of the above scheme. 
+
+Correctness: Let U1 = {1, 2, 4} and U2 = {1, 2, 4}. Since 
+
+U = 3 , both sets satisfy |U 1|, |U 2| ≥ U . From {Y U1 
+
+> k
+
+}k∈U 2 ,each user can recover P 
+
+> k∈U 1
+
+Nk and P 
+
+> k∈U 1
+
+Sk =(P 
+
+> k∈U 1
+
+Sk(1) , P 
+
+> k∈U 1
+
+Sk(2)) , due to the MDS property of 
+
+α. Combining this with X1 + X2 + X4 = P 
+
+> k∈U 1
+
+(Wk + Nk),
+
+each user can cancel P 
+
+> k∈U 1
+
+Nk and recover P 
+
+> k∈U 1
+
+Wk.
+
+Security: When U1 = U2 = {1, 2, 4}, we show that the security constraint (6) is satisfied. Consider that user 1 colludes with user 3, we have 
+
+I
+
+
+
+X2, X 3, X 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+; {Wk}k∈[4] 
+
+W1 + W2 + W4, W 1, Z 1, W 3, Z 3
+
+
+
+(25) 
+
+=H
+
+
+
+X2, X 3, X 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+W1 + W2 + W4, W 1, Z 1, W 3,Z3
+
+
+
+− H
+
+
+
+X2, X 3, X 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+|{ Wk}k∈[4] , Z 1, Z 3
+
+
+
+(26) 
+
+=H
+
+
+
+X2, X 3, X 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+, W 1 + W2 + W4, W 1, Z 1, W 3,Z3
+
+
+
+− H(W1 + W2 + W4, W 1, Z 1, W 3, Z 3)
+
+− H
+
+
+
+N2, N 3, N 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+{Wk}k∈[4] , Z 1, Z 3
+
+
+
+(27) 
+
+=H
+
+
+
+X2, X 4, Y U1 
+
+> 2
+
+, W 1, Z 1, W 3, Z 3
+
+
+
+− H(W1 + W2 + W4, W 1, Z 1, W 3, Z 3)
+
+−
+
+
+
+H
+
+
+
+N2, N 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+, Z 1, Z 3
+
+
+
+− H(Z1, Z 3)
+
+
+
+(28) 
+
+=H
+
+
+
+X2, X 4, Y U1 
+
+> 2
+
+, W 1, Z 1, W 3, Z 3
+
+
+
+− H(W1 + W2 + W4, W 1, Z 1, W 3, Z 3)
+
+− (H(N1, N 2, N 3, N 4, S 1, S 2, S 3, S 4) − H(Z1, Z 3)) (29) 
+
+=15 − 13 − (12 − 10) = 0 . (30) The equality in (27) follows by substituting Xk =
+
+Wk + Nk as defined in (22), which removes the depen-dence on {Wk}k∈[4] and reduces the remaining random variables to (N2, N 3, N 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+). The equality in (28) holds since W1 + W2 + W4 can be determined from 
+
+(X2, X 4, Y U1 
+
+> 2
+
+, Y U1 
+
+> 4
+
+, W 1, Z 1). Moreover, Y U1 
+
+> 4
+
+is functionally related to (Y U1 
+
+> 2
+
+, Z 1, Z 3) due to the MDS property of α ∈
+
+F3×4 
+
+> q
+
+, where any three columns determine the remaining ones. The equality in (29) follows from the structure of the key gen-eration scheme in (20). In particular, given (N2, N 4, Z 1, Z 3),the full keys tuple (N1, N 2, N 3, N 4, S 1, S 2, S 3, S 4) can be reconstructed. Finally, evaluating the entropy terms yields zero mutual information, implying that no additional information about {Wk}k∈[4] is leaked. Hence, the security constraint is satisfied. We now extend the above example to a general scheme applicable to arbitrary system parameters, while satisfying the correctness and security constraints. 
+
+C. General Scheme for Arbitrary K, U, T 
+
+We next present a general achievable scheme for the feasible regime U > T +1 . Before describing the construction, we first briefly explain why the condition U > T + 1 is necessary. Intuitively, when the number of surviving users is not strictly larger than the collusion level plus one, the users participating in decoding do not provide sufficient redundancy to simultane-ously guarantee correctness and information-theoretic security. In particular, correctness requires that the surviving users collectively recover the desired aggregation from the broadcast messages, while security requires that any user colluding with at most T other users should learn nothing beyond the target sum. However, when U ≤ T + 1 , the set of users involved in decoding can already be covered by the colluding users together with the observing user. Consequently, the information required for correct decoding inevitably leaks additional information about individual users’ inputs, making the correctness and security constraints incompatible. This intuition will be rigorously formalized in the converse proof of Section V-A. Therefore, in the remainder of this section, we focus on the feasible regime U > T + 1 and present an achievable scheme attaining the optimal rates. Consider the DSA problem with K users, where at least 
+
+U users survive. Moreover, each user k ∈ [K] may collude with at most T other users. Accordingly, we choose the input length as L = U − T − 1. Each user k holds an input vector 
+
+Wk =  Wk(1) , · · · , W k(U − T − 1) ⊤ ∈ F(U −T −1) ×1 
+
+> q
+
+.
+
+We next specify the correlated secret keys used in the scheme. Consider a total of 2K independent and uni-formly distributed random vectors over Fq , given by Nk =
+
+ Nk(1) , · · · , N k(U − T − 1) ⊤ ∈ F(U −T −1) ×1 
+
+> q
+
+, and Sk =
+
+ Sk(1) , · · · , S k(T + 1) ⊤ ∈ F(T +1) ×1 
+
+> q
+
+, for all k ∈ [K]. From these secret keys, we construct a collection of linearly inde-pendent combinations over Fq , with coefficients determined by a carefully designed MDS matrix. Specifically, for each 
+
+k ∈ [K], the keys available to user k is defined as 
+
+Zk =
+
+
+
+Nk, [Qi]k i∈[K]
+
+
+
+. (31) Here, [Qi]k ≜
+
+
+
+Ni(1) , · · · , N i(U −T −1) , S i(1) , · · · , S i(T +1) 
+
+
+
+αk ∈ Fq , where αk ∈ FU ×1 
+
+> q
+
+denotes the k-th column of a matrix α ∈ FU ×Kq . We say that a matrix α ∈ FU ×Kq
+
+with U < K is an MDS matrix if any U × U submatrix is nonsingular. Furthermore, α is said to be a (T + 1) -private MDS matrix if the submatrix formed by its last T + 1 rows is also MDS. Such a matrix exists for sufficiently large field size q. A (T + 1) -private MDS matrix [20] guarantees that, for any subset T ∪ { u} ⊆ [K] with |T ∪ { u}| ≤ T + 1 ,the collection of linear projections {[Qi]k}i∈[K], k ∈T ∪{ u} is statistically independent of the masking variables {Ni}i∈[K],i.e., 
+
+I  {[Qi]k}i∈[K], k ∈(T ∪{ u}); {Ni}i∈[K]
+
+ = 0 . (32) This follows from the fact that the submatrix formed by the last T + 1 rows of α is MDS, which ensures that any set of at most T + 1 such projections depends only on the keys vectors 
+
+{Si} and reveals no information about {Ni}.7
+
+To facilitate the subsequent security analysis, we next sum-marize several useful entropy properties of the secret keys in the following lemma. 
+
+Lemma 1: For any subset T ∪ { u} ⊆ [K] with |T ∪ { u}| ≤ 
+
+T + 1 , any U2 ⊆ U 1 ⊆ [K] satisfying |U 2| ≥ U , with U > T + 1 , we have 
+
+I  {Ni}i∈[K]\(T ∪{ u}); {Nk, {[Qi]k}i∈[K]}k∈(T ∪{ u})
+
+ = 0 .
+
+(33) 
+
+Proof: Since |T ∪ { u}| ≤ T + 1 , by the (T + 1) -privacy property in (32), we have 
+
+I  {Ni}i∈[K]\(T ∪{ u}); {Nk, {[Qi]k}i∈[K]}k∈(T ∪{ u})
+
+
+
+=H  {Nk, {[Qi]k}i∈[K]}k∈(T ∪{ u})
+
+ −
+
+H  {Nk, {[Qi]k}i∈[K]}k∈(T ∪{ u}) {Ni}i∈[K]\(T ∪{ u})
+
+
+
+=H  {Nk, {[Qi]k}i∈[K]}k∈(T ∪{ u})
+
+
+
+− H  {Nk}k∈(T ∪{ u}) {Ni}i∈[K]\(T ∪{ u})
+
+
+
+− H  {{ [Qi]k}i∈[K]}k∈(T ∪{ u}) {Ni}i∈[K]
+
+ (34) 
+
+=H  {Nk, {[Qi]k}i∈[K]}k∈(T ∪{ u})
+
+
+
+− H  {Nk}k∈(T ∪{ u})
+
+ − H  {{ [Qi]k}i∈[K]}k∈(T ∪{ u})
+
+
+
++ I  {{ [Qi]k}i∈[K]}k∈(T ∪{ u}); {Ni}i∈[K]
+
+| {z }
+
+> (32)
+> = 0
+
+(35) 
+
+≤H  {Nk}k∈(T ∪{ u})
+
+ + H  {{ [Qi]k}i∈[K]}k∈(T ∪{ u})
+
+
+
+− H  {Nk}k∈(T ∪{ u})
+
+
+
+− H  {{ [Qi]k}i∈[K]}k∈(T ∪{ u})
+
+ (36) 
+
+= 0 . (37) where the fourth term in (35) equals zero by (32), which follows from the (T + 1) -privacy property of the MDS matrix 
+
+α.With the correlated secret keys fully specified, we proceed to describe the message transmissions over two rounds. 
+
+First round: Each user transmits 
+
+Xk = Wk + Nk, ∀k ∈ [K]. (38) After the first round, each user determines the set of surviv-ing users U1 based on the received messages, and subsequently requests the transmission of the second-round messages. 
+
+Second round: To enable the recovery of the aggregated masking variables at each user, each surviving user k ∈ U 1
+
+transmits 
+
+Y U1 
+
+> k
+
+= X
+
+> i∈U 1
+
+[Qi]k. (39) With the correlated keys and two-round message transmis-sions fully specified, we proceed to analyze the scheme’s achievable rate, correctness, and information-theoretic secu-rity. 
+
+Rate: Each user input has length L = U − T − 1 symbols over Fq . In the first round, each user transmits LX = U −T −1
+
+symbols, yielding RX = LX 
+
+> L
+
+= 1. In the second round, each user transmits a single symbol, i.e., LY = 1 , which gives RY = LY 
+
+> L
+
+= 1   
+
+> U−T−1
+
+. Therefore, the proposed scheme achieves the rate pair 
+
+
+
+1, 1  
+
+> U−T−1
+
+
+
+, while satisfying both the correctness and security requirements. 
+
+Correctness: Each user k ∈ U2 receives the second-round messages {Y U1 
+
+> k
+
+}k∈U 2 , which, by (39), equal P  
+
+> i∈U 1
+
+[Qi]k k∈U 2
+
+. Each encoded symbol [Qi]k is defined as 
+
+[Qi]k ≜  Ni(1) , . . . , N i(U −T −1) , S i(1) , . . . , S i(T +1) αk,
+
+where α = [αk]k∈[K] ∈ FU ×Kq is an MDS matrix. By the MDS property, any U columns of α are linearly independent. Since each user u ∈ U2 receives messages from at least |U 2| ≥ U users, it obtains at least U coded symbols of the form P 
+
+> i∈U 1
+
+[Qi]k. These correspond to U linearly independent columns of α,which enables recovery of the aggregated keys vector P
+
+> i∈U 1
+
+ Ni(1) , . . . , N i(U − T − 1) , S i(1) , . . . , S i(T + 1) .
+
+Equivalently, each user can recover P 
+
+> i∈U 1
+
+Ni and P 
+
+> i∈U 1
+
+Si
+
+exactly. Finally, combining the recovered aggregated keys with the sum of the first-round messages, P 
+
+> k∈U 1
+
+Xk
+
+> (38)
+
+= P 
+
+> k∈U 1
+
+(Wk +
+
+Nk), each user can subtract P 
+
+> k∈U 1
+
+Nk and thus uniquely recover the desired aggregation P 
+
+> k∈U 1
+
+Wk with zero decoding error. 
+
+Security: Each user k ∈ U 2 collects messages from other users. The proposed scheme guarantees that, even if a user colludes with any set of at most T users, it can only learn the aggregate of the surviving users in the first round, and obtains no additional information about the individual messages of the non-colluding users. 
+
+I {Wk}k∈[K]; {Xk}k∈[K]\{ u}, {Y U1 
+
+> k
+
+}k∈U 1\{ u}
+
+X
+
+> k∈U 1
+
+Wk, {Wk, Z k}k∈T ∪{ u}
+
+!
+
+(40) 
+
+=H {Xk}k∈[K]\{ u}, {Y U1 
+
+> k
+
+}k∈U 1\{ u}
+
+X
+
+> k∈U 1
+
+Wk,
+
+{Wk, Z k}k∈T ∪{ u}
+
+!
+
+− H {Xk}k∈[K]\{ u},
+
+{Y U1 
+
+> k
+
+}k∈U 1\{ u}|{ Wk}k∈[K], {Wk, Z k}k∈T ∪{ u}
+
+!
+
+(41) 
+
+=H {Wk + Nk}k∈[K]\{ u},
+
+( X
+
+> i∈U 1
+
+[Qi]k
+
+)
+
+> k∈U 1
+
+X
+
+> k∈U 1
+
+Wk,
+
+{Wk, Z k}k∈T ∪{ u}
+
+!
+
+− H {Wk + Nk}k∈[K]\{ u},
+
+( X
+
+> i∈U 1
+
+[Qi]k
+
+)
+
+> k∈U 1
+
+{Wk}k∈[K], {Wk, Z k}k∈T ∪{ u}
+
+!
+
+(42) 
+
+=H {Wk + Nk}k∈[K]\(T ∪{ u})
+
+X
+
+> k∈U 1
+
+Wk,
+
+{Wk, Z k}k∈T ∪{ u}
+
+!
+
++ H X
+
+> i∈U 1
+
+Ni, X
+
+> i∈U 1
+
+Si
+
+{Wk + Nk}k∈[K]\{ u}, X
+
+> k∈U 1
+
+Wk, {Wk, Z k}k∈T ∪{ u}
+
+!
+
+−
+
+H({Wk + Nk}k∈[K]\(T ∪{ u})|{ Wk}k∈[K], {Zk}k∈T ∪{ u})8
+
+− H X
+
+> i∈U 1
+
+Ni, X
+
+> i∈U 1
+
+Si {Wk + Nk}k∈[K]\{ u},
+
+{Wk}k∈[K], {Wk, Z k}k∈T ∪{ u}
+
+!
+
+(43) 
+
+≤H {Wk + Nk}k∈[K]\(T ∪{ u})
+
+!
+
++ H X
+
+> i∈U 1
+
+Ni {Wk + Nk}k∈U 1 , X
+
+> k∈U 1
+
+Wk
+
+!| {z }
+
+> =0
+
++ H X
+
+> i∈U 1
+
+Si
+
+X
+
+> i∈U 1
+
+Ni, {Wk + Nk}k∈[K]\{ u},
+
+X
+
+> k∈U 1
+
+Wk,
+
+(
+
+Wk, N k,
+
+n
+
+[Qi]k
+
+o
+
+> i∈[K]
+
+)
+
+> k∈T ∪{ u}
+
+!
+
+− H {Nk}k∈[K]\(T ∪{ u})
+
+(
+
+Nk,
+
+n
+
+[Qi]k
+
+o
+
+> i∈[K]
+
+)
+
+> k∈T ∪{ u}
+
+!
+
+− H X
+
+> i∈U 1
+
+Ni {Nk}k∈[K], {Wk}k∈[K], {Zk}k∈T ∪{ u}
+
+!| {z }
+
+> =0
+
+− H X
+
+> i∈U 1
+
+Si {Nk}k∈[K], {Wk}k∈[K],
+
+{Nk,
+
+n
+
+[Qi]k
+
+o
+
+> i∈[K]
+
+}k∈T ∪{ u}
+
+!
+
+(44) 
+
+=H {Wk + Nk}k∈[K]\(T ∪{ u})
+
+!
+
+− H({Nk}k∈[K]\(T ∪{ u}))+ 
+
+I {Nk}k∈[K]\(T ∪{ u});
+
+(
+
+Nk,
+
+n
+
+[Qi]k
+
+o
+
+> i∈[K]
+
+)
+
+> k∈T ∪{ u}
+
+!| {z }
+
+> (33)
+> = 0
+
+(45) 
+
+=|[K] \ (T ∪ { u})| − | [K] \ (T ∪ { u})| = 0 . (46) We next justify the intermediate steps (43)–(45). In (43), the second and fourth entropy terms follow from the MDS struc-ture of the second-round encoding. Specifically, the collection 
+
+{Y U1 
+
+> k
+
+}k∈(U1\{ u}) allows recovery of only the aggregated keys P 
+
+> i∈U 1
+
+Ni and P 
+
+> i∈U 1
+
+Si. Given the aggregate P 
+
+> k∈U 1
+
+Wk,these quantities are independent of the individual users’ mes-sages and can be separated as shown. In (44), the second and fourth terms are zero since P 
+
+> i∈U 1
+
+Ni is uniquely determined by {Wk + Nk}k∈U 1 together with P 
+
+> k∈U 1
+
+Wk. The third term equals the sixth term. When |T ∪{ u}| = T +1 , both terms are zero since P 
+
+> i∈U 1
+
+Si is uniquely determined by P 
+
+> i∈U 1
+
+Ni and the second-round encoding coefficients known to the colluding users. When |T ∪{ u}| < T +1 , the random variable P 
+
+> i∈U 1
+
+Si
+
+is independent of all conditioned variables, and hence both terms equal H P  
+
+> i∈U 1
+
+Si
+
+. Finally, the third term in (45) equals zero due to the (T + 1) -privacy property in (33), which guarantees that {Nk}k∈[K]\(T ∪{ u}) is independent of the information available to the colluding users. V. C ONVERSE PROOF OF THEOREM 1Before presenting the converse proof, we first establish a basic property that follows from the independence between the inputs {Wk}k∈[K] and the secret keys {Zk}k∈[K], together with the uniform distribution of {Wk}k∈[K]. This property is formalized in the following lemma, which will be repeatedly used in the sequel. 
+
+Lemma 2: For any V0 < V 1, V0 < V 2, and V1̸ = V2, the following holds: 
+
+I
+
+ X
+
+> k∈[V1]
+
+Wk; X
+
+> k∈[V2]
+
+Wk, {Wk, Z k}k∈[V0]
+
+ = 0 . (47) 
+
+Proof of Lemma 2: 
+
+I
+
+ X
+
+> k∈[V1]
+
+Wk; X
+
+> k∈[V2]
+
+Wk, {Wk, Z k}k∈[V0]
+
+
+
+> (1)
+
+= I
+
+ X
+
+> k∈[V1]
+
+Wk; X
+
+> k∈[V2]
+
+Wk, {Wk}k∈[V0]
+
+ (48) 
+
+=H
+
+ X
+
+> k∈[V1]
+
+Wk
+
+
+
+− H
+
+ X
+
+> k∈[V1]
+
+Wk
+
+X
+
+> k∈[V2]
+
+Wk, {Wk}k∈[V0]
+
+ (49) 
+
+=L − L = 0 , (50) where the second term in (49) equals L since V1̸ = V2, V0 <V1, V0 < V 2, and {Wk}k∈[K] are independent and uniformly distributed. Building on Lemma 2, we proceed in several steps. We first characterize the infeasible regime when U ≤ T + 1 
+
+in Subsection V-A. We then illustrate the main converse ideas through two representative examples in Subsections V-B and V-C. Finally, for the feasible regime U > T +1 , we derive the converse bounds on the first-round and second-round communication rates in Subsections V-D and V-E, respectively. 
+
+A. Infeasibility Proof When U ≤ T + 1 
+
+We show that when U ≤ T + 1 , the system constraints are contradictory, and hence R∗ = ∅. To establish the contradiction, consider two distinct integers U1̸ = U2 such that U < U 2 and U < U 1. Let U1 = [ U1] and T = [ U − 1] ,and focus on user U , for which T ∪ { U } = [ U ]. Note that 
+
+U ≤ T + 1 ≤ K − 2, so this choice is valid. 
+
+L =H
+
+ X
+
+> k∈[U2]
+
+Wk
+
+
+
+(51) 9
+
+=I X
+
+> k∈[U2]
+
+Wk; {Xk}k∈[U2]\{ U } ,
+
+n
+
+Y [U2]
+
+> k
+
+o 
+
+> k∈[U−1]
+
+,WU , Z U
+
+!
+
++ H X
+
+> k∈[U2]
+
+Wk {Xk}k∈[U2]\{ U } ,
+
+| {z }n
+
+Y [U2]
+
+> k
+
+o 
+
+> k∈[U−1]
+
+, W U , Z U
+
+!| {z }
+
+> (5)
+> = 0
+
+(52) 
+
+≤I X
+
+> k∈[U2]
+
+Wk; {Xk}k∈[U2]\{ U } ,
+
+n
+
+Y [U2]
+
+> k
+
+o 
+
+> k∈[U−1]
+
+,
+
+X
+
+> k∈[U1]
+
+Wk, {Wk, Z k}k∈[U ]
+
+!
+
+(53) 
+
+=I X
+
+> k∈[U2]
+
+Wk; {Xk}k∈[U2]\{ U } ,
+
+n
+
+Y [U2]
+
+> k
+
+o 
+
+> k∈[U−1]
+
+X
+
+> k∈[U1]
+
+Wk, {Wk, Z k}k∈[U ]
+
+!
+
++ I X
+
+> k∈[U2]
+
+Wk; X
+
+> k∈[U1]
+
+Wk, {Wk, Z k}k∈[U ]
+
+!| {z }
+
+> =0
+
+(54) 
+
+> (4)
+
+= I X
+
+> k∈[U2]
+
+Wk; {Xk}k∈[U2]\{ U }
+
+X
+
+> k∈[U1]
+
+Wk, {Wk, Z k}k∈[U ]
+
+!
+
+(55) 
+
+≤I {Wk}k∈[K]\{ U } ; {Xk}k∈[K] ,
+
+n
+
+Y [U1]
+
+> k
+
+o 
+
+> k∈U 1\[U]
+
+X
+
+> k∈[U1]
+
+Wk, {Wk, Z k}k∈[U ]
+
+!
+
+(56) 
+
+=0 , (57) where the second term in (52) is zero due to the correctness constraint (5). The second term in (54) is zero by Lemma 2. (55) follows since the second-round messages 
+
+n
+
+Y [U2]
+
+> k
+
+o 
+
+> k∈[U−1]
+
+are deterministic functions of 
+
+{Wk, Z k}k∈[U ]. The last step follows from the security con-straint (6) with T ∪ { U } = [ U ].Having established the impossibility result for U ≤ T + 1 ,we next focus on the feasible regime U > T + 1 and derive converse bounds on the communication rates. Before presenting the general converse proof, we first use Example 1 to illustrate the key converse ideas in a simple setting. These examples provide useful intuition for the general arguments developed later. In particular, the first example explains why the first-round communication must already contain sufficient information about a user’s input if that user may drop out in the second round, while the second example illustrates how the security constraint effectively eliminates part of the communication from contributing to decoding. 
+
+B. Example 1: Converse for First-Round Communication 
+
+We briefly illustrate the main converse idea using Example 1 with K = 4 , U = 3 , and T = 0 . Consider the case where 
+
+U1 = {1, 2, 3, 4} and U2 = {2, 3, 4}. That is, all users survive the first round, while User 1 drops out in the second round. In this case, the surviving users in U2 must still recover the desired aggregation W1 + W2 + W3 + W4, even though User 1 does not transmit any second-round message. Since the input W1 is available only at User 1, the information about W1
+
+contained in the final decoding must already be carried by the first-round transmission X1. Intuitively, if X1 does not contain sufficient information about W1, then after User 1 drops out in the second round, the surviving users cannot reconstruct the desired sum. We next formalize this intuition. For User 2, the correctness constraint implies 
+
+0 = H
+
+
+
+W1 + W2 + W3 + W4
+
+X1, X 3, X 4, Y [4] 3 , Y [4] 4 , W 2, Z 2
+
+
+
+(58) 
+
+≥H
+
+
+
+W1 + W2 + W3 + W4 X1, X 3, X 4,Y [4] 3 , Y [4] 4 , W 2, Z 2, W 3, Z 3, W 4, Z 4
+
+
+
+(59) 
+
+> (3)(4)
+
+= H
+
+
+
+W1 + W2 + W3 + W4
+
+X1, W 2, Z 2, W 3, Z 3, W 4, Z 4
+
+
+
+(60) 
+
+=H
+
+
+
+W1 X1, W 2, Z 2, W 3, Z 3, W 4, Z 4
+
+
+
+. (61) Equation (60) follows because X3, X 4, Y [4] 3 , Y [4] 4 are deter-ministic functions of W3, Z 3, W 4, Z 4. Therefore, after condi-tioning on W2, Z 2, W 3, Z 3, W 4, Z 4, the only remaining uncer-tainty in the desired aggregation comes from W1. Since User 1 does not participate in the second round, the information about 
+
+W1 required for decoding can only be conveyed through the first-round message X1.Now consider the entropy of W1:
+
+L (2) 
+
+= H(W1) (62) 
+
+> (1)
+
+= H(W1|W2, Z 2, W 3, Z 3, W 4, Z 4) (63) 
+
+=I(W1; X1|W2, Z 2, W 3, Z 3, W 4, Z 4)+ H(W1|W2, Z 2, W 3, Z 3, W 4, Z 4, X 1)
+
+| {z }
+
+> (61)
+> = 0
+
+(64) 
+
+≤H(X1|W2, Z 2, W 3, Z 3, W 4, Z 4) (65) 
+
+≤H(X1) (66) 
+
+≤LX . (67) Therefore, 
+
+R1 = LX
+
+L ≥ 1. (68) This simple example captures the key intuition behind the general converse proof: if a user may drop out in the second round while its input must still be included in the desired 10 
+
+aggregation, then the first-round transmission must already contain sufficient information about that user’s input. 
+
+C. Example 1: Converse for Second-Round Communication 
+
+We next illustrate the converse idea for the second-round communication using Example 1 with K = 4 , U = 3 and 
+
+T = 0 . Unlike the converse for the first-round communication, the converse for the second-round communication relies on the security constraint. Intuitively, security forces part of the communication to become useless for decoding, and hence the remaining second-round messages must carry all information required for recovering the desired aggregation. Consider U1 = {1, 2, 3, 4} and U2 = {1, 2, 3}. Since T = 0 ,the security constraint requires that each user learns nothing beyond the desired aggregation. We focus on User 1. From the security constraint, User 1 together with the first-round messages and part of the second-round messages should not obtain any useful information about the desired aggregation beyond the target sum itself. Specifically, 
+
+0 (6) 
+
+= I
+
+
+
+W1, W 2, W 3, W 4; X2, X 3, X 4, Y [4] 2 , Y [4] 3 , Y [4] 4
+
+W1, Z 1, W 1 + W2 + W3 + W4
+
+
+
+(69) 
+
+≥I
+
+
+
+W1 + W2 + W3; X2, X 3,
+
+W1, Z 1, W 1 + W2 + W3 + W4
+
+
+
+(70) 
+
+=I
+
+
+
+W1 + W2 + W3; X2, X 3,W1, Z 1, W 1 + W2 + W3 + W4
+
+
+
+− I
+
+
+
+W1 + W2 + W3; W1, Z 1, W 1 + W2 + W3 + W4
+
+| {z }
+
+> (1)
+> = 0
+
+(71) 
+
+≥I
+
+
+
+W1 + W2 + W3; X2, X 3, W 1, Z 1
+
+
+
+. (72) Equation (72) shows that the first-round messages do not provide useful information for recovering the desired aggre-gation once the side information of User 1 and the target sum are given. Consequently, the remaining useful information required for decoding must come from the second-round messages. Next, from the correctness constraint, User 1 must recover 
+
+W1 + W2 + W3 + W4 from X2, X 3, Y [4] 2 , Y [4] 3 , W 1, Z 1. There-fore, 
+
+L =H(W1 + W2 + W3) (73) 
+
+=I
+
+
+
+W1 + W2 + W3; X2, X 3, Y [3] 2 , Y [3] 3 , W 1, Z 1
+
+
+
++ H
+
+
+
+W1 + W2 + W3 X2, X 3, Y [3] 2 , Y [3] 3 , W 1, Z 1
+
+| {z }
+
+> (5)
+> = 0
+
+(74) 
+
+= I
+
+
+
+W1 + W2 + W3; X2, X 3, W 1, Z 1
+
+| {z }
+
+> (72)
+> = 0
+
++ I
+
+
+
+W1 + W2 + W3; Y [3] 2 , Y [3] 3 X2, X 3, W 1, Z 1
+
+
+
+(75) 
+
+≤H
+
+
+
+Y [3] 2 , Y [3] 3
+
+
+
+(76) 
+
+≤H
+
+
+
+Y [3] 2
+
+
+
++ H
+
+
+
+Y [3] 3
+
+
+
+(77) 
+
+≤2LY . (78) Hence, 
+
+R2 = LY
+
+L ≥ 12 . (79) This example illustrates the key converse intuition: due to the security constraint, part of the communication becomes useless for decoding, and therefore the remaining second-round messages must carry all information required for re-covering the desired aggregation. 
+
+D. Converse for R1 ≥ 1 When U > T + 1 
+
+We now establish a lower bound on the first-round commu-nication rate. Intuitively, consider any user u that survives the first round but may drop out in the second round. Since Wu
+
+is only available at User u, the first-round message Xu must contain sufficient information about Wu so that the desired sum including Wu can still be recovered, which implies that 
+
+LX ≥ L. We next formalize this intuition. Consider any u ∈ [K] and u′ ∈ [K]\{ u}, and set U1 = [ K],
+
+U2 = [ K]\{ u}. Then from the correctness constraint (5), we have 
+
+0 (5) 
+
+= H X
+
+> k∈[K]
+
+Wk {Xk}k∈[K]\{ u′} ,
+
+n
+
+Y [K]
+
+> k
+
+o
+
+> k∈[K]\{ u,u ′}
+
+,Wu′ , Z u′
+
+!
+
+(80) 
+
+≥H X
+
+> k∈[K]
+
+Wk {Xk}k∈[K]\{ u′} ,
+
+n
+
+Y [K]
+
+> k
+
+o
+
+> k∈[K]\{ u,u ′}
+
+,
+
+{Wk, Z k}k∈[K]\{ u}
+
+!
+
+(81) 
+
+> (3)(4)
+
+= H
+
+
+
+Wu Xu, {Wk, Z k}k∈[K]\{ u}
+
+
+
+, (82) where (82) follows since {Xk}k∈[K]\{ u,u ′} and 
+
+{Y [K] 
+
+> k
+
+}k∈[K]\{ u,u ′} are deterministic functions of 
+
+{Wk, Z k}k∈[K]\{ u} (see (3), (4)). We next show that 
+
+L (2) 
+
+= H(Wu) (83) 
+
+> (1)
+
+= H
+
+
+
+Wu {Wk, Z k}k∈[K]\{ u}
+
+
+
+(84) 
+
+= I
+
+
+
+Wu; Xu {Wk, Z k}k∈[K]\{ u}
+
+
+
++ H
+
+
+
+Wu Xu, {Wk, Z k}k∈[K]\{ u}
+
+| {z }
+
+> (82)
+> = 0
+
+(85) 
+
+≤ H
+
+
+
+Xu {Wk, Z k}k∈[K]\{ u}
+
+
+
+(86) 
+
+≤ H (Xu) ≤ LX , (87) which implies 
+
+R1(7) 
+
+= LX
+
+L ≥ 1. (88) 11 
+
+E. Converse for R2 ≥ 1   
+
+> U−T−1
+
+When U > T + 1 
+
+Intuitively, due to the security constraint, all first-round messages and any T + 1 second-round messages do not contribute useful information for decoding the desired sum (see (93)). Hence, all useful information must come from the remaining (U −T −1) second-round messages, so that each of them must carry at least L/ (U −T −1) symbols of information on average. We now formalize this argument. Consider U1 = [ U + 1] , U2 = [ U ], and T = [ T ]. Recall that U > T + 1 . For User u = T + 1 , from the security constraint (6), we have 
+
+0 (6) 
+
+= I {Wk}k∈[K] ; {Xk}k∈[K]\{ T +1 } ,
+
+n
+
+Y [U +1] 
+
+> k
+
+o  
+
+> k∈[U+1] \{ T+1 }
+
+X 
+
+> k∈[U+1]
+
+Wk,
+
+{Wk, Z k}k∈([ T ]∪{ T +1 })
+
+!
+
+(89) 
+
+≥I X 
+
+> k∈[U]
+
+Wk; {Xk}k∈[U ]\{ T +1 }
+
+X 
+
+> k∈[U+1]
+
+Wk, {Wk, Z k}k∈[T +1] 
+
+!
+
+(90) 
+
+> (4)
+
+= I X 
+
+> k∈[U]
+
+Wk; {Xk}k∈[U ]\{ T +1 } ,
+
+n
+
+Y [U ]
+
+> k
+
+o 
+
+> k∈[T]
+
+X 
+
+> k∈[U+1]
+
+Wk, {Wk, Z k}k∈[T +1] 
+
+!
+
+(91) 
+
+=I X 
+
+> k∈[U]
+
+Wk; {Xk}k∈[U ]\{ T +1 } ,
+
+n
+
+Y [U ]
+
+> k
+
+o 
+
+> k∈[T]
+
+,
+
+X 
+
+> k∈[U+1]
+
+Wk, {Wk, Z k}k∈[T +1] 
+
+!
+
+− I X 
+
+> k∈[U]
+
+Wk; X 
+
+> k∈[U+1]
+
+Wk, {Wk, Z k}k∈[T +1] 
+
+!| {z }
+
+> (47)
+> = 0
+
+(92) 
+
+≥I X 
+
+> k∈[U]
+
+Wk; {Xk}k∈[U ]\{ T +1 } ,
+
+n
+
+Y [U ]
+
+> k
+
+o 
+
+> k∈[T]
+
+,WT +1 , Z T +1 
+
+!
+
+, (93) where (91) holds since the first-round messages 
+
+{Xk}k∈[U ]\{ T +1 } are deterministic functions of 
+
+{Wk, Z k}k∈[T +1] by (3), (4), and the second term in (92) is zero by Lemma 2. Next, consider U1 = U2 = [ U ]. For User T + 1 , we have 
+
+L =H X 
+
+> k∈[U]
+
+Wk
+
+!
+
+(94) 
+
+=I X 
+
+> k∈[U]
+
+Wk; {Xk}k∈[U ]\{ T +1 } ,
+
+n
+
+Y [U ]
+
+> k
+
+o  
+
+> k∈[U]\{ T+1 }
+
+,WT +1 , Z T +1 
+
+!
+
++ H X 
+
+> k∈[U]
+
+Wk {Xk}k∈[U ]\{ T +1 } ,
+
+| {z }n
+
+Y [U ]
+
+> k
+
+o  
+
+> k∈[U]\{ T+1 }
+
+, W T +1 , Z T +1 
+
+!| {z }
+
+> (5)
+> = 0
+
+(95) 
+
+=I X 
+
+> k∈[U]
+
+Wk;
+
+n
+
+Y [U ]
+
+> k
+
+o  
+
+> k∈[U]\[T+1]
+
+{Xk}k∈[U ]\{ T +1 } ,
+
+n
+
+Y [U ]
+
+> k
+
+o 
+
+> k∈[T]
+
+, W T +1 , Z T +1 
+
+!
+
++ I X 
+
+> k∈[U]
+
+Wk;
+
+| {z }
+
+{Xk}k∈[U ]\{ T +1 } ,
+
+n
+
+Y [U ]
+
+> k
+
+o 
+
+> k∈[T]
+
+, W T +1 , Z T +1 
+
+!| {z }
+
+> (93)
+> = 0
+
+(96) 
+
+≤H
+
+n
+
+Y [U ]
+
+> k
+
+o  
+
+> k∈[U]\[T+1]
+
+!
+
+≤ X  
+
+> k∈[U]\[T+1]
+
+H
+
+
+
+Y [U ]
+
+> k
+
+
+
+≤ (U − T − 1) LY (97) 
+
+⇒ R2(7) 
+
+= LY
+
+L ≥ 1
+
+U − T − 1 , (98) where the second term in (95) is zero due to the correctness constraint (5), and the second term in (96) is zero by (93). VI. C ONCLUSION 
+
+This paper studied DSA with user dropout and T -colluding adversaries. We proposed a two-round communication frame-work that enables correct recovery of the global sum of private inputs while guaranteeing information-theoretic privacy. We established a feasibility condition, showing that secure aggre-gation is achievable if and only if U > T + 1 . This result precisely characterizes the interplay between user dropout tolerance and collusion resistance in decentralized settings. For the feasible regime, we developed an explicit coding scheme based on structured correlated keys and MDS codes. The scheme achieves optimal communication rates, namely R1 = 1 
+
+for the first round and R2 = 1   
+
+> U−T−1
+
+for the second round, and thus fully characterizes the rate region under the proposed model. An interesting future direction is to extend the proposed framework to arbitrary or sparse networks. With limited neigh-borhood connectivity, recovery becomes harder because cor-related keys must cancel through local, topology-constrained interactions rather than global coordination. Characterizing how network topology affects feasibility, dropout tolerance, collusion resistance, and communication rates remains open. REFERENCES [1] J. Konecn` y, H. B. McMahan, F. X. Yu, P. Richt´ arik, A. T. Suresh, and D. Bacon, “Federated learning: Strategies for improving communication efficiency,” arXiv preprint arXiv:1610.05492 , vol. 8, 2016. 12 
+
+[2] B. McMahan, E. Moore, D. Ramage, S. Hampson, and B. A. y. Arcas, “Communication-Efficient Learning of Deep Networks from Decentralized Data,” in Proceedings of the 20th International Conference on Artificial Intelligence and Statistics , ser. Proceedings of Machine Learning Research, A. Singh and J. Zhu, Eds., vol. 54. PMLR, 20–22 Apr 2017, pp. 1273–1282. [Online]. Available: https://proceedings.mlr.press/v54/mcmahan17a.html [3] P. Kairouz and H. B. McMahan, “Advances and open problems in federated learning,” Foundations and Trends in Machine Learning ,vol. 14, no. 1-2, pp. 1–210, 06 2021. [Online]. Available: https: //doi.org/10.1561/2200000083 [4] T. Li, A. K. Sahu, A. Talwalkar, and V. Smith, “Federated learning: Challenges, methods, and future directions,” IEEE Signal Processing Magazine , vol. 37, no. 3, pp. 50–60, 2020. [5] T. Yang, G. Andrew, H. Eichner, H. Sun, W. Li, N. Kong, D. Ram-age, and F. Beaufays, “Applied federated learning: Improving google keyboard query suggestions,” arXiv preprint arXiv:1812.02903 , 2018. [6] K. Bonawitz, V. Ivanov, B. Kreuter, A. Marcedone, H. B. McMa-han, S. Patel, D. Ramage, A. Segal, and K. Seth, “Practical secure aggregation for federated learning on user-held data,” arXiv preprint arXiv:1611.04482 , 2016. [7] ——, “Practical secure aggregation for privacy-preserving machine learning,” in proceedings of the 2017 ACM SIGSAC Conference on Computer and Communications Security , 2017, pp. 1175–1191. [8] Y. Zhao and H. Sun, “Secure summation: Capacity region, groupwise key, and feasibility,” IEEE Transactions on Information Theory , 2023. [9] Z. Liu, J. Guo, K.-Y. Lam, and J. Zhao, “Efficient dropout-resilient ag-gregation for privacy-preserving machine learning,” IEEE Transactions on Information Forensics and Security , vol. 18, pp. 1839–1854, 2022. [10] Y. Zhao and H. Sun, “Mds variable generation and secure summation with user selection,” IEEE Transactions on Information Theory , vol. 71, no. 4, pp. 3129–3141, 2025. [11] Z. Li, Y. Zhao, and H. Sun, “Weakly secure summation with colluding users,” IEEE Transactions on Information Theory , 2025. [12] Z. Li, X. Zhang, J. Lv, H. Chen, J. Fan, and G. Caire, “Hierarchical secure aggregation with heterogeneous security constraints and arbitrary user collusion,” arXiv preprint arXiv:2507.14768 , 2025. [13] X. Zhang, Z. Li, K. Wan, H. Sun, M. Ji, and G. Caire, “Fundamental limits of hierarchical secure aggregation with cyclic user association,” 2025. [Online]. Available: https://tinyurl.com/mtj4zhvt [14] X. Zhang, K. Wan, H. Sun, S. Wang, M. Ji, and G. Caire, “Optimal communication and key rate region for hierarchical secure aggregation with user collusion,” IEEE Transactions on Information Theory , vol. 72, no. 2, pp. 1030–1050, 2026. [15] Z. Li, X. Zhang, K. Wan, H. Sun, M. Ji, and G. Caire, “Optimal rate region for multi-server secure aggregation with user collusion,” 2026. [Online]. Available: https://arxiv.org/abs/2601.06836 [16] X. Zhang, Z. Li, S. Li, K. Wan, D. W. K. Ng, and G. Caire, “Information-theoretic decentralized secure aggregation with collusion resilience,” 
+
+arXiv preprint arXiv:2508.00596 , 2025. [17] Z. Li, X. Zhang, Y. Zhao, H. Chen, J. Fan, and G. Caire, “The capacity of collusion-resilient decentralized secure aggregation with groupwise keys,” arXiv preprint arXiv:2511.14444 , 2025. [18] Z. Li, X. Zhang, and G. Caire, “Optimal key rates for decentralized secure aggregation with arbitrary collusion and heterogeneous security constraints,” arXiv preprint arXiv:2512.16112 , 2025. [19] Y. Zhao and H. Sun, “Information theoretic secure aggregation with user dropouts,” IEEE Transactions on Information Theory , vol. 68, no. 11, pp. 7471–7484, 2022. [20] J. So, C. He, C.-S. Yang, S. Li, Q. Yu, R. E Ali, B. Guler, and S. Avestimehr, “Lightsecagg: a lightweight and versatile design for secure aggregation in federated learning,” Proceedings of Machine Learning and Systems , vol. 4, pp. 694–720, 2022. [21] T. Jahani-Nezhad, M. A. Maddah-Ali, S. Li, and G. Caire, “Swiftagg: Communication-efficient and dropout-resistant secure aggregation for federated learning with worst-case security guarantees,” in 2022 IEEE International Symposium on Information Theory (ISIT) . IEEE, 2022, pp. 103–108. [22] Z. Li, Y. Zhao, X. Zhang, and G. Caire, “On the fundamental limits of hierarchical secure aggregation with dropout and collusion resilience,” 2026. [Online]. Available: https://arxiv.org/abs/2603.19705 [23] Z. Zhang, J. Liu, K. Wan, H. Sun, M. Ji, and G. Caire, “On secure aggregation with uncoded groupwise keys against user dropouts and user collusion,” IEEE Transactions on Information Theory , 2025. [24] M. Xu, X. Han, K. Wan, and G. Ge, “On hierarchical secure aggregation against relay and user collusion,” 2025. [Online]. Available: https://arxiv.org/abs/2511.20117 [25] C. E. Shannon, “Communication Theory of Secrecy Systems,” Bell System Technical Journal , vol. 28, no. 4, pp. 656–715, 1949. [26] H. Sun and S. A. Jafar, “The Capacity of Symmetric Private Information Retrieval,” IEEE Transactions on Information Theory , vol. 65, no. 1, pp. 322–329, 2019. [27] Z. Jia, H. Sun, and S. A. Jafar, “Cross Subspace Alignment and the Asymptotic Capacity of X–Secure T–Private Information Retrieval,” 
+
+IEEE Transactions on Information Theory , vol. 65, no. 9, pp. 5783– 5798, 2019. [28] K. Bonawitz, V. Ivanov, B. Kreuter, A. Marcedone, H. B. McMa-han, S. Patel, D. Ramage, A. Segal, and K. Seth, “Practical secure aggregation for federated learning on user-held data,” arXiv preprint arXiv:1611.04482 , 2016. [29] ——, “Practical Secure Aggregation for Privacy-Preserving Machine Learning,” in Proceedings of the 2017 ACM SIGSAC Conference on Computer and Communications Security , 2017, pp. 1175–1191. [30] J. H. Bell, K. A. Bonawitz, A. Gasc´ on, T. Lepoint, and M. Raykova, “Secure Single-Server Aggregation with (Poly) Logarithmic Overhead,” in Proceedings of the 2020 ACM SIGSAC Conference on Computer and Communications Security , 2020, pp. 1253–1269. [31] J. So, B. G¨ uler, and A. S. Avestimehr, “Turbo-Aggregate: Breaking the Quadratic Aggregation Barrier in Secure Federated Learning,” IEEE Journal on Selected Areas in Information Theory , vol. 2, no. 1, pp. 479–489, 2021. [32] S. Kadhe, N. Rajaraman, O. O. Koyluoglu, and K. Ramchandran, “Fast-SecAgg: Scalable Secure Aggregation for Privacy-Preserving Federated Learning,” arXiv preprint arXiv:2009.11248 , 2020. [33] K. Bonawitz, F. Salehi, J. Koneˇ cn` y, B. McMahan, and M. Gruteser, “Federated learning with autotuned communication-efficient secure ag-gregation,” in 2019 53rd Asilomar Conference on Signals, Systems, and Computers . IEEE, 2019, pp. 1222–1226. [34] B. Choi, J. yong Sohn, D.-J. Han, and J. Moon, “Communication-Computation Efficient Secure Aggregation for Federated Learning,” 
+
+arXiv preprint arXiv:2012.05433 , 2020.
