@@ -1,0 +1,37 @@
+{
+  "label": "2026-05-23",
+  "date": "2026-05-23",
+  "generated_at": "2026-05-23T20:40:41",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202605/23/2605.15694v2-going-beyond-the-edge-distributed-inference-of-transformer-models-on-ultra-low-power-wireless-devices",
+      "section": "deep",
+      "title_en": "Going Beyond the Edge: Distributed Inference of Transformer Models on Ultra-Low-Power Wireless Devices",
+      "authors": "Alexander Gräfe, Ding Huo, Vincent de Bakker, Johannes Berger, Marco Zimmerling, Sebastian Trimpe",
+      "date": "2026-05-15",
+      "pdf": "https://arxiv.org/pdf/2605.15694v2",
+      "score": "8.0",
+      "evidence": "Transformer模型的分布式推理",
+      "tldr": "针对超低功耗物联网设备无法独立运行大型Transformer模型的问题，本文提出了CATS分布式推理框架。该框架通过协同设计模型分区、无线通信和训练过程，引入了SomeGather剪枝通信原语以显著降低带宽和内存需求。同时，利用消息丢弃训练增强了模型对无线丢包的鲁棒性。实验表明，CATS支持多达16台设备协作，可运行比单机容量大14倍的模型，首次实现了此类设备上的分布式Transformer推理。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Transformer models are rapidly becoming a cornerstone of modern Internet of Things (IoT) applications, yet their computational and memory demands far exceed the capabilities of a single typical ultra-low-power IoT device. We present CATS, a framework for distributed transformer inference on ultra-low-power wireless devices, enabling multiple devices to collaboratively execute models far larger than what a single device can sustain. At its core, CATS is a communication-aware distributed transformer inference scheme co-designed across transformer partitioning, wireless communication and training. It employs SomeGather, a new pruned communication primitive that selectively broadcasts activation columns to reduce communication bandwidth and RAM usage without sacrificing model accuracy. Building on SomeGather, we design a partitioning method that exploits this primitive for efficient model parallelism. To cope with unreliable wireless communication, CATS employs message-dropout during training, which mimics packet losses and yields models that are robust to message loss during inference. In real-world experiments, we show that CATS brings distributed transformer inference to ultra-low-power wireless devices for the first time, with deployments on up to 16 devices that collaboratively execute transformer models up to 14 times larger than what a single device can run.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/23/2605.22039v1-secure-and-parallel-determinant-computation-for-large-scale-matrices-in-edge-environments",
+      "section": "quick",
+      "title_en": "Secure and Parallel Determinant Computation for Large-Scale Matrices in Edge Environments",
+      "authors": "Prajwal Panth",
+      "date": "2026-05-21",
+      "pdf": "https://arxiv.org/pdf/2605.22039v1",
+      "score": "6.0",
+      "evidence": "边缘服务器间的隐私保护分布式计算",
+      "tldr": "针对边缘计算环境下大规模矩阵行列式计算（MDC）的高复杂度与隐私泄露问题，本文提出了一种安全并行行列式计算（SPDC）框架。该框架利用复合元素扭曲（CED）技术实现轻量级加密，结合并行LU分解将计算任务分发至多个不可信边缘服务器，并引入单向通信模型和高效验证算法。该方案在保证数据隐私和结果完整性的同时，显著提升了计算效率，适用于资源受限的物联网实时应用场景。",
+      "tags": "query:fss-llm",
+      "abstract_en": "The advent of edge computing has enabled resource-constrained clients to delegate intensive computational tasks to distributed edge servers, especially within Internet of Things (IoT) environments. Among such tasks, Matrix Determinant Computation (MDC) remains critical for applications in control systems, cryptography, and machine learning. However, the cubic complexity of traditional determinant algorithms makes them unsuitable for real-time processing in constrained edge scenarios.   We propose a Secure Parallel Determinant Computation (SPDC) framework, which provides strong security guaranties, including privacy-preserving MDC, across N distributed edge servers. The framework achieves privacy through Composite Element Distortion (CED) - a lightweight encryption method that combines Element-wise Obfuscation (EWO) and the Panth Rotation Theorem (PRT) to conceal both structural and numerical matrix content while preserving determinant properties. Parallel LU decomposition is used to distribute encrypted matrix blocks across an arbitrary number of untrusted edge servers, enabling efficient and scalable determinant computation. A one-way communication model further reduces coordination overhead by eliminating inter-server interactions. To ensure result integrity with minimal client burden, we further introduce two verification algorithms: Q_2, a probabilistic scalar method, and Q_3, a deterministic and low-complexity alternative.   Mathematical analysis demonstrates that the proposed framework provides strong privacy and security guaranties, low computational overhead, and deployment flexibility - making it well-suited for secure, scalable, and real-time MDC in distributed edge-assisted systems.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

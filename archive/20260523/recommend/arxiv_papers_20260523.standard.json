@@ -1,0 +1,93 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-23T20:39:47.797759+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2605.15694v2",
+      "title": "Going Beyond the Edge: Distributed Inference of Transformer Models on Ultra-Low-Power Wireless Devices",
+      "abstract": "Transformer models are rapidly becoming a cornerstone of modern Internet of Things (IoT) applications, yet their computational and memory demands far exceed the capabilities of a single typical ultra-low-power IoT device. We present CATS, a framework for distributed transformer inference on ultra-low-power wireless devices, enabling multiple devices to collaboratively execute models far larger than what a single device can sustain. At its core, CATS is a communication-aware distributed transformer inference scheme co-designed across transformer partitioning, wireless communication and training. It employs SomeGather, a new pruned communication primitive that selectively broadcasts activation columns to reduce communication bandwidth and RAM usage without sacrificing model accuracy. Building on SomeGather, we design a partitioning method that exploits this primitive for efficient model parallelism. To cope with unreliable wireless communication, CATS employs message-dropout during training, which mimics packet losses and yields models that are robust to message loss during inference. In real-world experiments, we show that CATS brings distributed transformer inference to ultra-low-power wireless devices for the first time, with deployments on up to 16 devices that collaboratively execute transformer models up to 14 times larger than what a single device can run.",
+      "authors": [
+        "Alexander Gräfe",
+        "Ding Huo",
+        "Vincent de Bakker",
+        "Johannes Berger",
+        "Marco Zimmerling",
+        "Sebastian Trimpe"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-05-15T07:33:53+00:00",
+      "link": "https://arxiv.org/pdf/2605.15694v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Distributed inference of Transformer models",
+      "llm_evidence_cn": "Transformer模型的分布式推理",
+      "llm_evidence": "Transformer模型的分布式推理",
+      "canonical_evidence": "Transformer模型的分布式推理",
+      "llm_tldr_en": "Enables collaborative Transformer inference across multiple low-power devices via a communication-aware framework.",
+      "llm_tldr_cn": "通过通信感知框架实现多个低功耗设备间的Transformer模型协作推理。",
+      "llm_tldr": "通过通信感知框架实现多个低功耗设备间的Transformer模型协作推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2605.22039v1",
+      "title": "Secure and Parallel Determinant Computation for Large-Scale Matrices in Edge Environments",
+      "abstract": "The advent of edge computing has enabled resource-constrained clients to delegate intensive computational tasks to distributed edge servers, especially within Internet of Things (IoT) environments. Among such tasks, Matrix Determinant Computation (MDC) remains critical for applications in control systems, cryptography, and machine learning. However, the cubic complexity of traditional determinant algorithms makes them unsuitable for real-time processing in constrained edge scenarios.   We propose a Secure Parallel Determinant Computation (SPDC) framework, which provides strong security guaranties, including privacy-preserving MDC, across N distributed edge servers. The framework achieves privacy through Composite Element Distortion (CED) - a lightweight encryption method that combines Element-wise Obfuscation (EWO) and the Panth Rotation Theorem (PRT) to conceal both structural and numerical matrix content while preserving determinant properties. Parallel LU decomposition is used to distribute encrypted matrix blocks across an arbitrary number of untrusted edge servers, enabling efficient and scalable determinant computation. A one-way communication model further reduces coordination overhead by eliminating inter-server interactions. To ensure result integrity with minimal client burden, we further introduce two verification algorithms: Q_2, a probabilistic scalar method, and Q_3, a deterministic and low-complexity alternative.   Mathematical analysis demonstrates that the proposed framework provides strong privacy and security guaranties, low computational overhead, and deployment flexibility - making it well-suited for secure, scalable, and real-time MDC in distributed edge-assisted systems.",
+      "authors": [
+        "Prajwal Panth"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC",
+        "cs.AI",
+        "cs.CR",
+        "cs.MS"
+      ],
+      "published": "2026-05-21T06:23:17+00:00",
+      "link": "https://arxiv.org/pdf/2605.22039v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "privacy-preserving distributed computation across edge servers",
+      "llm_evidence_cn": "边缘服务器间的隐私保护分布式计算",
+      "llm_evidence": "边缘服务器间的隐私保护分布式计算",
+      "canonical_evidence": "边缘服务器间的隐私保护分布式计算",
+      "llm_tldr_en": "Proposes a secure parallel framework for privacy-preserving matrix determinant computation in edge environments.",
+      "llm_tldr_cn": "提出了一种在边缘环境下进行隐私保护矩阵行列式计算的安全并行框架。",
+      "llm_tldr": "提出了一种在边缘环境下进行隐私保护矩阵行列式计算的安全并行框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
