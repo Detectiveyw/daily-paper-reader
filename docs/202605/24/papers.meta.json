@@ -1,0 +1,37 @@
+{
+  "label": "2026-05-24",
+  "date": "2026-05-24",
+  "generated_at": "2026-05-24T20:38:33",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202605/24/2605.20944v1-privacy-preserving-distributed-optimization-under-time-constraints-using-secure-multi-party-computation-and-evolutionary-algorithms",
+      "section": "quick",
+      "title_en": "Privacy-Preserving Distributed Optimization Under Time Constraints Using Secure Multi-Party Computation and Evolutionary Algorithms",
+      "authors": "Sebastian Gruber, Tobias Harzfeld, Christoph G. Schuetz, Florian Wohner, Thomas Lorünser",
+      "date": "2026-05-20",
+      "pdf": "https://arxiv.org/pdf/2605.20944v1",
+      "score": "7.0",
+      "evidence": "使用安全多方计算的隐私保护分布式优化",
+      "tldr": "本文针对分布式优化中隐私保护计算（如MPC）带来的高运行开销问题，提出了一种结合进化算法与安全多方计算的框架。该方法利用进化算法进行解搜索，并使用MPC进行解评估，通过混淆评估结果在保护隐私的同时降低时间延迟，确保在时间受限环境下提供高质量解。",
+      "tags": "query:fss-llm",
+      "abstract_en": "In distributed optimization, multiple parties collaborate to find an optimal solution to a problem. Privacy-preserving distributed optimization uses techniques, such as secure multi-party computation (MPC), to protect the private inputs of each party. In time-critical settings, the runtime overhead introduced by privacy-preserving computations may prevent the optimization from finishing within the deadline. This paper presents an approach for privacy-preserving distributed optimization in time-critical settings that combines evolutionary algorithms for solution search and MPC for the evaluation of solutions. The approach reduces the impact of privacy-preserving computations on runtime and allows to return solution within the deadline. Obfuscation of evaluation results provides additional protection for private inputs from an honest-but-curious platform provider, but introduces a potential trade-off between protection and solution quality. This trade-off is investigated in experiments using a genetic algorithm for both the single-objective assignment problem and the traveling salesperson problem, as well as NSGA-II for the multi-objective assignment problem.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/24/2605.18415v1-residue-number-system-comparison-revisited-a-software-perspective",
+      "section": "quick",
+      "title_en": "Residue Number System Comparison revisited, a software perspective",
+      "authors": "Laurent-Stéphane Didier, Léa Glandus, Nadia El Mrabet, Jean-Marc Robert",
+      "date": "2026-05-18",
+      "pdf": "https://arxiv.org/pdf/2605.18415v1",
+      "score": "6.0",
+      "evidence": "余数系统中比较两个数字的新方法",
+      "tldr": "本研究针对余数系统（RNS）中数值比较这一难题，提出了一种利用额外模数的新方法。该方法无需特殊形式的模数基，且适用于全范围整数比较。通过将复杂度为 O(n^2)（并行可降至 O(log n)）的混合基表示（MRR）转换应用于比较过程，克服了现有方法对输入范围或模数结构的限制，为RNS下的除法、缩放及密码学应用提供了更高效的解决方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "This paper presents a novel method to compare two numbers in Residue Number System (RNS) using an additional modulus, which is often already available because it is required in modular computations and digital signal processing scaling.Our method provides the comparison of two integers in the full range of the RNS base. It does not require moduli of a special form, unlike other state-of-the-art methods that are restricted to specific RNS bases or require bounds on input numbers. Our approach only requires one single conversion to a mixed radix representation with a complexity of O(n2), which can be reduced to O(log(n)) in time with parallelization. This provides a significant advantage over classical methods and more recent competitive methods which work under restrictions. This opens perspectives for advancements in challenging RNS operations such as division, scaling, and cryptographic applications.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

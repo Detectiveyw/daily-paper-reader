@@ -6,28 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-23
-- 运行时间：2026-05-23 20:40:33 UTC
+- 最新运行日期：2026-05-24
+- 运行时间：2026-05-24 20:38:21 UTC
 - 运行状态：成功
 - 本次总论文数：2
-- 精读区：1
-- 速读区：1
+- 精读区：0
+- 速读区：2
 
 ### 今日简报（AI）
-今日聚焦边缘计算突破，深入探讨了超低功耗无线设备上的 Transformer 分布式推理及大规模矩阵安全计算。
-核心结论指出，通过分布式架构可让极低功耗终端跨越性能鸿沟，实现复杂大模型的高效运行。
-建议关注物联网设备协同计算的新趋势，探索如何利用碎片化算力完成高难度的 AI 任务。
-- 详情：[/202605/23/README](/202605/23/README)
+今日聚焦分布式优化中的隐私安全与剩余数系统（RNS）的软件性能重估。
+核心成果包括结合安全多方计算与进化算法的限时优化方案，以及针对 RNS 比较逻辑的软件实现优化。
+推荐关注如何在满足时间约束的前提下，利用加密技术平衡分布式计算的效率与隐私。
+- 详情：[/202605/24/README](/202605/24/README)
 
 ### 精读区论文标签
-1. [Going Beyond the Edge: Distributed Inference of Transformer Models on Ultra-Low-Power Wireless Devices](/202605/23/2605.15694v2-going-beyond-the-edge-distributed-inference-of-transformer-models-on-ultra-low-power-wireless-devices)  
-   标签：评分：8.0/10、query:fss-llm
-   evidence：Transformer模型的分布式推理
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Secure and Parallel Determinant Computation for Large-Scale Matrices in Edge Environments](/202605/23/2605.22039v1-secure-and-parallel-determinant-computation-for-large-scale-matrices-in-edge-environments)  
+1. [Privacy-Preserving Distributed Optimization Under Time Constraints Using Secure Multi-Party Computation and Evolutionary Algorithms](/202605/24/2605.20944v1-privacy-preserving-distributed-optimization-under-time-constraints-using-secure-multi-party-computation-and-evolutionary-algorithms)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：使用安全多方计算的隐私保护分布式优化
+2. [Residue Number System Comparison revisited, a software perspective](/202605/24/2605.18415v1-residue-number-system-comparison-revisited-a-software-perspective)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：边缘服务器间的隐私保护分布式计算
+   evidence：余数系统中比较两个数字的新方法
 
 
 <div class="dpr-home-promo-card">

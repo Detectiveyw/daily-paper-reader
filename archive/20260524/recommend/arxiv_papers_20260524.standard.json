@@ -1,0 +1,93 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-24T20:38:00.946469+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.20944v1",
+      "title": "Privacy-Preserving Distributed Optimization Under Time Constraints Using Secure Multi-Party Computation and Evolutionary Algorithms",
+      "abstract": "In distributed optimization, multiple parties collaborate to find an optimal solution to a problem. Privacy-preserving distributed optimization uses techniques, such as secure multi-party computation (MPC), to protect the private inputs of each party. In time-critical settings, the runtime overhead introduced by privacy-preserving computations may prevent the optimization from finishing within the deadline. This paper presents an approach for privacy-preserving distributed optimization in time-critical settings that combines evolutionary algorithms for solution search and MPC for the evaluation of solutions. The approach reduces the impact of privacy-preserving computations on runtime and allows to return solution within the deadline. Obfuscation of evaluation results provides additional protection for private inputs from an honest-but-curious platform provider, but introduces a potential trade-off between protection and solution quality. This trade-off is investigated in experiments using a genetic algorithm for both the single-objective assignment problem and the traveling salesperson problem, as well as NSGA-II for the multi-objective assignment problem.",
+      "authors": [
+        "Sebastian Gruber",
+        "Tobias Harzfeld",
+        "Christoph G. Schuetz",
+        "Florian Wohner",
+        "Thomas Lorünser"
+      ],
+      "primary_category": "cs.NE",
+      "categories": [
+        "cs.NE",
+        "cs.CR"
+      ],
+      "published": "2026-05-20T09:29:50+00:00",
+      "link": "https://arxiv.org/pdf/2605.20944v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "privacy-preserving distributed optimization using secure multi-party computation",
+      "llm_evidence_cn": "使用安全多方计算的隐私保护分布式优化",
+      "llm_evidence": "使用安全多方计算的隐私保护分布式优化",
+      "canonical_evidence": "使用安全多方计算的隐私保护分布式优化",
+      "llm_tldr_en": "Combines evolutionary algorithms and MPC for privacy-preserving optimization under time constraints.",
+      "llm_tldr_cn": "结合进化算法和多方计算，在时间约束下实现隐私保护优化。",
+      "llm_tldr": "结合进化算法和多方计算，在时间约束下实现隐私保护优化。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.18415v1",
+      "title": "Residue Number System Comparison revisited, a software perspective",
+      "abstract": "This paper presents a novel method to compare two numbers in Residue Number System (RNS) using an additional modulus, which is often already available because it is required in modular computations and digital signal processing scaling.Our method provides the comparison of two integers in the full range of the RNS base. It does not require moduli of a special form, unlike other state-of-the-art methods that are restricted to specific RNS bases or require bounds on input numbers. Our approach only requires one single conversion to a mixed radix representation with a complexity of O(n2), which can be reduced to O(log(n)) in time with parallelization. This provides a significant advantage over classical methods and more recent competitive methods which work under restrictions. This opens perspectives for advancements in challenging RNS operations such as division, scaling, and cryptographic applications.",
+      "authors": [
+        "Laurent-Stéphane Didier",
+        "Léa Glandus",
+        "Nadia El Mrabet",
+        "Jean-Marc Robert"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-05-18T13:52:39+00:00",
+      "link": "https://arxiv.org/pdf/2605.18415v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Novel method to compare two numbers in Residue Number System",
+      "llm_evidence_cn": "余数系统中比较两个数字的新方法",
+      "llm_evidence": "余数系统中比较两个数字的新方法",
+      "canonical_evidence": "余数系统中比较两个数字的新方法",
+      "llm_tldr_en": "Presents an efficient RNS comparison method using an additional modulus, relevant for secure arithmetic.",
+      "llm_tldr_cn": "提出了一种使用附加模数的高效 RNS 比较方法，与安全算术相关。",
+      "llm_tldr": "提出了一种使用附加模数的高效 RNS 比较方法，与安全算术相关。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Distributed Comparison Function",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
