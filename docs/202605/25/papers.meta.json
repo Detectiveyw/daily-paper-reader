@@ -1,0 +1,79 @@
+{
+  "label": "2026-05-25",
+  "date": "2026-05-25",
+  "generated_at": "2026-05-25T20:27:27",
+  "count": 5,
+  "papers": [
+    {
+      "paper_id": "202605/25/2605.22237v2-decision-aware-quadratic-relu-replacement-for-he-friendly-inference",
+      "section": "quick",
+      "title_en": "Decision-Aware Quadratic ReLU Replacement for HE-Friendly Inference",
+      "authors": "Rui Li, Wenyuan Wu, Weijie Miao",
+      "date": "2026-05-21",
+      "pdf": "https://arxiv.org/pdf/2605.22237v2",
+      "score": "7.0",
+      "evidence": "面向安全计算的同态加密友好推理与 ReLU 替换",
+      "tldr": "针对全同态加密（FHE）中ReLU函数计算开销大的问题，本文提出一种决策感知的二次多项式替换方法。该方法无需重新训练，通过将ReLU替换建模为提升空间中的线性分类问题，利用几何框架和软间隔松弛技术寻找能保持分类决策的低阶多项式系数。实验表明，该方法在保持准确率的同时，显著提升了推理速度。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Fully homomorphic encryption (FHE) supports only additions and multiplications, so FHE-only neural-network inference typically replaces ReLU with polynomials fitted over empirical activation intervals. Such interval fitting often requires higher-degree polynomials to control activation error, incurring homomorphic evaluation costs, while classification is determined by the final logit decision. We revisit ReLU replacement from a decision-aware perspective: given a trained single-hidden-layer ReLU MLP and a specified calibration set, can an HE-friendly low-degree polynomial replace ReLU without retraining while preserving calibration-set decisions? We focus on quadratic replacement, the lowest-degree that retains a genuine per-unit nonlinearity. For calibration sets positive-margin separable in the lifted space, we formulate quadratic replacement as a linear separation problem, yielding necessary and sufficient conditions for calibration-lossless replacement and a constructive algorithm for the coefficients. When the positive-margin condition fails -- often because a few near-boundary or misclassified calibration samples bring the lifted hulls into contact -- we extend the same geometric framework via reduced convex hulls and Lagrangian-dual soft-margin relaxations. These cap the weight any single sample can carry, converting the problem into smaller convex quadratic programs that yield approximately feasible coefficients with high empirical agreement on calibration-set decisions. In particular, at the maximal weight cap $μ=1$, the reduced-convex-hull relaxation reduces to standard convex-hull separation; the relaxation thus continuously extends the positive-margin exact theory. Under CKKS, the quadratic replacement matches plaintext top-1 accuracy on multiple benchmarks, running 3.7--4.1$\\times$ faster than Remez-7 in the activation module and 1.18--1.68$\\times$ faster end-to-end.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/25/2605.23158v1-what-does-the-server-see-understanding-privacy-leakage-from-large-language-models-in-split-inference",
+      "section": "quick",
+      "title_en": "What Does the Server See? Understanding Privacy Leakage from Large Language Models in Split Inference",
+      "authors": "Mingyuan Fan, Yu Liu, Fuyi Wang, Cen Chen",
+      "date": "2026-05-22",
+      "pdf": "https://arxiv.org/pdf/2605.23158v1",
+      "score": "7.0",
+      "evidence": "大模型拆分推理中通过激活匹配导致的隐私泄露",
+      "tldr": "本研究探讨了大型语言模型（LLM）在拆分推理模式下的隐私泄露风险。尽管该模式旨在通过仅传输中间激活值来保护隐私，但作者提出了ActInv攻击方法，证明了从激活值中高保真重构客户端输入的可行性。研究引入了扰动放大因子（PAF）来量化不同层的隐私抗性，并据此设计了PriPert防御机制，通过校准扰动方向在保证效能的同时显著提升了隐私保护能力，为LLM的隐私部署提供了新见解。",
+      "tags": "query:fss-llm",
+      "abstract_en": "The deployment of large language models (LLMs) on resource-constrained devices remains challenging, spurring interest in split inference, where models are partitioned between client and server to reduce computational burden and enhance privacy by transmitting only intermediate activations. However, the privacy-preserving capabilities of split inference, particularly in the context of LLMs, have not been exhaustively investigated. To fill this gap, we introduce ActInv, which solves an intermediate activation matching problem to reconstruct the client's input. Extensive evaluations demonstrate that ActInv achieves high-fidelity reconstructions, even in the presence of common perturbation-based defenses such as Gaussian noise injection and activation sparsification. To systematically understand this vulnerability, we develop Perturbation Amplification Factor (PAF), a metric for quantifying a layer's inherent resistance to reconstruction. Our analysis reveals that privacy vulnerability is not uniform across layers, with some layers being highly susceptible to leakage while others offer natural resistance. Furthermore, we demonstrate that defense effectiveness can be significantly improved by calibrating perturbation directions to maximize reconstruction error during backpropagation. Building on these insights, we design PriPert and conduct comprehensive evaluations, covering privacy, utility, and computational overhead, to demonstrate its effectiveness.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/25/2605.23641v1-kernel-based-relu-approximation-for-homomorphic-encryption-compatible-privacy-preserving-deep-learning-models",
+      "section": "quick",
+      "title_en": "Kernel-Based ReLU Approximation for Homomorphic Encryption-Compatible Privacy-preserving Deep Learning Models",
+      "authors": "Dimitrios Sygletos, Dimitra Papatsaroucha, Marios Choudetsanakis, Ilias Politis, Evangelos K. Markakis",
+      "date": "2026-05-22",
+      "pdf": "https://arxiv.org/pdf/2605.23641v1",
+      "score": "7.0",
+      "evidence": "用于 LLM 隐私保护推理的 ReLU 近似",
+      "tldr": "本研究针对同态加密（HE）不支持非线性激活函数（如ReLU）的问题，提出了一种基于核函数的ReLU近似方法。该方法利用Jackson定理，通过二阶多项式模拟ReLU的平滑核函数，以降低乘法深度。实验在预训练大语言模型（LLM）的Token嵌入及Transformer模型上进行，证明了该方法在保持高保真度的同时，能有效支持隐私保护下的深度学习推理。",
+      "tags": "query:fss-llm",
+      "abstract_en": "As privacy concerns in AI technologies continue to grow, Homomorphic Encryption (HE) offers a way to perform computations on encrypted data without the need of decryption during operations. However, HE is limited to addition and multiplication, making non-linear functions incompatible in their original form. This limitation has become more critical with the widespread use of Large Language Models (LLMs), where the non-linearity of activation functions such as the Rectified Linear Unit (ReLU) poses challenges for deployment in privacy-preserving Natural Language Processing (NLP) settings. This paper proposes a kernel-based approximation of ReLU, enabling its use within HE-constrained settings and thus contributing a critical step toward supporting privacy-preserving LLMs. A smooth kernel-based function, mimicking ReLU, is approximated using a second-degree polynomial, inspired by Jackson's theorem, to achieve low multiplicative depth. The proposed method is trained and assessed directly on token embeddings from pre-trained LLMs and evaluated in various scenarios, from simulated and tokenized data to deep learning and transformer models. Results show improved approximation fidelity, supporting the method's suitability for secure and privacy-preserving inference in various tasks.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/25/2605.23096v1-encrypted-neural-networks-without-overflows",
+      "section": "quick",
+      "title_en": "Encrypted Neural Networks without Overflows",
+      "authors": "Philipp Kern, Lorenzo Rovida, Samuel Teuber, Edoardo Manino, Carsten Sinz, Alberto Leporati",
+      "date": "2026-05-21",
+      "pdf": "https://arxiv.org/pdf/2605.23096v1",
+      "score": "6.0",
+      "evidence": "使用全同态加密对加密神经网络进行隐私推理",
+      "tldr": "本研究针对基于CKKS全同态加密方案的神经网络推理，首次揭示了其易受溢出攻击的漏洞，即正常输入可能超出多项式近似的容差范围导致输出失效。为此，作者提出了一种形式化验证技术，通过计算神经元输出的认证边界来消除溢出。该方法在实验中将故障率从47%降至0%，且能无缝集成到现有CKKS框架中，显著提升了加密推理的可靠性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Fully homomorphic encryption (FHE) enables private inference by evaluating neural networks on encrypted data. In this way, we can delegate the computation to a third party server without ever revealing the user's data. Currently, the CKKS scheme is the backbone of most efficient FHE implementations, but it only supports addition, multiplication, and array rotation operations, thus requiring all activation functions of the neural network to be approximated by polynomials within a certain interval, imposing strict design tolerances. In this paper, we demonstrate for the first time that this scheme is vulnerable to overflow attacks, i.e., seemingly benign inputs that can exceed such tolerances of the FHE circuit, thereby causing corrupt and unusable outputs. To avoid them, we propose a formal verification technique that computes certified bounds on the ranges of all neurons in the network. By construction, our method eliminates overflows and, in our experiments, removed observed overflows on all benchmarks, reducing failure rates from up to 47% to 0%. Moreover, our overflow-free solution is compatible with most CKKS-based frameworks, as it allows to simply substitute standard polynomials by polynomials with rigorously designed ranges.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/25/2605.23640v1-cacheprune-privacy-aware-and-fine-grained-kv-cache-sharing-for-efficient-llm-inference",
+      "section": "quick",
+      "title_en": "CachePrune: Privacy-Aware and Fine-Grained KV Cache Sharing for Efficient LLM Inference",
+      "authors": "Guanlong Wu, Zhaohan li, Yao Zhang, Zheng Zhang, Jianyu Niu, Ye Wu, Yinqian Zhang",
+      "date": "2026-05-22",
+      "pdf": "https://arxiv.org/pdf/2605.23640v1",
+      "score": "6.0",
+      "evidence": "大模型推理中隐私感知的KV缓存共享",
+      "tldr": "针对大模型推理中KV缓存共享带来的隐私泄露风险，本文提出CachePrune机制。该机制通过细粒度的令牌级缓存管理，在保护隐私的前提下实现非敏感数据（如系统指令）的跨用户共享。CachePrune解决了变长片段的提取与检索难题，在消除侧信道漏洞的同时，显著提升了推理效率和缓存命中率。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large Language Models (LLMs) rely on Key-Value (KV) caching to accelerate inference, and many serving systems further share the KV cache across users' requests to reduce redundant computation. While widely adopted, unrestricted cross-user sharing introduces side-channel vulnerabilities, allowing an adversary to infer user inputs by probing for cache reuse. Existing defenses disable sharing entirely to prevent leakage; yet such a coarse-grained strategy sacrifices substantial reuse potential, since prompts often include large portions of privacy-irrelevant segments, such as system instructions or publicly accessible materials. Building on this, we present CachePrune, a privacy-aware KV cache sharing mechanism that enables fine-grained reuse of KV entries across requests. Realizing such fine granularity requires token-level cache management, as reusable segments vary in length and position due to sensitivity masking, making reuse more complex than the fixed-size or sentence-level chunking used in existing coarse-grained schemes. Specifically, CachePrune makes fine-grained reuse practical by addressing two key challenges: accurately and efficiently deriving reusable KV segments and efficiently retrieving them over variable-length spans. We implement CachePrune on top of vLLM and evaluate it on three datasets, showing that it eliminates direct leakage through KV cache reuse side channels while reducing TTFT by 4.5x and increasing cache hit rates by 44% compared with state-of-the-art approaches.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

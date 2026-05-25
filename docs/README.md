@@ -6,29 +6,38 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-24
-- 运行时间：2026-05-24 20:38:21 UTC
+- 最新运行日期：2026-05-25
+- 运行时间：2026-05-25 20:27:17 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：5
 - 精读区：0
-- 速读区：2
+- 速读区：5
 
 ### 今日简报（AI）
-今日聚焦分布式优化中的隐私安全与剩余数系统（RNS）的软件性能重估。
-核心成果包括结合安全多方计算与进化算法的限时优化方案，以及针对 RNS 比较逻辑的软件实现优化。
-推荐关注如何在满足时间约束的前提下，利用加密技术平衡分布式计算的效率与隐私。
-- 详情：[/202605/24/README](/202605/24/README)
+今日聚焦隐私计算前沿，深入探讨同态加密下的 ReLU 优化技术与大模型拆分推理的隐私泄露风险。
+研究重点在于通过二次项或核函数替代 ReLU 以提升加密推理效率，并揭示了服务端在 LLM 拆分推理中可能获取的敏感信息。
+建议关注隐私保护与推理性能的平衡，特别是针对大模型云端部署的安全加固方案。
+- 详情：[/202605/25/README](/202605/25/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Privacy-Preserving Distributed Optimization Under Time Constraints Using Secure Multi-Party Computation and Evolutionary Algorithms](/202605/24/2605.20944v1-privacy-preserving-distributed-optimization-under-time-constraints-using-secure-multi-party-computation-and-evolutionary-algorithms)  
+1. [Decision-Aware Quadratic ReLU Replacement for HE-Friendly Inference](/202605/25/2605.22237v2-decision-aware-quadratic-relu-replacement-for-he-friendly-inference)  
    标签：评分：7.0/10、query:fss-llm
-   evidence：使用安全多方计算的隐私保护分布式优化
-2. [Residue Number System Comparison revisited, a software perspective](/202605/24/2605.18415v1-residue-number-system-comparison-revisited-a-software-perspective)  
+   evidence：面向安全计算的同态加密友好推理与 ReLU 替换
+2. [What Does the Server See? Understanding Privacy Leakage from Large Language Models in Split Inference](/202605/25/2605.23158v1-what-does-the-server-see-understanding-privacy-leakage-from-large-language-models-in-split-inference)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：大模型拆分推理中通过激活匹配导致的隐私泄露
+3. [Kernel-Based ReLU Approximation for Homomorphic Encryption-Compatible Privacy-preserving Deep Learning Models](/202605/25/2605.23641v1-kernel-based-relu-approximation-for-homomorphic-encryption-compatible-privacy-preserving-deep-learning-models)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：用于 LLM 隐私保护推理的 ReLU 近似
+4. [Encrypted Neural Networks without Overflows](/202605/25/2605.23096v1-encrypted-neural-networks-without-overflows)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：余数系统中比较两个数字的新方法
+   evidence：使用全同态加密对加密神经网络进行隐私推理
+5. [CachePrune: Privacy-Aware and Fine-Grained KV Cache Sharing for Efficient LLM Inference](/202605/25/2605.23640v1-cacheprune-privacy-aware-and-fine-grained-kv-cache-sharing-for-efficient-llm-inference)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：大模型推理中隐私感知的KV缓存共享
 
 
 <div class="dpr-home-promo-card">
