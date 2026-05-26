@@ -1,0 +1,93 @@
+{
+  "label": "2026-05-26",
+  "date": "2026-05-26",
+  "generated_at": "2026-05-26T21:06:05",
+  "count": 6,
+  "papers": [
+    {
+      "paper_id": "202605/26/2605.22898v1-firma-fibonacci-ring-model-aggregation-for-privacy-preserving-federated-learning",
+      "section": "quick",
+      "title_en": "FIRMA: FIbonacci Ring Model Aggregation for Privacy-preserving Federated Learning",
+      "authors": "Rachid Hedjam",
+      "date": "2026-05-21",
+      "pdf": "https://arxiv.org/pdf/2605.22898v1",
+      "score": "7.0",
+      "evidence": "无服务器运行与隐私模型聚合",
+      "tldr": "针对联邦学习中中心化聚合的安全风险及去中心化方法在隐私保护与权重分配上的不足，本文提出FIRMA协议族。该方法采用斐波那契权重的环形聚合模式，结合永久私有分类头、2-opt环拓扑优化及精度门控抑制机制。FIRMA在无需中心服务器的情况下，有效解决了梯度反转风险，并在高度异构的数据环境下显著提升了模型的收敛精度与鲁棒性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Federated learning protocols face a structural trilemma: canonical server-based aggregation~\\cite{mcmahan2017} creates a single point of failure and gradient inversion risk; decentralised ring-gossip alternatives~\\cite{hu2019segmented} expose classification heads to semi-honest peers via uninformed uniform weights; and personalised methods~\\cite{collins2021exploiting} reintroduce central aggregation. No existing protocol simultaneously achieves server-free operation, permanently private heads, ring topology, and principled asymmetric neighbour weighting. We propose FIRMA (\\textbf{FI}bonacci \\textbf{R}ing \\textbf{M}odel \\textbf{A}ggregation), a family of three progressively enhanced federated learning protocols: 1) \\fibfl\\ establishes the foundation: server-free ring aggregation with Fibonacci-weighted neighbour blending and permanently private classification heads. 2) \\fibflp\\ augments this with accuracy-gated neighbour suppression, selectively down-weighting poorly-converged peers while preserving the Fibonacci directional bias. 3) \\fibflpp, the full system, completes the family with a 2-opt ring permutation that maximises adjacent-client class diversity, global ring coverage via $K_g{=}\\lceil N/2\\rceil$ gossip passes, and cosine-annealed self-retention calibration. We establish a convergence rate bound and three supporting propositions governing normalisation, coverage, retention, and diversity optimality. Systematic experiments across 28 configurations -- four benchmarks crossed with seven heterogeneity regimes -- demonstrate that \\fibflpp\\ surpasses \\fedavg\\ in all 12 label-skew configurations, with a peak advantage of $+20.7$\\,pp on CIFAR-10 at $K{=}1$. Under Dirichlet heterogeneity, \\fibflpp\\ is the Pareto-dominant method among all server-free protocols, achieving the highest accuracy in 17 of 28 configurations.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/26/2605.25716v1-an-efficient-and-privacy-preserving-architecture-for-cross-institutional-collaborative-rag",
+      "section": "quick",
+      "title_en": "An Efficient and Privacy-Preserving Architecture for Cross-Institutional Collaborative RAG",
+      "authors": "Chenxin Mao, Shangyu Liu, Zhenzhe Zheng, Fan Wu, Jie Wu, Guihai Chen",
+      "date": "2026-05-25",
+      "pdf": "https://arxiv.org/pdf/2605.25716v1",
+      "score": "7.0",
+      "evidence": "隐私保护联邦RAG与分布式Transformer注意力机制",
+      "tldr": "针对跨机构知识库集成中存在的隐私监管和数据孤岛问题，本文提出了FedRAG框架。该框架通过创新的“打乱分布式注意力”协议，利用数值稳定的特征混淆和Token置换技术，在不暴露明文的前提下实现了注意力计算与数据本地化的解耦。FedRAG无需特殊硬件或模型重训练，在保证模型性能几乎无损的同时，显著降低了通信延迟，为高效、安全的联邦RAG提供了可行方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Retrieval-Augmented Generation (RAG) empowers LLMs with external knowledge, making cross-institutional domain-specific knowledge base integration a highly promising deployment paradigm. Despite this potential, strict privacy regulations create severe \"data silos\" that obstruct such collaboration. Building federated RAG systems requires distributed inference, but the Transformer's self-attention mechanism fundamentally conflicts with this by mandating cross-node access to distributed Key-Value caches. To address this challenge, we present FedRAG, a high-throughput, privacy-preserving federated RAG framework. At its core is a novel Scrambled Distributed Attention protocol that utilizes numerically stable feature scrambling and token permutation. By dynamically delegating scrambled computations to collaborating nodes, our system successfully decouples attention execution from data localization without exposing plaintext. Crucially, our approach requires no specialized hardware or model retraining, circumventing the prohibitive latency and communication overheads of cryptographic solutions while robustly defending against intermediate state inversion attacks. Extensive evaluations demonstrate our framework preserves negligible (<0.1\\%) model utility degradation and achieves up to a 62$\\times$ latency reduction over existing secure baselines, sustaining practical, human-reading throughput for cross-institutional knowledge synergy.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/26/2605.19893v2-ssv-sparse-speculative-verification-for-efficient-llm-inference",
+      "section": "quick",
+      "title_en": "SSV: Sparse Speculative Verification for Efficient LLM Inference",
+      "authors": "Zhibin Wang, Ziyu Zhong, Nuo Shen, Yuhang Zhou, Rong Gu, Sheng Zhong",
+      "date": "2026-05-19",
+      "pdf": "https://arxiv.org/pdf/2605.19893v2",
+      "score": "6.0",
+      "evidence": "高效LLM推理与验证框架",
+      "tldr": "针对长文本LLM推理，投机解码与动态稀疏注意力（NSA）存在结构性不匹配。本文提出SSV框架，通过重叠感知的分组查询执行、NSA算子融合及提示词自适应编排，将动态稀疏注意力转化为验证导向的工作负载。SSV显著提升了KV缓存复用率并降低了开销，在H100上实现了最高3.49倍的吞吐量提升。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Speculative decoding and dynamic sparse attention are two complementary approaches for accelerating long-context LLM inference: the former amortizes target-model execution across multiple verifier queries, while the latter reduces each query's KV-cache working set. Directly combining them, however, exposes a structural mismatch: speculative verification relies on cross-query commonality, whereas dynamic sparse attention assigns query-specific sparse layouts. This mismatch limits KV-block reuse, amplifies NSA's branch-wise overheads, and makes verification strategy selection input- and regime-dependent. We present SSV, a sparse speculative-verification framework that turns dynamic sparse attention into a verification-oriented workload. SSV combines overlap-aware grouped-query execution, refresh/reuse-based NSA kernel fusion, and profile-guided prompt-adaptive orchestration to improve cross-query reuse, reduce selected-index and branch-fusion overheads, and select effective draft-verification strategies under user-specified precision classes. Experiments on NVIDIA H100 GPUs show that SSV achieves up to 3.49x end-to-end throughput over autoregressive NSA decoding and up to 6.86x kernel speedups for sparse speculative verification.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/26/2605.21857v1-spider-two-server-functionality-for-the-cost-of-zero",
+      "section": "quick",
+      "title_en": "SPIDER: Two Server Functionality for the Cost of Zero",
+      "authors": "Ofir Dvir, Kali Hale, Javin Zipkin, Divyakant Agrawal, Dahlia Malkhi",
+      "date": "2026-05-21",
+      "pdf": "https://arxiv.org/pdf/2605.21857v1",
+      "score": "6.0",
+      "evidence": "隐私信息检索与服务器功能",
+      "tldr": "本文提出baseSPIDER和SPIDER两种单服务器私有信息检索（PIR）方案。baseSPIDER通过客户端预处理和存储提示信息，在保持渐近最优通信复杂度的同时，显著优化了处理大条目数据库时的常数因子。SPIDER则通过一种通用的转换机制，使PIR能在无需服务器端任何特殊API或协作的标准数据库接口上运行。该研究不仅简化了PIR设计，还消除了部署障碍，使其能直接应用于现有系统，是首个实现此类功能的单服务器PIR构造。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We introduce baseSPIDER and SPIDER, private information retrieval (PIR) schemes that embody two technical advancements. The baseSPIDER protocol operates with a single server and a stateful client that performs pre-processing and stores hints for future queries. In this setting, baseSPIDER introduces a new approach that matches the asymptotically optimal communication complexity of state-of-the-art schemes while improving constant factors--an advantage that is particularly significant for databases with large entries. In addition, baseSPIDER offers a conceptually simpler design relative to prior protocols. SPIDER operates over a default database interface and requires no cooperation from the server at any stage. To our knowledge, SPIDER is the first single-server PIR construction of this design, achieving privacy without specialized APIs, auxiliary server state, or protocol-specific interaction beyond conventional indexed access. SPIDER is built via a simple transformation of baseSPIDER to the default server setting, eliminating deployment barriers and enabling immediate applicability to existing systems. This transformation can be applied more broadly to three recent PIR solutions, adapting them for use in the default-server paradigm and yielding solutions of independent interest. SPIDER compares to the resulting modified solutions by exhibiting a simpler design while incurring higher client computational work.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/26/2605.24033v1-towards-verifiable-transformers-solver-checkable-circuit-explanations",
+      "section": "quick",
+      "title_en": "Towards Verifiable Transformers: Solver-Checkable Circuit Explanations",
+      "authors": "Neel Somani",
+      "date": "2026-05-21",
+      "pdf": "https://arxiv.org/pdf/2605.24033v1",
+      "score": "6.0",
+      "evidence": "可验证的Transformer电路与求解器可检查断言",
+      "tldr": "针对机械可解释性中电路解释缺乏形式化验证的问题，本文提出了“可验证Transformer”框架。该框架将Transformer电路转换为可由SMT求解器检查的有界声明，支持验证功能等效性、边缘必要性和鲁棒性等属性。通过引入可编码算子（如sparsemax）和代理验证机制，研究实现了对小型符号任务电路的穷尽验证，并展示了在大规模模型上的应用潜力，为将电路解释转化为可证明的命题提供了路径。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Mechanistic interpretability often identifies circuits inside Transformer models, but explanations of those circuits are usually validated through examples, ablations, and manual reasoning. This leaves a gap between finding a plausible circuit and proving what the circuit does. We introduce Verifiable Transformers, a framework for converting task-localized Transformer circuits into bounded, solver-checkable claims. Given a behavior, a finite task domain, and a candidate-token projection, we extract a task circuit and verify properties such as projected functional equivalence, edge necessity, task-relevant invariance, and final-residual robustness. Direct verification encodes the extracted circuit itself into an SMT solver. When a circuit contains operators that are not exactly or tractably encodable, surrogate-mediated verification fits an SMT-encodable surrogate, validates it against the extracted circuit over the bounded domain, and verifies symbolic explanations against the surrogate. We instantiate direct verification with a GPT-style architecture using Signed L1 BandNorm, sparsemax attention, and LeakyReLU. On small symbolic sequence tasks, we train an SMT-representable Transformer, extract sparse circuits for quote closing and bracket type tracking, and exhaustively verify projected functional equivalence, content invariance, edge necessity, and final-residual robustness. At GPT-2 scale, the same operator stack trains stably on OpenWebText, although naive direct SMT verification remains intractable. We also demonstrate surrogate-mediated verification on task-localized circuits with hard-to-encode attention, showing both verified symbolic explanations and solver-generated counterexamples. The goal is not full-model verification, but a concrete path for turning mechanistic circuit explanations into formal propositions that can be proven or refuted.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/26/2605.24054v1-verifiable-secure-aggregation-via-dual-servers-with-linear-tags-in-federated-learning",
+      "section": "quick",
+      "title_en": "Verifiable Secure Aggregation via Dual Servers with Linear Tags in Federated Learning",
+      "authors": "Yufei Zhou",
+      "date": "2026-05-22",
+      "pdf": "https://arxiv.org/pdf/2605.24054v1",
+      "score": "6.0",
+      "evidence": "双服务器架构下的可验证安全聚合",
+      "tldr": "针对联邦学习中服务器可能通过梯度反向传播泄露隐私或篡改聚合结果的问题，本文提出一种基于双服务器架构和伪随机函数（PRF）的可验证安全聚合方案。该方案利用线性标签实现服务器间的相互验证，在保证端到端安全和隐私的同时，将通信开销维持在明文水平，并显著降低了用户的计算与验证负担，特别适用于大规模参与者的联邦学习场景。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Federated learning (FL) enables collaborative model training by aggregating local updates without requiring raw data sharing. However, prior studies have shown that servers can exploit gradient inversion to compromise user privacy or manipulate aggregation results, undermining the utility of the global model. To address these concerns, we propose a secure and verifiable aggregation scheme with lightweight cryptographic primitives for FL. Our method leverages pseudo-random functions (PRFs) and a non-colluding dual-server architecture to achieve secure aggregation with mutual server verification, while maintaining communication overhead comparable to plaintext aggregation and a constant verification tag size. Crucially, it preserves user privacy and achieves end-to-end secure aggregation with verification. Moreover, our scheme significantly reduces both user computation and verification overhead, making it suitable for FL with a large number of participants. For instance, with an input dimension of 20K, user computation time is reduced to 18 ms, approximately 7$\\times$ faster than OPSA, while verification time decreases to 9.5 ms, approximately 2.4$\\times$ faster than OPSA.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

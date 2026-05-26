@@ -1,0 +1,237 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-26T21:05:18.481008+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 6,
+    "quick_skim_target": 11,
+    "quick_selected": 6
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.22898v1",
+      "title": "FIRMA: FIbonacci Ring Model Aggregation for Privacy-preserving Federated Learning",
+      "abstract": "Federated learning protocols face a structural trilemma: canonical server-based aggregation~\\cite{mcmahan2017} creates a single point of failure and gradient inversion risk; decentralised ring-gossip alternatives~\\cite{hu2019segmented} expose classification heads to semi-honest peers via uninformed uniform weights; and personalised methods~\\cite{collins2021exploiting} reintroduce central aggregation. No existing protocol simultaneously achieves server-free operation, permanently private heads, ring topology, and principled asymmetric neighbour weighting. We propose FIRMA (\\textbf{FI}bonacci \\textbf{R}ing \\textbf{M}odel \\textbf{A}ggregation), a family of three progressively enhanced federated learning protocols: 1) \\fibfl\\ establishes the foundation: server-free ring aggregation with Fibonacci-weighted neighbour blending and permanently private classification heads. 2) \\fibflp\\ augments this with accuracy-gated neighbour suppression, selectively down-weighting poorly-converged peers while preserving the Fibonacci directional bias. 3) \\fibflpp, the full system, completes the family with a 2-opt ring permutation that maximises adjacent-client class diversity, global ring coverage via $K_g{=}\\lceil N/2\\rceil$ gossip passes, and cosine-annealed self-retention calibration. We establish a convergence rate bound and three supporting propositions governing normalisation, coverage, retention, and diversity optimality. Systematic experiments across 28 configurations -- four benchmarks crossed with seven heterogeneity regimes -- demonstrate that \\fibflpp\\ surpasses \\fedavg\\ in all 12 label-skew configurations, with a peak advantage of $+20.7$\\,pp on CIFAR-10 at $K{=}1$. Under Dirichlet heterogeneity, \\fibflpp\\ is the Pareto-dominant method among all server-free protocols, achieving the highest accuracy in 17 of 28 configurations.",
+      "authors": [
+        "Rachid Hedjam"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-05-21T16:06:00+00:00",
+      "link": "https://arxiv.org/pdf/2605.22898v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Server-free operation and private model aggregation",
+      "llm_evidence_cn": "无服务器运行与隐私模型聚合",
+      "llm_evidence": "无服务器运行与隐私模型聚合",
+      "canonical_evidence": "无服务器运行与隐私模型聚合",
+      "llm_tldr_en": "Proposes FIRMA for server-free, privacy-preserving federated learning using a ring topology.",
+      "llm_tldr_cn": "提出了FIRMA协议，利用环形拓扑实现无服务器且隐私保护的联邦学习。",
+      "llm_tldr": "提出了FIRMA协议，利用环形拓扑实现无服务器且隐私保护的联邦学习。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.19893v2",
+      "title": "SSV: Sparse Speculative Verification for Efficient LLM Inference",
+      "abstract": "Speculative decoding and dynamic sparse attention are two complementary approaches for accelerating long-context LLM inference: the former amortizes target-model execution across multiple verifier queries, while the latter reduces each query's KV-cache working set. Directly combining them, however, exposes a structural mismatch: speculative verification relies on cross-query commonality, whereas dynamic sparse attention assigns query-specific sparse layouts. This mismatch limits KV-block reuse, amplifies NSA's branch-wise overheads, and makes verification strategy selection input- and regime-dependent. We present SSV, a sparse speculative-verification framework that turns dynamic sparse attention into a verification-oriented workload. SSV combines overlap-aware grouped-query execution, refresh/reuse-based NSA kernel fusion, and profile-guided prompt-adaptive orchestration to improve cross-query reuse, reduce selected-index and branch-fusion overheads, and select effective draft-verification strategies under user-specified precision classes. Experiments on NVIDIA H100 GPUs show that SSV achieves up to 3.49x end-to-end throughput over autoregressive NSA decoding and up to 6.86x kernel speedups for sparse speculative verification.",
+      "authors": [
+        "Zhibin Wang",
+        "Ziyu Zhong",
+        "Nuo Shen",
+        "Yuhang Zhou",
+        "Rong Gu",
+        "Sheng Zhong"
+      ],
+      "primary_category": "cs.OS",
+      "categories": [
+        "cs.OS"
+      ],
+      "published": "2026-05-19T14:24:27+00:00",
+      "link": "https://arxiv.org/pdf/2605.19893v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Efficient LLM inference and verification framework",
+      "llm_evidence_cn": "高效LLM推理与验证框架",
+      "llm_evidence": "高效LLM推理与验证框架",
+      "canonical_evidence": "高效LLM推理与验证框架",
+      "llm_tldr_en": "Introduces SSV to accelerate long-context LLM inference through sparse speculative verification.",
+      "llm_tldr_cn": "提出了SSV框架，通过稀疏投机验证加速长文本大语言模型推理。",
+      "llm_tldr": "提出了SSV框架，通过稀疏投机验证加速长文本大语言模型推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.25716v1",
+      "title": "An Efficient and Privacy-Preserving Architecture for Cross-Institutional Collaborative RAG",
+      "abstract": "Retrieval-Augmented Generation (RAG) empowers LLMs with external knowledge, making cross-institutional domain-specific knowledge base integration a highly promising deployment paradigm. Despite this potential, strict privacy regulations create severe \"data silos\" that obstruct such collaboration. Building federated RAG systems requires distributed inference, but the Transformer's self-attention mechanism fundamentally conflicts with this by mandating cross-node access to distributed Key-Value caches. To address this challenge, we present FedRAG, a high-throughput, privacy-preserving federated RAG framework. At its core is a novel Scrambled Distributed Attention protocol that utilizes numerically stable feature scrambling and token permutation. By dynamically delegating scrambled computations to collaborating nodes, our system successfully decouples attention execution from data localization without exposing plaintext. Crucially, our approach requires no specialized hardware or model retraining, circumventing the prohibitive latency and communication overheads of cryptographic solutions while robustly defending against intermediate state inversion attacks. Extensive evaluations demonstrate our framework preserves negligible (<0.1\\%) model utility degradation and achieves up to a 62$\\times$ latency reduction over existing secure baselines, sustaining practical, human-reading throughput for cross-institutional knowledge synergy.",
+      "authors": [
+        "Chenxin Mao",
+        "Shangyu Liu",
+        "Zhenzhe Zheng",
+        "Fan Wu",
+        "Jie Wu",
+        "Guihai Chen"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.DC"
+      ],
+      "published": "2026-05-25T11:18:19+00:00",
+      "link": "https://arxiv.org/pdf/2605.25716v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "privacy-preserving federated RAG and distributed Transformer attention",
+      "llm_evidence_cn": "隐私保护联邦RAG与分布式Transformer注意力机制",
+      "llm_evidence": "隐私保护联邦RAG与分布式Transformer注意力机制",
+      "canonical_evidence": "隐私保护联邦RAG与分布式Transformer注意力机制",
+      "llm_tldr_en": "Introduces FedRAG for privacy-preserving distributed Transformer inference in collaborative RAG systems.",
+      "llm_tldr_cn": "引入FedRAG框架，用于协作式RAG系统中的隐私保护分布式Transformer推理。",
+      "llm_tldr": "引入FedRAG框架，用于协作式RAG系统中的隐私保护分布式Transformer推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.21857v1",
+      "title": "SPIDER: Two Server Functionality for the Cost of Zero",
+      "abstract": "We introduce baseSPIDER and SPIDER, private information retrieval (PIR) schemes that embody two technical advancements. The baseSPIDER protocol operates with a single server and a stateful client that performs pre-processing and stores hints for future queries. In this setting, baseSPIDER introduces a new approach that matches the asymptotically optimal communication complexity of state-of-the-art schemes while improving constant factors--an advantage that is particularly significant for databases with large entries. In addition, baseSPIDER offers a conceptually simpler design relative to prior protocols. SPIDER operates over a default database interface and requires no cooperation from the server at any stage. To our knowledge, SPIDER is the first single-server PIR construction of this design, achieving privacy without specialized APIs, auxiliary server state, or protocol-specific interaction beyond conventional indexed access. SPIDER is built via a simple transformation of baseSPIDER to the default server setting, eliminating deployment barriers and enabling immediate applicability to existing systems. This transformation can be applied more broadly to three recent PIR solutions, adapting them for use in the default-server paradigm and yielding solutions of independent interest. SPIDER compares to the resulting modified solutions by exhibiting a simpler design while incurring higher client computational work.",
+      "authors": [
+        "Ofir Dvir",
+        "Kali Hale",
+        "Javin Zipkin",
+        "Divyakant Agrawal",
+        "Dahlia Malkhi"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-05-21T01:08:55+00:00",
+      "link": "https://arxiv.org/pdf/2605.21857v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Private information retrieval and server functionality",
+      "llm_evidence_cn": "隐私信息检索与服务器功能",
+      "llm_evidence": "隐私信息检索与服务器功能",
+      "canonical_evidence": "隐私信息检索与服务器功能",
+      "llm_tldr_en": "Introduces SPIDER, a private information retrieval scheme that optimizes communication and server cooperation.",
+      "llm_tldr_cn": "引入了SPIDER隐私信息检索方案，优化了通信效率并减少了对服务器协作的依赖。",
+      "llm_tldr": "引入了SPIDER隐私信息检索方案，优化了通信效率并减少了对服务器协作的依赖。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.24033v1",
+      "title": "Towards Verifiable Transformers: Solver-Checkable Circuit Explanations",
+      "abstract": "Mechanistic interpretability often identifies circuits inside Transformer models, but explanations of those circuits are usually validated through examples, ablations, and manual reasoning. This leaves a gap between finding a plausible circuit and proving what the circuit does. We introduce Verifiable Transformers, a framework for converting task-localized Transformer circuits into bounded, solver-checkable claims. Given a behavior, a finite task domain, and a candidate-token projection, we extract a task circuit and verify properties such as projected functional equivalence, edge necessity, task-relevant invariance, and final-residual robustness. Direct verification encodes the extracted circuit itself into an SMT solver. When a circuit contains operators that are not exactly or tractably encodable, surrogate-mediated verification fits an SMT-encodable surrogate, validates it against the extracted circuit over the bounded domain, and verifies symbolic explanations against the surrogate. We instantiate direct verification with a GPT-style architecture using Signed L1 BandNorm, sparsemax attention, and LeakyReLU. On small symbolic sequence tasks, we train an SMT-representable Transformer, extract sparse circuits for quote closing and bracket type tracking, and exhaustively verify projected functional equivalence, content invariance, edge necessity, and final-residual robustness. At GPT-2 scale, the same operator stack trains stably on OpenWebText, although naive direct SMT verification remains intractable. We also demonstrate surrogate-mediated verification on task-localized circuits with hard-to-encode attention, showing both verified symbolic explanations and solver-generated counterexamples. The goal is not full-model verification, but a concrete path for turning mechanistic circuit explanations into formal propositions that can be proven or refuted.",
+      "authors": [
+        "Neel Somani"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.LO"
+      ],
+      "published": "2026-05-21T05:21:40+00:00",
+      "link": "https://arxiv.org/pdf/2605.24033v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "verifiable Transformer circuits and solver-checkable claims",
+      "llm_evidence_cn": "可验证的Transformer电路与求解器可检查断言",
+      "llm_evidence": "可验证的Transformer电路与求解器可检查断言",
+      "canonical_evidence": "可验证的Transformer电路与求解器可检查断言",
+      "llm_tldr_en": "Introduces a framework to convert Transformer circuits into verifiable, solver-checkable formal claims.",
+      "llm_tldr_cn": "引入了一个将Transformer电路转换为可验证、求解器可检查的形式化断言的框架。",
+      "llm_tldr": "引入了一个将Transformer电路转换为可验证、求解器可检查的形式化断言的框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.24054v1",
+      "title": "Verifiable Secure Aggregation via Dual Servers with Linear Tags in Federated Learning",
+      "abstract": "Federated learning (FL) enables collaborative model training by aggregating local updates without requiring raw data sharing. However, prior studies have shown that servers can exploit gradient inversion to compromise user privacy or manipulate aggregation results, undermining the utility of the global model. To address these concerns, we propose a secure and verifiable aggregation scheme with lightweight cryptographic primitives for FL. Our method leverages pseudo-random functions (PRFs) and a non-colluding dual-server architecture to achieve secure aggregation with mutual server verification, while maintaining communication overhead comparable to plaintext aggregation and a constant verification tag size. Crucially, it preserves user privacy and achieves end-to-end secure aggregation with verification. Moreover, our scheme significantly reduces both user computation and verification overhead, making it suitable for FL with a large number of participants. For instance, with an input dimension of 20K, user computation time is reduced to 18 ms, approximately 7$\\times$ faster than OPSA, while verification time decreases to 9.5 ms, approximately 2.4$\\times$ faster than OPSA.",
+      "authors": [
+        "Yufei Zhou"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-05-22T00:36:24+00:00",
+      "link": "https://arxiv.org/pdf/2605.24054v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Verifiable secure aggregation with dual-server architecture",
+      "llm_evidence_cn": "双服务器架构下的可验证安全聚合",
+      "llm_evidence": "双服务器架构下的可验证安全聚合",
+      "canonical_evidence": "双服务器架构下的可验证安全聚合",
+      "llm_tldr_en": "Proposes a verifiable secure aggregation scheme for federated learning using dual servers and PRFs.",
+      "llm_tldr_cn": "提出一种基于双服务器和PRF的联邦学习可验证安全聚合方案。",
+      "llm_tldr": "提出一种基于双服务器和PRF的联邦学习可验证安全聚合方案。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
