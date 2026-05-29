@@ -1,0 +1,51 @@
+{
+  "label": "2026-05-29",
+  "date": "2026-05-29",
+  "generated_at": "2026-05-29T21:27:47",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202605/29/2605.24619v1-synthesizing-inductive-invariants-for-distributed-protocols-via-ic3-and-large-language-models",
+      "section": "quick",
+      "title_en": "Synthesizing Inductive Invariants for Distributed Protocols via IC3 and Large Language Models",
+      "authors": "Weining Cao, Guangyuan Wu, Yuan Yao, Hengfeng Wei, Taolue Chen, Xiaoxing Ma",
+      "date": "2026-05-23",
+      "pdf": "https://arxiv.org/pdf/2605.24619v1",
+      "score": "6.0",
+      "evidence": "使用大语言模型和符号控制器验证分布式协议",
+      "tldr": "针对分布式协议验证中归纳不变性合成的难题，本文提出IC3Syn框架。该框架将符号化的IC3控制器与大语言模型（LLM）相结合，在TLA+规范上执行类IC3过程。IC3负责将合成任务分解为具体的阻塞任务，而LLM则提供协议级的推理能力，从而在无需逻辑限制或手动模板的情况下实现灵活搜索。实验显示，IC3Syn在29个复杂协议上表现优异，成功解决了包括工业级MLDR在内的挑战性任务。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Distributed protocols are notoriously difficult to verify correctly. Proving safety typically requires inductive invariants that both imply the desired property and are preserved by every protocol transition; yet inferring such invariants remains a major bottleneck: existing approaches either restrict the protocol models to a decidable fragment of first-order logic or demand expert-crafted templates.   We present IC3Syn, a neuro-symbolic framework that synthesizes inductive invariants by executing an IC3-style process over TLA+ states with the assistance of Large Language Models (LLMs). At large, IC3Syn combines a symbolic IC3 controller, which decomposes invariant synthesis into focused blocking tasks and an LLM which provides protocol-level reasoning that IC3 alone lacks for TLA+ specifications. This integration enables a disciplined yet flexible search for invariants without imposing logical restrictions or requiring manual templates.   We evaluate IC3Syn on 29 distributed protocols spanning consensus, reconfiguration and client-server systems, and compare it against Endive, IC3PO, SWISS and DistAI. IC3Syn discovers candidate invariants for all 29 protocols, including MongoLoglessDynamicRaft (MLDR), an industrial-scale Raft-based reconfiguration protocol for which none of the compared tools reports a solution, as well as one complex Paxos variant. In each case, the invariants synthesized on finite instances are shown in TLAPS to be inductive for the full unbounded protocol, thereby establishing safety.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/29/2605.27782v1-revisiting-ml-training-under-fully-homomorphic-encryption-convergence-guarantees-differential-privacy-and-efficient-algorithms",
+      "section": "quick",
+      "title_en": "Revisiting ML Training under Fully Homomorphic Encryption: Convergence Guarantees, Differential Privacy, and Efficient Algorithms",
+      "authors": "Yvonne Zhou, Mingyu Liang, Ivan Brugere, Danial Dervovic, Yue Guo, Antigoni Polychroniadou, Min Wu, Dana Dachman-Soled",
+      "date": "2026-05-27",
+      "pdf": "https://arxiv.org/pdf/2605.27782v1",
+      "score": "6.0",
+      "evidence": "全同态加密下的机器学习训练与多项式近似",
+      "tldr": "本研究首次对全同态加密（FHE）环境下的机器学习训练进行了理论收敛性分析，并提出了一种适配加密计算的差分隐私（DP）训练算法。针对FHE必须使用多项式近似激活函数和损失函数的特性，研究证明了近似梯度下降的收敛性。通过集成差分隐私且无需高开销的逐样本梯度裁剪，该方法在保持模型效用的同时显著提升了计算效率，为在敏感数据上进行大规模、安全且隐私的机器学习训练奠定了基础。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We present the first theoretical convergence analysis of machine learning training under fully homomorphic encryption (FHE), combined with a differentially private (DP) training algorithm tailored to encrypted computation. Our approach improves computational efficiency over standard differentially private gradient descent (DP-GD) while achieving comparable utility. In particular, we prove convergence of approximate gradient descent using polynomial approximations of activation and loss functions, which are required for FHE compatibility. To preserve privacy in downstream tasks, we integrate differential privacy without relying on costly per-sample gradient clipping, enabling scalable encrypted learning. We also provide data-independent hyperparameter selection and theoretically grounded strategies for polynomial approximation which can be of independent interest. Together, these contributions advance the feasibility of efficient, private, and secure machine learning on sensitive data.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/29/2605.30106v1-a-rust-to-lean-verification-pipeline-with-ai-provers-an-experience-report",
+      "section": "quick",
+      "title_en": "A Rust-to-Lean Verification Pipeline with AI Provers: An Experience Report",
+      "authors": "Natalia Klaus, Palina Tolmach, Juan Conejero",
+      "date": "2026-05-28",
+      "pdf": "https://arxiv.org/pdf/2605.30106v1",
+      "score": "6.0",
+      "evidence": "密码原语的形式化验证和机器检查的正确性证明",
+      "tldr": "本研究报告了一种将生产级 Rust 加密代码转化为 Lean 4 机器检查证明的验证流水线。该方案结合了 Charon、Aeneas 等提取工具，利用 ArkLib 等数学规范库，并引入 Aristotle 和 Aleph 等 AI 证明器自动完成证明义务。所有证明均由 Lean 内核校验以确保安全性。通过在 Plonky3 和 RISC Zero 项目中的应用，该流水线成功验证了多种加密原语，展示了 AI 在降低验证门槛和提升自动化程度方面的巨大潜力。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We describe a verification pipeline that takes production Rust cryptographic code and produces machine-checked correctness proofs in Lean 4. The pipeline combines three components: symbolic extraction tools (Charon and Aeneas, or Hax) that lift Rust into Lean 4; formal cryptographic specification libraries (ArkLib and CompPoly, from the Verified zkEVM project) that provide the mathematical targets; and AI provers (Aristotle from Harmonic AI and Aleph from Logical Intelligence) that close the resulting proof obligations. Every proof is checked by the Lean kernel, so AI output cannot compromise soundness.   Within the scope of the Ethereum Foundation's zkEVM Verification Project, we applied the pipeline to cryptographic primitives in Plonky3 (FRI folding, Mersenne31 and KoalaBear field arithmetic, Horner polynomial evaluation) and RISC Zero (Merkle inclusion verification). In addition, Aleph authored proofs of two bounds-style theorems in Plonky3's compute_log_arity_for_round that previously stood as sorry.   The paper describes the architecture, walks through a running example based on Aleph's two proofs, reports which classes of proof obligations AI closed and which required manual work, and discusses the engineering gaps we encountered: Lean 4 toolchain drift across tools and specific Aeneas/Hax extraction limits. We also document concrete missing lemmas, tactic gaps, and code-generation friction points discovered during proof development. We hope this contribution lowers the barrier to adoption of formal verification and facilitates more effective use of AI in this pipeline. The result is a working pipeline for formal verification of Rust, with kernel-checked proofs and reproducible artefacts.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
