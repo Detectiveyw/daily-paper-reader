@@ -1,0 +1,92 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-31T20:37:26.845359+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.29450v1",
+      "title": "Protecting On-Device AI Inference: A Systematic Review of Attacks and Defence Mechanisms",
+      "abstract": "The need for secure and private Artificial Intelligence (AI) and Machine Learning (ML) on edge and mobile devices has increased the necessity of protecting the architecture of these systems from threats to both security and privacy. With an ever-increasing number of pre-trained AI models being used on mobile platforms for client-side inference, there are rising concerns about the risks associated with the theft/extraction of AI models, adversarial attacks on AI models, and data breaches. As a result of this trend, a variety of defence mechanisms have been proposed to protect against these threats. These include Trusted Execution Environments (TEEs), homomorphic encryption, obfuscation, and differential privacy, among others. However, current surveys largely focus on edge intelligence, which includes distributed training, and thus overlook security and privacy issues that are specific to on-device AI inference. To the best of our knowledge, this paper presents the first comprehensive review of threats and corresponding defence mechanisms targeting on-device inference. Our results show that the attack and defence literature are unbalanced: approximately one quarter of the surveyed attack papers focus on Intellectual Property (IP) attacks, whereas half of the defence solutions tackle the same issue. More importantly, some attack categories have no defence paper associated to them, such as adversarial attacks that account for roughly one third of the attack literature. This asymmetry between known attacks and available mitigations highlights clear opportunities for future research on securing on-device AI inference.",
+      "authors": [
+        "Zisis Tsiatsikas",
+        "Alexandros Fakis",
+        "Georgios Karopoulos",
+        "Vasileios Kouliaridis",
+        "Marios Anagnostopoulos"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-05-28T06:44:46+00:00",
+      "link": "https://arxiv.org/pdf/2605.29450v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "review of secure on-device AI inference and defense mechanisms",
+      "llm_evidence_cn": "设备端安全AI推理及防御机制综述",
+      "llm_evidence": "设备端安全AI推理及防御机制综述",
+      "canonical_evidence": "设备端安全AI推理及防御机制综述",
+      "llm_tldr_en": "Systematically reviews attacks and defenses for secure on-device AI inference, including encryption and TEEs.",
+      "llm_tldr_cn": "系统综述了设备端安全AI推理的攻击与防御机制，包括加密和可信执行环境。",
+      "llm_tldr": "系统综述了设备端安全AI推理的攻击与防御机制，包括加密和可信执行环境。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.25133v1",
+      "title": "Trust but Verify: Prover-Verifier Deliberation for Selective LLM Prediction",
+      "abstract": "Reliably knowing when a language model is correct is almost as important as being correct. We introduce prover-verifier deliberation (PVD), an inference-time protocol grounded in interactive proof theory, as a mechanism for selective prediction: the protocol produces both an answer and a structured confidence verdict, allowing a system to report high-confidence answers while abstaining on uncertain cases. In each dialogue, a prover defends a candidate answer through checkable sub-claims while a verifier issues targeted challenges and returns \\textsc{Accept}, \\textsc{Challenge}, or \\textsc{Reject}. Because frozen language models are imperfect provers and verifiers operating over a noisy channel, formal soundness and completeness guarantees do not transfer; instead, we characterize the protocol empirically through its coverage-precision behavior. Our main experiment uses Claude Sonnet 4.6 as prover and Claude Haiku 4.5 as verifier on GPQA Diamond. Questions accepted with no answer revision, which we call Accept + No Change (ANC), are reported as the high-confidence subset; we evaluate this subset by its precision and coverage. ANC separates reliable from unreliable answers, yielding a $\\sim$30pp HC-Prec gap over the non-ANC complement. Robustness experiments with GPT and Gemini pairings show that high HC-Prec can transfer across model families, while verifier strictness and domain competence largely determine the size of the selection gap. On Humanity's Last Exam, weaker prover-verifier pairings can collapse or invert the ANC signal, illustrating a practical failure mode when the verifier operates outside its effective region. Comparisons with self-consistency, universal self-consistency, multi-agent debate, and Reflexion suggest that prover-verifier deliberation supplies a distinct argument-defensibility signal for selective prediction.",
+      "authors": [
+        "João Sedoc",
+        "Baotong Zhang",
+        "Dean Foster"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-05-24T15:23:27+00:00",
+      "link": "https://arxiv.org/pdf/2605.25133v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "prover-verifier protocol for LLM inference verification",
+      "llm_evidence_cn": "用于大模型推理验证的证明者-验证者协议",
+      "llm_evidence": "用于大模型推理验证的证明者-验证者协议",
+      "canonical_evidence": "用于大模型推理验证的证明者-验证者协议",
+      "llm_tldr_en": "Introduces a prover-verifier protocol to improve LLM prediction reliability through interactive proof theory.",
+      "llm_tldr_cn": "引入了一种证明者-验证者协议，通过交互式证明理论提高大模型预测的可靠性。",
+      "llm_tldr": "引入了一种证明者-验证者协议，通过交互式证明理论提高大模型预测的可靠性。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

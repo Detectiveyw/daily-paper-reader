@@ -1,0 +1,37 @@
+{
+  "label": "2026-05-31",
+  "date": "2026-05-31",
+  "generated_at": "2026-05-31T20:37:58",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202605/31/2605.29450v1-protecting-on-device-ai-inference-a-systematic-review-of-attacks-and-defence-mechanisms",
+      "section": "quick",
+      "title_en": "Protecting On-Device AI Inference: A Systematic Review of Attacks and Defence Mechanisms",
+      "authors": "Zisis Tsiatsikas, Alexandros Fakis, Georgios Karopoulos, Vasileios Kouliaridis, Marios Anagnostopoulos",
+      "date": "2026-05-28",
+      "pdf": "https://arxiv.org/pdf/2605.29450v1",
+      "score": "7.0",
+      "evidence": "设备端安全AI推理及防御机制综述",
+      "tldr": "随着移动端AI推理的普及，模型窃取和对抗攻击等安全威胁日益严重。本文首次系统性地综述了针对设备端AI推理的攻击与防御机制，涵盖了TEE、同态加密和混淆等技术。研究发现当前攻防文献分布不均，特别是针对对抗攻击的防御研究严重滞后，本文通过揭示这些研究空白，为未来提升设备端AI安全性提供了重要参考。",
+      "tags": "query:fss-llm",
+      "abstract_en": "The need for secure and private Artificial Intelligence (AI) and Machine Learning (ML) on edge and mobile devices has increased the necessity of protecting the architecture of these systems from threats to both security and privacy. With an ever-increasing number of pre-trained AI models being used on mobile platforms for client-side inference, there are rising concerns about the risks associated with the theft/extraction of AI models, adversarial attacks on AI models, and data breaches. As a result of this trend, a variety of defence mechanisms have been proposed to protect against these threats. These include Trusted Execution Environments (TEEs), homomorphic encryption, obfuscation, and differential privacy, among others. However, current surveys largely focus on edge intelligence, which includes distributed training, and thus overlook security and privacy issues that are specific to on-device AI inference. To the best of our knowledge, this paper presents the first comprehensive review of threats and corresponding defence mechanisms targeting on-device inference. Our results show that the attack and defence literature are unbalanced: approximately one quarter of the surveyed attack papers focus on Intellectual Property (IP) attacks, whereas half of the defence solutions tackle the same issue. More importantly, some attack categories have no defence paper associated to them, such as adversarial attacks that account for roughly one third of the attack literature. This asymmetry between known attacks and available mitigations highlights clear opportunities for future research on securing on-device AI inference.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202605/31/2605.25133v1-trust-but-verify-prover-verifier-deliberation-for-selective-llm-prediction",
+      "section": "quick",
+      "title_en": "Trust but Verify: Prover-Verifier Deliberation for Selective LLM Prediction",
+      "authors": "João Sedoc, Baotong Zhang, Dean Foster",
+      "date": "2026-05-24",
+      "pdf": "https://arxiv.org/pdf/2605.25133v1",
+      "score": "6.0",
+      "evidence": "用于大模型推理验证的证明者-验证者协议",
+      "tldr": "本研究针对大语言模型在选择性预测中的可靠性问题，提出了一种基于交互式证明理论的“证明者-验证者博弈”（PVD）推理协议。该协议通过证明者提供子主张、验证者进行针对性挑战的对话机制，筛选出高置信度的答案（ANC）。实验表明，该方法在GPQA Diamond等复杂任务上能显著区分可靠与不可靠答案，为LLM的置信度评估提供了独特的论证防御信号。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Reliably knowing when a language model is correct is almost as important as being correct. We introduce prover-verifier deliberation (PVD), an inference-time protocol grounded in interactive proof theory, as a mechanism for selective prediction: the protocol produces both an answer and a structured confidence verdict, allowing a system to report high-confidence answers while abstaining on uncertain cases. In each dialogue, a prover defends a candidate answer through checkable sub-claims while a verifier issues targeted challenges and returns \\textsc{Accept}, \\textsc{Challenge}, or \\textsc{Reject}. Because frozen language models are imperfect provers and verifiers operating over a noisy channel, formal soundness and completeness guarantees do not transfer; instead, we characterize the protocol empirically through its coverage-precision behavior. Our main experiment uses Claude Sonnet 4.6 as prover and Claude Haiku 4.5 as verifier on GPQA Diamond. Questions accepted with no answer revision, which we call Accept + No Change (ANC), are reported as the high-confidence subset; we evaluate this subset by its precision and coverage. ANC separates reliable from unreliable answers, yielding a $\\sim$30pp HC-Prec gap over the non-ANC complement. Robustness experiments with GPT and Gemini pairings show that high HC-Prec can transfer across model families, while verifier strictness and domain competence largely determine the size of the selection gap. On Humanity's Last Exam, weaker prover-verifier pairings can collapse or invert the ANC signal, illustrating a practical failure mode when the verifier operates outside its effective region. Comparisons with self-consistency, universal self-consistency, multi-agent debate, and Reflexion suggest that prover-verifier deliberation supplies a distinct argument-defensibility signal for selective prediction.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
