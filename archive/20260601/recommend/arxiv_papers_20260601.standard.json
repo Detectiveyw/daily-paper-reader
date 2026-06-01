@@ -1,0 +1,92 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-01T22:25:57.974128+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2605.25367v1",
+      "title": "Architectural Limits of Cloud TPUs in Finite-Field Cryptography",
+      "abstract": "We empirically characterise the cost-efficiency deficit between cloud Tensor Processing Units and GPUs for finite-field cryptography. Against A100 GPU baselines (cuZK), we measure a $[5{,}558\\times, 6{,}908\\times]$ deficit across v5p and v4 architectures under an FP32-mantissa staging discipline, and a $\\sim$$4{,}693\\times$ deficit using v5p's native \\texttt{int32} accumulator. We analytically project this deficit into a fundamental arithmetic penalty (lacking wide-integer ALUs) and a spatial penalty. We demonstrate that evaluating concurrent multi-tenant deployments, where strict separation forces eager Montgomery reduction, yields a projected $5.19\\times$ spatial collapse; relaxing this constraint theoretically recovers these spatial cycles, yet the underlying arithmetic penalty remains. To facilitate this characterisation, we deploy \\codename as a measurement vehicle. By mapping low-degree polynomials onto matrix-form Number Theoretic Transforms, the scheduler stacks heterogeneous polynomials into dense 2D matrices, achieving $\\sim$$100\\%$ K-dimension column occupancy on uniform workloads ($>$$92\\%$ on mixed-degree traces). However, despite optimal K-dimension packing, severe M-dimension under-utilisation (e.g., $6.25\\%$ on v4) combined with overwhelming VPU-bound Montgomery reduction stalls mathematically starve the systolic arrays. A post-hoc HLO validator ensures these measurements remain structurally isolated against the XLA fusion engine. Our findings empirically demonstrate the structural inadequacy of AI-optimised systolic arrays for exact, high-throughput field arithmetic.",
+      "authors": [
+        "Hung Dang",
+        "Xuan Phu Dang",
+        "Tue Nguyen"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR"
+      ],
+      "published": "2026-05-25T02:46:02+00:00",
+      "link": "https://arxiv.org/pdf/2605.25367v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Finite-field cryptography performance on TPUs vs GPUs",
+      "llm_evidence_cn": "TPU与GPU在有限域密码学上的性能对比",
+      "llm_evidence": "TPU与GPU在有限域密码学上的性能对比",
+      "canonical_evidence": "TPU与GPU在有限域密码学上的性能对比",
+      "llm_tldr_en": "Characterizes the efficiency gap of cloud TPUs for finite-field cryptography.",
+      "llm_tldr_cn": "表征了云端TPU在有限域密码学计算中的效率差距。",
+      "llm_tldr": "表征了云端TPU在有限域密码学计算中的效率差距。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2605.29251v1",
+      "title": "Provably Secure Agent Guardrail",
+      "abstract": "As large language models transition from bounded generative engines to agents with expansive execution privileges, AI going out of control precipitates a fundamental crisis in artificial intelligence security. Existing defense architectures heavily rely on empirical semantic guardrails and probabilistic large model adjudicators, mechanisms that fail to provide deterministic security lower bounds when facing complex semantic symbol decoupling attacks. To overcome this empirical semantic guardrail dilemma, this paper proposes a new security paradigm for agents based on the fundamental limitations of logical reasoning. Based on this paradigm, we further introduce an executable Proof-Constrained Action (ePCA) framework with a neural symbolic isolation architecture. This framework abandons semantic trust in natural language, forcing agents to losslessly formalize their intentions into first-order logical mathematical constraints before performing physical operations. Empirical evaluations of macroscopic and microscopic two-dimensional dynamic adversarial systems demonstrate that our formal verification mechanism achieves zero attack success rate and zero false positive rate across the evaluated scenarios, with extremely low computational latency. This research provides a conditional formal foundation under explicit system assumptions and an engineering paradigm for constructing the underlying defense foundation for future intelligent systems.",
+      "authors": [
+        "Benlong Wu",
+        "Weiming Zhang",
+        "Kejiang Chen",
+        "Han Fang",
+        "Nenghai Yu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CR"
+      ],
+      "published": "2026-05-28T02:12:41+00:00",
+      "link": "https://arxiv.org/pdf/2605.29251v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Provably secure guardrails for LLM agents using neural symbolic isolation",
+      "llm_evidence_cn": "使用神经符号隔离的大语言模型智能体可证明安全护栏",
+      "llm_evidence": "使用神经符号隔离的大语言模型智能体可证明安全护栏",
+      "canonical_evidence": "使用神经符号隔离的大语言模型智能体可证明安全护栏",
+      "llm_tldr_en": "Proposes a neural-symbolic isolation architecture to provide deterministic security for LLM agents.",
+      "llm_tldr_cn": "提出了一种神经符号隔离架构，为大语言模型智能体提供确定性的安全保障。",
+      "llm_tldr": "提出了一种神经符号隔离架构，为大语言模型智能体提供确定性的安全保障。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "label": "2026-06-01",
+  "date": "2026-06-01",
+  "generated_at": "2026-06-01T22:26:37",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202606/01/2605.25367v1-architectural-limits-of-cloud-tpus-in-finite-field-cryptography",
+      "section": "quick",
+      "title_en": "Architectural Limits of Cloud TPUs in Finite-Field Cryptography",
+      "authors": "Hung Dang, Xuan Phu Dang, Tue Nguyen",
+      "date": "2026-05-25",
+      "pdf": "https://arxiv.org/pdf/2605.25367v1",
+      "score": "6.0",
+      "evidence": "TPU与GPU在有限域密码学上的性能对比",
+      "tldr": "本研究实测并分析了云端TPU（v4/v5p）与GPU在有限域密码学计算中的效率差距。研究发现TPU存在超过4,600倍的性能劣势，并将其归因于缺乏宽整数ALU的算术惩罚和空间利用率不足。通过将多项式映射为矩阵形式的数论变换进行测试，揭示了脉动阵列在处理精确算术时的维度利用率低下和计算停顿问题，为AI芯片在密码学领域的局限性提供了实证。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We empirically characterise the cost-efficiency deficit between cloud Tensor Processing Units and GPUs for finite-field cryptography. Against A100 GPU baselines (cuZK), we measure a $[5{,}558\\times, 6{,}908\\times]$ deficit across v5p and v4 architectures under an FP32-mantissa staging discipline, and a $\\sim$$4{,}693\\times$ deficit using v5p's native \\texttt{int32} accumulator. We analytically project this deficit into a fundamental arithmetic penalty (lacking wide-integer ALUs) and a spatial penalty. We demonstrate that evaluating concurrent multi-tenant deployments, where strict separation forces eager Montgomery reduction, yields a projected $5.19\\times$ spatial collapse; relaxing this constraint theoretically recovers these spatial cycles, yet the underlying arithmetic penalty remains. To facilitate this characterisation, we deploy \\codename as a measurement vehicle. By mapping low-degree polynomials onto matrix-form Number Theoretic Transforms, the scheduler stacks heterogeneous polynomials into dense 2D matrices, achieving $\\sim$$100\\%$ K-dimension column occupancy on uniform workloads ($>$$92\\%$ on mixed-degree traces). However, despite optimal K-dimension packing, severe M-dimension under-utilisation (e.g., $6.25\\%$ on v4) combined with overwhelming VPU-bound Montgomery reduction stalls mathematically starve the systolic arrays. A post-hoc HLO validator ensures these measurements remain structurally isolated against the XLA fusion engine. Our findings empirically demonstrate the structural inadequacy of AI-optimised systolic arrays for exact, high-throughput field arithmetic.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/01/2605.29251v1-provably-secure-agent-guardrail",
+      "section": "quick",
+      "title_en": "Provably Secure Agent Guardrail",
+      "authors": "Benlong Wu, Weiming Zhang, Kejiang Chen, Han Fang, Nenghai Yu",
+      "date": "2026-05-28",
+      "pdf": "https://arxiv.org/pdf/2605.29251v1",
+      "score": "6.0",
+      "evidence": "使用神经符号隔离的大语言模型智能体可证明安全护栏",
+      "tldr": "针对大模型智能体在执行权限扩大后面临的安全危机，本文指出传统语义护栏在应对复杂攻击时缺乏确定性保障。为此，提出了一种基于逻辑推理局限性的新安全范式，并开发了可执行证明约束动作（ePCA）框架。该框架采用神经符号隔离架构，强制智能体在执行前将意图形式化为一阶逻辑约束，从而在动态对抗中实现了零攻击成功率和零误报率，为构建未来智能系统的底层防御奠定了形式化基础。",
+      "tags": "query:fss-llm",
+      "abstract_en": "As large language models transition from bounded generative engines to agents with expansive execution privileges, AI going out of control precipitates a fundamental crisis in artificial intelligence security. Existing defense architectures heavily rely on empirical semantic guardrails and probabilistic large model adjudicators, mechanisms that fail to provide deterministic security lower bounds when facing complex semantic symbol decoupling attacks. To overcome this empirical semantic guardrail dilemma, this paper proposes a new security paradigm for agents based on the fundamental limitations of logical reasoning. Based on this paradigm, we further introduce an executable Proof-Constrained Action (ePCA) framework with a neural symbolic isolation architecture. This framework abandons semantic trust in natural language, forcing agents to losslessly formalize their intentions into first-order logical mathematical constraints before performing physical operations. Empirical evaluations of macroscopic and microscopic two-dimensional dynamic adversarial systems demonstrate that our formal verification mechanism achieves zero attack success rate and zero false positive rate across the evaluated scenarios, with extremely low computational latency. This research provides a conditional formal foundation under explicit system assumptions and an engineering paradigm for constructing the underlying defense foundation for future intelligent systems.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
