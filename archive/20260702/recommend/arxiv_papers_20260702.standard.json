@@ -1,0 +1,201 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-02T21:39:23.697392+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [
+    {
+      "id": "2606.25349v1",
+      "title": "General Techniques for Reducing Key-Switching Overhead in Privacy-Preserving Two-Party Transformer Inference",
+      "abstract": "In secure two-party Transformer inference, linear layers are typically evaluated using Fully Homomorphic Encryption (FHE) through plaintext-ciphertext or ciphertext-ciphertext matrix multiplications, where key switching primarily occurs and dominates computational overhead in both FHE-based and hybrid FHE-MPC systems. Existing optimizations rely heavily on packing-specific algorithms, limiting their general applicability.   Targeting this overhead from a packing-independent perspective, we propose a preprocessing-assisted method for secure attention computation. By decomposing attention into precomputable operations and online interactions, this method reduces online inference-phase key switching without modifying existing packing strategies.   However, the first method shifting key switching offline introduces additional storage requirements. To address this, we propose storage-communication trade-off techniques that replace large precomputed ciphertexts with modest online communication, enabling flexible deployment under varying resource constraints.   While ciphertext-ciphertext matrix multiplication is offloaded to the preprocessing phase in hybrid schemes and the first layer of FHE-based schemes, these operations still persist in the offline stage and subsequent FHE layers. To further optimize it, we propose a fused key-switch technique targeting the multiplication-followed-by-rotation pattern, which frequently arises in existing RNS-CKKS matrix multiplication schemes. By combining relinearization and rotation into a single procedure, this technique reduces the associated computation costs.   Analytical evaluations demonstrate that our proposed techniques significantly reduce online key-switch overhead and provide flexible trade-offs between storage and communication without requiring modifications to existing packing strategies.",
+      "authors": [
+        "Wenshao Yang",
+        "Zhenhua Liu",
+        "Dongdong Yao"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-06-24T03:33:17+00:00",
+      "link": "https://arxiv.org/pdf/2606.25349v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Secure two-party Transformer inference and FHE optimization",
+      "llm_evidence_cn": "安全两方Transformer推理与FHE优化",
+      "llm_evidence": "安全两方Transformer推理与FHE优化",
+      "canonical_evidence": "安全两方Transformer推理与FHE优化",
+      "llm_tldr_en": "Reduces key-switching overhead in secure Transformer inference using preprocessing-assisted methods.",
+      "llm_tldr_cn": "通过预处理辅助方法降低安全Transformer推理中的密钥切换开销。",
+      "llm_tldr": "通过预处理辅助方法降低安全Transformer推理中的密钥切换开销。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.27092v1",
+      "title": "zQR: A Verifiable QR-Driven zkSNARK Proof Verification Framework for Mobile Platforms",
+      "abstract": "Privacy is one of the fundamental rights of individuals in modern societies. Yet, the practical adoption of privacy-preserving technologies in daily interactions remains limited. Zero-knowledge proofs offer strong privacy guarantees but are often hindered by their technical complexity. In this paper, we advance the idea of verifiable QR codes that enable off-line verifiers to verify proofs encoded in QR codes. Based on this core idea, we build a novel QR-driven zkSNARK proof verification framework (i.e., zQR) for mobile platforms. The framework integrates blockchain for auditability, non-repudiation and logging; and large-language models for automatic circuit generation. We perform a security discussion of the framework by considering multiple attack surfaces. Furthermore, we present an experimental evaluation measuring temporal costs (proof generation and verification latency, QR code encoding and decoding latency) and financial costs (blockchain gas consumption). Our results demonstrate the feasibility of zQR as a proof-of-concept framework for privacy-preserving verification on mobile platform where proofs are compactly represented with QR code symbol version of 19 with low error correction level. Finally, we discuss potential applications, current limitations and future directions for the broader adoption of privacy-preserving technologies in daily interactions.",
+      "authors": [
+        "Goshgar Can Ismayilov"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-06-25T14:29:35+00:00",
+      "link": "https://arxiv.org/pdf/2606.27092v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Verifiable proof framework using LLMs for circuit generation",
+      "llm_evidence_cn": "使用LLM生成电路的可验证证明框架",
+      "llm_evidence": "使用LLM生成电路的可验证证明框架",
+      "canonical_evidence": "使用LLM生成电路的可验证证明框架",
+      "llm_tldr_en": "Introduces a verifiable QR-driven zkSNARK framework for mobile platforms using LLMs for automation.",
+      "llm_tldr_cn": "引入一种面向移动平台的、利用LLM自动生成电路的可验证zkSNARK框架。",
+      "llm_tldr": "引入一种面向移动平台的、利用LLM自动生成电路的可验证zkSNARK框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.31639v1",
+      "title": "A Lifecycle and Application-Stack Survey of Large Language Model Vulnerabilities: Attacks, Risks, Defenses, and Open Problems",
+      "abstract": "Large language models are no longer only text generators. They are increasingly embedded in retrieval pipelines, enterprise assistants, coding environments, robotic systems, security-operation workflows, and autonomous agents that can read private data, call tools, write files, execute code, and act across organizational boundaries. This shift changes the security problem: risks do not arise from the model weights alone, but from the full lifecycle and application stack through which data, prompts, model outputs, tools, memories, and user authority interact. This paper systematizes the literature on vulnerabilities in large language model systems through a lifecycle and application-stack lens. We organize attacks across eight stages: data collection, pretraining, post-training alignment, model packaging and supply chain, retrieval and memory, prompting and inference, tool/agent execution, and deployment/maintenance. For each stage, we analyze attacker capabilities, affected security objectives, representative attacks, practical risks, evaluation practices, and defenses. We further map LLM-specific vulnerabilities to confidentiality, integrity, availability, safety, privacy, fairness, accountability, and agency-control objectives. Unlike taxonomies that list isolated attack names, the proposed systematization emphasizes where trust boundaries fail, how untrusted data becomes executable instruction, how delegated authority amplifies model errors, and why point defenses rarely compose. We close with a research agenda for secure LLM systems, including compositional security, provenance-aware retrieval, tool-call containment, long-horizon agent evaluation, privacy-preserving adaptation, realistic red teaming, and deployment-grade incident response.",
+      "authors": [
+        "Seyed Bagher Hashemi Natanzi",
+        "Bo Tang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.GT",
+        "cs.LO"
+      ],
+      "published": "2026-06-30T13:21:43+00:00",
+      "link": "https://arxiv.org/pdf/2606.31639v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Survey of LLM vulnerabilities and defenses in application stacks",
+      "llm_evidence_cn": "大语言模型应用栈中的漏洞与防御综述",
+      "llm_evidence": "大语言模型应用栈中的漏洞与防御综述",
+      "canonical_evidence": "大语言模型应用栈中的漏洞与防御综述",
+      "llm_tldr_en": "Systematizes LLM vulnerabilities across the lifecycle, including risks in private data and tool interaction.",
+      "llm_tldr_cn": "系统化梳理了LLM生命周期中的漏洞，包括私有数据和工具交互中的风险。",
+      "llm_tldr": "系统化梳理了LLM生命周期中的漏洞，包括私有数据和工具交互中的风险。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.29389v1",
+      "title": "Exploring the Cryptographic Limits of Transformer Networks",
+      "abstract": "In recent work it has been shown that colluding AI agents can use steganographic methods to exchange malicious information. Whether a transformer can implement steganographic methods depends on what cryptographic functions it can implement, since a transformer that can implement a cryptographic function within its layers has source-free randomness access. Despite existing circuit-complexity results, no prior work maps specific cryptographic constructions to transformer architectures. As Merrill et al. have shown that saturated transformers can be seen as threshold circuits, we first generate threshold circuits for three different cryptographic constructions (Keccak functions, Merkle--Damgard constructions and Merkle Trees) and then map these circuits to different transformer architectures. We derive verified scaling laws for the width and depth of the circuits which implement each cryptographic construction and propose two different mappings: no-attention mapping, tokens-as-gates mapping. Beyond its security implications, this work contributes to by establishing a methodology for deriving structural guarantees on transformer computational capacity. Specifically, we derive constructive upper bounds on what a transformer of a given depth and width could plausibly compute, providing a principled foundation for capability evaluations of transformer-based AI systems.",
+      "authors": [
+        "Stefan Domunco",
+        "Andis Draguns",
+        "Philip Torr",
+        "Isaac Robinson",
+        "Christian Schroeder de Witt"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-06-28T13:26:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.29389v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Mapping cryptographic constructions to transformer architectures",
+      "llm_evidence_cn": "将加密结构映射到Transformer架构",
+      "llm_evidence": "将加密结构映射到Transformer架构",
+      "canonical_evidence": "将加密结构映射到Transformer架构",
+      "llm_tldr_en": "Explores the ability of Transformer networks to implement cryptographic functions like Keccak and Merkle Trees.",
+      "llm_tldr_cn": "探索Transformer网络实现Keccak和默克尔树等加密功能的能力。",
+      "llm_tldr": "探索Transformer网络实现Keccak和默克尔树等加密功能的能力。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.00621v1",
+      "title": "High-Performance NTT Accelerators for PQC leveraging Unified Redundant Arithmetic and Fine-Tuned Microarchitecture",
+      "abstract": "Post-quantum cryptography and privacy-preserving technologies are expected to play a central role in future secure communication systems. Lattice-based PQC schemes such as ML-KEM (CRYSTALS-Kyber) and ML-DSA (CRYSTALS-Dilithium) rely heavily on large-degree polynomial arithmetic, making the Number Theoretic Transform (NTT) a key computational primitive. Although existing hardware accelerators exploit parallelism and pipelining to support both NTT and INTT, their efficiency is often limited by the overhead of modular reduction and correction steps, inverse-transform scaling operations, and suboptimal FPGA implementations. This work addresses these limitations by proposing parallel iterative NTT/INTT accelerators based on optimized unified butterfly units. We introduce a novel redundant number representation that eliminates conditional corrections for both Montgomery modulo multiplication and combined subtract-multiply operations, and integrate inverse-transform scaling into existing arithmetic hardware to avoid dedicated scaling units. Furthermore, we design hierarchical Montgomery multipliers that map efficiently onto FPGA DSP resources, reducing hardware cost while enabling high operating frequencies. FPGA-based experimental results demonstrate higher clock frequencies, reduced execution times, and competitive resource utilization, supporting efficient NTT acceleration for PQC and related privacy-preserving applications.",
+      "authors": [
+        "George Alexakis",
+        "Dimitrios Schoinianakis",
+        "Giorgos Dimitrakopoulos"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR",
+        "cs.CR"
+      ],
+      "published": "2026-07-01T08:41:11+00:00",
+      "link": "https://arxiv.org/pdf/2607.00621v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "accelerators for privacy-preserving technologies and PQC",
+      "llm_evidence_cn": "隐私保护技术与后量子密码加速器",
+      "llm_evidence": "隐私保护技术与后量子密码加速器",
+      "canonical_evidence": "隐私保护技术与后量子密码加速器",
+      "llm_tldr_en": "Proposes high-performance NTT accelerators for lattice-based cryptography and privacy technologies.",
+      "llm_tldr_cn": "为基于格的密码学和隐私技术提出了高性能NTT加速器。",
+      "llm_tldr": "为基于格的密码学和隐私技术提出了高性能NTT加速器。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
