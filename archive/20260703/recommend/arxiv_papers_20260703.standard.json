@@ -1,0 +1,125 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-03T21:05:45.116289+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2606.27803v1",
+      "title": "Reliable Homomorphic Matching for Fuzzy Labeled PSI at Scale",
+      "abstract": "Fuzzy Labeled Private Set Intersection (FLPSI) lets a receiver learn the labels of enrolled records similar to its query, and nothing else. Constructions based on a set-threshold reduction reach practical performance: a query matches a record when the two agree on a threshold number of components, and the private matching is delegated to an inner set-threshold kernel. We study its homomorphic form, which combines leveled-BFV homomorphic encryption (HE), a garbled circuit, and secret sharing to decide the match under encryption and release the record's label. We identify a composition gap in this kernel: efficiency is bought with a per-trial false-accept probability, but one query runs a trial for every record, so the error compounds with the database size into the kernel's realization soundness error (RSE), the rate at which it accepts a query the plaintext matcher would reject. The RSE is a reliability property of the cryptographic matching layer, not the matcher's accuracy, and a sound kernel must contribute zero or negligible RSE of its own. We formalize this as a composable security property, give a closed-form bound on the receiver's advantage, and close the gap with CSTPSI, a kernel that runs independent token rounds and raises the per-trial bound to a matching power. We prove CSTPSI secure in the semi-honest model. The bound sets the round count: two token rounds suffice for million-scale databases and three for billion-scale at the $10^{-6}$ engineering threshold. Our evaluation confirms this: at a million records the baseline kernel's RSE reaches 100% while CSTPSI holds it at 0 in every measured configuration. For large labels at small to moderate scale CSTPSI is more than 20x faster than the baseline, with up to 93% less communication, converging to the baseline only at million-scale. Our implementation, with a one-command reproducibility harness, is publicly available.",
+      "authors": [
+        "Erkam Uzun"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-06-26T07:40:03+00:00",
+      "link": "https://arxiv.org/pdf/2606.27803v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Combines secret sharing and homomorphic encryption for private matching",
+      "llm_evidence_cn": "结合秘密共享和同态加密进行隐私匹配",
+      "llm_evidence": "结合秘密共享和同态加密进行隐私匹配",
+      "canonical_evidence": "结合秘密共享和同态加密进行隐私匹配",
+      "llm_tldr_en": "Addresses reliability in homomorphic matching using secret sharing and garbled circuits.",
+      "llm_tldr_cn": "利用秘密共享和混淆电路解决了同态匹配中的可靠性问题。",
+      "llm_tldr": "利用秘密共享和混淆电路解决了同态匹配中的可靠性问题。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.28994v1",
+      "title": "Arbitrary Reduction of Validation Error for AI Decision Tests using Homomorphic AI and Repetition Codes",
+      "abstract": "This paper presents new results and breakthrough obtained with the HbHAI techniques (Hash-based Homomorphic Artificial Intelligence) proposed in \\cite{filiol0,sepp}. HbHAI is based on a novel class of key-dependent hash functions that naturally preserve most similarity properties, most AI algorithms rely on. It enables to analyse and process data in its cryptographically secure form while using existing native AI algorithms without modification, with unprecedented performances compared to existing homomorphic encryption schemes and most notably compared to the same processing on corresponding plaintext data.   Two major results have been obtained further. First we enable to reduce the compression rate up to a factor of 10 thus allowing to process massive datasets while reducing the computation time and the energy footprint in the same order. Second, we show how it is possible to arbitrarily reduce the final validation error of AI-based decision tests by using repetition error-correcting codes.",
+      "authors": [
+        "Eric Filiol",
+        "Jaagup Sepp"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-06-27T16:10:47+00:00",
+      "link": "https://arxiv.org/pdf/2606.28994v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Homomorphic AI for secure data processing without modification",
+      "llm_evidence_cn": "用于安全数据处理的同态AI技术",
+      "llm_evidence": "用于安全数据处理的同态AI技术",
+      "canonical_evidence": "用于安全数据处理的同态AI技术",
+      "llm_tldr_en": "Uses hash-based homomorphic AI to process cryptographically secure data with native algorithms.",
+      "llm_tldr_cn": "使用基于哈希的同态AI技术，通过原生算法处理加密安全数据。",
+      "llm_tldr": "使用基于哈希的同态AI技术，通过原生算法处理加密安全数据。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.02187v1",
+      "title": "Privacy-Preserving and Verifiable Approximate Distributed Coded Computing",
+      "abstract": "Distributed machine learning enables collaborative model training without centralizing data, but it also exposes learning processes to privacy leakage and malicious manipulation. Existing defenses typically address these threats in isolation and are often tailored to specific learning paradigms or model architectures, limiting their applicability in realistic deployments. In particular, federated learning and decentralized learning exhibit distinct adversarial surfaces that are rarely addressed within a unified framework. In this paper, we present a model-agnostic framework for adversary-resistant distributed learning that jointly addresses privacy preservation and malicious behavior across both federated and decentralized settings. Our approach combines paradigm-specific defense mechanisms with GPBACC, a privacy-enhancing coded computing technique applicable to arbitrary machine learning models. For federated learning, we integrate robust aggregation strategies to mitigate the impact of malicious participants, while for decentralized learning we employ approximate decode-and-compare and group testing techniques to enable lightweight verification and adversary isolation without relying on a trusted aggregator. Crucially, we evaluate the proposed framework through an explicit, attack-driven analysis. We implement representative privacy attacks and malicious behaviors, and empirically demonstrate that the combination of GPBACC with robust aggregation and verification mechanisms significantly reduces privacy leakage and improves resilience against active adversaries. These results suggest that privacy-enhancing coded computing, when combined with appropriate adversary-resistance strategies, provides a practical and deployable foundation for secure distributed machine learning.",
+      "authors": [
+        "Xavier Martínez-Luaña",
+        "Alba Gude-Santos",
+        "Manuel Fernández-Veiga",
+        "Rebeca P. Díaz-Redondo"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CR"
+      ],
+      "published": "2026-07-02T13:57:32+00:00",
+      "link": "https://arxiv.org/pdf/2607.02187v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "privacy-preserving and verifiable distributed computing",
+      "llm_evidence_cn": "隐私保护且可验证的分布式计算",
+      "llm_evidence": "隐私保护且可验证的分布式计算",
+      "canonical_evidence": "隐私保护且可验证的分布式计算",
+      "llm_tldr_en": "Develops a framework for privacy-preserving and verifiable distributed learning against malicious behavior.",
+      "llm_tldr_cn": "开发了一个针对恶意行为的隐私保护且可验证的分布式学习框架。",
+      "llm_tldr": "开发了一个针对恶意行为的隐私保护且可验证的分布式学习框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

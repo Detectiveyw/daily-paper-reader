@@ -6,36 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-02
-- 运行时间：2026-07-02 21:40:20 UTC
+- 最新运行日期：2026-07-03
+- 运行时间：2026-07-03 21:06:17 UTC
 - 运行状态：成功
-- 本次总论文数：5
-- 精读区：1
-- 速读区：4
+- 本次总论文数：3
+- 精读区：0
+- 速读区：3
 
 ### 今日简报（AI）
-今日深度解析隐私保护下 Transformer 推理的性能瓶颈，重点攻克两方计算中的密钥切换开销。
-核心结论
-- 详情：[/202607/02/README](/202607/02/README)
+今日聚焦隐私计算前沿，涵盖大规模模糊 PSI、可验证分布式计算及同态 AI 决策优化。
+重点关注如何通过同态匹配实现大规模模糊标签 PSI，以及利用重复码将 AI 决策验证误差降至任意低。
+建议关注同态加密与纠错码结合在提升 AI 决策可信度方面的跨界应用。
+- 详情：[/202607/03/README](/202607/03/README)
 
 ### 精读区论文标签
-1. [General Techniques for Reducing Key-Switching Overhead in Privacy-Preserving Two-Party Transformer Inference](/202607/02/2606.25349v1-general-techniques-for-reducing-key-switching-overhead-in-privacy-preserving-two-party-transformer-inference)  
-   标签：评分：9.0/10、query:fss-llm
-   evidence：安全两方Transformer推理与FHE优化
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [zQR: A Verifiable QR-Driven zkSNARK Proof Verification Framework for Mobile Platforms](/202607/02/2606.27092v1-zqr-a-verifiable-qr-driven-zksnark-proof-verification-framework-for-mobile-platforms)  
+1. [Reliable Homomorphic Matching for Fuzzy Labeled PSI at Scale](/202607/03/2606.27803v1-reliable-homomorphic-matching-for-fuzzy-labeled-psi-at-scale)  
    标签：评分：7.0/10、query:fss-llm
-   evidence：使用LLM生成电路的可验证证明框架
-2. [Exploring the Cryptographic Limits of Transformer Networks](/202607/02/2606.29389v1-exploring-the-cryptographic-limits-of-transformer-networks)  
+   evidence：结合秘密共享和同态加密进行隐私匹配
+2. [Privacy-Preserving and Verifiable Approximate Distributed Coded Computing](/202607/03/2607.02187v1-privacy-preserving-and-verifiable-approximate-distributed-coded-computing)  
    标签：评分：7.0/10、query:fss-llm
-   evidence：将加密结构映射到Transformer架构
-3. [A Lifecycle and Application-Stack Survey of Large Language Model Vulnerabilities: Attacks, Risks, Defenses, and Open Problems](/202607/02/2606.31639v1-a-lifecycle-and-application-stack-survey-of-large-language-model-vulnerabilities-attacks-risks-defenses-and-open-problems)  
+   evidence：隐私保护且可验证的分布式计算
+3. [Arbitrary Reduction of Validation Error for AI Decision Tests using Homomorphic AI and Repetition Codes](/202607/03/2606.28994v1-arbitrary-reduction-of-validation-error-for-ai-decision-tests-using-homomorphic-ai-and-repetition-codes)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：大语言模型应用栈中的漏洞与防御综述
-4. [High-Performance NTT Accelerators for PQC leveraging Unified Redundant Arithmetic and Fine-Tuned Microarchitecture](/202607/02/2607.00621v1-high-performance-ntt-accelerators-for-pqc-leveraging-unified-redundant-arithmetic-and-fine-tuned-microarchitecture)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：隐私保护技术与后量子密码加速器
+   evidence：用于安全数据处理的同态AI技术
 
 
 <div class="dpr-home-promo-card">
