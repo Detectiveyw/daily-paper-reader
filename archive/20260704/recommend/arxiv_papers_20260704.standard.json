@@ -1,0 +1,162 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-04T20:57:39.429297+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.00213v1",
+      "title": "Federated Sovereign Transport Protocol (FSTP): Verifiable Coordination Without Disclosure",
+      "abstract": "This paper introduces the Federated Sovereign Transport Protocol (FSTP), a synchronization boundary and transport layer for federated networks in which nodes have heterogeneous privacy requirements. Existing federation protocols leave data confinement to operator policy: they define message formats and delivery semantics but impose no structural constraint on what a conforming server may emit. FSTP addresses this gap by making data confinement a property of the protocol itself.   The central mechanism is a synchronization agent whose output type set is formally closed. Raw internal data cannot appear in any federation message because the constraint is enforced by the Rust type system at compile time, not by a runtime check. A contextual identity model derives a separate, unlinkable identifier for each federation relationship, preventing cross-context correlation structurally. A Blocklace-based event substrate provides tamper-evident, partially ordered logging with synchronization cost proportional to the symmetric difference between node states, and supports data erasure without breaking the hash chain.   The result is proof without exposure: a federation participant can verify that a process occurred, that a credential is authentic, and that an outcome is uncorrupted without accessing the internal data that produced these artifacts. FSTP is developed as the inter-node transport layer of Velyzor, a governance platform for institutions with demanding confidentiality requirements. The specification and reference implementation are released as open-source infrastructure under Apache 2.0; source code and figures accompany this paper.",
+      "authors": [
+        "Ramón Soto C.",
+        "Liz Soto"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-06-30T21:44:43+00:00",
+      "link": "https://arxiv.org/pdf/2607.00213v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Verifiable coordination and data confinement in federated networks",
+      "llm_evidence_cn": "联邦网络中的可验证协调与数据限制",
+      "llm_evidence": "联邦网络中的可验证协调与数据限制",
+      "canonical_evidence": "联邦网络中的可验证协调与数据限制",
+      "llm_tldr_en": "Presents a protocol for verifiable coordination in federated networks without disclosing raw internal data.",
+      "llm_tldr_cn": "提出一种联邦网络协议，在不泄露原始内部数据的情况下实现可验证的协调。",
+      "llm_tldr": "提出一种联邦网络协议，在不泄露原始内部数据的情况下实现可验证的协调。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.27934v1",
+      "title": "Self-Verifying Measurement Records: Hash-Linked Evidence Graphs for Hardware Benchmarking",
+      "abstract": "Performance numbers reported for hardware are accepted on trust: the reader cannot recompute them, the apparatus is gone, and the silicon itself can be silently wrong, with fleet studies reporting on the order of one core in a thousand returning incorrect arithmetic with no error raised. We make a reported hardware measurement a tamper-evident, independently checkable record. Every quantity in the text, a table, or a figure is bound, by its content hash, to the observation and the verification behind it; the whole is a hash-linked, append-only structure (a transparency log for measurement) that a verifier audits offline without trusting its producer. Matrix products are verified by a probabilistic identity (Freivalds) at O(k n^2) cost under a tolerance we derive from floating-point error analysis and calibrate to the device's own measured residual floor, so a wrong product is rejected with probability 1 - 2^(-k); quantities with no such identity carry an algebraic checksum and a measured reproducibility class. We then treat the check itself as a security object: a probe seed committed for offline reproducibility is an attack surface, and a probe-aware adversary can hide a corruption in the probe's null space, fooling even a quorum of bit-identical witnesses, while a Fiat-Shamir challenge derived from the claimed output closes this. Driving the device from an unprivileged tenant's reach, with a di/dt power virus and a thermal soak, neither moves the calibrated tolerance nor produces a silent error, placing the physical-fault threat at the rare defective part or the privileged attacker and marking the boundary at which the record must compose with a hardware root of trust. We demonstrate the construction across Blackwell and Hopper GPUs and report a residual-floor and reproducibility map by precision, size, and device.",
+      "authors": [
+        "Faruk Alpay",
+        "Baris Basaran"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AR"
+      ],
+      "published": "2026-06-26T10:26:50+00:00",
+      "link": "https://arxiv.org/pdf/2606.27934v1",
+      "tags": [
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Verifiable measurement records and probabilistic identity for matrix products",
+      "llm_evidence_cn": "可验证的测量记录和矩阵乘法的概率恒等式验证",
+      "llm_evidence": "可验证的测量记录和矩阵乘法的概率恒等式验证",
+      "canonical_evidence": "可验证的测量记录和矩阵乘法的概率恒等式验证",
+      "llm_tldr_en": "Proposes hash-linked evidence graphs and Freivalds' algorithm for verifiable hardware benchmarking.",
+      "llm_tldr_cn": "提出哈希链接证据图和Freivalds算法，用于实现可验证的硬件基准测试。",
+      "llm_tldr": "提出哈希链接证据图和Freivalds算法，用于实现可验证的硬件基准测试。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.31016v1",
+      "title": "Beyond Wireless Security: Covert Communications in Large Language Model-enabled Edge Networks",
+      "abstract": "Large language model (LLM)-enabled edge networks (LLMENs) offer mobile users high-quality and low-latency AI-generated content services in the 6G era. However, unlike typical edge networks, LLMENs present unique security challenges due to the inherent complexity of LLMs, their high computational overhead, and continuous interactions with users. Specifically, both frequent user interactions (i.e., queries and responses) over wireless channels and potential electromagnetic information leakage from intensive LLM computations make LLMENs susceptible to various security threats, such as eavesdropping, jamming, prompt poisoning, and prompt injection attacks. Since existing countermeasures against these attacks often incur prohibitive overhead, developing holistic, efficient, and secure privacy protections for LLMENs is crucial. This article first reviews the vulnerabilities of LLMENs, outlines various attacks, and analyzes the drawbacks of existing countermeasures. To overcome these limitations, we propose a covert communications (CC) and computations approach to enhance both the overall security and efficiency of LLMENs. Furthermore, various supplementary solutions are developed to improve the covertness of this framework. Finally, our approach is further evaluated through a case study where the total latency is minimized under stringent communication and computational security requirements. Numerical results demonstrate the proposed approach's effectiveness in enhancing both privacy protection and the execution efficiency of LLM tasks.",
+      "authors": [
+        "Yuanai Xie",
+        "Jiaxin Chen",
+        "Zhaozhi Liu"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-06-30T01:07:39+00:00",
+      "link": "https://arxiv.org/pdf/2606.31016v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "LLM security challenges and privacy in edge networks",
+      "llm_evidence_cn": "大语言模型安全挑战与边缘网络隐私",
+      "llm_evidence": "大语言模型安全挑战与边缘网络隐私",
+      "canonical_evidence": "大语言模型安全挑战与边缘网络隐私",
+      "llm_tldr_en": "Discusses security threats and covert communications in LLM-enabled edge networks.",
+      "llm_tldr_cn": "探讨了启用大语言模型的边缘网络中的安全威胁和隐蔽通信问题。",
+      "llm_tldr": "探讨了启用大语言模型的边缘网络中的安全威胁和隐蔽通信问题。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.01492v1",
+      "title": "Unveiling the Non-Monotonic Effect of Privacy on Generalization under Byzantine Robustness",
+      "abstract": "Recent work has established a fundamental trilemma between Byzantine robustness, local differential privacy (LDP), and optimization error in distributed learning. We show that this trilemma does not universally extend to generalization error, but instead depends critically on the privacy regime. Specifically, in the high-noise regime (strong privacy), we prove that increasing privacy reduces the generalization error, i.e., there is no tension between robustness and privacy. In the low-noise regime (weaker privacy), however, the tension between robustness and privacy reappears and increasing privacy indeed degrades generalization. Our theory explains this surprising non-monotonic behavior of the generalization error via matching lower and upper bounds on the algorithmic stability of Byzantine-robust distributed learning under LDP constraints. We corroborate and further analyze these theoretical findings with empirical evaluations.",
+      "authors": [
+        "Thomas Boudou",
+        "Batiste Le Bars",
+        "Nirupam Gupta",
+        "Aurélien Bellet"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CR",
+        "stat.ML"
+      ],
+      "published": "2026-07-01T21:42:47+00:00",
+      "link": "https://arxiv.org/pdf/2607.01492v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Byzantine robustness and privacy in distributed learning",
+      "llm_evidence_cn": "分布式学习中的拜占庭鲁棒性与隐私",
+      "llm_evidence": "分布式学习中的拜占庭鲁棒性与隐私",
+      "canonical_evidence": "分布式学习中的拜占庭鲁棒性与隐私",
+      "llm_tldr_en": "Analyzes the relationship between Byzantine robustness, privacy, and generalization in distributed learning.",
+      "llm_tldr_cn": "分析了分布式学习中拜占庭鲁棒性、隐私与泛化性能之间的关系。",
+      "llm_tldr": "分析了分布式学习中拜占庭鲁棒性、隐私与泛化性能之间的关系。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "label": "2026-07-04",
+  "date": "2026-07-04",
+  "generated_at": "2026-07-04T20:58:15",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202607/04/2607.00213v1-federated-sovereign-transport-protocol-fstp-verifiable-coordination-without-disclosure",
+      "section": "quick",
+      "title_en": "Federated Sovereign Transport Protocol (FSTP): Verifiable Coordination Without Disclosure",
+      "authors": "Ramón Soto C., Liz Soto",
+      "date": "2026-06-30",
+      "pdf": "https://arxiv.org/pdf/2607.00213v1",
+      "score": "7.0",
+      "evidence": "联邦网络中的可验证协调与数据限制",
+      "tldr": "FSTP 是一种为具有异构隐私需求的联邦网络设计的传输协议。针对现有协议无法强制约束数据外泄的问题，FSTP 利用 Rust 类型系统在编译时确保内部原始数据不被泄露。它结合了上下文身份模型和 Blocklace 事件基座，实现了可验证且防篡改的同步，同时支持数据擦除。该协议在不暴露内部数据的情况下提供过程验证，为高机密性机构的治理平台提供了核心支撑。",
+      "tags": "query:fss-llm",
+      "abstract_en": "This paper introduces the Federated Sovereign Transport Protocol (FSTP), a synchronization boundary and transport layer for federated networks in which nodes have heterogeneous privacy requirements. Existing federation protocols leave data confinement to operator policy: they define message formats and delivery semantics but impose no structural constraint on what a conforming server may emit. FSTP addresses this gap by making data confinement a property of the protocol itself.   The central mechanism is a synchronization agent whose output type set is formally closed. Raw internal data cannot appear in any federation message because the constraint is enforced by the Rust type system at compile time, not by a runtime check. A contextual identity model derives a separate, unlinkable identifier for each federation relationship, preventing cross-context correlation structurally. A Blocklace-based event substrate provides tamper-evident, partially ordered logging with synchronization cost proportional to the symmetric difference between node states, and supports data erasure without breaking the hash chain.   The result is proof without exposure: a federation participant can verify that a process occurred, that a credential is authentic, and that an outcome is uncorrupted without accessing the internal data that produced these artifacts. FSTP is developed as the inter-node transport layer of Velyzor, a governance platform for institutions with demanding confidentiality requirements. The specification and reference implementation are released as open-source infrastructure under Apache 2.0; source code and figures accompany this paper.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/04/2606.27934v1-self-verifying-measurement-records-hash-linked-evidence-graphs-for-hardware-benchmarking",
+      "section": "quick",
+      "title_en": "Self-Verifying Measurement Records: Hash-Linked Evidence Graphs for Hardware Benchmarking",
+      "authors": "Faruk Alpay, Baris Basaran",
+      "date": "2026-06-26",
+      "pdf": "https://arxiv.org/pdf/2606.27934v1",
+      "score": "6.0",
+      "evidence": "可验证的测量记录和矩阵乘法的概率恒等式验证",
+      "tldr": "针对硬件性能测试中数据不可验证及静默错误的问题，本文提出了一种自验证测量记录框架。该框架利用哈希链证据图构建防篡改、可独立审计的透明日志，将测量结果与验证过程绑定。通过改进的Freivalds算法及Fiat-Shamir变换，实现了对矩阵运算等结果的高效概率验证，并能抵御探测感知攻击。在Blackwell和Hopper GPU上的实验证明，该方法能有效识别硬件故障并提供可靠的性能基准。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Performance numbers reported for hardware are accepted on trust: the reader cannot recompute them, the apparatus is gone, and the silicon itself can be silently wrong, with fleet studies reporting on the order of one core in a thousand returning incorrect arithmetic with no error raised. We make a reported hardware measurement a tamper-evident, independently checkable record. Every quantity in the text, a table, or a figure is bound, by its content hash, to the observation and the verification behind it; the whole is a hash-linked, append-only structure (a transparency log for measurement) that a verifier audits offline without trusting its producer. Matrix products are verified by a probabilistic identity (Freivalds) at O(k n^2) cost under a tolerance we derive from floating-point error analysis and calibrate to the device's own measured residual floor, so a wrong product is rejected with probability 1 - 2^(-k); quantities with no such identity carry an algebraic checksum and a measured reproducibility class. We then treat the check itself as a security object: a probe seed committed for offline reproducibility is an attack surface, and a probe-aware adversary can hide a corruption in the probe's null space, fooling even a quorum of bit-identical witnesses, while a Fiat-Shamir challenge derived from the claimed output closes this. Driving the device from an unprivileged tenant's reach, with a di/dt power virus and a thermal soak, neither moves the calibrated tolerance nor produces a silent error, placing the physical-fault threat at the rare defective part or the privileged attacker and marking the boundary at which the record must compose with a hardware root of trust. We demonstrate the construction across Blackwell and Hopper GPUs and report a residual-floor and reproducibility map by precision, size, and device.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/04/2606.31016v1-beyond-wireless-security-covert-communications-in-large-language-model-enabled-edge-networks",
+      "section": "quick",
+      "title_en": "Beyond Wireless Security: Covert Communications in Large Language Model-enabled Edge Networks",
+      "authors": "Yuanai Xie, Jiaxin Chen, Zhaozhi Liu",
+      "date": "2026-06-30",
+      "pdf": "https://arxiv.org/pdf/2606.31016v1",
+      "score": "6.0",
+      "evidence": "大语言模型安全挑战与边缘网络隐私",
+      "tldr": "针对6G时代大语言模型赋能的边缘网络（LLMENs）面临的频繁交互泄露和计算电磁泄露等安全威胁，本文分析了现有防御措施的高开销局限性。提出了一种隐蔽通信与计算框架，通过增强通信和计算过程的隐蔽性来保护用户隐私并抵御多种攻击。案例研究表明，该方法在满足严格安全需求的同时，能有效降低任务延迟，提升了LLMENs的整体安全性和执行效率。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large language model (LLM)-enabled edge networks (LLMENs) offer mobile users high-quality and low-latency AI-generated content services in the 6G era. However, unlike typical edge networks, LLMENs present unique security challenges due to the inherent complexity of LLMs, their high computational overhead, and continuous interactions with users. Specifically, both frequent user interactions (i.e., queries and responses) over wireless channels and potential electromagnetic information leakage from intensive LLM computations make LLMENs susceptible to various security threats, such as eavesdropping, jamming, prompt poisoning, and prompt injection attacks. Since existing countermeasures against these attacks often incur prohibitive overhead, developing holistic, efficient, and secure privacy protections for LLMENs is crucial. This article first reviews the vulnerabilities of LLMENs, outlines various attacks, and analyzes the drawbacks of existing countermeasures. To overcome these limitations, we propose a covert communications (CC) and computations approach to enhance both the overall security and efficiency of LLMENs. Furthermore, various supplementary solutions are developed to improve the covertness of this framework. Finally, our approach is further evaluated through a case study where the total latency is minimized under stringent communication and computational security requirements. Numerical results demonstrate the proposed approach's effectiveness in enhancing both privacy protection and the execution efficiency of LLM tasks.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/04/2607.01492v1-unveiling-the-non-monotonic-effect-of-privacy-on-generalization-under-byzantine-robustness",
+      "section": "quick",
+      "title_en": "Unveiling the Non-Monotonic Effect of Privacy on Generalization under Byzantine Robustness",
+      "authors": "Thomas Boudou, Batiste Le Bars, Nirupam Gupta, Aurélien Bellet",
+      "date": "2026-07-01",
+      "pdf": "https://arxiv.org/pdf/2607.01492v1",
+      "score": "6.0",
+      "evidence": "分布式学习中的拜占庭鲁棒性与隐私",
+      "tldr": "本研究探讨了分布式学习中拜占庭鲁棒性、本地差分隐私（LDP）与泛化误差之间的复杂关系。研究发现，隐私对泛化误差的影响呈现非单调性：在强隐私（高噪声）阶段，增加隐私反而能降低泛化误差，消除鲁棒性与隐私间的冲突；而在弱隐私阶段，两者间的冲突重新显现。通过算法稳定性理论，本文为这一现象提供了严密的理论证明和实验验证，挑战了三者始终存在冲突的传统认知。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Recent work has established a fundamental trilemma between Byzantine robustness, local differential privacy (LDP), and optimization error in distributed learning. We show that this trilemma does not universally extend to generalization error, but instead depends critically on the privacy regime. Specifically, in the high-noise regime (strong privacy), we prove that increasing privacy reduces the generalization error, i.e., there is no tension between robustness and privacy. In the low-noise regime (weaker privacy), however, the tension between robustness and privacy reappears and increasing privacy indeed degrades generalization. Our theory explains this surprising non-monotonic behavior of the generalization error via matching lower and upper bounds on the algorithmic stability of Byzantine-robust distributed learning under LDP constraints. We corroborate and further analyze these theoretical findings with empirical evaluations.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
