@@ -1,0 +1,65 @@
+{
+  "label": "2026-07-07",
+  "date": "2026-07-07",
+  "generated_at": "2026-07-07T20:51:29",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202607/07/2607.04819v1-layer-parallel-inference-reduces-encrypted-nonlinear-depth-in-transformers",
+      "section": "deep",
+      "title_en": "Layer-Parallel Inference Reduces Encrypted Nonlinear Depth in Transformers",
+      "authors": "Ligong Han, Kai Xu, Hao Wang, Ruijiang Gao, Akash Srivastava",
+      "date": "2026-07-06",
+      "pdf": "https://arxiv.org/pdf/2607.04819v1",
+      "score": "8.0",
+      "evidence": "使用全同态加密和层并行技术的加密Transformer推理",
+      "tldr": "针对全同态加密（FHE）下Transformer推理因非线性层顺序堆叠导致的计算瓶颈，本文研究了结构化牛顿层并行（SNLP）方法。该方法将L层顺序非线性深度转化为少数求解器迭代和线性修正，显著减少了加密推理中的自举（bootstrap）次数。实验表明，SNLP在大幅降低非线性深度的同时保持了较低的误差放大率，为高效加密大模型推理提供了新路径。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Fully homomorphic encryption (FHE) enables computation on encrypted data, but practical encrypted Transformer inference is bottlenecked by the sequential composition of many nonlinear blocks. We study whether Structured Newton Layer Parallelism (SNLP) can make this inter-layer composition more FHE-friendly: each Transformer block still requires polynomial approximations for operations such as softmax and RMSNorm, but SNLP reduces the layerwise sequential nonlinear depth from L stages to a small number of solver iterations plus linear structured corrections. Using a simulation framework based on Chebyshev polynomial approximations, we measure error accumulation under sequential versus SNLP inference across 8 models and 4 architecture families. On a 0.5B IDN-trained model, SNLP reduces symbolic bootstraps from 53 to 20 (2.65x) with only +1.2% perplexity degradation, while lowering error amplification (1.36x vs. 1.42x). Across all tested models, SNLP has lower amplification than sequential inference. Ablations show that softmax approximation dominates the error budget and CKKS arithmetic noise is negligible in our setting, suggesting that SNLP is complementary to block-level FHE-friendly operator design rather than a replacement for it.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/07/2607.05251v1-privacy-preserving-robustness-verification-for-neural-networks",
+      "section": "quick",
+      "title_en": "Privacy-Preserving Robustness Verification for Neural Networks",
+      "authors": "Nianyun Song, Xiaokun Luan, Yu Guo, Rongfang Bie, Meng Sun, Xiyue Zhang",
+      "date": "2026-07-06",
+      "pdf": "https://arxiv.org/pdf/2607.05251v1",
+      "score": "7.0",
+      "evidence": "使用两方计算的隐私保护神经网络验证",
+      "tldr": "针对神经网络验证中模型参数与输入数据隐私保护的冲突，本文提出首个隐私保护鲁棒性验证框架 SecureCROWN。该框架基于安全两方计算（2PC），通过将线性边界传播中的条件逻辑转化为连续算术运算，并引入牛顿-拉夫逊法提升数值稳定性，实现了在不泄露私有数据的前提下获得与明文一致的验证结果，证明了隐私敏感领域鲁棒性验证的可行性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Neural network verification and data privacy are inherently in tension: verification demands full access to model parameters and input data, yet both are increasingly restricted by privacy regulations and intellectual property constraints. This tension has left robustness verification impractical in privacy-sensitive domains. In this work, we address this gap with SecureCROWN, the first framework for privacy-preserving neural network robustness verification. Built upon secure two-party computation (2PC), our framework enables a model owner and a data owner to jointly compute certified robustness bounds -- revealing only the final result while provably protecting both parties' private data under the semi-honest security model. A key challenge is securely computing the conditional operations in Linear Bound Propagation, where the data-dependent branching is incompatible with standard secure computation protocols. We eliminate branching by formulating conditional logic as continuous arithmetic operations. Additionally, we introduce a Newton--Raphson refinement method to improve numerical stability. Extensive analysis and experiments show that SecureCROWN strictly matches plaintext verification results, while completing in 0.1--200s across varied model sizes and communication settings (LAN/WAN), demonstrating the feasibility of privacy-preserving neural network verification.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/07/2607.04194v1-efficient-and-secure-range-counting-over-distributed-geographic-data-with-query-range-protection",
+      "section": "quick",
+      "title_en": "Efficient and Secure Range Counting over Distributed Geographic Data with Query Range Protection",
+      "authors": "Haoxin Yang, Pinghui Wang, Zhe Hou, Tian Zhou, Guangmingzi Yang, Zehua Lei, Rundong Li, Yutong Song, Yongyuan Peng, Fangming Dong, Xiaohong Guan",
+      "date": "2026-07-05",
+      "pdf": "https://arxiv.org/pdf/2607.04194v1",
+      "score": "6.0",
+      "evidence": "分布式数据范围计数的安全比较",
+      "tldr": "针对分布式地理数据中的范围计数问题，本文提出了PPRC协议，旨在解决现有方案在处理重叠数据时隐私保护、效率与准确性无法兼得的挑战。PPRC引入了私有范围谓词（PRP）技术，将复杂的加密比较转化为高效的成员测试，并设计了不经意线性计数（OLC）方案，实现了对重叠数据的安全聚合。实验证明，该协议在保证查询隐私的同时，显著提升了计算速度并降低了误差。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Range counting is a core primitive in geographic information systems. When data is distributed across multiple organizations, conducting range counting raises substantial privacy concerns. Existing privacy-preserving protocols focus on protecting organizations' datasets, but cannot simultaneously achieve efficiency, query privacy, and accuracy on overlapping data. Typical protocols process query range in plaintext for efficient point-in-range evaluation, since query-private designs rely on expensive secure comparisons. Moreover, most works assume non-overlapping datasets across organizations, which leads to huge errors in overlapping scenarios. In this paper, we propose PPRC, the first protocol that jointly satisfies all the privacy, efficiency, and accuracy requirements. PPRC makes two key technical contributions. First, we design the Private Range Predicate (PRP) technique that supports efficient point-in-range evaluation while protecting the query range. PRP reformulates range evaluation as encrypted membership tests, effectively replacing costly secure comparisons with faster secure multiplications. Second, we propose Oblivious Linear Counting (OLC), an aggregation scheme that efficiently and securely aggregates partial results from organizations with overlapping data. OLC involves only lightweight cryptographic operations and ensures that no information is leaked beyond the final range count. We theoretically analyze the accuracy, efficiency, and security of PPRC. Experiments on real-world and synthetic datasets show that PPRC achieves up to 55x smaller errors and 37x speedup compared to baseline protocols.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/07/2607.05016v1-algorithmically-presented-numbers-and-canonical-representations-in-cryptographic-protocols",
+      "section": "quick",
+      "title_en": "Algorithmically Presented Numbers and Canonical Representations in Cryptographic Protocols",
+      "authors": "Arslan Brömme",
+      "date": "2026-07-06",
+      "pdf": "https://arxiv.org/pdf/2607.05016v1",
+      "score": "6.0",
+      "evidence": "密码协议中的数字表示",
+      "tldr": "本研究从表示论视角探讨密码协议，强调数值的算法呈现结构对协议运行至关重要。文章区分了算法可近似性、有限精确描述性及规范化表示，证明了不存在能将任意可计算实数近似程序统一转换为唯一有限编码的计算算子。通过引入规范可序列化对象类和有理数系统规范，解决了协议中数学确定性与操作唯一性之间的差异，并通过区块链文件完整性验证等实例展示了该理论在提升协议互操作性和验证性方面的作用。",
+      "tags": "query:fss-llm",
+      "abstract_en": "This paper develops a representation-theoretic perspective on cryptographic protocols. The focus is not solely on the computability of the abstract value as an extensional property, but on the algorithmic structure of its presentation in a representation system: for operational use in protocols, algorithmic accessibility of the value does not suffice; its fixed presentation is also decisive. We distinguish three representation-theoretic notions -- algorithmically approximable (A_app, the computable real numbers), finitely exactly describable in a system (A_fin(S)), and canonical normalizability of a system -- and show that there is no computable extensional canonicalizer that uniformly transforms arbitrary approximation programs of computable real numbers into unique finite value encodings. As the operational rational core presentation we use the rational system with its canonical encoding specification Sigma_Q (fixed rules for valid fraction descriptions, canonical codes, and normalization); the associated value set is A_ex = Q. The notion of a canonically serializable object class transfers this core idea to practical protocol objects (files as byte sequences, hash values, transaction IDs, and normatively serialized payloads). We illustrate the consequences for interoperability, well-definedness, and verification with fully worked toy examples from symmetric and asymmetric encryption and hashing, and with a real-world example, the snaproot hash-anchoring protocol for blockchain-based file integrity verification. The paper thereby shows that the mathematical determinacy of a value and its operational uniqueness as a protocol object are two different requirements. Once a normative representation specification has been fixed, byte-level correctness and well-definedness arguments can be carried out without further implementation-dependent serialization or rounding decisions.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
