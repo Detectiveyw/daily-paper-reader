@@ -1,0 +1,130 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-08T21:41:10.343241+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.02847v1",
+      "title": "ShannonProver: Towards Automating Formal Cryptographic Proofs",
+      "abstract": "Cryptographic proofs are produced at a scale that increasingly exceeds the community's ability to verify them manually. Machine-checked proofs offer a path toward scalable proof verification, but writing proof scripts for expressive proof assistants such as EasyCrypt remains a major bottleneck: even when the high-level proof plan is known, converting it into proof tactics requires substantial reasoning effort. This paper presents ShannonProver, an agentic framework for automating cryptographic proofs. ShannonProver targets the setting in which a cryptographer provides the security model and a decomposition of the target theorem into lemma-level proof obligations, while the system automatically constructs EasyCrypt proof scripts for those obligations.   We evaluate ShannonProver on a dataset of formal cryptographic proofs in EasyCrypt. The dataset spans textbook primitives, deployed protocols, and standardization efforts such as NIST proposals, and includes expert case studies drawn from a corpus that has not previously been available online. We show that ShannonProver can automate substantial portions of cryptographic proof engineering for case studies such as ChaChaPoly1305 and MEE-CBC. More broadly, this work suggests a path toward accelerating cryptographic research: as agents automate the proof-engineering burden, cryptographers can iterate more quickly on new constructions, obtain machine-checked assurance earlier, and bring trustworthy protocols from design to deployment faster.",
+      "authors": [
+        "Yiping Ma",
+        "Yu-Lin Tsai",
+        "Mayank Rathee",
+        "Deevashwer Rathee",
+        "François Dupressoir",
+        "Pierre-Yves Strub",
+        "Raluca Ada Popa"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.PL"
+      ],
+      "published": "2026-07-03T00:50:51+00:00",
+      "link": "https://arxiv.org/pdf/2607.02847v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "automating formal cryptographic proofs",
+      "llm_evidence_cn": "自动化形式化密码学证明",
+      "llm_evidence": "自动化形式化密码学证明",
+      "canonical_evidence": "自动化形式化密码学证明",
+      "llm_tldr_en": "ShannonProver automates the construction of EasyCrypt proof scripts for cryptographic security models.",
+      "llm_tldr_cn": "ShannonProver 自动化了为密码学安全模型构建 EasyCrypt 证明脚本的过程。",
+      "llm_tldr": "ShannonProver 自动化了为密码学安全模型构建 EasyCrypt 证明脚本的过程。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.03406v1",
+      "title": "LeanDY: Type-Based and Trace-Based Symbolic Protocol Verification in Lean",
+      "abstract": "Computer-aided formal verification is a widely used approach for the symbolic analysis of cryptographic protocols. However, many modern protocols rely on features that remain challenging for existing techniques. In particular, reasoning about state, time-dependent behavior, inductively defined data structures, unbounded executions, and conditional secrecy requires a level of expressiveness that is difficult to reconcile with effective automation. As a result, protocol verification has largely followed two disjoint paths: fully automated methods with limited expressiveness, or interactive proofs in general-purpose theorem provers that offer flexibility but only limited, non-specialized automation.   We present an orthogonal approach that bridges this gap by combining compositional type-based reasoning with trace-based reasoning, enabling modular verification of stateful and unbounded protocols. Guided by the language-and-automation co-design (LAC) principle, our approach delivers protocol-specific automation while retaining high expressiveness. We implement this framework as the LeanDY library for the Lean proof assistant, building on and extending the design of DY*, and combining protocol-specific automation with interactive proofs. Our framework supports, in a unified setting, a broad class of functional and security requirements, including secrecy and authentication for stateful protocols, as well as recursive conditional secrecy for protocols using XOR. We formalize SegWit-style blockchain primitives in LeanDY and demonstrate its expressiveness by carrying out an in-depth formalization of payment channels on top of this blockchain model, verifying punishment mechanisms and properties that depend on chain liveness.",
+      "authors": [
+        "Simon Jeanteur",
+        "Lorenzo Veronese",
+        "Magdalena Soltiro",
+        "Matteo Maffei"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.PL"
+      ],
+      "published": "2026-07-03T15:12:30+00:00",
+      "link": "https://arxiv.org/pdf/2607.03406v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "symbolic protocol verification for cryptographic protocols",
+      "llm_evidence_cn": "密码协议的符号化协议验证",
+      "llm_evidence": "密码协议的符号化协议验证",
+      "canonical_evidence": "密码协议的符号化协议验证",
+      "llm_tldr_en": "Presents LeanDY, a tool for formal verification of cryptographic protocols using the Lean theorem prover.",
+      "llm_tldr_cn": "介绍了LeanDY，一种在Lean定理证明器中对密码协议进行形式化验证的工具。",
+      "llm_tldr": "介绍了LeanDY，一种在Lean定理证明器中对密码协议进行形式化验证的工具。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.05920v1",
+      "title": "LibFHE: A Numba-Based CUDA-Python Library for Non-RNS CKKS-BGV Fully Homomorphic Encryption on GPUs",
+      "abstract": "It has been a decade since the fourth-generation FHE framework, CKKS, was proposed; yet, there is still no indicator pointing toward a fifth-generation successor; and in recent years, numerous studies have explored GPU acceleration to improve the efficiency of homomorphic computations. In this paper, we propose LibFHE, a high-performance GPU-accelerated framework that features CUDA-Python bindings to achieve both high-level programmability and bare-metal GPU performance for homomorphic workloads. A large majority of state-of-the-art implementations adopt the RNS-CKKS variant. In contrast, this work deliberately revisits the original (non-RNS) CKKS-BGV framework, and develops a GPU-based implementation along with corresponding optimizations. Experimental results demonstrate that optimized CUDA-Python implementations can achieve performance comparable to highly optimized C++ FHE libraries, while significantly reducing implementation complexity and improving programmability.",
+      "authors": [
+        "John Chiang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-07T07:18:12+00:00",
+      "link": "https://arxiv.org/pdf/2607.05920v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "GPU acceleration for homomorphic encryption used in secure inference",
+      "llm_evidence_cn": "用于安全推理的全同态加密GPU加速",
+      "llm_evidence": "用于安全推理的全同态加密GPU加速",
+      "canonical_evidence": "用于安全推理的全同态加密GPU加速",
+      "llm_tldr_en": "LibFHE provides high-performance GPU acceleration for CKKS-BGV homomorphic encryption schemes.",
+      "llm_tldr_cn": "LibFHE为CKKS-BGV同态加密方案提供高性能GPU加速。",
+      "llm_tldr": "LibFHE为CKKS-BGV同态加密方案提供高性能GPU加速。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

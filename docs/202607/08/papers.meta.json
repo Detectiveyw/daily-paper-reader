@@ -1,0 +1,51 @@
+{
+  "label": "2026-07-08",
+  "date": "2026-07-08",
+  "generated_at": "2026-07-08T21:41:48",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202607/08/2607.02847v1-shannonprover-towards-automating-formal-cryptographic-proofs",
+      "section": "quick",
+      "title_en": "ShannonProver: Towards Automating Formal Cryptographic Proofs",
+      "authors": "Yiping Ma, Yu-Lin Tsai, Mayank Rathee, Deevashwer Rathee, François Dupressoir, Pierre-Yves Strub, Raluca Ada Popa",
+      "date": "2026-07-03",
+      "pdf": "https://arxiv.org/pdf/2607.02847v1",
+      "score": "6.0",
+      "evidence": "自动化形式化密码学证明",
+      "tldr": "随着密码学证明规模扩大，人工验证变得困难。本文提出 ShannonProver，一个旨在自动化形式化密码学证明的智能体框架。该系统针对 EasyCrypt 证明助手，在用户提供安全模型和引理分解的基础上，自动生成证明脚本。通过对 ChaChaPoly1305 和 MEE-CBC 等复杂协议的评估，证明了其能显著减轻证明工程负担，加速从设计到部署的信任构建过程。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Cryptographic proofs are produced at a scale that increasingly exceeds the community's ability to verify them manually. Machine-checked proofs offer a path toward scalable proof verification, but writing proof scripts for expressive proof assistants such as EasyCrypt remains a major bottleneck: even when the high-level proof plan is known, converting it into proof tactics requires substantial reasoning effort. This paper presents ShannonProver, an agentic framework for automating cryptographic proofs. ShannonProver targets the setting in which a cryptographer provides the security model and a decomposition of the target theorem into lemma-level proof obligations, while the system automatically constructs EasyCrypt proof scripts for those obligations.   We evaluate ShannonProver on a dataset of formal cryptographic proofs in EasyCrypt. The dataset spans textbook primitives, deployed protocols, and standardization efforts such as NIST proposals, and includes expert case studies drawn from a corpus that has not previously been available online. We show that ShannonProver can automate substantial portions of cryptographic proof engineering for case studies such as ChaChaPoly1305 and MEE-CBC. More broadly, this work suggests a path toward accelerating cryptographic research: as agents automate the proof-engineering burden, cryptographers can iterate more quickly on new constructions, obtain machine-checked assurance earlier, and bring trustworthy protocols from design to deployment faster.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/08/2607.03406v1-leandy-type-based-and-trace-based-symbolic-protocol-verification-in-lean",
+      "section": "quick",
+      "title_en": "LeanDY: Type-Based and Trace-Based Symbolic Protocol Verification in Lean",
+      "authors": "Simon Jeanteur, Lorenzo Veronese, Magdalena Soltiro, Matteo Maffei",
+      "date": "2026-07-03",
+      "pdf": "https://arxiv.org/pdf/2607.03406v1",
+      "score": "6.0",
+      "evidence": "密码协议的符号化协议验证",
+      "tldr": "本研究针对现有加密协议形式化验证工具在表达力与自动化之间的权衡难题，提出了基于 Lean 证明助手的 LeanDY 库。该框架结合了组合类型推理与轨迹推理，能够处理状态、时间相关行为及无限执行等复杂特性。通过语言与自动化协同设计，LeanDY 在保持高表达力的同时提供了协议专用自动化，成功验证了包括 SegWit 区块链原语和支付通道在内的复杂系统安全性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Computer-aided formal verification is a widely used approach for the symbolic analysis of cryptographic protocols. However, many modern protocols rely on features that remain challenging for existing techniques. In particular, reasoning about state, time-dependent behavior, inductively defined data structures, unbounded executions, and conditional secrecy requires a level of expressiveness that is difficult to reconcile with effective automation. As a result, protocol verification has largely followed two disjoint paths: fully automated methods with limited expressiveness, or interactive proofs in general-purpose theorem provers that offer flexibility but only limited, non-specialized automation.   We present an orthogonal approach that bridges this gap by combining compositional type-based reasoning with trace-based reasoning, enabling modular verification of stateful and unbounded protocols. Guided by the language-and-automation co-design (LAC) principle, our approach delivers protocol-specific automation while retaining high expressiveness. We implement this framework as the LeanDY library for the Lean proof assistant, building on and extending the design of DY*, and combining protocol-specific automation with interactive proofs. Our framework supports, in a unified setting, a broad class of functional and security requirements, including secrecy and authentication for stateful protocols, as well as recursive conditional secrecy for protocols using XOR. We formalize SegWit-style blockchain primitives in LeanDY and demonstrate its expressiveness by carrying out an in-depth formalization of payment channels on top of this blockchain model, verifying punishment mechanisms and properties that depend on chain liveness.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/08/2607.05920v1-libfhe-a-numba-based-cuda-python-library-for-non-rns-ckks-bgv-fully-homomorphic-encryption-on-gpus",
+      "section": "quick",
+      "title_en": "LibFHE: A Numba-Based CUDA-Python Library for Non-RNS CKKS-BGV Fully Homomorphic Encryption on GPUs",
+      "authors": "John Chiang",
+      "date": "2026-07-07",
+      "pdf": "https://arxiv.org/pdf/2607.05920v1",
+      "score": "6.0",
+      "evidence": "用于安全推理的全同态加密GPU加速",
+      "tldr": "LibFHE是一个基于Numba和CUDA-Python的高性能GPU加速全同态加密（FHE）库。与主流的RNS-CKKS变体不同，该研究重新审视并实现了原始的非RNS CKKS-BGV框架。通过CUDA-Python绑定，LibFHE在保持接近底层GPU性能的同时，显著提升了编程灵活性并降低了实现复杂度，为FHE的高效计算提供了新途径。",
+      "tags": "query:fss-llm",
+      "abstract_en": "It has been a decade since the fourth-generation FHE framework, CKKS, was proposed; yet, there is still no indicator pointing toward a fifth-generation successor; and in recent years, numerous studies have explored GPU acceleration to improve the efficiency of homomorphic computations. In this paper, we propose LibFHE, a high-performance GPU-accelerated framework that features CUDA-Python bindings to achieve both high-level programmability and bare-metal GPU performance for homomorphic workloads. A large majority of state-of-the-art implementations adopt the RNS-CKKS variant. In contrast, this work deliberately revisits the original (non-RNS) CKKS-BGV framework, and develops a GPU-based implementation along with corresponding optimizations. Experimental results demonstrate that optimized CUDA-Python implementations can achieve performance comparable to highly optimized C++ FHE libraries, while significantly reducing implementation complexity and improving programmability.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

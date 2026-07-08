@@ -6,34 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-07
-- 运行时间：2026-07-07 20:51:20 UTC
+- 最新运行日期：2026-07-08
+- 运行时间：2026-07-08 21:41:32 UTC
 - 运行状态：成功
-- 本次总论文数：4
-- 精读区：1
+- 本次总论文数：3
+- 精读区：0
 - 速读区：3
 
 ### 今日简报（AI）
-今日聚焦隐私计算前沿，重点攻克 Transformer 加密推理效率与神经网络安全验证难题。
-核心突破在于利用层并行推理显著降低加密非线性深度，并实现了隐私保护下的模型鲁棒性校验。
-建议关注加密大模型推理的性能优化，这是实现数据不出域、模型安全调用的关键技术路径。
-- 详情：[/202607/07/README](/202607/07/README)
+今日聚焦密码学形式化证明的自动化突破与 GPU 加速全同态加密库的最新进展。
+重点关注利用 Lean 语言实现协议验证的自动化工具，以及通过 CUDA-Python 优化非 RNS 架构下 FHE 的运算效率。
+建议深入了解形式化验证在安全协议中的落地应用，并关注高性能加密库的工程实践。
+- 详情：[/202607/08/README](/202607/08/README)
 
 ### 精读区论文标签
-1. [Layer-Parallel Inference Reduces Encrypted Nonlinear Depth in Transformers](/202607/07/2607.04819v1-layer-parallel-inference-reduces-encrypted-nonlinear-depth-in-transformers)  
-   标签：评分：8.0/10、query:fss-llm
-   evidence：使用全同态加密和层并行技术的加密Transformer推理
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Privacy-Preserving Robustness Verification for Neural Networks](/202607/07/2607.05251v1-privacy-preserving-robustness-verification-for-neural-networks)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：使用两方计算的隐私保护神经网络验证
-2. [Efficient and Secure Range Counting over Distributed Geographic Data with Query Range Protection](/202607/07/2607.04194v1-efficient-and-secure-range-counting-over-distributed-geographic-data-with-query-range-protection)  
+1. [ShannonProver: Towards Automating Formal Cryptographic Proofs](/202607/08/2607.02847v1-shannonprover-towards-automating-formal-cryptographic-proofs)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：分布式数据范围计数的安全比较
-3. [Algorithmically Presented Numbers and Canonical Representations in Cryptographic Protocols](/202607/07/2607.05016v1-algorithmically-presented-numbers-and-canonical-representations-in-cryptographic-protocols)  
+   evidence：自动化形式化密码学证明
+2. [LeanDY: Type-Based and Trace-Based Symbolic Protocol Verification in Lean](/202607/08/2607.03406v1-leandy-type-based-and-trace-based-symbolic-protocol-verification-in-lean)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：密码协议中的数字表示
+   evidence：密码协议的符号化协议验证
+3. [LibFHE: A Numba-Based CUDA-Python Library for Non-RNS CKKS-BGV Fully Homomorphic Encryption on GPUs](/202607/08/2607.05920v1-libfhe-a-numba-based-cuda-python-library-for-non-rns-ckks-bgv-fully-homomorphic-encryption-on-gpus)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：用于安全推理的全同态加密GPU加速
 
 
 <div class="dpr-home-promo-card">

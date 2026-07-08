@@ -1,0 +1,1680 @@
+Title: LeanDY: Type-Based and Trace-Based Symbolic Protocol Verification in Lean
+
+URL Source: https://arxiv.org/pdf/2607.03406v1
+
+Published Time: Tue, 07 Jul 2026 01:27:55 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# LeanDY: Type-Based and Trace-Based Symbolic Protocol Verification in Lean 
+
+# Simon Jeanteur 
+
+TU Wien Vienna, Austria simon.jeanteur@tuwien.ac.at 
+
+# Lorenzo Veronese 
+
+TU Wien Vienna, Austria lorenzo.veronese@tuwien.ac.at 
+
+# Magdalena Solitro 
+
+Fondazione Bruno Kessler Trento, Italy msolitro@fbk.eu 
+
+# Matteo Maffei 
+
+TU Wien Vienna, Austria Christian Doppler Laboratory Blockchain Technologies for the Internet of Things Vienna, Austria matteo.maffei@tuwien.ac.at 
+
+## Abstract 
+
+Computer-aided formal verification is a widely used approach for the symbolic analysis of cryptographic protocols. However, many modern protocols rely on features that remain challenging for exist-ing techniques. In particular, reasoning about state, time-dependent behavior, inductively defined data structures, unbounded execu-tions, and conditional secrecy requires a level of expressiveness that is difficult to reconcile with effective automation. As a re-sult, protocol verification has largely followed two disjoint paths: fully automated methods with limited expressiveness, or interactive proofs in general-purpose theorem provers that offer flexibility but only limited, non-specialized automation. We present an orthogonal approach that bridges this gap by combining compositional type-based reasoning with trace-based reasoning, enabling modular verification of stateful and unbounded protocols. Guided by the language-and-automation co-design (LAC) principle, our approach delivers protocol-specific automation while retaining high expressiveness. We implement this framework as the LeanDY library for the Lean proof assistant, building on and extending the design of DY*, and combining protocol-specific au-tomation with interactive proofs. Our framework supports, in a unified setting, a broad class of functional and security require-ments, including secrecy and authentication for stateful protocols, as well as recursive conditional secrecy for protocols using XOR. We formalize SegWit-style blockchain primitives in LeanDY and demonstrate its expressiveness by carrying out an in-depth for-malization of payment channels on top of this blockchain model, verifying punishment mechanisms and properties that depend on chain liveness. This is the technical report. 
+
+## 1 Introduction 
+
+Over the past decades, computer-aided formal analysis of crypto-graphic protocols has matured into a widely used set of techniques and has become a key component of real-world protocol analysis. For example, ProVerif [13 ] and Tamarin [43 ] have supported the verification of the design of TLS 1.3 [ 12 ] and WireGuard [ 34 , 38 ]; and F ∗ [51 , 52 ] has been used to verify the Signal protocol, the core of modern messaging applications [ 10 ]. However, many modern protocols rely on features that remain challenging for existing tech-niques. In particular, reasoning about global state, time-dependent behavior, unbounded executions, and conditional secrecy , i.e., se-crets that must remain private only until a specific condition is met, requires a level of expressiveness that is difficult to reconcile with automation. These challenges are particularly prominent for blockchain-based protocols, which, despite their recent adoption in applications such as payment-channel networks, have seen fewer machine-aided verification efforts. The design of such protocols typically relies on a global, high-integrity ledger, requires reasoning across application-level and consensus-level specifications, and of-ten combines safety and liveness arguments. Additionally, they may use constructions such as XOR, whose algebraic properties make symbolic reasoning notoriously difficult [ 35 ]. As a result, protocols such as the Lightning Network remain only partially verified, with the notable exceptions being [ 28 ], which analyzed the protocol up to a fixed bound, and [ 26 ], which formalized a simplified abstraction of the protocol. Symbolic methods for protocol analysis, as formalized by Dolev and Yao [ 24 ], can be categorized into two broad areas: trace-based and type-based methodologies. Trace-based symbolic proofs are based on a global append-only trace of all actions, e.g., sending messages or storing state, performed by protocol participants. Con-fidentiality and authentication properties are thus expressed in terms of reachability of specific trace configurations (e.g., there is no trace where a secret value is sent to the network). Type-based proofs, instead, employ types, notably refinement types [ 5, 8 ], to guarantee that well-typed protocol implementations respect some confidentiality, integrity, or authentication invariants (e.g., a pro-gram that sends over the network a value with type high confi-dentiality is rejected by the type system). Both approaches have limitations. Trace-based verification supports a high degree of au-tomation, as symbolic provers such as ProVerif or Tamarin can explore all possible attacker behavior and automatically discover concrete attack traces or prove that such traces do not exist. How-ever, these tools require examining complete protocol executions, which is infeasible for complex protocols composed of multiple modes or those with an unbounded number of rounds. This degree 
+
+> arXiv:2607.03406v1 [cs.CR] 3 Jul 2026 Jeanteur et al.
+
+of automation is well suited to certain classes of protocols, but becomes harder to retain when reasoning compositionally about cross-layer protocols or when mixing safety and liveness require-ments. In contrast, type-based verification offers strong modularity: each function or sub-protocol is type-checked independently, and the type system guarantees that security invariants hold for any (unbounded) composition of well-typed modules. The main limita-tion of such advanced type systems is that proofs cannot be fully automated and require manual intervention. In this paper, we build on the design of DY ∗ [10 ], combining the above approaches into a unified methodology where type-based proofs can be complemented with inductive trace-based reasoning to obtain security proofs expressed at the trace level. We imple-ment this methodology as the LeanDY library for the Lean proof assistant, providing a mechanized framework for symbolic protocol verification with support for XOR and conditional secrecy. While XOR has been supported in Horn-clause–based approaches [ 35 ] and conditional secrecy has been studied in refinement-type systems [ 5], these features have not previously been combined in a single mechanized framework. Leveraging Lean’s powerful abstractions (e.g., quotients) and the language and automation co-design (LAC) [ 49 ] design principle, we improve on DY ∗ by defining a structured embedded domain-specific language (eDSL) for specifying protocol implementations, which allows for automated type-based reasoning while providing controlled escape hatches (e.g., trace-based reasoning) when more expressivity is required. Specifically, LeanDY offers a smoother transition between automation and interactive proving compared to the previous F ∗-based approach, enabling users to fall back to the powerful Lean interactive mode when automation is insufficient for protocol-specific goals such as cross-layer reasoning, liveness, or punishment arguments in layer-2 blockchain protocols. 
+
+Contributions . More concretely, this paper makes the following contributions. 
+
+• We present LeanDY, a library for protocol verification in the Lean proof assistant supporting dynamic compromise, mutable state, conditional secrecy properties, and XOR. The library supports a high degree of automation thanks to the type-based approach, while still allowing for interactive proofs in the trace-based model (Sec. 3). 
+
+• We develop and integrate in LeanDY a type-based approach to conditional secrecy properties for protocols making use of XOR operations, including chained release patterns (Sec. 2). 
+
+• We formalize SegWit-style blockchain primitives in LeanDY, providing a mechanized model of Bitcoin-like transaction structure, witness-based scripts, and timelocks (Sec. 4). 
+
+• We show the expressiveness of LeanDY by carrying out an in-depth formalization of payment channels on top of this blockchain model, verifying punishment mechanisms and properties that depend on chain liveness (Sec. 4). The complete LeanDY library, the formalization of blockchain primitives, payment channels, and additional example protocols are available online [32].                            
+
+> Alice Bob Carol Dave
+> 𝑟𝑘 alice
+> 𝐶𝑙𝑜𝑠𝑒 𝐵
+> 𝐸𝑛𝑑 𝑟𝑘 alice ⊕𝑟𝑘 bob
+> 𝐶𝑙𝑜𝑠𝑒 𝐶
+> 𝑟𝑘 alice ⊕𝑟𝑘 bob ⊕𝑟𝑘 carol
+> 𝐶𝑙𝑜𝑠𝑒 𝐷
+> Sig 𝐴 (𝐻 (𝑟𝑘 alice ) ) Sig 𝐵 (𝐻 (𝑟𝑘 alice ⊕𝑟𝑘 bob ) ) Sig 𝐶 (𝐻 (𝑟𝑘 alice ⊕𝑟𝑘 bob ⊕𝑟𝑘 carol ) )
+
+Figure 1: Conditional release protocol with two intermedi-aries. 
+
+## 2 Labels for Conditional Secrecy of XOR 
+
+In this section, we illustrate the security labels supported by Le-anDY, exemplifying their use when type-checking protocols as well as the associated challenges. As a running example, we consider a blockchain protocol based on hash time-locked contracts (HTLCs) that uses XOR, hashes, and signatures. 
+
+Terms and Labels . We define symbolic terms 𝑀 as follows: 
+
+𝑁 ≔ 𝑥 | 𝑥 ⊕ 𝑁 𝐶 ≔ 𝑎𝑙𝑖𝑐𝑒 |𝑏𝑜𝑏 |... 𝑀 ≔ 𝑁 | 𝐶 | 𝐻 (𝑀 )| 𝑆𝑖𝑔 𝑀 (𝑀 ) | ... 
+
+where 𝑥 represents an atomic nonce, and 𝑁 is the XOR ( ⊕) of mul-tiple nonces; 𝐶 denotes arbitrary constants (e.g., principal names); 
+
+𝐻 represents hashes, 𝑆𝑖𝑔 signatures, etc. We assign each term a unique secrecy label (or type) in the form: 
+
+𝐿 ≔ S𝑒𝑐 | P 𝑢𝑏 | P 𝑟𝑖𝑣 𝑛 | [ 𝐿 1/𝐿 2]𝐸 
+
+where we denote public data as P𝑢𝑏 , secret data as S𝑒𝑐 ; we use 
+
+P𝑟𝑖𝑣 𝑛 to represent data that is only readable by the principal 𝑛 
+
+and becomes public after compromise of 𝑛 ; and we use the nota-tion [𝐿 1/𝐿 2]𝐸 for the conditional swap of labels 𝐿 1 and 𝐿 2 based on the condition 𝐸 representing an event of the protocol. For in-stance, [S 𝑒𝑐 /P 𝑢𝑏 ]𝐿𝑒𝑎𝑘 denotes a term that is initially secret and becomes public after the 𝐿𝑒𝑎𝑘 event. Events refer to specific steps of the execution of the protocol and can be used to define its se-curity specification in terms of correspondence assertions [ 57 ]. We assume that events are irreversible, in the sense that once an event is reached during execution, it cannot be undone; consequently, any conditional label swap triggered by such an event is permanent and cannot be reverted. These confidentiality labels overapproximate the secrecy of sym-bolic bytes in the following sense: if a term is labeled P𝑢𝑏 , it may be known to the adversary. A S𝑒𝑐 value, instead, is guaranteed to never be sent to the attacker. In particular, we require every term that is sent to the network to have the P𝑢𝑏 label, i.e., all data sent to the network is known to the attacker. This requirement allows us to infer the P𝑢𝑏 label for all terms that appear on the network if the protocol and the adversary consistently follow the requirement (i.e., are well typed). Additionally, not every XOR-related term needs an explicit annotation: once labels are assigned to a small set of protocol terms, LeanDY derives the labels of algebraically related XOR expressions automatically by taking the meet of the labels of their operands. Note that the labels defined above correspond to the specific instances required for the purposes of this section; however, LeanDY supports the definition of arbitrary dynamic labels. We refer to Sec. 3.1.3 for a more formal presentation of the typing rules. 
+
+Proving Correspondence Assertions . More concretely, let us show how the above labels allow us to prove the correct ordering 2LeanDY : Type-Based and Trace-Based Symbolic Protocol Verification in Lean 
+
+of protocol events. Consider the protocol depicted in Fig. 1. We model a simplified abstraction of the opening and closing opera-tions of payment-channel networks (PCNs) as described in [ 41 ]. This abstraction describes the conditional release chains present in protocols such as PCNs, atomic swaps using lock contracts, and the Tor network. Specifically, we assume that a setup phase has been successfully completed and that 𝑏𝑜𝑏 knows the secret 𝑟𝑘 𝑏𝑜𝑏 
+
+and the assertion 𝐻 (𝑟𝑘 alice ⊕ 𝑟𝑘 bob ); that 𝑐𝑎𝑟𝑜𝑙 knows the secret 
+
+𝑟𝑘 carol and the assertion 𝐻 (𝑟𝑘 alice ⊕ 𝑟𝑘 bob ⊕ 𝑟𝑘 carol ); and that 𝑑𝑎𝑣𝑒 
+
+knows 𝑟𝑘 alice ⊕ 𝑟𝑘 bob ⊕ 𝑟𝑘 carol . The protocol then proceeds in two phases: first, three channels are opened sequentially between 𝑎𝑙𝑖𝑐𝑒 
+
+and 𝑏𝑜𝑏 , 𝑏𝑜𝑏 and 𝑐𝑎𝑟𝑜𝑙 , and 𝑐𝑎𝑟𝑜𝑙 and 𝑑𝑎𝑣𝑒 . This is achieved by sending the assertion 𝑆𝑖𝑔 (𝐻 (𝑟𝑘 )) to the network, where 𝑟𝑘 rep-resents the revocation secret necessary to close the channel. For the purposes of this example, we abstract away the underlying blockchain mechanics and assume that broadcasting the revocation key to the network suffices to close the channel (see Sec. 4 for our encoding of blockchain primitives). To allow for the sequential clos-ing of all intermediate channels, this broadcasting of the revocation keys starts from 𝑑𝑎𝑣𝑒 , who sends 𝑟𝑘 alice ⊕ 𝑟𝑘 bob ⊕ 𝑟𝑘 carol , allow-ing 𝑐𝑎𝑟𝑜𝑙 , who knows 𝑟𝑘 𝑐𝑎𝑟𝑜𝑙 , to close her channel and broadcast 
+
+𝑟𝑘 alice ⊕ 𝑟𝑘 bob . Finally, since 𝑏𝑜𝑏 knows 𝑟𝑘 𝑏𝑜𝑏 , they can close their channel by broadcasting 𝑟𝑘 𝑎𝑙𝑖𝑐𝑒 . We can encode the requirement that all channels are closed (in order) when 𝑎𝑙𝑖𝑐𝑒 receives 𝑟𝑘 𝑎𝑙𝑖𝑐𝑒 
+
+using the following correspondence assertion. 
+
+𝐸𝑛𝑑 =⇒ 𝐶𝑙𝑜𝑠𝑒 𝐵 ∧ 𝐶𝑙𝑜𝑠𝑒 𝐶 ∧ 𝐶𝑙𝑜𝑠𝑒 𝐷 
+
+This corresponds to the atomicity property of payment-channel networks, ensuring that either all payments are completed or none happen. We prove the above proposition using our conditional confiden-tiality labels. Let us define an initial labeling as follows. 
+
+𝑇 1 ≔ 𝑟𝑘 alice ⊕ 𝑟𝑘 bob ⊕ 𝑟𝑘 carol : [S 𝑒𝑐 /P 𝑢𝑏 ]𝐶𝑙𝑜𝑠𝑒 𝐷 
+
+𝑇 2 ≔ 𝑟𝑘 alice ⊕ 𝑟𝑘 bob : [S 𝑒𝑐 /P 𝑢𝑏 ]𝐶𝑙𝑜𝑠𝑒 𝐶 ∧𝐶𝑙𝑜𝑠𝑒 𝐷 
+
+𝑇 3 ≔ 𝑟𝑘 bob : [S 𝑒𝑐 /P 𝑢𝑏 ]𝐶𝑙𝑜𝑠𝑒 𝐵 
+
+Here, 𝑇 1, 𝑇 2, and 𝑇 3 are identifiers that we can use to refer to the complex XOR expressions. The initial labels match the expected secrecy of the values that are sent on the network: since 𝑇 1 is the revocation key to close the channel, it is initially secret, but can be published to the network when the event 𝐶𝑙𝑜𝑠𝑒 𝐷 is reached. Similarly, 𝑇 2 is initially secret, but can be published only after both 
+
+𝐶𝑙𝑜𝑠𝑒 𝐶 and 𝐶𝑙𝑜𝑠𝑒 𝐷 have occurred ( 𝐶𝑙𝑜𝑠𝑒 𝐶 ∧𝐶𝑙𝑜𝑠𝑒 𝐷 ). Finally, in order to showcase our approach for automatically generating labels, we assign an initial label only to 𝑟𝑘 𝑏𝑜𝑏 , which is considered public after the 𝐶𝑙𝑜𝑠𝑒 𝐵 event. We can automatically derive labels for the remaining 𝑟𝑘 nonces by observing that the XOR of two conditionally confidential terms remains conditionally confidential, with a label given by the con-junction of the events in their respective conditions. Intuitively, the resulting label corresponds to the meet of the initial labels: it is public only if both operands are public, and private otherwise, since the XOR preserves the opacity of the individual nonces. 
+
+𝑟𝑘 alice = 𝑇 2 ⊕ 𝑇 3 : [S 𝑒𝑐 /P 𝑢𝑏 ]𝐶𝑙𝑜𝑠𝑒 𝐵 ∧𝐶𝑙𝑜𝑠𝑒 𝐶 ∧𝐶𝑙𝑜𝑠𝑒 𝐷 
+
+𝑟𝑘 carol = 𝑇 1 ⊕ 𝑇 2 : [S 𝑒𝑐 /P 𝑢𝑏 ]𝐶𝑙𝑜𝑠𝑒 𝐶 ∧𝐶𝑙𝑜𝑠𝑒 𝐷 
+
+Since 𝑟𝑘 𝑎𝑙𝑖𝑐𝑒 is 𝑇 2 ⊕ 𝑇 3, the condition on the label is the conjunc-tion of the three 𝐶𝑙𝑜𝑠𝑒 events; similarly, the label of 𝑟𝑘 𝑐𝑎𝑟𝑜𝑙 is the conjunction of the labels of 𝑇 1 and 𝑇 2.Once all values sent to the network have been assigned labels, we proceed as follows. For each message sent, we must establish that its label is public. For each value that is received, we compute the set of events that must have occurred for the value to be sent, under the assumption that its label is public. We analyze each message exchange (input/output pair) performed by each participant in isolation. We begin with 𝑑𝑎𝑣𝑒 . The value 𝑇 1 is sent over the network and must therefore be labeled P𝑢𝑏 , which is only possible after the occurrence of the 𝐶𝑙𝑜𝑠𝑒 𝐷 event. Continuing with 𝑐𝑎𝑟𝑜𝑙 , the value 
+
+𝑇 2 is sent and must also be public. While 𝑐𝑎𝑟𝑜𝑙 can locally trigger the 𝐶𝑙𝑜𝑠𝑒 𝐶 event, establishing that 𝐶𝑙𝑜𝑠𝑒 𝐷 has occurred requires additional reasoning. In particular, 𝑐𝑎𝑟𝑜𝑙 can compute 𝑇 2 only after receiving 𝑇 1 and combining it with her secret 𝑟𝑘 𝑐𝑎𝑟𝑜𝑙 . Since 𝑇 1 is received from the network, its label must be P𝑢𝑏 , which implies that the event 𝐶𝑙𝑜𝑠𝑒 𝐷 must already have taken place. A similar argument applies to 𝑏𝑜𝑏 . In order to send 𝑟𝑘 𝑎𝑙𝑖𝑐𝑒 , 𝑏𝑜𝑏 must execute the 𝐶𝑙𝑜𝑠𝑒 𝐵 event, and moreover, both 𝐶𝑙𝑜𝑠𝑒 𝐶 and 𝐶𝑙𝑜𝑠𝑒 𝐷 must have occurred in prior steps of the protocol. Finally, upon reaching the 
+
+𝐸𝑛𝑑 event, 𝑎𝑙𝑖𝑐𝑒 receives 𝑟𝑘 𝑎𝑙𝑖𝑐𝑒 from the network. Since this value must be public, it follows that all three 𝐶𝑙𝑜𝑠𝑒 events have occurred, thereby establishing our correspondence assertion goal. The above example highlights the compositional nature of our proof technique. In particular, we establish our security goal by analyzing each protocol participant in isolation, while maintaining the invariant that all data sent over the network is labeled as public. This enables us to derive, for each local action, the set of events that must have occurred to justify the release of a given value. By composing these local arguments, we can obtain a global ordering of events that satisfies the correspondence assertion, thus establishing our goal without requiring a global analysis of the protocol. 
+
+Handling dynamic compromise . This type-based approach can be extended to handle dynamic compromise of protocol partici-pants. Specifically, we use the P𝑟𝑖𝑣 𝑛 label to represent data that is private to principal 𝑛 but becomes public upon compromise of 𝑛 .We then replace the S𝑒𝑐 label in the initial labeling above with the corresponding P𝑟𝑖𝑣 label for each principal. However, P𝑟𝑖𝑣 alone is insufficient to model the secrecy of 𝑇 2 and 𝑇 3. For instance, when 
+
+𝑐𝑎𝑟𝑜𝑙 is compromised, 𝑇 2 becomes public only if either 𝑑𝑎𝑣𝑒 is also compromised or the 𝐶𝑙𝑜𝑠𝑒 𝐷 event has occurred. We capture this dependency using the meet operator ( ⊓), which yields a label that is public only when both operands are public. The initial labeling of the values used in the protocol is thus: 
+
+𝑇 1 : [P 𝑟𝑖𝑣 𝑑𝑎𝑣𝑒 /P 𝑢𝑏 ]𝐶𝑙𝑜𝑠𝑒 𝐷 
+
+𝑇 2 : [P 𝑟𝑖𝑣 𝑐𝑎𝑟𝑜𝑙 ⊓ L( 𝑇 1)/P 𝑢𝑏 ]𝐶𝑙𝑜𝑠𝑒 𝐶 ∧𝐶𝑙𝑜𝑠𝑒 𝐷 
+
+𝑇 3 : [P 𝑟𝑖𝑣 𝑏𝑜𝑏 ⊓ L( 𝑇 2)/P 𝑢𝑏 ]𝐶𝑙𝑜𝑠𝑒 𝐵 
+
+where we use L( 𝑇 𝑛 ) to refer to the initial label of 𝑇 𝑛 . Note that the structure of the label matches the chaining of compromises required for the values to be public. The computed labels follow the same principle as above: the label of an XOR is given by the meet of the labels of its operands.            
+
+> 𝑟𝑘 alice =𝑇 2⊕𝑇 3:
+> h
+> ( P 𝑟𝑖𝑣 𝑐𝑎𝑟𝑜𝑙 ⊓ L ( 𝑇 1) ) ⊓ ( P 𝑟𝑖𝑣 𝑏𝑜𝑏 ⊓ L ( 𝑇 2) )
+> .
+> P𝑢𝑏
+> i
+> 𝐶𝑙𝑜𝑠𝑒 𝐵 ∧𝐶𝑙𝑜𝑠𝑒 𝐶 ∧𝐶𝑙𝑜𝑠𝑒 𝐷
+
+3Jeanteur et al. 
+
+Note that the dynamic compromise of principals must be ac-counted for in the security goal: we either assume that principals remain uncompromised for the duration of the protocol, yielding the proof above, or we explicitly incorporate the possibility of com-promise into the security goal: 
+
+´𝑎𝑙𝑖𝑐𝑒 ∨ 𝐸𝑛𝑑 =⇒ (𝐶𝑙𝑜𝑠𝑒 𝐵 ∨ ´𝑏𝑜𝑏 ) ∧ ( 𝐶𝑙𝑜𝑠𝑒 𝐶 ∨ ´𝑐𝑎𝑟𝑜𝑙 )∧ ( 𝐶𝑙𝑜𝑠𝑒 𝐷 ∨ ´𝑑𝑎𝑣𝑒 )
+
+!
+
+Here, compromised participants, denoted ´𝑝 , share their private knowledge with the adversary. Such an adversary can thus broad-cast the release secrets without triggering the honest principals’ events. This is reflected in the property, where, for each event, either the event is triggered or the respective principal is compromised. The proof follows the steps of the previous example, with an addi-tional case split explicitly handling the possibility of compromise for each participant. 
+
+## 3 The LeanDY Library 
+
+The LeanDY library is a Lean framework for proving trace properties ,such as authentication and confidentiality, of protocols modeled as state machines that rely on a specific set of APIs, covering crypto-graphic primitives (encryption, signatures, etc.), network communi-cation, and mutable storage. Protocols use symbolic cryptography and are verified against a Dolev-Yao-style adversary. The basic proof technique is to establish a trace invariant : every state transition (i.e., any function that modifies the trace, including those modeling the adversary) is proved to preserve this invariant. Consequently, any reachable state, regardless of whether it is generated by an attacker or an honest protocol participant, satisfies the invariant. Following the design principle of language and automation co-design (LAC) [ 49 ], LeanDY provides a general trace invariant, valid_ trace , parameterized by protocol-specific behavior, and mecha-nisms for users to specify only these protocol-dependent compo-nents. In addition, the library offers a Domain-Specific Language (DSL) for protocol specifications and includes a type system that supports the semi-automatic verification, for each function written in the DSL, of the protocol-specific parts of the trace invariant. More specifically, users of the library write the protocol spec-ifications as a collection of message exchanges using the DSL, in-stantiate the protocol-specific components of the trace invariant (states, events, and validity predicates), and then use the type system together with semi-automated proof support to show that each ex-change satisfies valid _exchange . From these per-exchange proofs, LeanDY derives preservation of valid _trace for the trace updates generated by the protocol. As a final step, the user provides a sep-arate extrinsic proof that the resulting trace invariant implies the desired security property (e.g., authentication, confidentiality, etc.) We now present the main building blocks of the LeanDY library. We first describe the core library, which provides the foundational machinery for verification: the definition of traces, the trace in-variant, the representation of symbolic bytes, the attacker model, and the type system used to reason about the confidentiality and integrity of messages. We then turn our attention to the user-facing layer of the library and present the DSL used to specify protocols, and the proof automation included in the library. 
+
+## 3.1 Core Definitions 
+
+3.1.1 The Trace and the Trace Invariant. The trace represents the global trail of all observable actions performed by protocol partici-pants and adversaries. We implement the trace as a list of Trace-Event s, as reported in the following listing.                                                
+
+> 1inductive TraceEvent (𝛼 𝜂 :Type )where
+> 2|MsgSent (msg :B𝛼 𝜂 ) : TraceEvent 𝛼 𝜂
+> 3|Corrupt (principal :P) : TraceEvent 𝛼 𝜂
+> 4|SetState (content :B𝛼 𝜂 ) : TraceEvent 𝛼 𝜂
+> 5|Event (e:Event 𝛼 𝜂 ) : TraceEvent 𝛼 𝜂
+> 67abbrev T(𝛼 𝜂 :Type )≔List (TraceEvent 𝛼 𝜂 )−− the trace
+
+The trace records sent messages ( MsgSent ); the time point when a principal has been compromised ( Corrupt , which can happen at any time); serialized protocol states ( SetState ); and protocol-specific events ( Event ) used for, e.g., authentication properties. Different traces are ordered by suffix, as new events are prepended to the trace. All trace properties in LeanDY, e.g., validity or secrecy of messages, are monotone with respect to the trace. For instance, if a value is public (i.e., accessible to the adversary), it remains so after extending the trace. We define a trace to be valid, i.e., valid _trace (𝑡𝑟 ) holds, if, for all events in the trace, each event respects the following property:                          
+
+> 1abbrev valid_trace_event ( Γ: LabelingEnv 𝛼 𝜂 )
+> 2(ev : TraceEvent 𝛼 𝜂 ) (tr: T𝛼 𝜂 ) : Prop ≔
+> 3match ev with
+> 4| MsgSent m => valid_bytes Γm tr ∧m.is_public Γtr
+> 5| SetState s => match u_state_parse.parse s with
+> 6| some s => u_valid_state Γs tr
+> 7| none => False
+> 8| .Event e => u_valid_event Γe tr
+> 9| .Corrupt _ => True
+
+Specifically, a message event is valid if the message is public with respect to its confidentiality label and its symbolic bytes are valid (Sec. 3.1.3). A state is valid if it can be parsed into a valid protocol-specific state, and an event must be valid according to the protocol-specific invariant (Sec. 3.1.4). 
+
+3.1.2 Symbolic Bytes and the Adversary. Every value sent over the network or stored in a principal state is represented as symbolic bytes. Bytes are encoded as the following datatype:                                                                                                                   
+
+> 1inductive InnerBytes 𝛼 𝜂 :Type
+> 2|Xor (content :Finset 𝜂 )
+> 3|Const (c:Const )
+> 4|Key (p:𝛼 ) ( kind :Kind .Key ) ( k:InnerBytes 𝛼 𝜂 )
+> 5|Sign (p:𝛼 ) ( m k :InnerBytes 𝛼 𝜂 )
+> 6|Verify (p:𝛼 ) ( 𝜎 k:InnerBytes 𝛼 𝜂 )
+> 7|Hash (p:𝛼 ) ( m:InnerBytes 𝛼 𝜂 )
+> 8|SymEnc (p:𝛼 ) ( m k :InnerBytes 𝛼 𝜂 )
+> 9|SymDec (p:𝛼 ) ( c k :InnerBytes 𝛼 𝜂 )
+> 10 |AEnc (p:𝛼 ) ( m k :InnerBytes 𝛼 𝜂 )
+> 11 |ADec (p:𝛼 ) ( c k :InnerBytes 𝛼 𝜂 )
+> 12 |Tuple (p:𝛼 ) ( a b :InnerBytes 𝛼 𝜂 )
+> 13 |Proj_1 (p:𝛼 ) ( x:InnerBytes 𝛼 𝜂 )
+> 14 |Proj_2 (p:𝛼 ) ( x:InnerBytes 𝛼 𝜂 )
+> 15 16 def Bytes (𝛼 𝜂 :Type )≔Option (InnerBytes 𝛼 𝜂 )
+
+4LeanDY : Type-Based and Trace-Based Symbolic Protocol Verification in Lean 
+
+where we use the Xor constructor to represent nonces, optionally composed of the bitwise XOR of multiple other nonces; we use the Const constructor to represent constants, e.g., principal names; the Key constructor is used to represent keys and contains a label describing its kind (i.e., signing, verifying, or symmetric key) and its bitwise representation (usually a nonce); the rest of the InnerBytes 
+
+constructors symbolically represent cryptographic operations (sig-natures, hashing, symmetric and asymmetric encryption), tuples, and the corresponding destructors. The 𝛼 parameter distinguishes different versions of each cryptographic function, allowing the use in the same protocol, e.g., of different hash functions. The set of available nonces, represented by 𝜂 , is decided before protocol ex-ecution. This is a significant departure from DY ∗, where nonces are dynamically added to the trace; our approach substantially simplifies the definition of the type system Sec. 3.1.3. The Bytes type is a nullable InnerBytes , i.e., we use the special value (none : Bytes) , also called fail , to encode failure. For exam-ple, applying a projection operator on a value other than a tuple, or verifying an invalid signature returns the fail value. This reduction behavior is encoded in the normalization function 𝛾 . The function reduces a Bytes value to normal form, encoding the symbolic cryp-tography equational theory: e.g., decrypting an encrypted message with the matching key reduces to the original plaintext. 
+
+Bytes Quotient and Equational Theories . To simplify the rea-soning about equational theories, LeanDY exposes symbolic bytes using Lean’s powerful quotient abstraction. Specifically, by con-sidering bytes modulo equality of their normal form , we sidestep the problem of explicitly requiring the user to manually reduce constructor, destructor, and equivalence rules by calling 𝛾 . The main type for symbolic bytes exposed to users is the BytesEq (or B)quotient type defined as follows. 
+
+⟦𝑥 ⟧ : B ≔ {𝑎 : Bytes | 𝛾 (𝑎 ) = 𝛾 (𝑥 )} .
+
+That is, we represent symbolic bytes as equivalence classes of bytes that reduce to the same normal form. This way, when encountering symbolic bytes in protocol code, users of LeanDY are not required to handle all possible ways specific bytes can be constructed. Let us consider, for instance, a protocol that decrypts a message, expects a pair, and compares the first projection with a previously stored nonce. Syntactically, tuple(x,y).proj_1 is built from a projection constructor applied to a tuple constructor, but in B it is equal to 
+
+x because both have the same 𝛾 -normal form. Protocol proofs can therefore use ordinary equality on B as the quotient hides the equational reasoning. 
+
+Dolev-Yao Attacker . We model a Dolev-Yao-style adversary with the inductive predicate AttackerKnows reported in Listing 1. The predicate models all information that can be derived by the attacker starting from their initial knowledge. Specifically, the adversary initially knows all public information, including constants ( Const ), the fail value ( Fail ), and the nonce composed of all zeros ( Zero ); all messages sent to the network (i.e., all messages in the trace, 
+
+Published ) and all nonces that are marked as initially public for the specific protocol ( Initial ). Then, for each constructor and destruc-tor, the adversary can apply them to the bitstrings they know to derive new bitstrings. These are the traditional attacker rules used by, e.g., ProVerif [13 ], that encode, for instance, that the adversary                                                                                                                                                        
+
+> 1inductive AttackerKnows Γtr :B𝛼 𝜂 →Prop
+> 2−− public knowledge
+> 3|Published {m} ( hin : . MsgSent m ∈tr ) : AttackerKnows m
+> 4|Fail :AttackerKnows .fail
+> 5|Initial {n} ( hin :n∈Γ.public_names tr ) : AttackerKnows (. nonce n )6|Const {c} : AttackerKnows (. const c )7|Zero :AttackerKnows (. xor_set {}) 8−− constructors and destructors
+> 9|Xor :AttackerKnows (. xor_set s 1)→AttackerKnows (. xor_set s 2)→AttackerKnows
+> (. xor_set (s1△s2)) 10 |Key :AttackerKnows k →AttackerKnows (. key p kind k )11 |Sign :AttackerKnows m →AttackerKnows k →AttackerKnows (. sign p m k )12 |Verify :AttackerKnows 𝜎 →AttackerKnows k →AttackerKnows (. verify p 𝜎 k)13 |Hash :AttackerKnows m →AttackerKnows (. hash p m )14 |SymEnc :AttackerKnows m →AttackerKnows k →AttackerKnows (. symenc p m k )15 |SymDec :AttackerKnows c →AttackerKnows k →AttackerKnows (. symdec p c k )16 |AEnc :AttackerKnows m →AttackerKnows k →AttackerKnows (. asenc p m k )17 |ADec :AttackerKnows c →AttackerKnows k →AttackerKnows (. adec p c k )18 |Tuple :AttackerKnows a →AttackerKnows b →AttackerKnows (. tuple p a b )19 |Proj_1 :AttackerKnows a →AttackerKnows (. proj_1 p a )20 |Proj_2 :AttackerKnows a →AttackerKnows (. proj_2 p a )
+
+Listing 1: Definition of AttackerKnows , modeling adversary knowledge. 
+
+can decrypt encrypted messages if they know the decryption key. The only exception is the rule for XOR: the symbol Δ denotes the symmetric difference of finite sets of nonce names, reflecting the algebraic properties of XOR. More generally, the encoding is de-signed to model a maximally powerful Dolev-Yao adversary. To this end, AttackerKnows is deliberately unconstrained: any restrictions imposed on honest protocol executions must still permit all terms derivable by the adversary. 
+
+3.1.3 Type System. LeanDY includes a type system to support rea-soning about the confidentiality and well-formedness of messages. Specifically, the trace invariant requires that every message 𝑚 added to the trace, i.e., sent on the network, must be public ( Γ ⊢𝑡𝑟 𝑚 : ⊤), and valid ( valid _bytes Γ 
+
+> 𝑡𝑟
+
+(𝑚 )). We now present our construction of secrecy labels, the typing rules encoding confidentiality, and the definition of valid _bytes Γ 
+
+> 𝑡𝑟
+
+() .
+
+Secrecy Labels . Secrecy labels in LeanDY overapproximate the confidentiality level of bytestrings. Specifically, if a bytestring is labeled as public, it may be shared with the attacker, i.e., the public label is a precondition for sending it to a public channel (as a MsgSent 
+
+in the trace). However, it can remain private. Conversely, private data is guaranteed to never be sent to a public channel or known to the attacker. We encode labels as general trace properties that express when (i.e., in which traces) the corresponding value may be compromised ( corrupt 0).  
+
+> 1
+
+structure Label 𝛼 𝜂 where -- latter written ℓ 
+
+> 2
+
+corrupt 0 (tr: Trace 𝛼 𝜂 ) : Prop  
+
+> 3
+
+monotone: Monotone corrupt 0
+
+The monotone component of each label contains a proof that its trace property is growing with respect to the suffix ordering of traces. This notion corresponds to the intuition that corruption is permanent: since the attacker never forgets data once public, compromised data will remain compromised for all new traces. Such an encoding allows us to overcome the limited expressivity of the original DY ∗ labels, which could only represent a small set of compromise conditions, and enables LeanDY to reason about conditional secrecy and temporal relationships between events. 5Jeanteur et al. 
+
+Moreover, new protocol-specific labels can be defined as part of each protocol’s development without requiring modifications to the base library. For instance, LeanDY defined the following standard labels.  
+
+> 1
+
+def Pub ≔ {corrupt 0 _ ≔ True , . . . } −− public  
+
+> 2
+
+def Sec ≔ {corrupt 0 _ ≔ False , . . . } −− secret  
+
+> 3
+
+def P (p : P) ≔ {corrupt 0 tr ≔ .Corrupt p ∈ tr , . . . } −− readable by p 
+
+> 4
+
+def meet l 1 l2 ≔ {corrupt 0 tr ≔ l1.corrupt 0 tr ∧ l2.corrupt 0 tr , . . . } 
+
+> 5
+
+def join l 1 l2 ≔ {corrupt 0 tr ≔ l1.corrupt 0 tr ∨ l2.corrupt 0 tr , . . . }
+
+where Pub and Sec denote, respectively, public and private data; 
+
+P 𝑥 represents the data readable only by the principal 𝑥 ; meet and join combine labels using the ∧ and ∨ of their corrupt 0 conditions. Labels thus describe who can read a given set of messages and 
+
+when . Following the above definitions of meet and join, we can define a less public than ordering of labels, parametrized by the current trace. 
+
+𝑙 1 ≤𝑡𝑟 𝑙 2 ≔ ∀𝑡𝑟 ′, 𝑡𝑟 ≤ 𝑡𝑟 ′ → 𝑙 1.corrupt 0 𝑡𝑟 ′ → 𝑙 2.corrupt 0 𝑡𝑟 ′
+
+Intuitively, 𝑙 1 is less public than 𝑙 2 starting from a specific point in time represented by the trace 𝑡𝑟 if, for all future traces, when 𝑙 1
+
+is public then also 𝑙 2 is public. When 𝑡𝑟 is the empty trace, 𝑙 1 ≤∅
+
+𝑙 2 represents the stronger property that 𝑙 1 is always less public than 𝑙 2. With this definition, we can encode the conditional swap label we used in Sec. 2 as follows, where we use the h0 to ensure monotonicity:  
+
+> 1
+
+def releasable (l 1 l2: ℓ 𝛼 𝜂 ) (e: TraceEvent 𝛼 𝜂 ) 
+
+> 2
+
+(h 0: l 1 ≤∅ l2) : ℓ 𝛼 𝜂 where  
+
+> 3
+
+corrupt 0 tr ≔ (if e ∈ tr then l 1 else l 2).corrupt 0 tr  
+
+> 4
+
+monotone ≔ . . . 
+
+Note that in LeanDY we use a more general definition that allows us to use any growing function to conditionally swap two labels, and instantiate releasable as a special case of the general definition. The relation ≤𝑡𝑟 captures the information-flow ordering on la-bels, but for non-empty traces it is only a preorder, i.e., it lacks antisymmetry: two labels may differ syntactically while represent-ing the same confidentiality level from trace 𝑡𝑟 onward. Therefore we introduce the corresponding equivalence relation. 
+
+𝑙 1 𝑡𝑟 𝑙 2 ≔ 𝑙 1 ≤𝑡𝑟 𝑙 2 ∧ 𝑙 2 ≤𝑡𝑟 𝑙 1
+
+which encodes which labels are indistinguishable starting from the trace 𝑡𝑟 . Quotienting labels by this equivalence yields the type 𝔩 𝑡𝑟 
+
+of labels at trace 𝑡𝑟 :
+
+⟦𝑙 1⟧𝑡𝑟 : 𝔩 𝑡𝑟 ≔ {𝑙 2 : ℓ | 𝑙 1 𝑡𝑟 𝑙 2 }
+
+Intuitively, 𝔩 𝑡𝑟 forgets historical distinctions that no longer affect confidentiality from trace 𝑡𝑟 onward. This quotient significantly simplifies formal reasoning with labels: properties can be stated directly on equivalence classes rather than introducing witnesses for equivalence (e.g., ∃𝑙, 𝑙 𝑡𝑟 P𝑢𝑏 ). More importantly, lifting ≤𝑡𝑟 
+
+to the 𝔩 𝑡𝑟 equivalence classes yields a complete lattice. 
+
+Property 1 (Security Lattice). Lifting ≤𝑡𝑟 to 𝔩 𝑡𝑟 forms a com-plete lattice . We simply write that order ≤.The equivalence classes of Pub , Sec , meet l 1 l2 and join l 1 l2 are respectively the top ( ⊤), bottom ( ⊥), meet ( ⟦l1⟧𝑡𝑟 ⊓ ⟦ l2⟧𝑡𝑟 ) and join (⟦l1⟧𝑡𝑟 ⊔ ⟦ l2⟧𝑡𝑟 ) of this lattice. 
+
+L-Const      
+
+> Γ⊢𝑡𝑟 const (𝑐 ):⊤
+
+L-Hash     
+
+> Γ⊢𝑡𝑟 hash (𝑛 ):⊤
+
+L-Fail     
+
+> Γ⊢𝑡𝑟 fail :⊤
+
+L-Xor          
+
+> ⟦Γ(𝑡 )⟧ 𝑡𝑟 =𝑙
+> Γ⊢𝑡𝑟
+> Ê
+> 𝑥 ∈𝑡 𝑥 :𝑙
+
+L-Tuple                 
+
+> Γ⊢𝑡𝑟 𝑎 :𝑙 𝑎 Γ⊢𝑡𝑟 𝑏 :𝑙 𝑏
+> Γ⊢𝑡𝑟 tuple (𝑎, 𝑏 ):𝑙 𝑎 ⊓𝑙 𝑏
+
+L-Sign          
+
+> Γ⊢𝑡𝑟 𝑚 :𝑙
+> Γ⊢𝑡𝑟 sign (𝑚, 𝑘 ):𝑙
+
+L-PubKey             
+
+> kind ∈ { Ver ,AEnc }Γ⊢𝑡𝑟 𝑘 :𝑙
+> Γ⊢𝑡𝑟 key (kind , 𝑘 ):⊤
+
+L-PrivKey              
+
+> kind ∈ { Sign ,ADec ,SEnc }Γ⊢𝑡𝑟 𝑘 :𝑙
+> Γ⊢𝑡𝑟 key (kind , 𝑘 ):𝑙
+
+L-SEnc                  
+
+> Γ⊢𝑡𝑟 𝑚 :𝑙 𝑚 Γ⊢𝑡𝑟 𝑘 :𝑙 𝑘 𝑙 𝑘 ≤𝑙 𝑚
+> Γ⊢𝑡𝑟 symenc (𝑚, 𝑘 ):⊤
+
+L-AEnc                   
+
+> Γ⊢𝑡𝑟 𝑚 :𝑙 𝑚 Γ⊢𝑡𝑟 𝑑𝑘 :𝑙 𝑑𝑘 𝑙 𝑑𝑘 ≤𝑙 𝑚
+> Γ⊢𝑡𝑟 aenc (𝑚, key (aenc , 𝑑𝑘 ) ) :⊤
+
+Figure 2: Typing rules for confidentiality labels. Typing Rules for Confidentiality . Proofs of confidentiality that use the above secrecy labels are formulated in terms of the type system shown in Fig. 2. The judgment Γ ⊢𝑡𝑟 𝑏 : 𝑙 assigns a unique label 1 𝑙 ∈ 𝔩 𝑡𝑟 to the term 𝑏 ∈ B at trace 𝑡𝑟 depending on its shape. Specifically, constants, hashes, and the special value fail are public (⊤). Signatures and secret keys preserve the label of their payload. The symmetric encryption of a value with a key is public only when the label of the key is less public than the label of the message. Similar considerations apply for asymmetric encryption. Finally, nonces, represented as the XOR of a finite set of nonces, are labeled according to a labeling environment Γ, which defines the expected confidentiality properties of the protocol. Γ maps sets of nonces to their initial labels. It is thus important for this initial assignment to be compatible with the expected behavior of XOR. 
+
+Example 1 (xor compatibility). Let 𝑛 1, 𝑛 2 and 𝑛 3 be nonces. If 
+
+𝑛 1 ⊕ 𝑛 2 and 𝑛 2 ⊕ 𝑛 3 are published, then effectively 𝑛 1 ⊕ 𝑛 3 is as well. 
+
+We generalize Ex. 1 to finite sets of nonces: if two sets of nonces are public, their XOR combination, i.e., their symmetric difference, must also be public. This yields (1): 
+
+Γ(𝑠 1).corrupt 0 𝑡𝑟 ∧ Γ(𝑠 2).corrupt 0 𝑡𝑟 ⇒ Γ(𝑠 1△𝑠 2).corrupt 0 𝑡𝑟 (1) Eq. (1) is then a proof obligation when defining a labeling environ-ment. We present in Sec. 3.2.3 the automation that LeanDY provides for this definition and the automatic derivation of the initial labels we showed in Sec. 2. 
+
+Well-Formed Symbolic Bytes . Secrecy labels characterize the confidentiality of symbolic bytes; however, they do not, by them-selves, restrict how honest protocol participants may use crypto-graphic primitives. Therefore, LeanDY provides a well-formedness predicate valid _bytes Γ 
+
+> 𝑡𝑟
+
+() for symbolic bytes and enforces that every message sent to the network satisfies this predicate. Users of the library are able to customize the predicate by instantiating the 
+
+CryptoPreds type class.                                  
+
+> 1class CryptoPreds 𝛼 𝜂 where
+> 2u_hash_pred :LabelingEnv 𝛼 𝜂 →𝛼 →(m:B𝛼 𝜂 )→ T 𝛼 𝜂 →Prop
+> 3u_sign_pred :LabelingEnv 𝛼 𝜂 →𝛼 →(m k :B𝛼 𝜂 )→ T 𝛼 𝜂 →Prop
+> 1for non-
+
+fail terms 
+
+6LeanDY : Type-Based and Trace-Based Symbolic Protocol Verification in Lean 
+
+V-Fail  
+
+> valid _bytes Γ
+> 𝑡𝑟 (fail )
+
+V-Xor   
+
+> valid _bytes Γ
+> 𝑡𝑟 (xor (𝑥 ) )
+
+V-Const   
+
+> valid _bytes Γ
+> 𝑡𝑟 (const (𝑥 ) )
+
+V-Key     
+
+> valid _bytes Γ
+> 𝑡𝑟 (𝑘 )
+> valid _bytes Γ
+> 𝑡𝑟 (key (kind , 𝑘 ) )
+
+V-Tuple       
+
+> valid _bytes Γ
+> 𝑡𝑟 (𝑎 )valid _bytes Γ
+> 𝑡𝑟 (𝑏 )
+> valid _bytes Γ
+> 𝑡𝑟 (tuple (𝑎, 𝑏 ) )
+
+V-Hash 
+
+hash_pred Γ    
+
+> 𝑡𝑟 (𝑚 )valid _bytes Γ
+> 𝑡𝑟 (𝑚 )
+> valid _bytes Γ
+> 𝑡𝑟 (hash (𝑚 ) )
+
+V-Sign 
+
+sign_pred Γ          
+
+> 𝑡𝑟 (𝑚, 𝑘 )valid _bytes Γ
+> 𝑡𝑟 (𝑚 )valid _bytes Γ
+> 𝑡𝑟 (𝑘 )
+> valid _bytes Γ
+> 𝑡𝑟 (sign (𝑚, key (sign , 𝑘 ) ) )
+
+V-SEnc 
+
+sym_enc_pred Γ          
+
+> 𝑡𝑟 (𝑚, 𝑘 )valid _bytes Γ
+> 𝑡𝑟 (𝑚 )valid _bytes Γ
+> 𝑡𝑟 (𝑘 )
+> valid _bytes Γ
+> 𝑡𝑟 (symenc (𝑚, key (symenc , 𝑘 ) ) )
+
+V-AEnc 
+
+asym_enc_pred Γ          
+
+> 𝑡𝑟 (𝑚, 𝑘 )valid _bytes Γ
+> 𝑡𝑟 (𝑚 )valid _bytes Γ
+> 𝑡𝑟 (𝑘 )
+> valid _bytes Γ
+> 𝑡𝑟 (aenc (𝑚, key (aenc , 𝑘 ) ) )
+
+Figure 3: Core rules defining valid _bytes () .                                 
+
+> 4u_sym_enc_pred :LabelingEnv 𝛼 𝜂 →𝛼 →(m k :B𝛼 𝜂 )→ T 𝛼 𝜂 →Prop
+> 5u_asym_enc_pred :LabelingEnv 𝛼 𝜂 →𝛼 →(m k :B𝛼 𝜂 )→ T 𝛼 𝜂 →Prop
+> 6. . . −− proofs of monotonicity
+
+Each field specifies protocol-specific restrictions on honest cryp-tographic uses; for example, a protocol may allow signing only messages of a particular shape or only after a specific event has occurred. The class defines default (unrestricted) implementations for all predicates, so for each protocol users can specify only the relevant fields, inheriting the default implementation for the others. In order to allow for the unconstrained use of cryptography by the attacker, LeanDY requires each cryptographic operation to either satisfy the corresponding CryptoPred or be applied with a public key. For example, symmetric encryption is always permitted when the encryption key is public, and otherwise must satisfy the user-defined predicate u_sym_enc_pred . Analogous conditions apply to hashing, signing, and asymmetric encryption.                                                   
+
+> 1def hash_pred Γp m tr ≔
+> 2is_public Γm tr ∨u_hash_pred Γp m tr
+> 3def sign_pred Γp m k tr ≔
+> 4is_public Γ(key p .Sign k )tr ∨u_sign_pred Γp m k tr
+> 5def sym_enc_pred Γp m k tr ≔
+> 6is_public Γ(key p .SymEnc k )tr ∨u_sym_enc_pred Γp m k tr
+> 7def asym_enc_pred Γp m k tr ≔
+> 8is_public Γ(key p .AEncK k )tr ∨u_asym_enc_pred Γp m k tr
+
+The valid _bytes Γ 
+
+> 𝑡𝑟
+
+() predicate is defined in terms of the above dis-junctions and is reported in Fig. 3. Constants are always valid, tuples are well-formed whenever each of their components is well-formed, and cryptographic operations must satisfy the corresponding pred-icates: either the relevant keys are available to the attacker, or the protocol-specific usage predicates must hold. 
+
+Soundness . We define the soundness of the LeanDY type system in terms of the confidentiality and well-formedness of the data that can be derived by the adversary. 
+
+Property 2 (Type-system soundness). For every valid trace, anything known by the attacker is public and well-formed: 
+
+∀𝑏. AttackerKnows Γ 
+
+> 𝑡𝑟
+
+(𝑏 ) → Γ ⊢𝑡𝑟 𝑏 : ⊤ ∧ valid _bytes Γ 
+
+> 𝑡𝑟
+
+(𝑏 ). (2) With this theorem, we ensure that the adversary cannot recover private data starting only from publicly available information and that all adversary operations preserve the well-formedness of pub-lic data. Moreover, the theorem shows that we can derive such confidentiality and well-formedness judgments without restricting the capabilities of the attacker. 
+
+3.1.4 Protocol-Specific States and Predicates. The valid _trace 
+
+invariant refers to protocol-specific components that must be spec-ified as part of each protocol definition. This is achieved using the 
+
+UserPreds type class, which extends CryptoPreds with user events, user states, a validity predicate for states, defined as an instance of the HasValid type class, and a parser/serializer for states.                                         
+
+> 1class UserPreds (𝛼 𝜂 :Type )extends CryptoPreds 𝛼 𝜂 where
+> 2u_valid_event :LabelingEnv 𝛼 𝜂 →Event 𝛼 𝜂 →Trace 𝛼 𝜂 →Prop
+> 3u_valid_event_monotone (Γe) : Monotone (u_valid_event Γe)
+> 45u_state :Type
+> 6u_state_has_valid :HasValid 𝛼 𝜂 u_state
+> 7u_state_parse :Parsing .Parsable (B𝛼 𝜂 )u_state
+
+The class defines default implementations for all fields: predicates return True and monotonicity obligations are proved automatically by simplification, making events trivially valid and imposing no restrictions. This way, LeanDY users are required to specify only the fields relevant to their protocol, inheriting the default implemen-tations for the rest. The u_state_parse field connects the symbolic trace, where states are stored as bytes, with the structured state type ( u_state ) used by protocol code. 
+
+3.1.5 Parsing and Serializing Bytes. Protocol specifications rely heavily on custom formats to abstract low-level details away. This abstraction does not always reflect reality, yielding the entire class of format confusion attacks [ 42 , 45 , 55 ]. There is an ongoing effort to make existing tools aware of such attacks via frameworks like Tu-laFale [11 ] or, even more relevant to our context, Comparse [56 ]. The core of LeanDY is intentionally built around the symbolic bytes datatype introduced in Sec. 3.1.2. This restriction keeps the implementation simple and limits the soundness arguments of Sec. 3.1.3 to the constructors of the term algebra. To make this representation practical for protocol specifications, LeanDY pro-vides a generic parsing and serialization infrastructure between user-defined data types and symbolic bytes. Protocol implementa-tions can therefore be written in terms of domain-specific types, such as protocol states or structured messages, while the library core and its proofs only need to reason about the underlying sym-bolic byte algebra. 
+
+Parsing . Parsing and serialization between any two types is per-formed through the Parsable type class.  
+
+> 1
+
+class Parsable ( 𝛼 𝛽 : Type) where  
+
+> 2
+
+parse: 𝛼 → Option 𝛽  
+
+> 3
+
+serialize: 𝛽 → 𝛼 
+
+7Jeanteur et al.  
+
+> 4
+
+sound (x: 𝛽 ): parse (serialize x) = some x  
+
+> 5
+
+notation "do_parse " x " as " 𝛾 => Parsable.parse ( 𝛽 ≔𝛾 ) x 
+
+where, typically, 𝛼 is instantiated as B. The do_parse notation is used as a user-friendly typing annotation for parsing. Parsing is used throughout LeanDY, and all relevant types im-plement it. It is also used to abstract away B for state management. This genericity enables composing parsing definitions. Notably, 
+
+Parsable is a transitive relation between types:  
+
+> 1
+
+def trans_parsable (𝛾 1 𝛾 2 𝛾 3: Type ) 
+
+> 2
+
+(h1: Parsable 𝛾 1 𝛾 2) ( h2: Parsable 𝛾 2 𝛾 3): Parsable 𝛾 1 𝛾 3 
+
+> 3
+
+where  
+
+> 4
+
+parse ≔ h1.parse h2.parse −− Kleisli composition [33]  
+
+> 5
+
+serialize ≔ h1.serialize ◦ h2.serialize  
+
+> 6
+
+sound ≔ . . . 
+
+This allows for easily instantiating Parsable on complex types and is what some of the automation relies on: we derive a trivial parsing to a nested tuple, and then, by transitivity, derive the Parsable 
+
+instance all the way to B.
+
+Remark 1. We do not enforce bijective parsing. This enables sup-port for formats where serialization is loosely specified. This can notably matter for blockchain protocols (e.g., Sec. 4), where scripts 
+
+can be written in multiple semantically equivalent ways (e.g., using 
+
+OP_NOP s). 
+
+Extending the Type System . We allow the user to extend the notion of valid public to more than just B using the HasValidPublic 
+
+type class. Combined with parsing (using the ValidParsable type class), this effectively corresponds to extending the type system with a new constructor.                                                     
+
+> 1class HasValidPublic (𝛼 𝜂 𝛾 :Type )where
+> 2is_valid_public (Γ:LabelingEnv 𝛼 𝜂 ) ( x:𝛾 ) ( tr :T𝛼 𝜂 ): Prop
+> 3is_valid_public_monotone Γ(x:𝛾 ): Monotone (is_valid_public Γx)
+> 45class ValidParsable (𝛼 𝜂 𝛾 𝛿 :Type )
+> 6[HasValidPublic 𝛼 𝜂 𝛾 ] [ HasValidPublic 𝛼 𝜂 𝛿 ] [ Parsable 𝛾 𝛿 ]
+> 7where
+> 8valid_parse Γtr (x:𝛾 ) ( y:𝛿 ) ( h:is_valid_public Γx tr ) ( h':parse x =some y ):
+> 9is_valid_public Γy tr
+> 10 valid_serialize Γtr (y:𝛿 ) ( h:is_valid_public Γy tr ) :
+> 11 is_valid_public Γ(serialize y )tr
+
+Thus, implementing ValidParsable effectively adds the following 
+
+ValidSerialize rule to the type system. 
+
+ValidSerialize 
+
+is_valid_public Γ 
+
+> 𝑡𝑟
+
+(𝑥 )
+
+valid _bytes Γ 
+
+> 𝑡𝑟
+
+(serialize 𝑥 ) Γ ⊢𝑡𝑟 serialize 𝑥 : ⊤
+
+Automation . The ValidSerialize rule is part of the type system’s automation, and LeanDY also features macros to automatically de-rive Parsable and ValidParsable instances. In particular, all types in Sec. 4.2 (states, messages, custom scripts,. . . ) have parsing auto-matically derived. 
+
+## 3.2 Protocols DSL and Proof Automation 
+
+A cryptographic protocol is modeled as a set of atomic actions named exchanges . Each exchange corresponds to a (honest) proto-col participant receiving a message from the network, performing a stateful computation on the received bitstring, and sending a  
+
+> 1
+
+def initiator_check : exchange Unit Nonce ≔ 
+
+> 2
+
+𝜆 input state => Id.run do  
+
+> 3
+
+let .Init sa sb sna ≔ state | return default  
+
+> 4
+
+let dec ≔ input.symdec () (sk sa sb)  
+
+> 5
+
+if dec ≠ .fail then  
+
+> 6
+
+let na ' ≔ dec.proj_1 ()  
+
+> 7
+
+let a ' ≔ dec.proj_2 ()  
+
+> 8
+
+if sa = a ' ∧ sna = na ' then  
+
+> 9
+
+return { default with events ≔ [.done sa sb na '] }  
+
+> 10
+
+return default 
+
+Listing 2: Final exchange of the simple authentication protocol 
+
+new message, optionally updating its state or triggering protocol-specific events. More specifically, each exchange is a function of the following form. 
+
+exchange ≔ N → B → 𝑆𝑡𝑎𝑡𝑒 → B × 𝑆𝑡𝑎𝑡𝑒 × [ 𝐸𝑣𝑒𝑛𝑡 ].
+
+The input includes a (unique) timestamp, to ensure nonce freshness, a message received from the network, represented as symbolic bytes (Sec. 3.1.2), and a protocol-specific state (Sec. 3.1.4); the output triple includes a message to be published, a possibly updated state and a list of protocol-specific events. 
+
+Example 2. Consider the simple authentication protocol [19]: 
+
+𝐴 → 𝐵 : ⟨𝐴, 𝐵, 𝑁 𝑎 ⟩ (3) 
+
+𝐵 → 𝐴 : {⟨ 𝑁 𝑎, 𝐴 ⟩} 𝑠 𝑆𝑘 𝐴 𝐵 (4) We model the protocol as three exchanges: (i) 𝐴 sends the tuple 
+
+⟨𝐴, 𝐵, 𝑁 𝑎 ⟩ and stores in its state the three values; (ii) 𝐵 receives the tuple, computes the symmetric encryption of ⟨𝑁 𝑎, 𝐴 ⟩ using the shared key 𝑆𝑘 𝐴𝐵 and sends it over the network (no state is required); (iii) 𝐴 receives the encrypted bitstring, decrypts it with the shared key, and verifies that both the nonce 𝑁 𝑎 and the iden-tifier 𝐴 correspond to the ones stored in the previous exchange. The last exchange of the protocol is shown in Listing 2. The type 
+
+exchange Unit Nonce represents an exchange of symbolic bytes that uses the concrete Nonce datatype for nonces (see Sec. 3.1.2). The exchange is a function that receives an input and a state and returns a structure with the three fields described above. We use a 
+
+default structure with an empty list of events, an empty state, and the symbol fail as the default output in case of error (e.g., when the decryption or equality checks fail). When the decryption does not fail and all checks are successful, the exchange returns the event done representing the principal 𝐴 confirming the end of the protocol. Each exchange must be proven correct with an extrinsic proof: the user must provide the associated correctness theorem proving the following proposition. 
+
+valid _exchange (𝑜𝑝 ) ≔ ∀( 𝑖𝑛 : B) ( 𝑠𝑡 : 𝑆𝑡𝑎𝑡𝑒 ),
+
+
+
+valid _bytes Γ 
+
+> 𝑡𝑟
+
+(𝑖𝑛 ) ∧ valid _state Γ 
+
+> 𝑡𝑟
+
+(𝑠𝑡 ) ∧ ( Γ ⊢𝑡𝑟 𝑖𝑛 : ⊤) 
+
+
+
+→
+
+valid _bytes Γ  
+
+> 𝑡𝑟 ++𝑒𝑣𝑠
+
+(𝑚𝑠𝑔 ) ∧ valid _state Γ  
+
+> 𝑡𝑟 ++𝑒𝑣𝑠
+
+(𝑠𝑡 ′)∧ (∀ 𝑒 ∈ 𝑒𝑣𝑠, valid _event Γ 
+
+> 𝑡𝑟
+
+(𝑒 )) ∧ ( Γ ⊢𝑡𝑟 ++𝑒𝑣𝑠 𝑚𝑠𝑔 : ⊤) 
+
+!
+
+(5) 8LeanDY : Type-Based and Trace-Based Symbolic Protocol Verification in Lean 
+
+where 𝑜𝑝 (𝑖𝑛, 𝑠𝑡 ) = ⟨𝑚𝑠𝑔, 𝑠𝑡 ′, 𝑒𝑣𝑠 ⟩
+
+Specifically, valid _exchange requires that protocol exchanges pre-serve the validity of states and messages: given a valid public input and a valid state for a specific trace 𝑡𝑟 in a labeling environment 
+
+Γ, an exchange must ensure (i) the new message 𝑚𝑠𝑔 is both valid and public for the trace 𝑡𝑟 ++ 𝑒𝑣𝑠 , (ii) the newly generated state 𝑠𝑡 ′
+
+is valid for 𝑡𝑟 ++ 𝑒𝑣𝑠 and (iii) each event in 𝑒𝑣𝑠 is valid with respect to the original trace 𝑡𝑟 .Once valid _exchange has been proved for all exchanges com-posing a protocol, LeanDY automatically provides a proof of 
+
+valid _trace Γ (𝑡𝑟 ) → valid _trace Γ (𝑡𝑟 ′)
+
+for the trace updates that result from all exchanges. This implies that valid _trace Γ (𝑡𝑟 ) holds for all traces generated by the proto-col. It is then easy to show, provided the protocol-specific validity definitions are correct, that valid _trace Γ (𝑡𝑟 ) implies the security goals of the protocol with a separate extrinsic proof. 
+
+3.2.1 Soundness of valid _exchange : the Transition Function. The above result is achieved by composing the observable effects of exchanges on the global trace using the transition function:  
+
+> 1
+
+def transition (op : exchange 𝛼 𝜂 ) : Traceful Unit ≔ do  
+
+> 2
+
+let input ← Traceful .recv  
+
+> 3
+
+let state ← Traceful .getState  
+
+> 4
+
+let time ← Traceful .getTime  
+
+> 5
+
+let ⟨msg , newState , evs ⟩ ≔ op time input state  
+
+> 6
+
+Traceful .triggerEvents evs  
+
+> 7
+
+Traceful .saveState newState  
+
+> 8
+
+Traceful .send msg 
+
+For each exchange op , the transition function fetches a state and a message from the trace and executes op with the two inputs. The three outputs are added to the trace by first triggering all user events, storing the state, and finally sending the new message. The 
+
+Traceful monad implements the functions for trace manipulation, e.g., Traceful.recv and Traceful.send for sending and receiving messages, and is implemented as an Option-State-Reader stack.  
+
+> 1
+
+structure ChoiceFn where  
+
+> 2
+
+msg (tr : T 𝛼 𝜂 ) : { m: B 𝛼 𝜂 // (. MsgSent m ) ∈ tr } 
+
+> 3
+
+state (tr : T 𝛼 𝜂 ) : { m: B 𝛼 𝜂 // (. SetState m ) ∈ tr } 
+
+> 45
+
+abbrev Traceful ≔ ReaderT ChoiceFn (StateT (T 𝛼 𝜂 ) Option )
+
+Computations in Traceful may fail (Option), may perform modifi-cations to the implicit trace (State), and may index into the trace using specific criteria (Reader). In particular, the ChoiceFn record provides functions to obtain events (a message or a state) from the trace. We use this abstraction to allow for reasoning about an over-approximation of all possible choices for messages or state: by keeping ChoiceFn universally quantified, we do not make any assumption on how states or messages passed to exchanges are selected. This is critical, as any proof using transition holds re-gardless of the choice of messages or states: this simulates the ad-versarial behavior of sending out-of-order or malformed messages to protocol participants. 
+
+L-TupleMono               
+
+> Γ⊢𝑡𝑟 𝑎 :𝑙 Γ⊢𝑡𝑟 𝑏 :𝑙
+> Γ⊢𝑡𝑟 tuple (𝑎, 𝑏 ):𝑙
+
+L-Proj1          
+
+> Γ⊢𝑡𝑟 𝑎 :⊤
+> Γ⊢𝑡𝑟 proj 1(𝑎 ):⊤
+
+L-Proj2          
+
+> Γ⊢𝑡𝑟 𝑎 :⊤
+> Γ⊢𝑡𝑟 proj 2(𝑎 ):⊤
+
+L-Verify          
+
+> Γ⊢𝑡𝑟 𝜎 :⊤
+> Γ⊢𝑡𝑟 verify (𝜎, 𝑘 ):⊤
+
+(a) Derived confidentiality labeling rules. 
+
+V-Proj1   
+
+> valid _bytes Γ
+> 𝑡𝑟 (𝑎 )
+> valid _bytes Γ
+> 𝑡𝑟
+>  proj 1(𝑎 )
+
+V-Proj2   
+
+> valid _bytes Γ
+> 𝑡𝑟 (𝑎 )
+> valid _bytes Γ
+> 𝑡𝑟
+>  proj 2(𝑎 )
+
+V-ADec     
+
+> valid _bytes Γ
+> 𝑡𝑟 (𝑐 )
+> valid _bytes Γ
+> 𝑡𝑟 (adec (𝑐, 𝑘 ) )
+
+V-SDec     
+
+> valid _bytes Γ
+> 𝑡𝑟 (𝑐 )
+> valid _bytes Γ
+> 𝑡𝑟 (symdec (𝑐, 𝑘 ) )
+
+V-Verify     
+
+> valid _bytes Γ
+> 𝑡𝑟 (𝜎 )
+> valid _bytes Γ
+> 𝑡𝑟 (verify (𝜎, 𝑘 ) )
+
+(b) Derived validity rules. 
+
+Figure 4: Selected derived rules for destructors and tuples. 
+
+The transition function plays a central role in establishing the main soundness result of LeanDY, namely that each valid exchange preserves the validity of the trace with respect to the trace invariant:  
+
+> 1
+
+theorem transition_valid {ch : ChoiceFn } 
+
+> 2
+
+(op : exchange 𝛼 𝜂 ) ( tr : T 𝛼 𝜂 ) 
+
+> 3
+
+(hop : valid_exchange Γ tr op ) ( h0: valid_trace Γ tr ) 
+
+> 4
+
+(ht : transition op ch tr = some ((), tr ')) : valid_trace Γ tr '
+
+Given a valid trace tr and a valid _exchange (𝑜𝑝 ), if the transition 
+
+function succeeds (i.e., returns some value) and returns a new trace 
+
+tr’ , then tr’ is valid. With the transition_valid theorem, LeanDY provides its users a protocol-specific proof of validity of every protocol trace generated by the valid exchanges that compose the honest implementation of a protocol and all adversarial behavior. 
+
+3.2.2 Exchange-Specific Tactics. By proving trace-level preserva-tion once and for all via transition_valid , LeanDY shifts the entire verification burden to the static properties of individual message exchanges. Proving these exchange-specific invariants—formulated as valid _exchange -shaped goals—offers a great starting point for automation. Recall from Eq. (5) the shape of valid _exchange . It loosely consists of two parts: type-system proofs and user predicate proofs. 
+
+Type-System Automation . Type checking is generally a mun-dane task for computers. LeanDY’s type system, however, features arbitrary user-provided predicates (i.e., CryptoPred s) and a gener-ally undecidable subtyping relation (due to the trace-dependent label ordering in L-SEnc and L-AEnc ). Aside from these two as-pects, the type system does not feature a general subsumption rule, making type checking mostly deterministic. Leveraging this determinism, LeanDY provides the prove_* tac-tics to prove Γ ⊢𝑡𝑟 𝑚 : 𝑙 and/or valid _bytes Γ 
+
+> 𝑡𝑟
+
+(𝑚 ). To make such automation usable in practice, we derive the typing rules for destructors, some of which are transcribed in Fig. 4. We can 9Jeanteur et al. 
+
+omit some of the expected premises by leveraging the fact that some terms effectively get simplified away; this is notably the case for the valid_bytes rules. We specialized the rule L-Tuple into 
+
+L-TupleMono to focus the automation on the most common case of public labels. The decryption rules for labels are not present in Fig. 4 as they involve more complex quantified formulas. 
+
+Full Automation of Exchanges . Beyond simple type-system automation, we build on the extensible automation machinery of Lean to automate the remaining proof obligations. To simplify reasoning about control flow, we split execution paths in a manner similar to StrandsRocq [ 19 ]. We then lever-age our prove_* tactics alongside Lean’s built-in simplifier and automated proof search machinery (e.g., the grind tactic [ 23 ]) to dispatch straightforward subgoals. Ultimately, this leaves only the non-trivial goals that capture the core cryptographic properties of the protocol. This culminates in the intro_valid_exchange tactic. We show-case its effectiveness by automatically proving the entire valid_ exchange property for the initiator_check from Ex. 2 (defined in Listing 2). The automation gracefully hands control back to the user for the cryptographically relevant case of valid_events , thereby automating away all security-irrelevant details.             
+
+> 1theorem valid_initiator_check (tr: TUnit Nonce) : valid_exchange.alt Γtr (initiator_check) ≔by
+> 2intro_valid_exchange for initiator_check
+> 3case valid_events sa sb sna _ _ =>
+> 4simp_all
+> 5exists sa, sb, sna.1
+> 6grind
+
+Aesop -Based Automation . LeanDY also provides a fine-tuned configuration for the Aesop rule-based tactic [ 37 ]. This enables a backtracking search through the type system rules and helper lemmas as well as basic first-order reasoning. This approach is significantly more lightweight than the previous one, enabling its use in contexts where the simplifier might otherwise loop (e.g., on extremely large terms or complex user predicates). Due to its higher degree of automation, our aesop_type_system tactic can notably make use of the more complex decryption and tuple rules. In the end, it can single-handedly dispatch the proof for the responder role of Ex. 2:           
+
+> 1theorem valid_responder (a b : P) (tr: TUnit Nonce) :
+> 2valid_exchange Γtr (responder a b) ≔by
+> 3aesop_type_system
+
+Unlike intro_valid_exchange , however, it has a less graceful failure mode, rarely offering the user meaningful progress on failure. 
+
+3.2.3 Automatic Labeling Environments with XOR. Manually build-ing a typing environment that follows Eq. (1) may look like a daunt-ing task. A naive but intuitive method is to consider Eq. (6): 𝑥 1 ⊕ 𝑥 2
+
+can only be known by those who know both 𝑥 1 and 𝑥 2.
+
+Γ(𝑥 1 ⊕ 𝑥 2) = Γ(𝑥 1) ⊓ Γ(𝑥 2) (6) where ⊓ is Sec. 3.1.3’s meet .Then, starting from an assignment Γ0 of labels to atomic values (i.e., terms of the form .Xor {𝑛 } in our setting), we can naturally and easily build a consistent labeling environment from Eq. (6).               
+
+> 1def from_singles ( Γ0:𝜂 →ℓ 𝛼 𝜂 ) : LabelingEnv 𝛼 𝜂 where
+> 2Λs≔.𝑠 0∈sΓ0𝑠 0
+> 3. . .
+
+Looking deeper, it might seem like from_singles and Eq. (6) are not acceptable. Already a typical use of the one-time pad breaks them: in that setting 𝑚 ⊕𝑘 is expected to be Pub while from_singles 
+
+and Eq. (6) would assign it the label Γ(𝑚 ) ⊓ Γ(𝑘 ), meaning 𝑚 ⊕ 𝑘 
+
+could only be published after both 𝑚 and 𝑘 are published. Thankfully, we are not constrained to atomic values. Finite sets form a vector space (over the Booleans, with △ as the addition), and  
+
+> from_singles
+
+can be generalized to any basis of that space. This means the user only needs to focus on defining the labels for the most important terms (the basis), letting Lean compute the rest.                        
+
+> 1−− b is an 𝜄 -indexed family which forms a basis
+> 2def from_basis (b:Basis 𝜄 Bool (Finset 𝜂 )) ( Γ0:𝜄 →ℓ 𝛼 𝜂 ):
+> LabelingEnv 𝛼 𝜂 where
+> 3Λs≔.𝑖 ∈(b.repr s) Γ0𝑖
+> 4. . .
+
+where (b.repr s 𝑖 : Bool) is the projection of s on the 𝑖 th vector of b; as the scalars of this vector space are Booleans, we use set notation to denote the result of this projection. 
+
+Example 3 (Sec. 2’s labels). {𝑟𝑘 bob }, {𝑟𝑘 alice , 𝑟𝑘 bob }, and {𝑟𝑘 alice ,𝑟𝑘 bob , 𝑟𝑘 carol } form a basis of the set of linear combinations of revo-cation keys. In Sec. 2, we assigned them the labels 𝑇 3, 𝑇 2, and 𝑇 1,respectively, and used from_basis to derive the labels of {𝑟𝑘 alice } and 
+
+{𝑟𝑘 carol }.
+
+## 4 Verifying Payment Channels 
+
+In this section, we present our formalization of payment channels using the LeanDY library. We first describe our encoding of block-chain primitives, which allows us to prove safety properties that depend on chain liveness. We then present the payment-channel protocol, its encoding within LeanDY, and the corresponding safety and liveness proofs. 
+
+Remark 2. All Lean structure s of type Type in this section derive  
+
+> ValidParsable
+
+(see Sec. 3.1.5). B+ denotes the non-failing bytes type (i.e., {𝑏 : B|𝑏 ≠ fail }), and Vec 𝜏 𝑛 denotes a list of elements of type 𝜏 of length 𝑛 . Moreover, we will use ellipsis (e.g., “ . . . ”) to omit irrelevant content or inline proofs in Lean listings. 
+
+## 4.1 Modeling Blockchain Primitives 
+
+We model a SegWit-style Unspent Transaction Output (UTXO) blockchain inside LeanDY. The model is intentionally close to Bit-coin on the core ledger mechanisms—transaction identifiers, spend-able outputs, witness-based scripts, and timelocks—while abstract-ing the full Bitcoin virtual machine and consensus rules. This is expressive enough to model real-world blockchain protocols, yet lightweight enough to support mechanized proofs. The key aspect of the model is that it is built on top of the primi-tives introduced above via the parsing framework (Sec. 3.1.5). This brings, for free, all the soundness guarantees, composition proper-ties, and proof automation of LeanDY to the realm of blockchain protocols. 10 LeanDY : Type-Based and Trace-Based Symbolic Protocol Verification in Lean 
+
+4.1.1 Structures. We first introduce the core datatypes of the model. 
+
+Pointers . Bitcoin spends outputs by referring to them through a transaction identifier and an output index. We model these two ingredients explicitly. A TXID is represented as a hash-bearing struc-ture, and a Pointer packages a TXID together with a VOUT index.                    
+
+> 1structure TXID 𝛼 𝜂 ≔(hash :B+𝛼 𝜂 )
+> 2structure VOUT ≔(n:N)
+> 3structure Pointer 𝛼 𝜂 ≔(txid :TXID 𝛼 𝜂 ) ( vout :VOUT )
+
+Crucially, a transaction identifier depends only on the transac-tion body and not on its witnesses. As in SegWit, this allows us to compute the TXID of a transaction before its witnesses are at-tached, which is essential for breaking spending dependencies, like in channel openings. 
+
+Transactions . A transaction carries inputs, witnesses, outputs, and a locktime. We rule out malformed transactions with mismatched numbers of inputs and witnesses using dependent typing and vec-tors.                            
+
+> 1structure Transaction 𝛼 𝜂 where
+> 2(ninputs noutputs :N)
+> 3inputs :Vec (Input 𝛼 𝜂 )ninputs
+> 4witnesses :Vec (B+𝛼 𝜂 )ninputs
+> 5outputs :Vec (Output 𝛼 𝜂 )noutputs
+> 6locktime :N
+
+Each output contains an amount and a locking script scriptPubKey ,while each input contains a pointer to a previous output, an un-locking script scriptSig , and a sequence number used for relative timelocks.                        
+
+> 1structure Output 𝛼 𝜂 where
+> 2amount : B
+> 3scriptPubKey :B+𝛼 𝜂
+> 1structure Input 𝛼 𝜂 where
+> 2outptr :Pointer 𝛼 𝜂
+> 3scriptSig :B+𝛼 𝜂
+> 4sequence :N
+
+Blocks and blockchain . A block is a list of transactions, and a blockchain is a list of blocks. Rather than treating the chain as a separate global state, we reconstruct it from the protocol trace: whenever a block is published, it is sent as a message event. The current chain is thus extracted by filtering the trace for block mes-sages.                                    
+
+> 1structure Block 𝛼 𝜂 ≔(transactions :List (Transaction 𝛼 𝜂 ))
+> 2structure Blockchain 𝛼 𝜂 ≔(blocks :List (Block 𝛼 𝜂 ))
+> 34def List .get_blockchain (tr :Trace 𝛼 𝜂 ) : Blockchain 𝛼 𝜂 ≔
+> 5List .filterMap
+> 6(𝜆 | . MsgSent msg => do_parse msg as Block 𝛼 𝜂 |_=> none )
+> 7tr .reverse
+
+This design is crucial for the rest of the development: blockchain facts are treated as ordinary trace facts. Consequently, the gen-eral trace machinery of LeanDY applies unchanged: blockchain-related messages live in the same trace as protocol states and events, thereby benefiting from the same monotonicity and validity infras-tructure introduced in Sec. 3. Moreover, this design enforces part of blockchain consensus: effectively, only one canonical blockchain matters. 
+
+4.1.2 Validity. Validity is defined hierarchically. Scripts justify in-dividual spends, pointers determine whether a referenced output exists and is still unspent, transactions combine script checks with value preservation, and a blockchain is valid when each of its trans-actions is valid against its preceding prefix. 
+
+Scripts . A key feature of Bitcoin-like blockchains is the use of scripts to guard outputs. Fully implementing the Bitcoin Virtual Machine (VM) in LeanDY would significantly increase both proof size and proof engineering overhead. Instead, we abstract over script semantics with a Script type class.                          
+
+> 1structure ScriptInput 𝛼 𝜂 where
+> 2(arg witness stripped :B+𝛼 𝜂 )
+> 3(sequence locktime relativeHeight :N)
+> 45class Script 𝛼 𝜂 𝛿 where
+> 6eval (self :𝛿 ) ( input :ScriptInput 𝛼 𝜂 ) : Prop
+> 7decidableEval self input :Decidable (eval self input )
+
+The eval predicate relates the spent output script (parsed as a value of type 𝛿 ) to the data available during script execution: the 
+
+> scriptSig
+
+, the witness, the stripped transaction used as the signa-ture preimage, and the fields required for timelock checks. Requiring  
+
+> eval
+
+to be decidable ensures that scripts remain executable, not just logically specified. This interface is expressive enough to encode both native scripts and wrappers such as Pay-to-Witness-Script-Hash (P2WSH) [ 39 ]. In the latter case, the witness reveals both redeeming arguments and the underlying script, whose hash must match the hash stored in the spent output.                                                
+
+> 1structure P2WSH (S:Type )≔(hash :B+𝛼 𝜂 )
+> 2structure P2WSH .Witness ≔(args script :B+𝛼 𝜂 )
+> 34instance [Script 𝛼 𝜂 S] : Script 𝛼 𝜂 (P2WSH S )where
+> 5eval self input ≔Option .getD (dflt ≔False ) $ do
+> 6let {args ,script }←do_parse input .witness as P2WSH .Witness
+> 7|return False
+> 8guard (hash _ script =self .hash )
+> 9return Script .eval (←do_parse script as S )
+> 10 {input with witness ≔args }
+
+where we exploit the Option monad. Option.getD unwraps the  
+
+> Option
+
+object, returning dflt on failure. Thus, instantiating Script 
+
+for P2WSH S amounts to parsing the witness, checking the script hash, parsing the revealed script as an S, and recursively evaluating it. 
+
+Pointers . A pointer is valid if it refers to an existing output of an existing transaction in the current blockchain. However, payment-channel reasoning requires a stronger condition: an input can only spend an output that has not already been consumed. For this, we define the set of spendable pointers as the set of all output pointers currently on chain minus those that already occur in transaction inputs.             
+
+> 1def spendable_ptrs :Finset (Pointer 𝛼 𝜂 )≔
+> 2(output_ptrs b ). toFinset .filter (𝜆 ptr => ptr .txid .unique b )
+> 3\ ( input_ptrs b ). toFinset
+
+11 Jeanteur et al. 
+
+The additional uniqueness check on TXID s prevents ambiguity when retrieving an output from its transaction identifier. Membership in spendable_ptrs therefore captures exactly the UTXOs that are available for spending. This check is slightly stronger than Bitcoin’s operational treatment of collisions; our model simply rejects am-biguous cases instead of selecting a specific transaction. For the setting considered here, this restriction does not impose significant limitations. Indeed, Bitcoin’s BIP30 [ 58 ] rules out the same ambigu-ity at the level of unspent outputs: duplicate transaction identifiers are disallowed whenever the earlier transaction still has unspent outputs. Correspondingly, we prove that in every valid chain of our model, all spendable outputs have unique transaction identifiers 
+
+Transactions . Transaction validity is parameterized by both a blockchain—intuitively, the chain against which the transaction is checked—and a script language. A valid transaction must spend only spendable pointers, satisfy the locking scripts of all its inputs, and preserve value.                     
+
+> 1structure Transaction .valid :Prop where
+> 2unique : ( tx .ninputs = 0) →tx .unique b
+> 3spendable :tx .all_input_spendable b
+> 4balance : ( tx .ninputs ≠0) →tx .valid_balance b
+> 5valid_scripts :tx .valid_eval_scripts b script_t
+
+The unique field is relevant only for transactions with no inputs (i.e., coinbase transactions): in that case, there is no spent pointer from which uniqueness could otherwise be recovered, so we require a proof that the resulting TXID is fresh to match [ 58 ]. For ordinary transactions, spendable prevents double spending, balance enforces that outputs do not create money, and valid_scripts ensures that every input actually unlocks the output it claims to spend. A transaction already present on the chain is checked against the blockchain prefix preceding it. This matches the intended causal reading of blockchain execution: when validating a transaction, only earlier transactions are available as spendable outputs. 
+
+Blockchain . Finally, a blockchain is valid when each transaction it contains is valid with respect to its preceding prefix. In the imple-mentation this is expressed by validating every transaction against its restricted sub-blockchain.        
+
+> 1def Blockchain .valid ≔∀tx ∈b,tx .valid_restr b script_t
+
+where tx.valid_restr b means that tx is checked not against the full blockchain b, but only against the sub-blockchain consisting of transactions that precede tx in b. This is the right notion for on-chain validation: when a transaction is appended to the chain, only earlier transactions may provide spendable outputs. This prefix-based definition is precisely what yields the global safety properties we require. In particular, it rules out double spends between distinct valid transactions and guarantees that outputs remain stable as the chain grows. 
+
+## 4.2 Payment Channels 
+
+Payment channels are the core building blocks of payment-channel networks such as Lightning [ 47 ]. Two parties first lock funds in a joint on-chain output and then perform an unbounded number of off-chain balance updates by exchanging signed replacement trans-actions. Only the opening and closing phases require interaction with the blockchain: all intermediate payments remain off chain. The main difficulty is preventing a party from broadcasting an old commitment transaction that reflects a more favorable balance. This is addressed with revocation secrets and punishment: each update replaces the previous commitment state and simultaneously reveals the secret needed to punish the owner of that old state if it is ever posted on chain. Hence, participants do not need to trust the counterparty; they only need the ability to detect a revoked close and publish the corresponding punishment transaction in time. Our formalization focuses on the core two-party revocation mechanism underlying payment channels. We model channel open-ing, an unbounded sequence of off-chain updates, unilateral publi-cation of a commitment transaction, and the corresponding pun-ishment transaction. We abstract away from features orthogonal to our proof obligations, such as fees and balance negotiation, and cooperative closing. 
+
+Remark 3. This section instantiates the types 𝛼 and 𝜂 to concrete types, namely Unit and Nonce respectively, where:           
+
+> 1inductive Nonce where
+> 2| Rk (a b: P) (t: N) --revocation key for a
+> 3| Sk (a: P) --secret key (e.g., for signing)
+> 4|. . .
+
+4.2.1 Protocol Overview. The protocol is summarized in Fig. 5. We model the opening phase, the update phase, and the punishment. Conceptually, the protocol is built on top of smaller message ex-change groups. 
+
+Funding and Initial Publication . The opening phase consists of a commitment and two additional groups (Groups 1 and 3 ) to set up the initial common fund used in all subsequent payment-channel transactions. Group 1 captures the negotiation to agree on the inputs of the common fund. We bypass modeling this group by universally quantifying over the common fund transaction inputs. This lets the parties pre-compute the TXID of the not-yet-published funding transaction. They wait until Group 3 to exchange the witnesses required to make this transaction valid and publish it, thereby avoiding locking money forever in case Group 2 fails. 
+
+Commitments . When both parties agree on a new balance (via mechanisms beyond the scope of this paper), they exchange enough information for each party to build a unilateral closing transaction. As modeled in Groups 2 and 4 , these consist of (stripped) transac-tion signatures and hashes of revocation keys. 
+
+Revocation . Both parties can revoke an old channel state by ex-changing their respective revocation keys (Group 5 ). These revoca-tion keys act as proof of good faith that neither party will attempt to publish the now-outdated state on chain. Failure to uphold this promise results in punishment. When revocation and commitment are executed sequentially, some of the messages can be merged. Our model merges Messages 10 and 11 and Messages 12 and 13 .
+
+Punishment . Finally, Group 6 models the punishment (in Fig. 5, only for Alice). If a transaction spending the common fund appears on chain and Alice knows its revocation key, Alice sends a trans-action that redeems Bob’s funds. This part of the protocol lives outside of the typical execution flow, as honest agents should never reach it. 12 LeanDY : Type-Based and Trace-Based Symbolic Protocol Verification in Lean Alice Bob Opening    
+
+> 1: Common Fund Funding 1
+> 2: hash
+
+
+
+𝑟𝑘 0
+
+> 𝐴
+
+ 
+
+> 3: hash
+
+
+
+𝑟𝑘 0
+
+> 𝐵
+
+ 
+
+> 4: sign
+
+
+
+𝑡𝑥 0
+
+> 𝐴 →𝐵
+
+, 𝑠𝑘 𝐵 
+
+ 
+
+> checks _
+> 5: sign
+
+
+
+𝑡𝑥 0
+
+> 𝐵 →𝐴
+
+, 𝑠𝑘 𝐴 
+
+ checks _ 
+
+> Commit
+
+02    
+
+> 6: witnesses 𝐴
+> checks _
+> 7: witnesses 𝐵
+> checks _
+> 8: publish common fund to blockchain
+> Publish 3
+> Update Loop
+> 9: hash
+
+ 𝑟𝑘 𝑛 𝐴 
+
+ 
+
+> 10 : hash
+
+ 𝑟𝑘 𝑛 𝐵 
+
+ 
+
+> 11 : sign
+
+ 𝑡𝑥 𝑛 𝐴 →𝐵 , 𝑠𝑘 𝐵 
+
+ 
+
+> checks _
+> 12 : sign
+
+ 𝑡𝑥 𝑛 𝐵 →𝐴 , 𝑠𝑘 𝐴 
+
+ 
+
+> Commit
+
+𝑛 4    
+
+> Released A B _ _13 :
+
+𝑟𝑘 𝑛 −1  
+
+> 𝐴
+> checks _
+> Released B A _ _
+> Old 𝐵 𝑛 −1
+> _
+> 14 :
+
+𝑟𝑘 𝑛 −1  
+
+> 𝐵
+> checks _
+> Old 𝐴 𝑛 −1_
+> Revoke
+
+𝑛 − 15  
+
+> Punishment
+> 15 :
+
+𝑡𝑥 𝑘 𝐵 →𝐴 on chain if 𝑟𝑘 𝑘 𝐵 is in Alice’s memory _     
+
+> Defended 𝑟𝑘 𝑘 𝐵 𝑡𝑥 𝑝 _
+> 16 : a transaction
+
+𝑡𝑥 𝑝 that spends 𝑡𝑥 𝑘 𝐵 →𝐴   
+
+> PostDefended
+> _𝑟𝑘 𝑘 𝐵 𝑡𝑥 𝑝
+> _
+> Punish 6
+
+Figure 5: High-level flow of the modeled payment-channel protocol. 
+
+4.2.2 Transactions and Scripts. The security of payment channels relies on their specific choice of transactions and scripts. The pro-tocol involves two kinds of transactions: the funding transaction ,which has unspecified inputs but is locked by a CommonFund script; and the closing transactions (e.g., 𝑡𝑥 𝑛 𝐴 →𝐵 in Fig. 5), which spend the aforementioned funding transaction and whose outputs are locked by ToRemote and ToLocal scripts. A schematic of the money flow in a closing transaction is provided in Fig. 6. Furthermore, payment channels and our model use SegWit-style Pay-to-Witness-Script-Hash (P2WSH) scripts like those introduced common fund      
+
+> ToRemote
+> balance 𝐵
+> Bob
+> ToLocal
+> balance 𝐴
+> knows 𝑟𝑘 𝑛 𝐴 Bob after to_self_delay blocks Alice
+
+Figure 6: Diagram of the flow of money of 𝑡𝑥 𝑛 𝐴 →𝐵 .
+
+in Sec. 4.1.2. Overall, the scripts under consideration are of type 
+
+P2WSH Script , with Script structured as follows:  
+
+> 1
+
+inductive Script where  
+
+> 2
+
+| CommonFundS (s : CommonFund ) −− funding output  
+
+> 3
+
+| ToRemoteS (s : ToRemote ) −− remote commitment output  
+
+> 4
+
+| ToLocalS (s : ToLocal ) −− delayed / punishable output  
+
+> 5
+
+| . . . 
+
+We explore each of these scripts, showcasing the ability of LeanDY to capture a wide variety of Bitcoin scripts. 
+
+CommonFund . The common fund transaction is guarded by a stan-dard 2-of-2 multisig script [2]. It can be modeled as follows:  
+
+> 1
+
+structure CommonFund ≔ (pka pkb : B+ Unit Nonce ) 
+
+> 2
+
+structure CommonFund .Redeem ≔ (signa signb : B+ Unit Nonce ) 
+
+> 34
+
+open CommonFund in instance : Script CommonFund where  
+
+> 5
+
+eval self input ≔ Option .getD (dflt ≔False ) $ do  
+
+> 6
+
+let {signa , signb } ← do_parse input .witness as Redeem  
+
+> 7
+
+return verify () signa self .pka = input .stripped ∧ 
+
+> 8
+
+verify () signb self .pkb = input .stripped  
+
+> 9
+
+decidableEval ≔ . . . 
+
+ToRemote . The remote party of a closing transaction is the party that does not store this transaction in their memory (e.g., Bob for 
+
+𝑡𝑥 𝑛 𝐴 →𝐵 ). This party can retrieve their funds unconditionally and immediately from the closing transaction.  
+
+> 1
+
+structure ToRemote ≔ (pk : B+ Unit Nonce ) 
+
+> 2
+
+structure ToRemote .Redeem ≔ (sign : B+ Unit Nonce ) 
+
+> 34
+
+open ToRemote in instance : Script ToRemote where  
+
+> 5
+
+eval self input ≔ Option .getD (dflt ≔False ) $ do  
+
+> 6
+
+let m ← do_parse input .witness as Redeem  
+
+> 7
+
+return verify () m.sign self .pk = input .stripped ∧ . . .  
+
+> 8
+
+decidableEval ≔ . . . 
+
+ToLocal . Much of the power of the payment channel comes from the ToLocal output. This is the output a party is expected to spend to retrieve their share of the balance when closing unilaterally. Since unilateral closing can occur without consulting the coun-terparty, the protocol must ensure that the channel is not closed in an outdated state. This is where the punishment mechanism is involved. This output can be redeemed by either party: the closing party must wait for to_self_delay , which allows the counterparty time to execute the punishment.  
+
+> 1
+
+structure ToLocal .PunishRedeem ≔ (sign rk : B+ Unit Nonce ) 
+
+> 2
+
+structure ToLocal .RegularRedeem ≔ (sign : B+ Unit Nonce ) 
+
+> 34
+
+open ToLocal in  
+
+> 5
+
+inductive ToLocal .Eval : ToLocal −> ScriptInput Unit Nonce −> Prop  
+
+> 6
+
+| regular  
+
+> 7
+
+(hp : parse input .witness = some (RegularRedeem .mk sign ))  
+
+> 8
+
+(hv : verify () sign self .pk_regular = input .stripped ) 
+
+> 9
+
+(htime : self .to_self_delay ≤ input .sequence ∧ . . . ): −− needs to wait  
+
+> 10
+
+ToLocal .Eval self input 
+
+13 Jeanteur et al.                              
+
+> 11 |punish
+> 12 (hp :parse input .witness =some (PunishRedeem .mk sign rk ))
+> 13 (hv :verify () sign self .pk_punish =input .stripped )
+> 14 (hrk :hash () rk =self .hrk_punish ):
+> 15 ToLocal .Eval self input
+> 16 17 instance :Script ToLocal where
+> 18 eval ≔ToLocal .Eval
+> 19 decidableEval ≔. . .
+
+In other words, ToLocal offers two redemption paths. The regular owner can recover the output with a valid signature only after wait-ing for to_self_delay (the regular case), while the counterparty can spend it immediately by providing a valid punishment signature together with a revocation key whose hash matches hrk_punish (the 
+
+punish case). This is the core revocation mechanism of Lightning-style channels. 
+
+4.2.3 States, Labels, Events and their Invariants. 
+
+State . Each party continuously keeps track of the current channel state and (if applicable) the previous one in a structure called 
+
+PcState :          
+
+> 1structure PcState where
+> 2(self_rk :B+Unit Nonce )
+> 3(other_rk other_hrk valid_sign :Option (B+Unit Nonce ))
+> 4. . .
+
+where self_rk , other_rk , other_hrk , and valid_sign are respec-tively the party’s revocation key, the other party’s revocation key and revocation hash, and the local transaction’s signature by the other party. The state invariant ensures consistency among all elements; no-tably, that valid_sign is a valid signature of the correct transaction, and that other_rk is the preimage of other_hrk .
+
+Labels . This protocol features a comparatively simple set of labels, as the variables are either long-term secrets (e.g., keys with private labels) or public. The only exception is the revocation key, for which we directly use the conditional-swap operator defined in Sec. 3.1.3: 
+
+Γ(Rk a b i ) ≔ releasable ( P a) Pub Released a b i ... 
+
+Thus, a revocation key is initially secret and becomes public exactly when the corresponding Released _ _ _ event is emitted at the revoke step of Fig. 5. 
+
+Events . Besides the simple events marking the successful execution of an exchange (which are omitted from Fig. 5), our model features the Old 𝑘 𝐼 events. These indicate that a party considers a channel state to be outdated, and must therefore defend against it. These  
+
+> Old 𝑘 𝐼
+
+events are the triggers for liveness queries. The Defended rk tx 
+
+and PostDefended _ rk tx events mark successful punishment using a revocation key rk and a punishing transaction tx . This last event can further only be triggered with a transaction tx which spends a transaction that spends the common fund, capturing that it is a punishing transaction. 
+
+Signing Invariant . The most important invariant in our model is imposed on signatures via the CryptoPreds type class introduced in Sec. 3.1.3, which constrains honest agents to only sign valid transactions 2. Furthermore, these transactions are constrained to 
+
+> 2at least with the keys reserved for this protocol
+
+be either regular payment-channel transactions (e.g., 𝑡𝑥 𝑛 𝐴 →𝐵 ) or punishment transactions.                                        
+
+> 1instance instCryptoPreds :CryptoPreds Unit Nonce where
+> 2u_sign_pred Γ_ m k tr ≔
+> 3regular_tx_pred tr m k ∨punishment_tx_pred tr m k
+> 4. . .
+> 56def regular_tx_pred _ m k ≔∃. . . ,
+> 7m=serialize (( mk_tx vks tx_owner cf_ptr _ hrk ). strip b 0. . . )∧
+> 8key () . Verify k =vks [signer ]∧
+> 9cf_ptr .points_to_common_fund vks b ∧
+> 10 . . .
+> 11 12 def punishment_tx_pred tr stx k ≔
+> 13 Defended _ stx ∈tr ∧
+> 14 . . . −− stx is a stripped punishment transaction
+
+Here, mk_tx builds a closing transaction as per Sec. 4.2.2 (e.g., “ mk_tx (𝐴 ,𝐵 )𝐴 cf_ptr _ (hash _ 𝑟𝑘 𝑛 𝐵 )” is 𝑡𝑥 𝑛 𝐴 →𝐵 ) that spends cf_ptr . Sec. 4.2.3 further enforces cf_ptr to be the funding transaction. Finally, strip 
+
+prepares the transaction for signature as per the Bitcoin specifica-tion [40]. 
+
+4.2.4 Safety. We show that the protocol upholds various correct-ness and safety properties regarding its transactions and the local state of the parties. 
+
+Correctness of Transactions . Our model enables us to prove key lemmas about the transactions. Notably, we can guarantee that all transactions involved have the correct structure. 
+
+Lemma 1 (Transactions). Barring key compromises, a funding transaction can only be spent by a transaction built with mk_tx using the correct parameters; and a ToLocal output can only be spent by a punishment transaction produced in Group 6 .
+
+Correctness of Stored Transactions . We consider a channel state to be ready when a signature and a revocation key hash are known. 
+
+Lemma 2. After the check steps in Groups 2 and 4 , each party can construct a valid transaction that spends the common funds. 
+
+Formally, we prove:                                                  
+
+> 1def isReady :PcState →Prop
+> 2| { other_hrk ≔some _ ,valid_sign_stripped ≔some _ , ..} => True
+> 3|_=> False
+> 45theorem ready_state_imp_valid_tx {tr t pstate pc }−− i.e., Lem. 2
+> 6(hv :valid_trace Γtr )
+> 7(hstate :tr .IsStateAt t (State .Std pstate )) −− pstate is in the trace
+> 8(hmem :pc ∈state ) ( hready :pc .isReady )−− a channel state is in pstate
+> 9(hnot_spent :pstate .common_fund ∉tr .get_blockchain .input_ptrs ) : −− the common fund has not been spent
+> 10 (pstate .mk_transaction tr .get_blockchain pc ). valid tr .get_blockchain
+> (P2WSH Script )≔. . .
+
+where pstate.mk_transaction tr.get_blockchain pc constructs the closing transaction. 
+
+4.2.5 Liveness. The security of payment channels relies on live-ness. Indeed, the punishment mechanism only functions if the participants are sufficiently reactive to execute the punishment. Un-fortunately, such properties are typically out of reach of standard Dolev-Yao models. Indeed, such models assume an adversary with full control over the network. This allows the adversary to per-manently block a party from interacting with the protocol, which 14 LeanDY : Type-Based and Trace-Based Symbolic Protocol Verification in Lean 
+
+would prevent the punishment of a cheating counterparty. Thus, tra-ditional Dolev-Yao-based verification tools such as ProVerif [13 ]and Tamarin [ 43 ] do not natively support such properties. In con-trast, LeanDY provides the flexibility to reason directly in Lean about arbitrary trace properties: to Lean, traces are simply lists. Payment channels are safe under the liveness of two entities: the defending party (ensuring that the punishment transaction is sent) and the miners (ensuring that the transaction is eventually included in the blockchain). We first formalize these two notions, then we present our main security theorem. 
+
+Participant Liveness . We first define a mechanism to select an 
+
+exchange for execution. The core component is a predicate P that, given a trace, selects a specific exchange along with its associated message and state. We define this selection mechanism as follows:      
+
+> 1structure Liveness .Select [up :UserPreds
+
+𝛼 𝜂 ]   
+
+> 2(P:
+
+T 𝛼 𝜂 → exchange 𝛼 𝜂 → t → t → Prop ) ( op : exchange 𝛼 𝜂 )  
+
+> 3(tr ) ( t_msg t_s :t) ( msg :
+
+B 𝛼 𝜂 ) ( s: up .u_state ) : Prop where       
+
+> 4hop_select :P tr op t_msg t_s
+> 5hmsg :tr .IsMessageAt t_msg msg
+> 6hs :tr .IsStateAt t_s s
+
+Liveness then guarantees that whatever exchange is selected by 
+
+Liveness.Select (if any) is eventually executed, provided the trace grows by a sufficient number of blocks ( n).      
+
+> 1def Liveness [up :UserPreds
+
+𝛼 𝜂 ]   
+
+> 2(P:
+
+T 𝛼 𝜂 → exchange 𝛼 𝜂 → t → t → Prop ) ( n : N)   
+
+> 3(tr tr '): Prop
+
+≔ 
+
+> 4
+
+∀ (t_msg t_s : t) ( msg :B 𝛼 𝜂 ) ( s: up .u_state ) op ,    
+
+> 5(hselect :Liveness .Select P op tr t_msg t_s msg s )
+
+→ −− op is selected      
+
+> 6(hgrow :tr <= tr ')
+
+→     
+
+> 7(hheight :tr .get_blockchain .height +n
+
+≤ tr '.get_blockchain .height ) → −−  
+
+> the traces are related and sufficiently many blocks have been mined
+> 8
+
+∃ l1 l2,                  
+
+> 9tr '=l2++ ( op (l1.length +tr .length )msg s ). as_list ++ l1++ tr −− then op
+> is executed somewhere between tr and tr’
+
+Miner Liveness . Blockchain consensus algorithms rely on the presence of a sufficient number of honest miners. Consequently, miners will eventually add all valid transactions to the blockchain. This validity constraint is captured by ValidLongEnough , which ensures that a transaction remains valid for at least n blocks after a given timepoint t.    
+
+> 1abbrev Transaction .ValidLongEnough (n:
+
+N) ( tr ) ( t:t) ( tx ) : Prop ≔ 
+
+> 2
+
+∃ tr 1,  
+
+> 3tr 1
+
+≤ tr ∧    
+
+> 4(tr .get_blockchain_at t ). height +n
+
+≤ tr 1.get_blockchain .height ∧    
+
+> 5tr 1.get_blockchain .height <tr .get_blockchain .height
+
+∧ 
+
+> 6tx .valid tr 1.get_blockchain script_t
+
+where get_blockchain_at retrieves the blockchain state from the prefix of tr up to time t.Assuming miner liveness then means that if a transaction is broadcast to the miners (captured by the published_tx_at predicate) and remains valid for at least n blocks, it will be included in the blockchain within those n blocks.     
+
+> 1def miner_liveness (n:
+
+N) tr (t:t) tx : Prop ≔   
+
+> 2(h1:published_tx_at tr tx t )
+
+→   
+
+> 3(hv :tx .ValidLongEnough script_t n tr t )
+
+→  
+
+> 4tx
+
+∈ tr .get_blockchain 
+
+Liveness of Punishment . Listing 3 features the exact theorem proven to express punishment liveness. Intuitively, assuming the liveness of both the participants (Group 6 ) and the miners, we    
+
+> 1inductive DefenseSelector tr :
+
+. . . → Prop where    
+
+> 2|intro {
+
+. . . } ( hold : . Old {i, . . . } ∈ tr ) . . . : DefenseSelector tr (Group 6 ) . . . i    
+
+> 34theorem punish .eventually_on_chain
+> 5(tr tr_final ) ( ps ) ( common_fund ) ( punish_time miner_time :
+
+N)    
+
+> 6(hgrow :tr
+
+≤ tr_final )      
+
+> 7(hheight_final :tr .get_blockchain .height +param .toSelfDelay
+
+≤          
+
+> tr_final .get_blockchain .height )
+> 8(htime_budget :punish_time +miner_time <param .toSelfDelay )
+> 910 (hv 1:valid_trace
+
+Γ tr_final ) ( hv 2: tr_final .get_blockchain .valid (P2WSH Script ))     
+
+> 11 (hnot_corrupt :Corrupt ps .a
+
+∉ tr_final ∧ Corrupt ps .b ∉ tr_final )    
+
+> 12 13 (hcf :common_fund .points_to_common_fund ps .vk tr .get_blockchain
+
+. . . )    
+
+> 14 (hspent :common_fund .spent tr .get_blockchain )
+> 15 (h_old :
+
+∀ tr ' hrk self balance , tr ' ≤ tr_final →    
+
+> 16 common_fund .spent_by_hrk (tr '.get_blockchain )ps
+
+. . . self hrk balance → 
+
+> 17
+
+∃ rk i , hrk = . hash _ rk ∧ (. Old {ps , self , common_fund , i, rk , balance } ∈ tr '))      
+
+> 18 19 −− punishment liveness
+> 20 (hlpunish :
+
+∀ tr tr_punish , tr ≤ tr_final → tr_punish ≤ tr_final →      
+
+> 21 Liveness DefenseSelector punish_time tr tr_punish )
+> 22 −− miner liveness
+> 23 (hlminer :
+
+∀ t tx ,      
+
+> 24 miner_liveness (P2WSH Script )published_to_miners miner_time tr_final t tx )
+> 25 26 (hno_race :
+
+∀ rk stx stx ' tr ', tr ' ≤ tr_final →  
+
+> 27 (. Defended rk stx
+
+∈ tr ') → (. Defended rk stx ' ∈ tr ') → stx ' = stx ):  
+
+> 28
+
+∃ rk tx tx ',  
+
+> 29 (. PostDefended common_fund rk tx
+
+∈ tr_final ) ∧  
+
+> 30 tx '
+
+∈ tr_final .get_blockchain ∧   
+
+> 31 tx .strip tr_final .get_blockchain 0
+
+. . . = tx '.strip tr_final .get_blockchain 0 . . .  
+
+> 32
+
+≔ . . . 
+
+Listing 3: Liveness of Punishment 
+
+show that if a revoked commitment transaction is published on the blockchain, then a punishing transaction is accepted on chain within punish_time + miner_time blocks (representing the response time of the participant and the miners, respectively). However, due to the highly composable nature of LeanDY protocols and the reality of Bitcoin transaction signing, further refinements were required. We detail these refinements below. The theorem relates a trace tr (which contains a revoked com-mitment transaction) to its extension tr_final , which we prove contains the corresponding punishment transaction. Hypotheses on lines 6 to 8 relate these two traces: tr_final is a sufficiently long extension of tr ensuring that enough blocks have been mined to allow the punishment transaction to be sent ( punish_time ) and ac-cepted by the miners ( miner_time ). These two liveness delays must fit within the script’s toSelfDelay to ensure that the punishment happens before the cheater can claim the funds. Hypotheses hv 1 and 
+
+hv 2 (Sec. 4.2.5) enforce generic validity assumptions on the traces. As shown in Sec. 3.2.1, trace validity is an invariant preserved un-der honest protocol execution; hence, assuming the validity of the extended trace is sound, as honest actions do not violate the transi-tion rules. hnot_corrupt (Sec. 4.2.5) enforces honest signing. This is also acceptable, as cheating is allowed behavior (it will simply result in punishment) even for honest agents, as per Sec. 4.2.4. Hy-potheses hcf and hspent (Sec. 4.2.5) bind the common_fund pointer to 15 Jeanteur et al. 
+
+the common fund of the channel and assert that it has been spent.  
+
+> h_old
+
+(Sec. 4.2.5) further ensures that the transaction spending the common fund corresponds to a revoked state (i.e., the relevant  
+
+> Old
+
+event occurred). Liveness of Group 6 and of the miners is specified in Sec. 4.2.5, respectively. hlpunish is universally quanti-fied over subtraces of tr_final because the defending party must react regardless of the exact block height at which the cheating transaction was published. Finally, Sec. 4.2.5’s hno_race ensures that effectively only one punishment thread succeeds at a time by requiring punishment to use a similar transaction. It is impossible and meaningless to enforce strict equality on the transaction due to the malleability of SegWit transaction signatures, since witnesses are not signed [36]. The theorem’s conclusion (Lines 28 to 31) must similarly take malleability into account. Sec. 4.2.5 states that tx is a punishment transaction broadcast to the miners. Since we cannot guarantee it will reach the blockchain completely unaltered due to malleability, we instead prove that the stripped transaction (which excludes witness data) matches the transaction eventually included on-chain. 
+
+## 5 Related Work 
+
+Mechanized Symbolic Protocol Analysis . Over the years, sev-eral works have focused on the mechanized security of crypto-graphic protocols in the symbolic security model defined by Dolev and Yao [ 24 ]. In his seminal work, Lawrence C. Paulson [ 46 ] devel-oped a rigorous technique for verifying cryptographic protocols within the Isabelle/HOL proof assistant [ 44 ]. The approach is based on representing protocols as (potentially unbounded) sets of execu-tion traces, capturing the messages exchanged among protocol par-ticipants and with the adversary. Leveraging the expressiveness of Isabelle, particularly for inductive reasoning, the approach enables proving, for instance, that a certain communication event always follows another event, under the assumption that data remains secret. The authors demonstrate the effectiveness of the approach by verifying the NSL protocol and, in a later work, the Kerberos au-thentication protocol [ 7 ]. Despite its expressiveness, the approach offers limited automation: while Isabelle provides general-purpose tools (e.g., sledgehammer [15]), proofs remain largely manual due to the need for protocol-specific reasoning and the challenges of automating inductive arguments in general-purpose proof search. Busi et al. [ 19 ] follow a similar approach in their formalization of strand spaces. Their StrandsRocq library encodes the induc-tive proof technique developed by Fábrega et al. [ 27 ], enabling symbolic proofs of secrecy and agreement within the Rocq proof assistant. StrandsRocq provides a set of strand-specific automated tactics for implementing case analysis over strands, automatically solving trivial goals. While this automation is specialized and sup-ports proof reuse, it is constrained by a protocol representation that remains close to the original strand space model. This design choice limits the degree of achievable automation compared to approaches following the LAC principle [ 49 ], where the language can be deliberately restricted to enable more effective automated reasoning. The DY ∗ library [ 10 ] aims to provide a different workflow, where protocol implementations can be automatically verified by lever-aging the SMT-based automation of the F ∗ language. Protocols are modeled as imperative procedures using effectful primitives to send and receive messages from the network, store state, and perform cryptographic operations. These primitives manipulate a global trace of events for verification and can be swapped for concrete implementations for execution. This fully automated approach, however, suffers from several shortcomings. First, the code needs to be annotated with assert commands to guide the SMT solver toward a solution. These proof annotations obscure the flow of the protocol, mixing specification and technical proof-related details. Second, F ∗ offers limited tool support for writing and refining these assertions, making it more difficult to guide the verification process interactively compared to proof assistants that provide more direct feedback. To address the limitations of this automated (intrinsic) proof style, Théophile Wallez developed an alternative version of DY ∗ focusing on explicit extrinsic proofs [ 53 , 54 ]. Compared to automated SMT-based reasoning, extrinsic proofs require a less automated workflow, similar to more traditional interactive theo-rem proving. This shift, however, further highlights the limitations of F ∗ with respect to interactive, tactic-based proof development, and motivates our choice for the Lean proof assistant. This work presents a further extension of DY ∗ to support more general labels, capable of modeling arbitrary trace properties. Compared to our implementation, however, their labeling system does not support the XOR operator nor the automatic labeling of non-atomic values described in Sec. 2. 
+
+Automated Symbolic Protocol Analysis . In parallel with the above efforts on the mechanized analysis of protocols, fully au-tomated solvers have been developed and refined over the years. Notably, Bruno Blanchet introduced ProVerif [13 ], one of the ear-liest and most widely used tools supporting so-called push-button verification of protocols expressed in the applied 𝜋 -calculus [1]. 
+
+ProVerif translates 𝜋 -calculus processes into Horn clauses and employs a specialized resolution-based algorithm to check secrecy and correspondence properties. A comparable approach is taken by Simon Meier in the Tamarin prover [ 43 ]. In Tamarin , protocols are specified as rewriting rules, and the solver explores the resulting transition system over multisets of terms, enabling the verification of secrecy and correspondence properties. Both tools support the analysis of protocols with an unbounded number of sessions and messages. However, they require reasoning about the full protocol execution, lacking mechanisms to analyze sub-protocols in isolation and to compose verification results. In subsequent work, ProVerif 
+
+has been extended to support observational equivalence [ 20 ], a limited form of induction [ 14 ] over the length of execution traces, and even support for XOR [ 21 ]. Additionally, various techniques have been proposed to integrate support for XOR operations into these automated verifiers, such as reducing Horn theories with XOR to the XOR-free case to enable analysis in ProVerif [35 ], or extending the Tamarin prover to support stateful cryptographic protocols with XOR [ 25 ]. Attempts were also made to provide a hammer-like approach combining all these tools in the form of 
+
+Sapic+ [ 22 ]. While all these approaches move automated verifiers toward greater flexibility, they offer only limited support for inter-active proof development when automation alone is insufficient. 16 LeanDY : Type-Based and Trace-Based Symbolic Protocol Verification in Lean 
+
+Blockchain Protocol Verification . The emergence of blockchain technologies introduced new classes of protocols and security prop-erties to verify, prompting a rapid response from the verification community. Significant effort has been devoted to formalizing the foundations of blockchain systems. Rupić et al. [ 50 ] provide a mech-anized formalization of Bitcoin’s consensus in Rocq , while An-nenkov et al. [ 4] formalize the smart contract execution layer. At the contract level, Andrychowicz et al. [ 3] model contracts using 
+
+UPPAAL [ 9 ], and Jacquot and Donnet develop CHAUSSETTE [ 31 ], a tool that uses symbolic execution to uncover vulnerabilities in Bitcoin scripts. Our work, instead, focuses on modeling layer-2 (off-chain) protocols [ 47 ], specifically payment channels and the Lightning Network. The Lightning Network has attracted substantial research inter-est across several aspects. This includes game-theoretic analyses such as CheckMate [ 18 ] and the work of Rain et al. [ 48 ]. Mean-while, in the symbolic model, Boyd et al. [ 17 ] leverage Tamarin to formally analyze Hash Time-Lock Contracts (HTLCs), and Barthe et al. [ 6] develop Tidy to extend Tamarin with support for timed cryp-tographic protocols. Additionally, Hüttel and Staroveški [ 29 , 30 ]verified secrecy and authenticity properties of specific Lightning subprotocols using ProVerif . The works closest to ours in scope are the recent verifications of the full Lightning Network protocol. These include the TLA+ model by Grundmann and Hartenstein [ 28 ]and the Why3 [ 16 ] formalization by Fabiański et al. [ 26 ]. While these are impressive verification achievements, they focus on the monolithic verification of a single protocol, rather than providing a reusable framework. In contrast, we focus on the usability and generality of LeanDY. Our formalization of payment channels in LeanDY demonstrates that our library is expressive enough for this class of protocols, providing a general framework for the verifica-tion of safety and liveness properties of complex protocols. 
+
+## 6 Conclusion 
+
+In this paper, we presented LeanDY, a library for symbolic protocol verification in the Lean proof assistant that combines type-based reasoning with inductive trace-based proofs. The framework builds on the design of DY ∗ and supports mutable state, dynamic com-promise, and conditional secrecy properties for protocols using XOR, including chained release patterns. Following the LAC design principle, LeanDY provides protocol-specific automation while still allowing users to complement it with interactive proofs when more expressivity is required. We developed a mechanized model of SegWit-style blockchain primitives in LeanDY, capturing Bitcoin-like transaction structures, witness-based scripts, and timelocks. We showed the expressive-ness of the framework by developing an in-depth formalization of payment channels, verifying punishment mechanisms and proper-ties that depend on chain liveness. As future work, we plan to build on this payment-channel development toward a formalization of the full Lightning Network protocol. 
+
+## References 
+
+[1] Martín Abadi and Cédric Fournet. 2001. Mobile Values, New Names, and Secure Communication. In Proceedings of the 28th ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages (London, United Kingdom, 2001) (Popl ’01) . Association for Computing Machinery, New York, NY, USA, 104–115. doi:10. 1145/360204.360213 [2] Gavin Andresen. 2011-10, 2011. BIP 11: M-of-N Standard Transactions. https: //github.com/bitcoin/bips/blob/master/bip-0011.mediawiki [3] Marcin Andrychowicz, Stefan Dziembowski, Daniel Malinowski, and Ł ukasz Mazurek. 2014. Modeling Bitcoin Contracts by Timed Automata. In Formal Modeling and Analysis of Timed Systems (Cham, 2014), Axel Legay and Marius Bozga (Eds.). Springer International Publishing, 7–22. doi:10.1007/978-3-319-10512-3_2 [4] Danil Annenkov, Jakob Botsch Nielsen, and Bas Spitters. 2020. ConCert: A Smart Contract Certification Framework in Coq. In Proceedings of the 9th ACM SIGPLAN International Conference on Certified Programs and Proofs (New York, NY, USA, 2020-01-22) (CPP 2020) . Association for Computing Machinery, 215–228. doi:10.1145/3372885.3373829 [5] Michael Backes, Căt˘ alin Hri ¸tcu, and Matteo Maffei. 2014. Union, Intersection and Refinement Types and Reasoning about Type Disjoint-ness for Secure Protocol Implementations. 22, 2 (2014), 301–353. arXiv:https://journals.sagepub.com/doi/pdf/10.3233/JCS-130493 doi:10.3233/JCS-130493 [6] Gilles Barthe, Ugo Dal Lago, Giulio Malavolta, and Itsaka Rakotonirina. 2022. Tidy: Symbolic Verification of Timed Cryptographic Protocols. In Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security 
+
+(Los Angeles CA USA, 2022-11-07). ACM, 263–276. doi:10.1145/3548606.3559343 [7] Giampaolo Bella and Lawrence C. Paulson. 1998. Kerberos Version IV: Inductive Analysis of the Secrecy Goals. In Computer Security — ESORICS 98 (1998), Jean-Jacques Quisquater, Yves Deswarte, Catherine Meadows, and Dieter Gollmann (Eds.). Springer Berlin Heidelberg, 361–375. [8] Jesper Bengtson, Karthikeyan Bhargavan, Cédric Fournet, Andrew D. Gordon, and Sergio Maffeis. 2011. Refinement Types for Secure Implementations. 33, 2, Article 8 (2011). doi:10.1145/1890028.1890031 [9] Johan Bengtsson, Kim Larsen, Fredrik Larsson, Paul Pettersson, and Wang Yi. 1996. UPPAAL — a Tool Suite for Automatic Verification of Real-Time Systems. In 
+
+Hybrid Systems III (Berlin, Heidelberg, 1996), Rajeev Alur, Thomas A. Henzinger, and Eduardo D. Sontag (Eds.). Springer, 232–243. doi:10.1007/BFb0020949 [10] Karthikeyan Bhargavan, Abhishek Bichhawat, Quoc Huy Do, Pedram Hosseyni, Ralf Küsters, Guido Schmitz, and Tim Würtele. 2021. DY ★: A Modular Symbolic Verification Framework for Executable Cryptographic Protocol Code. In 2021 IEEE European Symposium on Security and Privacy (EuroS&P) (2021). 523–542. doi:10.1109/EuroSP51992.2021.00042 [11] Karthikeyan Bhargavan, Cédric Fournet, Andrew D. Gordon, and Riccardo Pu-cella. 2004. TulaFale: A Security Tool for Web Services. In Formal Methods for Components and Objects (Berlin, Heidelberg, 2004), Frank S. de Boer, Marcello M. Bonsangue, Susanne Graf, and Willem-Paul de Roever (Eds.). Springer, 197–222. doi:10.1007/978-3-540-30101-1_9 [12] Karthikeyan Bhargavan, Cédric Fournet, Markulf Kohlweiss, Alfredo Pironti, Pierre-Yves Strub, and Santiago Zanella-Béguelin. 2014. Proving the TLS Hand-shake Secure (As It Is). In Advances in Cryptology – CRYPTO 2014 (2014). Springer, Berlin, Heidelberg, 235–255. doi:10.1007/978-3-662-44381-1_14 [13] Bruno Blanchet. 2001. An Efficient Cryptographic Protocol Verifier Based on Prolog Rules. In 14th IEEE Computer Security Foundations Workshop (CSFW-14) 
+
+(Cape Breton, Nova Scotia, Canada, 2001-06). IEEE Computer Society, 82–96. doi:10.1109/CSFW.2001.930138 [14] Bruno Blanchet, Vincent Cheval, and Véronique Cortier. 2022. ProVerif with Lemmas, Induction, Fast Subsumption, and Much More. In 2022 IEEE Symposium on Security and Privacy (SP) (2022-05). 69–86. doi:10.1109/SP46214.2022.9833653 [15] Jasmin Christian Blanchette, Sascha Böhme, and Lawrence C. Paulson. 2013. Extending Sledgehammer with SMT Solvers. 51, 1 (2013), 109–128. doi:10.1007/ s10817-013-9278-5 [16] Fran ¸cois Bobot, Jean-Christophe Filliâtre, Claude Marché, and Andrei Paskevich. 2011. Why3: Shepherd Your Herd of Provers. In Boogie 2011: First International Workshop on Intermediate Verification Languages (Wroclaw, Poland, 2011). 53–64. https://inria.hal.science/hal-00790310 [17] Colin Boyd, Kristian Gjø steen, and Shuang Wu. 2020. A Blockchain Model in Tamarin and Formal Analysis of Hash Time Lock Contract. In 2nd Work-shop on Formal Methods for Blockchains (FMBC 2020) (Dagstuhl, Germany, 2020) 
+
+(Open Access Series in Informatics (OASIcs), Vol. 84) , Bruno Bernardo and Diego Marmsoler (Eds.). Schloss Dagstuhl – Leibniz-Zentrum für Informatik, 5:1–5:13. doi:10.4230/OASIcs.FMBC.2020.5 [18] Lea Salome Brugger, Laura Kovács, Anja Petkovic Komel, Sophie Rain, and Michael Rawson. 2023. CheckMate: Automated Game-Theoretic Security Rea-soning. In Proceedings of the 2023 ACM SIGSAC Conference on Computer and Communications Security (New York, NY, USA, 2023-11-21) (CCS ’23) . Associa-tion for Computing Machinery, 1407–1421. doi:10.1145/3576915.3623183 [19] Matteo Busi, Riccardo Focardi, and Flaminia L. Luccio. 2025. Strands Rocq: Why Is a Security Protocol Correct, Mechanically?. In 2025 IEEE 38th Computer Security Foundations Symposium (CSF) (2025). 33–48. doi:10.1109/CSF64896.2025.00022 [20] Vincent Cheval and Bruno Blanchet. 2013. Proving More Observational Equiv-alences with ProVerif. In Lecture Notes in Computer Science . Springer Berlin Heidelberg, 226–246. doi:10.1007/978-3-642-36830-1_12 
+
+17 Jeanteur et al. 
+
+[21] Vincent Cheval and Caroline Fontaine. 2025. Automatic Verification of Finite Variant Property Beyond Convergent Equational Theories. In 2025 IEEE 38th Computer Security Foundations Symposium (CSF) (2025-06). 521–536. doi:10.1109/ CSF64896.2025.00005 [22] Vincent Cheval, Charlie Jacomme, Steve Kremer, and Robert Künnemann. 2022. {SAPIC+}: Protocol Verifiers of the World, Unite! 3935–3952. https://www.usenix. org/conference/usenixsecurity22/presentation/cheval [23] Leonardo de Moura. 2025. The Lean Reference Manual: The Grind Tactic . https: //lean-lang.org/doc/reference/latest/The--grind--tactic/ [24] D. Dolev and A. Yao. 1983. On the Security of Public Key Protocols. 29, 2 (1983), 198–208. doi:10.1109/TIT.1983.1056650 [25] Jannik Dreier, Lucca Hirschi, Sasa Radomirovic, and Ralf Sasse. 2018. Automated Unbounded Verification of Stateful Cryptographic Protocols with Exclusive Or. In 2018 IEEE 31st Computer Security Foundations Symposium (CSF) (2018). 359–373. doi:10.1109/CSF.2018.00033 [26] Grzegorz Fabiański, Rafał Stefański, and Orfeas Stefanos Thyfronitis Litos. 2026. A Formally Verified Lightning Network. In Financial Cryptography and Data Security (Cham, 2026), Christina Garman and Pedro Moreno-Sanchez (Eds.). Springer Nature Switzerland, 3–20. doi:10.1007/978-3-032-07024-1_1 [27] F. Javier Thayer Fábrega, Jonathan C. Herzog, and Joshua D. Guttman. 1999. Strand Spaces: Proving Security Protocols Correct. 7, 2–3 (1999), 191–230. doi:10. 3233/JCS-1999-72-304 [28] Matthias Grundmann and Hannes Hartenstein. 2026. Security of the Lightning Network: Model Checking a Stepwise Refinement with TLA+. In Integrated For-mal Methods (Cham, 2026), Ferruccio Damiani and Marie Farrell (Eds.). Springer Nature Switzerland, 313–335. [29] Hans Hüttel and Vilim Staroveski. 2020. Secrecy and Authenticity Properties of the Lightning Network Protocol:. In Proceedings of the 6th International Conference on Information Systems Security and Privacy (Valletta, Malta, 2020). SCITEPRESS - Science and Technology Publications, 119–130. doi:10.5220/0008974801190130 [30] Hans Hüttel and Vilim Staroveˇ ski. 2022. Key Agreement in the Lightning Network Protocol. In Information Systems Security and Privacy (Cham, 2022), Steven Furnell, Paolo Mori, Edgar Weippl, and Olivier Camp (Eds.). Springer International Publishing, 139–155. doi:10.1007/978-3-030-94900-6_7 [31] Vincent Jacquot and Benoît Donnet. 2023. CHAUSSETTE: A Symbolic Verifica-tion of Bitcoin Scripts. Springer. https://orbi.uliege.be/handle/2268/305862 [32] Simon Jeanteur, Lorenzo Veronese, Magdalena Solitro, and Matteo Maffei. 2026. LeanDY: Type-Based and Trace-Based Symbolic Protocol Verification in Lean. https://github.com/SecPriv/leandy. [33] H. Kleisli. 1965. Every Standard Construction Is Induced by a Pair of Adjoint Functors. 16, 3 (1965), 544–546. jstor:2034693 doi:10.2307/2034693 [34] Nadim Kobeissi, Georgio Nicolas, and Karthikeyan Bhargavan. 2019. Noise Ex-plorer: Fully Automated Modeling and Verification for Arbitrary Noise Protocols. In 2019 IEEE European Symposium on Security and Privacy (EuroS&P) (2019). 356–370. doi:10.1109/EuroSP.2019.00034 [35] Ralf Küsters and Tomasz Truderung. 2008. Reducing Protocol Analysis with XOR to the XOR-free Case in the Horn Theory Based Approach. In Proceedings of the 15th ACM Conference on Computer and Communications Security (Alexandria, Virginia, USA, 2008) (Ccs ’08) . Association for Computing Machinery, New York, NY, USA, 129–138. doi:10.1145/1455770.1455788 [36] Johnson Lau and Pieter Wuille. 2016-01, 2016. BIP 143: Transaction Signature Verification for Version 0 Witness Program. https://github.com/bitcoin/bips/ blob/master/bip-0143.mediawiki [37] Jannis Limperg and Asta Halkjæ r From. 2023. Aesop: White-Box Best-First Proof Search for Lean. In Proceedings of the 12th ACM SIGPLAN International Conference on Certified Programs and Proofs (New York, NY, USA, 2023-01-11) (CPP 2023) .Association for Computing Machinery, 253–266. doi:10.1145/3573105.3575671 [38] Benjamin Lipp, Bruno Blanchet, and Karthikeyan Bhargavan. 2019. A Mechanised Cryptographic Proof of the WireGuard Virtual Private Network Protocol. In 2019 IEEE European Symposium on Security and Privacy (EuroS&P) (2019-06). 231–246. doi:10.1109/EuroSP.2019.00026 [39] Eric Lombrozo, Johnson Lau, and Pieter Wuille. 2015-12, 2015. BIP 141: Segregated Witness (Consensus Layer). https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki [40] Eric Lombrozo and Pieter Wuille. 2016. BIP 144: Segregated Witness (Peer Services). https://github.com/bitcoin/bips/blob/master/bip-0144.mediawiki [41] Giulio Malavolta, Pedro Moreno-Sanchez, Aniket Kate, Matteo Maffei, and Sri-vatsan Ravi. 2017. Concurrency and Privacy with Payment-Channel Networks. In Proceedings of the 2017 ACM SIGSAC Conference on Computer and Communi-cations Security (Dallas, Texas, USA, 2017) (Ccs ’17) . Association for Computing Machinery, New York, NY, USA, 455–471. doi:10.1145/3133956.3134096 [42] Nikos Mavrogiannopoulos, Frederik Vercauteren, Vesselin Velichkov, and Bart Preneel. 2012. A Cross-Protocol Attack on the TLS Protocol. In Proceedings of the 2012 ACM Conference on Computer and Communications Security (New York, NY, USA, 2012-10-16) (CCS ’12) . Association for Computing Machinery, 62–72. doi:10.1145/2382196.2382206 [43] Simon Meier, Benedikt Schmidt, Cas Cremers, and David Basin. 2013. The TAMARIN Prover for the Symbolic Analysis of Security Protocols. In Computer Aided Verification (Berlin, Heidelberg, 2013) (Lecture Notes in Computer Science) ,Natasha Sharygina and Helmut Veith (Eds.). Springer, 696–701. doi:10.1007/978-3-642-39799-8_48 [44] Tobias Nipkow, Lawrence C. Paulson, and Markus Wenzel. 2002. Isabelle/HOL: A Proof Assistant for Higher-Order Logic . Lecture Notes in Computer Science, Vol. 2283. Springer. doi:10.1007/3-540-45949-9 [45] Kenneth G Paterson, Matteo Scarlata, and Kien Tuong Truong. [n. d.]. Three Lessons From Threema: Analysis of a Secure Messenger. ([n. d.]). [46] Lawrence C. Paulson. 1998. The Inductive Approach to Verifying Cryptographic Protocols. 6, 1–2 (1998), 85–128. doi:10.3233/JCS-1998-61-205 [47] Joseph Poon and Thaddeus Dryja. 2016. The Bitcoin Lightning Network: Scalable off-Chain Instant Payments. [48] Sophie Rain, Georgia Avarikioti, Laura Kovács, and Matteo Maffei. 2023. Towards a Game-Theoretic Security Analysis of Off-Chain Protocols. In 2023 IEEE 36th Computer Security Foundations Symposium (CSF) (2023-07). 107–122. doi:10.1109/ CSF57540.2023.00003 [49] Daniel Ricketts, Valentin Robert, Dongseok Jang, Zachary Tatlock, and Sorin Lerner. 2014. Automating Formal Proofs for Reactive Systems. In Proceedings of the 35th ACM SIGPLAN Conference on Programming Language Design and Imple-mentation (Edinburgh, United Kingdom, 2014) (Pldi ’14) . Association for Com-puting Machinery, New York, NY, USA, 452–462. doi:10.1145/2594291.2594338 [50] Kristijan Rupić, Lovro Roˇ zić, and Ante Derek. 2020. Mechanized Formal Model of Bitcoin’s Blockchain Validation Procedures. In 2nd Workshop on For-mal Methods for Blockchains (FMBC 2020) (Dagstuhl, Germany, 2020) (Open Access Series in Informatics (OASIcs), Vol. 84) , Bruno Bernardo and Diego Marm-soler (Eds.). Schloss Dagstuhl – Leibniz-Zentrum für Informatik, 7:1–7:14. doi:10.4230/OASIcs.FMBC.2020.7 [51] Nikhil Swamy, Juan Chen, Cédric Fournet, Pierre-Yves Strub, Karthikeyan Bhar-gavan, and Jean Yang. 2011. Secure Distributed Programming with Value-Dependent Types. In Proceedings of the 16th ACM SIGPLAN International Con-ference on Functional Programming (Tokyo, Japan, 2011) (Icfp ’11) . Association for Computing Machinery, New York, NY, USA, 266–278. doi:10.1145/2034773. 2034811 [52] Nikhil Swamy, Căt˘ alin Hri ¸tcu, Chantal Keller, Aseem Rastogi, Antoine Delignat-Lavaud, Simon Forest, Karthikeyan Bhargavan, Cédric Fournet, Pierre-Yves Strub, Markulf Kohlweiss, Jean-Karim Zinzindohoue, and Santiago Zanella-Béguelin. 2016. Dependent Types and Multi-Monadic Effects in F*. In Proceedings of the 43rd Annual ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages (St. Petersburg FL USA, 2016-01-11). ACM, 256–270. doi:10.1145/ 2837614.2837655 [53] Théophile Wallez. 2025. A Verification Framework for Secure Group Messaging. https://hal.science/tel-05455122 [54] Théophile Wallez. 2026. DY* Unchained: Now with Composable Security Proofs and Precise Compromise Scenarios . https://eprint.iacr.org/2026/830 [55] Théophile Wallez, Jonathan Protzenko, Benjamin Beurdouche, and Karthikeyan Bhargavan. 2023. TreeSync: Authenticated Group Management for Messaging Layer Security. 1217–1233. [56] Théophile Wallez, Jonathan Protzenko, and Karthikeyan Bhargavan. 2023. Com-parse: Provably Secure Formats for Cryptographic Protocols. In Proceedings of the 2023 ACM SIGSAC Conference on Computer and Communications Security 
+
+(Copenhagen, Denmark, 2023) (Ccs ’23) . Association for Computing Machinery, New York, NY, USA, 564–578. doi:10.1145/3576915.3623201 [57] T.Y.C. Woo and S.S. Lam. 1993. A Semantic Model for Authentication Protocols. In Proceedings 1993 IEEE Computer Society Symposium on Research in Security and Privacy (1993). 178–194. doi:10.1109/RISP.1993.287633 [58] Pieter Wuille. 2012-02, 2012. BIP 30: Duplicate Transactions. https://github.com/ bitcoin/bips/blob/master/bip-0030.mediawiki 
+
+18
