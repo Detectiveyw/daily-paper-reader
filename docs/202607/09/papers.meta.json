@@ -1,0 +1,51 @@
+{
+  "label": "2026-07-09",
+  "date": "2026-07-09",
+  "generated_at": "2026-07-09T20:48:29",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202607/09/2607.05920v2-libfhe-a-numba-based-cuda-python-library-for-non-rns-ckks-bgv-fully-homomorphic-encryption-on-gpus",
+      "section": "quick",
+      "title_en": "LibFHE: A Numba-Based CUDA-Python Library for Non-RNS CKKS-BGV Fully Homomorphic Encryption on GPUs",
+      "authors": "John Chiang",
+      "date": "2026-07-07",
+      "pdf": "https://arxiv.org/pdf/2607.05920v2",
+      "score": "6.0",
+      "evidence": "用于安全计算的GPU加速全同态加密",
+      "tldr": "LibFHE是一个基于Numba和CUDA-Python的高性能全同态加密（FHE）库，专注于在GPU上实现非RNS版本的CKKS-BGV框架。该研究在当前主流采用RNS变体的背景下，重新审视并优化了原始框架，旨在通过Python的高易用性结合GPU的硬件性能，降低FHE的开发门槛并提升计算效率，为同态加密应用提供了一种兼顾性能与开发效率的新方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "It has been a decade since the fourth-generation FHE framework, CKKS, was proposed; yet, there is still no indicator pointing toward a fifth-generation successor; and in recent years, numerous studies have explored GPU acceleration to improve the efficiency of homomorphic computations. In this paper, we propose LibFHE, a high-performance GPU-accelerated framework that features CUDA-Python bindings to achieve both high-level programmability and bare-metal GPU performance for homomorphic workloads. A large majority of state-of-the-art implementations adopt the RNS-CKKS variant. In contrast, this work deliberately revisits the original (non-RNS) CKKS-BGV framework, and develops a GPU-based implementation along with corresponding optimizations. Experimental results demonstrate that optimized CUDA-Python implementations can achieve performance comparable to highly optimized CPU-based C++ FHE libraries, while significantly reducing implementation complexity and improving programmability.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/09/2607.07046v1-voltron-enabling-elastic-multi-device-execution-of-llm-inference-for-empowered-edge-intelligence",
+      "section": "quick",
+      "title_en": "Voltron: Enabling Elastic Multi-Device Execution of LLM Inference for Empowered Edge Intelligence",
+      "authors": "Chanwoo Cho, Wooseok Kim, Yonglak Son, Young Seo Lee, Young Geun Kim",
+      "date": "2026-07-08",
+      "pdf": "https://arxiv.org/pdf/2607.07046v1",
+      "score": "6.0",
+      "evidence": "边缘设备上的分布式LLM推理以保护隐私",
+      "tldr": "针对中心化LLM推理带来的延迟和隐私问题，以及单边缘设备资源受限导致模型精度不足的挑战，本文提出Voltron框架。Voltron通过弹性利用多个用户端设备协同执行LLM推理，能够支持更大规模的模型。该框架可适应多变的边缘环境，在满足服务质量（QoS）要求的同时，显著提升了边缘智能的推理精度。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large language models (LLMs) are widely used in intelligent services due to their remarkable capability in generative tasks. Typically, LLM-based services process the inference requests of the users in a centralized data center. Unfortunately, such centralized execution has limitations for end-users, such as increased response latency with communication overhead and privacy leakage risk. To alleviate the aforementioned limitations, there have been increasing pushes to execute LLM inference locally on user-end devices. However, the limited resources of a single edge device impose restrictions on achievable accuracy of LLMs. To overcome the issue, we first propose to leverage multiple user-end devices available at the edge for LLM inference, enabling the execution of larger models. Specifically, we propose Voltron, a novel on-device LLM inference framework that elastically utilizes multiple user-end devices for LLM inference execution while adapting to diverse real-world edge environments. In our evaluation, Voltron achieves up to 16.5% higher accuracy than state-of-the-art LLMs that can be executed on a single edge device, satisfying user QoS requirements.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/09/2607.07596v1-narad-non-colluding-aggregator-oblivious-record-and-decrypt",
+      "section": "quick",
+      "title_en": "NARAD: Non-colluding Aggregator-oblivious Record-And-Decrypt",
+      "authors": "Akshit Vakati Venkata, Rajat Dugar, Ayush Adarsh",
+      "date": "2026-07-08",
+      "pdf": "https://arxiv.org/pdf/2607.07596v1",
+      "score": "6.0",
+      "evidence": "无需可信密钥分发者的安全分布式计算架构",
+      "tldr": "本文提出NARAD，一种无需可信密钥分发者的电子投票架构。它结合Paillier同态加密与Diffie-Hellman式掩码，通过收集器和聚合器两个非共谋角色实现计票，在保护选民隐私的同时确保结果可验证。系统利用Solana区块链记录密文，并采用位打包技术优化多候选人投票效率。实验显示其处理速度极快，且通过安全飞地增强了抗篡改和防共谋能力。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Electronic voting must keep individual ballots private while letting anyone verify the final tally. This paper presents an architecture that meets both goals without a trusted key dealer: each voter encrypts a ballot in the browser with a self-generated secret key under the Paillier additive homomorphic cryptosystem, and no party ever holds every key. Two server roles divide the tally. A collector combines the voters' per-ballot auxiliary values into a single group element; an aggregator uses that element to cancel the voters' random masks inside the homomorphic product and recover the exact vote sum, learning the result but no individual ballot. The Solana blockchain records every ciphertext immutably and enforces the election lifecycle, while a native C library (libtommath) performs the heavy modular arithmetic. We state six assumptions under which the protocol is correct and prove product homomorphism, mask cancellation, and sum recovery; privacy rests on the Decisional Composite Residuosity (DCR) assumption for the additive layer together with a Diffie-Hellman-style assumption on the masking base. A bit-packing scheme places an entire multi-candidate ballot in one ciphertext, cutting client work, on-chain transactions, storage, and tally cost by a factor of k (the candidate count); the slot width b is free, with only k*b bounded by log_2(N). With b = 25 and a 255-bit modulus the scheme supports ten candidates and up to 2^25 - 1 = 33,554,431 votes per candidate, about 335 million ballots, and tallies 50,000 ballots in under one second. Finally, running the collector and aggregator inside attested secure enclaves makes the tally tamper-resistant and prevents cross-role collusion to deanonymize voters. The proof-of-concept implementation is open-source; a worked numerical example in the appendix reproduces the full pipeline.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
