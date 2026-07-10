@@ -1,0 +1,37 @@
+{
+  "label": "2026-07-10",
+  "date": "2026-07-10",
+  "generated_at": "2026-07-10T21:09:32",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202607/10/2607.08095v1-zkcomposer-decomposing-proof-construction-to-scale-zkml",
+      "section": "quick",
+      "title_en": "zkComposer: Decomposing Proof Construction to Scale zkML",
+      "authors": "Pawan Kumar Sanjaya, Christina Giannoula, Valdy Oktavian, Mehdi Saeedi, Gabor Sines, Gururaj Saileshwar, Nandita Vijaykumar",
+      "date": "2026-07-09",
+      "pdf": "https://arxiv.org/pdf/2607.08095v1",
+      "score": "7.0",
+      "evidence": "机器学习模型的可验证推理",
+      "tldr": "zkML（零知识机器学习）在保护模型隐私的同时实现可验证推理，但现有系统因采用单体证明构造导致证明生成成本高且并行性受限。本文提出 zkComposer 框架，通过将推理证明分解为多个独立的子证明（如按层分解），并利用共享承诺链接相邻子证明，实现了更高维度的并行化。实验表明，该方法在 CNN 和 GPT-2 模型上显著降低了证明生成和响应时间，最高提升达 6.84 倍。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Zero-knowledge machine learning (zkML) enables a server to perform verifiable inference while keeping model parameters private from the client. However, existing zkML systems incur prohibitive proof-generation costs. We observe that proof generation exhibits limited parallelism; that is, prover time does not decrease significantly as the number of threads increases. This limitation is because existing systems rely on monolithic proof computation, constructing a single proof for the entire machine learning model. We introduce zkComposer, a modular proof-construction framework that unlocks an additional dimension of parallelism, in addition to the parallelism in existing proof kernels. zkComposer decomposes the zkML proof of correct inference into independent sub-proofs, each covering a subset of the computation for inference e.g., each independent sub-proof can cover a subset of contiguous layers in the ML model. Adjacent sub-proofs are cryptographically linked through shared commitments to the activations from the boundary layer. zkComposer provides the same guarantees as the monolithic proof without requiring additional linking proofs or changes to the underlying cryptographic primitives. We implement zkComposer and evaluate it on three CNNs and GPT-2. We show that, on CNN workloads, zkComposer reduces prover time and response time by up to 3.25x relative to zkCNN [1]. On GPT-2, zkComposer reduces these times by up to 4.83x relative to zkGPT [2], when partitioning along the model layers. When partitioning across both model layers and input sequences in GPT-2, we show that zkComposer reduces prover time and response time by up to 6.84x relative to zkGPT [2].",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/10/2607.06612v1-provefl-private-robust-and-verifiable-aggregation-in-federated-learning",
+      "section": "quick",
+      "title_en": "PRoVeFL: Private Robust and Verifiable Aggregation in Federated Learning",
+      "authors": "Harsh Kasyap, Anil Kumar Pradhan, Ugur Ilker Atmaca, Graham Cormode, Carsten Maple",
+      "date": "2026-07-07",
+      "pdf": "https://arxiv.org/pdf/2607.06612v1",
+      "score": "6.0",
+      "evidence": "分布式学习中的可验证聚合与隐私",
+      "tldr": "PRoVeFL是一个针对联邦学习设计的隐私保护、拜占庭容错且可验证的聚合框架。它利用多密钥全同态加密和多服务器架构，在确保隐私的前提下，通过将部分密文操作转至明文域处理，实现了对多种主流鲁棒聚合算法的高效支持。该框架不仅增强了聚合过程的可验证性，还在性能上显著优于Prio和ELSA等现有方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Federated Learning (FL) enables multiple clients to collaboratively train machine learning models while retaining data locality, thereby enhancing user privacy. However, traditional FL frameworks rely on a centralized aggregation server and assume honest-but-curious clients, making them susceptible to both server-side inference and client-side poisoning attacks. Although recent work has explored secure and Byzantine-resilient FL protocols, they face a fundamental trade-off among privacy, integrity, and verifiability, and incur substantial computational and communication overhead due to the heavy use of cryptographic primitives. In this work, we propose PRoVeFL-a novel, modular FL framework that is Privacy-preserving, Byzantine-Robust, and ensures Verifiable aggregation. PRoVeFL employs multiple servers leveraging multi-key fully homomorphic encryption. Each client encrypts its local model updates and distributes encrypted shares to all servers. This design enables a hybrid computation model in which ciphertext operations are carefully offloaded to the plaintext domain under strict privacy constraints to efficiently evaluate complex statistical aggregation rules. PRoVeFL is compatible with a wide range of state-of-the-art Byzantine-robust aggregation algorithms (e.g., Krum, Trimmed Mean, FLTrust, norm clipping, MESAS, and more) and further enhances them with verifiability mechanisms that require minimal trust in at least one honest server. We evaluate it across different settings and demonstrate its scalability with varying numbers of parameters and participants. PRoVeFL improves runtime over the prior works, Prio and ELSA, based on distributed trust with comparable security guarantees, up to 100x and 10x, respectively.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

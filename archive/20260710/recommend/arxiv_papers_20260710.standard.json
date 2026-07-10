@@ -1,0 +1,96 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-10T21:09:04.176150+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.08095v1",
+      "title": "zkComposer: Decomposing Proof Construction to Scale zkML",
+      "abstract": "Zero-knowledge machine learning (zkML) enables a server to perform verifiable inference while keeping model parameters private from the client. However, existing zkML systems incur prohibitive proof-generation costs. We observe that proof generation exhibits limited parallelism; that is, prover time does not decrease significantly as the number of threads increases. This limitation is because existing systems rely on monolithic proof computation, constructing a single proof for the entire machine learning model. We introduce zkComposer, a modular proof-construction framework that unlocks an additional dimension of parallelism, in addition to the parallelism in existing proof kernels. zkComposer decomposes the zkML proof of correct inference into independent sub-proofs, each covering a subset of the computation for inference e.g., each independent sub-proof can cover a subset of contiguous layers in the ML model. Adjacent sub-proofs are cryptographically linked through shared commitments to the activations from the boundary layer. zkComposer provides the same guarantees as the monolithic proof without requiring additional linking proofs or changes to the underlying cryptographic primitives. We implement zkComposer and evaluate it on three CNNs and GPT-2. We show that, on CNN workloads, zkComposer reduces prover time and response time by up to 3.25x relative to zkCNN [1]. On GPT-2, zkComposer reduces these times by up to 4.83x relative to zkGPT [2], when partitioning along the model layers. When partitioning across both model layers and input sequences in GPT-2, we show that zkComposer reduces prover time and response time by up to 6.84x relative to zkGPT [2].",
+      "authors": [
+        "Pawan Kumar Sanjaya",
+        "Christina Giannoula",
+        "Valdy Oktavian",
+        "Mehdi Saeedi",
+        "Gabor Sines",
+        "Gururaj Saileshwar",
+        "Nandita Vijaykumar"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-09T04:05:43+00:00",
+      "link": "https://arxiv.org/pdf/2607.08095v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Verifiable inference for machine learning models",
+      "llm_evidence_cn": "机器学习模型的可验证推理",
+      "llm_evidence": "机器学习模型的可验证推理",
+      "canonical_evidence": "机器学习模型的可验证推理",
+      "llm_tldr_en": "Scales zero-knowledge machine learning (zkML) through modular proof decomposition.",
+      "llm_tldr_cn": "通过模块化证明分解技术提升零知识机器学习的可扩展性。",
+      "llm_tldr": "通过模块化证明分解技术提升零知识机器学习的可扩展性。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.06612v1",
+      "title": "PRoVeFL: Private Robust and Verifiable Aggregation in Federated Learning",
+      "abstract": "Federated Learning (FL) enables multiple clients to collaboratively train machine learning models while retaining data locality, thereby enhancing user privacy. However, traditional FL frameworks rely on a centralized aggregation server and assume honest-but-curious clients, making them susceptible to both server-side inference and client-side poisoning attacks. Although recent work has explored secure and Byzantine-resilient FL protocols, they face a fundamental trade-off among privacy, integrity, and verifiability, and incur substantial computational and communication overhead due to the heavy use of cryptographic primitives. In this work, we propose PRoVeFL-a novel, modular FL framework that is Privacy-preserving, Byzantine-Robust, and ensures Verifiable aggregation. PRoVeFL employs multiple servers leveraging multi-key fully homomorphic encryption. Each client encrypts its local model updates and distributes encrypted shares to all servers. This design enables a hybrid computation model in which ciphertext operations are carefully offloaded to the plaintext domain under strict privacy constraints to efficiently evaluate complex statistical aggregation rules. PRoVeFL is compatible with a wide range of state-of-the-art Byzantine-robust aggregation algorithms (e.g., Krum, Trimmed Mean, FLTrust, norm clipping, MESAS, and more) and further enhances them with verifiability mechanisms that require minimal trust in at least one honest server. We evaluate it across different settings and demonstrate its scalability with varying numbers of parameters and participants. PRoVeFL improves runtime over the prior works, Prio and ELSA, based on distributed trust with comparable security guarantees, up to 100x and 10x, respectively.",
+      "authors": [
+        "Harsh Kasyap",
+        "Anil Kumar Pradhan",
+        "Ugur Ilker Atmaca",
+        "Graham Cormode",
+        "Carsten Maple"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-07-07T07:10:43+00:00",
+      "link": "https://arxiv.org/pdf/2607.06612v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "verifiable aggregation and privacy in distributed learning",
+      "llm_evidence_cn": "分布式学习中的可验证聚合与隐私",
+      "llm_evidence": "分布式学习中的可验证聚合与隐私",
+      "canonical_evidence": "分布式学习中的可验证聚合与隐私",
+      "llm_tldr_en": "A federated learning framework ensuring privacy and verifiability against malicious clients and servers.",
+      "llm_tldr_cn": "一种联邦学习框架，确保针对恶意客户端和服务器的隐私性与可验证性。",
+      "llm_tldr": "一种联邦学习框架，确保针对恶意客户端和服务器的隐私性与可验证性。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

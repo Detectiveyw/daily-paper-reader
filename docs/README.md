@@ -6,32 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-09
-- 运行时间：2026-07-09 20:48:20 UTC
+- 最新运行日期：2026-07-10
+- 运行时间：2026-07-10 21:09:24 UTC
 - 运行状态：成功
-- 本次总论文数：3
+- 本次总论文数：2
 - 精读区：0
-- 速读区：3
+- 速读区：2
 
 ### 今日简报（AI）
-今日聚焦隐私计算与边缘智能，探索 GPU 加速全同态加密及大模型多设备弹性推理。
-重点关注 LibFHE 带来的非 RNS 架构 GPU 加速方案，以及 Voltron 如何通过多设备协同提升边缘端 LLM 的推理能效。
-建议关注隐私安全与边缘算力优化的开发者，深入了解这些提升加密效率与模型部署灵活性的新工具。
-- 详情：[/202607/09/README](/202607/09/README)
+今日聚焦零知识证明与联邦学习的交叉前沿，探索隐私计算在 AI 领域的性能与安全突破。
+重点关注 zkComposer 通过分解证明构造提升 zkML 扩展性，以及 PRoVeFL 在联邦学习中实现的私密可验证聚合。
+建议深入了解零知识证明如何解决大模型推理中的信任难题。
+- 详情：[/202607/10/README](/202607/10/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [LibFHE: A Numba-Based CUDA-Python Library for Non-RNS CKKS-BGV Fully Homomorphic Encryption on GPUs](/202607/09/2607.05920v2-libfhe-a-numba-based-cuda-python-library-for-non-rns-ckks-bgv-fully-homomorphic-encryption-on-gpus)  
+1. [zkComposer: Decomposing Proof Construction to Scale zkML](/202607/10/2607.08095v1-zkcomposer-decomposing-proof-construction-to-scale-zkml)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：机器学习模型的可验证推理
+2. [PRoVeFL: Private Robust and Verifiable Aggregation in Federated Learning](/202607/10/2607.06612v1-provefl-private-robust-and-verifiable-aggregation-in-federated-learning)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：用于安全计算的GPU加速全同态加密
-2. [Voltron: Enabling Elastic Multi-Device Execution of LLM Inference for Empowered Edge Intelligence](/202607/09/2607.07046v1-voltron-enabling-elastic-multi-device-execution-of-llm-inference-for-empowered-edge-intelligence)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：边缘设备上的分布式LLM推理以保护隐私
-3. [NARAD: Non-colluding Aggregator-oblivious Record-And-Decrypt](/202607/09/2607.07596v1-narad-non-colluding-aggregator-oblivious-record-and-decrypt)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：无需可信密钥分发者的安全分布式计算架构
+   evidence：分布式学习中的可验证聚合与隐私
 
 
 <div class="dpr-home-promo-card">
