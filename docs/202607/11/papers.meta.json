@@ -1,0 +1,51 @@
+{
+  "label": "2026-07-11",
+  "date": "2026-07-11",
+  "generated_at": "2026-07-11T21:08:41",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202607/11/2607.08042v1-degree-constrained-interval-optimization-for-minimax-polynomial-approximation-in-homomorphic-encryption",
+      "section": "quick",
+      "title_en": "Degree-Constrained Interval Optimization for Minimax Polynomial Approximation in Homomorphic Encryption",
+      "authors": "Jiheon Woo, Donggyun Ryu, Yongjune Kim",
+      "date": "2026-07-09",
+      "pdf": "https://arxiv.org/pdf/2607.08042v1",
+      "score": "7.0",
+      "evidence": "隐私保护推理中非线性激活函数的多项式逼近",
+      "tldr": "针对同态加密（HE）中非多项式激活函数的近似问题，本文提出了一种度约束下的区间优化方法。研究者将近似区间选择建模为分布感知的优化问题，旨在最小化均方误差。通过结合极小化极大近似多项式与域扩展多项式（DEP），有效抑制了区间外输入的误差外推。该方法在固定多项式次数下，平衡了区间内近似精度与区间外鲁棒性，为HE推理提供了更优的近似方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Homomorphic encryption (HE) enables privacy-preserving inference under arithmetic constraints that restrict encrypted evaluation to additions and multiplications. As a result, non-polynomial activation functions must be replaced by polynomial approximations. Among polynomial approximation methods, minimax approximation, typically computed by the Remez algorithm, is a standard approach because it minimizes the maximum approximation error over a given design interval. For minimax polynomial design, the approximation interval is a critical hyperparameter: a wider interval improves robustness to large-magnitude inputs while increasing the minimax approximation error under a fixed degree budget. In this paper, we formulate this trade-off as a distribution-aware interval optimization problem, where the approximation interval is chosen to minimize the mean-squared error (MSE) with respect to the pre-activation distribution of interest. To effectively control outside-interval inputs, we combine minimax polynomials with domain extension functions (DEFs) and their HE-realizable polynomial counterparts, domain extension polynomials (DEPs), which approximate a clipping operation outside the design interval and thereby suppress uncontrolled polynomial extrapolation. We first derive an analytically tractable DEF-based proxy objective that captures the trade-off between within-interval minimax approximation error and outside-interval clipping error. We then connect this idealized objective to HE-realizable DEP constructions through an implementation-error decomposition with an accompanying upper bound.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/11/2607.06320v1-dithered-gaussian-mechanism-for-randomness-efficient-differential-privacy",
+      "section": "quick",
+      "title_en": "Dithered Gaussian Mechanism for Randomness-Efficient Differential Privacy",
+      "authors": "Nikita P. Kalinin, Rasmus Pagh",
+      "date": "2026-07-07",
+      "pdf": "https://arxiv.org/pdf/2607.06320v1",
+      "score": "6.0",
+      "evidence": "解决隐私机制中有限精度浮点输出导致的漏洞",
+      "tldr": "本研究提出了一种名为“抖动高斯机制”的新型差分隐私方法。该机制通过对输出进行离散化而非对噪声分布本身进行离散化，继承了标准高斯机制的隐私保证，同时有效规避了有限精度浮点数带来的安全漏洞。该方法通过分离高质量隐私随机源与高性能公共随机源，显著降低了对高质量随机比特的需求，使其与噪声水平无关。在DP-SGD模型训练中的应用表明，该机制能在较低的性能开销下实现加密级安全的噪声生成。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We present the dithered Gaussian mechanism, a novel alternative to the discrete Gaussian mechanism for differential privacy that discretizes the private output rather than the noise distribution itself. By interpreting this discretization as post-processing of the Gaussian mechanism, our construction directly inherits the privacy guarantees of the standard Gaussian mechanism while avoiding vulnerabilities caused by finite-precision floating-point outputs. We show that the mechanism is provably randomness-efficient: by sampling the discretized output values directly, the number of high-quality random bits required for privacy can be reduced significantly and made independent of the noise level. This is achieved by separating the randomness into two sources: a high-quality source used for the privacy-critical sampling step, and a high-performance public source, possibly known to the adversary, that supplies the additional randomness needed for randomized discretization. This separation enables the use of cryptographically secure randomness without substantial performance loss. As an application, we study model training with DP-SGD and show that cryptographically secure noise generation with reduced exposure to floating-point vulnerabilities can be achieved with modest practical overhead.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/11/2607.08440v1-coded-task-offloading-for-fluid-computing-a-privacy-aware-approach-under-d2d-networks",
+      "section": "quick",
+      "title_en": "Coded Task Offloading for Fluid Computing: A Privacy-Aware Approach under D2D Networks",
+      "authors": "Diego Cajaraville-Aboy, Manuel Fernández-Veiga, Ana Fernández-Vilas, Rebeca P. Díaz-Redondo",
+      "date": "2026-07-09",
+      "pdf": "https://arxiv.org/pdf/2607.08440v1",
+      "score": "6.0",
+      "evidence": "用于隐私感知分布式任务卸载的线性秘密共享",
+      "tldr": "针对流式计算中D2D网络任务卸载的隐私泄露和能效问题，本文提出一种基于编码计算的卸载方案。该方案结合线性秘密共享技术，将任务编码为冗余分片以实现容错和隐私保护，并构建了联合优化延迟、能耗与隐私泄露的数学模型。通过分支定界算法和启发式调度器，在动态环境下实现了性能优化，揭示了延迟、能耗与隐私之间的权衡关系。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Fluid Computing aims to support distributed applications execution across heterogeneous cloud, edge, and device resources, motivating task execution mechanisms that adapt to dynamic and privacy-sensitive environments under runtime conditions. In this context, current task offloading schemes rarely address privacy risks and information leakage under adversarial execution settings; furthermore, most coded computing proposals focus on straggler mitigation without considering system-level objectives such as energy awareness. This paper proposes a coded task offloading scheme for D2D networks under stochastic task arrivals and queue-based dynamics. The proposal combines task offloading techniques with linear secret sharing schemes, where tasks are encoded into redundant shares to support threshold-based recovery, straggler mitigation, and privacy preservation while enhancing system performance. Then, we formulate a privacy-aware offloading problem that jointly optimizes delay and energy while penalizing the theoretical privacy leakage of coded tasks under noisy leakage observations. The problem is solved using a branch-and-bound solver alongside a lightweight heuristic scheduler, both of which are evaluated through a discrete-event simulator. Results show that coded offloading improves the delay--energy trade-off with respect to classical full and parallel offloading schemes, while the heuristic achieves near-optimal performance, outperforming baseline and state-of-the-art solvers. The results also show how privacy leakage penalties reshape offloading decisions, exposing an inherent delay--energy--privacy trade-off.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,126 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-11T21:02:19.397836+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.08042v1",
+      "title": "Degree-Constrained Interval Optimization for Minimax Polynomial Approximation in Homomorphic Encryption",
+      "abstract": "Homomorphic encryption (HE) enables privacy-preserving inference under arithmetic constraints that restrict encrypted evaluation to additions and multiplications. As a result, non-polynomial activation functions must be replaced by polynomial approximations. Among polynomial approximation methods, minimax approximation, typically computed by the Remez algorithm, is a standard approach because it minimizes the maximum approximation error over a given design interval. For minimax polynomial design, the approximation interval is a critical hyperparameter: a wider interval improves robustness to large-magnitude inputs while increasing the minimax approximation error under a fixed degree budget. In this paper, we formulate this trade-off as a distribution-aware interval optimization problem, where the approximation interval is chosen to minimize the mean-squared error (MSE) with respect to the pre-activation distribution of interest. To effectively control outside-interval inputs, we combine minimax polynomials with domain extension functions (DEFs) and their HE-realizable polynomial counterparts, domain extension polynomials (DEPs), which approximate a clipping operation outside the design interval and thereby suppress uncontrolled polynomial extrapolation. We first derive an analytically tractable DEF-based proxy objective that captures the trade-off between within-interval minimax approximation error and outside-interval clipping error. We then connect this idealized objective to HE-realizable DEP constructions through an implementation-error decomposition with an accompanying upper bound.",
+      "authors": [
+        "Jiheon Woo",
+        "Donggyun Ryu",
+        "Yongjune Kim"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-09T01:33:24+00:00",
+      "link": "https://arxiv.org/pdf/2607.08042v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "polynomial approximation for non-linear activations in privacy-preserving inference",
+      "llm_evidence_cn": "隐私保护推理中非线性激活函数的多项式逼近",
+      "llm_evidence": "隐私保护推理中非线性激活函数的多项式逼近",
+      "canonical_evidence": "隐私保护推理中非线性激活函数的多项式逼近",
+      "llm_tldr_en": "Optimizes polynomial approximations for homomorphic encryption to enable secure inference of non-linear functions.",
+      "llm_tldr_cn": "优化同态加密的多项式逼近，以实现非线性函数的安全推理。",
+      "llm_tldr": "优化同态加密的多项式逼近，以实现非线性函数的安全推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.06320v1",
+      "title": "Dithered Gaussian Mechanism for Randomness-Efficient Differential Privacy",
+      "abstract": "We present the dithered Gaussian mechanism, a novel alternative to the discrete Gaussian mechanism for differential privacy that discretizes the private output rather than the noise distribution itself. By interpreting this discretization as post-processing of the Gaussian mechanism, our construction directly inherits the privacy guarantees of the standard Gaussian mechanism while avoiding vulnerabilities caused by finite-precision floating-point outputs. We show that the mechanism is provably randomness-efficient: by sampling the discretized output values directly, the number of high-quality random bits required for privacy can be reduced significantly and made independent of the noise level. This is achieved by separating the randomness into two sources: a high-quality source used for the privacy-critical sampling step, and a high-performance public source, possibly known to the adversary, that supplies the additional randomness needed for randomized discretization. This separation enables the use of cryptographically secure randomness without substantial performance loss. As an application, we study model training with DP-SGD and show that cryptographically secure noise generation with reduced exposure to floating-point vulnerabilities can be achieved with modest practical overhead.",
+      "authors": [
+        "Nikita P. Kalinin",
+        "Rasmus Pagh"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-07-07T14:20:00+00:00",
+      "link": "https://arxiv.org/pdf/2607.06320v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Addresses vulnerabilities caused by finite-precision floating-point outputs in privacy mechanisms",
+      "llm_evidence_cn": "解决隐私机制中有限精度浮点输出导致的漏洞",
+      "llm_evidence": "解决隐私机制中有限精度浮点输出导致的漏洞",
+      "canonical_evidence": "解决隐私机制中有限精度浮点输出导致的漏洞",
+      "llm_tldr_en": "Introduces a dithered Gaussian mechanism to ensure differential privacy while avoiding floating-point vulnerabilities.",
+      "llm_tldr_cn": "引入抖动高斯机制，在实现差分隐私的同时避免有限精度浮点数带来的安全漏洞。",
+      "llm_tldr": "引入抖动高斯机制，在实现差分隐私的同时避免有限精度浮点数带来的安全漏洞。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing supporting floating point operations and verifiable security",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.08440v1",
+      "title": "Coded Task Offloading for Fluid Computing: A Privacy-Aware Approach under D2D Networks",
+      "abstract": "Fluid Computing aims to support distributed applications execution across heterogeneous cloud, edge, and device resources, motivating task execution mechanisms that adapt to dynamic and privacy-sensitive environments under runtime conditions. In this context, current task offloading schemes rarely address privacy risks and information leakage under adversarial execution settings; furthermore, most coded computing proposals focus on straggler mitigation without considering system-level objectives such as energy awareness. This paper proposes a coded task offloading scheme for D2D networks under stochastic task arrivals and queue-based dynamics. The proposal combines task offloading techniques with linear secret sharing schemes, where tasks are encoded into redundant shares to support threshold-based recovery, straggler mitigation, and privacy preservation while enhancing system performance. Then, we formulate a privacy-aware offloading problem that jointly optimizes delay and energy while penalizing the theoretical privacy leakage of coded tasks under noisy leakage observations. The problem is solved using a branch-and-bound solver alongside a lightweight heuristic scheduler, both of which are evaluated through a discrete-event simulator. Results show that coded offloading improves the delay--energy trade-off with respect to classical full and parallel offloading schemes, while the heuristic achieves near-optimal performance, outperforming baseline and state-of-the-art solvers. The results also show how privacy leakage penalties reshape offloading decisions, exposing an inherent delay--energy--privacy trade-off.",
+      "authors": [
+        "Diego Cajaraville-Aboy",
+        "Manuel Fernández-Veiga",
+        "Ana Fernández-Vilas",
+        "Rebeca P. Díaz-Redondo"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-07-09T13:02:13+00:00",
+      "link": "https://arxiv.org/pdf/2607.08440v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "linear secret sharing for privacy-aware distributed task offloading",
+      "llm_evidence_cn": "用于隐私感知分布式任务卸载的线性秘密共享",
+      "llm_evidence": "用于隐私感知分布式任务卸载的线性秘密共享",
+      "canonical_evidence": "用于隐私感知分布式任务卸载的线性秘密共享",
+      "llm_tldr_en": "Combines task offloading with secret sharing for privacy-aware distributed computing in D2D networks.",
+      "llm_tldr_cn": "将任务卸载与秘密共享结合，用于D2D网络中的隐私感知分布式计算。",
+      "llm_tldr": "将任务卸载与秘密共享结合，用于D2D网络中的隐私感知分布式计算。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
