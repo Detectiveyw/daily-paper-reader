@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-07-12 <!--dpr-date:20260712-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/12/2607.08226v1-threshold-authorization-without-threshold-signatures-signature-agnostic-mpc-custody" data-sidebar-item="{&quot;title&quot;: &quot;Threshold Authorization Without Threshold Signatures: Signature-Agnostic MPC Custody&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2607.08226v1-threshold-authorization-without-threshold-signatures-signature-agnostic-mpc-custody&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;基于MPC的阈值授权与秘密分享&quot;}">Threshold Authorization Without Threshold Signatures: Signature-Agnostic MPC Custody</a>
   * 2026-07-11 <!--dpr-date:20260711-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/11/2607.08042v1-degree-constrained-interval-optimization-for-minimax-polynomial-approximation-in-homomorphic-encryption" data-sidebar-item="{&quot;title&quot;: &quot;Degree-Constrained Interval Optimization for Minimax Polynomial Approximation in Homomorphic Encryption&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2607.08042v1-degree-constrained-interval-optimization-for-minimax-polynomial-approximation-in-homomorphic-encryption&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;隐私保护推理中非线性激活函数的多项式逼近&quot;}">Degree-Constrained Interval Optimization for Minimax Polynomial Approximation in Homomorphic Encryption</a>

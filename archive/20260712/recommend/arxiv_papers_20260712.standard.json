@@ -1,0 +1,51 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-12T21:03:18.662265+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.08226v1",
+      "title": "Threshold Authorization Without Threshold Signatures: Signature-Agnostic MPC Custody",
+      "abstract": "Digital-asset custody has been built on threshold multi-party approval: no operation proceeds unless $t$ of $n$ parties approve, and fewer than t compromised parties can neither authorize nor learn the authorization secret. Threshold signature schemes (TSS) have been the standard mechanism, but the post-quantum transition disrupts this model: standardized hash-based signatures resist efficient threshold signing, and lattice-based threshold protocols remain an emerging research track.   We present a dual-gate architecture that separates member authentication from threshold authorization. Each member signs its approval with an ordinary signature under any EUF-CMA scheme; the quorum jointly produces a threshold seal from Shamir-shared secrets bound to the operation. The seal is the base instance of a programmable authorization computation: simple quorum is the minimal policy, while richer policies can evaluate secret-shared state without making the member-signature scheme part of that computation. The signature scheme is a deployment parameter: migrating from ECDSA to SLH-DSA or ML-DSA is a key rotation, not a protocol redesign, and members holding keys in commodity HSMs participate through the standard sign API. The architecture can be deployed wherever the asset-control path supports programmable verification, such as smart contracts, vault modules, or HSMs guarding a master key, and produces an enforcement-layer authorization rather than a native chain signature. Below-threshold secrecy is information-theoretic; an adversary holding $\\geq t$ signing keys but no coefficient shares still cannot produce the seal.",
+      "authors": [
+        "Dariia Porechna"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-09T08:20:45+00:00",
+      "link": "https://arxiv.org/pdf/2607.08226v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "MPC-based threshold authorization and secret sharing",
+      "llm_evidence_cn": "基于MPC的阈值授权与秘密分享",
+      "llm_evidence": "基于MPC的阈值授权与秘密分享",
+      "canonical_evidence": "基于MPC的阈值授权与秘密分享",
+      "llm_tldr_en": "Presents a dual-gate architecture for threshold authorization using MPC without specific threshold signatures.",
+      "llm_tldr_cn": "提出一种利用多方计算实现阈值授权的双门架构，无需特定阈值签名。",
+      "llm_tldr": "提出一种利用多方计算实现阈值授权的双门架构，无需特定阈值签名。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
