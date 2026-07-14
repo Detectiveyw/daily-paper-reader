@@ -1,0 +1,23 @@
+{
+  "label": "2026-07-14",
+  "date": "2026-07-14",
+  "generated_at": "2026-07-14T21:39:52",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202607/14/2607.04819v2-layer-parallel-inference-reduces-encrypted-nonlinear-depth-in-transformers",
+      "section": "deep",
+      "title_en": "Layer-Parallel Inference Reduces Encrypted Nonlinear Depth in Transformers",
+      "authors": "Ligong Han, Kai Xu, Hao Wang, Ruijiang Gao, Han Gao, Akash Srivastava",
+      "date": "2026-07-06",
+      "pdf": "https://arxiv.org/pdf/2607.04819v2",
+      "score": "8.0",
+      "evidence": "加密Transformer推理与非线性深度优化",
+      "tldr": "针对全同态加密（FHE）在 Transformer 推理中因非线性层顺序堆叠导致的计算瓶颈，本文研究了结构化牛顿层并行（SNLP）的应用。SNLP 将 L 层顺序非线性深度转化为少数求解器迭代和线性修正，显著减少了加密推理所需的自举（bootstrap）次数。实验表明，该方法在 0.5B 模型上将自举次数降低了 2.65 倍，且误差累积更低，为高效加密大模型推理提供了新路径。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Fully homomorphic encryption (FHE) enables computation on encrypted data, but practical encrypted Transformer inference is bottlenecked by the sequential composition of many nonlinear blocks. We study whether Structured Newton Layer Parallelism (SNLP) can make this inter-layer composition more FHE-friendly: each Transformer block still requires polynomial approximations for operations such as softmax and RMSNorm, but SNLP reduces the layerwise sequential nonlinear depth from L stages to a small number of solver iterations plus linear structured corrections. Using a simulation framework based on Chebyshev polynomial approximations, we measure error accumulation under sequential versus SNLP inference across 8 models and 4 architecture families. On a 0.5B IDN-trained model, SNLP reduces symbolic bootstraps from 53 to 20 (2.65x) with only +1.2% perplexity degradation, while lowering error amplification (1.36x vs. 1.42x). Across all tested models, SNLP has lower amplification than sequential inference. Ablations show that softmax approximation dominates the error budget and CKKS arithmetic noise is negligible in our setting, suggesting that SNLP is complementary to block-level FHE-friendly operator design rather than a replacement for it.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
