@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-07-15 <!--dpr-date:20260715-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/15/2607.06700v1-cilc-cryptographically-secure-inter-agent-loop-closure-candidate-detection-for-multi-agent-collaborative-slam" data-sidebar-item="{&quot;title&quot;: &quot;CILC: Cryptographically-secure Inter-agent Loop Closure Candidate Detection for Multi-Agent Collaborative SLAM&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2607.06700v1-cilc-cryptographically-secure-inter-agent-loop-closure-candidate-detection-for-multi-agent-collaborative-slam&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;用于隐私保护协作任务的安全多方计算&quot;}">CILC: Cryptographically-secure Inter-agent Loop Closure Candidate Detection for Multi-Agent Collaborative SLAM</a>
   * 2026-07-14 <!--dpr-date:20260714-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/14/2607.04819v2-layer-parallel-inference-reduces-encrypted-nonlinear-depth-in-transformers" data-sidebar-item="{&quot;title&quot;: &quot;Layer-Parallel Inference Reduces Encrypted Nonlinear Depth in Transformers&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2607.04819v2-layer-parallel-inference-reduces-encrypted-nonlinear-depth-in-transformers&quot;, &quot;score&quot;: &quot;8.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;加密Transformer推理与非线性深度优化&quot;}">Layer-Parallel Inference Reduces Encrypted Nonlinear Depth in Transformers</a>

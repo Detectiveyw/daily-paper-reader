@@ -6,26 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-14
-- 运行时间：2026-07-14 21:39:31 UTC
+- 最新运行日期：2026-07-15
+- 运行时间：2026-07-15 21:22:38 UTC
 - 运行状态：成功
 - 本次总论文数：1
-- 精读区：1
-- 速读区：0
+- 精读区：0
+- 速读区：1
 
 ### 今日简报（AI）
-今日聚焦 Transformer 加密推理优化，通过层并行技术显著降低非线性计算深度。
-该研究证明层并行推理能有效缓解加密场景下的延迟瓶颈，大幅提升安全推理效率。
-建议关注隐私计算与大模型结合的读者重点研读，探索更高效的安全架构设计。
-- 详情：[/202607/14/README](/202607/14/README)
+今日聚焦多智能体协作 SLAM 中的加密安全回环检测技术。
+重点推荐 CILC 框架，它在保障多机协作隐私的同时实现了加密级别的回环候选检测。
+建议关注机器人集群安全与隐私保护的读者，深入探索加密算法在分布式定位中的应用。
+- 详情：[/202607/15/README](/202607/15/README)
 
 ### 精读区论文标签
-1. [Layer-Parallel Inference Reduces Encrypted Nonlinear Depth in Transformers](/202607/14/2607.04819v2-layer-parallel-inference-reduces-encrypted-nonlinear-depth-in-transformers)  
-   标签：评分：8.0/10、query:fss-llm
-   evidence：加密Transformer推理与非线性深度优化
+- 本次无精读推荐。
 
 ### 速读区论文标签
-- 本次无速读推荐。
+1. [CILC: Cryptographically-secure Inter-agent Loop Closure Candidate Detection for Multi-Agent Collaborative SLAM](/202607/15/2607.06700v1-cilc-cryptographically-secure-inter-agent-loop-closure-candidate-detection-for-multi-agent-collaborative-slam)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：用于隐私保护协作任务的安全多方计算
 
 
 <div class="dpr-home-promo-card">
