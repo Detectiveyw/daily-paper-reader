@@ -1,0 +1,245 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-16T20:35:59.784193+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 6,
+    "quick_skim_target": 11,
+    "quick_selected": 6
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.12505v1",
+      "title": "Realizable N:M Sparse Transformer Inference via Search-Kernel Co-Design",
+      "abstract": "Vision Transformers (ViTs) achieve strong accuracy but incur high inference latency. Semi-structured N:M sparsity can reduce arithmetic cost, yet its theoretical savings often fail to translate into proportional end-to-end speedups on modern GPUs. This mismatch arises because deployment latency depends not only on arithmetic reduction but also on execution regularity and hardware scheduling under sparsity. Achieving practical acceleration, therefore, requires coordinated design across sparse execution and sparsity configuration. To this end, we propose a hardware-software co-design framework for N:M sparse ViT inference. On the hardware side, we design MD-SpMM, an N:M sparse CUDA kernel that reorganizes sparse GEMM into micro-dense, Tensor-Core-aligned dataflow and uses inference-aware adaptive parallelism to sustain utilization. On the software side, we perform layer-wise sparsity search under explicit end-to-end latency budgets using a three-stage heuristic search with constraint relaxation to avoid premature convergence and enable deployment-aware sparsity allocation. Experiments on multiple ViT/Swin models and GPU platforms show that the framework achieves over 2.2x latency speedup while maintaining comparable accuracy and delivering superior accuracy under the same latency constraint. The source code is publicly available at https://github.com/liuganhuo/realizable-nm-sparse-transformer.",
+      "authors": [
+        "Yiming Liu",
+        "Wenqi Lou",
+        "Zhiguang Wang",
+        "Zhiwei Ke",
+        "Fengrui Zuo",
+        "Chao Wang",
+        "Xuehai Zhou"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR"
+      ],
+      "published": "2026-07-14T08:36:00+00:00",
+      "link": "https://arxiv.org/pdf/2607.12505v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Hardware-software co-design for N:M sparse Transformer inference",
+      "llm_evidence_cn": "N:M稀疏Transformer推理的软硬件协同设计",
+      "llm_evidence": "N:M稀疏Transformer推理的软硬件协同设计",
+      "canonical_evidence": "N:M稀疏Transformer推理的软硬件协同设计",
+      "llm_tldr_en": "Optimizes Vision Transformer inference latency through N:M sparsity and custom CUDA kernels.",
+      "llm_tldr_cn": "通过N:M稀疏性和自定义CUDA内核优化视觉Transformer的推理延迟。",
+      "llm_tldr": "通过N:M稀疏性和自定义CUDA内核优化视觉Transformer的推理延迟。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.10305v1",
+      "title": "Byzantine Accountability Without Consensus: Strong Eventual Consistency for Non-Associative, Stochastic, Robust Aggregation",
+      "abstract": "Byzantine-robust aggregation rules such as multi-Krum assume a central coordinator, and decentralising them is obstructed by the rules themselves: they are globally coupled, non-associative, and discontinuous, so an ulpscale perturbation can flip the selected subset, moving the output by a non-vanishing amount. None of this prevents coordinator-free replication, because a robust rule needs no agreed order of contributions, only an agreed set and an agreed exclusion predicate, both of which converge without consensus. ACFA (Accountable Consensus-Free Aggregation) replicates a content-addressed OR-Set of signed contributions and a grow-only set of self-authenticating equivocation proofs, offline-verifiable by anyone. Aggregation is a deterministic pure function of the converged product state: fixed-point integer arithmetic over a hash-canonical order, ties broken by content hash. We prove that any pure function of a converged product of CRDTs (non-monotone, non-associative, or stochastic) inherits Strong Eventual Consistency, together with its converse; the contribution is the composition of a data lattice with an evidence lattice applied to a robust selector, not the elementary lifting step. A prototype (10 nodes, 3 Byzantine) passes 16/16 falsification checks: byte-identical roots under adversarial gossip, deterministic re-convergence after late equivocation proofs, partition recovery, and three byte-identity-breaking ablations. The guarantee is consistency, not accuracy; robustness is imported, conditional on 2f + 3 admitted contributions (at most f Byzantine) and a stated quantisation-margin condition.",
+      "authors": [
+        "Ryan Gillespie"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC",
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-07-11T13:23:06+00:00",
+      "link": "https://arxiv.org/pdf/2607.10305v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Byzantine-robust aggregation without central coordinator",
+      "llm_evidence_cn": "无需中心协调器的拜占庭鲁棒聚合",
+      "llm_evidence": "无需中心协调器的拜占庭鲁棒聚合",
+      "canonical_evidence": "无需中心协调器的拜占庭鲁棒聚合",
+      "llm_tldr_en": "Develops a consensus-free, Byzantine-robust aggregation protocol for decentralized environments.",
+      "llm_tldr_cn": "为去中心化环境开发了一种无需共识的、具备拜占庭鲁棒性的聚合协议。",
+      "llm_tldr": "为去中心化环境开发了一种无需共识的、具备拜占庭鲁棒性的聚合协议。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.10709v1",
+      "title": "PromptGraph: Graph-Guided Prompt Sanitization for Balancing Privacy and Utility in LLM Inference",
+      "abstract": "Large Language Model (LLM) services introduce a fundamental privacy challenge. Sensitive information may be inferred not only from explicit identifiers, such as names or phone numbers, but also from contextual associations among otherwise innocuous spans. Existing sanitizers typically assign privacy or utility signals to individual spans without explicitly modeling pairwise relationships among them. In this paper, we propose PromptGraph, a graph-guided prompt-sanitization approach for privacy-preserving LLM inference. PromptGraph estimates privacy leakage at the span level and utility-relevant contextual dependencies between pairs of spans. It represents each prompt as an attributed graph, in which nodes carry span-level privacy scores and edges encode contextual dependencies needed to preserve utility. The sanitization objective selects a protected span set that maximizes privacy gain while penalizing the loss of contextual dependencies. This formulation explicitly balances privacy and utility when contextual evidence is hidden. Protected spans are sanitized locally, and returned placeholders are restored only after passing local consistency checks. We conduct extensive experiments showing that PromptGraph achieves a more favorable balance between privacy and utility than prompt-privacy baselines.",
+      "authors": [
+        "Chen Gu",
+        "Hui Wan",
+        "Donghui Hu",
+        "Hui Wang",
+        "Zhuoer Gu"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-07-12T11:04:49+00:00",
+      "link": "https://arxiv.org/pdf/2607.10709v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy-preserving LLM inference via prompt sanitization",
+      "llm_evidence_cn": "通过提示词清洗实现大模型隐私保护推理",
+      "llm_evidence": "通过提示词清洗实现大模型隐私保护推理",
+      "canonical_evidence": "通过提示词清洗实现大模型隐私保护推理",
+      "llm_tldr_en": "PromptGraph balances privacy and utility in LLM inference using graph-guided prompt sanitization.",
+      "llm_tldr_cn": "PromptGraph通过图引导的提示词清洗，在大模型推理中平衡隐私与效用。",
+      "llm_tldr": "PromptGraph通过图引导的提示词清洗，在大模型推理中平衡隐私与效用。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.12505v2",
+      "title": "Realizable N:M Sparse Transformer Inference via Search-Kernel Co-Design",
+      "abstract": "Vision Transformers (ViTs) achieve strong accuracy but incur high inference latency. Semi-structured N:M sparsity can reduce arithmetic cost, yet its theoretical savings often fail to translate into proportional end-to-end speedups on modern GPUs. This mismatch arises because deployment latency depends not only on arithmetic reduction but also on execution regularity and hardware scheduling under sparsity. Achieving practical acceleration, therefore, requires coordinated design across sparse execution and sparsity configuration. To this end, we propose a hardware-software co-design framework for N:M sparse ViT inference. On the hardware side, we design MD-SpMM, an N:M sparse CUDA kernel that reorganizes sparse GEMM into micro-dense, Tensor-Core-aligned dataflow and uses inference-aware adaptive parallelism to sustain utilization. On the software side, we perform layer-wise sparsity search under explicit end-to-end latency budgets using a three-stage heuristic search with constraint relaxation to avoid premature convergence and enable deployment-aware sparsity allocation. Experiments on multiple ViT/Swin models and GPU platforms show that the framework achieves over 2.2x latency speedup while maintaining comparable accuracy and delivering superior accuracy under the same latency constraint. The source code is publicly available at https://github.com/liuganhuo/realizable-nm-sparse-transformer.",
+      "authors": [
+        "Yiming Liu",
+        "Wenqi Lou",
+        "Zhiguang Wang",
+        "Zhiwei Ke",
+        "Fengrui Zuo",
+        "Chao Wang",
+        "Xuehai Zhou"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR"
+      ],
+      "published": "2026-07-14T08:36:00+00:00",
+      "link": "https://arxiv.org/pdf/2607.12505v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Transformer inference acceleration and hardware co-design",
+      "llm_evidence_cn": "Transformer推理加速与硬件协同设计",
+      "llm_evidence": "Transformer推理加速与硬件协同设计",
+      "canonical_evidence": "Transformer推理加速与硬件协同设计",
+      "llm_tldr_en": "A hardware-software co-design framework for sparse Vision Transformer inference to reduce latency.",
+      "llm_tldr_cn": "一种用于稀疏视觉Transformer推理的软硬件协同设计框架，旨在降低延迟。",
+      "llm_tldr": "一种用于稀疏视觉Transformer推理的软硬件协同设计框架，旨在降低延迟。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.13093v1",
+      "title": "Efficient and Privacy Aware Edge Cloud Collaborative Inference for Large Language Models",
+      "abstract": "On-device LLM inference faces a trilemma of response latency, limited hardware resources and user privacy. Full cloud inference delivers strong computing power but exposes user prompts and dialogue data, while standalone on-device inference is unfeasible for most consumer and embedded edge devices. This paper presents a privacy-centric edge-cloud collaborative LLM inference framework built on endpoint-authenticated KV cache. Local endpoints handle input preprocessing, embedding computation, adaptive feature optimization, KV cache authentication, speculative decoding and low-dimensional model head calculation, while the cloud conducts authenticated decoder inference, KV cache management, token verification and high-dimensional vocabulary projection. Endpoints fuse partial outputs, apply language-adaptive masking and sample target tokens. All transmitted data and truncated logits are quantized and AES-GCM encrypted for privacy, with core lightweight modules, draft parameters and cache access policies kept local to avoid leakage. The framework supports heterogeneous devices including CPU-only, GPU-equipped and embedded devices via optimized streaming, batching and quantized ONNX deployment. Evaluations demonstrate that the framework reduces per-token latency by up to 46.1\\% and downlink payloads by up to 67.4\\% over baseline split inference, retaining comparable performance to full cloud inference.",
+      "authors": [
+        "Yi Li",
+        "Chen Li",
+        "Jiexiong Liu"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-07-14T01:17:17+00:00",
+      "link": "https://arxiv.org/pdf/2607.13093v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy-centric edge-cloud collaborative LLM inference framework",
+      "llm_evidence_cn": "以隐私为中心的大模型边缘云协作推理框架",
+      "llm_evidence": "以隐私为中心的大模型边缘云协作推理框架",
+      "canonical_evidence": "以隐私为中心的大模型边缘云协作推理框架",
+      "llm_tldr_en": "Proposes a collaborative LLM inference framework using authenticated KV cache to protect user privacy.",
+      "llm_tldr_cn": "提出一种基于认证KV缓存的协作式大模型推理框架，旨在保护用户隐私并降低延迟。",
+      "llm_tldr": "提出一种基于认证KV缓存的协作式大模型推理框架，旨在保护用户隐私并降低延迟。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.13235v1",
+      "title": "Proof in a Bottle: Long-Lived Verifiable Secret Sharing via Pre-Quantum Commitment and Immutable Ledger Binding",
+      "abstract": "Traditional secret sharing techniques such as Verifiable Secret sharing (VSS) are vulnerable to quantum attacks by a Cryptographically Relevant Quantum Computer (CRQC) running Shor's algorithm. We observe that the binding a VSS needs is required only at the moment of dealing, and this binding can be made before any CRQC exists. We propose Proof in a Bottle (PiB), which decouples verifiability from long-term binding: standard Pedersen commitments provide zero-knowledge, publicly checkable consistency during a pre-quantum window, while a salted, index-bound hash of the share set, anchored to an immutable public ledger, preserves the binding established in that window into the post-quantum era. The guarantee is explicitly a commit-now, reveal-later one: it protects today's honest dealings against tomorrow's quantum adversary.",
+      "authors": [
+        "Markus Jakobsson",
+        "Keir Finlow-Bates"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.ET"
+      ],
+      "published": "2026-07-14T19:57:43+00:00",
+      "link": "https://arxiv.org/pdf/2607.13235v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Verifiable Secret Sharing (VSS) and zero-knowledge consistency",
+      "llm_evidence_cn": "可验证秘密共享 (VSS) 与零知识一致性",
+      "llm_evidence": "可验证秘密共享 (VSS) 与零知识一致性",
+      "canonical_evidence": "可验证秘密共享 (VSS) 与零知识一致性",
+      "llm_tldr_en": "Introduces a long-lived verifiable secret sharing scheme resistant to quantum attacks.",
+      "llm_tldr_cn": "引入了一种能够抵抗量子攻击的长效可验证秘密共享方案。",
+      "llm_tldr": "引入了一种能够抵抗量子攻击的长效可验证秘密共享方案。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing supporting floating point operations and verifiable security",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

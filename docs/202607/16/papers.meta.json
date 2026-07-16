@@ -1,0 +1,93 @@
+{
+  "label": "2026-07-16",
+  "date": "2026-07-16",
+  "generated_at": "2026-07-16T20:36:42",
+  "count": 6,
+  "papers": [
+    {
+      "paper_id": "202607/16/2607.12505v1-realizable-nm-sparse-transformer-inference-via-search-kernel-co-design",
+      "section": "quick",
+      "title_en": "Realizable N:M Sparse Transformer Inference via Search-Kernel Co-Design",
+      "authors": "Yiming Liu, Wenqi Lou, Zhiguang Wang, Zhiwei Ke, Fengrui Zuo, Chao Wang, Xuehai Zhou",
+      "date": "2026-07-14",
+      "pdf": "https://arxiv.org/pdf/2607.12505v1",
+      "score": "7.0",
+      "evidence": "N:M稀疏Transformer推理的软硬件协同设计",
+      "tldr": "M稀疏化时理论加速与实际性能不匹配的问题，本文提出了一种软硬件协同设计框架。硬件上，设计了MD-SpMM内核以优化数据流和并行度；软件上，通过三阶段启发式搜索在延迟预算下优化层级稀疏度分配。该框架在保持精度的同时实现了超过2.2倍的端到端加速，为稀疏模型的高效部署提供了新方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Vision Transformers (ViTs) achieve strong accuracy but incur high inference latency. Semi-structured N:M sparsity can reduce arithmetic cost, yet its theoretical savings often fail to translate into proportional end-to-end speedups on modern GPUs. This mismatch arises because deployment latency depends not only on arithmetic reduction but also on execution regularity and hardware scheduling under sparsity. Achieving practical acceleration, therefore, requires coordinated design across sparse execution and sparsity configuration. To this end, we propose a hardware-software co-design framework for N:M sparse ViT inference. On the hardware side, we design MD-SpMM, an N:M sparse CUDA kernel that reorganizes sparse GEMM into micro-dense, Tensor-Core-aligned dataflow and uses inference-aware adaptive parallelism to sustain utilization. On the software side, we perform layer-wise sparsity search under explicit end-to-end latency budgets using a three-stage heuristic search with constraint relaxation to avoid premature convergence and enable deployment-aware sparsity allocation. Experiments on multiple ViT/Swin models and GPU platforms show that the framework achieves over 2.2x latency speedup while maintaining comparable accuracy and delivering superior accuracy under the same latency constraint. The source code is publicly available at https://github.com/liuganhuo/realizable-nm-sparse-transformer.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/16/2607.10305v1-byzantine-accountability-without-consensus-strong-eventual-consistency-for-non-associative-stochastic-robust-aggregation",
+      "section": "quick",
+      "title_en": "Byzantine Accountability Without Consensus: Strong Eventual Consistency for Non-Associative, Stochastic, Robust Aggregation",
+      "authors": "Ryan Gillespie",
+      "date": "2026-07-11",
+      "pdf": "https://arxiv.org/pdf/2607.10305v1",
+      "score": "6.0",
+      "evidence": "无需中心协调器的拜占庭鲁棒聚合",
+      "tldr": "本文针对拜占庭鲁棒聚合规则（如multi-Krum）依赖中心协调器且难以去中心化的挑战，提出了ACFA（无共识可追责聚合）框架。该框架利用内容寻址的OR-Set和自验证的重复投票证明，在无需共识协议的情况下实现数据复制。研究证明了CRDT收敛状态的纯函数（即使是非结合或随机的）均能继承强最终一致性（SEC）。通过原型验证，ACFA在对抗性网络环境下实现了字节级的一致性，为分布式鲁棒聚合提供了新的理论支撑和实践方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Byzantine-robust aggregation rules such as multi-Krum assume a central coordinator, and decentralising them is obstructed by the rules themselves: they are globally coupled, non-associative, and discontinuous, so an ulpscale perturbation can flip the selected subset, moving the output by a non-vanishing amount. None of this prevents coordinator-free replication, because a robust rule needs no agreed order of contributions, only an agreed set and an agreed exclusion predicate, both of which converge without consensus. ACFA (Accountable Consensus-Free Aggregation) replicates a content-addressed OR-Set of signed contributions and a grow-only set of self-authenticating equivocation proofs, offline-verifiable by anyone. Aggregation is a deterministic pure function of the converged product state: fixed-point integer arithmetic over a hash-canonical order, ties broken by content hash. We prove that any pure function of a converged product of CRDTs (non-monotone, non-associative, or stochastic) inherits Strong Eventual Consistency, together with its converse; the contribution is the composition of a data lattice with an evidence lattice applied to a robust selector, not the elementary lifting step. A prototype (10 nodes, 3 Byzantine) passes 16/16 falsification checks: byte-identical roots under adversarial gossip, deterministic re-convergence after late equivocation proofs, partition recovery, and three byte-identity-breaking ablations. The guarantee is consistency, not accuracy; robustness is imported, conditional on 2f + 3 admitted contributions (at most f Byzantine) and a stated quantisation-margin condition.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/16/2607.10709v1-promptgraph-graph-guided-prompt-sanitization-for-balancing-privacy-and-utility-in-llm-inference",
+      "section": "quick",
+      "title_en": "PromptGraph: Graph-Guided Prompt Sanitization for Balancing Privacy and Utility in LLM Inference",
+      "authors": "Chen Gu, Hui Wan, Donghui Hu, Hui Wang, Zhuoer Gu",
+      "date": "2026-07-12",
+      "pdf": "https://arxiv.org/pdf/2607.10709v1",
+      "score": "6.0",
+      "evidence": "通过提示词清洗实现大模型隐私保护推理",
+      "tldr": "针对大语言模型推理中的隐私泄露问题，本文提出 PromptGraph。该方法通过图结构建模提示词中各片段间的上下文依赖关系，不仅考虑单个片段的隐私风险，还量化了片段间的关联性。通过在保护隐私增益与维持上下文效用之间寻找最优平衡，PromptGraph 实现了更精准的提示词脱敏，在保护敏感信息的同时最大限度保留了模型的推理能力。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large Language Model (LLM) services introduce a fundamental privacy challenge. Sensitive information may be inferred not only from explicit identifiers, such as names or phone numbers, but also from contextual associations among otherwise innocuous spans. Existing sanitizers typically assign privacy or utility signals to individual spans without explicitly modeling pairwise relationships among them. In this paper, we propose PromptGraph, a graph-guided prompt-sanitization approach for privacy-preserving LLM inference. PromptGraph estimates privacy leakage at the span level and utility-relevant contextual dependencies between pairs of spans. It represents each prompt as an attributed graph, in which nodes carry span-level privacy scores and edges encode contextual dependencies needed to preserve utility. The sanitization objective selects a protected span set that maximizes privacy gain while penalizing the loss of contextual dependencies. This formulation explicitly balances privacy and utility when contextual evidence is hidden. Protected spans are sanitized locally, and returned placeholders are restored only after passing local consistency checks. We conduct extensive experiments showing that PromptGraph achieves a more favorable balance between privacy and utility than prompt-privacy baselines.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/16/2607.12505v2-realizable-nm-sparse-transformer-inference-via-search-kernel-co-design",
+      "section": "quick",
+      "title_en": "Realizable N:M Sparse Transformer Inference via Search-Kernel Co-Design",
+      "authors": "Yiming Liu, Wenqi Lou, Zhiguang Wang, Zhiwei Ke, Fengrui Zuo, Chao Wang, Xuehai Zhou",
+      "date": "2026-07-14",
+      "pdf": "https://arxiv.org/pdf/2607.12505v2",
+      "score": "6.0",
+      "evidence": "Transformer推理加速与硬件协同设计",
+      "tldr": "M稀疏推理框架。硬件上，设计了MD-SpMM内核，通过微密集数据流和自适应并行提高GPU利用率；软件上，采用三阶段启发式搜索，在端到端延迟约束下优化各层稀疏配置。实验表明，该框架在保持精度的同时实现了超过2.2倍的加速，有效解决了稀疏性理论节省与实际加速不匹配的问题。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Vision Transformers (ViTs) achieve strong accuracy but incur high inference latency. Semi-structured N:M sparsity can reduce arithmetic cost, yet its theoretical savings often fail to translate into proportional end-to-end speedups on modern GPUs. This mismatch arises because deployment latency depends not only on arithmetic reduction but also on execution regularity and hardware scheduling under sparsity. Achieving practical acceleration, therefore, requires coordinated design across sparse execution and sparsity configuration. To this end, we propose a hardware-software co-design framework for N:M sparse ViT inference. On the hardware side, we design MD-SpMM, an N:M sparse CUDA kernel that reorganizes sparse GEMM into micro-dense, Tensor-Core-aligned dataflow and uses inference-aware adaptive parallelism to sustain utilization. On the software side, we perform layer-wise sparsity search under explicit end-to-end latency budgets using a three-stage heuristic search with constraint relaxation to avoid premature convergence and enable deployment-aware sparsity allocation. Experiments on multiple ViT/Swin models and GPU platforms show that the framework achieves over 2.2x latency speedup while maintaining comparable accuracy and delivering superior accuracy under the same latency constraint. The source code is publicly available at https://github.com/liuganhuo/realizable-nm-sparse-transformer.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/16/2607.13093v1-efficient-and-privacy-aware-edge-cloud-collaborative-inference-for-large-language-models",
+      "section": "quick",
+      "title_en": "Efficient and Privacy Aware Edge Cloud Collaborative Inference for Large Language Models",
+      "authors": "Yi Li, Chen Li, Jiexiong Liu",
+      "date": "2026-07-14",
+      "pdf": "https://arxiv.org/pdf/2607.13093v1",
+      "score": "6.0",
+      "evidence": "以隐私为中心的大模型边缘云协作推理框架",
+      "tldr": "针对端侧大模型推理面临的延迟、资源限制与隐私泄露难题，本文提出一种基于端点认证KV缓存的边云协作推理框架。该框架通过在本地处理敏感计算（如嵌入、推测解码）并在云端执行高负载推理，结合AES-GCM加密与量化技术，实现了高效且隐私安全的推理。实验表明，该方法在显著降低延迟和数据传输量的同时，保持了与全云端推理相当的性能。",
+      "tags": "query:fss-llm",
+      "abstract_en": "On-device LLM inference faces a trilemma of response latency, limited hardware resources and user privacy. Full cloud inference delivers strong computing power but exposes user prompts and dialogue data, while standalone on-device inference is unfeasible for most consumer and embedded edge devices. This paper presents a privacy-centric edge-cloud collaborative LLM inference framework built on endpoint-authenticated KV cache. Local endpoints handle input preprocessing, embedding computation, adaptive feature optimization, KV cache authentication, speculative decoding and low-dimensional model head calculation, while the cloud conducts authenticated decoder inference, KV cache management, token verification and high-dimensional vocabulary projection. Endpoints fuse partial outputs, apply language-adaptive masking and sample target tokens. All transmitted data and truncated logits are quantized and AES-GCM encrypted for privacy, with core lightweight modules, draft parameters and cache access policies kept local to avoid leakage. The framework supports heterogeneous devices including CPU-only, GPU-equipped and embedded devices via optimized streaming, batching and quantized ONNX deployment. Evaluations demonstrate that the framework reduces per-token latency by up to 46.1\\% and downlink payloads by up to 67.4\\% over baseline split inference, retaining comparable performance to full cloud inference.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/16/2607.13235v1-proof-in-a-bottle-long-lived-verifiable-secret-sharing-via-pre-quantum-commitment-and-immutable-ledger-binding",
+      "section": "quick",
+      "title_en": "Proof in a Bottle: Long-Lived Verifiable Secret Sharing via Pre-Quantum Commitment and Immutable Ledger Binding",
+      "authors": "Markus Jakobsson, Keir Finlow-Bates",
+      "date": "2026-07-14",
+      "pdf": "https://arxiv.org/pdf/2607.13235v1",
+      "score": "6.0",
+      "evidence": "可验证秘密共享 (VSS) 与零知识一致性",
+      "tldr": "针对传统可验证秘密共享（VSS）易受量子攻击的问题，本文提出“瓶中证明”（PiB）方案。该方案利用量子计算机出现前的窗口期，通过Pedersen承诺确保当前的零知识一致性，并结合不可篡改账本锚定的加盐哈希，将绑定效力延续至后量子时代，实现“现在承诺，未来揭示”的长期安全保障。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Traditional secret sharing techniques such as Verifiable Secret sharing (VSS) are vulnerable to quantum attacks by a Cryptographically Relevant Quantum Computer (CRQC) running Shor's algorithm. We observe that the binding a VSS needs is required only at the moment of dealing, and this binding can be made before any CRQC exists. We propose Proof in a Bottle (PiB), which decouples verifiability from long-term binding: standard Pedersen commitments provide zero-knowledge, publicly checkable consistency during a pre-quantum window, while a salted, index-bound hash of the share set, anchored to an immutable public ledger, preserves the binding established in that window into the post-quantum era. The guarantee is explicitly a commit-now, reveal-later one: it protects today's honest dealings against tomorrow's quantum adversary.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
