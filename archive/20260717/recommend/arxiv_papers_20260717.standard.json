@@ -1,0 +1,97 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-17T20:40:02.579817+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.10109v1",
+      "title": "Adaptive Model Compression (AMC): Saliency-Driven Resource Allocation for Ultra-Low-Power Transformer Inference",
+      "abstract": "Deploying large-scale transformer models on resource-constrained edge devices remains a challenge due to the high energy and memory overhead inherent in static inference, which processes simple and complex tokens with uniform intensity. To address this, we propose Adaptive Model Compression (AMC), a saliency-driven framework that dynamically allocates hardware resources based on token importance. By implementing a multi-tier architecture, our system identifies critical high-saliency information for full-precision processing while aggressively reducing the rank and bit-width of less significant data. Experimental results demonstrate that AMC achieves a 59.2% reduction in system energy and a 2.24x increase in throughput on 45nm CMOS hardware. This approach effectively extends the battery life of mobile devices by utilizing high-definition compute only where necessary, maintaining robust performance with a marginal 3.6% accuracy trade-off.",
+      "authors": [
+        "Jiayin Hu",
+        "Kai Yuan",
+        "Vanessa Hu",
+        "Xuetao Yin",
+        "Jianhua Li",
+        "Sean Suchter"
+      ],
+      "primary_category": "cs.IR",
+      "categories": [
+        "cs.IR",
+        "cs.AI",
+        "cs.AR",
+        "cs.LG"
+      ],
+      "published": "2026-07-11T04:05:26+00:00",
+      "link": "https://arxiv.org/pdf/2607.10109v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "resource allocation for Transformer inference",
+      "llm_evidence_cn": "Transformer推理的资源分配",
+      "llm_evidence": "Transformer推理的资源分配",
+      "canonical_evidence": "Transformer推理的资源分配",
+      "llm_tldr_en": "Proposes saliency-driven resource allocation to optimize energy and memory for Transformer inference.",
+      "llm_tldr_cn": "提出显著性驱动的资源分配方案，优化Transformer推理的能耗和内存开销。",
+      "llm_tldr": "提出显著性驱动的资源分配方案，优化Transformer推理的能耗和内存开销。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.13088v1",
+      "title": "Securing LLMs in the Wild: Privacy and Security Challenges at the Edge",
+      "abstract": "Large Language Models (LLMs) are rapidly moving from research settings into the wild, deployed on enterprise infrastructure, personal devices, and edge platforms. While cloud deployments offer scalable compute, concerns over data sovereignty, compliance, latency, and third-party dependence are driving organizations toward edge and on-premise LLMs. This shift introduces new security and privacy challenges: limited compute and memory force aggressive optimizations, including quantization, pruning, model partitioning, and parameter-efficient adaptation, each of which can introduce vulnerabilities and reshape the threat landscape. We describe this tension as the Security-Efficiency Paradox, mechanisms that improve efficiency may weaken robustness, expose new attack surfaces, or increase privacy risks. We examine how compression can degrade safety alignment, how partitioned inference enables reconstruction attacks, and how continuous local adaptation may cause privacy leakage and model drift. To analyze these risks, we introduce a deployment-centric taxonomy organized around three architectural constraints: the Memory Wall, the Quadratic Wall, and the Compute Wall. We derive a unified constraint model that quantifies when unsafe optimizations become unavoidable, linking each wall to specific attack surfaces. Building on this model, we propose the Secure Operational Efficiency Score (SOES), a holistic metric balancing task accuracy, jailbreak resistance, and privacy against energy, memory, and latency, enabling practitioners to configure edge LLMs under real-world hardware limits. We further present a practical decision procedure and targeted mitigations for each optimization-induced vulnerability. Together, these contributions provide a co-designed framework for jointly evaluating security, privacy, and efficiency, laying a foundation for securing edge-native intelligent systems.",
+      "authors": [
+        "Ren-Yi Huang",
+        "Mingchen Li",
+        "Dumindu Samaraweera",
+        "Morris Chang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-07-13T16:45:04+00:00",
+      "link": "https://arxiv.org/pdf/2607.13088v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy and security challenges for LLMs at the edge including model partitioning",
+      "llm_evidence_cn": "边缘端大模型的隐私与安全挑战，包括模型分区",
+      "llm_evidence": "边缘端大模型的隐私与安全挑战，包括模型分区",
+      "canonical_evidence": "边缘端大模型的隐私与安全挑战，包括模型分区",
+      "llm_tldr_en": "Analyzes security-efficiency trade-offs and privacy risks for LLMs deployed on edge platforms.",
+      "llm_tldr_cn": "分析了在边缘平台部署的大语言模型的安全效率权衡与隐私风险。",
+      "llm_tldr": "分析了在边缘平台部署的大语言模型的安全效率权衡与隐私风险。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

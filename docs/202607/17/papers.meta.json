@@ -1,0 +1,37 @@
+{
+  "label": "2026-07-17",
+  "date": "2026-07-17",
+  "generated_at": "2026-07-17T20:40:32",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202607/17/2607.10109v1-adaptive-model-compression-amc-saliency-driven-resource-allocation-for-ultra-low-power-transformer-inference",
+      "section": "quick",
+      "title_en": "Adaptive Model Compression (AMC): Saliency-Driven Resource Allocation for Ultra-Low-Power Transformer Inference",
+      "authors": "Jiayin Hu, Kai Yuan, Vanessa Hu, Xuetao Yin, Jianhua Li, Sean Suchter",
+      "date": "2026-07-11",
+      "pdf": "https://arxiv.org/pdf/2607.10109v1",
+      "score": "6.0",
+      "evidence": "Transformer推理的资源分配",
+      "tldr": "针对边缘设备部署大模型的高能耗挑战，本文提出自适应模型压缩（AMC）框架。该框架通过显著性驱动的资源分配，对关键Token进行全精度处理，而对次要数据进行低秩和低位宽压缩。在45nm CMOS硬件上实现了59.2%的能耗降低和2.24倍的吞吐量提升，仅损失3.6%的精度。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Deploying large-scale transformer models on resource-constrained edge devices remains a challenge due to the high energy and memory overhead inherent in static inference, which processes simple and complex tokens with uniform intensity. To address this, we propose Adaptive Model Compression (AMC), a saliency-driven framework that dynamically allocates hardware resources based on token importance. By implementing a multi-tier architecture, our system identifies critical high-saliency information for full-precision processing while aggressively reducing the rank and bit-width of less significant data. Experimental results demonstrate that AMC achieves a 59.2% reduction in system energy and a 2.24x increase in throughput on 45nm CMOS hardware. This approach effectively extends the battery life of mobile devices by utilizing high-definition compute only where necessary, maintaining robust performance with a marginal 3.6% accuracy trade-off.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/17/2607.13088v1-securing-llms-in-the-wild-privacy-and-security-challenges-at-the-edge",
+      "section": "quick",
+      "title_en": "Securing LLMs in the Wild: Privacy and Security Challenges at the Edge",
+      "authors": "Ren-Yi Huang, Mingchen Li, Dumindu Samaraweera, Morris Chang",
+      "date": "2026-07-13",
+      "pdf": "https://arxiv.org/pdf/2607.13088v1",
+      "score": "6.0",
+      "evidence": "边缘端大模型的隐私与安全挑战，包括模型分区",
+      "tldr": "随着大语言模型从云端转向边缘设备，资源限制驱动的优化技术引发了“安全-效率悖论”。本文系统分析了边缘部署中的隐私与安全挑战，提出了基于内存、计算和二次方墙的分类体系，并引入了统一约束模型及SOES评分标准，旨在平衡模型性能、安全性和硬件效率，为构建安全的边缘原生智能系统提供了协同设计框架。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large Language Models (LLMs) are rapidly moving from research settings into the wild, deployed on enterprise infrastructure, personal devices, and edge platforms. While cloud deployments offer scalable compute, concerns over data sovereignty, compliance, latency, and third-party dependence are driving organizations toward edge and on-premise LLMs. This shift introduces new security and privacy challenges: limited compute and memory force aggressive optimizations, including quantization, pruning, model partitioning, and parameter-efficient adaptation, each of which can introduce vulnerabilities and reshape the threat landscape. We describe this tension as the Security-Efficiency Paradox, mechanisms that improve efficiency may weaken robustness, expose new attack surfaces, or increase privacy risks. We examine how compression can degrade safety alignment, how partitioned inference enables reconstruction attacks, and how continuous local adaptation may cause privacy leakage and model drift. To analyze these risks, we introduce a deployment-centric taxonomy organized around three architectural constraints: the Memory Wall, the Quadratic Wall, and the Compute Wall. We derive a unified constraint model that quantifies when unsafe optimizations become unavoidable, linking each wall to specific attack surfaces. Building on this model, we propose the Secure Operational Efficiency Score (SOES), a holistic metric balancing task accuracy, jailbreak resistance, and privacy against energy, memory, and latency, enabling practitioners to configure edge LLMs under real-world hardware limits. We further present a practical decision procedure and targeted mitigations for each optimization-induced vulnerability. Together, these contributions provide a co-designed framework for jointly evaluating security, privacy, and efficiency, laying a foundation for securing edge-native intelligent systems.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
