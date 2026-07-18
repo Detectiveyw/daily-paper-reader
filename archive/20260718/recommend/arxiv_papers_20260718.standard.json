@@ -1,0 +1,123 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-18T21:08:59.386814+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.11466v1",
+      "title": "Prezta: Provable Remote Execution of Zero-Trust Authorization using SNARKs",
+      "abstract": "Modernizing the security of operational technology systems that control critical infrastructure has become a pressing challenge. Because edge devices have limited capabilities, modernization has relied on application gateways that interface with identity management systems and enforce access policies. These gateways are powerful enough to perform complex authorization decisions and support zero-trust architectures, but they create major deployment and management burdens: they must be collocated with remote, distributed edge devices, kept up to date with security patches, and managed with minimal downtime.   We propose Provable Remote Execution of Zero-Trust Authorization (Prezta), an architecture that eliminates these gateways by evaluating policies within a zero-knowledge virtual machine (zkVM) running on the client. The zkVM produces a succinct proof of authorization that edge devices can verify efficiently, extending the zero-trust security envelope to the edge. Policies and identity management schemes can evolve without updating edge devices.   To demonstrate the feasibility of Prezta, we implement a prototype built using the RISC Zero zkVM that supports XACML 3.0 policies and JWT identity claims. While zkVMs introduce substantial proof overhead, we mitigate this overhead by compiling policies to Rust code and precompiling regular expressions. Combined with optimized signature verification and JWT parsing, these measures reduce prover time by more than an order of magnitude. Our compiler correctly implements 83\\% of the XACML 3.0 conformance suite, with proof generation completing in tens of seconds on a desktop. Verification, by contrast, takes only tens of milliseconds, which is fast enough for resource-constrained edge devices.",
+      "authors": [
+        "Zhongjing Wei",
+        "Osaid Muhammad Ameer",
+        "Yupeng Zhang",
+        "Nikita Borisov"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-13T12:21:08+00:00",
+      "link": "https://arxiv.org/pdf/2607.11466v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "provable remote execution and zero-trust authorization using SNARKs",
+      "llm_evidence_cn": "使用SNARK的可证明远程执行和零信任授权",
+      "llm_evidence": "使用SNARK的可证明远程执行和零信任授权",
+      "canonical_evidence": "使用SNARK的可证明远程执行和零信任授权",
+      "llm_tldr_en": "Proposes a zero-trust architecture using SNARKs for verifiable remote execution on edge devices.",
+      "llm_tldr_cn": "提出了一种使用SNARK在边缘设备上进行可验证远程执行的零信任架构。",
+      "llm_tldr": "提出了一种使用SNARK在边缘设备上进行可验证远程执行的零信任架构。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.14375v1",
+      "title": "Random Parameter Noise Does Not Make Exact ReLU Verification Easy",
+      "abstract": "We study exact verification of ReLU networks in an adversarial smoothed model. Every network weight and bias is independently perturbed by Gaussian noise, clipped to $[-2,2]$, and rounded to the exact dyadic grid determined by the input bit complexity. We show that, under the standard assumption $\\mathrm{NP}\\not\\subseteq\\mathrm{BPP}$, there is no sound and complete verifier whose expected running time is polynomial in network size, bit complexity, and inverse noise level for every base instance. The conclusion already holds at the fixed noise level $σ_\\star=2^{-11}$ for one-hidden-layer networks over a unit box, with hidden fan-in at most three and base coefficients in $[-1,1]$.   The proof combines an exact gap embedding with a quantitative robustness argument. For every E3SAT formula $Φ$ with $m$ clauses, a four-ReLU-per-clause construction satisfies $\\max_{x\\in[0,1]^n} g_Φ(x)=(m-\\operatorname{unsat}(Φ))/3$, and coordinatewise threshold rounding never decreases the objective. A weighted parameter-sensitivity inequality and Gaussian concentration then show that a verification gap linear in $m$ survives the aggregate perturbation of all coefficients with probability at least $1-e^{-m/8}$. The proof includes clipping, exact dyadic rounding, output-layer perturbations, polynomial-bit sampling of the rounded Gaussian law, and the conversion from expected smoothed running time to a BPP algorithm. Computational checks test the exact identity and illustrate the different scaling of extensive and constant gaps; they are diagnostics rather than evidence for the complexity theorem. The result concerns worst-case base networks in the stated absolute-noise model, but it shows that parameter nondegeneracy alone does not yield a universal smoothed-polynomial guarantee for exact verification.",
+      "authors": [
+        "Mojtaba Soltanalian"
+      ],
+      "primary_category": "cs.CC",
+      "categories": [
+        "cs.CC",
+        "cs.LG"
+      ],
+      "published": "2026-07-15T21:26:20+00:00",
+      "link": "https://arxiv.org/pdf/2607.14375v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "exact verification of ReLU networks in adversarial models",
+      "llm_evidence_cn": "对抗模型下ReLU网络的精确验证",
+      "llm_evidence": "对抗模型下ReLU网络的精确验证",
+      "canonical_evidence": "对抗模型下ReLU网络的精确验证",
+      "llm_tldr_en": "Analyzes the complexity of exact ReLU network verification under random parameter noise and adversarial settings.",
+      "llm_tldr_cn": "分析了在随机参数噪声和对抗环境下ReLU网络精确验证的复杂性。",
+      "llm_tldr": "分析了在随机参数噪声和对抗环境下ReLU网络精确验证的复杂性。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.15052v1",
+      "title": "NFSA: Non-Forward Secure Aggregation with One Server via Two Layer Secret Sharing",
+      "abstract": "Federated Learning (FL) enables collaborative model training while preserving privacy by keeping data local. However, the risk of sensitive data leakage through model updates necessitates the use of secure aggregation protocols. Existing server-based secure aggregation protocols typically require the server to forward sensitive data shared between users, which increases communication overhead and introduces potential security risks. In this work, we propose a novel secure aggregation protocol based on two-layer secret sharing to address these issues. By combining Shamir's Secret Sharing with 2-out-of-2 additive secret sharing using a Pseudo-Random Function (PRF), our protocol eliminates direct communication between users, thereby removing the need for the server to forward data. We further extend the protocol with Key-homomorphic PRF (KhPRF) to support high-dimensional data aggregation and apply it to FL, enabling one-shot secure aggregation with a single server and no intermediary data forwarding. To reduce user overhead, we design a new encoding method based on the Chinese Remainder Theorem for the almost KhPRF-based mask, reducing the number of KhPRF calls and mitigating the model update expansion issue after masking. Experimental results show that our scheme significantly outperforms existing methods in terms of auxiliary node overhead. For instance, when the number of users is 100, our scheme improves communication efficiency by nearly 100 times and reduces computational overhead by approximately 17\\%. Moreover, user computation time can be reduced by 51\\% to 75\\% when the input length is $2^{18}$.",
+      "authors": [
+        "Yufei Zhou"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-16T14:30:53+00:00",
+      "link": "https://arxiv.org/pdf/2607.15052v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "two-layer secret sharing for secure aggregation",
+      "llm_evidence_cn": "用于安全聚合的两层秘密共享",
+      "llm_evidence": "用于安全聚合的两层秘密共享",
+      "canonical_evidence": "用于安全聚合的两层秘密共享",
+      "llm_tldr_en": "Proposes a secure aggregation protocol using two-layer secret sharing to eliminate direct user communication.",
+      "llm_tldr_cn": "提出一种基于两层秘密共享的安全聚合协议，消除了用户间的直接通信。",
+      "llm_tldr": "提出一种基于两层秘密共享的安全聚合协议，消除了用户间的直接通信。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

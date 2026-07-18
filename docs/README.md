@@ -6,29 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-17
-- 运行时间：2026-07-17 20:40:23 UTC
+- 最新运行日期：2026-07-18
+- 运行时间：2026-07-18 21:09:23 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：3
 - 精读区：0
-- 速读区：2
+- 速读区：3
 
 ### 今日简报（AI）
-聚焦边缘侧大模型部署，探索超低功耗推理优化与端侧安全防护。
-重点关注通过显著性驱动的自适应压缩（AMC）提升 Transformer 效率，并剖析了 LLM 在野外部署时的隐私挑战。
-建议关注如何在资源受限环境下平衡模型性能与数据安全，实现更稳健的本地化 AI 应用。
-- 详情：[/202607/17/README](/202607/17/README)
+今日聚焦零信任授权、神经网络验证与安全聚合，探索隐私计算与模型安全的前沿边界。
+重点关注利用 SNARKs 实现可证明的零信任远程执行，以及研究揭示了随机参数噪声并不能降低 ReLU 验证的复杂性。
+建议开发者深入了解零知识证明与双层秘密分享协议，以应对分布式环境下的授权与数据聚合挑战。
+- 详情：[/202607/18/README](/202607/18/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Adaptive Model Compression (AMC): Saliency-Driven Resource Allocation for Ultra-Low-Power Transformer Inference](/202607/17/2607.10109v1-adaptive-model-compression-amc-saliency-driven-resource-allocation-for-ultra-low-power-transformer-inference)  
+1. [Prezta: Provable Remote Execution of Zero-Trust Authorization using SNARKs](/202607/18/2607.11466v1-prezta-provable-remote-execution-of-zero-trust-authorization-using-snarks)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：Transformer推理的资源分配
-2. [Securing LLMs in the Wild: Privacy and Security Challenges at the Edge](/202607/17/2607.13088v1-securing-llms-in-the-wild-privacy-and-security-challenges-at-the-edge)  
+   evidence：使用SNARK的可证明远程执行和零信任授权
+2. [Random Parameter Noise Does Not Make Exact ReLU Verification Easy](/202607/18/2607.14375v1-random-parameter-noise-does-not-make-exact-relu-verification-easy)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：边缘端大模型的隐私与安全挑战，包括模型分区
+   evidence：对抗模型下ReLU网络的精确验证
+3. [NFSA: Non-Forward Secure Aggregation with One Server via Two Layer Secret Sharing](/202607/18/2607.15052v1-nfsa-non-forward-secure-aggregation-with-one-server-via-two-layer-secret-sharing)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：用于安全聚合的两层秘密共享
 
 
 <div class="dpr-home-promo-card">
