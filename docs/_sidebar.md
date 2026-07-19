@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-07-19 <!--dpr-date:20260719-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/19/2607.11391v1-performance-evaluation-of-branch-free-fused-multiply-add-algorithms-for-multi-component-type-multiple-precision-floating-point-arithmetic" data-sidebar-item="{&quot;title&quot;: &quot;Performance evaluation of branch-free fused multiply-add algorithms for multi-component-type multiple-precision floating-point arithmetic&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2607.11391v1-performance-evaluation-of-branch-free-fused-multiply-add-algorithms-for-multi-component-type-multiple-precision-floating-point-arithmetic&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;多精度浮点运算算法&quot;}">Performance evaluation of branch-free fused multiply-add algorithms for multi-component-type multiple-precision floating-point arithmetic</a>
   * 2026-07-18 <!--dpr-date:20260718-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/18/2607.11466v1-prezta-provable-remote-execution-of-zero-trust-authorization-using-snarks" data-sidebar-item="{&quot;title&quot;: &quot;Prezta: Provable Remote Execution of Zero-Trust Authorization using SNARKs&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2607.11466v1-prezta-provable-remote-execution-of-zero-trust-authorization-using-snarks&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;使用SNARK的可证明远程执行和零信任授权&quot;}">Prezta: Provable Remote Execution of Zero-Trust Authorization using SNARKs</a>

@@ -1,0 +1,23 @@
+{
+  "label": "2026-07-19",
+  "date": "2026-07-19",
+  "generated_at": "2026-07-19T19:52:08",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202607/19/2607.11391v1-performance-evaluation-of-branch-free-fused-multiply-add-algorithms-for-multi-component-type-multiple-precision-floating-point-arithmetic",
+      "section": "quick",
+      "title_en": "Performance evaluation of branch-free fused multiply-add algorithms for multi-component-type multiple-precision floating-point arithmetic",
+      "authors": "Tomonori Kouya",
+      "date": "2026-07-13",
+      "pdf": "https://arxiv.org/pdf/2607.11391v1",
+      "score": "6.0",
+      "evidence": "多精度浮点运算算法",
+      "tldr": "本研究针对多分量多精度浮点运算，提出了一套适用于双字（DW）、三字（TW）和四字（QW）精度的无分支融合乘加（FMA）算法。通过消除条件分支并利用无误差变换（EFT），该方法旨在解决传统算法中分支预测开销大的问题。实验结果表明，所提算法在基准测试中显著提升了计算效率，为高性能多精度算术运算提供了更优的加速方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "High performance in multi-component multiple-precision arithmetic constructed from existing floating-point operations using error-free transformations (EFTs), can be achieved by employing branch-free algorithms that eliminate if-branches. Zhang and Aiken proposed branch-free algorithms for addition and multiplication in double-word(DW), triple-word(TW), and quadruple-word(QW) arithmetic. Among these, we implemented the TW and QW variants, for which substantial performance improvements over existing algorithms can be expected, and demonstrated that they indeed contribute to acceleration. In this paper, we propose new branch-free fused multiply-add operations for DW, TW, and QW arithmetic to achieve further performance improvements, and show through benchmark tests that the proposed operations can enhance performance.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
