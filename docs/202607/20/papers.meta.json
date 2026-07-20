@@ -1,0 +1,51 @@
+{
+  "label": "2026-07-20",
+  "date": "2026-07-20",
+  "generated_at": "2026-07-20T20:19:45",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202607/20/2607.13093v2-efficient-and-privacy-aware-edge-cloud-collaborative-inference-for-large-language-models",
+      "section": "quick",
+      "title_en": "Efficient and Privacy Aware Edge Cloud Collaborative Inference for Large Language Models",
+      "authors": "Chen Li, Jiexiong Liu, Yi Li",
+      "date": "2026-07-14",
+      "pdf": "https://arxiv.org/pdf/2607.13093v2",
+      "score": "7.0",
+      "evidence": "以隐私为中心的面向量子大模型的边缘云协作推理",
+      "tldr": "针对端侧大模型推理面临的延迟、资源限制与隐私泄露难题，本文提出一种基于端点认证KV缓存的边云协作推理框架。该框架通过在本地处理敏感计算（如嵌入、推测解码）并在云端执行高负载推理，结合AES-GCM加密与量化技术，实现了高效且隐私安全的推理。实验表明，该方法在显著降低延迟和数据传输量的同时，保持了与全云端推理相当的性能。",
+      "tags": "query:fss-llm",
+      "abstract_en": "On-device LLM inference faces a trilemma of response latency, limited hardware resources and user privacy. Full cloud inference delivers strong computing power but exposes user prompts and dialogue data, while standalone on-device inference is unfeasible for most consumer and embedded edge devices. This paper presents a privacy-centric edge-cloud collaborative LLM inference framework built on endpoint-authenticated KV cache. Local endpoints handle input preprocessing, embedding computation, adaptive feature optimization, KV cache authentication, speculative decoding and low-dimensional model head calculation, while the cloud conducts authenticated decoder inference, KV cache management, token verification and high-dimensional vocabulary projection. Endpoints fuse partial outputs, apply language-adaptive masking and sample target tokens. All transmitted data and truncated logits are quantized and AES-GCM encrypted for privacy, with core lightweight modules, draft parameters and cache access policies kept local to avoid leakage. The framework supports heterogeneous devices including CPU-only, GPU-equipped and embedded devices via optimized streaming, batching and quantized ONNX deployment. Evaluations demonstrate that the framework reduces per-token latency by up to 46.1\\% and downlink payloads by up to 67.4\\% over baseline split inference, retaining comparable performance to full cloud inference.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/20/2607.15528v1-publicly-verifiable-certificates-for-statistical-algorithms",
+      "section": "quick",
+      "title_en": "Publicly-Verifiable Certificates for Statistical Algorithms",
+      "authors": "Michael Ngo, Michael P. Kim",
+      "date": "2026-07-17",
+      "pdf": "https://arxiv.org/pdf/2607.15528v1",
+      "score": "6.0",
+      "evidence": "统计有效性的公开可验证证书",
+      "tldr": "本文研究了机器学习中的非交互式证明问题，提出了“公开可验证统计有效性证书”（pvCSV）这一新概念。该机制允许学习者在发布假设的同时提供证书，使任何用户都能基于其特定分布高效验证假设的有效性。研究重点针对自适应统计查询（SQ）算法构建了pvCSV，成功将验证的样本复杂度从学习所需的平方根级别降低至对数级别，为统计算法的公开验证提供了理论基础和高效方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Following Goldwasser, Rothblum, Shafer, and Yehudayoff, who defined a framework for interactive proofs of learning [ITCS'21], we initiate the study of non-interactive proofs of learning. We define and study a new notion: Publicly-Verifiable Certificates of Statistical Validity (pvCSVs), which allow for public, distributionally-robust certification that the result of a learning algorithm is valid. In a pvCSV, a learner publishes a hypothesis $h$ and corresponding certificate $π$; then, any user, who holds a user-specific distribution, can read the pair $(h,π)$ and determine efficiently whether the hypothesis is valid according to the user-specific distribution.   We construct pvCSVs in the context of Adaptive Statistical Query (SQ) Algorithms. To certify SQ algorithms that makes $k$ adaptive queries, we construct pvCSVs where the sample complexity scales with $O(\\log k)$, whereas the sample complexity of the best learning algorithms scale with $\\tilde{O}(\\sqrt{k})$. More generally, we study proof systems for learning in the SQ model, demonstrating the model's strengths as well as its limitations.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/20/2607.15750v1-ciphertext--and-polynomial-level-optimization-for-fully-homomorphic-encryption",
+      "section": "quick",
+      "title_en": "Ciphertext- and Polynomial-Level Optimization for Fully Homomorphic Encryption",
+      "authors": "Seongho Kim, Heelim Choi, Jaemin Kim, Seonyoung Cheon, Dongkwan Kim, Jaeho Lee, Hoyun Youm, Dongyoon Lee, Hanjun Kim, Yongwoo Lee",
+      "date": "2026-07-17",
+      "pdf": "https://arxiv.org/pdf/2607.15750v1",
+      "score": "6.0",
+      "evidence": "使用全同态加密的隐私保护计算",
+      "tldr": "全同态加密（FHE）支持在加密数据上直接计算，但现有编译器多在粗粒度的密文层级进行优化，忽略了多项式层级的优化空间。本文提出Recifhe，一种新型多层级编译器，不仅支持密文层级的全局优化和管理，还能消除跨密文操作的冗余多项式计算。实验表明，Recifhe相比仅进行密文优化的方案实现了1.25倍的加速，显著提升了FHE程序的执行效率。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Fully homomorphic encryption (FHE) schemes such as RNS-CKKS enable privacy-preserving services by allowing direct computation on encrypted data. While recent FHE compilers optimize FHE programs, they operate at the coarse-grained ciphertext level, where each ciphertext operation comprises a sequence of polynomial operations. At this granularity, the compilers miss optimization opportunities across ciphertext operations. This work presents Recifhe, a new multi-level compiler that supports not only ciphertext-level but also polynomial-level optimization. At the ciphertext level, Recifhe transforms a non-FHE input program into an FHE program by inserting ciphertext management operations and applies global optimizations. At the polynomial level, Recifhe eliminates redundant polynomial computations across ciphertext operations. Recifhe achieves a 1.25x speedup over ciphertext-level-only optimization.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

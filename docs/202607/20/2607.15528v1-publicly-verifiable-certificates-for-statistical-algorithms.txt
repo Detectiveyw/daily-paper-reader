@@ -1,0 +1,1258 @@
+Title: Publicly-Verifiable Certificates for Statistical Algorithms
+
+URL Source: https://arxiv.org/pdf/2607.15528v1
+
+Published Time: Mon, 20 Jul 2026 00:19:30 GMT
+
+Number of Pages: 41
+
+Markdown Content:
+# Publicly-Verifiable Certificates for Statistical Algorithms 
+
+## Michael Ngo ∗
+
+## MIT 
+
+## mingo@mit.edu 
+
+## Michael P. Kim †
+
+## Cornell University 
+
+## mpk@cs.cornell.edu 
+
+## 1 April 2026 
+
+Abstract 
+
+Following Goldwasser, Rothblum, Shafer, and Yehudayoff, who defined a framework for interactive proofs of learning [GRSY21], we initiate the study of non-interactive proofs of learn-ing. We define and study a new notion: Publicly-Verifiable Certificates of Statistical Validity 
+
+(pvCSVs), which allow for public, distributionally-robust certification that the result of a learn-ing algorithm is valid. In a pvCSV, a learner publishes a hypothesis h and corresponding certificate π; then, any user, who holds a user-specific distribution, can read the pair ( h, π ) and determine efficiently whether the hypothesis is valid according to the user-specific distribution .We construct pvCSVs in the context of Adaptive Statistical Query (SQ) Algorithms. To certify SQ algorithms that makes k adaptive queries, we construct pvCSVs where the sample complexity scales with O(log k), whereas the sample complexity of the best learning algorithms scale with ˜O(√k). More generally, we study proof systems for learning in the SQ model, demon-strating the model’s strengths as well as its limitations. 
+
+# 1 Introduction 
+
+Training large-scale AI models using statistical machine learning is notoriously costly. Due to the resource demands of running ML algorithms, AI users rely upon pre-trained models from a handful of tech companies. These companies hold enough data—so they claim—to train general-purpose models that are effective across a wide range of settings. In this setup, however, users receive no guarantee that the AI models were trained appropriately. If users fear that the training data does not adequately reflect their setting, they must investigate, for themselves, whether the model produces errors (or worse, harms) within their application. Inspired by these issues, Goldwasser, Shafer, Rothblum, and Yehudayoff [GRSY21] introduced and studied the problem of delegating machine learning, through the PAC Verification framework. Building on the classic model of interactive proofs [GMR85,Bab85], PAC Verification formalizes the problem: a statistically-limited user (the verifier ) interacts with a powerful, but untrusted learner 
+
+> ∗
+
+Research completed while at Cornell University, supported by the Bowers Undergraduate Research Experience (BURE) and the Dean Archer Undergraduate Research Program. This research was supported by a gift from Google. 
+
+> †
+
+This research was supported by a gift from Google. 
+
+1arXiv:2607.15528v1 [cs.LG] 17 Jul 2026 (the prover ), who aims to convince the user that a given model (the hypothesis ) is valid. As in cryptographic proof systems, PAC Verification requires that protocols for delegating learning satisfy formal notions of completeness and soundness . To date, results in the area focus on developing protocols for verifying Agnostic PAC Learning [Val84, Hau92, KSS94] for specific concept classes [GRSY21, MS23, GJK +24]. As a notable exception, Mutreja and Shafer [MS23] also introduce a notion of delegation of Statistical Query (SQ) algorithms for loss minimization. An essential element of prior works on delegation of learning is interaction . To establish whether a given hypothesis is valid, the prover and verifier exchange a sequence of messages in an online fashion, after which the verifier chooses to accept or reject the prover’s hypothesis. As a concrete example, the original work on PAC verification shows how to delegate the Goldreich-Levin algorithm [GL89] (which requires point query access to the unknown function), when the verifier only has i.i.d. labeled samples. In this proof system, the verifier uses its interactions with the prover to label the point queries, while cleverly hiding some points whose labels are known to the verifier to ensure soundness. The early works on PAC verification have demonstrated that interactive proof systems provide a powerful tool for efficiently checking the results of an expensive ML computation. 1
+
+Interaction, however, also presents challenges. Most immediately, running an interactive proof re-quires the verifier and prover to be online at the same time to execute the protocol. Additionally, each execution of the interactive proof may require the prover to answer execution-specific chal-lenges, including re-running the original ML computation. Given the immense cost of training ML models in the first place, providers may be unwilling to participate in the interactive proof more than once (if at all). In such a setting, where the interactive proof is executed once—between the learner and a single verifier—many users would have to place their trust in a single entity. Even if users agree that the verifier is generally trustworthy, as before, individual users may worry that the verifier’s data does not represent their setting and applications. 
+
+This Work. We initiate the study of non-interactive proofs of learning. Our study leads us to a new notion: Publicly-Verifiable Certificates of Statistical Validity (pvCSVs) . pvCSVs allow for public, distributionally-robust certification that the result of a learning algorithm is valid. In particular, a pvCSV allows a learner to publish a hypothesis h and certificate of validity π that allows any downstream user to subsequently verify that the hypothesis is statistically valid on a 
+
+user-specified distribution. We can understand the semantics of a pvCSV by imagining two worlds. 
+
+• In the first world, a user collects a huge amount of data from a distribution D, relevant to their setting and application. Then, they correctly execute a statistical learning algorithm A
+
+on top of this data to obtain a hypothesis hideal .
+
+• In the second world, a centralized, well-resourced learner publishes a pvCSV ( hreal , π ) for the algorithm A; the same user from before collects a much more modest amount of data from 
+
+D, then reads and verifies ( hreal , π ), using the small amount of user-specific data. A pvCSV guarantees that if ( hreal , π ) passes verification, the two worlds produced equally-valid hypotheses hideal ≈D,A hreal according to the user-specific data distribution and the learning algo-
+
+> 1In these works, and in our paper, “efficiency” primarily focuses on statistical resources, rather than computation.
+
+2rithm A. This guarantee must hold even though the user has no knowledge of the data distribution used to produce the pvCSV. As such, pvCSVs resolve the key shortcomings of interactive proofs for delegation of learning: the learner can execute the expensive training algorithm once and (with little overhead) generate a corresponding pvCSV certificate that any user can subsequently verify. 
+
+Certification of Adaptive Data Analysis. We make our study of pvCSVs concrete by revis-iting the question of Adaptive Data Analysis [DFH +15c] in the Statistical Query Model [Kea98]. Many tools for learning from data—including workhorse ML algorithms like gradient descent—can be framed as adaptive statistical algorithms. In such an algorithm, the learner is allowed to ask a sequence of queries of the data distribution (e.g., What is the gradient of the expected loss over 
+
+D? ), where each query may depend on the results from prior queries. Formally, we consider learning algorithms A that interact with a Statistical Query (SQ) oracle O:given a tolerance τ and a query q, O(q) responds with a τ -accurate estimate of the expectation of the predicate q over the data distribution. Critical to our investigation, the algorithm may select its sequence of queries adaptively based on the prior responses. That is, the algorithm’s choice of the 
+
+i-th query qi may depend arbitrarily on prior queries q1, . . . , q i−1 and responses O(q1), . . . , O(qi−1), (e.g., What is the gradient at the i-th iterate, after taking i − 1 gradient descent steps? ). While the paradigm of adaptive data analysis is a versatile and powerful tool for learning, such algorithms are known to be statistically expensive. About a decade ago, [DFH +15c] identified adaptivity as a key issue in statistical algorithms. To maintain the statistical validity of an adaptive analysis requires the learner to either resample fresh data to support every new query, or to employ sophisticated (differentially-private) algorithms for answering queries in a way to prevent overfitting to the data set [DFH +15c,DFH +15a,DFH +15b,BNS +16,FS18,JLN +19,DK22,Bla25]. To answer k
+
+adaptively selected statistical queries, the best algorithms use a number of samples scaling (roughly) with √k, and in fact, this dependence is essentially tight [HU14, SU15]. In other words, no matter what techniques are employed, adaptive statistical algorithms require 
+
+exponentially more data than non-adaptive (batch) statistical analyses of similar size. In this work, we ask when we can certify the results of adaptive data analysis more efficiently than learning. 
+
+## 1.1 Our Contributions 
+
+We develop proof systems for delegating arbitrarily-adaptive statistical algorithms where the verifier requires samples scaling only with the non-adaptive complexity. In doing so, we realize an exponen-tial gap, between the sample complexity required for executing SQ algorithms versus verifying them. Moving beyond prior work on interactive proofs for learning, we build novel non-interactive proof systems—namely, publicly-verifiable Certificates of Statistical Validity —that enable a new form of distributionally-robust validation of statistical learning. Along the way, we develop a number of extensions to earlier models of proof systems for delegation of learning. 
+
+Publicly-Verifiable Certificates of Statistical Validity. In Section 3, we introduce our pri-mary contribution: a new notion of proof that allows for public, distributionally-robust certification of learning. A publicly-verifiable Certificate of Statistical Validity (pvCSV) is a non-interactive proof 3system that allows any verifier to certify the results of a statistical computation with respect to the verifier’s own distribution . A pvCSV allows a single, well-resourced learner—the prover—to publish the results of a statistical algorithm in a way that can be checked efficiently (with less resources) by any downstream verifier; in particular, the verifiers need not hold the same distribution as the prover. Instead, the proof system guarantees a universal soundness property such that if the verifier accepts the proof, then the results of the statistical algorithm are valid on the verifier’s distribution—even if the algorithm was executed using samples from a different distribution. 
+
+Definition 1 (pvCSV, informal) . A publicly-verifiable Certificate of Statistical Validity is a non-interactive proof system, where a prover P with distribution DP publishes a hypothesis h paired with certificate π. Any verifier V with distribution DV can read the pair (h, π ) and accept or reject where the following guarantees hold with high probability. 
+
+• Completeness: if DP = DV , there exists an honest prover pair (h, π ) such that h is valid for 
+
+DV and V accepts. 
+
+• Universal Soundness: for any verifier V with distribution DV , for any (possibly-cheating) prover pair (˜h, ˜π), if V accepts, then ˜h is actually valid for DV .
+
+One way to understand the guarantee of pvCSVs is as a robust proof of statistical validity, without an explicit assumption about distributional shifts . Rather than positing some known relationship between the prover and verifier distributions, the verification procedure works for any DP and 
+
+DV and results in acceptance whenever the published certificate—derived from the execution of a learning algorithm A using the prover’s distribution—reflects some legitimate execution on the verifier’s distribution. While our notion of completeness assumes that DP = DV , the guarantee is more subtle than this equality would suggest. The distributions DP and DV may differ significantly in composition, but if the verifier accepts, then (by universal soundness) the hypothesis h is valid for DV (because the distributions are indistinguishable according to some invocation of A). The careful reader will note that this “universal soundness” condition is actually implied by standard soundness for delegation of learning, 2 but holds new significance in the context of non-interactive proofs. Our view on soundness, paired with a non-interactive proof system, allows us to realize certificates of learning that can be verified publicly by any user. We can use various measures of complexity to evaluate the quality of a pvCSV construction. Prin-ciple to our work is sample complexity: we aim for pvCSVs where the verifier saves considerably in the number of samples needed from DV compared to the number of samples required for learning (or proving). Further, we can track other measures like time complexity (of both the verifier and the honest prover) and proof length as well. We define pvCSVs formally in Section 3 and provide a thorough discussion of the notion and its properties (like validity and universal soundness) therein. With this key definition in place, the main technical contributions of this work are to construct pvCSVs for adaptive statistical algorithms within the SQ learning framework. Our pvCSVs achieve an exponential gap in the sample complexity between SQ verification and SQ learning. While the core idea of each of our constructions is similar, the resulting protocols differ in important ways based on properties of the original SQ algorithm. As we show, the way that the algorithm uses randomness and the way the SQ oracle is allowed to adapt to the algorithm’s internal state are key factors in building universally-sound pvCSVs.     
+
+> 2The honest prover using DPmay be viewed as a cheating prover with respect to the verifier holding DV.
+
+4pvCSVs for Deterministic SQ Algorithms. In Section 3.1, we consider SQ algorithms that do not use internal randomness. These “deterministic” SQ algorithms are considerably simpler to reason about, and as such, we obtain strong, statistically-sound pvCSVs for all such algorithms. 3
+
+Theorem 2. Let A be a deterministic SQ algorithm that learns a concept G. Suppose A makes k
+
+adaptive queries to a τ -accurate SQ oracle O. There exists a pvCSV scheme for certifying G (with constant failure probability) achievable in the following complexities. 
+
+• Honest prover sample complexity: mP ≤ ˜O(√k/τ 2)
+
+• Verifier sample complexity: mV ≤ O(log( k)/τ 2)
+
+• Certificate size: |π| ≤ O(k · log(1 /τ )) In other words, even though the best learning algorithms use ˜O(√k) samples to support k adaptively-chosen queries, there is a short certificate (namely, the results of the queries) that convinces a verifier with considerably less information about the distribution in O(log( k)) samples. The bounds of The-orem 2 follow from the prover and verifier collectively executing a direct simulation of the original SQ algorithm with no overhead for the honest prover; in this sense, the delegation scheme can be thought of as doubly-efficient in its statistical complexity, ` a la [GKR08]. Computationally, both the prover and the verifier need to simulate the execution of the underlying SQ algorithm, so the time-complexity scales roughly linearly in the running time of the original algorithm. 
+
+pvCSVs for Randomized SQ Algorithms and SQ Protocols. In Section 4, we investigate how to build pvCSVs for SQ algorithms that use randomness. Randomness introduces significant technicality in the resulting proof systems. Here, we give an informal description of our results, including various definitions we develop to obtain the results. Towards a pvCSV for randomized SQ algorithms, we need to reason about how the algorithm— and the (possibly-adversarial) SQ oracle—may act adaptively to the randomness. First, we say that a randomized SQ algorithm operates in ℓ “epochs” if it can be broken down into a series of 
+
+ℓ deterministic SQ algorithms, which each take a fresh random string as an input. Next, we say that an SQ oracle is “public-state” if it may choose its query responses as a function of the SQ algorithm’s internal randomness (in contrast to an “oblivious” oracle, which has no knowledge of the algorithm’s randomness). We construct pvCSVs in the Random Oracle Model (ROM) [BR93] for all constant-epoch randomized SQ algorithms that are correct using a public-state SQ oracle. 
+
+Theorem 3. Let A be a randomized SQ algorithm that learns a goal G with high probability. Suppose A makes k adaptive queries to a τ -accurate public-state SQ oracle O, over an execution of O(1) epochs. There exists a computationally-sound pvCSV scheme in the ROM for certifying G
+
+(with constant failure probability) achievable in the following complexities. 
+
+• Honest prover sample complexity: mP ≤ ˜O(√k/τ 2)
+
+• Verifier sample complexity: mV ≤ O(log( k)/τ 2)
+
+• Certificate size: π ≤ O(k · log(1 /τ )) In fact, Theorem 3 follows from a much more general result. We start by adapting the definition of delegation of learning [GRSY21] to the statistical query setting, yielding a format for interactive   
+
+> 3We note that such “deterministic” algorithms may still have non-deterministic behavior, due to the algorithm’s adaptivity to the responses from the SQ oracle, which is assumed to be τ-accurate, but otherwise, adversarial.
+
+5learning which we call SQ protocols . We show that a large class of interactive SQ protocols (of which randomized SQ algorithms are a special case) can be compiled into a canonical SQ protocol 
+
+with desirable properties. The class consists of SQ protocols where the verifier may send random and non-random challenges to the prover and may make private statistical queries (not sent to the prover) to its public-state oracle; we call these protocols “mixed-message, private-query” SQ protocols. After compilation, we obtain a canonical SQ protocol with the same completeness and soundness guarantees as the original, but which is public-coin (verifier only sends random challenges) and public-query (verifier reveals all SQs to the prover). Importantly, the canonical verifier still only makes a single batch of statistical queries. 
+
+Lemma 4. Suppose (P, V ) is a mixed-message, private-query SQ protocol where the verifier makes 
+
+k adaptive queries to a τ -accurate public-state SQ oracle and verifies concept G. There exists a canonical public-coin, public-query SQ protocol (Pcan , Vcan ) that verifies G with the same complete-ness/soundness as (P, V ), with the following properties. 
+
+• Pcan makes at most k additional statistical queries compared to P ;
+
+• Vcan makes a single, non-adaptive batch of k statistical queries. 
+
+This canonical SQ protocol can then be compiled into a pvCSV via a Fiat-Shamir transforma-tion [FS86], whose blow-up in soundness scales exponentially with the “epoch complexity” of the original protocol. The sample complexities claimed in Theorem 3 follow by giving sample-based implementations of an adaptive SQ oracle (for the prover) and non-adaptive SQ oracle (for the verifier). As a consequence, we obtain computationally-sound pvCSVs for a much broader class of learning goals—those that can be solved by an interactive SQ protocol according to Lemma 4. As may be evident, to appropriately reason about delegation of learning in this context, we need to reason about a number of novel concepts (e.g., SQ protocols, public-coin, public-query, epoch complexity, etc.). An additional key contribution of our work is laying out precise definitions for these notions that arise in the study of proof systems for learning, presented formally in Section 4.1. We discuss our construction of pvCSVs for randomized algoirthms/SQ protocols in greater detail within the Technical Overview. 
+
+Beyond pvCSVs: The Limits of SQ Protocols. Building pvCSVs, particularly for ran-domized SQ algorithms, required investigating aspects of more general interactive protocols for statistical query learning. We complement our constructions of pvCSVs with a few results about the strengths and limitations of SQ protocols. We show that, quite generically, verification of SQ protocols can be made statistically non-adaptive, in the sense that the verifier issues a single batch of statistical queries, and thus, has sample complexity scaling logarithmically in the number of queries. The exact class of protocols which we can delegate soundly in this manner is a bit technical, but it consists of a large class of “public-query” SQ protocols. In particular, the class of protocols includes private-coin protocols, where the verifier maintains secret randomness from the prover, but allows the prover to know which statistical queries the verifier issues. 
+
+Proposition 5 (Informal) . For every public-query SQ protocol where the verifier makes k adaptive queries to a τ -accurate public-state SQ oracle, there is an equivalent SQ protocol where the verifier V
+
+makes a single, non-adaptive batch of queries; that is, V has sample complexity mV ≤ O(log( k)/τ 2).
+
+6This result shows that statistical validation of a large class of SQ protocols can be done in non-adaptive sample complexity. A natural question, then, is whether this statistically-efficient verifi-cation scheme can be made computationally-efficient. Unfortunately, we show a barrier to generic computational savings in the SQ model. Piggybacking off of a sample complexity lower bound given by [MS23] for PAC Verfication, we obtain a lower bound on the verifier’s query complexity 
+
+for the same class of SQ protocols from Proposition 5. 
+
+Corollary 6 (Informal) . For every hypothesis class H of VC dimension d, in any SQ protocol (as in Proposition 5) that ε-PAC Verifies H using a τ -accurate SQ oracle for τ ≈ ε, the verifier makes 
+
+2Ω( √d) statistical queries. 
+
+SQ Verification under Differential Privacy. Finally, we show that the verifiers of all of our pvCSVs and interactive SQ protocols can be implemented under Differential Privacy [DMNS06]. Differential Privacy (DP) is the de facto notion to protect individuals’ data in statistical analyses, but it can be statistically costly: implementing SQ algorithms under DP requires sample complexity akin to adaptive data analysis. This result shows that a verifier can validate the results of a statistical analysis much more efficiently, while still maintaining privacy over their own data set. The new private verifiers use essentially the same number of samples as the non-private verifiers. Concretely, we state the result for the pvCSV verifiers. 
+
+Proposition 7 (Informal) . Consider the pvCSV verifier from either Theorem 2 or Theorem 3. There exists an ε-DP implementation of the verifier over the samples from DV (with constant failure probability) whose sample complexity scales as O(log( k)/τ 2 + log( k)/τ ε ).
+
+## 1.2 Technical Overview and Discussion of Results 
+
+In the remainder of the introduction, we give a more detailed overview of our models and results. Throughout, we aim to provide pointers into the main text for formal presentation. We include discussion of the significance of the results, connections to prior works, as well as possible extensions. The primary goal of our work is to take an arbitrarily-adaptive SQ algorithm A and turn it into a pvCSV that can be verified efficiently. At a high-level our approach is simple: require the prover to run a direct simulation of A; then, check the prover’s work. In particular, the statistically-expensive aspect of adaptive data analysis is generating the sequence of queries q1, . . . , q k. Once the sequence has been generated, however, the answers to the queries q1, . . . , q k can be checked in a single, non-adaptive batch of k statistical queries. This observation immediately suggests a non-interactive proof system for delegating “deterministic” SQ algorithms that do not use any internal randomness, which is the focus of Section 3.1. 
+
+• The honest prover P executes A using their own SQ oracle OP to answer any necessary queries. Along the way, the prover records the queries and results, and at the end, when A
+
+outputs some hypothesis h, P sends h and π = ⟨q1, OP (q1), . . . , q k, OP (qk)⟩ to the verifier V .
+
+• To certify that h is valid, the verifier must re-run A, but rather than using its own oracle, it will answer any statistical queries using the answers from π. If at any point, the verifier’s execution A requires a query q that is not provided in π, then V rejects immediately, since the 7transcript sent by the prover was not consistent with the execution of A. If the transcript is consistent, then the verifier concludes the protocol by issuing the batch of statistical queries from π to its own oracle OV , and checks that OV (qi) is sufficiently close to the reported 
+
+OP (qi) for each query. Note that even though we think of A as deterministic since it does not use randomness, its adaptivity to the SQ oracle responses introduces non-determinism, so verifying the consistency of the transcript is a non-trivial aspect of the verifier’s check. Given the simplicity of this delegation scheme, both the honest prover and verifier can be imple-mented very efficiently. The only overhead of the honest prover is to record the results of their statistical queries to be sent to the verifier (or posted for public verification), so the sample and time complexities scale precisely with the original complexities of the SQ algorithm A. To an-swer a sequence of adaptive queries to τ -accuracy, the prover can be implemented in ˜O(√k/τ 2)samples [BNS +16, DK22, Bla25]. The verifier also has to execute the algorithm A, so there is no computational savings, but the statistical savings are exponential. By concentration bounds, checking a batch of k statistical queries to τ -accuracy can be achieved from O(log( k)/τ 2) samples. 
+
+Understanding Universal Soundness. One of the key selling points of pvCSVs is the universal soundness condition: that any verifier holding DV which may differ significantly from the prover’s distribution DP can check the certificate while maintaining soundness. As described above, our pvCSV construction does not explicitly distinguish between the prover’s distribution DP and the verifier’s DV . But in a sense that can be made formal, to obtain universal soundness, we only need for standard soundness to hold from the verifier’s perspective. Specifically, even if the pvCSV ( h, π )was generated honestly by a prover P holding DP , to the verifer holding DV , we can imagine P
+
+to be a potential cheating prover. In this case, the verifier may reject outright, or may accept if h
+
+actually satisfies the learning goal over DV . The verifier’s final statistical validation—paired with the correctness guarantee of SQ algorithms—ensures that if the reported query responses from π
+
+are sufficiently close to the expectations on the verifier’s distribution DV , then h is the result of some valid invocation of the SQ algorithm A over DV .
+
+Handling Randomness. For algorithms that use randomness, we cannot simply trust the prover to report a direct simulation of the execution of A, using untrusted randomness. Instead, a natural idea for a pvCSV is to convert the randomized algorithm into a public-coin protocol, then apply a Fiat-Shamir transformation [FS86], to obtain a non-interactive proof. In Section 4, we show that this approach works to yield pvCSVs, but we need to be careful in how we reason about the algorithm’s use of randomness, as well as how the SQ oracle affects the proof of soundness. Starting from a randomized SQ algorithm A, we imagine breaking the algorithm into a series of “epochs” where in the i-th epoch, the algorithm samples fresh randomness ri, and then executes a deterministic SQ algorithm Ai until the end of the epoch. Every randomized algorithm can be broken into epochs, but different algorithms require more or fewer epochs. At the low extreme, an algorithm that uses a random initialization, then executes deterministically, would have epoch complexity 1; at the other extreme, a stochastic optimization algorithm that makes random choices at every iteration based on fresh independent coins will have high epoch complexity. The epoch complexity of the algorithm A controls the complexity of the resulting proof system. 8In particular, we can turn any SQ algorithm of epoch complexity ℓ into a public-coin interactive proof in the SQ model of round complexity ℓ. At the start of each epoch i, the verifier V sends randomness ri to the prover P . Then, the honest prover P simulates the deterministic algorithm 
+
+Ai(ri) using its own oracle OP to answer any statistical queries. At the end of the epoch, the prover can return a transcript, similar to in the deterministic case, that summarizes the statistical queries and oracle responses. At the end of all epochs, the verifier can issue a non-adaptive batch of queries to OV to ensure that the responses were all sufficiently accurate. As described, the SQ protocol is complete, but has a subtle issue with soundness without further assumptions. In the original algorithm, A issues its queries to an SQ oracle O, whereas in the protocol, the verifier V simulates A but delegates the SQs to the prover. The key distinction between these two setups is that the prover also receives the internal randomness of the algorithm 
+
+ri, as the public-coin message at the start of each epoch. In other words, to ensure soundness, the original randomized algorithm A must be correct even for SQ oracles that have full knowledge of the state of A. Algorithms whose correctness hinges on the obliviousness of O to the randomness of 
+
+A cannot be delegated in this way while maintaining soundness. Formally, we define “public-state” SQ oracles in Section 4.1, along with the corresponding correctness notion for SQ algorithms. Once we restrict our delegation to randomized SQ algorithms which are correct under this more powerful SQ oracle, then we obtain a sound public-coin protocol. To obtain pvCSVs, we appeal to the Random Oracle Model (ROM), and show how to apply the Fiat-Shamir transform to our protocol. There is some subtlety in defining the notion of universal soundness for pvCSVs in the ROM and then subsequently arguing that Fiat-Shamir applied to our protocol obtains such soundness. With the appropriate definitions in place, the soundness proof follows by following the state restoration approach of [BSCS16, CY24]. 
+
+Beyond SQ Algorithms. Building pvCSVs for randomized SQ algorithms required us to define and investigate a number of more general models of proof systems in the SQ model. A key result we show in Section 4.2 is that a diverse class of interactive SQ protocols can be compiled into a canonical public-coin SQ protocol. In a sense, this result is an analogue of the established understanding of public-coin protocols for delegation of computation. We show that, quite generically, if an SQ protocol consists of a verifier that reveals its randomness to the prover, there is a canonical version of the protocol where the only messages the verifier sends to the prover are its randomness. Further, the verifier need not maintain any private statistical queries, but can delegate all of its queries to the prover, then execute one final non-adaptive validation. This result holds in the same model of public-state SQ oracle, which may adapt to the state of the verifier. With this canonical compiler for SQ protocols, we can similarly obtain computationally-sound pvCSVs in the ROM, by applying Fiat-Shamir to the canonical protocol. 
+
+Towards Computationally-Efficient Certification of Learning. In this work, our focus is on developing statistically-efficient proofs of learning. We make no effort to optimize the verifier’s running time. Our pvCSV verifier for an SQ algorithm A runs in time proportional to the running time of A. A natural question in the study of proof systems is whether we can save on computation time during verification. In Section 5, we show some barrier to generic speed-ups (at least within the SQ framework). In 9particular, Corollary 6 shows that there are statistically learnable VC classes, for which there is no computationally-efficient SQ verification scheme, even if we allow for interaction. Our SQ lower bound is actually a consequence of the efficiency of our verification schemes (in terms of the number of statistical queries) and an existing lower bound on the samples required for verification from [MS23] in terms of the VC dimension. In other words, a fast SQ verification scheme (which doesn’t make many SQ queries) would imply an impossibly-statistically-efficient verification scheme for the VC class studied by [MS23]. Nevertheless, in some sense, our exploration of pvCSVs and SQ protocols provides new design principles for simultaneously statistically and computationally efficient verification. Recall that the canonical protocol of Lemma 4, which compiles into a pvCSV as in Theorem 3, applies not just to randomized algorithms but to a broad class of SQ protocols. Further, the verifier in the resulting pvCSV runs in time proportional to (or less than) the verifier in the original protocol—not the full simulation of ( P, V ). In other words, if we can design SQ protocols that reduce verification time, then we may get simultaneous statistical and computational efficiency for free (provided the protocol is covered by Lemma 4). Concretely, our results show that minimizing the epoch complexity of a learning procedure—even if that entails designing an interactive proof system—may actually lead to more efficient pvCSVs than simply focusing on delegating algorithms for learning. Such observations may also motivate a deeper study of pseudorandomness in machine learning; for instance, if a randomized SQ algorithm can actually be proved correct under a weaker source of randomness, it may reduce the epoch complexity and improve efficiency. 
+
+Publicly-Verifiable End-to-End DP. Finally, in Section 6, we show Proposition 7, which implies a mechanism for verifying pvCSVs statistically efficiently under Differential Privacy with respect to the verifier’s samples. Given such a verifier, it’s tempting to wonder whether we can achieve End-to-End DP over both the prover’s samples from DP and the verifier’s from DV . The existence of a DP verifier implies an honest prover strategy to achieve such a goal. Due to the connections between adaptive data analysis and DP, this honest prover strategy is no more expensive than accounting for adaptivity. That said, in our setting, we’d have no guarantees about the behavior of the cheating prover, who might violate DP arbitrarily. To handle the possibility of a cheating prover, we could employ a scheme for Certified DP of [BGKW24]. Certified DP ensures that a prover’s release of statistical queries follows a DP mechanism with respect to some committed-to, but untrusted database X ∼DP , in a manner that can be verified publicly. In this sense, adding our DP statistical validation scheme as post-processing to the output of a Certified DP mechanism would allow the verifier to be convinced of End-to-End DP, while also ensuring statistical accuracy of queries from the untrusted database X under the verifier’s distribution DV .
+
+## 1.3 Related Works 
+
+Our study of pvCSVs and SQ protocols lives in the intersection of learning theory and cryptographic proof systems. We highlight some of the most relevant related lines of work. 10 Proof Systems for Learning and Statistics. Proof systems for statistical algorithms grew out of the literature on interactive (cryptographic) proof systems [GMR85, Bab85]. The PAC Verification, introduced in [GRSY21], led to a number of results about strengths and limitations of interactive proofs of learning [MS23,GJK +24]. Most related to our work is the work of Mutreja and Shafer [MS23], who also thought about the issue of delegating SQ algorithms in the context of loss minimization. In fact, in a subsequent journal version [MS26], the authors independently include a result analogous to Proposition 5, on the interactive delegation of adaptive SQ algorithms. Other works have investigated certifying properties of learning algorithms. [BGKW24] recently designed mechanisms for public cerification of differential privacy (and other private probabilistic mechanisms) in the release of statistical queries. Following this work, [BTFM +25] extended the techniques to give a publicly-verifiable implementation of DP Stochastic Gradient Descent, without appealing to heavy-handed cryptographic primitives for certifying generic computations. Beyond proofs for learning algorithms, there has been significant work investigating proof systems for properties of distributions. Initiated by [CG18], a sequence of works [HR22, HR23, HR24b, HR24a] has established doubly-efficient proof systems for distribution testing. 
+
+Adaptive Data Analysis. Since its identification as a key algorithmic challenge [DFH +15b, DFH +15a, DFH +15c], Adaptive Data Analysis has seen significant developments, in line with the developments of sophisticated tools for Differential Privacy [DMNS06]. The majority of work studying adaptive data analysis focuses on the problem of answering statistical queries. [BNS +16] first showed near-optimal ˜O(√k) dependence on the number of adaptively chosen queries. Sub-sequently, a sequence of papers has simplified their analysis and techniques and improved their bounds [FS18, JLN +19, DK22]. Recently, [Bla25] showed that a much simpler subsampling mecha-nism actually suffices for optimal adaptive data analysis—despite the fact that it does not suffice for DP. Indeed, the analysis of [Bla25] does not go through the standard “transfer theorem” that DP implies adaptive generalization, but rather analyzes the effects of subsampling directly. 
+
+# 2 Preliminaries 
+
+We give formal definitions of the statistical query model of learning [Kea98] that we adopt, as well as proof systems developed in the context of verifying machine learning [GRSY21,MS23]. We start with background on the SQ Model. Then, we discuss our formalisms for algorithms and proof systems that use SQ oracles. We defer some technical aspects of our learning model (particularly those related to algorithms’ use of randomness) to the relevant technical section (Section 4.1). Finally, we review background on adaptive data analysis and the complexity of implementing SQ algorithms from samples [DFH +15a]. 
+
+## 2.1 The Statistical Query Model 
+
+The Statistical Query (SQ) Model [Kea98] abstracts away the notion of learning from samples to the notion of learning from approximate statistics. In this model, the learning algorithm is allowed 11 to specify predicates q : X → { 0, 1} from a collection 4 Q ⊆ { 0, 1}X and receive—from the statistical query oracle —the (rough) expectation of the queried predicate on the distribution of interest D.
+
+Definition 2.1 (SQ Oracle, idealized) . A Statistical Query (SQ) Oracle is a stateful algorithm 
+
+O : Q → [0 , 1] that takes input queries q ∈ Q and responds with evaluations O(q) ∈ [0 , 1] . For 
+
+τ > 0, the oracle O is τ -accurate over D if for any finite sequence of k ∈ N (adaptively-selected) queries q1, q 2, . . . , q k, for all i ∈ [k]
+
+O(qi) − E
+
+> X∼D
+
+[qi(X)] ≤ τ. 
+
+Many notable learning algorithms can be described in the SQ Model, including most (Agnostic) PAC Learning algorithms 5 [Kea98] as well as more modern ML algorithms like Gradient Descent. We remark that, per the definition, the SQ oracle O with τ -accuracy must always report approxi-mate expectations within τ of the true expectation. As such, given access to an SQ oracle, we can hope to design algorithms that always succeed. In Section 2.3, we discuss concrete, sample-based implementations of the SQ oracle abstraction, which necessarily introduce a failure probability. 
+
+Learning Goal. We consider an abstract setting of learning over distributions D supported on a domain X , such as X = {0, 1}d for some finite dimension d ∈ N. Additionally, we consider an abstract collection of hypotheses H. We define the goal of learning in terms of identifying a hypothesis within some “good” set of hypotheses G(D) ⊆ H , parameterized by the distribution D.
+
+Definition 2.2 (Learning goal, abstract) . Fix a class of hypotheses H and a learning goal G ⊆ H .For a distribution D, we say an algorithm A learns G if A outputs some g ∈ G (D) in the target set of hypotheses. 
+
+For instance, in the context of Agnostic PAC learning, we can take H to be the concept class 
+
+H ⊆ { h : {0, 1}d → { 0, 1}} , and the good subset G(D) ⊆ H to be all hypotheses achieving classification error Pr [g(x)̸ = y] ≤ Pr [h∗(x)̸ = y] + ε competitive with the best h∗ ∈ H over D. We adopt this abstract notion of learning, rather than a concrete notion like the PAC framework, in order to emphasize the generality of our approach. At the extreme, we may take the hypotheses H
+
+to be the collection of sequences of statistical queries and expectations, and the good set G(D) to be sequences that arise as a valid execution of a statistical algorithm on D. (We comment further on our choice of abstract Learning Goal after Definition 2.7 of protocols for delegating SQ learning.) 
+
+Statistical Query Algorithms. Naturally, we define SQ algorithms as algorithms that may make calls to an SQ oracle. For SQ algorithms that solve a learning goal, we need to specify the approximation parameter τ > 0 necessary to guarantee correctness. Formally, we distinguish between deterministic and randomized SQ algorithms.          
+
+> 4In our work, we take Q={0,1}Xto be the set of all boolean functions, so often drop explicit reference to Q.In this work, we will not consider the computational complexity of evaluating functions q∈Q, and instead, measure the complexity of learning in terms of the total number/sequence of queries issued.
+> 5Learning Parities is the most notable example of a task that is PAC learnable, but not SQ learnable.
+
+12 Definition 2.3 (SQ Learning, deterministic) . Fix a learning goal G and τ > 0. A deterministic algorithm A τ -SQ learns G if, for any distribution D and τ -accurate SQ oracle O for D, AO outputs a hypothesis g ∈ G (D).
+
+When A is deterministic, without loss of generality, we can think of the SQ oracle O as a pre-specified function where O(q) is defined for all q ∈ Q up front, rather than a stateful algorithm responding sequentially. Specifically, if the queries that A issues are a deterministic function of the input to A and the responses given by O so far, then a pre-specified function can simulate any stateful oracle, by simply running A ahead of time. Note the output of running A with τ -accurate oracle O may still be nondeterministic based on the choice of O, even if A doesn’t flip coins. That said, we insist that given a τ -accurate (idealized) oracle O, the algorithm A always succeeds. 
+
+Randomized SQ Algorithms. In our study of SQ proof systems, the distinction between de-terministic and randomized algorithms is significant. In contrast to deterministic algorithms, when 
+
+A is randomized, it becomes important to think of the SQ oracle O as a stateful adversary, who responds with knowledge of prior queries/responses, subject to τ -accuracy. That is, for a sequence of queries q1, q 2, . . . , q k, the response ai = O(qi) may depend on ⟨q1, a 1, q 2, a 2, . . . , q i−1, a i−1, q i⟩. An SQ algorithm that learns G must output a good hypothesis with high probability, no matter what decisions the oracle makes in response to the sequence of queries. 
+
+Definition 2.4 (SQ Learning, randomized) . Fix a learning goal G and τ > 0, γ > 0. A randomized algorithm A (τ, γ )-SQ learns G if for any distribution D, and any τ -accurate SQ oracle O for D,
+
+AO outputs a hypothesis g ∈ G (D) with probability at least 1 − γ over the random coins of A.
+
+With this high-level definition in place, we defer significant details and definitions about randomized SQ algorithms to Section 4.1, which are essential to understanding our pvCSVs for randomized SQ algorithms and SQ protocols. In particular, we consider two flavors of SQ oracles for randomized algorithms, “oblivious” oracles (as in Definition 2.1) and “public-state” oracles (see Definition 4.3). 
+
+Complexity Measures for SQ algorithms. An important complexity measure of SQ algo-rithms is the number of statistical queries the algorithm makes B, as well as the adaptivity to prior query responses k. The adaptivity of an SQ algorithm A is the number of rounds in which batches of queries are issued to O. At the extremes of adaptivity, k = B is a fully-adaptive algorithm, where the choice of each query qi is determined as an arbitrary function of the prior queries and responses ⟨q1, O(q1), q 2, O(q2), . . . , q i−1, O(qi−1)⟩; whereas k = 1 is a non-adaptive SQ algorithm and all of the queries are issued in a single batch. As we discuss in Section 2.3, the adaptive query complexity determines how efficiently we can implement the SQ oracle from samples. 
+
+Definition 2.5 (Query Complexity) . Fix τ > 0. An SQ algorithm has τ -query complexity (k, B ) if for all distributions D and τ -accurate SQ oracles O, the execution of AO issues at most B queries over k rounds of adaptivity. 
+
+Additionally, we will informally track the running time of SQ algorithms (eliding details of compu-tation over real-valued responses from the SQ oracle). 13 Definition 2.6 (Running Time) . Fix τ > 0. An SQ algorithm has running time T (τ ) if over all 
+
+D and all τ -accurate SQ oracles O, the execution of AO runs in at most T (τ ) steps. 
+
+For simplicity’s sake, in both query and time complexity, we assume that randomized SQ algoirthms provide a deterministic guarantee on the complexity (that is, a BPP-style guarantee). 
+
+## 2.2 Proof Systems for Statistical Learning 
+
+We consider proof systems for statistical learning based off of the classic notions from complex-ity theory and cryptography [GMR85, Bab85], and more recently the notion of PAC Verifica-tion [GRSY21]. In this setting, a prover P and a verifier V interact in order for the verifier to be convinced that a given hypothesis g ∈ G (D) is good for a learning goal. We model P and V as randomized algorithms and denote their interaction as ( P, V ). We adapt the notions from recent works on PAC Verification to define a model of interactive proof system where the parties have access to SQ oracles as follows. 
+
+Definition 2.7 (SQ Protocol, adapted from [GRSY21, MS23]) . A Statistical Query protocol is given by the interaction of two randomized SQ algorithms, the honest prover P and the verifier V ,denoted (P, V ).Fix a learning goal G, τP , τ V > 0, and γ > 0. An SQ protocol (P, V ) ( τP , τ V , γ )-SQ-verifies G if for any distribution D and τP -accurate SQ oracle OP and τV -accurate SQ oracle OV , the following conditions hold: 
+
+• Completeness: the honest protocol (P OP , V OV ) outputs g ∈ G (D) with probability at least 1−γ
+
+over the random coins of P and V .
+
+• Soundness: for any cheating prover strategy ˜P , with probability at least 1 − γ over the random coins of V , the protocol ( ˜P OV , V OV ) outputs g ∈ G (D) or V rejects. For failure probability δ > 0, the SQ protocol has sample complexity (mP , m V ) if the honest prover’s oracle OP can be implemented from at most mP samples and the verifier’s oracle OV can be im-plemented from at most mV samples, with probability at least 1 − δ over i.i.d. samples from D.
+
+In other words, in an SQ protocol, there exists an honest prover strategy that allows the verifier to accept a good hypothesis g ∈ G (D) with high probability, and conversely, if the verifier accepts a hypothesis ˜ g, then with high probability, 6 the hypothesis ˜ g ∈ G (D), even if it was generated through an interaction with a different prover. Note that, as is standard, we imagine the cheating prover ˜P is all-powerful and may have arbitrary knowledge of the distribution D. Additionally, we equip the cheating prover with the verifier’s oracle OV ; that is, for any query that the verifier asks q ∈ Q , the precise value a = OV (q) is known to both V and ˜P . (That said, the verifier may choose to keep queries private from the prover.)    
+
+> 6For simplicity, we use a single parameter γfor the completeness and soundness error. Of course, it may also be interesting to consider protocols that achieve different completeness and soundness parameters. In fact, all of our protocols achieve completeness 1 in the SQ oracle model.
+
+14 There are many properties of SQ protocols that may be of interest. For instance, we consider both private- and public-coin protocols (or, as hinted above, private- and public-query protocols). We defer these definitions—particularly those related to our construction of pvCSVs—to Section 4.1. Implementing the oracles from samples will necessarily incur some additional failure probability 
+
+δ > 0, distinguished from soundness error γ of the original protocol. Accounting for the failure probability γ of the oracle-based protocol separately from the failure probability δ that arises from sampling actually leads to improved analysis of the soundness of some of our protocols. We discuss background on the sample complexity of adaptive SQ algorithms in Section 2.3. 
+
+Comparison to PAC Verification. Definition 2.7 is directly inspired by the notion of PAC Verification of statistical algorithms [GRSY21, MS23], but departs in a few key ways. First off, our notion of learning is not tied directly to Agnostic PAC learning (or loss minimization as in [MS23]). Instead, we elect to use our abstract learning goal (Definition 2.2) as the basis for SQ Protocols. We make this choice because the protocols we design are not actually tied to any properties of loss minimization, but instead run a direct simulation of a given SQ algorithm. So, provided we start with a learning algorithm A that achieves its learning goal with good probability, we can turn it into a SQ protocol that also learns G.7
+
+Second, we define SQ protocols in the SQ oracle model, rather than in terms of direct samples from the distribution. In reality, we will be interested in understanding the statistical resources (i.e., samples) necessary to implement the verifier and honest prover strategies. As in the earlier works on PAC verification, the goal is to design SQ protocols where the verifier’s oracle OV can be implemented more efficiently than the honest prover’s OP . For instance, quantitatively, perhaps P
+
+requies an oracle with much tighter tolerance than V , τP < τ V ; or as in our work, qualitatively, 
+
+P may require an adaptive oracle, whereas V uses a non-adaptive oracle. That said, nothing precludes a hybrid definition, where the verifier only has SQ oracle-access to D, but the prover has more refined access through samples or point evaluations.. 
+
+Computational Soundness and The Random Oracle Model. Definition 2.7 assumes that cheating provers are computationally-unbounded. We refer to this property as statistical sound-ness . In contrast, we say that computational soundness holds when we prove soundness against probabilistic polynomial-time cheating provers ˜P . When we consider computational soundness, we will still assume that ˜P may hold prior, detailed knowledge of D (so need not be given an SQ oracle), but does not have the computational resources to break cryptographic primitives. We will be particularly interested in computational soundness when designing pvCSVs for ran-domized SQ algorithms. To do so, we leverage a key cryptographic paradigm: The Fiat-Shamir Transformation [FS86]. The heuristic takes a public-coin interactive protocol and removes inter-action by emulating the verifier’s random messages with calls to a cryptographic hash function. Classically, the soundness of Fiat-Shamir is proved in the Random Oracle Model (ROM) [BR93], which models public access to an (idealized) hash function.  
+
+> 7One may even be inclined to define delegation of learning as a distributional simulation of a given algorithm A.In fact, once formalized, many of our protocols would satisfy such a notion, but we encounter issues with soundness when we want to achieve non-interactive protocols (i.e., pvCSVs) for randomized SQ algorithms in Section 4.
+
+15 Definition 2.8 (Random Oracle Model) . For output size m ∈ N, the Random Oracle Model aug-ments the base computational model by assuming that all parties have access to a public, uniformly-random function f : {0, 1}∗ → { 0, 1}m that can be evaluated at unit cost. 
+
+Note that when we consider protocols that operate in the ROM, the probability of violating com-putational soundness is over the verifier’s random coins as well as the draw of the random oracle. While, in full generality, soundness does not transfer from the ROM to realizable models of compu-tation [Bar01,GK03], proofs of soundness in the ROM are generally considered as strong evidence of security and sufficient for many practical applications. Our pvCSVs for randomized SQ algorithms will be proved computationally-sound in the ROM. 
+
+## 2.3 Sample-Based Implementation of SQ Oracles 
+
+To run SQ learning algorithms/protocols, we need a concrete implementation of the SQ oracle ab-straction based on samples drawn from D. The number of samples required to guarantee statistical validity of the oracle’s responses depends on features of the SQ algorithm A.In particular, the sample complexity depends on the number of queries issued B, the desired accuracy τ , as well as the adaptivity k. The adaptivity of an SQ algorithm A is the number of rounds in which batches of queries are issued to O. At the extremes of adaptivity, k = B is a completely adaptive algorithm, where the choice of each query qi is determined as an arbitrary function of the prior queries and responses ⟨q1, O(q1), q 2, O(q2), . . . , q i−1, O(qi−1)⟩; whereas k = 1 is a non-adaptive SQ algorithm and all of the queries are issued in a single batch. The following definition captures these dependencies. 
+
+Definition 2.9 (SQ Oracle implementation) . An algorithm O is a (k, B, τ, δ )-implementation of an SQ oracle for a distribution D, if O can support any sequence of queries q1, q 2, . . . , q B satisfying the following properties: 
+
+• Rounds of adaptivity k: the sequence of queries is issued in at most k batches; queries selected in the ith batch may depend arbitrarily on the queries and responses of the first i − 1 batches 
+
+• Query budget B: the total number of queries in the sequence is upper bounded by B
+
+• Accuracy τ : for every query q in the sequence, the response O(q) is τ -accurate on D.
+
+• Failure probability δ: for all such query sequences of complexity (k, B ), with probability at least 1 − δ, all queries are answered τ -accurately. The sample complexity of an SQ oracle implementation is the number m ∈ N of i.i.d. samples from 
+
+D required to guarantee (k, B, τ, δ )-implementation. 
+
+We define the notion of an SQ Oracle implementation in terms of the rounds of adaptivity and the total number of queries, because certain mechanisms are able to exploit limited adaptivity to achieve better sample complexity [HR10, DFH +15c]. Note that, in order to guarantee τ -accurate queries, we can assume that our implementation returns values using O(log(1 /τ )) bits of precision. 16 Crucially for our work, the sample complexity required to answer a non-adaptive batch of queries is an exponential improvement over the complexity required to answer an adaptively-selected sequence of queries. For a non-adaptive batch of queries, the empirical SQ oracle that takes m samples 
+
+x1, . . . , x m ∼ D and reports O(q) = 1
+
+> m
+
+Pmi=1 q(xi) achieves logarithmic dependence on the number of queries. 
+
+Proposition 2.10 (Non-adaptive Sample Complexity) . For any τ, δ > 0, the empirical oracle is a 
+
+(1 , B, τ, δ )-implementation of an SQ oracle for D with sample complexity 
+
+m ≤ O
+
+ log( B/δ )
+
+τ 2
+
+
+
+.
+
+Proposition 2.10 follows by a standard application of Hoeffding’s inequality. The sample complexity for answering an adaptively-selected sequence of statistical queries, however, requires much more sophisticated analysis. The complexity was only established in the past decade, after connecting the problem of adaptive data analysis with the technique of Differential Privacy [DMNS06]. In the case of fully-adaptive algorithms, where k = B statistical queries are issued adaptively, the (roughly) optimal sample complexity scales with √k, rather than log( k). Initially, the upper bounds followed by leveraging the stability properties of differentially-private query release [BNS +16,DK22], but the most recent result of [Bla25] leverages a subsampling technique without DP. 8
+
+Proposition 2.11 (Theorem 3 of [Bla25], Adaptive Sample Complexity Upper Bound) . For any 
+
+τ, δ > 0, there exists a mechanism that is a (k, k, τ, δ )-implementation of an SQ oracle for D with sample complexity 
+
+m ≤ O
+
+pk · log( k/δ ) · log(1 /δ )
+
+τ 2
+
+!
+
+The lower bound holds based on the construction of (interactive) fingerprinting codes [HU14,SU15], and holds unconditionally in large-domain settings and assuming the existence of one-way functions in all settings. 
+
+Proposition 2.12 (Theorems 1 & 2 of [SU15], Adaptive Sample Complexity Lower Bound) . For any τ ∈ (0 , 0.49) , any mechanism which is a (k, k, τ, 1/2) -implementation of an SQ oracle for D
+
+has sample complexity 
+
+m ≥ Ω( √k)
+
+if either of the following assumptions hold: one-way functions exist, and the mechanism is compu-tationally bounded; or the space of samples X is sufficiently large: |X | ≥ 2O(k).
+
+In other words, there is a provable exponential gap in the sample complexity required to answer k
+
+queries adaptively versus non-adaptively.     
+
+> 8Note that the bounds achieved by [DK22] and [Bla25] are technically incomparable, but differ only in poly-logarithmic factors in kand τ. Either mechanism could be used to implement our honest prover’s SQ oracle.
+
+17 3 Publicly-Verifiable Certificates of Statistical Validity 
+
+In this section, we introduce the main conceptual contribution of this work— publicly-verifiable Certificates of Statistical Validity —which allows a prover to publish a digest from the execution of a learning algorithm that any verifier can subsequently test for statistical validity. Importantly, the verifier of a publicly-verifiable Certificate of Statistical Validity (pvCSV) need not hold the same distribution as the prover. Instead, the verifier can test for statistical validity with respect to their own distribution DV , through an SQ oracle or samples. To formalize pvCSVs, we must first introduce the notion of soudness that makes proofs “publicly-verifiable.” We define universal soundness to ensure soundness holds no matter what distribution the verifier holds. 
+
+Definition 3.1 (Universal Soundness for SQ protocols) . Fix a learning goal G, τV > 0, and γ > 0.An SQ protocol (P, V ) has γ-universal soundness if for any verifier distribution DV and τV -accurate SQ oracle OV for DV , and for any prover ˜P , with probability at least 1 − γ, ( ˜P OV , V OV ) outputs 
+
+g ∈ G (DV ) or V rejects. 
+
+It is easy to see that universal soundness of SQ Protocols is actually just a restatement of standard soundness; syntactically, our definition simply renames the distribution D to be in terms of DV . But importantly, the restatement of the property allows us to reason rigorously about proof systems when the prover and verifier hold different distributions. Under universal soundness, when the verifier has access to DV , running the protocol results in V rejecting or V accepting a hypothesis that is good for the verifier’s distribution, regardless of the prover’s distribution DP .In a bit more detail, we can imagine an honest prover with oracle access to OP for a distribution 
+
+DP , while a verifier has access to an oracle OV for a completely different distribution DV . In effect, we can view the honest prover P OP , as a possible cheating prover for any downstream verifier V OV .Still, if the verifier accepts the proof of some non-⊥ hypothesis, then universal soundness guarantees that h ∈ G (DV ). The appeal of universal soundness shows itself when we consider non-interactive proofs, where a prover wants to publish a fixed certificate, which any verifier (holding any DV )can verify for themselves. In this context, we can define pvCSVs as a non-interactive SQ protocol satisfying universal soundness. 
+
+Definition 3.2 (pvCSV) . Fix a learning goal G, τP , τ V > 0, and γ > 0. A publicly-verifiable Certificate of Statistical Validity (pvCSV) scheme is a non-interactive SQ protocol, where a prover 
+
+P with τP -accurate SQ oracle for distribution DP publishes a hypothesis h ∈ H with certificate π.The pvCSV (τP , τ V , γ )-certifies G if any verifier V with τV -accurate SQ oracle OV for distribution 
+
+DV can read (h, π ) and accept or reject with the following guarantees: 
+
+• Completeness: if DP = DV , the honest prover, with τP -accurate SQ oracle for DP , can generate a hypothesis-certificate pair (h, π ) ← P OP such that V OV accepts and h ∈ G (DV )
+
+with probability at least 1 − γ, over the random coins of P and V .
+
+• Universal Soundness: for any verifier distribution DV , for any prover strategy (h, π ) ← ˜P OV ,
+
+V OV rejects or h ∈ G (DV ) with probability at least 1 − γ over the random coins of V .
+
+The construction of a pvCSV allows a prover with access to a distribution DP to execute an algorithm A that learns G once and publish the results ( h, π ). Then, any party who is interested in 18 running A on their own distribution DV can, instead, run the verification algorithm V on ( h, π ). If ( h, π ) is accepted, then by universal soundness, h ∈ G (DV ) is guaranteed to be valid for the verifier’s distribution. 
+
+Remarks. A few remarks about the definition of pvCSVs are in order. 
+
+• Distributional Access: We describe our pvCSVs as SQ protocols, then give sample-based implementations. That said, pvCSVs could equally encompass non-interactive protocols for verification of learning, with more general distributional access, provided we define a more general notion of universal soundness. As in [GRSY21], the type of statistical access available may serve as a qualitative difference in the complexity of the prover and verifier. 
+
+• Complexity Measures: Quantitatively, there are many measures of complexity one could track for pvCSVs. We will be most interested in the sample complexity (using i.i.d. random draws) of the honest prover and verifier from DP and DV , respectively. In general, we may also track other natural complexity measures, such as the time complexity or size of the certificate. 
+
+• Computational Soundness: Definition 3.2 considers universal soundness with respect to computationally-unbounded provers. We also consider computationally-sound pvCSVs, where soundness only holds with respect to PPT algorithms. Concretely, we will prove soundness in the Random Oracle Model, where the failure probability is taken over the random draw of random oracle (in addition to the verifier’s coins). 
+
+• On Robust Completeness? Note that in our notion of completeness, we assume that the honest prover and verifier have access to exactly the same distribution DP = DV . Given the motivating perspective on pvCSVs, we might hope for a weaker notion of distributional closeness required for completeness. Such a guarantee may be formally defined in future work. We remark that—paired with universal soundness—we still get some notion of robustness. If the verifier accepts ( h, π ) then the distributions are indistinguishable, according to the queries asked by (a specific execution of) A, regardless of how close they are in any standard notion of statistical/computational indistinguishability. 
+
+## 3.1 A pvCSV for Every Deterministic SQ Algorithm 
+
+Our first construction establishes that every deterministic SQ algorithm has a statistically-sound pvCSV where the verifier answers k queries non-adaptively and has sample complexity O(log( k)), whereas the best known, efficient prover must answer k possibly adaptive queries with sample complexity scaling with ˜O(√k). We present the pvCSV scheme as a non-interactive SQ protocol, Protocol 1. To generate the certificate, the honest prover first simulates the execution of A using the prover’s SQ oracle OP , returning a hypothesis h. Along the way, the prover writes down the list of queries q and answers OP (q) provided by the oracle as the certificate. Then, the verifier also simulates the execution of A, but uses the digest of query-answer pairs ( q, OP (q)) provided by the certificate, rather than making any adaptive statistical queries . Finally, the verifier runs a batch 
+
+statistical validation of the answers provided in the certificate using its oracle OV for DV . The key insight is that the verifier can non-adaptively check every (adaptively-chosen) query produced during the execution of A.19 Protocol 1: pvCSV for Determinstic SQ Algorithm 
+
+Setup: Let G, τ , γ and A be as described in Theorem 3.4. Let OP be a τ / 3-accurate SQ oracle for DP .Let OV be a τ / 3-accurate SQ oracle for DV .
+
+Simulation of SQ algorithm A
+
+Prover P :
+
+Initialize an empty transcript π = ⟨⟩ 
+
+Simulate A by executing AOP ; specifically: 
+
+• whenever A issues an SQ q, P queries OP (q) and updates π ← ⟨ π, q, OP (q)⟩
+
+if simulation of A returns h then 
+
+P sends ( h, π ) to V
+
+Verification of transcript 
+
+Verifier V :
+
+Read and typecheck ( h, π ). Parse π into ( q, a) as follows: 
+
+• q := ( q1, q 2, . . . , q BV ), the list of SQs issued during simulation of A
+
+• a := ( a1, a 2, . . . , a BV ), the answers to q, where aj should equal OP (qj )Check that π is consistent with A outputting h; that is, 
+
+• Simulate A using a to answer SQs 
+
+• Check that A returns h̸ = ⊥
+
+if π is NOT consistent with A then 
+
+Reject and output ⊥
+
+Statistical Validation of simulated oracle queries 
+
+if NOT Validate (q, a, τ / 3, τ ) then 
+
+Reject and output ⊥
+
+Accept and output h
+
+Algorithm 2: Validate (q, a, τ P , τ ) i.e., Non-adaptive Statistical Validation 
+
+Input: Batch of statistical queries q;List of candidate answers to queries a;Candidate accuracy τP > 0 and final accuraccy τ > 0
+
+Setup: Non-adaptive τV -accurate SQ oracle OV s.t. τP + 2 τV ≤ τ
+
+Issue batch of queries q to OV ; let ˆ aj := OV (qj ) for all 1 ≤ j ≤ B
+
+for j = 1 , . . . , B do if |ˆaj − aj | > τ V + τP then return False 
+
+end return True 20 We prove that Protocol 1 is a pvCSV where the verifier’s sample complexity scales “non-adaptively” even when an adaptive algorithm is necessary for learning. We start with the following lemma. 
+
+Lemma 3.3. Fix a learning goal G, τ > 0. Suppose A is a deterministic algorithm that τ -SQ learns G. There is an SQ protocol (P, V ), described in Protocol 1, with the following properties: (a) (P, V ) is a non-interactive SQ protocol that (τ / 3, τ / 3, 0) -SQ verifiers G
+
+(b) V uses a non-adaptive SQ oracle, regardless of the SQ adaptivity of A. That is, suppose A has 
+
+τ -query complexity (k, B ); then, 
+
+• P has τ / 3-query complexity (1 , B );
+
+• V has τ / 3-query complexity (k, B )
+
+(c) V and P run in linear time in the original algorithm. That is, suppose A runs in time TA(τ );then both P and V run in time O(TA(τ )) 
+
+Proof. First, we analyze the prover and verifier’s query complexities. Observe that P runs a direct simulation of the queries issued by A, supported by OP . Since OP is τ / 3-accurate, then P has 
+
+τ / 3-query complexity ( k, B ). In contrast, V calls OV once on all B queries through the Validate 
+
+subroutine. Since OV is τ / 3-accurate, V has τ / 3-query complexity (1 , B ). So part (b) holds. Next, we analyze run time. Observe that both P and V simulate an execution of A. While the oracles OP and OV are both τ / 3-accurate, the simulations of A can assume τ -accuracy, so the simulations take time O(TA(τ )). V also runs a statistical valdiation that checks the statistical closeness of the B queries, each of which takes constant time to evaluate in the query model, which is also linear in the run time of A. Thus, part (c) holds. To complete the lemma, we show that ( P, V ) is a non-interactive SQ protocol that ( τ / 3, τ / 3, 0)-SQ verifies G.9 Observe by construction ( P, V ) is non-interactive: P sends one message ( h, π ) to V .Next, we show ( P, V ) satisfies perfect completenees and universal soundness for G
+
+Completeness: We consider the honest protocol ( P, V ) where DP = DV . First, we show that V al-ways accepts the honestly generated certificate ( h, π ). Since ( h, π ) is honestly generated, V can parse 
+
+π into queries q and answers a. Then it is sufficient to show that π is consistent with an execution of 
+
+A that results in the output h. Consider the sequence of queries q = ( q1, q 2, . . . , q B ) listed in the cer-tificate. We claim this is exactly the same sequence of queries that V will produce when simulating 
+
+A. This claim follows (formally by induction on the sequence of queries) because A is deterministic and the verifier’s simulation of A uses the same query responses a = ( OP (q1), OP (q2), . . . , OP (qB )) as the prover’s execution. By the same argument, the output h of the prover and verifier’s execution of A will be the same (since A is deterministic and operates on the same input sequence). Second, we show that π passes the verifier’s statistical validation Validate (q, a, τ / 3, τ ), according to OV . Recall that OP and OV are both τ 
+
+> 3
+
+-accurate oracles for DP = DV , by assumption. Since the verifier issues the same queries q1, q 2, . . . , q B to OV , we see that, for each 1 ≤ j ≤ B, the comparison looks at the difference between OP (qj ) and OV (qj ). Both queries are within τ / 3 of the true expectation Ex∼D [qj (x)], so by the triangle inequality |ˆaj − aj | ≤ 2τ / 3. Therefore, Validate 
+
+always returns true, and V always accepts the honestly generated ( h, π ). 
+
+> 9The failure probability of the pvCSV will arise when we implement the protocol’s oracles using samples.
+
+21 So it is sufficient to show that h ∈ G (DV ). Recall that h is the output of running A using a 
+
+τ / 3-accurate oracle for DP . Because DP = DV (and τ / 3 ≤ τ ), this execution is also the result of running A using some τ -accurate oracle for DV . Thus, by the assumption that A τ -SQ learns G,then h ∈ G (DV ). So, ( P, V ) achieves completeness 1. 
+
+Universal Soundness: Let DV be any distribution, and OV be any τ / 3-accurate SQ oracle for 
+
+DV . Take any cheating prover strategy ˜P , and consider the interaction ( ˜P OV , V OV ). It suffices to argue, as in the above argument for completeness, that if V accepts, then h ∈ G (DV ). If V accepts, then it must be the case that π is consistent with some execution of A that results in outputting h.Further, Validate (q, a, τ / 3, τ ) passes, which implies the answers a are within 2 τ / 3 of the responses from the verifier’s non-adaptive oracle query ˆ a = OV (q). Since OV is τ / 3-accurate with respect to 
+
+DV , by the triangle inequality, |aj − Ex∼D V [qj (x)] | ≤ τ for all 1 ≤ j ≤ B.In combination, π gives the verifier a way to simulate A using τ -accurate answers its queries over 
+
+DV . The learning guarantee of A implies that the returned hypothesis h ∈ G (DV ) must be valid. Thus under interaction with any prover cheater, the verifier V either rejects or accepts and outputs 
+
+h ∈ G (DV ), and ( P, V ) satisfies universal soundness 0. With this lemma in place, establishing our main theorem of this section is straightforward. To achieve an improved bound on the size of the certificate, we make the following optimization. Notice that our proof of correctness does not actually use the fact that the queries q used by the prover are the same as the queries derived by the verifier’s simulation of A; instead, we only need that the answers in the certificate, a are valid for the verifier’s queries. Thus, we do not need to include queries in the certificate at all: we need only the certificate be the list of answers, that is, π := a. While including the names of the queries improves the clarity of the proof system, we derive an equally-valid SQ protocol where π := a in the following theorem. 
+
+Theorem 3.4 (Formal Statement of Theorem 2) . Fix a learning goal G and τ > 0. Suppose A is a deterministic SQ algorithm that τ -SQ learns G, which makes k adaptive queries to a τ -accurate oracle O. For any δ > 0, there exists a pvCSV scheme for G with failure probability δ achievable in the following complexities. 
+
+• Honest prover sample complexity: mP ≤ O
+
+pk · log( k/δ ) · log(1 /δ )/τ 2
+
+
+
+• Verifier sample complexity: mV ≤ O(log( k/δ )/τ 2)
+
+• Certificate size: |π| ≤ O(k · log(1 /τ )) 
+
+Proof. Let ( P, V ) be Protocol 1. By Lemma 3.3, to run a fully-adaptive SQ algorithm using k
+
+queries, it suffices to have a ( k, k, τ / 3)-implementation of OP and a (1 , k, τ / 3)-implementation of 
+
+OV . The honest prover and verifier sample complexities follow from Proposition 2.11 and Proposi-tion 2.10, respectively. The original SQ verification protocol contributes γ = 0 failure probability, so by union bounding over the failure probability of implementing OP and OV , completeness and universal soundness hold with probability at least 1 − δ.Finally, we analyze the size of the certificate π. Without loss of generality, we modify the certificate so that π := a, and the verifier so that it doesn’t check for ˜ qi = qi. As mentioned above, this does 22 not change the validity of Lemma 3.3. Every answer to a statistical query requires O(log(1 /τ )) bits of space. Since π = a = ( a1, a 2, . . . , a B ), then |π| = O(B log(1 /τ )). Finally, we remark informally on the time complexities of the honest prover and verifier. Both parties run a direct simulation of the original SQ algorithm A. Additionally, the honest prover must implement the mechanism of [Bla25] for adaptive data analysis to answer the queries to OP ,whereas OV may respond with the empirical statistics from its sample. In most settings, the overall running time for both will be dominated by the simulation of A.
+
+# 4 Delegation of Randomized SQ Learning 
+
+In this section, we address delegating SQ learning algorithms that use randomness. Our investi-gation leads us to develop a number of new definitions and tools for understanding SQ protocols. With these tools in place, we obtain (computationally-sound) pvCSVs, not only for randomized SQ algorithms, but for a large class of SQ protocols. We start by giving essential definitions, highlighting important properties of randomized SQ algo-rithms and protocols. Using these definitions, we then show that for a large class of SQ protocols, there exists a reformulation into a Canonical SQ Protocol. This canonical protocol allows for non-adaptive verification of the statistical queries, leading to exponential savings in sample complexity for the verifier, for any original SQ protocol (including randomized algorithms that make adap-tive statistical queries). We conclude the section with a construction of pvCSVs for this class, by showing how to apply a Fiat-Shamir transformation to the canonical protocol. 
+
+## 4.1 Definitions for Randomized SQ Learning and SQ Protocols 
+
+To begin, we fix a standard, mechanical format for describing randomized SQ algorithms that proceed in epochs . In the t-th epoch, 
+
+• A samples randomness rt ∈ { 0, 1}dt , for some (efficiently-bounded) dt ∈ N
+
+• A then executes a deterministic SQ algorithm At as a subroutine, with rt as fixed input, which may issue adaptive statistical queries. The choice of the t-th subroutine At may be chosen adaptively as a function of prior randomness, as well as any statistical queries issued. In terms of expressivity, formatting randomized algorithms into epochs is not a restriction, as we can simulate any algorithm in this format. But the number of epochs turns out to be a key quantity that affects the complexity of our proof systems. 
+
+Definition 4.1 (Epoch Complexity) . Fix τ > 0 and ℓ ∈ N. A randomized SQ algorithm A has epoch complexity ℓ if for any τ -accuate SQ oracle O, the execution of AO can be broken into ℓ
+
+epochs. 
+
+Extending the notion of epoch complexity to SQ protocols, we standardize the verifier’s execution similarly. In the t-th epoch, 23 • V samples randomness rt ∈ { 0, 1}dt for some (efficiently-bounded) dt ∈ N 
+
+• V executes a deterministic, interactive SQ algorithm Vt as a subroutine, with rt as a fixed input, which may issue adaptive statistical queries and communicate with P .Again, the choice of the t-th subroutine Vt can be chosen adaptively based on prior randomness, 
+
+V ’s internal state, and messages from the prover. 
+
+Definition 4.2 (Epoch Complexity of SQ Protocols) . Fix τV > 0 and ℓ ∈ N. An SQ verifier V
+
+has epoch complexity ℓ if for any prover ˜P and any τV -accurate SQ oracle OV , the execution of V
+
+within the interaction ( ˜P OV , V OV ) can be broken into ℓ epochs. 
+
+Intuitively, formatting randomized algorithms (and SQ verifiers) into epochs allows us to separate “adaptivity” of A based on fresh randomness and adaptivity based on the results of statistical queries (and prover messages). In the extreme, each epoch could issue a single statistical query, so adaptivity to the randomness and queries are essentially the same. At the other extreme, we might consider algorithms that start with a random initialization, but then proceed deterministically. Such algorithms may still make adaptive SQ queries, but could be implemented in a single epoch. The number of epochs serves as a natural complexity measure of the algorithm’s use of its randomness. 
+
+Oblivious vs. Public-State SQ Oracles. Recall that we model an SQ oracle as a stateful algorithm, who may respond adversarially (within τ -accuracy) based on the state of the algorithm 
+
+A. When our algorithms leverage randomness, we need to reason about what knowledge the oracle 
+
+O has about the algorithm’s internal state—namely, the randomness sampled at the current epoch. One standard notion of SQ oracle allows the algorithm to maintain private state from the oracle. In this case, the algorithm need not reveal any of its random coins to the oracle. We refer to such oracles as oblivious SQ oracles, which follow the earlier notion given in Definition 2.1. For randomized SQ algorithms, we mainly focus on oracles, who may respond adversarially with full knowledge of the algorithm’s randomness. This notion is captured by a public-state SQ oracle. 
+
+Definition 4.3 (Public-State SQ Oracle) . A public-state SQ oracle is a stateful algorithm O :
+
+Q × { 0, 1}∗ → [0 , 1] that takes as input a query q ∈ Q and a string r ∈ { 0, 1}∗ representing random coins, and responds with an evaluation O(q, r ) ∈ [0 , 1] .For τ > 0, the oracle O is τ -accurate over D if for any finite, adaptively chosen sequence of k ∈ N
+
+queries and randomness (q1, r 1), (q2, r 2), . . . , (qk, r k), for all i ∈ [k],
+
+O(qi, r i) − E
+
+> X∼D
+
+[qi(X)] ≤ τ. 
+
+Concretely, consider a sequence issued by a randomized SQ algorithm A. In the t-th epoch, whenever 
+
+At issues a query q ∈ Q , the randomness r1 . . . r t is sent to the public-state oracle O(q, r 1 . . . r t).Further, a randomized SQ algorithm τ -SQ learns G with public state, if correctness holds for any 
+
+τ -accurate public-state SQ oracle O; an SQ protocol (P, V ) ( τP , τ V , γ )-SQ verifies G with public verifier state, if completeness and soundness hold for any τV -accurate public-state SQ oracle OV .
+
+24 In other words, a randomized algorithm equipped with a public-state SQ oracle may, as usual, specify the query q ∈ Q of interest, but necessarily reveals the randomness sampled so far. By the standardization into epochs, the randomness captures all of the state of A.Note that any algorithm/protocol that succeeds with access to a public-state oracle also works with an oblivious oracle, but the converse is not true. Correctness with respect to a public-state oracle is a stronger guarantee: no matter what information is leaked to the oracle through interaction, the algorithm will work. That said, proving correctness may be more challenging, so designing correct algorithms with a public-state oracle may be harder than with an oblivious oracle. 
+
+Public-Coin SQ Protocols. As with traditional interactive protocols, we can distinguish SQ protocols based on the verifier’s communication of its randomness. Key to our study of non-interactive proof systems for randomized SQ algorithms, we first consider public-coin interactive SQ protocols. Defining public-coin protocols when the verifier is equipped with an SQ oracle (which may introduce non-determinism) is nuanced. We consider two alternative definitions. 
+
+Definition 4.4 (Public-Coin SQ Protocols) . An SQ protocol (P, V ) is a (standard) public-coin SQ protocol if in every round of communication, V samples a uniformly random string r, independent of all prior randomness and messages, and sends r to P . Concretely, for V of epoch complexity ℓ,the protocol consists of ℓ rounds, where in the t-th round, Vt sends its randomness rt to P .
+
+Definition 4.5 (Mixed-Message SQ Protocols) . An SQ protocol (P, V ), where V has epoch com-plexity ℓ. (P, V ) is a mixed-message (public-coin) SQ protocol if for all t = 1 , . . . , ℓ , the first message of the t-th epoch is from Vt to P and includes the epoch’s randomness rt.
+
+In other words, a standard public-coin SQ protocol adopts the formalism that the only messages the verifier sends to the prover are its randomness, whereas a mixed-message SQ protocol must reveal its randomness to the prover, but may also send non-random challenges. Without an SQ oracle, the distinction is moot: in the t-th epoch, Vt is a deterministic algorithm, so the prover can simulate any challenges it would receive and respond accordingly. But with an SQ oracle— which may respond adversarially within its tolerance— V OV 
+
+> t
+
+may have non-deterministic behavior, even conditioned on rt. Thus, in principle, mixed-message SQ protocols could be more expressive than public-coin SQ protocols. Despite this distinction, our main result in Section 4.2 (Protocol 3) implies that (as in standard interactive proofs) any mixed-message SQ protocol can be compiled into a public-coin SQ protocol with the same completeness and soudness guarantees. 
+
+Public-Query SQ Protocols. A final consideration in classifying SQ protocols is whether the verifier’s queries are kept private or made public to the prover. A public-query protocol reveals its queries to the prover at every round of communication. 
+
+Definition 4.6 (Public-Query SQ Protocols) . An SQ protocol (P, V ) is a public-query SQ protocol if in every round i of communication, the ith message mi from V to P includes every statistical query qi1 , . . . , q ij issued by V to OV since the previous message mi−1.
+
+Note that, per the discussion above, whether the verifier’s queries are public or private is orthogonal to whether the verifier’s coins are public or private. That said, Protocol 3 also implies that any 25 public-coin, private-query protocol can be made public-query. In this sense, we use the term “public-query” to refer to private-coin, public-query SQ protocols. We explore public-query protocols further when we consider the strength and limits of SQ proof systems beyond pvCSVs in Section 5. 
+
+## 4.2 A Canonical Public-Coin SQ Protocol 
+
+With the preliminaries on randomized SQ algorithms and SQ protocols in place, we are ready to describe protocols for delegating randomized SQ algorithms. We describe, in Protocol 3, an interactive public-coin SQ protocol for delegating any randomized SQ algorithm that SQ-learns a concept G with public state. In fact, our protocol is much more general, and can take any mixed-message, private-query SQ protocol that SQ-verifies G with public verifier state (which include all randomized SQ algorithms with public state) and compile it into a canonical public-coin SQ protocol, where the verifier issues a single non-adaptive batch of statistical queries. 
+
+Protocol Description. Protocol 3 works as follows. We start with a mixed-message SQ protocol (P, V ) where the verifier may make private statistical queries, and each player is arbitrarily-adaptive in their queries. Note that randomized SQ algorithms are the special case of such protocols, where the algorithm must accept h or output ⊥ without assistance from any prover. We want to build a public-coin, public-query SQ protocol ( Pcan , Vcan ) where the verifier issues a single batch of statistical queries. As in Protocol 1, the verifier will delegate its queries to the prover and check them at the end. Because ( P, V ) is mixed-message, we know that the verifier V starts each epoch by sending its randomness to the prover. This random message will be the only message Vcan sends to Pcan per epoch; then, Pcan will be responsible for simulating the remaining interactive execution of that epoch. Pcan will use its own SQ oracle OPcan to make any queries. This aspect of the protocol— where the prover simulates the queries of the verifier with knowledge of its randomness—is where we need to leverage the assumption that ( P, V ) learns G with public verifier state; that is, even if the oracle (or in this case the prover) can respond adversarially based on the state of the verifier, the protocol is still sound. Once the epoch finishes, Pcan will send the transcript of the execution to Vcan , who can update state and move to the next epoch. At the end, the canonical verifier Vcan checks to ensure that the prover faithfully simulated the execution of P and V . Finally, Vcan runs a statistical check to make sure all of the query values reported by the prover are actually within the required tolerance of the original protocol. In all, we obtain the following guarantee on our canonical public-coin SQ protocol. 
+
+Lemma 4.7 (Formal Statement of Lemma 4) . Fix a learning goal G, τP , τ V > 0, and γ > 0, and let τ ′ 
+
+> P
+
+= min {τP , τ V /3} and τ ′ 
+
+> V
+
+= τV /3. Suppose (P, V ) is a mixed-message, private-query SQ protocol that (τP , τ V , γ )-verifies G with public verifier state. There is an SQ protocol (Pcan , Vcan ),described in Protocol 3, with the following properties: (a) (Pcan , Vcan ) is a public-coin SQ protocol that (τ ′ 
+
+> P
+
+, τ ′ 
+
+> V
+
+, γ )-verifies G
+
+(b) For V of epoch complexity ℓ, (Pcan , Vcan ) has at most ℓ rounds of interaction. 
+
+26 Protocol 3: Canonical SQ Protocol 
+
+Setup: Let G, τ P , τ V , γ and ( P, V ) be as described in Lemma 4.7. Let OPcan be a min {τP , τ V /3}-accurate SQ oracle for DP .Let OVcan be a τV /3-accurate SQ oracle for DV .
+
+Phase 1: Interactive simulation of SQ protocol (P, V )Initialize an empty transcript π0 = ⟨⟩ 
+
+for i = 1 , . . . , ℓ do Prover Pcan and Verifier Vcan determine Vi for the i-the epoch of V , based on πi−1
+
+Verifier Vcan samples the i-th epoch’s randomness ri and sends to Pcan 
+
+Prover Pcan updates πi ← ⟨ πi−1, r i⟩
+
+Pcan simulates the i-th epoch by executing ( P OPcan , V OPcan  
+
+> i
+
+)( πi); specifically: 
+
+• when Vi issues SQ q, Pcan queries OPcan (q) and updates πi ← ⟨ πi, q, OPcan (q)⟩
+
+• when Vi sends message s to P , Pcan simulates prover P OPcan (πi)
+
+• when P sends message m to V , Pcan updates πi ← ⟨ πi, s, m ⟩
+
+if simulation of V returns h then 
+
+Pcan updates π ← πi and sends ( h, π ) to Vcan 
+
+Pcan breaks from loop 
+
+else if simulation of V ready for next epoch then 
+
+Pcan sends updates to transcript πi to Vcan for next epoch 
+
+end Phase 2: Verification of interactive transcript 
+
+Verifier Vcan :
+
+Read and typecheck ( h, π ). Parse π into ( qV , aV , ˜r, m, s) as follows: 
+
+• qV := ( q1, q 2, . . . , q BV ), the list of verifier SQs issued during simulation of ( P, V )
+
+• aV := ( a1, a 2, . . . , a BV ), the answers to qV , where aj should equal OP (qj )
+
+• ˜r := (˜ r1, . . . , ˜rℓ), the public coins of V
+
+• s := ( s1, . . . , ), the non-random messages of V to P
+
+• m := ( m1, . . . , ), the messages of P to V
+
+Check that π is consistent with ( P, V ) outputting h; that is, 
+
+• Check that ˜ r = r1, . . . , r ℓ
+
+• Simulate V with randomness ˜ r; use aV to answer SQs, and m for messages from P
+
+• Check that V returns h̸ = ⊥
+
+if π is NOT consistent with (P, V ) then 
+
+Reject and output ⊥
+
+Phase 3: Validation of simulated oracle queries 
+
+Verifier Vcan :if NOT Validate (qV , aV , τ V /3, τ V ) then 
+
+Reject and output ⊥
+
+Accept and output h
+
+27 (c) Vcan uses a non-adaptive SQ oracle, regardless of the SQ adaptivity in (P, V ). That is, suppose V has τV -query complexity (kV , B V ) and P has τP -query complexity (kP , B P ); then, 
+
+• Vcan has τ ′ 
+
+> V
+
+-query complexity (1 , B V );
+
+• Pcan has τ ′ 
+
+> P
+
+-query complexity (kP + kV , B P + BV )
+
+(d) Vcan and Pcan run in linear time in the original protocol. That is, suppose V runs in time TV (τV ) and P runs in time TP (τP ); then 
+
+• Vcan runs in time O(TV (τV )) 
+
+• Pcan runs in time O(TV (τV ) + TP (τP )) 
+
+(e) For P of communication complexity cP , Pcan has communication complexity O(BV log(1 /τ ′ 
+
+> P
+
+))+ 
+
+cP .Proof. Before we prove that the canonical protocol verifies G, we will analyze the other properties first. First, we analyze round complexity. Observe by construction that each round of commu-nication corresponds to one epoch of V . Since V has epoch complexity ℓ, ( Pcan , Vcan ) has round complexity ℓ. So part (b) holds. Next, we analyze statistical complexity. Observe that Pcan simulates the interaction ( P OPcan , V OPcan ), so OPcan must answer at most BP queries from P and BV queries from V , and compose the rounds of adaptivity for kP +kV rounds. Thus Pcan has τ ′ 
+
+> P
+
+-query complexity ( kP +kV , B P +BV ). Meanwhile, 
+
+Vcan only checks the statistical validity of the proposed verifier’s queries in a single batch to OVcan ,so it has τ ′ 
+
+> V
+
+-query complexity (1 , B V ). Therefore part (c) holds. Next, we analyze run time. Pcan just simulates the entire interaction ( P OPcan , V OPcan ). While 
+
+OPcan operates at τ ′ 
+
+> P
+
+accuracy, in order to meet the ( τP , τ V , γ )-learning guarantee of the original protocol, Pcan simulates P running at τP accuracy and V running at τV accuracy. So Pcan runs in time O(TV (τV ) + TP (τP )). Similarly, Vcan simulates V but using transcript π and running at τV
+
+accuracy. So Vcan runs in time O(TV (τV )), and part (d) holds. Now, we analyze the Pcan ’s communication complexity. In the description of Protocol 3, Pcan 
+
+implicitly sends the entire transcript π of the simulation of ( P, V ), which comprises of the queries 
+
+qV and answers aV of V , public coins ˜ r of V , non-random messages s from V to P , and messages 
+
+m from P to V . However, strictly speaking Pcan does not need to relay qV , ˜ r, and s. Vcan already has the true public coins ( r1, . . . , r ℓ), and can simulate V using that, aV and m to generate the missing qV and s. Therefore, we can simplify Pcan ’s communication complexity to just aV and s.Then note |aV | = O(BV log(1 /τ ′ 
+
+> P
+
+)). And |s| = cP , the communication complexity of P . So Pcan ’s communication complexity is O(BV log(1 /τ ′ 
+
+> P
+
+) + cP , and part (e) holds. To complete the lemma, we show that ( Pcan , Vcan ) is a public-coin SQ protocol that ( τ ′ 
+
+> P
+
+, τ ′ 
+
+> V
+
+, γ )-SQ verifies G. First, observe that Vcan sends all random coins generated for the ℓ rounds of communication, so it is public-coin. As noted in part (c), Pcan employs a τ ′ 
+
+> P
+
+-accurate SQ oracle, and Vcan employs a τ ′ 
+
+> V
+
+-accurate SQ oracle. So what remains to be shown is that the canonical transformation preserves 1 − γ completeness and γ soundness. 
+
+Completeness: Assume DP = DV , and consider the honest protocol ( Pcan , Vcan ) whose interaction generates ( h, π ). First, we note that in the honest protocol, π is well-formatted, so the canonical 28 verifier can parse π into ( qV , aV , ˜r, s, m) and successfully check that π is consistent with an ex-ecution of ( P, V ) that outputs h. That is, V , using randomness ˜ r receiving evaluations aV and messages m, will make queries qV , send messages s, and output the hypothesis h. This works since 
+
+Pcan will properly simulate ( P, V ) and relay the transcript to Vcan .Second, we show that a passes the canonical verifier’s statistical validation Validate (qV , aV , τ V /3, τ V ), according to OVcan . Recall that OPcan is τ ′ 
+
+> P
+
+-accurate for DP (which is equal to DV by assumption) and τ ′ 
+
+> P
+
+≤ τ ′ 
+
+> V
+
+. Similarly, OVcan is τ ′ 
+
+> V
+
+-accurate for DV and τ ′ 
+
+> V
+
+= τV /3. Thus, by the specification of 
+
+Validate (which uses an argument via triangle inequality), statistical validation passes. Additionally since ˜ r is generated via Vcan ’s random coins ( r1, . . . , r ℓ), in all Vcan will always accept unless h = ⊥.Thus, it is sufficient to argue that, under the honest protocol, h ∈ G (DV ) with probability at least 1 − γ. Recall that h is the output of simulating ( P OPcan , V OPcan ) on randomness ˜ r. Since OPcan 
+
+is a τ ′ 
+
+> P
+
+-accurate for DP and τ ′ 
+
+> P
+
+≤ τP , then the simulated P has access to a τP -accurate oracle for DP . Similarly, since DP = DV by assumption, τ ′ 
+
+> P
+
+≤ τV , and Pcan knows all random coins sent by Vcan , then the simulated V has access to a public-state τV -accurate oracle for DV . Since randomness is uniform and generated in epochs according to the canonical verifier, the simulation of (P OPcan , V OVcan (˜ r)) is indistinguishable from a true execution of ( P, V ). Since ( P, V ) ( τP , τ V , γ )-SQ verifies G, then h ∈ G (DV ) with probability at least 1 − γ. Thus, completeness of ( Pcan , Vcan ) is 1 − γ.
+
+Universal Soundness: It suffices to show that universal soundness of Vcan reduces to the universal soundness V . Take any cheating prover strategy ˜Pcan for VOVcan  
+
+> can
+
+. We construct a cheating prover ˜P and oracle ˜OV for V as follows. We will argue anytime ˜Pcan cheat, then ( ˜P , ˜OV ) cheats as well. Without loss of generality, let ˜Pcan be deterministic. Let ˜P and ˜OV each simulate ˜Pcan , where the randomness of each epoch of V is used as input. If the simulation of ˜Pcan produces a valid transcript 
+
+π = ( qV , aV , ˜r, s, m), then ˜OV responds as the answers aV = ( a1, a 2, . . . , a BV ) and ˜P responds as the messages m = ( m1, m 2, . . . ). To ensure that ˜OV is a τV -accurate oracle for DV , any answer 
+
+a which is τ -far from the true expectation for DV will be replaced with an arbitrary τV -accurate answer for DV . In the case where ˜Pcan does not produce a valid transcript, then ˜P will always reply with a well-formed dummy message and ˜OV will always reply with a τV -accurate answer. We now reduce from between ( ˜Pcan , VOVcan  
+
+> can
+
+) and ( ˜P , V ˜OV ). Let the random coins of Vcan and V be the same random coins. Let us condition on the event that ( ˜Pcan , VOVcan  
+
+> can
+
+) accepts. Then ˜Pcan must have produced a valid transcript π = ( qV , aV , ˜r, s, m) and a hypothesis h̸ = ⊥ where π corresponds to a simulation of V that produces h. Further, Validate (qV , aV , τ V /3, τ V ) passed. Then aV are 2τV /3-close to the answers from OVcan (qV ). Since OVcan is τV /3-accurate for DV , then by triangle inequality, aV are τV -accurate for DV .Since the random coins are shared between Vcan and V , ( h, π ), as generated above, is also the output of ˜P and ˜OV ’s simulation of ˜Pcan . Recall that we are conditioning on the event that the 
+
+Vcan accepts. Thus, all answers aV are τV -accurate for DV , and all messages m are well-formed. Thus, ˜P sends messages m, and ˜OV provides answers aV . Therefore, the view of the verifier in ( ˜P , V OV ) is indistinguishable from Vcan simulation of V using π. Since Vcan accepted and output 
+
+h, then V must have accepted and also output h.Suppose that ( ˜Pcan , VOVcan  
+
+> can
+
+) accepts and outputs h / ∈ G (DV ) with probability γ′. Then by monotonic-ity, ( ˜P , V ˜OV ) accepts and outputs h / ∈ G (DV ) with probability at least γ′. But ( ˜P , V ˜OV ) accepts 29 and outputs h / ∈ G (DV ) with probability at most γ by universal soundness of ( P, V ). Therefore, 
+
+γ′ ≤ γ. Since this holds over all DV and τV /3-accurate oracles OV for DV , then ( ˜Pcan , VOVcan  
+
+> can
+
+)accepts and outputs h /∈ G (DV ) with probability at most γ. So ( Pcan , Vcan ) satisfies universal soundness γ.
+
+## 4.3 pvCSVs from the Canonical Protocol and Fiat-Shamir 
+
+Next, we construct pvCSVs for SQ computations that use randomness. Specifically, we compile the canonical Protocol 3 from above into non-interactive SQ protocols using a Fiat-Shamir trans-formation [FS86]. We prove soundness of the transformation in the Random Oracle Model (ROM), which allows us to replace the public coins of the verifier with non-interactive calls to the random oracle. We begin with preliminaries defining correctness and soundness in the ROM. Then, we describe our Fiat-Shamir transformation over canonical SQ protocols in Protocol 4. 
+
+pvCSVs in the ROM. In the Random Oracle Model [BR93], both the prover and verifier have query access to a shared random function called the random oracle f : {0, 1}∗ → { 0, 1}m for some output size m ∈ N. Completeness and soundness take probabilities over the sampling of the random oracle which is denoted f ← U . Furthermore, we restrict the cheating prover to at most t ∈ N
+
+queries of the random oracle, called the random oracle budget, typically taken to be polynomial in some security parameter. We adapt Definition 3.2 of pvCSVs to define computationally-sound pvCSVs in the ROM. 
+
+Definition 4.8 (pvCSV in the ROM) . Let G, τP , τ V > 0, γcsv > 0, and (Pcsv , Vcsv ) be defined in the setup of Definition 3.2. The pvCSV prover Pcsv and verifier Vcsv are given query-access to a random oracle f . The pvCSV (τP , τ V , γ, γ ′)-certifies G in the ROM if the following guarantees hold: 
+
+• γ-Completeness in the ROM: if DP = DV , then for any verifier distribution DV , τV -accurate oracle OV for DV , τP -accurate oracle OP for DV , over sampling of the random oracle f ,random coins of Pcsv and Vcsv , the honest prover can generate a hypothesis-certificate pair 
+
+(h, π ) ← POP ,f  
+
+> csv
+
+such that VOV ,f  
+
+> csv
+
+accepts and h ∈ G (DV ) with probability at least 1 − γ. That is, 
+
+∀D V , OV , OP . Pr 
+
+ VOV ,f  
+
+> csv
+
+(h, π ) = 1 
+
+∧ h ∈ G (DV )
+
+f ← U ,
+
+random coins of Pcsv and Vcsv ,
+
+(h, π ) ← POP ,f 
+
+> csv
+
+ ≥ 1 − γ
+
+• γ′-Universal Soundness in the ROM: for any verifier distribution DV and τV -accurate oracle 
+
+OV for DV , for any random oracle budget t ∈ N, for any t-query prover strategy ˜Pcsv , for 
+
+(h, π ) ← ˜P OV ,f  
+
+> csv
+
+, then V OV rejects or h ∈ G (DV ) with probability at least 1 − γ′(t) over sampling of the random oracle f , random coins of Vcsv . That is, 
+
+∀D V , OV , ˜Pcsv . Pr 
+
+ VOV ,f  
+
+> csv
+
+(h, π ) = 0 
+
+∨ h ∈ G (DV )
+
+f ← U ,
+
+random coins of V , 
+
+(h, π ) ← ˜P OV ,f 
+
+> csv
+
+ ≥ 1 − γ′(t)30 We denote ROM soundness against t-query provers as γ′(t) where γ′ is a function and t ∈ N is the random oracle query budget. Additionally, since soundness is parameterized whereas completeness is not, we split completeness and soundness error into ( γ, γ ′). 
+
+Applying Fiat-Shamir to the Canonical Protocol. We transform the Canonical SQ protocol (Pcan , Vcan ) into a pvCSV in the ROM by applying the Fiat-Shamir transformation to the initial phase of public-coin interaction. As is standard in Fiat-Shamir, the canonical verifier’s randomness in the i-th round is the query of the random oracle with the partial transcript of interaction up to round i. We describe the resulting protocol ( PFS , VFS ) in Protocol 4. The honest prover PFS 
+
+simulates the interaction ( Pcan , Vcan ) where Vcan ’s randomness is sampled via the random oracle f .Then, the verifier VFS runs the second and third phase of the canonical protocol as before, checking the correctness of the computational simulation and the statistical validity of the relevant SQs via a batch evaluation of the queries of Vcan .The correctness of the resulting pvCSV follows from the state restoration argument of [BSCS16], with some subtleties that arise in the SQ protocol setting. The structure of the Canonical protocol simplifies the analysis considerably: the protocol naturally divides into a phase of public-coin interaction, followed by (computational and statistical) verification of the transcript. Completeness of the protocol follows from completeness of Protocol 3, since the honest prover can execute the same sequence of queries and computations. Thus, we focus on establishing soundness. There are two key aspects of Protocol 4 that require us to be careful in establishing soundness of the transformation. First, in our setting, the cheating prover has considerable powers related to the statistical learning problem, with full knowledge of the underlying distribution D and access to the verifier’s SQ oracle. But, importantly, the cheating prover in the Fiat-Shamir protocol and Canonical protocol are afforded the same powers. The approach of establishing Fiat-Shamir soundness via state restoration is a black-box reduction, so we can apply the same argument even in our setting where the provers have non-standard computational and statistical powers. Second, our application of Fiat-Shamir is used to generate a legitimate prover-verifier transcript, which produces a hypothesis h, rather than directly certifying a known predicate (e.g., certifying a given 
+
+h ∈ G (DV )). That said, once we have a sound transcript, Phase 2 and Phase 3 of the original protocol allow us to validate that the h is actually good for the verifier’s distribution. Specifically, we invoke the following guarantee about the Fiat-Shamir transformation applied to public-coin protocols. 
+
+Theorem 4.9 (Corollary of Lemma 13.2.7 and Theorem 14.3.1 of [CY24]) . Let (P, V ) be a public-coin interactive protocol with round complexity ℓ and soundness γ. Let (PFS , VFS ) be the Fiat-Shamir transformed protocol, and suppose it has γFS soundness in the ROM. There is a black-box reduction that establishes the following upper bound on soundness of (PFS , VFS ) in terms of soundness of 
+
+(P, V ), round complexity ℓ, and random oracle budget t ∈ N.
+
+γFS (t) ≤
+
+t + ℓℓ
+
+
+
+γ
+
+Specifically, the reduction goes through a state restoration game and demonstrates how, given a cheating prover for the Fiat-Shamir proof system ˜PFS , there exists a cheating prover ˜P for the 31 Protocol 4: Non-Interactive SQ Protocol in Random Oracle Model 
+
+Setup: Let ( Pcan , Vcan ) be a canonical SQ protocol that τ -SQ verifies G, where 
+
+• PFS accesses a τ -accurate SQ Oracle OP for DP .
+
+• VFS accesses a τ -accurate SQ Oracle OV for DV .
+
+• ℓ is the round complexity of ( Pcan , Vcan ). 
+
+• Both PFS and VFS have access to a random oracle f .
+
+Prover POP ,f  
+
+> FS
+
+:Initialize an empty transcript π0 = ⟨⟩ 
+
+Simulate the interaction ( Pcan , Vcan ) as follows: 
+
+for i = 1 , . . . , ℓ do 
+
+POP 
+
+> can
+
+sends Vcan a message mi
+
+Generate Vcan ’s randomness at the i-th round as ri := f (⟨m1, . . . , m i⟩)
+
+Vcan sends ri to Pcan 
+
+Update πi := ⟨πi−1, m i, r i⟩
+
+end 
+
+Let π := πℓ
+
+Send π to Verifier VFS .
+
+Verifier VOV ,f  
+
+> FS
+
+:Parse the transcript π as 
+
+• m = ( m1, m 2, . . . , m ℓ) purported messages from Pcan 
+
+• r = ( r1, r 2, . . . , r ℓ) purported generated randomness for Vcan 
+
+for i = 1 , . . . , ℓ do if ri̸ = f (⟨m1, . . . , m i⟩) then 
+
+Reject and output ⊥
+
+end 
+
+Execute Phase 2 and Phase 3 of Vcan 
+
+if either phase fails then 
+
+Reject and output ⊥.Accept and output h.original interactive protocol that makes calls to ˜PFS , at a  t+ℓℓ
+
+-factor loss in success probability. With this fact, we establish the correctness of Protocol 4. 
+
+Lemma 4.10 (Fiat-Shamir for Canonical Protocol) . Fix G, τP , τ V > 0, γcan > 0, and canonical SQ protocol (Pcan , Vcan ) that (τP , τ V , γ can )-verifies G with round complexity ℓ. Then the Fiat- Shamir transformed protocol (PFS , VFS ), described in Protocol 4, is a pvCSV that (τP , τ V , γ can ,  t+ℓℓ
+
+γcan )-certifies G in the ROM where t ∈ N is the random oracle budget. Proof sketch. Completeness is immediate, by the fact that the random oracle calls are identically distributed to the challenges sent by the public-coin verifier. Thus, the honest prover generates a transcript from the same distribution as the honest execution of Protocol 3. Soundness follows by Theorem 4.9 applied to Phase 1 of Protocol 3. In particular, the black-box reduction allows us to convert any cheating prover for Protocol 4 ˜PFS into a cheating prover for 32 Protocol 3 ˜Pcan . While the provers are afforded non-standard SQ oracles and knowledge of the distribution, the Canonical interactive prover ˜Pcan has the same oracle access as the Fiat-Shamir prover ˜PFS , so ˜Pcan can implement the black-box calls to ˜PFS in the reduction. Thus, converting the interactive SQ protocol into a non-interactive protocol is sound up to the γFS (t) ≤  t+ℓℓ
+
+γcan loss as stated in Theorem 4.9. In particular, the Fiat-Shamir protocol generates a legitimate transcript of the original Canonical protocol, with all but γFS (t) soundness error. Finally, we argue that in the SQ model, the verifier’s additional checks establish that h ∈ G (DV )or result in rejection. After the non-interactive simulation of the interactive Phase 1, the verifier additionally executes Phase 2 and Phase 3 of Protocol 3. Phase 2 certifies that the transcript is a legitimate execution of the SQ protocol (based on the responses to statistical queries) and Phase 3 validates that the query responses are statistically correct. In the SQ model, these checks contribute zero additional soundness error. Thus, the upper bound on soundness holds as claimed. 
+
+pvCSVs for all mixed-message protocols with public-verifier state. We conclude with a statement of the overall pvCSV guarantee established in this section within the ROM. In Lemma 4.7, we argue that for the class of mixed-message, private-query SQ protocols with public verifier state can be transformed into a Canonical public-coin SQ protocol. Then, in Lemma 4.10, we apply the Fiat-Shamir transform to turn any Canonical protocol into a pvCSV in the ROM. Chaining these lemmas together, we obtain the following theorem. 
+
+Theorem 4.11. Fix G, τP , τ V > 0, γ > 0, and a mixed-message, private-query SQ protocol (P, V )
+
+with public verifier state. Let τ ′ 
+
+> P
+
+= min {τP , τ V /3} and τ ′ 
+
+> V
+
+= τV /3. Suppose (P, V ) ( τP , τ V , γ )-verifies G. Applying the canonical transformation described in Protocol 3, and then the Fiat-Shamir transformation, described in Protocol 4, yields a pvCSV (PFS , VFS ) that certifies G with the following characteristics: (a) For V with epoch complexity ℓ, (PFS , VFS ) ( τ ′ 
+
+> P
+
+, τ ′ 
+
+> V
+
+, γ,  t+ℓℓ
+
+γ)-certifies G in the ROM. (b) VFS uses a non-adaptive SQ oracle, regardless of the SQ adaptivity in (P, V ). That is, suppose V has τV -query complexity (kV , B V ) and P has τP -query complexity (kP , B P ); then, 
+
+• VFS has τ ′ 
+
+> V
+
+-query complexity (1 , B V );
+
+• PFS has τ ′ 
+
+> P
+
+-query complexity (kP + kV , B P + BV )
+
+(c) VFS and PFS run in linear time in the original protocol. That is, suppose V runs in time TV (τV ) and P runs in time TP (τP ); then 
+
+• Vcan runs in time O(TV (τV )) 
+
+• Pcan runs in time O(TV (τV ) + TP (τP )) 
+
+(d) For P with communication complexity cP , the certificate size |π| = O(BV log(1 /τ ′ 
+
+> P
+
+)) + cP .Proof. Let ( Pcan , Vcan ) be the intermediate, canonical SQ protocol. By Lemma 4.7, ( Pcan , Vcan )(τ ′ 
+
+> P
+
+, τ ′ 
+
+> V
+
+, γ )-verifies G. Since V has epoch complexity ℓ, ( Pcan , Vcan ) has round complexity ℓ. There-fore, by Lemma 4.10, ( PFS , VFS ) ( τ ′ 
+
+> P
+
+, τ ′ 
+
+> V
+
+, γ,  t+ℓℓ
+
+γ)-certifies G in the ROM. So part (a) holds. 33 Observe that the Fiat-Shamir transformation from ( Pcan , Vcan ) to ( PFS , VFS ) preserves many prop-erties including the precision, query complexity, and runtime of the prover and verifier, (at least while assuming unit cost for evaluating the random oracle). Therefore, parts (b) and (c) follow directly from Lemma 4.7. Let cP be the communication complexity of P . By Lemma 4.7, Pcan ’s communication complex-ity is O(BV log(1 /τ ′ 
+
+> P
+
+)) + cP . After applying the Fiat-Shamir transformation, the communication complexity is the canonical prover’s communication complexity. So, part (d) holds. By application of known implementations for adaptive and non-adaptive SQ oracles in Proposi-tion 2.11 and Proposition 2.10, we have the following. 
+
+Corollary 4.12. Let G, τP , τV , γ, (P, V ), pvCSV (PFS , VFS ) be defined as in the above theorem. Let τ ′ 
+
+> P
+
+= min {τP , τ V /3}. Suppose that both P and V make fully-adaptive queries, that is, kP = BP
+
+and kV = BV . Then for all failure probability δ > 0, the pvCSV has sample complexity (mPFS , m VFS )
+
+is as follows: 
+
+mPFS = O
+
+p(kV + kP ) · log(( kV + kP )/δ ) · log(1 /δ )
+
+τ ′2
+
+> P
+
+!
+
+mVFS = O
+
+ log( kV /δ )
+
+τ 2
+
+> V
+
+
+
+# 5 Beyond pvCSVs: Strengths and Limits of SQ Protocols 
+
+In this section, we consider the power and limitations of SQ protocols. First, we reiterate that, statistically, SQ protocols are very powerful. In even more generic settings than our pvCSV con-structions, SQ algorithms/protocols can be delegated via interactive SQ protocol such that the verifier’s sample complexity scales logarithmically in the number of queries. Then, we show that SQ protocols—despite their sample efficiency—do not generically provide a computationally effi-cient verification scheme. In particular, by a lower bound of [MS23] on the sample complexity required to PAC Verify certain VC classes, we show a subexponential lower bound on the query complexity of SQ verification for the same class. 
+
+Interactive Non-Adaptive SQ Verification. One of the key limitations in our construction of pvCSVs is the reliance on correctness under a public-state SQ oracle. We show that it is possible to achieve non-adaptive statistical verification of SQ algorithms that are only correct under an oblivious SQ oracle, albeit with interaction. This result is analogous to a result showed in the recent journal version of [MS23]. Given any SQ algorithm, the verifier simply executes the algorithm using the prover as its oracle. The prover responds interactively to each query. And then at the end, the verifier checks the answers of the prover non-adaptively. In fact, this simple idea also establishes that a large class of SQ protocols—even more general than those covered by Lemma 4.7—can be verified using non-adaptive statistical complexity. Specifically, for any public-query (private-coin) SQ protocol that verifies G with public verifier state, there is an implementation of the protocol that only requires non-adaptive verifier sample complexity. 
+
+Proposition 5.1. Fix a learning goal G, τP , τ V > 0, and γ > 0, and let τ ′ 
+
+> P
+
+= min {τP , τ V /3}
+
+and τ ′ 
+
+> V
+
+= τV /3. Suppose (P, V ) is a public-query SQ protocol that (τP , τ V , γ )-verifies G with public 
+
+34 verifier state, where P has τP -query complexity (kP , B P ) and V has τV -query complexity (kV , B V ).There is an SQ protocol (P ′, V ′) that (τ ′ 
+
+> P
+
+, τ ′ 
+
+> V
+
+, γ )-verifies G with public verifier state, where P ′ has 
+
+τ ′ 
+
+> P
+
+-query complexity (kP + kB , B P + BV ) and V ′ has non-adaptive τ ′ 
+
+> V
+
+-query complexity (1 , B V ).
+
+Proposition 5.1 follows, again, by asking the prover to make the verifier’s statistical queries. The completeness, soundness, and resulting bounds are analogous to those established by Lemma 4.7. 
+
+Query Lower Bound for SQ Verification of a VC Class. We show that the statistical upper bound we achieve for the SQ verifier actually implies a computational lower bound for SQ protocols. Specifically, there exists a hypothesis class of VC dimension d that cannot be SQ verified, even using the most general interactive SQ protocols, using polynomially many queries in d. Our lower bound piggybacks off of the lower bound proved in [MS23] for PAC Verification. 10 
+
+Theorem (Restatement of Theorem 2.1 of [MS23]) . Fix ε > 0, δ = 1 /3, and let (P, V ) be an interactive proof system for learning. For any hypothesis class H of VC Dimension d, if (P, V )
+
+PAC verifies H (for all distributions D) with accuracy ε and failure probability δ, then the verifier 
+
+V must use at least mV ≥ Ω( √d/ε 2) i.i.d. samples from D.
+
+Stringing this lower bound on the sample complexity of PAC verifying a VC class with our upper bound on the sample complexity of SQ verification, we immediately get a query complexity lower bound for SQ verification. Taking our upper bound of log( k)/τ 2 from Proposition 5.1, in terms of the number of statistical queries k, and their lower bound of √d/ε 2 in terms of the VC dimension 
+
+d, we obtain the following corollary. 
+
+Corollary 5.2. Fix γ = 1 /3 and fix the verifier tolerance τV = Ω( ε) > 0 in terms of the agnostic learning accuracy ε. For every hypothesis class H of VC dimension d, and for any τP > 0, any public-query SQ protocol that (τP , τ V , γ )-SQ verifies ε-Agnostic PAC learning of H with public verifier state requires the verifier to make k = 2 Ω( √d) statistical queries. 
+
+That is, even for the strongest model of SQ protocol we consider—interactive, public-query SQ protocols that use a public-state SQ oracle—when the tolerance of the SQ oracle is fixed τV ≈ ε,verification may be computationally inefficient, despite statistical efficiency. 
+
+# 6 Differential Privacy and SQ Verification 
+
+In many statistical analyses, Differential Privacy (DP) [DMNS06] is a desirable property to satisfy to maintain the privacy of individuals’ data within a database. 11 DP protects individuals’ privacy by requiring stability in a randomized algorithm’s behavior on neighboring databases D, D ′ that differ on a single element.  
+
+> 10 Informally, PAC Verification is the problem of delegation of learning, for the specific learning goal of Agnostic PAC learning. We refer the unfamiliar reader to [GRSY21].
+> 11 DP is the gold standard notion for privacy-protections in statistical analyses. We refer the unfamiliar reader to introductory materials on DP, including [DR14, Vad17, Kam20]. For the sake of presentation, we omit background on the Exponential Mechanism of [MT07].
+
+35 Algorithm 5: DPValidate (v, a, τ P , τ ) i.e., Differentially-Private Statistical Validation 
+
+Input: Batch of statistical queries q;List of candidate answers to queries a;Candidate accuracy τP > 0 and final accuracy τ > 0, where τP ≤ τ / 3
+
+Setup: mV i.i.d. samples drawn from DV ; x1, . . . , x mV
+
+Sensitiviy of empirical queries ∆ = 1 /m V
+
+for j = 1 , . . . , B do 
+
+Define ˆ aj = 1
+
+> mV
+
+PmV 
+
+> i=1
+
+qj (xi)Define νj = |ˆaj − aj |
+
+end 
+
+Use the Exponential Mechanism to sample a noisy maximum ν∗ over {νj } according to: 
+
+Pr [ν∗ = νj ] ∝ exp 
+
+ ε · νj
+
+2∆ 
+
+
+
+if ν∗ > τ / 2 then return False 
+
+return True 
+
+Definition 6.1 (Differential Privacy [DMNS06]) . Fix a domain X and range R, and ε, δ > 0. A randomized algorithm M : X ∗ → R is (ε, δ )-differentially private if for all neighboring databases 
+
+D, D ′ ∈ X ∗ and for all measurable subsets S ⊆ R ,
+
+Pr [M (D) ∈ S] ≤ eε · Pr [M (D′) ∈ S] + δ. 
+
+DP provides rigorous protections to individuals, but comes at a cost. Even for non-adaptive sta-tistical queries, in high-dimensional settings ( d ≥ k), answering k queries requires sample com-plexity scaling polynomially in k. Concretely, to answer k queries with τ tolerance under pure (ε, 0)-DP requires Ω( k/τ ε ) i.i.d. samples from D [HT10]; under approximate ( ε, δ )-DP requires Ω( pk · log(1 /δ )/τ ε ) [SU16]. Both of these results are tight (up to poly-logarithmic factors); in fact, the upper bound on answering adaptive statistical queries is tightly connected to the upper bound on answering queries under approximate DP. Certifying the results of a statistical analysis, while maintaining DP with respect to the verifier’s samples, offers a potential for significant savings. We show, generically, that the verifiers for our pvCSVs (in fact, for all of our SQ protocols) can be implemented under DP using essentially the same non-adaptive sample complexity. 
+
+Proposition 6.2. There exists an (ε, 0) -DP implementation of the non-adaptive statistical valida-tion, given in Algorithm 5, with failure probability β that uses mV i.i.d. samples from DV , where for any number of adaptive queries k,
+
+mV ≤ O
+
+ log( k/β )
+
+τ 2 + log( k/β )
+
+τ ε 
+
+
+
+.
+
+Proof sketch. The proposition follows from a standard application of the Exponential Mechanism [MT07]. The original non-adaptive statistical validation step evaluates each query on the samples 36 from DV .12 Namely, the original verifier computes ˆ a1, . . . , ˆak where ˆ aj = 1
+
+> mV
+
+PmV 
+
+> i=1
+
+qj (xi). Instead, the new verifier checks the (noisy) maximum difference between the statistics reported by the prover and the empirical statistics on their samples, |aj − ˆaj |.To compute the new verifier’s sample complexity, we need to reason about the accuracy of the empirical statistics ˆ a1, . . . , ˆak, as well as the accuracy of the exponential mechanism. For tar-get tolerance τ and prover tolerance τ / 3 (as in our protocols), we will insist that each of these components achieves τ / 16 additive error with all but β/ 2 probability each. First, the accuracy of the empirical statistics: per Proposition 2.10, mV can scale as O(log( k/β )/τ 2). Then, the accuracy of the release of the maximum difference max 1≤j≤k |aj − ˆaj |: per [MT07], with all but β/ 2 probability, the exponential mechanism achieves error α where 
+
+α ≤ 2∆ 
+
+ε · log(2 k/β )where ∆ = 1 /m V is the sensitivity of the release from a database of mV samples. Thus, the exponen-tial mechanism guarantees τ / 16-accuracy to the empirical statistics for some mV ≤ O(log( k/β )/τ ε ). With these accuracies fixed with all but β total failure probability, we can define the new verifier and analyze Completeness and Soundness. For a sequence of k fully-adaptive SQs, Algorithm 5 runs the exponential mechanism to release the noisy maximum difference max 1≤j≤k |aj − ˆaj |. If the difference is less than τ / 2, it accepts; otherwise, it rejects. 
+
+Completeness: Per our earlier protocols, we assume the honest prover reports each aj within 
+
+τP = τ / 3 of the true query value. The verifier’s empirical statistics ˆ aj are within τ / 16 of the true query value, and their difference is released with τ / 16-accuracy, so in sum, the reported maximum difference will be strictly less than τ / 2, with all but β probability. 
+
+Soundness: Suppose there is some statistic aj that was reported with more than τ additive error from the true value, so the SQ guarantee is violated. Again, the verifier’s accuracy ensures that the difference |aj − ˆaj | is at least 15 τ / 16, which is released with at most τ / 16 additive error. So, with all but β probability, the reported maximum difference is strictly more than τ / 2. 
+
+> 12 This is the simplest implementation of Algorithm 2 given i.i.d. samples.
+
+37 Acknowledgements 
+
+The authors thank Noah Stephens-Davidowitz for significant conversations at the start of this work and feedback throughout the project. We also thank Robert Kleinberg, Jonathan Shafer, and Nick Spooner for helpful discussions. 
+
+# References 
+
+[Bab85] L´ aszl´ o Babai. Trading group theory for randomness. In Proceedings of the seventeenth annual ACM symposium on Theory of computing , pages 421–429, 1985. [Bar01] Boaz Barak. How to go beyond the black-box simulation barrier. In Proceedings 42nd IEEE Symposium on Foundations of Computer Science , pages 106–115. IEEE, 2001. [BGKW24] Zo¨ e Ruha Bell, Shafi Goldwasser, Michael P Kim, and Jean-Luc Watson. Certifying private probabilistic mechanisms. In Annual International Cryptology Conference ,pages 348–386. Springer, 2024. [Bla25] Guy Blanc. Subsampling suffices for adaptive data analysis. Journal of the ACM ,72(1):1–45, 2025. [BNS +16] Raef Bassily, Kobbi Nissim, Adam Smith, Thomas Steinke, Uri Stemmer, and Jonathan Ullman. Algorithmic stability for adaptive data analysis. In Proceedings of the forty-eighth annual ACM symposium on Theory of Computing , pages 1046–1059, 2016. [BR93] Mihir Bellare and Phillip Rogaway. Random oracles are practical: A paradigm for designing efficient protocols. In Proceedings of the 1st ACM Conference on Computer and Communications Security , pages 62–73, 1993. [BSCS16] Eli Ben-Sasson, Alessandro Chiesa, and Nicholas Spooner. Interactive oracle proofs. In Theory of Cryptography Conference , pages 31–60. Springer, 2016. [BTFM +25] Zo¨ e Ruha Bell, Anvith Thudi, Olive Franzese-McLaughlin, Nicolas Papernot, and Shafi Goldwasser. Efficient public verification of private ml via regularization. arXiv preprint arXiv:2512.04008 , 2025. [CG18] Alessandro Chiesa and Tom Gur. Proofs of proximity for distribution testing. In 9th Innovations in Theoretical Computer Science Conference (ITCS 2018) , pages 53–1. Schloss Dagstuhl–Leibniz-Zentrum f¨ ur Informatik, 2018. [CY24] Alessandro Chiesa and Eylon Yogev. Building Cryptographic Proofs from Hash Func-tions . 2024. [DFH +15a] Cynthia Dwork, Vitaly Feldman, Moritz Hardt, Toni Pitassi, Omer Reingold, and Aaron Roth. Generalization in adaptive data analysis and holdout reuse. Advances in neural information processing systems , 28, 2015. 38 [DFH +15b] Cynthia Dwork, Vitaly Feldman, Moritz Hardt, Toniann Pitassi, Omer Reingold, and Aaron Roth. The reusable holdout: Preserving validity in adaptive data analysis. 
+
+Science , 349(6248):636–638, 2015. [DFH +15c] Cynthia Dwork, Vitaly Feldman, Moritz Hardt, Toniann Pitassi, Omer Reingold, and Aaron Leon Roth. Preserving statistical validity in adaptive data analysis. In Pro-ceedings of the forty-seventh annual ACM symposium on Theory of computing , pages 117–126, 2015. [DK22] Yuval Dagan and Gil Kur. A bounded-noise mechanism for differential privacy. In 
+
+Conference on Learning Theory , pages 625–661. PMLR, 2022. [DMNS06] Cynthia Dwork, Frank McSherry, Kobbi Nissim, and Adam Smith. Calibrating noise to sensitivity in private data analysis. In Theory of cryptography conference , pages 265–284. Springer, 2006. [DR14] Cynthia Dwork and Aaron Roth. The Algorithmic Foundations of Differential Privacy ,volume 9. Now Publishers Inc., 2014. [FS86] Amos Fiat and Adi Shamir. How to prove yourself: Practical solutions to identification and signature problems. In Conference on the theory and application of cryptographic techniques , pages 186–194. Springer, 1986. [FS18] Vitaly Feldman and Thomas Steinke. Calibrating noise to variance in adaptive data analysis. In Conference On Learning Theory , pages 535–544. PMLR, 2018. [GJK +24] Tom Gur, Mohammad Mahdi Jahanara, Mohammad Mahdi Khodabandeh, Ninad Rajgopal, Bahar Salamatian, and Igor Shinkar. On the power of interactive proofs for learning. In Proceedings of the 56th Annual ACM Symposium on Theory of Computing ,pages 1063–1070, 2024. [GK03] Shafi Goldwasser and Yael Tauman Kalai. On the (in) security of the fiat-shamir paradigm. In 44th Annual IEEE Symposium on Foundations of Computer Science, 2003. Proceedings. , pages 102–113. IEEE, 2003. [GKR08] Shafi Goldwasser, Yael Tauman Kalai, and Guy N. Rothblum. Delegating computa-tion: Interactive proofs for muggles. In Proceedings of the 40th Annual ACM Sympo-sium on Theory of Computing (STOC ’08) , pages 113–122, Victoria, British Columbia, Canada, 2008. ACM. [GL89] Oded Goldreich and Leonid Levin. A hard-core predicate for all one-way functions. In Proceedings of the 21st Annual ACM Symposium on Theory of Computing (STOC ’89) , pages 25–32. ACM, 1989. [GMR85] Shafi Goldwasser, Silvio Micali, and Charles Rackoff. The knowledge complexity of interactive proof-systems. In Proceedings of the Seventeenth Annual ACM Symposium on Theory of Computing (STOC ’85) , pages 291–304, Providence, Rhode Island, 1985. ACM. 39 [GRSY21] Shafi Goldwasser, Guy N Rothblum, Jonathan Shafer, and Amir Yehudayoff. Interac-tive proofs for verifying machine learning. In 12th Innovations in Theoretical Computer Science Conference (ITCS 2021) , pages 41–1. Schloss Dagstuhl–Leibniz-Zentrum f¨ ur Informatik, 2021. [Hau92] David Haussler. Decision-theoretic generalizations of the pac model for neural net and other learning applications. Information and Computation , 100(1):78–150, 1992. [HR10] Moritz Hardt and Guy N Rothblum. A multiplicative weights mechanism for privacy-preserving data analysis. In 2010 IEEE 51st annual symposium on foundations of computer science , pages 61–70. IEEE, 2010. [HR22] Tal Herman and Guy N Rothblum. Verifying the unseen: interactive proofs for label-invariant distribution properties. In Proceedings of the 54th Annual ACM SIGACT Symposium on Theory of Computing , pages 1208–1219, 2022. [HR23] Tal Herman and Guy Rothblum. Doubley-efficient interactive proofs for distribu-tion properties. In 2023 IEEE 64th Annual Symposium on Foundations of Computer Science (FOCS) , pages 743–751. IEEE, 2023. [HR24a] Tal Herman and Guy Rothblum. How to verify any (reasonable) distribution prop-erty: Computationally sound argument systems for distributions. arXiv preprint arXiv:2409.06594 , 2024. [HR24b] Tal Herman and Guy Rothblum. Interactive proofs for general distribution properties. In 2024 IEEE 65th Annual Symposium on Foundations of Computer Science (FOCS) ,pages 528–538. IEEE, 2024. [HT10] Moritz Hardt and Kunal Talwar. On the geometry of differential privacy. In Pro-ceedings of the 42nd Annual ACM Symposium on Theory of Computing (STOC ’10) ,pages 705–714. ACM, 2010. [HU14] Moritz Hardt and Jonathan Ullman. Preventing false discovery in interactive data analysis is hard. In 2014 IEEE 55th annual symposium on foundations of computer science , pages 454–463. IEEE, 2014. [JLN +19] Christopher Jung, Katrina Ligett, Seth Neel, Aaron Roth, Saeed Sharifi-Malvajerdi, and Moshe Shenfeld. A new analysis of differential privacy’s generalization guarantees. 
+
+arXiv preprint arXiv:1909.03577 , 2019. [Kam20] Gautam Kamath. Cs 860: Algorithms for private data analysis, 2020. Lecture notes and videos available at http://www.gautamkamath.com/CS860-fa2020.html .[Kea98] Michael Kearns. Efficient noise-tolerant learning from statistical queries. Journal of the ACM (JACM) , 45(6):983–1006, 1998. [KSS94] Michael Kearns, Robert E. Schapire, and Linda M. Sellie. Toward efficient agnostic learning. Machine Learning , 17(2–3):115–141, 1994. [MS23] Saachi Mutreja and Jonathan Shafer. Pac verification of statistical algorithms. In The Thirty Sixth Annual Conference on Learning Theory , pages 5021–5043. PMLR, 2023. 40 [MS26] Saachi Mutreja and Jonathan Shafer. Pac verification of statistical algorithms. Theory of Computing , 22(5):1–40, 2026. A preliminary version appeared in the Proceedings of COLT’23. [MT07] Frank McSherry and Kunal Talwar. Mechanism design via differential privacy. In 
+
+48th Annual IEEE Symposium on Foundations of Computer Science (FOCS) , pages 94–103. IEEE Computer Society, 2007. [SU15] Thomas Steinke and Jonathan Ullman. Interactive fingerprinting codes and the hard-ness of preventing false discovery. In Conference on learning theory , pages 1588–1628. PMLR, 2015. [SU16] Thomas Steinke and Jonathan Ullman. Between pure and approximate differential privacy. Journal of Privacy and Confidentiality , 7(2):3–22, 2016. [Vad17] Salil Vadhan. The complexity of differential privacy. In Yehuda Lindell, editor, Tuto-rials on the Foundations of Cryptography , pages 347–450. Springer, 2017. [Val84] Leslie G. Valiant. A theory of the learnable. Communications of the ACM ,27(11):1134–1142, 1984. 41

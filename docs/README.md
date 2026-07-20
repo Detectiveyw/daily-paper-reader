@@ -6,26 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-19
-- 运行时间：2026-07-19 19:52:01 UTC
+- 最新运行日期：2026-07-20
+- 运行时间：2026-07-20 20:19:36 UTC
 - 运行状态：成功
-- 本次总论文数：1
+- 本次总论文数：3
 - 精读区：0
-- 速读区：1
+- 速读区：3
 
 ### 今日简报（AI）
-今日聚焦多精度浮点运算优化，完成对无分支融合乘加（FMA）算法的性能评估。
-该研究验证了无分支设计在提升多组分多精度算术效率上的具体表现。
-建议关注高性能计算底层优化的读者参考其算法实现，以提升复杂数值计算的执行性能。
-- 详情：[/202607/19/README](/202607/19/README)
+今日聚焦隐私计算与大模型推理，深入探讨了边缘云协作及全同态加密的性能优化方案。
+最值得关注 LLM 在边缘侧的隐私感知推理技术，以及通过密文级优化提升全同态加密效率的最新进展。
+建议关注隐私保护技术如何赋能端侧 AI 部署，在保障数据安全的同时实现高效计算。
+- 详情：[/202607/20/README](/202607/20/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Performance evaluation of branch-free fused multiply-add algorithms for multi-component-type multiple-precision floating-point arithmetic](/202607/19/2607.11391v1-performance-evaluation-of-branch-free-fused-multiply-add-algorithms-for-multi-component-type-multiple-precision-floating-point-arithmetic)  
+1. [Efficient and Privacy Aware Edge Cloud Collaborative Inference for Large Language Models](/202607/20/2607.13093v2-efficient-and-privacy-aware-edge-cloud-collaborative-inference-for-large-language-models)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：以隐私为中心的面向量子大模型的边缘云协作推理
+2. [Publicly-Verifiable Certificates for Statistical Algorithms](/202607/20/2607.15528v1-publicly-verifiable-certificates-for-statistical-algorithms)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：多精度浮点运算算法
+   evidence：统计有效性的公开可验证证书
+3. [Ciphertext- and Polynomial-Level Optimization for Fully Homomorphic Encryption](/202607/20/2607.15750v1-ciphertext--and-polynomial-level-optimization-for-fully-homomorphic-encryption)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：使用全同态加密的隐私保护计算
 
 
 <div class="dpr-home-promo-card">
