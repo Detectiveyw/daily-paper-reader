@@ -1,0 +1,37 @@
+{
+  "label": "2026-07-21",
+  "date": "2026-07-21",
+  "generated_at": "2026-07-21T21:22:22",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202607/21/2607.15750v2-ciphertext--and-polynomial-level-optimization-for-fully-homomorphic-encryption",
+      "section": "quick",
+      "title_en": "Ciphertext- and Polynomial-Level Optimization for Fully Homomorphic Encryption",
+      "authors": "Seongho Kim, Heelim Choi, Jaemin Kim, Seonyoung Cheon, Dongkwan Kim, Jaeho Lee, Hoyun Youm, Dongyoon Lee, Hanjun Kim, Yongwoo Lee",
+      "date": "2026-07-17",
+      "pdf": "https://arxiv.org/pdf/2607.15750v2",
+      "score": "6.0",
+      "evidence": "通过对加密数据直接计算实现隐私保护服务",
+      "tldr": "本研究针对全同态加密（FHE）程序优化中的细粒度缺失问题，提出了 Recifhe 编译器。传统的 FHE 编译器主要在粗粒度的密文层级运作，忽略了构成密文操作的多项式层级优化空间。Recifhe 通过多层级架构，不仅在密文层级自动插入管理操作并进行全局优化，还在多项式层级消除了跨密文操作的冗余计算。实验表明，该方法相比单一密文层级优化实现了 1.25 倍的加速，为提升 FHE 计算效率提供了新思路。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Fully homomorphic encryption (FHE) schemes such as RNS-CKKS enable privacy-preserving services through direct computation on encrypted data. While recent FHE compilers optimize FHE programs, they operate at the coarse-grained ciphertext level, where each ciphertext operation comprises a sequence of polynomial operations. At this granularity, the compilers miss polynomial-level optimization opportunities across ciphertext operations. This work presents Recifhe, a new multi-level compiler that supports both ciphertext-level and polynomial-level optimization. At the ciphertext level, Recifhe transforms a non-FHE input program into an FHE program by inserting ciphertext management operations and applies global optimizations. At the polynomial level, Recifhe eliminates redundant polynomial computations across ciphertext operations. Recifhe achieves a 1.25x speedup over ciphertext-level-only optimization.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/21/2607.17603v1-protecting-floating-point-computation-for-dnn-binaries-with-mba-obfuscation",
+      "section": "quick",
+      "title_en": "Protecting Floating-Point Computation for DNN Binaries with MBA Obfuscation",
+      "authors": "Yikun Hu, Zichen Zhao, Peixiang Qin, Ziyi Zhou, Jiaping Gui, Yuandao Cai, Wensheng Tang",
+      "date": "2026-07-20",
+      "pdf": "https://arxiv.org/pdf/2607.17603v1",
+      "score": "6.0",
+      "evidence": "通过混淆保护深度神经网络二进制文件中的浮点运算",
+      "tldr": "针对深度神经网络（DNN）二进制文件易受逆向工程攻击导致模型泄露的问题，本文提出FLOB混淆框架。该框架利用混合布尔算术（MBA）变换保护浮点运算，通过将浮点值提升至高精度二进制扩展空间进行变换，确保在不引入额外舍入误差的前提下实现语义等效。实验表明，FLOB能显著降低算子恢复率，有效对抗现有反混淆工具，同时在保护强度与性能间提供灵活权衡。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Deep neural networks (DNNs) have become a foundational component of modern computing systems with a wide range of applications, such as computer vision, edge intelligence, etc. For the sake of low latency and data privacy, DNN models are increasingly compiled into executables and deployed on local devices. However, that exposes the models to model theft, enabling adversaries to recover proprietary assets via reverse engineering techniques. While code obfuscation naturally emerges for protecting executables from reverse engineering, existing schemes are primarily designed for traditional programs, focusing on complex control flow structures and integer-based operations. They are fundamentally inappropriate for DNN binaries, which exhibit relatively simple code structures and heavily rely on floating-point computation.   In this paper, we propose FLOB, an obfuscation framework that protects floating-point computations in DNN binaries using Mixed Boolean-Arithmetic (MBA) transformations. Our approach lifts floating-point values into a higher-precision binary expansion space and performs MBA transformations at the representation level. The computation is carried out entirely in the lifted space, and the final result is then projected back to the target precision, yielding outputs that are semantically equivalent under the original floating-point format, without introducing additional rounding error. The experimental results show that FLOB outperforms the state-of-the-art obfuscation schemes against existing reverse engineering analyzers and deobfuscators, while preserving computational correctness without introducing additional numerical error, allowing flexible trade-off between protection and performance. Specifically, FLOB reduces the operator recovery rate to 4.51% on average, achieving a 32.82 percentage-point reduction compared to existing methods.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

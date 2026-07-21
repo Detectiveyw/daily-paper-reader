@@ -1,0 +1,101 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-21T21:19:51.321447+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.15750v2",
+      "title": "Ciphertext- and Polynomial-Level Optimization for Fully Homomorphic Encryption",
+      "abstract": "Fully homomorphic encryption (FHE) schemes such as RNS-CKKS enable privacy-preserving services through direct computation on encrypted data. While recent FHE compilers optimize FHE programs, they operate at the coarse-grained ciphertext level, where each ciphertext operation comprises a sequence of polynomial operations. At this granularity, the compilers miss polynomial-level optimization opportunities across ciphertext operations. This work presents Recifhe, a new multi-level compiler that supports both ciphertext-level and polynomial-level optimization. At the ciphertext level, Recifhe transforms a non-FHE input program into an FHE program by inserting ciphertext management operations and applies global optimizations. At the polynomial level, Recifhe eliminates redundant polynomial computations across ciphertext operations. Recifhe achieves a 1.25x speedup over ciphertext-level-only optimization.",
+      "authors": [
+        "Seongho Kim",
+        "Heelim Choi",
+        "Jaemin Kim",
+        "Seonyoung Cheon",
+        "Dongkwan Kim",
+        "Jaeho Lee",
+        "Hoyun Youm",
+        "Dongyoon Lee",
+        "Hanjun Kim",
+        "Yongwoo Lee"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.SE"
+      ],
+      "published": "2026-07-17T08:39:12+00:00",
+      "link": "https://arxiv.org/pdf/2607.15750v2",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "privacy-preserving services through direct computation on encrypted data",
+      "llm_evidence_cn": "通过对加密数据直接计算实现隐私保护服务",
+      "llm_evidence": "通过对加密数据直接计算实现隐私保护服务",
+      "canonical_evidence": "通过对加密数据直接计算实现隐私保护服务",
+      "llm_tldr_en": "Presents a multi-level compiler for FHE to optimize privacy-preserving computation at both ciphertext and polynomial levels.",
+      "llm_tldr_cn": "提出一种全同态加密多级编译器，在密文和多项式级别优化隐私保护计算。",
+      "llm_tldr": "提出一种全同态加密多级编译器，在密文和多项式级别优化隐私保护计算。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.17603v1",
+      "title": "Protecting Floating-Point Computation for DNN Binaries with MBA Obfuscation",
+      "abstract": "Deep neural networks (DNNs) have become a foundational component of modern computing systems with a wide range of applications, such as computer vision, edge intelligence, etc. For the sake of low latency and data privacy, DNN models are increasingly compiled into executables and deployed on local devices. However, that exposes the models to model theft, enabling adversaries to recover proprietary assets via reverse engineering techniques. While code obfuscation naturally emerges for protecting executables from reverse engineering, existing schemes are primarily designed for traditional programs, focusing on complex control flow structures and integer-based operations. They are fundamentally inappropriate for DNN binaries, which exhibit relatively simple code structures and heavily rely on floating-point computation.   In this paper, we propose FLOB, an obfuscation framework that protects floating-point computations in DNN binaries using Mixed Boolean-Arithmetic (MBA) transformations. Our approach lifts floating-point values into a higher-precision binary expansion space and performs MBA transformations at the representation level. The computation is carried out entirely in the lifted space, and the final result is then projected back to the target precision, yielding outputs that are semantically equivalent under the original floating-point format, without introducing additional rounding error. The experimental results show that FLOB outperforms the state-of-the-art obfuscation schemes against existing reverse engineering analyzers and deobfuscators, while preserving computational correctness without introducing additional numerical error, allowing flexible trade-off between protection and performance. Specifically, FLOB reduces the operator recovery rate to 4.51% on average, achieving a 32.82 percentage-point reduction compared to existing methods.",
+      "authors": [
+        "Yikun Hu",
+        "Zichen Zhao",
+        "Peixiang Qin",
+        "Ziyi Zhou",
+        "Jiaping Gui",
+        "Yuandao Cai",
+        "Wensheng Tang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-20T06:43:16+00:00",
+      "link": "https://arxiv.org/pdf/2607.17603v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Protecting floating-point computation for DNN binaries via obfuscation",
+      "llm_evidence_cn": "通过混淆保护深度神经网络二进制文件中的浮点运算",
+      "llm_evidence": "通过混淆保护深度神经网络二进制文件中的浮点运算",
+      "canonical_evidence": "通过混淆保护深度神经网络二进制文件中的浮点运算",
+      "llm_tldr_en": "Uses MBA obfuscation to protect floating-point operations in DNN binaries from reverse engineering.",
+      "llm_tldr_cn": "利用MBA混淆技术保护深度神经网络二进制文件中的浮点运算，防止逆向工程。",
+      "llm_tldr": "利用MBA混淆技术保护深度神经网络二进制文件中的浮点运算，防止逆向工程。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing supporting floating point operations and verifiable security",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

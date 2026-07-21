@@ -6,32 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-20
-- 运行时间：2026-07-20 20:19:36 UTC
+- 最新运行日期：2026-07-21
+- 运行时间：2026-07-21 21:22:13 UTC
 - 运行状态：成功
-- 本次总论文数：3
+- 本次总论文数：2
 - 精读区：0
-- 速读区：3
+- 速读区：2
 
 ### 今日简报（AI）
-今日聚焦隐私计算与大模型推理，深入探讨了边缘云协作及全同态加密的性能优化方案。
-最值得关注 LLM 在边缘侧的隐私感知推理技术，以及通过密文级优化提升全同态加密效率的最新进展。
-建议关注隐私保护技术如何赋能端侧 AI 部署，在保障数据安全的同时实现高效计算。
-- 详情：[/202607/20/README](/202607/20/README)
+今日聚焦隐私计算与模型安全，深入探索全同态加密优化及深度学习二进制混淆技术。
+重点突破全同态加密在密文与多项式层级的性能瓶颈，并利用MBA混淆技术强化DNN浮点运算的安全性。
+建议关注隐私计算效率与AI防护的交叉领域，探索兼顾性能与安全性的模型部署方案。
+- 详情：[/202607/21/README](/202607/21/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Efficient and Privacy Aware Edge Cloud Collaborative Inference for Large Language Models](/202607/20/2607.13093v2-efficient-and-privacy-aware-edge-cloud-collaborative-inference-for-large-language-models)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：以隐私为中心的面向量子大模型的边缘云协作推理
-2. [Publicly-Verifiable Certificates for Statistical Algorithms](/202607/20/2607.15528v1-publicly-verifiable-certificates-for-statistical-algorithms)  
+1. [Ciphertext- and Polynomial-Level Optimization for Fully Homomorphic Encryption](/202607/21/2607.15750v2-ciphertext--and-polynomial-level-optimization-for-fully-homomorphic-encryption)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：统计有效性的公开可验证证书
-3. [Ciphertext- and Polynomial-Level Optimization for Fully Homomorphic Encryption](/202607/20/2607.15750v1-ciphertext--and-polynomial-level-optimization-for-fully-homomorphic-encryption)  
+   evidence：通过对加密数据直接计算实现隐私保护服务
+2. [Protecting Floating-Point Computation for DNN Binaries with MBA Obfuscation](/202607/21/2607.17603v1-protecting-floating-point-computation-for-dnn-binaries-with-mba-obfuscation)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：使用全同态加密的隐私保护计算
+   evidence：通过混淆保护深度神经网络二进制文件中的浮点运算
 
 
 <div class="dpr-home-promo-card">
