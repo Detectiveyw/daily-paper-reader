@@ -1,0 +1,79 @@
+{
+  "label": "2026-07-23",
+  "date": "2026-07-23",
+  "generated_at": "2026-07-23T20:22:35",
+  "count": 5,
+  "papers": [
+    {
+      "paper_id": "202607/23/2607.19490v1-integrity-of-peer-to-peer-distributed-llm-inference-under-malicious-nodes",
+      "section": "deep",
+      "title_en": "Integrity of peer-to-peer distributed LLM inference under malicious nodes",
+      "authors": "Mert Cihangiroglu, Antonino Nocera",
+      "date": "2026-07-21",
+      "pdf": "https://arxiv.org/pdf/2607.19490v1",
+      "score": "8.0",
+      "evidence": "恶意节点下分布式LLM推理的完整性",
+      "tldr": "本文针对P2P分布式大模型推理中的恶意节点篡改问题，提出了一种基于“金丝雀”输入的完整性检查方法。该方法通过在正常请求中混入秘密输入，并测量节点间传递的激活值偏差，利用概率测试区分恶意篡改与良性硬件噪声。实验表明，该方法在多种配置下均实现了1.0的AUROC，能精准识别恶意节点，为去中心化推理提供了安全保障。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Peer-to-peer distributed inference executes a Large Language Model (LLM) on pooled consumer hardware by spreading its layers across many nodes. Every request passes through nodes that are owned and controlled by multiple independent parties. However, in this setting, any party can tamper with the output of its layers to corrupt the end result. Recomputing the forward pass on trusted hardware can catch this, but it introduces additional computational cost. The scientific literature includes several prior integrity-checking approaches, such as known-answer traps for image classifiers and cryptographic commitments. However, these solutions test only the exact correctness and do not account for the ordinary variation that may arise between benign nodes. In this paper, we propose a method that checks the output integrity by measuring the variation in the activations that each node passes to the next. A peer who wants to use the network selects a small set of secret canary inputs whose correct activations are known in advance and mixes them into regular traffic. Because the peers cannot tell a canary from a real query, any tampering node corrupts them as well. The deviation from the known reference then reveals malicious activity: benign nodes exhibit only minor variation from hardware-induced noise, whereas tampered nodes deviate far more. We treat the identification of malicious nodes as a probabilistic test that separates two drift distributions, without relying on a fixed threshold. We study 408 configurations with metrics and success criteria fixed before any experiment ran; the detector reaches AUROC 1.0, correctly ranking the malicious shard above every benign shard on every canary in every configuration.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/23/2607.17603v2-protecting-floating-point-computation-for-dnn-binaries-with-mba-obfuscation",
+      "section": "quick",
+      "title_en": "Protecting Floating-Point Computation for DNN Binaries with MBA Obfuscation",
+      "authors": "Yikun Hu, Zichen Zhao, Peixiang Qin, Ziyi Zhou, Jiaping Gui, Yuandao Cai, Wensheng Tang",
+      "date": "2026-07-20",
+      "pdf": "https://arxiv.org/pdf/2607.17603v2",
+      "score": "6.0",
+      "evidence": "保护深度神经网络二进制文件的浮点运算",
+      "tldr": "针对深度神经网络（DNN）二进制文件易受逆向工程攻击导致模型泄露的问题，本文提出了一种名为FLOB的混淆框架。FLOB利用混合布尔算术（MBA）变换保护浮点运算，通过将浮点值提升至高精度二进制扩展空间进行变换，确保在不引入额外舍入误差的前提下实现语义等效。实验表明，FLOB能显著降低算子恢复率，在保护模型资产的同时兼顾计算准确性与性能。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Deep neural networks (DNNs) have become a foundational component of modern computing systems with a wide range of applications, such as computer vision, edge intelligence, etc. For the sake of low latency and data privacy, DNN models are increasingly compiled into executables and deployed on local devices. However, that exposes the models to model theft, enabling adversaries to recover proprietary assets via reverse engineering techniques. While code obfuscation naturally emerges for protecting executables from reverse engineering, existing schemes are primarily designed for traditional programs, focusing on complex control flow structures and integer-based operations. They are fundamentally inappropriate for DNN binaries, which exhibit relatively simple code structures and heavily rely on floating-point computation.   In this paper, we propose FLOB, an obfuscation framework that protects floating-point computations in DNN binaries using Mixed Boolean-Arithmetic (MBA) transformations. Our approach lifts floating-point values into a higher-precision binary expansion space and performs MBA transformations at the representation level. The computation is carried out entirely in the lifted space, and the final result is then projected back to the target precision, yielding outputs that are semantically equivalent under the original floating-point format, without introducing additional rounding error. The experimental results show that FLOB outperforms the state-of-the-art obfuscation schemes against existing reverse engineering analyzers and deobfuscators, while preserving computational correctness without introducing additional numerical error, allowing flexible trade-off between protection and performance. Specifically, FLOB reduces the operator recovery rate to 4.51% on average, achieving a 32.82 percentage-point reduction compared to existing methods.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/23/2607.18342v1-prism-sensitivity-aware-polynomial-pruning-for-efficient-neural-network-encryption",
+      "section": "quick",
+      "title_en": "PRISM: Sensitivity-Aware PolynoMial PRuning for EffIcient Neural Network Encryption",
+      "authors": "Sahaj Majavdia, Mahdi Taheri",
+      "date": "2026-07-20",
+      "pdf": "https://arxiv.org/pdf/2607.18342v1",
+      "score": "6.0",
+      "evidence": "加密下的神经网络推理",
+      "tldr": "针对同态加密（HE）下神经网络推理的效率与可靠性问题，本文提出了PRISM框架及PSAP结构化剪枝方法。该方法综合考虑权重大小、多项式激活敏感度和旋转成本，在提升推理效率的同时显著增强了模型对位翻转错误的鲁棒性。实验表明，PSAP在ResNet等架构上大幅减少了旋转操作和乘法深度，且在故障注入测试中表现出远优于传统剪枝方法的可靠性，为高效且可靠的加密推理提供了新方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Structured pruning is essential for making neural network inference feasible under homomorphic encryption (HE), yet its impact on model reliability has remained unexplored. This paper presents a systematic reliability characterization of pruned CKKS-encrypted neural networks and introduces Polynomial-Sensitivity-Aware Pruning (PSAP), a structured pruning method that is inherently reliability-aware. PSAP scores filters jointly by weight magnitude, polynomial activation sensitivity, and rotation cost, which concentrates pruning in fault-tolerant regions. Across two architectures, two datasets, two numerical representations, and five bit-error rates (40 full-model and 108 per-layer experiments), PSAP-pruned models limit catastrophic (>10 pp accuracy drop) layers to at most two versus 5--14 for magnitude-pruned baselines, reducing worst-case vulnerability by up to 29 times under int32 bit-flip injection. Direct CKKS encrypted fault injection indicates a safe operating boundary near BER~ 10^{-5}, supporting int32 injection as a conservative reliability proxy. The fault-critical structural layers account for only 1.1% of parameters, enabling selective hardening at minimal overhead. These reliability gains are obtained alongside competitive efficiency: PSAP reduces Halevi--Shoup rotations by up to 45.2\\% on ResNet-32, and an adaptive mixed-degree allocation scheme lowers multiplicative depth from 66 to 56 levels, enabling leveled inference without bootstrapping.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/23/2607.19456v1-moa-structured-decode-attention-dnf-derivation-kv-cache-accumulation-gqamqa-and-openacc-kernel",
+      "section": "quick",
+      "title_en": "MoA-Structured Decode Attention DNF Derivation, KV-Cache Accumulation, GQA/MQA, and OpenACC Kernel",
+      "authors": "Lenore Mulin, Gaetan Hains",
+      "date": "2026-07-21",
+      "pdf": "https://arxiv.org/pdf/2607.19456v1",
+      "score": "6.0",
+      "evidence": "Transformer注意力的内存优化推理构件",
+      "tldr": "本研究利用数组数学（MoA）推导了四种针对Transformer注意力推理的内存优化方案。通过对解码阶段的指称范式（DNF）进行代数推导，消除了中间缓冲区，实现了极低的DRAM流量。研究涵盖了单查询解码、高效GPU内核、KV缓存累加以及GQA/MQA的数学推导，并通过OpenACC实现了硬件加速，所有结果均通过了PyTorch的数值验证。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We derive four memory-optimal inference artifacts for transformer attention using the Mathematics of Arrays (MoA), each following directly from the forward-pass Denotational Normal Form (DNF) of with the query-row index fixed to the current decode step. The artifacts are: (1)~a single-query decode DNF in which the $ψ$-reduction eliminates the $K^\\top$ buffer algebraically, achieving $(d_k + nd_k+ nd_v+ d_v)\\times4\\,{B}$ Dynamic Random Access Memory (DRAM) traffic result numerically verified to $\\|{err}\\|_\\leq2\\times10^{-7}$; (2)~a C/OpenACC Graphics Processing Unit (GPU) kernel with Operational Normal Form (ONF) stride arithmetic and hardware-coalesced memory access, verified to $\\|\\mathrm{err}\\|_\\infty=0$ (exact IEEE-754 floating-point arithmetic); (3)~a multi-step KV-cache with $O(d_k+d_v)$ per-step append via MoA concatenation $\\#$; and (4)~Grouped-Query Attention (GQA) and Multi-Query Attention (MQA) derived via $ψ$-selection, achieving a proven $\\frac {h_q} { h_{kv} }$ reduction in KV traffic. All programs are verified against PyTorch scaled_dot_product_attention.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/23/2607.19795v1-towards-automated-formal-verification-of-zkevms-using-llm-guided-constraint-synthesis",
+      "section": "quick",
+      "title_en": "Towards Automated Formal Verification of zkEVMs Using LLM-Guided Constraint Synthesis",
+      "authors": "Shichen Huang, Zhenghe Jiang, Yi Jiang, Ling-I Wu, Jingyang Li, Guoqiang Li",
+      "date": "2026-07-22",
+      "pdf": "https://arxiv.org/pdf/2607.19795v1",
+      "score": "6.0",
+      "evidence": "使用零知识证明的可验证执行正确性",
+      "tldr": "本研究针对zkEVM实现中潜在的逻辑漏洞，提出了VeriSynth框架以实现自动化的形式化验证。VeriSynth通过LLM将Rust代码转化为Python/Z3符号约束模型，并利用SMT求解器作为正确性仲裁者。该框架集成了语义分解、检索增强提示和验证引导的自动修复技术，解决了传统手动建模效率低和LLM幻觉问题。实验表明，VeriSynth在zkEVM漏洞检测中达到了90%以上的准确率，显著优于现有基准。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Zero-Knowledge Ethereum Virtual Machines (zkEVMs) secure Ethereum rollups by generating zero-knowledge proofs that guarantee off-chain execution correctness. However, subtle implementation bugs (e.g., incorrect gas accounting) can lead to valid proofs certifying semantically faulty states, thereby silently defeating cryptographic guarantees. Formal verification via SMT solvers can prevent this, but is bottlenecked by specification: current zkEVM development practice lacks automated methods to translate Rust opcode handlers into verification models. Current practices rely on unsustainable manual specifications, while LLM-based approaches suffer from hallucination and lack formal guarantees. To address this, we propose VeriSynth, a framework that synthesizes executable Python/Z3 verification models from Rust zkEVM code. VeriSynth enforces a hybrid paradigm: an LLM acts strictly as a formalization frontend to translate code into symbolic constraints, while an SMT solver serves as the correctness arbiter. To handle complex multi-component state transitions, VeriSynth integrates semantic decomposition, retrieval-grounded prompting, and verification-guided auto-repair into a closed-loop pipeline. We evaluate VeriSynth on the first source-level zkEVM verification benchmark, encompassing both correct and faulty opcode implementations. VeriSynth achieves a bug detection rate of over 90%, substantially outperforming direct and conversational LLM baselines, as well as a production-grade handwritten mutation-testing suite. Ablation studies confirm that each pipeline component is critical to the framework's overall effectiveness.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
