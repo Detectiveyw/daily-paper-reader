@@ -1,0 +1,130 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-24T21:29:28.929359+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2607.21162v1",
+      "title": "Agree on the Model, Verify the Inference: GKR Protocols for HND-Based Transformer Inference",
+      "abstract": "Outsourced Transformer inference exposes clients to model substitution and incomplete execution, while direct replay removes the computational benefit of delegation. We present GKR-HND, a registered-model protocol for verifying the polynomial backbone of Homomorphic--Nonhomomorphic Decomposition Transformers. The retained verifier checks the GKR transcript and registered-weight openings, but delegates expensive public evaluations to an assigned computation worker. Assuming an honest retained verifier and prover--worker non-collusion, the verifier accepts only when the worker's signed, request-bound response agrees with the proof claims. Experiments with pretrained HND models validate the proof path and the delegated public computation without dense-matrix replay.",
+      "authors": [
+        "Xiaolong Liang",
+        "Juanjuan Li",
+        "Rui Qin",
+        "Yisheng Lv"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CR"
+      ],
+      "published": "2026-07-23T10:52:53+00:00",
+      "link": "https://arxiv.org/pdf/2607.21162v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Verifiable Transformer inference using GKR protocols",
+      "llm_evidence_cn": "使用GKR协议的可验证Transformer推理",
+      "llm_evidence": "使用GKR协议的可验证Transformer推理",
+      "canonical_evidence": "使用GKR协议的可验证Transformer推理",
+      "llm_tldr_en": "Proposes a protocol for verifying Transformer inference to prevent model substitution and incomplete execution.",
+      "llm_tldr_cn": "提出一种验证Transformer推理的协议，防止模型替换和执行不完整。",
+      "llm_tldr": "提出一种验证Transformer推理的协议，防止模型替换和执行不完整。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.19146v1",
+      "title": "Sarus: Privacy-Preserving Multi-Vendor Perception Fusion via Homomorphic Encryption",
+      "abstract": "Cooperative perception enables autonomous vehicles (AVs) to improve situational awareness by aggregating detection outputs from multiple agents and sensing platforms, often via a shared fusion service in multi-vendor deployments. However, sharing such outputs at inference time exposes proprietary model behavior and sensitive environmental information, creating significant privacy and security concerns. In this paper, we present Sarus, a privacy-preserving framework for multi-vendor perception fusion via homomorphic encryption (HE), enabling aggregation without revealing individual vendor outputs. Each vendor encodes detections as compact Gaussian moment vectors over a shared spatial lattice and transmits encrypted payloads to a fusion server, which aggregates them directly in the encrypted domain. The fused result is then decrypted and reconstructed into final detections through class-wise bin merging.   We analyze the computational complexity, showing linear scaling for vendor payload construction and $O(BV)$ server-side fusion with the number of occupied bins $B$ and vendors $V$, while postprocessing scales as $O(B + \\sum_{c\\in \\mathcal{C}} B_c^2)$, where $\\mathcal{C}$ denotes the set of object classes and $B_c$ is the number of occupied bins for class $c$. Experiments demonstrate linear scaling in practice with only a bounded constant-factor overhead from HE, with decryption dominating postprocessing cost. Experiments on the KITTI dataset using camera (YOLOv8) and LiDAR (PointPillars, PV-RCNN) detectors show that Sarus improves scene-level coverage by effectively aggregating complementary detections, particularly in distance-dependent regimes where individual modalities degrade. These results indicate that privacy-preserving multi-vendor perception fusion is feasible for real-time deployment when statistical compression and spatial sparsity are jointly exploited.",
+      "authors": [
+        "Munawar Hasan",
+        "Apostol Vassilev"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.CV"
+      ],
+      "published": "2026-07-21T14:38:52+00:00",
+      "link": "https://arxiv.org/pdf/2607.19146v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy-preserving inference via homomorphic encryption",
+      "llm_evidence_cn": "通过同态加密实现隐私保护推理",
+      "llm_evidence": "通过同态加密实现隐私保护推理",
+      "canonical_evidence": "通过同态加密实现隐私保护推理",
+      "llm_tldr_en": "Uses homomorphic encryption for secure multi-vendor perception fusion during inference to protect proprietary models.",
+      "llm_tldr_cn": "在推理过程中使用同态加密实现安全的多厂商感知融合，保护专有模型隐私。",
+      "llm_tldr": "在推理过程中使用同态加密实现安全的多厂商感知融合，保护专有模型隐私。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.19623v1",
+      "title": "From Bit-Position Sensitivity to Unequal Error Protection for DNN Inference Memory",
+      "abstract": "We characterize per-bit-position fault sensitivity in ML inference across 16 workloads -- spanning transformer-based models and attention-free CNNs -- and across three floating-point formats. Our central empirical finding is a sharp bit-sensitivity transition: flipping any of the least-significant fraction bits up to a data-type-specific threshold, Xsafe, degrades task metrics by less than 1% under deterministic single-bit stress tests. Sensitivity rises through the upper fraction bits and spikes at the exponent-mantissa boundary, where a single-bit flip causes catastrophic collapse. Because low-order bits are largely inconsequential while high-order and exponent bits are critical, uniform SECDED protection -- which guards every bit equally at 12.5% storage overhead -- is unnecessarily conservative. We derive per-data-type Xsafe floors (FP16: 6, BF16: 4, FP32: 15) and workload-aware tiers that widen the unprotected region for resilient model classes, raising ECC savings to 37.5-62.5% without retraining. Text-conditioned diffusion models dictate the conservative floor; vision encoders, NLU models, and resilient LLMs tolerate wider bypass regions. These floors and tiers drive an Unequal Error Protection (UEP) codec with per-cacheline data-type tags and a dual-partition SRAM architecture for ML accelerators. Validation across 870+ fault-injection runs confirms selective protection holds under contiguous 2- and 3-bit upsets. The codec reduces ECC area by 27.8% relative to uniform SECDED; dual-voltage operation of the non-critical partition lowers gross BF16 read energy by about 17%, with a roughly 4% dual-partition macro-area overhead.",
+      "authors": [
+        "Muhammad Husnain Mubarik",
+        "Karthik Mohan Kumar",
+        "Pedro Antonio Pena",
+        "Keshavan Varadarajan",
+        "Kunal Tyagi"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR",
+        "cs.LG"
+      ],
+      "published": "2026-07-21T23:07:56+00:00",
+      "link": "https://arxiv.org/pdf/2607.19623v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "fault sensitivity in floating-point formats for transformer inference",
+      "llm_evidence_cn": "Transformer推理中浮点格式的故障敏感性",
+      "llm_evidence": "Transformer推理中浮点格式的故障敏感性",
+      "canonical_evidence": "Transformer推理中浮点格式的故障敏感性",
+      "llm_tldr_en": "Analyzes bit-level sensitivity in floating-point DNN inference to improve memory protection.",
+      "llm_tldr_cn": "分析浮点深度神经网络推理中的位级敏感性，以改进内存保护。",
+      "llm_tldr": "分析浮点深度神经网络推理中的位级敏感性，以改进内存保护。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing supporting floating point operations and verifiable security",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

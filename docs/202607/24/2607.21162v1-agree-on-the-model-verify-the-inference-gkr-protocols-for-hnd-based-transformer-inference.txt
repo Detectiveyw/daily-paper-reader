@@ -1,0 +1,570 @@
+Title: Agree on the Model, Verify the Inference: GKR Protocols for HND-Based Transformer Inference
+
+URL Source: https://arxiv.org/pdf/2607.21162v1
+
+Published Time: Fri, 24 Jul 2026 00:48:22 GMT
+
+Number of Pages: 24
+
+Markdown Content:
+# Agree on the Model, Verify the Inference: GKR Protocols for HND-Based Transformer Inference 
+
+Xiaolong Liang, Juanjuan Li, Rui Qin, and Yisheng Lv 
+
+State Key Laboratory of Multimodal Artificial Intelligence Systems, Institute of Automation, Chinese Academy of Sciences, Beijing 100190, China 
+
+yisheng.lv@ia.ac.cn 
+
+Abstract 
+
+Outsourced Transformer inference exposes clients to model substitution and incomplete execution, while direct replay removes the computational benefit of delegation. We present GKR-HND, a registered-model protocol for verifying the polynomial backbone of Homomorphic–Nonhomomorphic Decomposition Transformers. The retained verifier checks the GKR transcript and registered-weight openings, but delegates expensive public evaluations to an assigned computation worker. Assuming an honest retained verifier and prover–worker non-collusion, the verifier accepts only when the worker’s signed, request-bound response agrees with the proof claims. Experiments with pretrained HND models validate the proof path and the delegated public computation without dense-matrix replay. 
+
+Keywords: verifiable inference; interactive proofs; GKR protocol; polynomial Transformer; model integrity 
+
+# 1 Introduction 
+
+Delegating Transformer inference to edge or cloud services reduces the computational burden on resource-constrained clients [1 –3]. At the same time, clients lose direct control over which model is deployed and how inference is executed. An untrusted service provider may therefore substitute a smaller model, alter the registered weights, or omit part of the computation. Although reputation and payment mechanisms can discourage such behavior, they cannot certify that a particular inference instance used the registered model and completed the required computation [4, 5]. Re-executing the model would provide such a check, but would eliminate the computational benefit of outsourcing. We therefore ask whether a client can verify the execution of a registered Transformer backbone without storing its dense weights or replaying its matrix products. Cryptographic proof systems can verify outsourced computation without replaying it [6 –8]. Proving a complete Transformer remains computationally expensive because encoding its non-polynomial operations enlarges the arithmetic relation. The Homomorphic–Nonhomomorphic Decomposition (HND) Transformer [9] reduces this arithmetization burden by separating a polynomial backbone from compact non-polynomial correction modules. Its original modular verification procedure, however, still propagates a full hidden state through L dense blocks and retains O(Ld 2) client work. We therefore present GKR-HND, which applies GKR [10, 11] to the registered HND backbone. GKR-HND combines a block-local GKR proof with delegated public computation. The retained verifier checks the proof transcript and the openings against the registered model. It derives the remaining public evaluation queries from the checked transcript and sends them to an assigned computation worker. The worker does not receive an expected answer from the prover. Its signed response is bound to the model, request, block, operation, and transcript. With an honest retained verifier and prover–worker non-collusion, disagreement causes rejection, while accepted block results can be composed through their public boundaries. The contributions are summarized as follows. 1arXiv:2607.21162v1 [cs.LG] 23 Jul 2026 • We propose GKR-HND, a method for verifying the outsourced polynomial backbone of HND inference without replaying dense products, under a threat model with an honest retained verifier and non-colluding prover and worker. 
+
+• We separate retained cryptographic verification from public terminal computation and bind the assigned worker’s response to each query. 
+
+• We evaluate the protocol with pretrained HND models and verify the delegated proof path without dense-matrix replay. The remainder of this paper is organized as follows. Section 2 reviews the background and related work. Section 3 formulates the verification problem and introduces the threat model. Section 4 presents the GKR-HND verification protocol. Section 5 analyzes its security guarantees and computational costs. Section 6 reports the experimental results. Finally, Section 7 concludes the paper. 
+
+# 2 Background and Related Work 
+
+The GKR protocol allows a verifier to check the claimed output of a layered arithmetic circuit without re-executing the full circuit [10, 11]. Starting from the output claim, GKR applies sum-check to reduce a claim about one layer to claims about the preceding layer [15]. For regular circuits, the verifier work is polylogarithmic in the layer width, apart from input and wiring evaluations. Streaming refinements further reduce this overhead for structured computations [16]. This layer-by-layer reduction is well matched to the HND polynomial backbone. Because the backbone is organized as a sequence of layered blocks, GKR can reduce each block to random-point claims and thereby avoid client-side replay of its dense matrix operations. Succinct arguments offer a different design point. Pinocchio and Groth16 use preprocessing to obtain compact pairing-based proofs [18, 21], whereas Aurora and FRI-based systems use transparent polynomial testing [7, 19, 20, 26]. These constructions make different tradeoffs among setup, proof size, and verifier cost. The terminal step of GKR requires a narrower mechanism. Once the reduction reaches evaluations of registered weight tables, the verifier must authenticate them against the commitments fixed during model registration. KZG and inner-product constructions provide this mechanism with different setup and proof-size tradeoffs [22,23,27]. GKR-HND represents the terminal check through the abstract interface in (3) , leaving the block reduction independent of a particular commitment backend. Neural inference introduces a different source of cost. The prover workload depends not only on the model computation but also on its representation inside the arithmetic relation. SafetyNets verifies matrix multiplication together with polynomial activation layers [4], while VeriML applies SNARKs to selected training iterations [5]. Later work supports more complex inference. Mystique develops matrix proofs and conversion protocols for committed neural networks, whereas ZKML compiles practical models to Halo2 circuits [28, 29]. zkLLM and zkGPT specialize the proof procedure for language-model inference [31, 32]. Although polynomial approximations and lookup arguments make Transformer operations such as softmax and normalization provable, the prover must still evaluate the encoded relation [29–31]. The representation itself therefore contributes to the proof cost. Model design can reduce this cost before proof generation. Quantization maps real-valued computa-tion to low-precision arithmetic [34, 35], while polynomial networks replace nonlinear activations with algebraic surrogates [33]. Several Transformer variants likewise change the computational structure of attention [36 –39]. HND addresses the problem through decomposition. It separates inference into a polynomial backbone and compact non-polynomial correction modules [9]. Because the backbone is already a layered polynomial computation, its verification can use the correction values as fixed public inputs instead of placing the correction modules inside the same relation. This reduces the relation that must be proved. The original HND audit, however, still propagates a full hidden state through L
+
+dense blocks and retains O(Ld 2) client work. The verification bottleneck therefore remains. Verification can also separate cryptographic checking from expensive public computation. Flow provides a systems precedent for assigning execution and result checking to different node roles [17]. GKR-HND uses a narrower separation. The retained verifier checks the GKR transcript and registered 2openings, while an assigned worker evaluates the public tables at the verifier-derived points. The worker signs its response, and any mismatch causes rejection. This arrangement removes dense replay from the client without transferring the verifier’s sum-check decisions to the worker. 
+
+# 3 Problem Formulation 
+
+3.1 Problem Statement 
+
+We consider a registered public HND model over Fp. Before any inference request, a model publisher submits the architecture and weights W = {Wl}L−1 
+
+> l=0
+
+to a trusted registrar. The registrar validates their declared structure and numeric bounds, fixes a commitment cm Wl to each encoded weight table, and publishes the resulting model identifier. At inference time, the client delegates backbone execution to an untrusted prover P . A retained verifier V in the client trust domain checks the GKR transcript and registered-weight openings, while independently operated workers may perform designated public computations for different blocks. The public statement for the proved backbone is 
+
+stmt = ( modelID , requestID , X 0, C, X L), (1) where X0 is the encoded input, C = {Cl}L−1 
+
+> l=0
+
+contains correction values fixed before proof challenges, 
+
+XL is the claimed backbone output, and requestID binds the encoded input, correction tables, and typed initial boundary selected for this inference to the registered backbone and block. It also binds the token count, numeric and output policies, assigned worker and role specification, parameter registry, and a freshness nonce. Raw input tokens and embedding parameters remain outside this descriptor because the verified relation begins at X0. A prover-side helper A may generate weight-evaluation proofs and is treated as part of the prover side. For compact notation, 
+
+Wl = ( WQ, W K , W V , W O, W 1, W 2, γ 1, γ 2)
+
+denotes the tuple of block-l tensors, and cm Wl denotes the corresponding tuple of eight individual commitments. Model dimensions and the canonical zero-padding rule are included in modelID .The cryptographic verification problem is to decide whether the claimed backbone output matches the registered computation: 
+
+XL ?
+
+= HL−1(· · · H1(H0(X0; W0, C 0); W1, C 1) · · · ;
+
+WL−1, C L−1). (2) The retained verifier checks this statement without replaying the full backbone. For a weight table W ,we require a polynomial-evaluation commitment interface 
+
+cm W ← Commit (W ),
+
+(v, π W ) ← Open (W, r ),
+
+{0, 1} ← VerifyEval (cm W , r, v, π W ), (3) where an accepted opening is intended to establish v = fW (r). The backend may be KZG-, inner-product-, or hash/folding-based; GKR-HND uses only this interface. We assume evaluation soundness for this interface. Once a commitment is fixed and before r is sampled, a probabilistic polynomial-time adversary can produce an accepted tuple (r, v, π W ) with 
+
+v̸ = fW (r) only with probability at most ϵeval . The deployment-level verification task also contains deterministic checks outside this relation. The retained verifier may assign the public fixed-point scan and terminal public evaluations to an independent worker. Combining the returned values with the proved backbone yields a hybrid protocol: GKR covers the polynomial relation, while the worker independently evaluates the assigned public computation. 33.2 Threat Model 
+
+The registrar is trusted to validate the declared model and to bind the canonical encoding, numeric policy, and public parameters to modelID . The client C retains verifier V as the acceptance authority in its trust domain. Verifier V fixes the request, checks the sum-check transcript in order, derives the Fiat–Shamir challenges, verifies the ML–KZG openings, and composes the accepted block boundaries. Corruption of V is therefore outside the integrity model. The prover P executes the registered backbone. Its optional opening helper A belongs to the same trust domain and may be controlled by the same adversary. This arrangement leaves the registered-weight claims protected by evaluation soundness because V verifies each opening against the pinned commitment. For block l, verifier V may assign the expensive public-tensor evaluations and fixed-point scan to a worker Ol. The worker receives evaluation points derived by V after the corresponding prover messages have been fixed, and returns a result bound to the model, request, block, transcript, and assigned operation. Verifier V compares that result with the proof-bound values and rejects a disagreement. For a delegated check outside the cryptographic relation, integrity assumes that at least one of P and 
+
+Ol follows the prescribed computation and that they are not jointly controlled. Different blocks may use different workers and proceed concurrently; each block requires one assigned result. The artifact records this role convention in docs/protocol_roles.json under the protocol identifier GKR-HND/v1 .
+
+3.3 Evaluation Commitment Backend 
+
+The implementation instantiates (3) with a direct multilinear extension of the KZG evaluation paradigm [22]. We specify it here because its setup and opening costs are part of the measured system. Let (G1, G2, GT , e ) be the asymmetric pairing groups of BLS12-381, write [z]k = zG k, and let 
+
+χb(x) = Qm−1 
+
+> i=0
+
+xbi 
+
+> i
+
+(1 − xi)1−bi for b ∈ { 0, 1}m. Setup samples τ = ( τ0, . . . , τ m−1) and publishes 
+
+pp m =  G1, G 2, {[τj ]2}m−1 
+
+> j=0
+
+, {[χb(τ )] 1}b∈{ 0,1}m ,
+
+{[χb(τj+1: m)] 1 : j = 0 , . . . , m − 1, b ∈ { 0, 1}m−j−1}. (4) The setup-local scalars τ are erased. The full Lagrange basis permits a commitment directly from an LSB-first evaluation table: 
+
+cm f = X
+
+> b∈{ 0,1}m
+
+f (b)[ χb(τ )] 1 = [ f (τ )] 1. (5) To open at r = ( r0, . . . , r m−1), define one suffix quotient per variable, 
+
+qj (x>j ) = f (r<j , 1, x >j ) − f (r<j , 0, x >j ), (6) and return v = f (r) together with Qj = [ qj (τ>j )] 1. Successive table folding constructs these quotients without coefficient conversion. Multilinearity gives the telescoping identity 
+
+f (τ ) − f (r) = 
+
+> m−1
+
+X
+
+> j=0
+
+(τj − rj )qj (τ>j ), (7) so verification checks the single multi-pairing equation 
+
+e(cm f − [v]1, G 2)
+
+> m−1
+
+Y
+
+> j=0
+
+e(−Qj , [τj − rj ]2) = 1 GT . (8) For an m-variate table, this experimental SRS stores 2m+1 − 1 G1 elements, in addition to m G2 trapdoor encodings. Commitment and opening are O(2 m) and the proof contains one field value and 
+
+m G1 elements (32 +48 m compressed bytes on BLS12-381); verification uses one multi-pairing with 
+
+m + 1 terms. Every public parameter is canonically serialized and hashed into the registered SRS digest. The implementation does not batch openings and this paper does not claim a new standalone security reduction for the backend. The analysis in Section 5.2 represents its contribution by ϵeval . Production 4use should replace it with an audited PCS that satisfies the evaluation-soundness condition above under a stated setup ceremony and assumption. The protocol provides execution integrity under this assumption and fresh verifier challenges. It does not provide model or input confidentiality, availability, correct model registration, or semantic model quality. A failed or withholding prover-side opening helper can delay verification, but it cannot make an invalid execution pass unless it breaks evaluation soundness. 
+
+3.4 HND Decomposition 
+
+The HND architecture describes a network through two coordinated components: 
+
+f (x) ≈ H(x, N (x)) , (9) where H is a polynomial backbone over Fp and N supplies correction values for non-polynomial operations. The verification relation studied here is conditional : it proves H(X0, C ) for correction values C already included in the public statement. It does not prove that C = N (X) or that an approximate correction generator preserves the accuracy of an undecomposed Transformer. This distinction is necessary because a verifier that does not materialize intermediate states cannot in general compute state-dependent normalization factors for free. 
+
+Figure 1: Overview of the original HND decomposition. The quantized model is separated into a compact correction network N and a polynomial backbone H. The intended deployment evaluates the correction path on the verifier side and the backbone on the prover side. In the checkpoint experiment in this paper, the resulting correction tables are fixed as public inputs; their generation is not part of the proved relation. In the ideal HND architecture, the correction would satisfy C⋆l = Nl(Xl). The verified relation instead treats Cl as a public input and checks only 
+
+Xl+1 = Hl(Xl; Wl, C l) ∈ FT ×dp . (10) Here Wl is registered before the request, Cl is public and fixed before the challenges, and Hl is the outsourced polynomial computation. An extended hybrid protocol can assign the deterministic check Cl = Nl(Xl) to a computation worker without placing it in the GKR relation. The current checkpoint proof experiment does not yet implement that extension. It imports correction tables produced by the original networks and fixes them as public inputs. The separate scaling benchmark uses 5nonzero synthetic field elements to exercise the polynomial kernel. Neither experiment alone constitutes end-to-end verified language-model inference. The core Transformer components fit this structure as follows. RMSNorm contains a reciprocal square-root scaling factor. HND moves this scalar into the correction network and leaves the backbone with a multiplication by a trusted scale: 
+
+RMSNorm( x) = γ · x · 1
+
+q 1
+
+> d
+
+P 
+
+> i
+
+x2 
+
+> i
+
++ ϵ
+
+⇝ γ · x · crms . (11) Softmax attention is replaced by a polynomial attention-like block, such as a SimA-style construction. With 
+
+Q = XW Q, K = XW K , V = XW V , (12) the non-polynomial normalization factors are isolated as correction scalars, for example 
+
+bQ = Q ⊙ Cq, bK = K ⊙ Ck,S = bQ bK⊤, O = SV. (13) The server-side operations are then matrix multiplication and element-wise multiplication over Fp.Smooth activations are replaced by polynomial surrogates, for example 
+
+ϕ(z) = az 2 + bz + c, (14) or by wider polynomial feed-forward blocks. Residual additions remain native field additions; the evaluated checkpoints use c = 0 . In the HND Transformer instantiation, the correction table contains RMSNorm inverse scales and Q/K L1-inverse attention scales for every token, i.e., T (2 H + 2) scalars per layer for sequence length T and H heads. 
+
+3.5 The GKR Protocol 
+
+GKR is an interactive proof for layered arithmetic computations. In the HND setting, each backbone layer is viewed as a finite-field arithmetic layer Vi 7 → Vi+1 , where gate values correspond to hidden-state coordinates. The verifier starts from a claim about the output layer and repeatedly reduces it to a claim about the previous layer. Each reduction invokes the sum-check protocol, which is the core per-layer mechanism. Consider a low-degree polynomial f (x1, . . . , x v) over Fp. The prover claims a value H for the sum over all Boolean assignments: 
+
+H = X
+
+> x1∈{ 0,1}
+
+· · · X 
+
+> xv∈{ 0,1}
+
+f (x1, . . . , x v). (15) Sum-check verifies this claim in v rounds without enumerating the 2v Boolean assignments. In round 
+
+j, the prover sends the univariate polynomial gj (t) = P  
+
+> xj+1 ,...,x v∈{ 0,1}
+
+f (r1, . . . , r j−1, t, x j+1 , . . . , x v),where r1, . . . , r j−1 are random challenges from earlier rounds. If the individual degree in round j is bounded by δj , then gj is sent using δj + 1 coefficients. The verifier checks gj (0) + gj (1) = gj−1(rj−1)
+
+(with g0(r0) ≜ H) and samples a fresh challenge rj ∈ Fp. After v rounds, the verifier accepts the original claim if and only if f (r1, . . . , r v) = gv(rv). By the Schwartz–Zippel bound, a cheating prover succeeds with probability at most Pvj=1 δj /|Fp| for this sum-check instance. Multilinear relations have 
+
+δj = 1 , while product gates and polynomial activations use the corresponding constant degree. Direct evaluation of f (r1, . . . , r v) would be as expensive as recomputing the layer. GKR avoids this by encoding the previous layer Vi−1 as f , so that the claim f (r1, . . . , r v) =? becomes the input to the next recursion step, pushing the verification burden down layer by layer: claim about VL =⇒ claim about VL−1 =⇒ · · · =⇒ claim about V0. (16) The verifier never materializes intermediate layers. The prover supplies the low-degree univariate polynomials and a small number of random-point evaluations, and the final claim reduces to the known 6input V0 = X0. In a non-interactive deployment, the verifier’s random challenges can be derived from an auditable public transcript. Soundness requires each challenge to be unpredictable when the prover fixes the message it checks. In the interactive protocol, V samples a fresh challenge after receiving each sum-check polynomial. The public statement in (1) and the model commitments are fixed before the first challenge. Any invalid layer relation then induces a nonzero low-degree discrepancy, which a fresh random point detects except with the stated Schwartz–Zippel probability. Weight claims are not accepted from an oracle: they must pass (3) against the preregistered commitments. A non-interactive transformation is possible only when every challenge is derived from the entire preceding transcript. For example, 
+
+rj = H(domain , stmt , {cm Wl }, m 1, r 1, . . . , m j ) ,
+
+where mj is the prover message preceding rj . A randomness beacon may be included as a salt, but cannot replace this sequential binding. Security of that transformation is in the random-oracle model. The non-interactive prototype in Section 6 implements the sequential transcript binding, but its experiments do not measure ROM security. 
+
+# 4 GKR-HND Verification Protocol 
+
+This section describes the two layers of GKR-HND verification. At the relation layer, the prover executes the polynomial backbone and produces one registered proof artifact per block. At the delegation layer, the retained verifier checks the proof and derives queries for the public computation assigned to a separate worker. The worker evaluates the disclosed data and signs each response. The backbone trace is represented as a layered arithmetic computation over Fp:
+
+Xl+1 = Hl(Xl; Wl, C l), l = 0 , . . . , L − 1, (17) where Wl is registered and Cl is fixed in the public statement. The retained verifier checks the transition from Xl to Xl+1 without replaying its dense matrix products, as shown in Fig. 2. Block artifacts share public boundary tensors, so the client can compose accepted transitions without constructing a single high-degree, all-block relation. 
+
+Figure 2: Relation-level GKR-HND workflow used by the retained verifier. The diagram illustrates backward reduction across layered polynomial computation; the deployment instantiates this check for each registered block. The “public weights” label denotes the conceptual interface, which the prototype realizes with pinned commitments and ML–KZG openings rather than dense-weight replay. The block-local interface supports later authenticated composition across the registered backbone. 74.1 Delegated Public Computation and Result Composition 
+
+The client first fixes a request root 
+
+Rreq = Hash (domain , descriptor canonical ), (18) where the canonical descriptor contains a nonzero fresh nonce and binds the registered backbone and block, assigned worker and role specification, encoded input and typed initial boundary, correction data, token count, numeric and output policies, and parameter-registry digest. The prover then publishes, for every block l, its public input and output boundaries, correction tables, fixed-point witness Wl, and proof πl. These artifacts are delivered to the retained verifier; the worker receives only the registered public data and the queries derived by that verifier. The retained verifier V authenticates the block registration and checks πl against its public boundaries and registered commitments. Only after a sum-check reduction succeeds does V issue a terminal query. The query binds the protocol version, model and request identifiers, block and operation indices, transcript digest, evaluation point, numeric policy, and freshness nonce. The assigned worker Ol scans 
+
+Wl and evaluates the requested public tables without receiving an expected value from the prover. For query Ql,j with binding metadata Bl,j , the worker returns a canonical response 
+
+Sl,j = ( Bl,j , Hash (Ql,j ), id Ol , status l,j , error l,j , value l,j , vk Ol , σ l,j ), (19) where σl,j is an Ed25519 signature under the public key assigned to Ol. The verifier checks the key, signature, complete query binding, and returned value before continuing the transcript. A missing, duplicated, stale, malformed, or inconsistent response causes rejection. The retained verifier accepts block l only after the proof, registered openings, numeric scan, and all delegated responses succeed. It accepts the backbone chain after every required block is present in order and the output digest of block l equals the input digest of block l + 1 . The proof relation remains block-local; chain composition compares authenticated block results and does not form one all-block polynomial. The same block decisions can be accumulated without changing the per-block proof relation. For example, a history value suitable for a later PoH-style extension can be updated as 
+
+hl+1 = Hash (hl, Rreq , l, B l, B l+1 , A l, {σl,j }j ), (20) where {σl,j }j are the worker responses used for block l. This hash chain records the ordered sequence of accepted transitions for a future PoH-style extension while each GKR proof remains block-local. 
+
+4.2 Tensor Encoding and Multilinear Extensions 
+
+We represent every HND backbone tensor by its multilinear extension (MLE) over a Boolean hypercube. For a hidden tensor of shape T × d, choose 
+
+mT = ⌈log 2 T ⌉, md = ⌈log 2 d⌉,
+
+pad with zeros, and index entries by (t, i ) ∈ { 0, 1}mT × { 0, 1}md . Let {0, 1}m = {0, 1}m. For 
+
+i = ( i1, . . . , i m) ∈ { 0, 1}m, the Lagrange basis polynomial is 
+
+βi(x) = 
+
+> m
+
+Y
+
+> k=1
+
+ xkik + (1 − xk)(1 − ik), x ∈ Fmp . (21) For an array A indexed by {0, 1}m, its multilinear extension is 
+
+eA(x) = X
+
+> i∈{ 0,1}m
+
+Ai βi(x). (22) For matrices, we use one group of variables per index: 
+
+fW (r, s ) = X
+
+> i,j
+
+Wi,j βi(r) βj (s). (23) 8A random evaluation eA(r) acts as a fingerprint of the entire tensor: changing any coordinate of A
+
+changes the polynomial eA, and a random evaluation detects the discrepancy except with probability bounded by the Schwartz–Zippel bound. This is why GKR works with multilinear extensions rather than ordinary array indices. However, computing eA(r) directly still requires summing over all 2m
+
+Boolean assignments. The saving comes from sum-check: the prover handles the large hypercube sums, while the verifier checks only low-degree univariate identities and samples fresh challenges. For a layer of width d = 2 m, the verifier performs O(m) = O( log d) such checks rather than enumerating all d
+
+coordinates. Layer by layer, GKR turns a random-point claim about Xl+1 into a random-point claim about Xl, until the final claim concerns the known input X0.
+
+4.3 Registered HND Block Relation 
+
+The verified backbone relation is structurally aligned with the pre-norm computation used by the available HND checkpoints. Let Xl ∈ FT ×dp , d = Hd h, and let Mt,u = 1 when u ≤ t and zero otherwise. The client-supplied correction tables are Cq,l , C k,l ∈ FT ×Hp and C1,l , C 2,l ∈ FTp . For every block l:
+
+H(1)  
+
+> l
+
+[t, j ] = Xl[t, j ]C1,l [t]γ1,l [j],Ql = H(1)  
+
+> l
+
+WQ,l , Kl = H(1)  
+
+> l
+
+WK,l , Vl = H(1)  
+
+> l
+
+WV,l ,Dl,h [t, u ] = 
+
+> dh−1
+
+X
+
+> j=0
+
+Ql[t, hd h + j]Kl[u, hd h + j],Sl,h [t, u ] = Mt,u Dl,h [t, u ]Cq,l [t, h ]Ck,l [u, h ],Zl,h [t, j ] =  
+
+> T−1
+
+X
+
+> u=0
+
+Sl,h [t, u ]Vl[u, hd h + j],Y attn  
+
+> l
+
+= Concat h(Zl,h )WO,l , Ul = Xl + Y attn  
+
+> l
+
+,H(2)  
+
+> l
+
+[t, j ] = Ul[t, j ]C2,l [t]γ2,l [j],Gl = H(2)  
+
+> l
+
+W1,l , Pl = alG⊙2 
+
+> l
+
++ blGl,Fl = PlW2,l , Xl+1 = Ul + Fl.
+
+(24) The six matrices and two normalization vectors are bound by ML–KZG commitments; (al, b l), the dimensions, padding convention, and SRS digest are included in the registered model identifier. Correc-tions are fixed as public statement data before Fiat–Shamir challenges. The current proof boundary begins at the embedded backbone input X0 and ends at XL; it does not yet include token/position embedding lookup, the correction generator, final RMSNorm, the LM head, sampling, or a key–value cache. The supporting perplexity audit is therefore a checkpoint-stability diagnostic, not a proved output. 
+
+4.4 Deterministic Fixed-Point Target Semantics 
+
+To make the remaining checkpoint-to-field gap testable rather than implicit, we fix the intended integer semantics. For scale s ∈ Z>0, an FP32 value x is exported as 
+
+qs(x) = round away (sx ), (25) where nearest rounding is used and exact half cases move away from zero. A signed integer z is encoded as z mod p, subject to a public magnitude bound |z| ≤ B < p/ 2 so that the field representation is unambiguous. After a fixed-point product or dot-product accumulator A, rescaling uses witnesses 
+
+(Q, R ) satisfying 
+
+A = sQ + R, 2|R| ≤ s, (26) with the sign of an exact-half remainder chosen opposite to that of A. This uniquely implements the rounding rule in (25). 9For the imported block, RS (A) denotes the quotient Q in (26) . The executable source-order schedule is T1 = RS( XC 1), H1 = RS( T1γ1),Q = RS( H1WQ), K = RS( H1WK ), V = RS( H1WV ),Q′ = RS( QC q), K′ = RS( KC k),Dh = RS( Q′
+
+> h
+
+K′⊤  
+
+> h
+
+), Sh = M ⊙ Dh,Zh = RS( ShVh), O = RS(Concat h ZhWO),U = X + O, T2 = RS( U C 2), H2 = RS( T2γ2),G = RS( H2W1), AG = RS( aG ),QG = RS( AG ⊙ G), BG = RS( bG ), P = QG + BG,F = RS( P W 2), X+ = U + F. 
+
+(27) This ordering follows the PyTorch source; it is intentionally not rearranged using real-number associa-tivity because intermediate rounding would change. The fixed-point mode publishes every quotient and remainder table. Before any matrix claim is accepted, the verifier linearly checks tensor shapes, the causal mask, both residual additions, every pointwise product, and the exact half-away rule in (26) . Every public signed value obeys |z| ≤ 262 − 1.For each matrix product, a conservative n max |A| max |B| bound and the reconstructed accumulator 
+
+sQ + R must fit signed 128-bit arithmetic and remain below p/ 2. A field equality established by sum-check therefore lifts to the unique signed integer equality without modular wraparound. Six checkpoint-weight products use ML–KZG openings; the H score and H value-aggregation products use public-table terminal evaluations, for 6 + 2 H = 22 matrix sum-checks at H = 8 .This design closes the numerical-semantics gap for the disclosed public block witnesses, but it is not a succinct range proof: the numeric scan costs linear time in the 2.08-MB public-instance encoding. It avoids replaying dense matrix multiplications, not reading the public witness. The offline registrar imports the SHA-256-pinned Q-format export and recomputes the canonical block registration, including all eight commitments. It signs the registration only if the recomputed bytes match the submitted statement. The resulting model identifier binds the source-checkpoint label and block position to the quantized weights, public model metadata, numeric and padding rules, and SRS. This procedure authenticates the exported fixed-point model; it does not prove semantic equivalence to the FP32 checkpoint. Per inference, the retained verifier receives the signed registration, public witness, proof, and public SRS. The computation worker receives the signed registration, public witness, and verifier-derived evaluation query, but not the proof. The 25-MB exporter file and dense weights are absent from both online interfaces. We claim no coverage of correction generation or the full checkpoint. Each nontrivial check in the backward pass is either a sum-check instance or a low-degree consistency check at an induced random point. For a matrix product Y = XW with contracted dimension b, the exact MLE identity is 
+
+eY (rx, r y) = X 
+
+> j∈{ 0,1}⌈log 2b⌉
+
+eX(rx, j )fW (j, r y), (28) where every padded coordinate is constrained to zero. The implementation stores the full padded evaluation tables: public inputs and registered tensors are rejected unless canonical, unused weight entries are fixed to zero, and the operator relations propagate those zeros through intermediate tables. There is no separate validity-mask argument. Sum-check over j ends in one claim on X and one evaluation claim on W . A pointwise product Y = A ⊙ B uses 
+
+eY (r) = X
+
+> i∈{ 0,1}m
+
+βi(r) eA(i) eB(i), (29) and addition is checked by MLE linearity. The head selectors and concatenation in (24) are fixed wiring predicates. More generally, a contracted operator has the form 
+
+eY (r) = X
+
+> z∈{ 0,1}m
+
+F (z; r), (30) 10 where F is the explicit low-degree integrand induced by (28) or (29) . Its terminal evaluation yields random-point claims about the operator inputs. Hidden-state claims are carried backward; every static-weight claim is resolved through VerifyEval , not by trusting the supplied value. For (24) , one block requires claims on six matrices and two normalization vectors before optional batching. When the backward pass produces multiple claims about the same tensor, they are combined by equality-polynomial folding. Suppose the verifier holds two claims eA(r1) = a1 and eA(r2) = a2. It samples η ∈ Fp, forms aη = ηa 1 + a2, and rewrites the combined claim as 
+
+aη = X
+
+> u∈{ 0,1}m
+
+Au
+
+ ηβ u(r1) + βu(r2). (31) Applying sum-check to (31) yields a terminal value λη(ρ) eA(ρ), where λη(ρ) = ηβ ρ(r1) + βρ(r2). If 
+
+λη(ρ)̸ = 0 , the verifier obtains one claim by division. The implementation absorbs a unique fold-counter value of zero and accepts no prover-selected retry, preventing Fiat–Shamir grinding. If the terminal coefficient is zero, proving fails closed. If either original claim is false, a fresh η cancels its error with probability at most 1/|Fp|. The procedure extends to more claims by repeated folding. Starting from a random claim on Xl+1 , the verifier first splits Xl+1 = Ul + Fl, reduces Fl = PlW2,l ,checks Pl = alG⊙2 
+
+> l
+
++ blGl, and reduces Gl = H(2)  
+
+> l
+
+W1,l . A degree-four product sum-check verifies 
+
+H(2)  
+
+> l
+
+= Ul ⊙C2,l ⊙γ2,l , after which the two claims on Ul are folded. The verifier then splits Ul = Xl +Y attn 
+
+> l
+
+and reduces Y attn  
+
+> l
+
+= ZlWO,l .The column variables of Zl are decomposed into within-head and head-index bits. For every h, a bilinear sum-check reduces Zl,h = Sl,h Vl,h over the key-token index. A pointwise degree-three check enforces the fixed causal mask, and a degree-four check enforces the query/key correction factors. The score claim is then reduced through Dl,h = Ql,h KT
+
+> l,h
+
+. Claims from all heads are folded into one claim on each of Ql, Kl, and Vl, followed by the three committed matrix reductions from H(1)  
+
+> l
+
+. The resulting claims on H(1)  
+
+> l
+
+are folded, the first pre-normalization is checked, and its Xl claim is folded with the attention-residual claim. This message order fixes every sum-check polynomial before its associated challenge. The backward reduction is instantiated independently for every block. The retained verifier fixes the public output Xl+1 before sampling its first challenge and reduces the resulting claim to Xl. It checks every sum-check equation and registered-weight opening before deriving any delegated terminal query. The assigned computation worker evaluates that query over the public boundary or trace and returns a signed response. The verifier accepts the local proof only when the response matches the reduced claim. A chain verifier then composes the block-local decisions by exact equality of adjacent public boundaries. 
+
+# 5 Protocol Guarantees and Cost 
+
+This section separates the algebraic soundness of each registered block proof from the deterministic public computation delegated to the assigned worker. Their combination is analyzed with an honest retained verifier and prover–worker non-collusion. 
+
+5.1 Time and Space Complexity 
+
+The retained verifier checks every sum-check message and verifies the experimental ML–KZG openings. The assigned worker scans the fixed-point witness and evaluates the requested public boundary or trace table. Let mmax = ⌈log 2 max (T, d, d ff )⌉. For block l, let qsc ,l and qeval ,l be the numbers of sum-checks and terminal weight claims, and let Npub ,l be the number of disclosed numeric entries. Their combined online work is O(|Xl| + |Xl+1 | + |Cl| + Npub ,l ) + O(qsc ,l mmax + HT )+ qeval ,l VerifyEval . (32) The correction and witness terms are linear because the present construction publishes those values. This linear work is delegated to the worker rather than eliminated; sublinear checking would add 11 commitments and proofs for these values. Without batching, (24) has eight committed weight tensors per block. The GKR portion can be streamed with O(mmax ) field elements per active sum-check. The verifier stores model commitments, public boundaries, and either the transcript or its running hash, while the worker reads the disclosed public witness. For the HND-32M real block, Npub = 259 ,728 signed integers (255,488 in the numeric trace), 
+
+qsc = 22 , and only six terminal claims require committed-weight openings. The retained verification path is therefore sub-matrix-multiplication, but the delegated worker path remains linear in the public witness. Because the query and signed response are block-local, different blocks can be assigned to separate workers. Such scheduling does not reduce aggregate work. Composing an L-block chain requires O(L) signature checks and adjacent-boundary comparisons in addition to the block-local proof checks. 
+
+5.2 Verification Guarantees 
+
+For honest execution, each matrix and pointwise reduction is an identity of multilinear extensions. The sum-check messages therefore satisfy their round equations, folding preserves the claimed linear combination, registered evaluations pass VerifyEval , and each block reduction reaches its public input boundary. The implementation rejects a zero terminal folding coefficient. If fold f uses mf Boolean variables, the resulting honest failure probability is at most P 
+
+> f
+
+(mf + 1) /|Fp| by Schwartz–Zippel and a union bound. Algebraic integrity requires the model commitments, request identifier, public boundaries, and corrections to be fixed before the first challenge. Let min and mout be the numbers of Boolean variables in the boundary MLEs. Let S be the set of sum-check instances; let ns and δs,j denote the number of rounds and individual degree in round j; and let qtot fold and qtot eval denote the total numbers of folds and accepted weight evaluations across the accepted block chain. Writing HW,C for the composed registered relation in (2), a prover that controls its opening helper satisfies 
+
+Pr[ Accept ∧ XL̸ = HW,C (X0)] ≤ min + mout + qtot fold 
+
+|Fp|
+
++
+
+P
+
+> s∈S
+
+Pns 
+
+> j=1
+
+δs,j 
+
+|Fp| + qtot eval ϵeval .
+
+(33) If the public output is not the result of the registered relation, backward reduction in at least one block reaches a false polynomial claim. A fresh random challenge accepts a nonzero discrepancy only with its Schwartz–Zippel/sum-check bound. Random linear folding cancels a false claim with probability at most 1/|Fp| per completed fold. A zero terminal coefficient is rejected and is not an accepting event. Otherwise the false claim reaches a registered tensor, where acceptance implies a failed evaluation-soundness event. A union bound gives (33) . This cryptographic bound holds when 
+
+V executes the prescribed verifier algorithm; it does not require the prover-side opening helper to be independent. The disclosed fixed-point relation combines that algebraic argument with a deterministic public scan. The registrar must derive the pinned model identifier from the same signed tables used for the eight commitments. If the assigned worker validates every bound and rescale witness in (27) , the 22 matrix reductions imply the signed fixed-point block relation subject to their sum-check and six-opening error bound. Both the bounded integer dot product and sQ + R remain below p/ 2, so field equality lifts to equality of their unique signed representatives. The scan separately enforces rounding, pointwise products, the mask, and residual additions. The retained verifier accepts these checks only through the worker’s authenticated response. They impose no additional cryptographic constraints on the prover, while their linear work remains outside the verifier process. For delegated public checks, the retained verifier first validates the sum-check transcript and derives the terminal query from that transcript. The assigned worker evaluates the public data independently and signs its response. If the prover supplies an invalid transcript, verification stops before the terminal query is issued. If the worker returns an inconsistent value, the comparison fails. Thus, with an honest retained verifier and at least one honest party among the prover and assigned worker, an invalid 12 delegated public check is rejected. Joint control of both parties is outside this non-collusion model; the registered-weight claims remain protected separately by their ML–KZG openings. Direct operators can use the same query and response binding when they are included in the verified statement. Their outputs must refer to the same model, request, and backbone boundaries. The standalone experiment reported below evaluates the signed public-computation path; end-to-end direct operators are kept separate from that result. The implementation uses the approximately 255-bit BLS12-381 scalar field. Its Fiat–Shamir transcript expands each challenge to 64 hash bytes before field reduction and incrementally absorbs the complete statement and preceding messages. Equation (33) describes the algebraic error; the non-interactive implementation additionally relies on the random-oracle model and the computational binding of the experimental ML–KZG backend. A production deployment would require an externally authenticated setup ceremony and an audited commitment implementation; the benchmark setup generated in this work is not such a ceremony. 
+
+5.3 Communication and Prover Cost 
+
+Supplementary Table S1 in File S1 enumerates the per-block verification budget for (24) . Model commitment is a one-time registration cost, whereas evaluation-proof generation occurs after transcript-dependent query points are known and is therefore online unless the backend supports applicable preprocessing. The round count is determined by the contracted or pointwise index. In the unbatched accounting of Supplementary Table S1, the operator relations contribute qbase = 9 + 4 H sum-checks and qblk eval = 8 
+
+weight evaluations per block. If the backward claim graph requires qblk fold folding sum-checks (six in the current implementation when H > 1), then qblk sc = qbase + qblk fold . Thus the verifier’s per-block online work is 
+
+O(qblk sc mmax ) + O(qblk eval · VerifyEval ), (34) plus the two boundary MLEs. A future batched-opening construction could reduce the number of commitment proofs, but no such reduction is claimed or measured in this paper. Communication consists of the GKR transcript, the public output, and backend-specific evaluation proofs. If one field element uses bF bytes, the interactive GKR messages occupy 
+
+bF
+
+X
+
+> s∈S
+
+ns(∆ s + 1) + O(( |XL| + qtot fold )bF ) (35) bytes before serialization metadata. The prototype adds one 32-byte value and one compressed 48-byte G1 quotient commitment per ML–KZG opening variable. Section 6 reports an estimated in-memory payload for the complete synthetic-relation proof, whose versioned canonical framing is not yet implemented. The real fixed-point path separately uses and parses the versioned canonical encoding reported in Table 2. The reference prover materializes evaluation tables and invokes one product sum-check per operator or fold. It is intended to validate the complete claim graph, not to be an optimized time-optimal GKR implementation. The reported prover time therefore includes the current table folding and online ML–KZG opening cost, while setup and model commitment are reported separately. The interactive protocol has a sequential challenge dependency. The prototype applies Fiat–Shamir in the random-oracle model [41] with an incremental SHA-256 state; this removes verifier messages but not the prover’s internal message–challenge order or transcript size. Each challenge binds the registered model identifier, public statement, and all preceding messages. 
+
+# 6 Experimental Analysis 
+
+The experiments separate six questions: whether the implementation realizes the registered block relation, whether chained fixed-point execution remains close to the checkpoint path, whether proofs are accepted and tampering is rejected, whether block proof checks can execute concurrently, whether the construction reaches the HND-124M block dimensions, and what costs remain at the prover, 13 retained verifier, computation worker, and result-composition layers. This separation prevents numerical agreement, direct recomputation, and protocol concurrency from being reported as cryptographic coverage of one another. 
+
+6.1 Checkpoint and Protocol Setup 
+
+Strict loading of the backbone and correction artifacts gives the HND-32M configuration d = 512 ,
+
+H = 8 , dh = 64 , dff = 2048 , and L = 8 . We fixed validation indices 0, 1, and 2 before inspecting the chained errors. For each prefix, the original correction networks produce the per-layer Q/K and RMS correction tables. Their non-polynomial execution remains outside the proof; the frozen tables are public statement data. The source checkpoint, attention-correction network, normalization-correction network, tokenizer, and validation cache have SHA-256 prefixes 3b38ef54 , 37ae6917 , 983c3c84 , d98595c6 , and 3faa2b24 ,respectively. Python 3.12.12, PyTorch 2.9.1, and CUDA 12.8 generate the checkpoint-derived exports on RTX 3090 and RTX 5060 Ti GPUs. An independent Rust implementation parses each binary, re-executes the integer schedule with checked i128 accumulators, and compares all 38 field-trace digests. The proof implementation uses a single-threaded Rust 1.97.0 release build on an Intel Xeon Platinum 8173M. Complete-split likelihood diagnostics for the 32M and larger checkpoints are reported in the supporting information. They are kept outside the main proof evaluation because the untouched paths contain non-finite outputs and the finite values require a disclosed safety-retry rule. Neither perplexity nor the client-side correction computation is asserted to be proved here. 
+
+6.2 Chained Fixed-Point Agreement 
+
+The chained exporter first quantizes the embedded input and then applies the source-order schedule in (27) . For block l > 0, its input is the exact signed-integer output of block l − 1, rather than a newly rounded FP32 hidden state. Each export records both hashes, and all 21 inter-block links across the three prefixes match byte for byte. This construction measures error accumulation while preserving an exact relation between adjacent proved block instances. Table 1 reports the maximum error over the three prefixes for every block. The local column compares one fixed-point block with the same block evaluated on that quantized input. The chained column compares the accumulated fixed-point output with the original FP32 checkpoint hidden state at the same depth. Across all 24 exports, the explicit float64 relation matches the PyTorch block to maximum absolute error at most 4.63 × 10 −8; the independent Rust replay obtains 38/38 digest agreement for every export. No accumulator exceeds 46 signed-magnitude bits. The largest chained relative error is 1.36 × 10 −4 at block 7. Table 1: Chained HND-32M fixed-point audit at T = 8 and Q20. Errors are maxima over validation indices 0, 1, and 2. Every one of the 24 exports has 38/38 Python–Rust digest agreement and an exact link to the preceding block. Block Local relative ℓ2 Chained relative ℓ2 Max. accumulator bits 0 6.0708 × 10 −5 6.0705 × 10 −5 46 1 5.3898 × 10 −5 7.7345 × 10 −5 46 2 5.1653 × 10 −5 9.1068 × 10 −5 46 3 4.6684 × 10 −5 1.0244 × 10 −4 45 4 4.1582 × 10 −5 1.1379 × 10 −4 45 5 3.4996 × 10 −5 1.1313 × 10 −4 45 6 3.0575 × 10 −5 1.2149 × 10 −4 46 7 2.8842 × 10 −5 1.3635 × 10 −4 46 The supporting information reports the precision and prefix-length ablations used to select Q20. On block 0, Q20 reduces output relative error by about a factor of 16 compared with Q16 while keeping 14 the maximum accumulator width at 46 bits; Q24 reduces the error further but raises that width to 54 bits. At fixed Q20, increasing T from 8 to 32 changes the local relative error only from 5.87 × 10 −5 to 
+
+6.07 × 10 −5. Accepted block-0 proofs at T = 16 and T = 32 are reported in the supporting information. The all-block proof chain below uses T = 8 .
+
+6.3 Real-Checkpoint Public-Witness Proof 
+
+For validation index 0, we register and prove each of the eight chained block instances in Table 1. All blocks use the same public SRS, but each registration commits to its own six weight matrices and two γ vectors and produces a distinct model identifier. All eight proofs are accepted, have distinct SHA-256 digests, and retain 38/38 Python–Rust trace agreement. Equality between a public output tensor and the next public input tensor links adjacent statements. Thus the experiment proves the chained polynomial backbone for this prefix under eight block-specific registrations; it does not prove the generation of the correction tables or the surrounding language-model operators. The retained verifier receives the public SRS, registration, public witness, proof, and pinned model identifier. It verifies the artifact through registered commitments rather than dense weights or the fixed-point forward function. For each block, the 2,077,872-byte witness contains 259,728 signed integers, including the numeric trace. The current chain stores a 19,092-byte proof for each block. The earlier block-0 benchmark retained below uses an 18,780-byte encoding; both proof paths check six committed-weight and sixteen public-table matrix relations. The two γ vectors are registrar-authenticated public data bound into the model identifier. The legacy proof digest fixes the input and correction tables but intentionally does not pin the prover’s claimed output or contain a nonce. In the authenticated worker path, the verifier derives a separate canonical query after checking the transcript. That query binds the model identifier, request digest, block, operation, transcript digest, numeric policy, freshness nonce, and evaluation points. The worker signs the complete canonical response. This mechanism authenticates the delegated public evaluation; proof-level request binding is a separate requirement. To obtain controlled performance statistics, we retain the original block-0 experiment on three independently selected prefixes. These measurements use one registration and one shared SRS and repeat proving and verification five times per prefix; they are not multiplied by eight to estimate end-to-end latency. Table 2: HND-32M block-0 performance on three prefixes. Proving and verification are means of five consecutive runs per prefix; parse/hash is one run. Times are seconds. Validation index Output relative ℓ2 Prove Parse/hash Verify incl. scan Online total Proof bytes Accepted 0 5.8705 × 10 −5 40.948 0.0278 0.1834 0.2112 18,780 yes 1 5.9279 × 10 −5 40.897 0.0232 0.1811 0.2043 18,780 yes 2 6.0708 × 10 −5 40.999 0.0250 0.1815 0.2065 18,780 yes The one-time fresh SRS generation, block-0 registration, and parameter serialization take 691.804, 63.511, and 34.130 s, respectively. Canonically loading and validating the 125,883,136-byte SRS and 8,796-byte registration takes 276.915 s and can be cached across requests. An isolated standalone verifier, invoked with no exporter or dense-weight input, accepts index 0 after this cold load and then requires 0.2063 s per instance. Across the 15 deployment-path repetitions, proof generation averages 40.948 s and verification including the public numeric scan averages 0.1820 s. Adding the 0.0253-s mean parse/hash cost gives a 0.2073-s online total. Direct fixed-point replay with resident dense weights averages 0.09072 s under the same repeated experiment. The unoptimized verifier is therefore 2.29 × slower than replay and does not demonstrate a latency advantage. Its present benefit is an integrity check against pinned registrations without dense-weight storage or matrix replay. The supporting information records the full timing distributions, peak memory, an earlier unexplained 81.045-s proof run, and all raw samples; no speedup is inferred from the driver disparity. 15 6.4 Parallel Proof Scheduling and HND-124M Extension 
+
+We first compare proof verification and direct fixed-point replay under the same parallel scheduler. The driver loads the same eight HND-32M blocks for both paths and checks every artifact before timing. After three warm-up runs, it records 15 runs for each thread count and alternates which path is measured first. The 280.144-s artifact load and preflight check are excluded. Table 3 reports the medians. From one to eight threads, proof verification improves by 7.45 ×, while replay improves by 
+
+6.27 ×. Verification remains slower than replay; at eight threads, the ratio is 1.69 ×.Table 3: Fair same-host HND-32M parallel comparison. Each entry is the median of 15 post-warm-up runs over the same eight blocks; times are seconds. Threads Proof verify Direct replay Proof speedup Proof/replay 1 1.555248 0.773003 1.000 2.012 2 0.829382 0.407903 1.875 2.033 4 0.433252 0.229410 3.590 1.889 8 0.208697 0.123241 7.452 1.693 The authenticated process test assigns one Ed25519 identity to the computation worker. The retained verifier accepts the honest signed responses and rejects a wrong key, a forged signature, a duplicated response, and replay under a different query binding. A canonical signed response occupies 397 bytes for one field value and 429 bytes for two values. These measurements describe the single-worker protocol. The direct embedding, correction-generation, and final-output paths are not included in this standalone authenticated worker result. Their evaluation is reported separately from the polynomial-backbone and public-witness checks. We next evaluate a checkpoint-derived HND-124M instance with d = 768 , H = 12 , dff = 3072 ,
+
+L = 12 , T = 8 , and Q20 semantics. Three clean repetitions each accept all 12 block proofs and confirm all 11 adjacent boundaries exactly. The median shared-SRS load, registration, proof generation, and online chain verification times are 1110.406, 632.007, 1093.443, and 2.812 s, respectively; the median end-to-end time is 2841.731 s. Each block uses a 23,932-byte proof and a 3,116,720-byte public witness, giving totals of 287,184 and 37,400,640 bytes. Median peak resident memory is 3,567,272 KiB. This experiment uses an in-process worker adapter and measures feasibility, not cross-host latency. Finally, we measure the HND-124M operators assigned to direct validation on an RTX 3090. After 10 warm-up runs, 50 repetitions give a summed component mean of 0.015848 s for embedding lookup, correction evaluation, final normalization, the all-token language-model head, and greedy selection at 
+
+T = 8 . The 3.235-s model load is excluded. The checkpoint path and the Q20 final boundary select the same next token. This benchmark measures deterministic recomputation, not cryptographic proof coverage, and remains separate from the authenticated worker experiment. 
+
+6.5 Synthetic Scaling 
+
+A separate experiment executes the complete multi-layer relation in (24) on fixed-seed BLS12-381 field tensors and correction tables. Each run generates an experimental SRS, registers all layer tensors, and pins the resulting model identifier before proving. After one warm-up, proving and verification are repeated 20 times. Table 4 reports the means. Because this path predates the versioned fixed-point encoding, its payload is the sum of compressed proof fields rather than a canonical wire size. The benchmark validates the claim graph and its scaling trend; it is not a substitute for the checkpoint experiment or an authenticated setup ceremony. Increasing T from 32 to 128 raises prover time from 2.600 to 3.658 s and the estimated payload from 99.5 to 124.5 KiB; verifier time changes from 0.279 to 0.288 s. The fourth row is not a pure scaling point: it jointly doubles d and dff and doubles L, raising prove time to 16.975 s. These measurements validate execution of the claim graph and expose the prototype’s cost profile; they do not predict checkpoint-scale latency. 16 Table 4: Commitment-composed protocol benchmark. Times are seconds; prove and verify are means of 20 accepted post-warm-up runs. Setup and commitment are offline. 
+
+T d H dff L Trace Setup Commit Prove Verify Est. proof (KiB) 32 64 8 128 2 0.091 6.789 1.012 2.600 0.279 99.5 64 64 8 128 2 0.205 6.927 1.028 2.900 0.288 112.0 128 64 8 128 2 0.499 6.790 1.020 3.658 0.288 124.5 32 128 8 256 4 0.659 27.713 8.278 16.975 0.610 210.9 
+
+6.6 Robustness and Limitations 
+
+The frozen artifact release gkr-hnd-test-suite-v1 contains 142 Rust tests: 66 unit tests and 76 integration tests across 13 integration targets. The unit tests exercise the arithmetic relation and the bindings used by the verifier. The integration tests extend this coverage to malformed artifacts and to protocol paths that cross process or network boundaries. The archived release output and a machine-readable map identify the claim checked by every test. These tests detect regressions; they are not a statistical estimate of cryptographic soundness and do not replace audit or fuzzing. The checkpoint experiment proves one HND-32M T = 8 polynomial-backbone chain as eight block-specific statements. The other two prefixes provide all-block numerical evidence only. The T = 16 and 
+
+T = 32 experiments have accepted block-0 proofs, but no all-block proof chain. For HND-124M, all 12 block-specific proofs are accepted and all 11 adjacent links are audited. Both model sizes still use public tensor equality between adjacent blocks rather than one aggregated or recursive multi-block proof. Embeddings, correction generation, final RMSNorm, the language-model head, and output selection remain outside the GKR relation. Their deterministic costs are measured separately, but the current authenticated worker path does not bind their results to the block proof. The authenticated experiment uses one local worker process with a pinned Ed25519 key. Cross-host transport, remote attestation, straggler control, and a network adversary remain future evaluation targets. The public witness exposes the complete numeric trace, and the worker scans it linearly. Parallel block assignment can change wall-clock scheduling without reducing aggregate work, but is not part of the single-worker authentication result. The evaluation ML–KZG backend also has a large SRS. The serialized HND-32M parameters occupy 125,883,136 bytes, and setup reaches about 0.80 GiB peak resident memory. The HND-124M serialized SRS occupies 503,420,128 bytes. Across the three clean HND-124M repetitions, median peak resident memory is 3,567,272 KiB. The experimental setup is generated in-process rather than by a certified ceremony, and online openings depend on preceding Fiat–Shamir challenges. Finally, comparison with zkGPT, zkLLM, ZKML, or Mystique would require a common relation, public-witness policy, security level, hardware, and wire format. We claim neither one end-to-end cryptographic proof of language-model inference nor a speedup over those systems. The implemented result is a same-host authenticated public-evaluation decision combined with separately validated block proofs. Production networking and end-to-end composition remain future work. 
+
+# 7 Conclusion 
+
+This paper presented GKR-HND as a verification protocol for registered HND Transformer backbones. A retained verifier checks the GKR transcript and registered-weight openings, while an assigned computation worker evaluates the remaining public queries. Assuming an honest retained verifier and prover–worker non-collusion, the verifier accepts only a signed worker response that matches the proof-derived query. Each proof remains block-local, preserving compatibility with later recursive or PoH-style composition. The prototype links three checkpoint-derived numerical chains across all eight HND-32M blocks and obtains exact Python–Rust digest agreement. For one chain, eight block-specific registered proofs are accepted and adjacent public states match exactly; the maximum accumulated relative error is 17 1.36 × 10 −4. A second checkpoint-derived experiment accepts all 12 HND-124M block proofs and all 11 adjacent links. The standalone worker path authenticates a request-bound public evaluation and rejects a wrong key, forged signature, duplicate response, or replayed query. This path currently uses a single same-host worker and remains separate from the checkpoint chain experiment. Public-witness linearity, the large experimental SRS, certified setup, cross-host deployment, direct-operator binding, and recursive aggregation remain open. The artifact establishes block-proof feasibility at the reported model scales and authenticates delegated public evaluation in a separate same-host process. 
+
+# Acknowledgments 
+
+This work was supported in part by the National Key Research and Development Program of China under Grant 2025YFE0216300. The authors declare no competing interests. During manuscript revision, the authors used OpenAI Codex to assist with structure and language; the authors reviewed and edited the resulting text and take full responsibility for the content. 
+
+# Supporting Information and Artifact Scope 
+
+The supporting information accompanying this preprint reports the precision and prefix-length ablations, the checkpoint-stability diagnostic, additional proof-chain results, and the artifact trust boundary. Com-plete pretrained checkpoints, correction networks, tokenizers, and validation caches are not redistributed. The replay archives and large public inputs described in the artifact accounting are not included in this arXiv source bundle; their byte sizes and SHA-256 identities are recorded in the supporting information. 
+
+# References 
+
+[1] Y. Zheng, Y. Chen, B. Qian, X. Shi, Y. Shu, and J. Chen, “A review on edge large language models: Design, execution, and applications,” ACM Comput. Surv. , vol. 57, no. 8, pp. 1–35, 2025, doi: 10.1145/3719664. [2] T. Gong, L. Zhu, F. R. Yu, and T. Tang, “Edge intelligence in intelligent transportation systems: A survey,” IEEE Trans. Intell. Transp. Syst. , vol. 24, no. 9, pp. 8919–8944, Sep. 2023, doi: 10.1109/TITS.2023.3275741. [3] Y. He, J. Fang, F. R. Yu, and V. C. Leung, “Large language models (LLMs) inference offloading and resource allocation in cloud-edge computing: An active inference approach,” IEEE Trans. Mobile Comput. , vol. 23, no. 12, pp. 11253–11264, 2024, doi: 10.1109/TMC.2024.3415661. [4] Z. Ghodsi, T. Gu, and S. Garg, “SafetyNets: Verifiable execution of deep neural networks on an untrusted cloud,” in Proc. NeurIPS , 2017. [5] L. Zhao, Q. Wang, C. Wang, Q. Li, C. Shen, and B. Feng, “VeriML: Enabling integrity assurances and fair payments for machine learning as a service,” IEEE Trans. Parallel Distrib. Syst. , vol. 32, no. 10, pp. 2524–2540, Oct. 2021, doi: 10.1109/TPDS.2021.3068195. [6] R. Gennaro, C. Gentry, B. Parno, and M. Raykova, “Quadratic span programs and succinct NIZKs without PCPs,” in Proc. EUROCRYPT , 2013. [7] E. Ben-Sasson, I. Bentov, Y. Horesh, and M. Riabzev, “Scalable, transparent, and post-quantum secure computational integrity,” IACR Cryptol. ePrint Arch. , Rep. 2018/046, 2018. [8] S. Setty, “Spartan: Efficient and general-purpose zkSNARKs without trusted setup,” in Proc. CRYPTO , 2020. [9] X. Liang, Y. Lv, J. Li, R. Qin, Y. Tian, and F.-Y. Wang, “Homomorphic-Nonhomomorphic Decomposition: A Verification-Friendly Transformer Architecture,” SSRN, 2026, doi: 10.2139/ssrn.6946183. 18 [10] S. Goldwasser, Y. T. Kalai, and G. N. Rothblum, “Delegating computation: interactive proofs for muggles,” in Proc. STOC , 2008. [11] J. Thaler, “Time-optimal interactive proofs for circuit evaluation,” in Proc. CRYPTO , 2013. [12] L. Babai and S. Moran, “Arthur–Merlin games: a randomized proof system, and a hierarchy of complexity classes,” J. Comput. Syst. Sci. , vol. 36, no. 2, pp. 254–276, 1988. [13] A. Shamir, “IP = PSPACE,” J. ACM , vol. 39, no. 4, pp. 869–877, 1992. [14] J. Thaler, Proofs, Arguments, and Zero-Knowledge , Found. Trends Privacy Secur. , vol. 4, no. 2–4, pp. 117–660, 2022, doi: 10.1561/3300000030. [15] C. Lund, L. Fortnow, H. Karloff, and N. Nisan, “Algebraic methods for interactive proof systems,” 
+
+J. ACM , vol. 39, no. 4, pp. 859–868, 1992. [16] G. Cormode, J. Thaler, and K. Yi, “Verifying computations with streaming interactive proofs,” 
+
+Proc. VLDB Endowment , vol. 5, no. 1, pp. 25–36, 2011, doi: 10.14778/2047485.2047488. [17] A. Hentschel, D. Shirley, L. Lafrance, and M. Zamski, “Flow: Separating consensus and compute— execution verification,” arXiv preprint arXiv:1909.05832 , 2019. [18] B. Parno, J. Howell, C. Gentry, and M. Raykova, “Pinocchio: Nearly practical verifiable computa-tion,” in Proc. IEEE Symp. Secur. Privacy , 2013. [19] E. Ben-Sasson, A. Chiesa, M. Riabzev, N. Spooner, M. Virza, and N. P. Ward, “Aurora: Transparent succinct arguments for R1CS,” in Proc. EUROCRYPT , 2019. [20] E. Ben-Sasson, L. Goldberg, S. Kopparty, and S. Saraf, “DEEP-FRI: Sampling outside the box improves soundness,” in Proc. ITCS , 2020. [21] J. Groth, “On the size of pairing-based non-interactive arguments,” in Proc. EUROCRYPT , 2016. [22] A. Kate, G. M. Zaverucha, and I. Goldberg, “Constant-size commitments to polynomials and their applications,” in Proc. ASIACRYPT , 2010. [23] J. Bootle, A. Cerulli, P. Chaidos, J. Groth, and C. Petit, “Efficient zero-knowledge arguments for arithmetic circuits in the discrete log setting,” in Proc. EUROCRYPT , 2016. [24] A. Chiesa, Y. Hu, M. Maller, P. Mishra, N. Vesely, and N. P. Ward, “Marlin: Preprocessing zkSNARKs with universal and updatable SRS,” in Proc. EUROCRYPT , 2020. [25] J. Lee, “Dory: Efficient, transparent arguments for generalised inner products and polynomial commitments,” in Proc. TCC , 2021. [26] E. Ben-Sasson, I. Bentov, Y. Horesh, and M. Riabzev, “Fast Reed–Solomon interactive oracle proofs of proximity,” in Proc. ICALP , 2018. [27] B. Bünz, J. Bootle, D. Boneh, A. Poelstra, P. Wuille, and G. Maxwell, “Bulletproofs: Short proofs for confidential transactions and more,” in Proc. IEEE Symp. Secur. Privacy , 2018. [28] C. Weng, K. Yang, X. Xie, J. Katz, and X. Wang, “Mystique: Efficient conversions for zero-knowledge proofs with applications to machine learning,” in Proc. 30th USENIX Security Symp. ,pp. 501–518, 2021. [29] B.-J. Chen, S. Waiwitlikhit, I. Stoica, and D. Kang, “ZKML: An optimizing system for ML inference in zero-knowledge proofs,” in Proc. 19th ACM European Conf. Computer Systems (EuroSys) , pp. 560–574, 2024, doi: 10.1145/3627703.3650088. [30] M. Hao, H. Chen, H. Li, C. Weng, Y. Zhang, H. Yang, and T. Zhang, “Scalable zero-knowledge proofs for non-linear functions in machine learning,” in Proc. 33rd USENIX Security Symp. ,pp. 3819–3836, 2024. 19 [31] H. Sun, J. Li, and H. Zhang, “zkLLM: Zero knowledge proofs for large language models,” in Proc. ACM CCS , pp. 4405–4419, 2024, doi: 10.1145/3658644.3670334. [32] W. Qu, Y. Sun, X. Liu, T. Lu, Y. Guo, K. Chen, and J. Zhang, “zkGPT: An efficient non-interactive zero-knowledge proof framework for LLM inference,” in Proc. 34th USENIX Security Symp. , pp. 2045–2063, 2025. [33] A. G. Ivakhnenko, “Polynomial theory of complex systems,” IEEE Trans. Syst., Man, Cybern. ,vol. SMC-1, no. 4, pp. 364–378, Oct. 1971. [34] I. Hubara, M. Courbariaux, D. Soudry, R. El-Yaniv, and Y. Bengio, “Quantized neural networks: Training neural networks with low precision weights and activations,” J. Mach. Learn. Res. , vol. 18, no. 187, pp. 1–30, 2018. [35] B. Jacob et al., “Quantization and training of neural networks for efficient integer-arithmetic-only inference,” in Proc. CVPR , 2018. [36] A. Katharopoulos, A. Vyas, N. Pappas, and F. Fleuret, “Transformers are RNNs: Fast autoregressive transformers with linear attention,” in Proc. ICML , 2020. [37] S. Wang et al., “Linformer: Self-attention with linear complexity,” arXiv preprint arXiv:2006.04768 ,2020. [38] N. Kitaev, L. Kaiser, and A. Levskaya, “Reformer: The efficient transformer,” in Proc. ICLR , 2020. [39] K. Choromanski et al., “Rethinking attention with performers,” in Proc. ICLR , 2021. [40] J. Su, M. Ahmed, Y. Lu, S. Pan, W. Bo, and Y. Liu, “RoFormer: Enhanced trans-former with rotary position embedding,” Neurocomputing , vol. 568, Art. 127063, 2024, doi: 10.1016/j.neucom.2023.127063. [41] A. Fiat and A. Shamir, “How to prove yourself: Practical solutions to identification and signature problems,” in Proc. CRYPTO , 1986. 20 Supporting Information for Agree on the Model, Verify the Inference: GKR Protocols for HND-Based Transformer Inference 
+
+Xiaolong Liang, Juanjuan Li, Rui Qin, and Yisheng Lv 
+
+State Key Laboratory of Multimodal Artificial Intelligence Systems, Institute of Automation, Chinese Academy of Sciences, Beijing 100190, China 
+
+yisheng.lv@ia.ac.cn 
+
+# A Precision and Prefix-Length Ablations 
+
+The main paper uses signed uniform Q20 semantics and a prefix length of T = 8 for checkpoint-derived proofs. Table 1 reports the ablations used to select that operating point. The exporter performs nearest-half-away-from-zero rounding and rescales after every source-order operation. The errors compare the fixed-point output with the explicit unquantized float64 block relation. The independent Rust replay obtains 38/38 field-digest agreement in every row. Table 1: HND-32M block-0 precision and prefix-length audit on validation index 0. 
+
+T Fraction bits Relative ℓ2 Max. abs. error Cosine Max. bits Digests 8 16 9.6721 × 10 −4 2.8896 × 10 −5 0.999999533 38 38/38 8 20 5.8705 × 10 −5 1.5789 × 10 −6 0.999999998 46 38/38 8 24 3.7795 × 10 −6 1.1302 × 10 −7 1.000000000 54 38/38 16 20 6.0057 × 10 −5 1.7961 × 10 −6 0.999999998 46 38/38 32 20 6.0703 × 10 −5 1.8805 × 10 −6 0.999999998 46 38/38 Q20 reduces the output relative error by approximately a factor of 16 compared with Q16, while all observed accumulators remain within 46 signed-magnitude bits. Q24 reduces the error further but increases the maximum width to 54 bits. At fixed Q20, increasing T from 8 to 32 changes the relative error only from 5.87 × 10 −5 to 
+
+6.07 × 10 −5.Table 2 records the corresponding block-0 proof artifacts for validation index 0. All three instances reuse the same public SRS and pass 38/38 cross-language trace checks. Each of the 11 prescribed mutations is rejected at T = 16 and T = 32 , as at T = 8 . Doubling the prefix approximately doubles the public-witness encoding, whereas each additional token-index round adds only 800 bytes to the canonical proof. These longer-prefix results cover block 0 only; the all-eight-block proof chain in the main paper uses T = 8 .Table 2: Accepted HND-32M block-0 Q20 proof artifacts for validation index 0. 
+
+T Public witness (bytes) Proof (bytes) Digests Max. bits Accepted 8 2,077,872 19,092 38/38 46 yes 16 4,180,272 19,892 38/38 46 yes 32 8,458,800 20,692 38/38 46 yes 
+
+# B Checkpoint Stability Diagnostic 
+
+This section reports model-quality diagnostics that are deliberately separated from the proved relation. We use HND-124M-core for the larger checkpoint to distinguish its Transformer core from the deployed model, which also contains an untied output projection. For target tokens y1, . . . , y N , the evaluator accumulates FP32 token-level cross entropy in double precision and reports 
+
+PPL = exp 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+− log p(yi | y<i )
+
+!
+
+. (1) 1It uses deterministic PyTorch settings, never drops a batch, records exact token counts, and hashes every model, tokenizer, and validation-cache artifact. Direct α = 0 inference produces non-finite logits for some sequences in both checkpoints, so the untouched full-split PPL is undefined. The finite diagnostic first executes the original path. Only when one sequence is non-finite does it retry that sequence after upper-clipping the two first-block RMS correction tables. Q/K corrections and all later blocks remain unchanged. The caps are 300 for HND-32M and 50 for HND-124M-core. They were selected post hoc to restore finite evaluation; they were not preregistered, and cap sensitivity was not measured. Table 3 therefore labels the results as safety-retry diagnostics rather than untouched checkpoint PPL. Table 3: Complete validation-split safety-retry perplexity. The retry includes every token and modifies only sequences whose original logits are non-finite.                       
+
+> Model Sequences Tokens Retry cap Retried Rate Retry PPL HND-32M 42,534 21,777,408 first-block RMS ≤300 588 1.382% 8.0964 HND-124M-core 52,371 53,627,904 first-block RMS ≤50 13 0.0248% 19.6547
+
+The two values are not a controlled size-scaling comparison because the models use different tokenizers, vocabulary sizes, sequence lengths, and validation caches. The 124M-core split is also merged across RTX 3090 and RTX 5060 Ti devices. The merge script rejects overlap, missing indices, artifact-hash mismatch, and incomplete shards, but deterministic settings do not guarantee bitwise equality across GPU architectures. No perplexity computation is part of the GKR-HND proof. 
+
+# C Repeated Timing and Artifact Accounting 
+
+Table 2 of the main paper reports the arithmetic means for three block-0 prefixes. Across the 15 recorded repetitions, proof generation has mean 40.948 s, median 40.796 s, and range 40.662–41.756 s. Verification including the public numeric scan has mean 0.1820 s, median 0.1817 s, and range 0.1796–0.1882 s. The three parse/hash measurements average 0.0253 s, giving a 0.2073-s mean online total. Direct fixed-point replay with resident dense weights averages 0.09072 s over 15 runs, with range 0.08861–0.09544 s. Fresh SRS generation takes 691.804 s; block-0 registration takes 63.511 s; and serializing the public parameters takes 34.130 s. A full canonical reload of the 125,883,136-byte SRS and 8,796-byte registration takes 276.915 s and can be cached. Each proof in the retained block-0 benchmark is 18,780 bytes and each public witness is 2,077,872 bytes. The witness bytes are not included in the proof-size column. An earlier integrated fresh-setup driver recorded one 81.045-s proof for the same block-0 statement, whereas the repeated deployment-path driver records 40.948 s and produces the identical proof SHA-256. The drivers ran in different system states and no controlled experiment isolates the disparity. The main paper therefore uses the repeated deployment-path measurements and makes no proving-speedup claim. For completeness, the current T = 16 and T = 32 block-0 proof drivers each ran once with the same cached SRS. They record prover times of 43.718 and 45.008 s and verification times of 0.2323 and 0.3272 s, respectively. These single-run values document the artifacts in Table 2; they are not used as a performance comparison or speedup claim. 
+
+# D Chained Proof Audit 
+
+Table 4 summarizes the machine-checked manifest for the chained experiment. All eight block-specific proofs use one SRS but distinct registered model identifiers. The 24 numerical instances cover eight blocks and three preselected prefixes. Only validation index 0 has a proof for every block; the other two chains are numerical audits. For every proved block, the driver separately changes a witness byte, numeric remainder, proof message, model identifier, weight commitment, input, correction, output, causal mask, numeric specification, and block-provenance field. All 88 modified instances are rejected. These deterministic mutations are regression checks, not a substitute for cryptographic audit or fuzzing. 
+
+# E Parallel Scheduling, Authenticated Worker, and HND-124M 
+
+Table 5 gives the controlled scheduler comparison described in the main paper. The driver uses ordinary host threads to schedule eight proof-verification or direct-replay tasks. These threads are benchmark resources rather than the assigned computation worker in the GKR-HND protocol. All values are medians of 15 post-warm-up repetitions, with three warm-ups and alternating path order. 2Table 4: Chained checkpoint-derived evidence. Invariant Result Numerical block instances 24 Independent Rust imports accepted 24/24 Field-trace digest agreement 38/38 per instance Exact adjacent-state links 21/21 Block-specific proofs accepted for index 0 8/8 Distinct model identifiers / proof hashes 8 / 8 Shared SRS SHA-256 prefix 8185c455 
+
+Proof bytes per block 19,092 Witness bytes per block 2,077,872 Maximum chained relative ℓ2 error 1.3635 × 10 −4
+
+Maximum accumulator width 46 bits Table 5: Fair eight-block HND-32M proof-verification and replay timings. Threads Proof (s) Replay (s) Proof speedup Proof/replay 1 1.555248 0.773003 1.000 2.012 2 0.829382 0.407903 1.875 2.033 4 0.433252 0.229410 3.590 1.889 8 0.208697 0.123241 7.452 1.693 The authenticated worker experiment uses one local computation-worker process with a pinned Ed25519 key. The retained verifier derives each query after the corresponding proof check and accepts only a signed response with the same model, request, block, operation, transcript, numeric policy, nonce, and evaluation points. The honest path accepts; a wrong key, forged signature, duplicate frame, malformed frame, or replayed binding is rejected. Canonical signed responses occupy 397 bytes for one field value and 429 bytes for two. This experiment covers the public numeric scan and terminal public-table evaluations. Direct embedding, correction generation, final normalization, logits, and output selection are measured separately. The HND-124M extension contains twelve block-specific registrations, witnesses, and proofs. All twelve proofs accept, and all eleven adjacent boundaries match. Table 6 reports the medians from three clean sequential repetitions. The worker adapter runs in process, so these data establish all-block feasibility rather than network latency. Table 6: Complete HND-124M proof-chain audit at T = 8 and Q20. Invariant or cost Result Accepted block proofs 12/12 Exact adjacent boundaries 11/11 Shared serialized SRS 503,420,128 bytes Median shared SRS load 1110.406 s Median registration 632.007 s Median proof generation 1093.443 s Median online chain verification 2.812 s Median end-to-end time 2841.731 s Proof bytes per block / total 23,932 / 287,184 Witness bytes per block / total 3,116,720 / 37,400,640 Median peak resident memory 3,567,272 KiB The direct HND-124M operators are benchmarked separately on an RTX 3090. After 10 warm-up iterations, 50 measured iterations give a 0.015848-s sum of the component means for the all-token path at T = 8 ; the 3.235-s model load is excluded. The checkpoint and Q20 final-boundary paths select the same next token. This measurement covers deterministic recomputation rather than the cryptographic relation. 3F Reproduction Boundary 
+
+The companion archives and content-addressed objects described below document the evaluated artifact snapshot; they are not included in this arXiv source bundle. The release separates compact companion archives from large public inputs. S1 contains the standalone source, tests, documentation, and tracked raw results. S2 contains the signed registrations for all 20 evaluated blocks and the two ordered backbone registrations. S3 provides current-format witnesses and accepted proofs for the three preselected T = 8 prefixes, whereas S4 provides the complete eight-block and twelve-block chains together with the T = 16 and T = 32 prefix experiments. At release tag gkr-hnd-test-suite-v1 , the standalone source contains 142 Rust tests: 66 unit tests and 76 integration tests across 13 integration targets. The release also archives the complete Cargo output and a machine-readable test-to-claim map. The two public SRS files and the checkpoint-derived fixed-point exports are stored as content-addressed objects rather than duplicated inside the ZIP files. Each object index records a retrieval URI, byte count, and SHA-256 digest. Each companion archive contains its own PACKAGE_MANIFEST.json , which lists every internal file and its digest. The release-level closure manifest binds all four archive hashes, all external objects, the artifact- generation commit, and the packaging commit. An automated closure check rejects a missing object, a dangling package entry, a legacy proof encoding, or a package containing the registrar’s private signing key. Complete FP32 checkpoints, correction networks, tokenizers, and validation caches are not redistributed. Their byte sizes and SHA-256 identities are recorded. Regenerating the chained fixed-point exports or the likelihood diagnostic therefore requires authorized access to those original artifacts. The source-checkpoint hash in a registration is a registrar-attested provenance label; the current proof does not certify the floating-point-to-fixed-point export procedure. The Q16 and Q24 records are retained only as fixed-point fidelity diagnostics; they are not inputs to a released cryptographic proof. Table 7 separates replay of the released public proof from regeneration of the checkpoint-derived relation. Replay needs no FP32 checkpoint. After building the Rust verifier from S1, a reviewer retrieves the indexed public SRS and fixed-point export objects and verifies their digests before using the registrations, witnesses, proofs, and chain decisions in S2–S4. Table 7: Released artifact layers and their trust boundary.                   
+
+> File Principal contents FP32 checkpoint required? S1 Source, tests, documentation, tracked raw results no S2 20 signed block registrations, two backbone roots, SRS index no S3 Three T= 8 block-0 witnesses and accepted proofs no S4 Eight- and twelve-block chains, T= 16 /32 proofs no Regeneration Export and likelihood re-execution yes
+
+The replay boundary verifies the disclosed fixed-point relation and its registered weights. It does not independently establish that a private FP32 checkpoint was trained as claimed, that the exporter selected the correct checkpoint tensors, or that the public correction tables were generated by the declared correction networks. Those provenance steps remain part of trusted registration and the recorded artifact audit. 4

@@ -1,0 +1,51 @@
+{
+  "label": "2026-07-24",
+  "date": "2026-07-24",
+  "generated_at": "2026-07-24T21:47:11",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202607/24/2607.21162v1-agree-on-the-model-verify-the-inference-gkr-protocols-for-hnd-based-transformer-inference",
+      "section": "deep",
+      "title_en": "Agree on the Model, Verify the Inference: GKR Protocols for HND-Based Transformer Inference",
+      "authors": "Xiaolong Liang, Juanjuan Li, Rui Qin, Yisheng Lv",
+      "date": "2026-07-23",
+      "pdf": "https://arxiv.org/pdf/2607.21162v1",
+      "score": "9.0",
+      "evidence": "使用GKR协议的可验证Transformer推理",
+      "tldr": "针对外包Transformer推理中存在的模型替换和执行不完整风险，本文提出了GKR-HND协议。该协议基于同态-非同态分解（HND）架构，利用GKR协议验证多项式骨干网络。通过引入保留验证者检查证明轨迹，并将高开销计算委托给计算节点，在保证验证效率的同时实现了对推理过程的完整性校验，实验证明该方法无需重放密集矩阵计算即可验证预训练模型。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Outsourced Transformer inference exposes clients to model substitution and incomplete execution, while direct replay removes the computational benefit of delegation. We present GKR-HND, a registered-model protocol for verifying the polynomial backbone of Homomorphic--Nonhomomorphic Decomposition Transformers. The retained verifier checks the GKR transcript and registered-weight openings, but delegates expensive public evaluations to an assigned computation worker. Assuming an honest retained verifier and prover--worker non-collusion, the verifier accepts only when the worker's signed, request-bound response agrees with the proof claims. Experiments with pretrained HND models validate the proof path and the delegated public computation without dense-matrix replay.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/24/2607.19146v1-sarus-privacy-preserving-multi-vendor-perception-fusion-via-homomorphic-encryption",
+      "section": "quick",
+      "title_en": "Sarus: Privacy-Preserving Multi-Vendor Perception Fusion via Homomorphic Encryption",
+      "authors": "Munawar Hasan, Apostol Vassilev",
+      "date": "2026-07-21",
+      "pdf": "https://arxiv.org/pdf/2607.19146v1",
+      "score": "6.0",
+      "evidence": "通过同态加密实现隐私保护推理",
+      "tldr": "针对自动驾驶中多供应商协同感知的隐私泄露问题，本文提出Sarus框架。该框架利用同态加密（HE）技术，允许各供应商将检测结果编码为空间网格上的高斯矩向量并加密传输，由服务端在加密域直接聚合。Sarus在保护各方模型行为和环境隐私的同时，实现了高效的感知融合。实验证明，该方法在KITTI数据集上显著提升了场景覆盖率，且计算复杂度随供应商数量线性扩展，证明了隐私保护感知融合在实时应用中的可行性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Cooperative perception enables autonomous vehicles (AVs) to improve situational awareness by aggregating detection outputs from multiple agents and sensing platforms, often via a shared fusion service in multi-vendor deployments. However, sharing such outputs at inference time exposes proprietary model behavior and sensitive environmental information, creating significant privacy and security concerns. In this paper, we present Sarus, a privacy-preserving framework for multi-vendor perception fusion via homomorphic encryption (HE), enabling aggregation without revealing individual vendor outputs. Each vendor encodes detections as compact Gaussian moment vectors over a shared spatial lattice and transmits encrypted payloads to a fusion server, which aggregates them directly in the encrypted domain. The fused result is then decrypted and reconstructed into final detections through class-wise bin merging.   We analyze the computational complexity, showing linear scaling for vendor payload construction and $O(BV)$ server-side fusion with the number of occupied bins $B$ and vendors $V$, while postprocessing scales as $O(B + \\sum_{c\\in \\mathcal{C}} B_c^2)$, where $\\mathcal{C}$ denotes the set of object classes and $B_c$ is the number of occupied bins for class $c$. Experiments demonstrate linear scaling in practice with only a bounded constant-factor overhead from HE, with decryption dominating postprocessing cost. Experiments on the KITTI dataset using camera (YOLOv8) and LiDAR (PointPillars, PV-RCNN) detectors show that Sarus improves scene-level coverage by effectively aggregating complementary detections, particularly in distance-dependent regimes where individual modalities degrade. These results indicate that privacy-preserving multi-vendor perception fusion is feasible for real-time deployment when statistical compression and spatial sparsity are jointly exploited.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/24/2607.19623v1-from-bit-position-sensitivity-to-unequal-error-protection-for-dnn-inference-memory",
+      "section": "quick",
+      "title_en": "From Bit-Position Sensitivity to Unequal Error Protection for DNN Inference Memory",
+      "authors": "Muhammad Husnain Mubarik, Karthik Mohan Kumar, Pedro Antonio Pena, Keshavan Varadarajan, Kunal Tyagi",
+      "date": "2026-07-21",
+      "pdf": "https://arxiv.org/pdf/2607.19623v1",
+      "score": "6.0",
+      "evidence": "Transformer推理中浮点格式的故障敏感性",
+      "tldr": "本研究分析了深度学习推理中比特位的故障敏感性，发现低位比特对精度影响极小。据此提出非等保护（UEP）编解码器和双分区SRAM架构，仅保护关键的高位和指数比特。该方法在无需重训的前提下，显著降低了ECC存储开销、硬件面积和读取能耗，有效平衡了机器学习加速器的可靠性与资源消耗。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We characterize per-bit-position fault sensitivity in ML inference across 16 workloads -- spanning transformer-based models and attention-free CNNs -- and across three floating-point formats. Our central empirical finding is a sharp bit-sensitivity transition: flipping any of the least-significant fraction bits up to a data-type-specific threshold, Xsafe, degrades task metrics by less than 1% under deterministic single-bit stress tests. Sensitivity rises through the upper fraction bits and spikes at the exponent-mantissa boundary, where a single-bit flip causes catastrophic collapse. Because low-order bits are largely inconsequential while high-order and exponent bits are critical, uniform SECDED protection -- which guards every bit equally at 12.5% storage overhead -- is unnecessarily conservative. We derive per-data-type Xsafe floors (FP16: 6, BF16: 4, FP32: 15) and workload-aware tiers that widen the unprotected region for resilient model classes, raising ECC savings to 37.5-62.5% without retraining. Text-conditioned diffusion models dictate the conservative floor; vision encoders, NLU models, and resilient LLMs tolerate wider bypass regions. These floors and tiers drive an Unequal Error Protection (UEP) codec with per-cacheline data-type tags and a dual-partition SRAM architecture for ML accelerators. Validation across 870+ fault-injection runs confirms selective protection holds under contiguous 2- and 3-bit upsets. The codec reduces ECC area by 27.8% relative to uniform SECDED; dual-voltage operation of the non-critical partition lowers gross BF16 read energy by about 17%, with a roughly 4% dual-partition macro-area overhead.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
