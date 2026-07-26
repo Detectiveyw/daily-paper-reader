@@ -1,0 +1,37 @@
+{
+  "label": "2026-07-26",
+  "date": "2026-07-26",
+  "generated_at": "2026-07-26T19:52:35",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202607/26/2607.18908v1-function-correcting-rt-codes-a-coding-framework-for-parallel-channels",
+      "section": "quick",
+      "title_en": "Function-Correcting RT Codes: A Coding Framework for Parallel Channels",
+      "authors": "Huiying Liu, Hongwei Liu, Sihem Mesnager",
+      "date": "2026-07-21",
+      "pdf": "https://arxiv.org/pdf/2607.18908v1",
+      "score": "6.0",
+      "evidence": "用于可靠函数值恢复的函数纠错码",
+      "tldr": "本文针对并行信道通信，将函数纠错码从 Hamming 度量扩展到 Rosenbloom-Tsfasman (RT) 度量，提出了函数纠错 RT 码（FCRTCs）。研究引入了不规则 RT 距离码这一新矩阵码类，建立了冗余优化与代码构造的直接联系。通过对 RT 权重及分布等特定函数类的深入分析，给出了冗余度的上下界及显式构造方案，为并行信道下的高效冗余编码提供了新的理论框架。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Function-correcting codes have recently emerged as an effective approach to reducing coding redundancy when the objective is to reliably recover only the prescribed function values of the transmitted information, rather than the complete message itself. As a natural generalization of the Hamming metric, the Rosenbloom--Tsfasman metric (RT-metric) has attracted considerable attention due to its relevance to communication over parallel channels. Motivated by these two research directions, we introduce in this paper function-correcting RT codes (FCRTCs), which extend the framework of function-correcting codes from the Hamming metric to the more general RT metric.   To investigate the fundamental problem of optimal redundancy, we introduce a new class of matrix codes, called irregular RT-distance codes, and establish a direct correspondence between the redundancy optimization problem for FCRTCs and the construction of such codes. This connection provides a unified framework for deriving redundancy bounds under the RT metric.   For arbitrary functions, we establish general upper and lower bounds on the optimal redundancy of FCRTCs. We then specialize our analysis to several important classes of functions, namely RT-weight functions, RT-weight distribution functions, and RT-locally-two-valued binary functions, for which substantially sharper bounds are obtained by exploiting their specific structural properties. Furthermore, we present explicit constructions of FCRTCs for RT-weight distribution functions and prove that these constructions attain the optimal redundancy bounds in several cases.   The proposed framework considerably extends the theory of function-correcting codes to the RT metric, provides new theoretical tools for studying reliable communication over parallel channels, and opens new perspectives for redundancy-efficient coding beyond the classical Hamming setting.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/26/2607.20890v1-information-theoretically-secure-aggregation-for-lightweight-federated-learning-resilient-to-dropouts-and-adversaries",
+      "section": "quick",
+      "title_en": "Information-Theoretically Secure Aggregation for Lightweight Federated Learning: Resilient to Dropouts and Adversaries",
+      "authors": "Hyeong-Gun Joo, Songnam Hong, Dong-Joon Shin",
+      "date": "2026-07-23",
+      "pdf": "https://arxiv.org/pdf/2607.20890v1",
+      "score": "6.0",
+      "evidence": "分布式学习的信息论安全聚合",
+      "tldr": "本研究针对资源受限设备的联邦学习，提出一种轻量级且信息论安全的聚合框架。该框架专为signSGD设计，通过单轮安全乘法和逆形式指数缩减技术，在保护隐私的同时显著降低了通信与计算开销。实验证明，该方案在大幅提升效率的同时，能有效应对节点掉线和恶意攻击，为大规模安全联邦学习提供了实用方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "On-device federated learning (FL) enables privacy-preserving and personalized model training on resource-constrained devices such as smartphones and IoT nodes. To reduce communication cost, sign-based methods (e.g., signSGD) transmit one-bit gradients. However, exposing gradient signs makes them vulnerable to inference attacks, while existing secure aggregation schemes are often incompatible with such methods or incur significant computational and communication overhead. We propose a lightweight and information-theoretically secure aggregation framework tailored for sign-based FL. The framework securely computes the majority vote (MV) polynomial through single-round secure multiplication, ensuring end-to-end information-theoretic security under the honest-majority assumption while revealing only the final aggregated sign to the server. To enhance efficiency and scalability, we introduce two key techniques. First, inverse-form exponent reduction halves the effective MV polynomial degree, reducing both communication and computation costs. Second, we propose single-round secure multiplication, achieving linear offline complexity and storage with only a single online communication. Together, these techniques reduce online communication by up to 99.5% and latency by up to 85.7% compared to conventional approaches. Also, by leveraging inherent MDS-code-based decoding, the framework achieves robustness against both dropouts and adversarial behaviors, yielding accuracy gains of up to 20.65% and 10.74%, respectively. Overall, the proposed framework establishes a practical foundation for large-scale, low-latency, and information-theoretically secure aggregation in sign-based FL.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

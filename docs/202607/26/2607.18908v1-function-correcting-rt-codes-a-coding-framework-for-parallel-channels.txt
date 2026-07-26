@@ -1,0 +1,3398 @@
+Title: Function-Correcting RT Codes: A Coding Framework for Parallel Channels
+
+URL Source: https://arxiv.org/pdf/2607.18908v1
+
+Published Time: Wed, 22 Jul 2026 00:47:08 GMT
+
+Number of Pages: 46
+
+Markdown Content:
+# Function-Correcting RT Codes: A Coding Framework for Parallel Channels 
+
+Huiying Liu 1, Hongwei Liu 1, Sihem Mesnager 2
+
+1. School of Mathematics and Statistics, Central China Normal University, Wuhan, 430079, China 2. LAGA, Department of Mathematics, Universities of Paris VIII and Paris XIII, CNRS, UMR 7539 and Telecom ParisTech, 91120 Palaiseau, France 
+
+Abstract: Function-correcting codes have recently emerged as an effective approach to reducing coding redundancy when the objective is to reliably recover only the prescribed function values of the transmitted information, rather than the complete message itself. As a natural generalization of the Hamming metric, the Rosenbloom–Tsfasman metric (RT-metric) has attracted considerable attention due to its relevance to communication over parallel channels. Motivated by these two research directions, we introduce in this paper function-correcting RT codes (FCRTCs), which extend the framework of function-correcting codes from the Hamming metric to the more general RT metric. To investigate the fundamental problem of optimal redundancy, we introduce a new class of matrix codes, called irregular RT-distance codes , and establish a direct correspondence between the redundancy optimization problem for FCRTCs and the construction of such codes. This connection provides a unified framework for deriving redundancy bounds under the RT metric. For arbitrary functions, we establish general upper and lower bounds on the optimal redundancy of FCRTCs. We then specialize our analysis to several important classes of functions, namely RT-weight functions, RT-weight distribution functions, and RT-locally-two-valued binary functions, for which substantially sharper bounds are obtained by exploiting their specific structural properties. Furthermore, we present explicit constructions of FCRTCs for RT-weight distribution functions and prove that these constructions attain the optimal redundancy bounds in several cases. The proposed framework considerably extends the theory of function-correcting codes to the RT metric, provides new theoretical tools for studying reliable communication over parallel channels, and opens new perspectives for redundancy-efficient coding beyond the classical Hamming setting. 
+
+Keywords: Rosenbloom-Tsfasman metric; Function-correcting codes; Irregular RT-distance codes; Optimal redundancy. 
+
+2020 Mathematics Subject Classification : 94B60, 94B65 
+
+E-Mail addresses: huiyingliu@mails.ccnu.edu.cn (Huiying Liu), hwliu@ccnu.edu.cn (Hongwei Liu), smesnager@univ-paris8.fr (Sihem Mesnager). 
+
+1arXiv:2607.18908v1 [cs.IT] 21 Jul 2026 1 Introduction 
+
+In modern communication systems, information is encoded into codewords before being transmitted through a noisy channel. To ensure reliable communication, redundancy is intentionally introduced during the encoding process so that transmission errors can be detected and corrected at the receiver. In the classical framework of coding theory, the decoding procedure aims to recover the entire transmitted message, thereby enabling any desired information derived from it to be computed. However, this requirement is unnecessarily restrictive in numerous practical scenar-ios. Indeed, many applications require only the value of a prescribed function of the transmitted message rather than the message itself. Recovering the complete informa-tion therefore introduces additional redundancy that is not always essential. Motivated by this observation, Lenz, Bitar, Wachter-Zeh and Yaakobi [8] introduced the notion of 
+
+function-correcting codes in 2023, thereby establishing a new coding paradigm that ex-plicitly exploits the structure of the underlying function. In the function-correcting framework, both the sender and the receiver are assumed to know the target function in advance. Consequently, for a prescribed error-correction capability and a given function, the minimum-distance requirement is imposed only on codewords corresponding to messages having distinct function values. This represents a fundamental departure from classical error-correcting codes, where every pair of dis-tinct codewords must satisfy the prescribed distance constraint. By relaxing the distance requirements when function values coincide, function-correcting codes can significantly reduce coding redundancy while still guaranteeing the correct recovery of the desired function value. Clearly, every classical error-correcting code is automatically a function-correcting code, since recovering the entire transmitted message immediately determines the corresponding function value. In their pioneering work [8], Lenz et al. established fundamental bounds on the op-timal redundancy of function-correcting codes and presented explicit constructions for Hamming-weight and Hamming-weight-distribution functions. Since then, this research direction has developed rapidly and has been extended to a variety of channel models and distance metrics. For symbol-pair read channels, Xia, Liu and Chen [28] investigated function-correcting codes with the symbol-pair metric and derived several bounds on their optimal redun-dancy. Subsequently, Singh, Singh and Yaakobi [23] generalized these results to the more general b-symbol read channel model. Rajan [4] further established a Plotkin-type bound for function-correcting codes under the b-symbol metric. In the context of the Lee metric, Hareesh, Rashid Ummer and Sundar Rajan [6] proposed explicit constructions of function-correcting codes, while Verma and Singh [25] investigated corresponding bounds on the optimal redundancy. Extending the framework beyond finite fields, Liu and Liu [9] general-ized function-correcting codes to finite chain rings equipped with the homogeneous metric. 2More recently, Singh and Singh [22] initiated the study of function-correcting codes for insertion–deletion channels, further illustrating the broad applicability and flexibility of this emerging coding paradigm. In 2025, Zhang, Xu, Zhang and Ge [31] employed Gray codes to improve several results established in [8, 28]. Another active research direction concerns the design of function-correcting codes tailored to specific classes of functions. In this context, Premlal and Sundar Rajan [13] investigated function-correcting codes for linear functions. Further developments for various families of functions can be found in [1, 12, 17]. Verma, Singh and Singh [26] studied function-correcting b-symbol codes associated with locally ( λ, ρ, b )-functions, while Verma and Singh [24] investigated function-correcting codes endowed with the homogeneous metric for linear and locally bounded functions. Additional advances along these directions are reported in [16, 18, 19]. Collectively, these contributions demon-strate both the versatility of the function-correcting coding framework and its increasing importance across a broad spectrum of communication models and application-driven set-tings. Parallel to these developments, the Rosenbloom–Tsfasman metric (RT-metric) has be-come one of the fundamental metrics for modelling communication over parallel channels. Originally introduced by Niederreiter [11] in 1987 in the study of point sets, and later systematically developed by Rosenbloom and Tsfasman [20], the RT-metric naturally ex-tends the classical Hamming metric while capturing error structures arising in parallel transmission systems. Rosenbloom and Tsfasman [20] established a Singleton-type bound for codes equipped with the RT metric, thereby laying the theoretical foundations of this metric. Codes endowed with the RT metric are naturally represented as matrix codes. In particular, when each codeword consists of a single row, the RT metric coincides with the classical Hamming metric, showing that the latter appears as a special case of the former. Consequently, many classical coding-theoretic problems have subsequently been revisited within the RT-metric framework. Over the past decades, a rich theory of RT-metric codes has been developed. Dougherty and Skriganov [2] established a MacWilliams-type identity for RT-metric codes, while Skriganov [21] investigated MDS codes together with the properties of their dual codes. Quistorff [14] derived new bounds for RT-metric codes and improved the RT analogue of the Plotkin bound. Zhou, Lin and Abdel-Ghaffar [30] constructed BCH codes endowed with the RT metric, and subsequently employed Galois–Fourier transforms associated with Hasse derivatives to investigate structural properties of Reed–Solomon and BCH codes under this metric. More recently, Xu, Xu and Du [29] introduced linear complementary dual codes with the RT metric, while Wang, Li and Heng [27] established new upper bounds on the minimum RT distance of linear matrix codes and proposed corresponding constructions. Further developments on RT-metric codes can be found in [3, 5, 7, 10, 15]. Although numerous families of classical codes have successfully been generalized from 3the Hamming metric to the RT metric, the function-correcting paradigm has not yet been investigated in this setting. This observation naturally raises the following question: 
+
+Can the theory of function-correcting codes be extended to the Rosenbloom–Tsfasman metric while preserving its redundancy advantages? 
+
+The primary objective of this paper is to answer this question affirmatively. To this end, we introduce function-correcting RT codes (FCRTCs), which constitute the RT-metric counterpart of function-correcting codes under the Hamming metric. Since the RT metric is defined on matrix spaces, FCRTCs naturally take the form of systematic matrix codes. Each codeword is decomposed into two components: an information matrix that carries the source data and a redundancy matrix that provides protection against transmission errors. Within this framework, our main objective is to investigate the fundamental problem of determining the optimal redundancy required by FCRTCs and to establish general bounds, along with explicit constructions, for several important classes of functions. To address the redundancy optimization problem, we introduce a new class of matrix codes endowed with the RT metric, referred to as irregular RT-distance codes . In these codes, the pairwise RT-distance constraints between codewords are prescribed by a nonneg-ative matrix D; accordingly, we also refer to them as D-RT codes . In addition, we introduce two new mathematical objects, namely RT-distance matrices and RT-function-distance matrices , which provide an appropriate framework for analysing function-correcting RT codes. These notions establish a direct connection between the optimal redundancy problem for FCRTCs and the construction of irregular RT-distance codes. This correspondence is one of the central ideas of the paper, as it enables the study of FCRTCs by analysing a more general class of matrix codes. In particular, for an arbitrary symmetric matrix D
+
+and assuming the number of rows of the codewords is fixed, we derive both upper and lower bounds on the minimum number of columns required for D-RT codes. Building upon this general framework, we first establish upper and lower bounds on the optimal redundancy of FCRTCs for an arbitrary function, thereby extending several fundamental results in [8] from the Hamming metric to the RT metric. We then focus on several important classes of functions for which significantly stronger results can be obtained by exploiting their specific algebraic and combinatorial properties. For RT-weight functions, we derive sharper bounds on the optimal redundancy of FCRTCs by leveraging the structural properties of the RT weight, thereby extending Lemma 6 of [8]. For RT-weight distribution functions, we propose explicit constructions of FCRTCs and prove that these constructions attain the optimal redundancy in several parameter regimes, thus generalizing Lemma 8 of [8]. Furthermore, for RT-locally-two-valued binary functions, we determine the optimal redundancy in several cases, extending the corresponding result given in Lemma 5 of [8]. 4The remainder of this paper is organized as follows. Section 2 introduces the notation and recalls the basic definitions required throughout the paper. In Section 3, we develop the general theoretical framework by establishing upper and lower bounds on the optimal redundancy of FCRTCs for arbitrary functions. This section also investigates irregular RT-distance codes and derives general bounds on the minimum column length of D-RT codes. Sections 4, 5, and 6 are devoted to RT-weight functions, RT-weight distribution functions, and RT-locally-two-valued binary functions, respectively, in which the general theory is refined to obtain stronger results and explicit constructions. Finally, Section 7 concludes the paper and discusses several directions for future research. 
+
+# 2 Preliminaries 
+
+Throughout this paper, let S be a set and denote its cardinality by |S|. Let k, r, h and 
+
+t be positive integers. We denote by Fh×k 
+
+> 2
+
+the vector space of all h × k matrices over the binary field F2.This section introduces the basic concepts and notation used throughout the paper. We first recall the notions of the Rosenbloom-Tsfasman weight and distance on matrix spaces, which form the metric foundation of our work. We then introduce function-correcting RT codes together with a new family of matrix codes, called irregular RT-distance codes, that will play a central role in the development of our theoretical framework 
+
+2.1 Rosenbloom–Tsfasman distance 
+
+We begin by recalling the definitions of the Rosenbloom–Tsfasman (RT) weight and the associated RT distance over the matrix space Fh×k 
+
+> 2
+
+. These notions generalize the classical Hamming weight and Hamming distance and provide the natural metric framework for coding over parallel channels. 
+
+Definition 2.1. Let 
+
+A = ( a1, a2, . . . , ak) ∈ Fh×k 
+
+> 2
+
+,
+
+where 
+
+ai = ( a1i, a 2i, . . . , a hi )⊺ ∈ Fh×12 , i ∈ { 1, 2, . . . , k }.
+
+The Rosenbloom–Tsfasman weight (or RT-weight ) of the column vector ai is defined by 
+
+wRT (ai) = 
+
+(h − min { s − 1 | asi ̸ = 0 }, if ai̸ = 0 ,
+
+0, if ai = 0 . (2.1) 
+
+The RT distance between two column vectors ai and aj is defined by 
+
+dRT (ai, aj ) = wRT (ai − aj ).
+
+5Furthermore, the RT-weight of the matrix A is given by 
+
+wRT (A) = 
+
+> k
+
+X
+
+> i=1
+
+wRT (ai).
+
+For illustration, consider the matrix 
+
+A = 1 0 10 1 0
+
+!
+
+∈ F2×32 .
+
+Its RT-weight is 
+
+wRT (A) = 5 .
+
+On the other hand, if the entries of A are viewed as a vector in F62, its Hamming weight is equal to 3. This example clearly illustrates that the RT-weight and the Hamming weight measure different structural properties of the same object. It is worth emphasizing that the RT-weight naturally extends the classical Hamming weight. Indeed, when h = 1 in Definition 2.1, every codeword consists of a single row, and the RT-weight of any matrix A ∈ F1×k 
+
+> 2
+
+coincides exactly with its Hamming weight. Consequently, the RT metric may be viewed as a genuine generalization of the Hamming metric from vector spaces to matrix spaces, making it particularly well suited for coding problems over parallel channels. 
+
+Definition 2.2. Let Fh×k 
+
+> 2
+
+denote the vector space of all h × k matrices over F2. The 
+
+Rosenbloom–Tsfasman distance (abbreviated as the RT distance ) between two matrices 
+
+A, B ∈ Fh×k 
+
+> 2
+
+is defined by 
+
+dRT (A, B ) = wRT (A − B).
+
+To illustrate Definition 2.2, consider the matrices 
+
+A = 1 0 10 1 0
+
+!
+
+, B = 1 1 10 1 0
+
+!
+
+, C = 0 1 01 0 1
+
+!
+
+∈ F2×32 .
+
+A straightforward computation yields 
+
+dRT (A, B ) = 2 , dRT (A, C ) = 6 , dRT (B, C ) = 4 .
+
+It is well known that dRT satisfies the axioms of a metric on Fh×k 
+
+> 2
+
+. Consequently, the pair 
+
+Fh×k 
+
+> 2
+
+, d RT 
+
+
+
+forms a metric space, which provides the natural mathematical framework for studying coding problems over parallel channels. 
+
+2.2 Function-correcting RT codes and irregular RT-distance codes 
+
+Having introduced the RT metric, we now define the main coding framework that we investigate in this paper. We first introduce function-correcting RT codes (FCRTCs), 6which extend the notion of function-correcting codes to the Rosenbloom–Tsfasman metric. We then introduce a more general family of matrix codes, called irregular RT-distance codes , along with two auxiliary matrix representations: RT-distance matrices and RT-function-distance matrices. These new notions will provide the key tools for transforming the redundancy optimization problem of FCRTCs into an equivalent problem involving irregular RT-distance codes. The objective of function-correcting RT codes is to guarantee the reliable recovery of function values after transmission through parallel channels, rather than the recovery of the entire transmitted information matrix. As in the classical framework of function-correcting codes, the code construction depends on a prescribed function defined on the information space. Let f : Fh×k 
+
+> 2
+
+−→ Im( f ) be an arbitrary function. This function naturally induces an equivalence relation on the information matrices by declaring two matrices to be equivalent whenever they have the same function value. More precisely, for every A, B ∈ Fh×k 
+
+> 2
+
+, we define A ∼f B ⇐⇒ f (A) = f (B). This equivalence relation induces an equivalence class for every A ∈ Fh×k 
+
+> 2
+
+, which we denote by [A]f = {B ∈ Fh×k 
+
+> 2
+
+| f (B) = f (A)}.
+
+This means that for every A, B ∈ Fh×k 
+
+> 2
+
+,[A]f̸ = [ B]f ⇐⇒ f (A)̸ = f (B).
+
+Accordingly, unlike classical error-correcting codes, function-correcting RT codes do not aim to distinguish among all information matrices. Instead, they need only distinguish the equivalence classes induced by the function f . Consequently, after transmission through parallel channels, the decoder is only required to recover the correct function value, rather than the complete information matrix. This relaxation of the decoding requirement is precisely what enables the reduction of coding redundancy. We are now ready to formally introduce the notion of function-correcting RT codes. Next, we introduce the definition. 
+
+Definition 2.3. Suppose that the RT-distance between the transmitted codeword and the received word is at most t, where h and k are positive integers. Let 
+
+f : Fh×k 
+
+> 2
+
+−→ Im( f )
+
+be an arbitrary function. Consider a systematic encoding function 
+
+Enc : Fh×k 
+
+> 2
+
+−→ Fh×(k+r)2 ,
+
+defined by Enc (A) = ( A, p (A)) , A ∈ Fh×k 
+
+> 2
+
+, where p(A) denotes the redundancy matrix associated with A.
+
+7If, for every pair A1, A 2 ∈ Fh×k 
+
+> 2
+
+satisfying [A1]f̸ = [ A2]f , the corresponding codewords satisfy 
+
+dRT 
+
+ Enc (A1), Enc (A2) ≥ 2t + 1 ,
+
+then { Enc (A) | A ∈ Fh×k 
+
+> 2
+
+} is called a function-correcting RT code for the function f ,abbreviated as an FCRTC .
+
+Remark 2.1. When h = 1 , the RT metric reduces to the classical Hamming metric. Consequently, an FCRTC coincides with a function-correcting code in the sense of Lenz 
+
+et al. [8]. Therefore, FCRTCs constitute a genuine extension of the original function-correcting coding framework from the Hamming metric to the more general Rosenbloom– Tsfasman metric. 
+
+The decoding principle underlying Definition 2.3 is based on the maximum-likelihood decoder with respect to the RT metric. Provided that the RT-distance between the trans-mitted codeword and the received word does not exceed t, the receiver can uniquely determine the correct function value, assuming that both the encoding rule Enc (·) and the function f (·) are known. It is important to emphasize that the decoder is not required to recover the original information matrix itself. Instead, its sole objective is to identify the correct equivalence class induced by the function f , or equivalently, to recover the correct value of f (A). This distinction is precisely what enables function-correcting RT codes to achieve a smaller redundancy than classical error-correcting codes. The central objective of this paper is therefore to determine the minimum redundancy required to construct FCRTCs with a prescribed error-correction capability. The redundancy introduced by an FCRTC takes the form of an additional matrix ap-pended to the information matrix through systematic encoding. Since the number of matrix rows is fixed throughout the paper, the efficiency of an FCRTC is naturally mea-sured by the minimum number of additional columns required to guarantee the prescribed error-correction capability. This leads to the following fundamental parameter, which will be the main object of investigation in the remainder of this paper. 
+
+Definition 2.4. Let h and k be positive integers. The optimal redundancy of FCRTCs for a function f : Fh×k 
+
+> 2
+
+→ Im( f ), denoted by rfRT (h, k, t ), is defined as the smallest integer 
+
+r for which there exists a function-correcting RT code with a systematic encoding function 
+
+Enc : Fh×k 
+
+> 2
+
+−→ Fh×(k+r)2 for the function f over Fh×k 
+
+> 2
+
+.
+
+Remark 2.2. The definition is consistent with the intuition that the complexity of the target function influences the amount of redundancy required. In the extreme case where f
+
+is a constant function over Fh×k 
+
+> 2
+
+, every information matrix belongs to the same equivalence class. Consequently, no redundancy is needed to distinguish between different function values, and therefore rfRT (h, k, t ) = 0 .
+
+8Determining the exact value of rfRT (h, k, t ) is the central problem addressed in this paper. As will become apparent in the subsequent sections, this optimization problem can be reformulated in terms of a new family of matrix codes endowed with irregular RT-distance constraints. This alternative viewpoint provides a unified framework for deriving both general bounds and explicit constructions. For convenience, we introduce the following notation, which will be used throughout the remainder of the paper. For any integer a, let [a]+ ≜ max {a, 0}.
+
+For every positive integer M , let [M ] ≜ {1, 2, . . . , M }.
+
+For a matrix D, we denote by [ D]ij its ( i, j )-th entry. Moreover, NM ×M 
+
+> 0
+
+denotes the set of all M × M matrices with nonnegative integer entries. The systematic structure of FCRTCs naturally separates each codeword into an in-formation part and a redundancy part. Consequently, the problem of determining the optimal redundancy can be reformulated as constructing a family of redundancy matri-ces that satisfy suitable pairwise RT-distance constraints. This observation motivates the introduction of the following class of matrix codes, which plays a central role throughout the paper. 
+
+Definition 2.5. Let h, M be positive integers and let 
+
+D ∈ NM ×M
+
+> 0
+
+be a matrix satisfying 
+
+[D]ii = 0 , i ∈ [M ].
+
+Let 
+
+P = {P1, P 2, . . . , P M } ⊆ Fh×r
+
+> 2
+
+be a code of cardinality M .If there exists an ordering of the codewords of P such that 
+
+dRT (Pi, P j ) ≥ [D]ij , ∀ i, j ∈ [M ],
+
+then P is called an irregular RT-distance code , or simply a D-RT code .Furthermore, for a given matrix D and a fixed integer h, the smallest integer r for which there exists a D-RT code over Fh×r 
+
+> 2
+
+is called the smallest column length of D-RT codes and is denoted by 
+
+N hRT (D).
+
+9Remark 2.3. Unlike classical codes, whose distance requirements are uniform for every pair of distinct codewords, a D-RT code allows different pairs of codewords to satisfy dif-ferent prescribed RT-distance constraints. The matrix D therefore completely specifies the geometric distance requirements imposed on the code and provides considerable flexibility in the design of matrix codes. As will be shown in the next section, this generalized framework is particularly well suited for characterizing the optimal redundancy of FCRTCs. 
+
+The next step is to determine how the distance requirements imposed by a function can be encoded in a matrix of prescribed pairwise RT distances. This motivates the introduction of RT-distance matrices and RT-function-distance matrices. 
+
+Definition 2.6. Let f : Fh×k 
+
+> 2
+
+→ Im( f ) be a function and A1, A 2, . . . , A M ∈ Fh×k 
+
+> 2
+
+be M
+
+matrices over Fh×k 
+
+> 2
+
+, where h, k, M are positive integers. We define the RT-distance matrix 
+
+DfRT (h, k, t, A 1, A 2, . . . , A M ) for the function f as a M × M matrix with entries 
+
+[DfRT (h, k, t, A 1, A 2, . . . , A M )] ij =
+
+([2 t + 1 − dRT (Ai, A j )] +, if f (Ai)̸ = f (Aj ),
+
+0, otherwise . (2.2) For a given function, FCRTCs adopt the system encoding method; thus, we can use RT-distance matrices to connect the optimal redundancy of FCRTCs with the smallest column length of D-RT codes. 
+
+Definition 2.7. Let f : Fh×k 
+
+> 2
+
+→ Im( f ) be a function. For any z ∈ Im( f ), let f −1(z) be the set of preimages of z, i.e. , f −1(z) = { A ∈ Fh×k 
+
+> 2
+
+| f (A) = z }. For ∀z1, z 2 ∈ Im( f ),
+
+define the RT-function-distance between function values dfRT (z1, z 2) as follows. 
+
+dfRT (z1, z 2) = min { dRT (A, B ) | A ∈ f −1(z1), B ∈ f −1(z2) },
+
+specifically, when z1 = z2 ∈ Im( f ), we have dfRT (z1, z 2) = 0 .
+
+Using Definition 2.7, we give the definition of the RT-function-distance matrix for a function f as follows. 
+
+Definition 2.8. Let f : Fh×k 
+
+> 2
+
+→ Im( f ) be a function, where |Im( f )| = E and Im( f ) = 
+
+{f1, . . . , f E }. The RT-function-distance matrix for the function f is denoted by an E × E
+
+matrix DfRT (h, k, t, f 1, . . . , f E ), whose entries are defined as follows. 
+
+[DfRT (h, k, t, f 1, . . . , f E )] ij =
+
+([2 t + 1 − dfRT (fi, f j )] +, if i̸ = j, 
+
+0, otherwise . (2.3) 
+
+# 3 Bounds of FCRTCs for General Functions 
+
+In this section, we investigate the fundamental problem of determining the optimal redundancy of function-correcting RT codes associated with an arbitrary function 
+
+f : Fh×k 
+
+> 2
+
+−→ Im( f ),
+
+10 where 
+
+E = |Im( f )|.
+
+Our approach proceeds in two successive steps. We first establish an exact correspon-dence between the optimal redundancy rfRT (h, k, t ) of FCRTCs and the smallest column length of appropriately constructed irregular RT-distance codes. This correspondence transforms the redundancy optimization problem into a purely geometric problem on ma-trix codes with prescribed pairwise RT-distance constraints. Building upon this characterization, we then derive general upper and lower bounds on the smallest column length N hRT (D) of D-RT codes. These results immediately translate into corresponding bounds on the optimal redundancy rfRT (h, k, t ) for arbitrary functions. Consequently, this section provides the general theoretical framework upon which all sub-sequent developments of the paper are based. 
+
+3.1 Connections between FCRTCs and irregular RT-distance codes 
+
+The main objective of this subsection is to establish a precise connection between function-correcting RT codes and irregular RT-distance codes. This connection consti-tutes the cornerstone of our approach, since it enables the optimal redundancy problem for FCRTCs to be reformulated as a coding-theoretic problem involving matrix codes with prescribed pairwise RT-distance constraints. The key observation is that FCRTCs employ systematic encoding. Consequently, ev-ery codeword naturally decomposes into an information matrix and a redundancy matrix, while the information part is completely determined by the transmitted message. There-fore, the distance constraints required for successful function correction can be entirely transferred to the redundancy matrices. To formalize this idea, we make use of the RT-distance matrices and RT-function-distance matrices introduced in the previous section. These matrices encode the RT-distance requirements imposed by the function and enable us to construct suitable D-RT codes. As a consequence, we establish exact relationships between the optimal redundancy 
+
+rfRT (h, k, t ) and the smallest column length N hRT (D) of the corresponding D-RT codes. The following theorem establishes the fundamental link between function-correcting RT codes and irregular RT-distance codes. Its proof relies on the systematic structure of FCRTCs. More precisely, we show that the RT-distance constraints required for successful function correction can be transferred exactly to the redundancy matrices, thereby estab-lishing a one-to-one correspondence between FCRTCs and suitable D-RT codes. It shows that the problem of determining the optimal redundancy of an FCRTC is exactly equiv-alent to determining the smallest column length of an appropriately constructed D-RT code. Consequently, the redundancy optimization problem is transformed into a geometric problem involving prescribed pairwise RT-distance constraints. 11 Theorem 3.1. Let 
+
+f : Fh×k 
+
+> 2
+
+→ Im( f )
+
+be an arbitrary function, and let 
+
+{A1, A 2, . . . , A 2hk } = Fh×k 
+
+> 2
+
+.
+
+Then 
+
+rfRT (h, k, t ) = N hRT 
+
+
+
+DfRT (h, k, t, A 1, A 2, . . . , A 2hk )
+
+
+
+. (3.1) 
+
+Proof. For simplicity, let 
+
+r1 = rfRT (h, k, t ), r2 = N hRT 
+
+
+
+DfRT (h, k, t, A 1, A 2, . . . , A 2hk )
+
+
+
+.
+
+We prove the theorem by establishing the two inequalities r1 ≤ r2 and r1 ≥ r2.We first prove that r1 ≤ r2. Let 
+
+{P1, P 2, . . . , P 2hk }
+
+be a DfRT (h, k, t, A 1, A 2, . . . , A 2hk )-RT code over Fh×r2 
+
+> 2
+
+. By Definition 2.5, 
+
+dRT (Pi, P j ) ≥ DfRT (h, k, t, A 1, A 2, . . . , A 2hk ) 
+
+> ij
+
+, ∀ i, j ∈ [2 hk ].
+
+Define the systematic encoding function 
+
+Enc : Fh×k 
+
+> 2
+
+−→ Fh×(k+r2)2 , Ai 7 −→ (Ai, P i).
+
+Consider two matrices Ai, A j ∈ Fh×k 
+
+> 2
+
+such that f (Ai)̸ = f (Aj ). Since the encoding is systematic, 
+
+dRT (Enc (Ai), Enc (Aj )) = dRT (Ai, A j ) + dRT (Pi, P j ).
+
+By Definition 2.6, [ DfRT (h, k, t, A 1, A 2, . . . , A 2hk )] ij ≥ 2t+1 −dRT (Ai, A j ), and therefore 
+
+dRT (Enc (Ai), Enc (Aj )) ≥ dRT (Ai, A j ) + 2 t + 1 − dRT (Ai, A j )= 2 t + 1 .
+
+Hence, { Enc (Ai) | Ai ∈ Fh×k 
+
+> 2
+
+} is an FCRTC. Consequently, r1 ≤ r2.
+
+We now prove the converse inequality. Assume, for contradiction, that r1 < r 2.Let 
+
+Enc : Fh×k 
+
+> 2
+
+−→ Fh×(k+r1)2 , Ai 7 −→ (Ai, P i),
+
+be an FCRTC. Since r1 < r 2, the collection 
+
+{P1, P 2, . . . , P 2hk }
+
+12 cannot form a DfRT (h, k, t, A 1, A 2, . . . , A 2hk )-RT code. Hence there exist i0̸ = j0 such that 
+
+f (Ai0 )̸ = f (Aj0 )and 
+
+dRT (Pi0 , P j0 ) < 2t + 1 − dRT (Ai0 , A j0 ).
+
+Therefore, 
+
+dRT (Enc (Ai0 ), Enc (Aj0 )) = dRT (Ai0 , A j0 ) + dRT (Pi0 , P j0 )
+
+< 2t + 1 ,
+
+which contradicts Definition 2.3. Thus, 
+
+r1 ≥ r2.
+
+Combining the two inequalities yields 
+
+rfRT (h, k, t ) = N hRT 
+
+
+
+DfRT (h, k, t, A 1, A 2, . . . , A 2hk )
+
+
+
+,
+
+thereby completing the proof. Although Theorem 3.1 provides an exact characterization of the optimal redundancy, its direct application may become computationally prohibitive when h and k are large, since the associated RT-distance matrix involves all 2 hk information matrices. To overcome this difficulty, we derive the following corollary, which provides a general lower bound on rfRT (h, k, t ) by considering only an arbitrary subset of information matrices. This considerably reduces the computational complexity while still yielding meaningful bounds on the optimal redundancy. 
+
+Corollary 3.1. Let 
+
+A1, A 2, . . . , A M ∈ Fh×k
+
+> 2
+
+be distinct matrices. Then, for every function f : Fh×k 
+
+> 2
+
+→ Im( f ), the optimal redundancy of FCRTCs satisfies 
+
+rfRT (h, k, t ) ≥ N hRT 
+
+
+
+DfRT (h, k, t, A 1, A 2, . . . , A M )
+
+
+
+.
+
+Furthermore, if 
+
+|Im( f )| ≥ 2k(h−1) + 1 ,
+
+then 
+
+rfRT (h, k, t ) ≥
+
+ 2th
+
+
+
+.
+
+13 Proof. For simplicity, let 
+
+r1 = rfRT (h, k, t ), r2 = N hRT 
+
+
+
+DfRT (h, k, t, A 1, A 2, . . . , A M )
+
+
+
+.
+
+By Theorem 3.1, 
+
+r1 = N hRT 
+
+
+
+DfRT (h, k, t, A 1, A 2, . . . , A 2hk )
+
+
+
+,
+
+where 
+
+Fh×k 
+
+> 2
+
+= {A1, A 2, . . . , A 2hk }.
+
+Let 
+
+{P1, P 2, . . . , P 2hk }
+
+be a DfRT (h, k, t, A 1, A 2, . . . , A 2hk )-RT code over Fh×r1 
+
+> 2
+
+. By Definition 2.5, 
+
+dRT (Pi, P j ) ≥ [DfRT (h, k, t, A 1, A 2, . . . , A 2hk )] ij , ∀ i, j ∈ [2 hk ].
+
+Since 
+
+{A1, A 2, . . . , A M } ⊆ Fh×k 
+
+> 2
+
+,
+
+the matrix 
+
+DfRT (h, k, t, A 1, A 2, . . . , A M )is a principal submatrix of 
+
+DfRT (h, k, t, A 1, A 2, . . . , A 2hk ).
+
+Consequently, 
+
+{P1, P 2, . . . , P M }
+
+forms a DfRT (h, k, t, A 1, A 2, . . . , A M )-RT code over Fh×r1 
+
+> 2
+
+. Therefore, 
+
+rfRT (h, k, t ) ≥ N hRT 
+
+
+
+DfRT (h, k, t, A 1, A 2, . . . , A M )
+
+
+
+.
+
+We now prove the second assertion. Assume that 
+
+|Im( f )| ≥ 2(h−1) k + 1 .
+
+We first claim that there exist two matrices 
+
+A1, A 2 ∈ Fh×k
+
+> 2
+
+such that 
+
+dRT (A1, A 2) = 1 and 
+
+f (A1)̸ = f (A2).
+
+14 Suppose, to the contrary, that 
+
+f (A1) = f (A2)for every pair of matrices satisfying 
+
+dRT (A1, A 2) = 1 .
+
+Define 
+
+S =
+
+n
+
+A ∈ Fh×k 
+
+> 2
+
+the last row of A is (0 , 0, . . . , 0) 
+
+o
+
+.
+
+For every B ∈ S, let 
+
+SB =
+
+n
+
+A ∈ Fh×k 
+
+> 2
+
+the first ( h − 1) rows of A coincide with those of B
+
+o
+
+,
+
+and 
+
+BRT (B, 1) = 
+
+n
+
+A ∈ Fh×k 
+
+> 2
+
+dRT (A, B ) = 1 
+
+o
+
+.
+
+Clearly, 
+
+Fh×k 
+
+> 2
+
+= [
+
+> B∈S
+
+SB .
+
+Fix an arbitrary matrix B0 ∈ S. For every 
+
+B1 ∈ BRT (B0, 1) ,
+
+our assumption implies that 
+
+f (B1) = f (B0).
+
+Similarly, for every 
+
+B2 ∈ BRT (B1, 1) ,
+
+we obtain 
+
+f (B2) = f (B1) = f (B0).
+
+Iterating this argument, every matrix belonging to SB0 has the same function value as 
+
+B0. Consequently, each set SB corresponds to a single function value. Since 
+
+|S| = 2 (h−1) k,
+
+it follows that 
+
+|Im( f )| ≤ 2(h−1) k,
+
+contradicting the hypothesis. Therefore, there exist A1, A 2 ∈ Fh×k 
+
+> 2
+
+such that 
+
+dRT (A1, A 2) = 1 and 
+
+f (A1)̸ = f (A2).
+
+15 By the first part of the proof, 
+
+rfRT (h, k, t ) ≥ N hRT 
+
+
+
+DfRT (h, k, t, A 1, A 2)
+
+
+
+,
+
+where 
+
+DfRT (h, k, t, A 1, A 2) = 0 2t
+
+2t 0
+
+!
+
+.
+
+Consider the code P = {P1, P 2} over Fh×⌈ 2th ⌉ 
+
+> 2
+
+, where 
+
+P1 =
+
+
+
+0 0 · · · 00 0 · · · 0... ... . . . ...0 0 · · · 0
+
+ , P2 =
+
+
+
+1 1 · · · 11 1 · · · 1... ... . . . ...1 1 · · · 1
+
+ .
+
+Since 
+
+dRT (P1, P 2) = h
+
+ 2th
+
+
+
+≥ 2t, 
+
+Definition 2.5 implies that P is a DfRT (h, k, t, A 1, A 2)-RT code. Hence, 
+
+N hRT 
+
+
+
+DfRT (h, k, t, A 1, A 2)
+
+
+
+≤
+
+ 2th
+
+
+
+.
+
+Conversely, let 
+
+P′ = {P ′
+
+> 1
+
+, P ′
+
+> 2
+
+}
+
+be any DfRT (h, k, t, A 1, A 2)-RT code over Fh×m 
+
+> 2
+
+. By Definition 2.5, dRT (P ′
+
+> 1
+
+, P ′
+
+> 2
+
+) ≥ 2t. On the other hand, by Definition 2.1, dRT (P ′
+
+> 1
+
+, P ′
+
+> 2
+
+) ≤ hm. Therefore, m ≥ 2th . Since m is an integer, m ≥  2th
+
+ . Consequently, N hRT 
+
+
+
+DfRT (h, k, t, A 1, A 2)
+
+
+
+=  2th
+
+ .
+
+Finally, rfRT (h, k, t ) ≥  2th
+
+ , which completes the proof. 
+
+Remark 3.1. Corollary 3.1 holds for arbitrary positive integers h and k. In the particular case where h = 1 , the RT metric coincides with the classical Hamming metric. Conse-quently, Corollary 3.1 reduces exactly to Corollary 1 of [8]. This further illustrates that the present framework constitutes a natural extension of the classical theory of function-correcting codes to the Rosenbloom–Tsfasman metric. 
+
+The lower bound established in Corollary 3.1 is derived from the RT-distance matrix associated with the information matrices. We now turn to the complementary problem of deriving a general upper bound on the optimal redundancy. Instead of considering all information matrices individually, we exploit the RT-function-distance matrix, which cap-tures only the distance requirements between distinct function values. This significantly reduces the size of the underlying matrix and yields a general upper bound for rfRT (h, k, t ). 16 Theorem 3.2. Let 
+
+f : Fh×k 
+
+> 2
+
+−→ Im( f )
+
+be a function. Then 
+
+rfRT (h, k, t ) ≤ N hRT 
+
+
+
+DfRT (h, k, t, f 1, . . . , f E )
+
+
+
+, (3.2) 
+
+where E = |Im( f )| and Im( f ) = {f1, f 2, . . . , f E }.
+
+Proof. Let Im( f ) = {f1, f 2, . . . , f E }, E = |Im( f )|.
+
+For simplicity, let 
+
+r1 = rfRT (h, k, t ), r2 = N hRT 
+
+
+
+DfRT (h, k, t, f 1, . . . , f E )
+
+
+
+.
+
+Let 
+
+{P1, P 2, . . . , P E }
+
+be a DfRT (h, k, t, f 1, . . . , f E )-RT code over Fh×r2 
+
+> 2
+
+. By Definition 2.5, 
+
+dRT (Pi, P j ) ≥ [DfRT (h, k, t, f 1, . . . , f E )] ij , ∀ i, j ∈ [E].
+
+Moreover, by Definition 2.7, 
+
+dRT (Pi, P j ) ≥ 2t + 1 − dRT (fi, f j ), ∀ i̸ = j. 
+
+We now define a systematic encoding function 
+
+Enc : Fh×k 
+
+> 2
+
+−→ Fh×(k+r2)2 ,
+
+by 
+
+Enc (A) = ( A, P i),
+
+where 
+
+f (A) = fi.
+
+Consider arbitrary matrices 
+
+A, B ∈ Fh×k 
+
+> 2
+
+,
+
+and suppose that 
+
+f (A) = fi, f (B) = fj .
+
+If fi̸ = fj , then 
+
+dRT (Enc (A), Enc (B)) = dRT (A, B ) + dRT (Pi, P j )
+
+≥ dRT (fi, f j ) + 2 t + 1 − dRT (fi, f j )= 2 t + 1 ,
+
+17 where the first inequality follows from Definition 2.7. Hence, Definition 2.3 implies that { Enc (A) | A ∈ Fh×k 
+
+> 2
+
+} is an FCRTC over Fh×(k+r2)2 .Therefore, r1 ≤ r2, that is, rfRT (h, k, t ) ≤ N hRT 
+
+
+
+DfRT (h, k, t, f 1, . . . , f E )
+
+
+
+. This completes the proof. The previous results provide complementary estimates for the optimal redundancy of FCRTCs: Corollary 3.1 establishes a general lower bound, whereas Theorem 3.2 provides a corresponding upper bound. A natural question is therefore to determine when these two bounds coincide. Recall that the entries of an RT-function-distance matrix are defined in terms of the RT distances between suitable information matrices. Consequently, whenever the RT-function-distance matrix can be realized by a family of representative information matrices, the lower and upper bounds become identical. The following corollary identifies such a situation and provides an exact characterization of the optimal redundancy. 
+
+Corollary 3.2. Let 
+
+f : Fh×k 
+
+> 2
+
+→ Im( f )
+
+be a function and E = |Im( f )|. Suppose that there exists a family of representative infor-mation matrices 
+
+A1, A 2, . . . , A E
+
+such that 
+
+{f (A1), f (A2), . . . , f (AE )} = Im( f )
+
+and 
+
+DfRT (h, k, t, f 1, . . . , f E ) = DfRT (h, k, t, A 1, . . . , A E ).
+
+Then 
+
+rfRT (h, k, t ) = N hRT 
+
+
+
+DfRT (h, k, t, f 1, . . . , f E )
+
+
+
+.
+
+Proof. By Corollary 3.1, 
+
+rfRT (h, k, t ) ≥ N hRT 
+
+
+
+DfRT (h, k, t, A 1, . . . , A E )
+
+
+
+.
+
+Since 
+
+DfRT (h, k, t, A 1, . . . , A E ) = DfRT (h, k, t, f 1, . . . , f E ),
+
+we obtain 
+
+rfRT (h, k, t ) ≥ N hRT 
+
+
+
+DfRT (h, k, t, f 1, . . . , f E )
+
+
+
+.
+
+On the other hand, Theorem 3.2 yields the reverse inequality. Therefore, 
+
+rfRT (h, k, t ) = N hRT 
+
+
+
+DfRT (h, k, t, f 1, . . . , f E )
+
+
+
+,
+
+which completes the proof. 18 3.2 Bounds on N hRT (D) for Certain Classes of Matrices 
+
+The results established in the previous subsection reduce the problem of determining the optimal redundancy of FCRTCs to the problem of computing the smallest column length 
+
+N hRT (D) of suitably defined D-RT codes. Consequently, deriving bounds on N hRT (D)immediately yields corresponding bounds on the optimal redundancy rfRT (h, k, t ) for ar-bitrary functions. Motivated by this observation, we now investigate upper and lower bounds on N hRT (D)for several classes of matrices D. These results constitute the main technical ingredients for the general redundancy bounds established later in this section. We begin by recalling a useful result of Rosenbloom and Tsfasman [20], which will play a key role in deriving our subsequent lower bounds. 
+
+Lemma 3.1. ([20]) Let 
+
+X = ( x1, x 2, . . . , x h)⊺, Y = ( y1, y 2, . . . , y h)⊺ ∈ Fh 
+
+> 2
+
+,
+
+and let K be a positive constant. Define 
+
+d(X, Y ) = h − max { i | x1 = y1, x 2 = y2, . . . , x i = yi},
+
+and 
+
+F (t) = X 
+
+> X,Y ∈Fh
+> 2
+
+d(X, Y )tX tY ,
+
+where tX is a nonnegative real number for every X ∈ Fh 
+
+> 2
+
+satisfying 
+
+X
+
+> X∈Fh
+> 2
+
+tX = K. 
+
+Then the maximum value of F (t) is 
+
+K2 
+
+h + 2 −h − 1
+
+
+
+.
+
+Observe that the distance d(X, Y ) introduced in Lemma 3.1 coincides with the RT distance defined in Definition 2.2. This observation enables us to exploit the extremal property established in Lemma 3.1 to derive a general lower bound on the smallest column length of D-RT codes. The resulting estimate holds for every nonnegative symmetric matrix. 
+
+Lemma 3.2. Let h and M be positive integers. Let 
+
+D ∈ NM ×M
+
+> 0
+
+be a nonnegative symmetric matrix satisfying 
+
+[D]ii = 0 , ∀ i ∈ [M ].
+
+19 Then 
+
+N hRT (D) ≥ 2h+1 
+
+M 2 (h − 1)2 h + 1  X
+
+> i,j i<j
+
+[D]ij .
+
+Proof. Let 
+
+r = N hRT (D),
+
+and let 
+
+C = {P1, P 2, . . . , P M } ⊆ Fh×r
+
+> 2
+
+be a D-RT code. By Definition 2.5, 
+
+dRT (Pi, P j ) ≥ [D]ij , ∀ i, j ∈ [M ].
+
+For each column position j ∈ [r] and every vector X ∈ Fh×12 , let tj (X) denote the number of codewords in C whose jth column is equal to X. Since the RT weight is additive over the columns, we have 
+
+X
+
+> i,j
+
+dRT (Pi, P j ) = 
+
+> r
+
+X
+
+> j=1
+
+X 
+
+> X,Y ∈Fh
+> 2
+
+dRT (X, Y )tj (X)tj (Y ).
+
+Moreover, for every j ∈ [r], X
+
+> X∈Fh
+> 2
+
+tj (X) = M. 
+
+Therefore, Lemma 3.1 implies that 
+
+X 
+
+> X,Y ∈Fh
+> 2
+
+dRT (X, Y )tj (X)tj (Y ) ≤ M 2 
+
+h + 2 −h − 1
+
+
+
+.
+
+Summing over all column positions yields 
+
+X
+
+> i,j
+
+dRT (Pi, P j ) ≤ rM 2 
+
+h + 2 −h − 1
+
+
+
+= rM 2 2−h (h − 1)2 h + 1 .
+
+On the other hand, since 
+
+dRT (Pi, P j ) ≥ [D]ij ,
+
+we obtain X
+
+> i,j
+
+[D]ij ≤ X
+
+> i,j
+
+dRT (Pi, P j ) ≤ rM 2 2−h (h − 1)2 h + 1 .
+
+Hence, 
+
+r ≥ 2h
+
+M 2 (h − 1)2 h + 1  X
+
+> i,j
+
+[D]ij .
+
+20 Finally, since D is symmetric and satisfies [ D]ii = 0, 
+
+X
+
+> i,j
+
+[D]ij = 2 X
+
+> i<j
+
+[D]ij .
+
+Consequently, 
+
+N hRT (D) = r ≥ 2h+1 
+
+M 2 (h − 1)2 h + 1  X
+
+> i<j
+
+[D]ij ,
+
+which completes the proof. 
+
+Remark 3.2. Lemma 3.2 extends the corresponding lower bound established for function-correcting codes under the Hamming metric. Indeed, when h = 1 and M is odd, the RT metric coincides with the Hamming metric, and Lemma 3.2 reduces exactly to Lemma 1 of [8]. 
+
+Lemma 3.2 provides a general lower bound on the smallest column length N hRT (D) for arbitrary nonnegative symmetric matrices. We now turn to the complementary problem of deriving an upper bound. To this end, we first introduce the notion of an RT-distance ball and its volume, which will play a fundamental role in the subsequent Gilbert–Varshamov-type argument. For A ∈ Fh×k 
+
+> 2
+
+, the RT-distance ball centered at A with radius d is defined by 
+
+BRT (h, k, d, A ) = 
+
+n
+
+B ∈ Fh×k 
+
+> 2
+
+dRT (A, B ) ≤ d
+
+o
+
+.
+
+The volume of the RT-distance ball is denoted by VRT (h, k, d ) and is given by 
+
+VRT (h, k, d ) = |BRT (h, k, d, A )| =
+
+n
+
+B ∈ Fh×k 
+
+> 2
+
+dRT (A, B ) ≤ d
+
+o
+
+.
+
+The classical Gilbert–Varshamov construction can be naturally extended to irregular RT-distance codes. This leads to the following general upper bound on the smallest column length N hRT (D). This dependence is reflected by the appearance of an arbitrary permutation in the following bound. 
+
+Lemma 3.3. Let h and M be positive integers, and let 
+
+D ∈ NM ×M
+
+> 0
+
+be a nonnegative symmetric matrix. Then, for every permutation 
+
+π : [ M ] → [M ],
+
+we have 
+
+N hRT (D) ≤ min 
+
+> r∈N
+
+(
+
+r : 2 hr > max  
+
+> j∈[M]
+> j−1
+
+X
+
+> i=1
+
+VRT 
+
+ h, r, [D]π(i)π(j) − 1)
+
+.
+
+21 Proof. By Definition 2.5, the ordering of the codewords is arbitrary. Hence, without loss of generality, we may assume that the permutation π is the identity map. Let 
+
+D ∈ NM ×M
+
+> 0
+
+be a nonnegative symmetric matrix. We construct the desired D-RT code sequentially. Choose an arbitrary matrix 
+
+P1 ∈ Fh×r 
+
+> 2
+
+.
+
+To select the second codeword, all matrices contained in the RT ball 
+
+BRT (h, r, [D]12 − 1, P 1)must be avoided. Since this ball contains 
+
+VRT (h, r, [D]12 − 1) matrices, whenever 2hr > V RT (h, r, [D]12 − 1) ,
+
+there exists a matrix 
+
+P2 ∈ Fh×r
+
+> 2
+
+such that 
+
+dRT (P1, P 2) ≥ [D]12 .
+
+Suppose next that P1, . . . , P j−1 have already been chosen so that 
+
+dRT (Pi, P ℓ) ≥ [D]iℓ , 1 ≤ i < ℓ ≤ j − 1.
+
+To choose Pj , it suffices to avoid the union of the RT balls 
+
+BRT (h, r, [D]ij − 1, P i) , 1 ≤ i ≤ j − 1.
+
+Therefore, if 2hr >
+
+> j−1
+
+X
+
+> i=1
+
+VRT (h, r, [D]ij − 1) ,
+
+then at least one matrix remains available, and we can choose 
+
+Pj ∈ Fh×r
+
+> 2
+
+such that 
+
+dRT (Pi, P j ) ≥ [D]ij , 1 ≤ i ≤ j − 1.
+
+Consequently, if 2hr > max  
+
+> j∈[M]
+> j−1
+
+X
+
+> i=1
+
+VRT 
+
+ h, r, [D]π(i)π(j) − 1 ,
+
+22 the above greedy procedure successfully constructs 
+
+{P1, P 2, . . . , P M },
+
+which forms a D-RT code over Fh×r 
+
+> 2
+
+.Hence, 
+
+N hRT (D) ≤ min 
+
+> r∈N
+
+(
+
+r : 2 hr > max  
+
+> j∈[M]
+> j−1
+
+X
+
+> i=1
+
+VRT 
+
+ h, r, [D]π(i)π(j) − 1)
+
+,
+
+which completes the proof. Since both RT-distance matrices and RT-function-distance matrices are, by Defini-tions 2.6 and 2.8, nonnegative symmetric matrices, the general bounds established in Lem-mas 3.2 and 3.3 apply directly to these matrices. Combined with the exact relationships derived in Subsection 3.1, these results immediately translate into general lower and upper bounds on the optimal redundancy rfRT (h, k, t ) for an arbitrary function f : Fh×k 
+
+> 2
+
+→ Im( f ). The resulting estimates constitute the main theoretical tools for analyzing the particular classes of functions investigated in the subsequent sections. 
+
+# 4 Bounds of FCRTCs for RT-Weight Functions 
+
+In the previous section, we established general lower and upper bounds on the optimal redundancy of function-correcting RT codes for arbitrary functions. We now specialize these results to the RT-weight function, whose particular algebraic structure allows sig-nificantly sharper estimates to be derived. Throughout this section, let f = wRT denote the RT-weight function over Fh×k 
+
+> 2
+
+. By Definition 2.1, Im( f ) = {0, 1, . . . , hk }, and therefore |Im( f )| = hk + 1 . For convenience, we set E = hk + 1 .
+
+Our objective is to exploit the structural properties of the RT-weight function to refine the general bounds established in Section 3 and obtain substantially tighter estimates of the optimal redundancy of FCRTCs. To establish the main results of this section, we first recall the shifted modulo operator introduced in [8]. For positive integers a and b, it is defined by 
+
+a smod b ≜ (( a − 1) mod b) + 1 ∈ { 1, 2, . . . , b }. (4.1) For example, 3 smod 3 = 3 , 5 smod 3 = 2 .
+
+Theorem 4.1. Let 
+
+f : Fh×k 
+
+> 2
+
+−→ Im( f )23 be the RT-weight function defined by 
+
+f (A) = wRT (A), A ∈ Fh×k 
+
+> 2
+
+.
+
+Then 
+
+N hRT (D1) ≤ rfRT (h, k, t ) ≤ N hRT (D2),
+
+where 
+
+D1, D 2 ∈ NE×E 
+
+> 0
+
+,
+
+and, for every i, j ∈ { 0, 1, . . . , hk },
+
+[D1](i+1)( j+1) =
+
+
+
+[2 t + 1 − | i − j| − (min {i, j } mod h)] + , i̸ = j, 
+
+0, i = j, 
+
+and 
+
+[D2](i+1)( j+1) =
+
+
+
+[2 t + 1 − | i − j|]+ , i̸ = j, 
+
+0, i = j. 
+
+Remark 4.1. Theorem 4.1 replaces the abstract matrices in the general bounds of Sec-tion 3 with two explicit matrices that depend only on the RT weights. Consequently, estimating the optimal redundancy for the RT-weight function is reduced to determining the smallest column lengths of the explicitly defined D1-RT and D2-RT codes. Proof. Let E = hk + 1 , and write Im( f ) = {f1, f 2, . . . , f E }, where fi = i − 1, i ∈ [E].
+
+We first establish the upper bound. Recall that dRT (fi, f j ) = min {dRT (A, B ) | wRT (A) = fi, w RT (B) = fj } .
+
+Let A, B ∈ Fh×k 
+
+> 2
+
+satisfy wRT (A) = fi = i − 1, w RT (B) = fj = j − 1. Since the RT distance satisfies dRT (A, B ) ≥ | wRT (A) − wRT (B)|, we obtain dRT (A, B ) ≥ | i − j|. Taking the minimum over all such pairs ( A, B ) yields dRT (fi, f j ) ≥ | i − j|.
+
+Therefore, by Definition 2.8, [ DfRT (h, k, t, f 1, . . . , f E )] ij ≤ [D2]ij , ∀ i, j ∈ [E].
+
+Now let P = {P1, P 2, . . . , P E } be a D2-RT code over Fh×N hRT (D2)2 . By Definition 2.5, we may assume that dRT (Pi, P j ) ≥ [D2]ij , ∀ i, j ∈ [E]. Consequently, 
+
+dRT (Pi, P j ) ≥ [DfRT (h, k, t, f 1, . . . , f E )] ij ,
+
+which shows that P is also a DfRT (h, k, t, f 1, . . . , f E )-RT code . Hence, 
+
+N hRT 
+
+
+
+DfRT (h, k, t, f 1, . . . , f E )
+
+
+
+≤ N hRT (D2).
+
+Finally, Theorem 3.2 yields rfRT (h, k, t ) ≤ N hRT 
+
+
+
+DfRT (h, k, t, f 1, . . . , f E )
+
+
+
+≤ N hRT (D2).
+
+The RT weight satisfies the reverse triangle inequality |wRT (A)−wRT (B)| ≤ dRT (A, B ),
+
+which immediately implies that dRT (A, B ) ≥ | wRT (A) − wRT (B)|.
+
+24 We now establish the lower bound by constructing an explicit family of representative information matrices. More precisely, we select one matrix for each possible RT weight and then apply Corollary 3.1. This construction enables us to derive an explicit lower bound through the associated RT-distance matrix. Let 
+
+A0 = 0 h×k
+
+be the zero matrix in Fh×k 
+
+> 2
+
+. For 1 ≤ i ≤ hk, 
+
+define 
+
+Ai =
+
+ ih
+
+−1
+
+z }| {
+
+1 · · · 1 0 0 · · · 00 · · · 0 0 0 · · · 0... ... ... . . . ...0 · · · 0 1 0 · · · 0... ... ... . . . ...0 · · · 0 0 0 · · · 0
+
+
+
+∈ Fh×k 
+
+> 2
+
+,
+
+where the unique nonzero entry in the ( h − (i smod h) + 1)-th row of the  ih
+
+-th column is equal to 1. By construction, 
+
+wRT (Ai) = i, 0 ≤ i ≤ hk. 
+
+Hence, 
+
+{wRT (A0), w RT (A1), . . . , w RT (Ahk )} = Im( f ).
+
+Therefore, Corollary 3.1 implies that 
+
+rfRT (h, k, t ) ≥ N hRT 
+
+
+
+DfRT (h, k, t, A 0, A 1, . . . , A hk )
+
+
+
+.
+
+To determine the entries of the corresponding RT-distance matrix, let i, j ∈ Im( f ) = 
+
+{0, 1, . . . , kh } with i̸ = j. Write 
+
+i = mh + l, j = ah + b, 
+
+where 0 ≤ l, b ≤ h − 1.
+
+Without loss of generality, assume that i > j .The proof naturally splits into the following five cases, according to the relative values of l and b.25 Case 1 l = b = 0 Case 2 l = 0 , b ̸ = 0 Case 3 l̸ = 0 , b = 0 Case 4 l = b̸ = 0 Case 5 l̸ = b, l ̸ = 0 , b ̸ = 0 Next, we will analyze the value of dRT (Ai, A j ) in each case. 
+
+Case 1. If l = b = 0, then m > a ,  ih
+
+ = m,  jh
+
+ = a, h − (i smod h) + 1 = 1, 
+
+h−(j smod h)+1 = 1, thus Ai =
+
+
+
+> m
+
+z }| { 
+
+1 · · · 1 0 0 · · · 00 · · · 0 0 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 0 0 · · · 0
+
+
+
+, A j =
+
+
+
+> a
+
+z }| { 
+
+1 · · · 1 0 0 · · · 00 · · · 0 0 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 0 0 · · · 0
+
+
+
+,
+
+dRT (Ai, A j ) = ( m − a)h = i − j + (min { i, j } mod h). 
+
+Case 2. If l = 0 , b ̸ = 0, then m > a , similarly, Ai =
+
+
+
+> m
+
+z }| { 
+
+1 · · · 1 0 0 · · · 00 · · · 0 0 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 0 0 · · · 0
+
+
+
+, and 
+
+ jh
+
+ = a + 1, h − (j smod h) + 1 = h − b + 1, thus Aj =
+
+
+
+> a
+
+z }| { 
+
+1 · · · 1 0 0 · · · 00 · · · 0 0 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 1 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 0 0 · · · 0
+
+
+
+.
+
+dRT (Ai, A j ) = ( m − a)h = i − j + b = i − j + (min { i, j } mod h).
+
+Case 3. If l̸ = 0 , b = 0, then m ≥ a.  ih
+
+ = m + 1, h − (i smod h) + 1 = h − l + 1, 
+
+Ai =
+
+
+
+> m
+
+z }| { 
+
+1 · · · 1 0 0 · · · 00 · · · 0 0 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 1 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 0 0 · · · 0
+
+
+
+. In this case,  jh
+
+ = a, h − (j smod h) + 1 = 1, then, 26 Aj =
+
+
+
+> a
+
+z }| { 
+
+1 · · · 1 0 0 · · · 00 · · · 0 0 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 0 0 · · · 0
+
+
+
+. If m = a, dRT (Ai, A j ) = l = i − j + (min { i, j } mod h). If m > a , dRT (Ai, A j ) = ( m − a)h + l = i − j + b = i − j + (min { i, j } mod h). 
+
+Case 4. If l = b̸ = 0, then m > a .  ih
+
+ = m + 1, h − (i smod h) + 1 = h − l + 1, thus, Ai =
+
+
+
+> m
+
+z }| { 
+
+1 · · · 1 0 0 · · · 00 · · · 0 0 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 1 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 0 0 · · · 0
+
+
+
+.  jh
+
+ = a + 1, h − (j smod h) + 1 = h − b + 1, thus 
+
+Aj =
+
+
+
+> a
+
+z }| { 
+
+1 · · · 1 0 0 · · · 00 · · · 0 0 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 1 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 0 0 · · · 0
+
+
+
+. By Definition 2.2, 
+
+dRT (Ai, A j ) = ( m − a)h + l = i − j + b = i − j + (min { i, j } mod h).
+
+Case 5. If l̸ = b, l ̸ = 0 , b ̸ = 0.  ih
+
+ = m + 1, h − (i smod h) + 1 = h − l + 1, 
+
+Ai =
+
+
+
+> m
+
+z }| { 
+
+1 · · · 1 0 0 · · · 00 · · · 0 0 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 1 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 0 0 · · · 0
+
+
+
+. Similarly, Aj =
+
+
+
+> a
+
+z }| { 
+
+1 · · · 1 0 0 · · · 00 · · · 0 0 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 1 0 · · · 0... . . . ... ... ... . . . ...0 · · · 0 0 0 · · · 0
+
+
+
+. If m = a,we have l > b, then dRT (Ai, A j ) = l = i − j + (min { i, j } mod h). If m > a, then 
+
+dRT (Ai, A j ) = ( m − a)h + l = i − j + b = i − j + (min { i, j } mod h). Consequently, for every 
+
+i, j ∈ { 0, 1, . . . , kh }, i̸ = j, 
+
+we obtain 
+
+dRT (Ai, A j ) = |i − j| + (min {i, j } mod h).
+
+27 Therefore, by Definition 2.6, [DfRT (h, k, t, A 0, A 1, . . . , A kh )] (i+1)( j+1) =
+
+
+
+[2 t + 1 − dRT (Ai, A j )] + , i̸ = j, 
+
+0, i = j. 
+
+Substituting the above expression for dRT (Ai, A j ) gives [DfRT (h, k, t, A 0, . . . , A kh )] (i+1)( j+1) =
+
+
+
+[2 t + 1 − | i − j| − (min {i, j } mod h)] + , i̸ = j, 
+
+0, i = j. 
+
+Hence, 
+
+DfRT (h, k, t, A 0, A 1, . . . , A kh ) = D1.
+
+Applying Corollary 3.1, we conclude that 
+
+rfRT (h, k, t ) ≥ N hRT (D1).
+
+Combining this inequality with the upper bound established previously yields 
+
+N hRT (D1) ≤ rfRT (h, k, t ) ≤ N hRT (D2),
+
+thereby completing the proof. 
+
+Remark 4.2. The case h = 1 deserves particular attention. Since 
+
+min {i, j } mod h = 0 , ∀ i, j ∈ [E],
+
+we obtain 
+
+D1 = D2,
+
+and consequently 
+
+N hRT (D1) = N hRT (D2).
+
+Therefore, the lower and upper bounds in Theorem 4.1 coincide, providing the exact value of the optimal redundancy. Moreover, because the RT metric coincides with the Hamming metric when h = 1 , Theorem 4.1 recovers exactly Lemma 6 of [8]. 
+
+Example 4.1. Let h = 2 , k = 2 , t = 1 . Let wRT be the RT-weight function over F2×22 .Then, the matrices D1 and D2 in Theorem 4.1 are 
+
+D1 =
+
+
+
+0 2 1 0 02 0 1 0 01 1 0 2 10 0 2 0 10 0 1 1 0
+
+
+
+, D 2 =
+
+
+
+0 2 1 0 02 0 2 1 01 2 0 2 10 1 2 0 20 0 1 2 0
+
+
+
+.
+
+By computation, N hRT (D1) = N hRT (D2) = 2 , thus, rwRT  
+
+> RT
+
+(2 , 2, 1) = 2 .
+
+28 The bound established in Theorem 4.1 still involves the quantity N hRT (D1), whose exact evaluation may be difficult in general. By combining the explicit structure of the matrix 
+
+D1 with the lower bound obtained in Lemma 3.2, we derive the following closed-form estimate for the optimal redundancy of FCRTCs associated with the RT-weight function. 
+
+Corollary 4.1. Let 
+
+f : Fh×k 
+
+> 2
+
+−→ Im( f )
+
+be the RT-weight function. If 
+
+k > th ,
+
+then 
+
+rfRT (h, k, t ) ≥ 2h+1 
+
+(t + 2) 2 (h − 1)2 h + 1  5t3 + 15 t2 + 10 t
+
+6 − ϕ1(h, t ) − ϕ2(h, t )
+
+
+
+,
+
+where 
+
+ϕ1(h, t ) = h(h − 1) ⌊ th ⌋
+
+2 · (3 ⌊ th ⌋ − 1) h + 6( t − h⌊ th ⌋) + 8 6 ,
+
+and 
+
+ϕ2(h, t ) = (t − h⌊ th ⌋)( t − h⌊ th ⌋ + 1)( t − h⌊ th ⌋ + 2) 6 .
+
+Proof. By Theorem 4.1, 
+
+rfRT (h, k, t ) ≥ N hRT (D1),
+
+where the matrix D1 is defined by [D1]ij =
+
+2t + 1 − | i − j| − (min {i − 1, j − 1} mod h)+, if i̸ = j, 
+
+0, otherwise ,
+
+for 1 ≤ i, j ≤ kh + 1. Let 
+
+P = {P1, P 2, . . . , P kh +1 }
+
+be a D1-RT code over Fh×N hRT (D1)2 . Without loss of generality, assume that 
+
+dRT (Pi, P j ) ≥ [D1]ij , 1 ≤ i, j ≤ kh + 1 .
+
+Let B be the submatrix formed by the first t + 2 rows and t + 2 columns of the matrix 
+
+D1. Consider the subcode 
+
+P′ = {P1, P 2, . . . , P t+2 }.
+
+It follows that 
+
+dRT (Pi, P j ) ≥ [D1]ij = [ B]ij , 1 ≤ i, j ≤ t + 2 .
+
+Hence, by Definition 2.5, P′ is a B-RT code over Fh×N hRT (D1)2 . Consequently, 
+
+N hRT (B) ≤ N hRT (D1) ≤ rfRT (h, k, t ).
+
+29 Applying Lemma 3.2, we obtain 
+
+N hRT (B) ≥ 2h+1 
+
+(t + 2) 2 (h − 1)2 h + 1  X
+
+> 1≤i<j ≤t+2
+
+[B]ij .
+
+Therefore, 
+
+rfRT (h, k, t ) ≥ 2h+1 
+
+(t + 2) 2 (h − 1)2 h + 1  X
+
+> 1≤i<j ≤t+2
+
+(2 t+1 −| i−j|− (min {i−1, j −1} mod h).
+
+Evaluating the above summation yields 
+
+rfRT (h, k, t ) ≥ 2h+1 
+
+(t + 2) 2 (h − 1)2 h + 1  5t3 + 15 t2 + 10 t
+
+6 − h(h − 1) ⌊ th ⌋
+
+2
+
+· (3 ⌊ th ⌋ − 1) h + 6( t − h⌊ th ⌋) + 8 6 − (t − h⌊ th ⌋)( t − h⌊ th ⌋ + 1)( t − h⌊ th ⌋ + 2) 6
+
+
+
+,
+
+which completes the proof. 
+
+# 5 FCRTCs for RT-Weight Distribution Functions 
+
+In the previous section, we investigated FCRTCs associated with the RT-weight func-tion and derived explicit bounds on their optimal redundancy. We now consider a broader and more informative class of functions, namely RT-weight distribution functions. Unlike the RT-weight, which records only the total RT weight of a matrix, an RT-weight dis-tribution function captures the complete distribution of RT weights among the columns. Consequently, it preserves significantly more structural information and leads to a richer class of function-correcting RT codes. The main objective of this section is twofold. First, we construct explicit FCRTCs for RT-weight distribution functions. Second, we determine the optimal redundancy in several important cases, thereby extending the results obtained for the RT-weight function. Throughout this section, let T be a positive integer, and let wRT denote the RT-weight function over Fh×k 
+
+> 2
+
+.We now introduce the class of RT-weight distribution functions considered in this paper. These functions partition the set of matrices by RT weight intervals rather than by their exact RT weights. Consequently, matrices whose RT weights fall within the same interval are assigned the same function value, yielding a coarser classification than the RT-weight function itself. 
+
+Definition 5.1. Let h and k be positive integers, and let T be a positive integer. The 
+
+RT-weight distribution function ∆ h,T RT over Fh×k 
+
+> 2
+
+is defined by 
+
+∆h,T RT : Fh×k 
+
+> 2
+
+−→ Im(∆ h,T RT ), A 7 −→ 
+
+ wRT (A)
+
+T
+
+
+
+.
+
+30 We emphasize that the RT-weight distribution function provides a coarser classification than the RT-weight function. Indeed, matrices whose RT weights belong to the same interval of length T are assigned the same function value. Consequently, the parameter T
+
+controls the granularity of the partition of Fh×k 
+
+> 2
+
+induced by the function Since Im( wRT ) = {0, 1, . . . , kh },
+
+Definition 5.1 implies that Im(∆ h,T RT ) = 
+
+
+
+0, 1, . . . , 
+
+ kh T
+
+ 
+
+.
+
+To simplify the presentation of the subsequent results, we shall assume throughout this section that 
+
+T | (kh + 1) .
+
+Consequently, 
+
+Im(∆ h,T RT ) = kh + 1 
+
+T .
+
+We shall therefore write 
+
+E = Im(∆ h,T RT ) = kh + 1 
+
+T .
+
+We now present an explicit construction of function-correcting RT codes for RT-weight distribution functions. The proposed construction exploits the function’s particular struc-ture and yields redundancy optimal over a range of parameters. 
+
+Theorem 5.1. Let h, k be positive integers and T ≥ 2ht + 1 . Define an encoding function 
+
+Enc : Fh×k 
+
+> 2
+
+→ Fh×
+
+ k+
+
+ 2th
+
+  
+
+> 2
+
+, A 7 → (A, P (wRT (A)+1) smod T ),
+
+where Pi ∈ Fh×
+
+ 2th
+
+ 
+
+> 2
+
+for i ∈ { 1, 2, . . . , T }, and 
+
+Pi =
+
+
+
+> i−1
+
+z }| { 
+
+1 · · · 1
+
+ 2th
+
+−i+1 
+
+z }| { 
+
+0 · · · 00 · · · 0 0 · · · 0
+
+... . . . ... ... . . . ...
+
+0 · · · 0 0 · · · 0
+
+
+
+for i ∈
+
+
+
+1, 2, . . . , 
+
+ 2th
+
+
+
++ 1 
+
+
+
+,
+
+for an integer 2 ≤ j ≤ h, if i ∈  (j − 1)  2th
+
+ + 2 , (j − 1)  2th
+
+ + 3 , . . . , j  2th
+
+ + 1 ,
+
+31 Pi =
+
+
+
+> i−(j−1)
+
+ 2th
+
+−1
+
+z }| { 
+
+0 · · · 0
+
+> j
+
+ 2th
+
+−i+1 
+
+z }| { 
+
+1 · · · 1
+
+... . . . ... ... . . . ...
+
+0 · · · 0 0 · · · 01 · · · 1 0 · · · 00 · · · 0 0 · · · 0
+
+... . . . ... ... . . . ...
+
+0 · · · 0 0 · · · 0
+
+
+
+, the j-th row 
+
+and 
+
+Pi =
+
+ 2th
+
+z }| { 
+
+1 · · · 11 · · · 1
+
+... . . . ...
+
+1 · · · 1
+
+
+
+, for i ∈
+
+
+
+h
+
+ 2th
+
+
+
++ 2 , h 
+
+ 2th
+
+
+
++ 3 , . . . , T 
+
+
+
+.
+
+Then  Enc (A) | A ∈ Fh×k 
+
+> 2
+
+is an FCRTC for the RT -weight distribution function over 
+
+Fh×k 
+
+> 2
+
+. If T ≥ 2ht + 1 , r∆h,T RT  
+
+> RT
+
+(h, k, t ) ≤  2th
+
+. Moreover, if 2ht + 1 ≤ T ≤ kh +1 2(h−1) k +1 ,
+
+r∆h,T RT  
+
+> RT
+
+(h, k, t ) =  2th
+
+.Proof. If h = 1, then the RT-weight function over Fh×k 
+
+> 2
+
+coincides with the Hamming weight function. In this case, whenever T ≥ 2t + 1, the encoding function Enc reduces to 
+
+Enc : Fk 
+
+> 2
+
+−→ Fk+2 t 
+
+> 2
+
+, A 7 −→  A, P (wRT (A)+1) smod T
+
+,
+
+where 
+
+Pi = (1 · · · 1| {z } 
+
+> i−1
+
+0 · · · 0| {z } 
+
+> 2t−i+1
+
+), 1 ≤ i ≤ 2t + 1 ,
+
+and 
+
+Pi = (1 · · · 1| {z } 
+
+> 2t
+
+), 2t + 2 ≤ i ≤ T. 
+
+It follows that  Enc (A) | A ∈ Fk
+
+> 2
+
+is an FCRTC. The proof is similar to that of Lemma 8 in [8]. Assume that h ≥ 2. Let 
+
+A1, A 2 ∈ Fh×k 
+
+> 2
+
+satisfy ∆h,T RT (A1)̸ = ∆ h,T RT (A2).
+
+If 
+
+dRT (A1, A 2) ≥ 2t + 1 ,
+
+then 
+
+dRT (Enc (A1), Enc (A2)) ≥ dRT (A1, A 2) ≥ 2t + 1 .
+
+32 Now suppose that 
+
+dRT (A1, A 2) ≤ 2t. 
+
+By the triangle inequality, 
+
+|wRT (A1) − wRT (A2)| ≤ dRT (A1, A 2) ≤ 2t. 
+
+Since T ≥ 2ht + 1, it follows that 
+
+|wRT (A1) − wRT (A2)| < T. 
+
+Without loss of generality, write ∆h,T RT (A1) = mT + w1, ∆h,T RT (A2) = ( m − 1) T + w2,
+
+for some integer m. Then 
+
+T + w1 − w2 < T, 
+
+which implies that 
+
+w1 < w 2.
+
+Moreover, 
+
+dRT (A1, A 2) ≥ T + w1 − w2.
+
+By the definition of the shifted modulo operator, 
+
+P(wRT (A1)+1) smod T = Pw1+1 , P(wRT (A2)+1) smod T = Pw2+1 .
+
+We distinguish the following seven cases according to the values of w1 and w2, and show in each case that 
+
+dRT (Enc (A1), Enc (A2)) ≥ 2t + 1 .
+
+0 ≤ w1 ≤  2th
+
+ i 2th
+
+ + 1 ≤ w1 ≤ (i + 1)  2th
+
+, h 2th
+
+ ≤ w1
+
+1 ≤ i ≤ h − 10 ≤ w2 ≤  2th
+
+ Case 1 ∗ ∗
+
+j 2th
+
+ + 1 ≤ w2 ≤ (j + 1)  2th
+
+, Case 4 i = j: Case 2 *1 ≤ j ≤ h − 1 i < j : Case 6 
+
+h 2th
+
+ ≤ w2 Case 5 Case 7 Case 3 33 Case 1. If 0 ≤ w1, w 2 ≤  2th
+
+, Pw1+1 =
+
+
+
+> w1
+
+z }| { 
+
+1 · · · 1
+
+ 2th
+
+−w1
+
+z }| { 
+
+0 · · · 00 · · · 0 0 · · · 0... . . . ... ... . . . ...0 · · · 0 0 · · · 0
+
+
+
+, Pw2+1 =
+
+
+
+> w2
+
+z }| { 
+
+1 · · · 1
+
+ 2th
+
+−w2
+
+z }| { 
+
+0 · · · 00 · · · 0 0 · · · 0... . . . ... ... . . . ...0 · · · 0 0 · · · 0
+
+
+
+.Then, dRT (Pw1+1 , P w2+1 ) = h(w2 − w1). Thus, 
+
+dRT (Enc (A1), Enc (A2)) = dRT (A1, A 2) + dRT (Pw1+1 , P w2+1 ) ≥ T + w1 − w2 + w2 − w1.
+
+Since T ≥ 2ht + 1 ≥ 2t + 1, dRT (Enc (A1), Enc (A2)) ≥ T ≥ 2t + 1. 
+
+Case 2. If i 2th
+
+ + 1 ≤ w1, w 2 ≤ (i + 1)  2th
+
+, 1 ≤ i ≤ h − 1, then 
+
+Pw1+1 =
+
+
+
+> w1−i
+
+ 2th
+
+z }| { 
+
+0 · · · 0
+
+> (i+1)
+
+ 2th
+
+−w1
+
+z }| { 
+
+1 · · · 1... . . . ... ... . . . ...0 · · · 0 0 · · · 01 · · · 1 0 · · · 00 · · · 0 0 · · · 0... . . . ... ... . . . ...0 · · · 0 0 · · · 0
+
+
+
+, the ( i + 1)-th row 
+
+Pw2+1 =
+
+
+
+> w2−i
+
+ 2th
+
+z }| { 
+
+0 · · · 0
+
+> (i+1)
+
+ 2th
+
+−w2
+
+z }| { 
+
+1 · · · 1... . . . ... ... . . . ...0 · · · 0 0 · · · 01 · · · 1 0 · · · 00 · · · 0 0 · · · 0... . . . ... ... . . . ...0 · · · 0 0 · · · 0
+
+
+
+. the ( i + 1)-th row 
+
+Thus, dRT (Pw1+1 , P w2+1 ) = h(w2 − w1). Similar to Case 1, 
+
+dRT (Enc (A1), Enc (A2)) ≥ T ≥ 2t + 1 .
+
+Case 3. If w1, w 2 ≥ h 2th
+
+ + 1, then Pw1+1 = Pw2+1 =
+
+ 2th
+
+z }| { 
+
+1 · · · 11 · · · 1... . . . ...1 · · · 1
+
+
+
+. Since w1 ≥ h 2th
+
+ + 1 and  2th
+
+ ≥ 2th , we have w1 ≥ 2t + 1. Thus, 
+
+dRT (Enc (A1), Enc (A2)) = dRT (A1, A 2) ≥ T − w2 + w1 ≥ 2t + 1 .
+
+34 Case 4. If 0 ≤ w1 ≤  2th
+
+, i 2th
+
+ + 1 ≤ w2 ≤ (i + 1)  2th
+
+, 1 ≤ i ≤ h − 1, then 
+
+Pw1+1 =
+
+
+
+> w1
+
+z }| { 
+
+1 · · · 1
+
+ 2th
+
+−w1
+
+z }| { 
+
+0 · · · 00 · · · 0 0 · · · 0... . . . ... ... . . . ...0 · · · 0 0 · · · 0
+
+
+
+, P w2+1 =
+
+
+
+> w2−i
+
+ 2th
+
+z }| { 
+
+0 · · · 0
+
+> (i+1)
+
+ 2th
+
+−w2
+
+z }| { 
+
+1 · · · 1... . . . ... ... . . . ...0 · · · 0 0 · · · 01 · · · 1 0 · · · 00 · · · 0 0 · · · 0... . . . ... ... . . . ...0 · · · 0 0 · · · 0
+
+
+
+. the ( i + 1)-th row 
+
+Assume that 
+
+w1 ≥ w2 − i
+
+ 2th
+
+
+
+.
+
+Then  2th
+
+
+
+− w1 ≤ (i + 1) 
+
+ 2th
+
+
+
+− w2,
+
+and hence 
+
+dRT (Pw1+1 , P w2+1 ) = h
+
+
+
+w2 − i
+
+ 2th
+
+ 
+
++ h
+
+ 2th
+
+
+
+− w1
+
+
+
+= h(w2 − w1) + h(1 − i)
+
+ 2th
+
+
+
+.
+
+Therefore, 
+
+dRT (Enc (A1), Enc (A2)) ≥ T + ( h − 1)( w2 − w1) − h(i − 1) 
+
+ 2th
+
+
+
+.
+
+Using the inequality 
+
+w2 − w1 ≥ (i − 1) 
+
+ 2th
+
+
+
++ 1 ,
+
+we obtain 
+
+dRT (Enc (A1), Enc (A2)) ≥ T − (i − 1) 
+
+ 2th
+
+
+
++ h − 1.
+
+Since 1 ≤ i ≤ h − 1, it follows that 
+
+dRT (Enc (A1), Enc (A2)) ≥ T − (h − 2) 
+
+ 2th
+
+
+
++ h − 1.
+
+Moreover, 2th ≤
+
+ 2th
+
+
+
+< 2th + 1 ,
+
+which yields 
+
+dRT (Enc (A1), Enc (A2)) ≥ (T − 2t) + 4th + 1 .
+
+Finally, since T ≥ 2ht + 1 and h ≥ 2, we conclude that 
+
+dRT (Enc (A1), Enc (A2)) ≥ 2t + 1 .
+
+35 Assume that 
+
+w1 < w 2 − i
+
+ 2th
+
+
+
+.
+
+Then  2th
+
+
+
+− w1 > (i + 1) 
+
+ 2th
+
+
+
+− w2,
+
+and hence 
+
+dRT (Pw1+1 , P w2+1 ) = hw 1 + ( h − i)
+
+
+
+w2 − i
+
+ 2th
+
+
+
+− w1
+
+
+
++ h
+
+
+
+(i + 1) 
+
+ 2th
+
+
+
+− w2
+
+
+
+= i(w1 − w2) +  h + i2  2th
+
+
+
+.
+
+Therefore, 
+
+dRT (Enc (A1), Enc (A2)) ≥ T + ( i + 1)( w1 − w2) +  h + i2  2th
+
+
+
+.
+
+Using the inequality 
+
+w1 − w2 ≥ − (i + 1) 
+
+ 2th
+
+
+
+,
+
+we obtain 
+
+dRT (Enc (A1), Enc (A2)) ≥ T + ( h − 2i − 1) 
+
+ 2th
+
+
+
+.
+
+Since 1 ≤ i ≤ h − 1, we have 
+
+h − 2i − 1 ≥ 1 − h, 
+
+and hence 
+
+dRT (Enc (A1), Enc (A2)) ≥ T − (h − 1) 
+
+ 2th
+
+
+
+.
+
+Moreover,  2th
+
+
+
+< 2th + 1 ,
+
+which yields 
+
+dRT (Enc (A1), Enc (A2)) > T − 2t − h + 2th + 1 .
+
+Since T ≥ 2ht + 1, it follows that 
+
+dRT (Enc (A1), Enc (A2)) > 2( h − 1) t − h + 2th + 2 .
+
+We now distinguish three cases. - If h = 2, then 
+
+dRT (Enc (A1), Enc (A2)) ≥ 2t + 1 .
+
+36 - If h = 3, then 
+
+dRT (Enc (A1), Enc (A2)) > 4t + 2t
+
+3 − 1.
+
+Since t ≥ 1, we obtain 
+
+dRT (Enc (A1), Enc (A2)) ≥ 2t + 1 .
+
+- Finally, assume that h ≥ 4. Since t ≥ 1, 
+
+dRT (Enc (A1), Enc (A2)) > 2( h − 1) t − h + 2th + 2 
+
+≥ 2( h − 1) t − ht + 2th + 2 = ( h − 2) t + 2th + 2 
+
+≥ 2t + 1 .
+
+Case 5. If 0 ≤ w1 ≤  2th
+
+, w2 ≥ h 2th
+
+ + 1, then Pw1+1 =
+
+
+
+> w1
+
+z }| { 
+
+1 · · · 1
+
+ 2th
+
+−w1
+
+z }| { 
+
+0 · · · 00 · · · 0 0 · · · 0... . . . ... ... . . . ...0 · · · 0 0 · · · 0
+
+
+
+,Pw2+1 =
+
+ 2th
+
+z }| { 
+
+1 · · · 11 · · · 1... . . . ...1 · · · 1
+
+
+
+. dRT (Pw1+1 , P w2+1 ) = ( h − 1) w1 + h  2th
+
+ − w1
+
+ = h 2th
+
+ − w1. Thus, 
+
+dRT (Enc (A1), Enc (A2)) ≥ T − w2 + h
+
+ 2th
+
+
+
+≥ 2t + 1 .
+
+Case 6. If i 2th
+
+ + 1 ≤ w1 ≤ (i + 1)  2th
+
+, j 2th
+
+ ≤ w2 ≤ (j + 1)  2th
+
+, 1 ≤ i < h − 1, 
+
+i < j ≤ h − 1, then 
+
+Pw1+1 =
+
+
+
+> w1−i
+
+ 2th
+
+z }| { 
+
+0 · · · 0
+
+> (i+1)
+
+ 2th
+
+−w1
+
+z }| { 
+
+1 · · · 1... . . . ... ... . . . ...0 · · · 0 0 · · · 01 · · · 1 0 · · · 00 · · · 0 0 · · · 0... . . . ... ... . . . ...0 · · · 0 0 · · · 0
+
+
+
+, the ( i + 1)-th row 
+
+37 Pw2+1 =
+
+
+
+> w2−j
+
+ 2th
+
+z }| { 
+
+0 · · · 0
+
+> (j+1)
+
+ 2th
+
+−w2
+
+z }| { 
+
+1 · · · 1... . . . ... ... . . . ...0 · · · 0 0 · · · 01 · · · 1 0 · · · 00 · · · 0 0 · · · 0... . . . ... ... . . . ...0 · · · 0 0 · · · 0
+
+
+
+. the ( j + 1)-th row 
+
+Assume that 
+
+w1 − i
+
+ 2th
+
+
+
+≥ w2 − j
+
+ 2th
+
+
+
+.
+
+Then (i + 1) 
+
+ 2th
+
+
+
+− w1 ≤ (j + 1) 
+
+ 2th
+
+
+
+− w2,
+
+and hence 
+
+dRT (Pw1+1 , P w2+1 ) = ( h − i)
+
+
+
+w2 − j
+
+ 2th
+
+ 
+
++ h
+
+
+
+(j − i)
+
+ 2th
+
+
+
++ w1 − w2
+
+
+
+= hw 1 − iw 2 + i(j − h)
+
+ 2th
+
+
+
+.
+
+Therefore, 
+
+dRT (Enc (A1), Enc (A2)) ≥ T + ( h + 1) w1 − (i + 1) w2
+
++ i(j − h)
+
+ 2th
+
+
+
+.
+
+Using the inequalities 
+
+w1 ≥ i
+
+ 2th
+
+
+
++ 1 , w2 ≤ (j + 1) 
+
+ 2th
+
+
+
+,
+
+we obtain 
+
+dRT (Enc (A1), Enc (A2)) ≥ T + ( h + 1) 
+
+
+
+i
+
+ 2th
+
+
+
++ 1 
+
+
+
+− (i + 1)( j + 1) 
+
+ 2th
+
+
+
++ i(j − h)
+
+ 2th
+
+
+
+= T − (j + 1) 
+
+ 2th
+
+
+
++ h + 1 .
+
+Finally, since i < j ≤ h − 1 and  2th
+
+
+
+< 2th + 1 ,
+
+38 it follows that 
+
+dRT (Enc (A1), Enc (A2)) ≥ T − 2t + 1 ≥ 2t + 1 .
+
+Assume that 
+
+w1 − i
+
+ 2th
+
+
+
+< w 2 − j
+
+ 2th
+
+
+
+.
+
+Then (i + 1) 
+
+ 2th
+
+
+
+− w1 > (j + 1) 
+
+ 2th
+
+
+
+− w2,
+
+and hence 
+
+dRT (Pw1+1 , P w2+1 ) = ( h − i)
+
+
+
+w1 − i
+
+ 2th
+
+ 
+
++ h
+
+
+
+(i − j)
+
+ 2th
+
+
+
++ w2 − w1
+
+
+
+= hw 2 − iw 1 +  i2 − hj   2th
+
+
+
+.
+
+Therefore, 
+
+dRT (Enc (A1), Enc (A2)) ≥ T + ( h − 1) w2 − (i − 1) w1
+
++  i2 − hj   2th
+
+
+
+.
+
+Using the inequalities 
+
+w1 ≤ (i + 1) 
+
+ 2th
+
+
+
+, w2 ≥ j
+
+ 2th
+
+
+
++ 1 ,
+
+we obtain 
+
+dRT (Enc (A1), Enc (A2)) ≥ T − (j − 1) 
+
+ 2th
+
+
+
++ h − 1.
+
+Finally, since i < j ≤ h − 1, T ≥ 2ht + 1, and h ≥ 2, it follows that 
+
+dRT (Enc (A1), Enc (A2)) ≥ T − 2t + 1 + 4th ≥ 2t + 1 .
+
+Case 7. If i 2th
+
+ + 1 ≤ w1 ≤ (i + 1)  2th
+
+, 1 ≤ i ≤ h − 1, w2 ≥ h 2th
+
+ + 1, then 
+
+Pw2+1 =
+
+ 2th
+
+z }| { 
+
+1 · · · 11 · · · 1... . . . ...1 · · · 1
+
+
+
+, Pw1+1 =
+
+
+
+> w1−i
+
+ 2th
+
+z }| { 
+
+0 · · · 0
+
+> (i+1)
+
+ 2th
+
+−w1
+
+z }| { 
+
+1 · · · 1... . . . ... ... . . . ...0 · · · 0 0 · · · 01 · · · 1 0 · · · 00 · · · 0 0 · · · 0... . . . ... ... . . . ...0 · · · 0 0 · · · 0
+
+
+
+. the ( i + 1)-th row 
+
+dRT (Pw1+1 , P w2+1 ) = w1 + ( h − i − 1)  2th
+
+. Since dRT (A1, A 2) ≥ T + w1 − w2,
+
+dRT (Enc (A1), Enc (A2)) ≥ T − w2 + 2 w1 + ( h − i − 1) 
+
+ 2th
+
+
+
+.
+
+39 By the assumption 
+
+w1 ≥ i
+
+ 2th
+
+
+
++ 1 ,
+
+we obtain 
+
+dRT (Enc (A1), Enc (A2)) ≥ T − w2 + ( h + i − 1) 
+
+ 2th
+
+
+
++ 2 .
+
+Since i ≥ 1, we have h + i − 1 ≥ h. Therefore, 
+
+dRT (Enc (A1), Enc (A2)) ≥ h
+
+ 2th
+
+
+
++ 1 ≥ 2t + 1 .
+
+Hence, by Definition 2.3, if T ≥ 2ht + 1, the set 
+
+{ Enc (A) | A ∈ Fh×k 
+
+> 2
+
+}
+
+forms an FCRTC for the RT-weight distribution function ∆ h,T RT over Fh×k 
+
+> 2
+
+. Consequently, 
+
+r∆h,T RT  
+
+> RT
+
+(h, k, t ) ≤
+
+ 2th
+
+
+
+.
+
+Furthermore, if 
+
+T ≤ kh + 1 2(h−1) k + 1 ,
+
+then 
+
+Im(∆ h,T RT ) = kh + 1 
+
+T ≥ 2(h−1) k + 1 .
+
+It follows from Corollary 3.1 that 
+
+r∆h,T RT  
+
+> RT
+
+(h, k, t ) ≥
+
+ 2th
+
+
+
+.
+
+Combining this lower bound with the above upper bound yields 
+
+r∆h,T RT  
+
+> RT
+
+(h, k, t ) = 
+
+ 2th
+
+
+
+,
+
+provided that 2ht + 1 ≤ T ≤ kh + 1 2(h−1) k + 1 .
+
+Remark 5.1. The proof of Lemma 8 in [8] is based on Corollary 1 of [8]. Therefore, the additional assumption T ≤ k+1 2 is implicitly required for the argument to be valid. With this assumption, the proof given in [8] applies without modification. Moreover, when h = 1 ,the Rosenbloom–Tsfasman metric reduces to the Hamming metric. Hence, Theorem 5.1 recovers exactly the result of Lemma 8 in [8]. 
+
+40 6 FCRTCs for RT-Locally-Two-Valued Binary Functions 
+
+In this section, we introduce a class of functions called RT-locally-two-valued binary functions. For RT-locally-two-valued binary functions, we mainly study FCRTCs for these functions. In some cases, we obtain the optimal redundancy of these FCRTCs. 
+
+Definition 6.1. Let h and k be positive integers, and let 
+
+f : Fh×k 
+
+> 2
+
+→ Im( f )
+
+be a function. For 
+
+A ∈ Fh×k
+
+> 2
+
+and 
+
+ρ ≥ 0,
+
+the RT-function ball centered at A with radius ρ is defined by 
+
+BRT f (h, A, ρ ) = 
+
+n
+
+f (B) B ∈ Fh×k 
+
+> 2
+
+, d RT (A, B ) ≤ ρ
+
+o
+
+.
+
+Based on the notion of RT-function balls introduced above, we are now in a position to define RT-locally-two-valued binary functions. Intuitively, these are functions whose values exhibit only limited local variation with respect to the RT metric: within every RT ball of a prescribed radius, the function takes at most two distinct values. 
+
+Definition 6.2. Let f : Fh×k 
+
+> 2
+
+→ Im( f ) be an arbitrary function, and let ρ be a nonnegative real number. If BRT f (h, A, ρ ) ≤ 2, ∀ A ∈ Fh×k 
+
+> 2
+
+, then f is called a ρ-RT-locally-two-valued binary function .
+
+The class of ρ-RT-locally-two-valued binary functions naturally includes all two-valued binary functions. Indeed, since such functions take at most two distinct values over their entire domain, they satisfy the defining condition for every nonnegative real number ρ.Another important example is provided by the RT-weight distribution function. If 
+
+T ≥ 4t + 1 ,
+
+then ∆ h,T RT is a 2 t-RT-locally-two-valued binary function .
+
+Theorem 6.1. Let h and k be positive integers, and let 
+
+f : Fh×k 
+
+> 2
+
+−→ Im( f )
+
+be a 2t-RT-locally-two-valued binary function. If 
+
+|Im( f )| ≥ 2(h−1) k + 1 ,
+
+then 
+
+rfRT (h, k, t ) = 
+
+ 2th
+
+
+
+.
+
+41 Proof. Let f be a 2 t-RT-locally-two-valued binary function over Fh×k 
+
+> 2
+
+. Define 
+
+α2t(A) = 
+
+
+
+(
+
+ 2th
+
+z }| {
+
+1 0 · · · 0 ) ⊺, if f (A) = max BRT f (h, A, 2t),
+
+(
+
+ 2th
+
+z }| {
+
+0 0 · · · 0 ) ⊺, otherwise .
+
+Let the matrix P (A) = ( 
+
+ 2th
+
+z }| {
+
+α2t(A) α2t(A) · · · α2t(A) ). Define the encoding function 
+
+Enc : Fh×k 
+
+> 2
+
+−→ Fh×(k+⌈ 2th ⌉) 
+
+> 2
+
+, A 7 −→ (A, P (A)) ,
+
+for every A ∈ Fh×k 
+
+> 2
+
+.Let A1, A 2 ∈ Fh×k 
+
+> 2
+
+satisfy f (A1)̸ = f (A2). If dRT (A1, A 2) ≥ 2t + 1, then 
+
+dRT (Enc (A1), Enc (A2)) ≥ dRT (A1, A 2) ≥ 2t + 1 .
+
+Now assume that dRT (A1, A 2) ≤ 2t. Then 
+
+f (A1), f (A2) ∈ BRT f (h, A 1, 2t) ∩ BRT f (h, A 2, 2t).
+
+Since f is a 2 t-RT-locally-two-valued binary function, it follows that 
+
+BRT f (h, A 1, 2t) = BRT f (h, A 2, 2t).
+
+Because f (A1)̸ = f (A2), we must have 
+
+α2t(A1)̸ = α2t(A2).
+
+By Definition 2.2, 
+
+dRT 
+
+ α2t(A1), α2t(A2) = h. 
+
+Therefore, 
+
+dRT (Enc (A1), Enc (A2)) = dRT (A1, A 2) + dRT (P (A1), P (A2)) 
+
+≥ 1 + h
+
+ 2th
+
+
+
+≥ 2t + 1 .
+
+By the definition of FCRTCs, the set { Enc( A) | A ∈ Fh×k 
+
+> 2
+
+}forms an FCRTC for the function f . Consequently, rfRT (h, k, t ) ≤  2th
+
+ . On the other hand, Corollary 3.1 implies that if Im( f ) ≥ 2(h−1) k + 1 , then rfRT (h, k, t ) ≥  2th
+
+ . Combining these upper and lower bounds, we conclude that whenever Im( f ) ≥ 2(h−1) k +1 , it holds that rfRT (h, k, t ) =  2th
+
+ .
+
+Remark 6.1. If h = 1 , the result of Theorem 6.1 is the same as Lemma 5 in [8] .
+
+42 7 Conclusion and Future Avenues 
+
+In this article, we introduced function-correcting-Rosenbloom–Tsfasman codes (FCRTCs) over Fh×k 
+
+> 2
+
+, thereby extending the framework of function-correcting codes from the Ham-ming metric to the more general Rosenbloom–Tsfasman (RT) metric. Since the RT met-ric coincides with the Hamming metric when h = 1, the proposed framework naturally generalizes the function-correcting codes introduced in [8]. Similar to classical function-correcting codes, FCRTCs reduce the redundancy required to protect function values compared with conventional error-correcting codes. A central contribution of this work is establishing a fundamental connection between the optimal redundancy of FCRTCs and the minimum column length of irregular RT-distance codes. By introducing RT-distance matrices and RT-function-distance matrices, we transformed the problem of determining the optimal redundancy of FCRTCs into the study of irregular RT-distance codes. This approach enabled us to derive general upper and lower bounds on the optimal redun-dancy for arbitrary functions, together with corresponding bounds on the smallest column length of irregular RT-distance codes associated with symmetric matrices. By exploiting the algebraic structure of specific classes of functions, we obtained sharper results for sev-eral important families, including RT-weight functions, RT-weight distribution functions, and RT-locally-two-valued binary functions. In particular, we proposed explicit construc-tions of FCRTCs for RT-weight distribution functions and showed that these constructions achieve the optimal redundancy for a broad range of parameters. Moreover, when h = 1, all our results reduce to their counterparts in [8], demonstrating that the present work provides a genuine extension of the existing theory from the Hamming metric to the RT metric. Several interesting research directions naturally arise from this work. First, it would be worthwhile to investigate FCRTCs across larger classes of functions and determine tighter redundancy bounds for these functions. Second, developing new constructions that attain or improve the theoretical bounds established in this paper remains an important problem. Since FCRTCs employ systematic encoding, their encoding and decoding procedures are inherently determined by the underlying function. Consequently, the design of efficient encoding and decoding algorithms achieving optimal redundancy constitutes another chal-lenging and promising direction for future research. Finally, it would also be interesting to investigate extensions of the proposed framework to other metrics, larger finite fields, and more general algebraic structures, as well as potential applications to communication systems over parallel channels. 
+
+Acknowledgement . This work was supported by the National Natural Science Founda-tion of China (NSFC) under Grant Nos. 12441102 and 12271199, and by the Fundamental Research Funds for the Central Universities (Grant No. CCNU25JCPT031). S. Mesnager sincerely thanks Hongwei Liu for many fruitful discussions, for providing an inspiring sci-entific environment at Central China Normal University in Wuhan, and for the warm 43 hospitality she received during her visit at the end of 2025. 
+
+# References 
+
+[1] S. S. Durgi, A. A. Mahesh, A. Kumari, R. Pandey and B. Sundar Rajan. Function-correcting codes with optimal data protection for Hamming code membership. arXiv Preprint arXiv: 2602.21932. [2] S. Dougherty and M. Skriganov. MacWilliams duality and the Rosenbloom-Tsfasman metric. Moscow Mathematical Journal, 2002, 2(1): 81-97. [3] S. T. Dougherty and M. M. Skriganov. Maximum distance separable codes in the 
+
+ρ metric over arbitrary alphabets. Journal of Algebraic Combinatorics, 2002, 16 (1): 71-81. [4] S. S. H and B. Sundar Rajan. On Plotkin bound for function-correcting codes for b-symbol read channels. In 2025 IEEE Information Theory Workshop, 2025: 698-703. [5] J. Y. Hyun and H. K. Kim. Maximum distance separable poset codes. Designs, Codes and Cryptography, 2008, 48 (3): 247-261. [6] K. Hareesh, N. T. Rashid Ummer and B. Sundar Rajan. Plotkin-like bound and explicit function-correcting code constructions for Lee metric channels. arXiv Preprint arXiv: 2508.01702. [7] S. Jain. Bursts in m-metric array codes. Linear Algebra and its Applications, 2006, 
+
+418 (1): 130-141. [8] A. Lenz, R. Bitar, A. Wachter-Zeh and E. Yaakobi. Function-correcting codes. IEEE Transactions on Information Theory, 2023, 69 (9): 5604-5618. [9] H. Y. Liu and H. Liu. Function-correcting codes with homogeneous distance. Finite Fields and Their Applications, 2026, 112 : 102791. [10] V. Marka, R. S. Selvaraj, and I. Gnanasudha. Self-dual codes in the Rosenbloom-Tsfasman metric. Mathematical Communications, 2017, 22 (1): 75-87. [11] H. Niederreiter. Point sets and sequences with small discrepancy. Monatshefte f¨ ur Mathematik, 1987, 104 (4): 273-337. [12] R. Pandey, S. Bajpai, A. A. Mahesh and B. Sundar Rajan. Function correcting codes for maximally-unbalanced boolean functions. arXiv Preprint arXiv: 2601.10135. [13] R. Premlal and B. S. Rajan. On function-correcting codes. IEEE Transactions on Information Theory, 2025, 71 (8): 5884-5897. 44 [14] J. Quistorf. On Rosenbloom and Tsfasman’s generalization of the Hamming space. Discrete Mathematics, 2007, 307 (21): 2514-2524. [15] C. Qureshi, V. Gubitosi, and A. Portela. On the non-existence of perfect codes in the Niederreiter-Rosenbloom-Tsfasman metric. IEEE Transactions on Information Theory, 2024, 70 (6): 4016-4021. [16] C. Rajput, Mahak and V. Lalitha. Generalized function-correcting partition codes. arXiv Preprint arXiv:2605.03370. [17] C. Rajput, B. Sundar Rajan, R. Freij-Hollanti and C. Hollanti. Function-correcting codes for locally bounded functions. In 2025 IEEE Information Theory Workshop. 2025: 851-856. [18] C. Rajput, B. Sundar Rajan, R. Freij-Hollanti and C. Hollanti. Function-correcting partition codes. arXiv Preprint arXiv: 2601.06450. [19] C. Rajput, B. Sundar Rajan, R. Freij-Hollanti and C. Hollanti. Function-correcting codes with data protection. IEEE Transactions on Information Theory, doi: 10.1109/TIT.2026.3692458. [20] M. Y. Rosenbloom and M. A. Tsfasman. Codes for the m-metric. Problems of Infor-mation Transmission, 1997, 33 (1): 45-52. [21] M. M. Skriganov. Coding theory and uniform distributions. Algebra IAnaliz, 2001, 
+
+13 (2): 191-239. [22] A. Singh and A. K. Singh. Function-correcting codes for insertion-deletion channel. arXiv Preprint arXiv: 2512.07243. [23] A. Singh, A. K. Singh and E. Yaakobi. Function-correcting codes for b-symbol read channels. arXiv Preprint arXiv:2503.12894. [24] G. K. Verma and A. K. Singh. Function-correcting codes for linear and locally bounded functions over a finite chain ring. arXiv Preprint arXiv: 2603.14471. [25] G. K. Verma and A. K. Singh. On function-correcting codes in the Lee metric. arXiv Preprint arXiv: 2507.17654. [26] G. K. Verma, A. Singh and A. Kumar Singh. Function-correcting b-symbol codes for locally ( λ, ρ, b )-functions. IEEE Transactions on Information Theory, 2026, 72 (1): 331-341. [27] X. Wang, C. Li and Z. Heng. New bounds of linear matrix codes for the Rosenbloom-Tsfasman metric and optimal constructions. IEEE Transactions on Information The-ory, 2025, 71 (9): 6844-6856. 45 [28] Q. Xia, H. Liu and B. Chen. Function-correcting codes for symbol-pair read channels. IEEE Transactions on Information Theory, 2024, 70(11): 7807-7819. [29] H. Xu, G. Xu, and W. Du. Niederreiter-Rosenbloom-Tsfasman LCD codes. Advances in Mathematics of Communications, 2022, 16 (4): 1071-1081. [30] W. Zhou, S. Lin, and K. A. S. Abdel-Ghaffar. BCH codes for the Rosenbloom-Tsfasman metric. IEEE Transactions on Information Theory, 2016, 62 (12): 6757-6767. [31] Y. Zhang, Z. Xu, X. Zhang and G. Ge. Optimal redundancy of function-correcting codes. IEEE Transactions on Information Theory, 2025, 71 (12): 9458-9467. 46

@@ -1,0 +1,89 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-26T19:49:56.405355+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.18908v1",
+      "title": "Function-Correcting RT Codes: A Coding Framework for Parallel Channels",
+      "abstract": "Function-correcting codes have recently emerged as an effective approach to reducing coding redundancy when the objective is to reliably recover only the prescribed function values of the transmitted information, rather than the complete message itself. As a natural generalization of the Hamming metric, the Rosenbloom--Tsfasman metric (RT-metric) has attracted considerable attention due to its relevance to communication over parallel channels. Motivated by these two research directions, we introduce in this paper function-correcting RT codes (FCRTCs), which extend the framework of function-correcting codes from the Hamming metric to the more general RT metric.   To investigate the fundamental problem of optimal redundancy, we introduce a new class of matrix codes, called irregular RT-distance codes, and establish a direct correspondence between the redundancy optimization problem for FCRTCs and the construction of such codes. This connection provides a unified framework for deriving redundancy bounds under the RT metric.   For arbitrary functions, we establish general upper and lower bounds on the optimal redundancy of FCRTCs. We then specialize our analysis to several important classes of functions, namely RT-weight functions, RT-weight distribution functions, and RT-locally-two-valued binary functions, for which substantially sharper bounds are obtained by exploiting their specific structural properties. Furthermore, we present explicit constructions of FCRTCs for RT-weight distribution functions and prove that these constructions attain the optimal redundancy bounds in several cases.   The proposed framework considerably extends the theory of function-correcting codes to the RT metric, provides new theoretical tools for studying reliable communication over parallel channels, and opens new perspectives for redundancy-efficient coding beyond the classical Hamming setting.",
+      "authors": [
+        "Huiying Liu",
+        "Hongwei Liu",
+        "Sihem Mesnager"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-07-21T09:50:48+00:00",
+      "link": "https://arxiv.org/pdf/2607.18908v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "function-correcting codes for reliable function value recovery",
+      "llm_evidence_cn": "用于可靠函数值恢复的函数纠错码",
+      "llm_evidence": "用于可靠函数值恢复的函数纠错码",
+      "canonical_evidence": "用于可靠函数值恢复的函数纠错码",
+      "llm_tldr_en": "Introduces function-correcting RT codes to reliably recover prescribed function values over parallel channels.",
+      "llm_tldr_cn": "引入了函数纠错RT码，用于在并行信道上可靠地恢复指定的函数值。",
+      "llm_tldr": "引入了函数纠错RT码，用于在并行信道上可靠地恢复指定的函数值。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.20890v1",
+      "title": "Information-Theoretically Secure Aggregation for Lightweight Federated Learning: Resilient to Dropouts and Adversaries",
+      "abstract": "On-device federated learning (FL) enables privacy-preserving and personalized model training on resource-constrained devices such as smartphones and IoT nodes. To reduce communication cost, sign-based methods (e.g., signSGD) transmit one-bit gradients. However, exposing gradient signs makes them vulnerable to inference attacks, while existing secure aggregation schemes are often incompatible with such methods or incur significant computational and communication overhead. We propose a lightweight and information-theoretically secure aggregation framework tailored for sign-based FL. The framework securely computes the majority vote (MV) polynomial through single-round secure multiplication, ensuring end-to-end information-theoretic security under the honest-majority assumption while revealing only the final aggregated sign to the server. To enhance efficiency and scalability, we introduce two key techniques. First, inverse-form exponent reduction halves the effective MV polynomial degree, reducing both communication and computation costs. Second, we propose single-round secure multiplication, achieving linear offline complexity and storage with only a single online communication. Together, these techniques reduce online communication by up to 99.5% and latency by up to 85.7% compared to conventional approaches. Also, by leveraging inherent MDS-code-based decoding, the framework achieves robustness against both dropouts and adversarial behaviors, yielding accuracy gains of up to 20.65% and 10.74%, respectively. Overall, the proposed framework establishes a practical foundation for large-scale, low-latency, and information-theoretically secure aggregation in sign-based FL.",
+      "authors": [
+        "Hyeong-Gun Joo",
+        "Songnam Hong",
+        "Dong-Joon Shin"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-07-23T03:26:41+00:00",
+      "link": "https://arxiv.org/pdf/2607.20890v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "information-theoretically secure aggregation for distributed learning",
+      "llm_evidence_cn": "分布式学习的信息论安全聚合",
+      "llm_evidence": "分布式学习的信息论安全聚合",
+      "canonical_evidence": "分布式学习的信息论安全聚合",
+      "llm_tldr_en": "Introduces a lightweight, secure aggregation framework for federated learning resilient to adversaries.",
+      "llm_tldr_cn": "引入了一种轻量级、安全的联邦学习聚合框架，能够抵御对手攻击。",
+      "llm_tldr": "引入了一种轻量级、安全的联邦学习聚合框架，能够抵御对手攻击。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
