@@ -6,29 +6,35 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-26
-- 运行时间：2026-07-26 19:52:26 UTC
+- 最新运行日期：2026-07-27
+- 运行时间：2026-07-27 21:30:19 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：4
 - 精读区：0
-- 速读区：2
+- 速读区：4
 
 ### 今日简报（AI）
-今日聚焦通信编码与联邦学习安全，深入探讨了并行信道下的函数纠错框架与轻量化安全聚合方案。
-重点关注 RT 编码在多信道传输中的应用，以及联邦学习中兼具掉线容错与抗攻击能力的信息论安全技术。
-建议关注如何在提升分布式系统鲁棒性的同时，进一步优化轻量化设备的计算与通信效率。
-- 详情：[/202607/26/README](/202607/26/README)
+今日聚焦深度学习隐私保护与加密认证，深入探讨从算法加密到系统鲁棒性的前沿进展。
+重点推荐 PrivDNN 部分加密框架，以及揭示加密认证中理论假设与现实鸿沟的深度分析。
+建议在部署隐私计算方案时，需格外警惕理论证明与工程实现之间的安全偏差。
+- 详情：[/202607/27/README](/202607/27/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Function-Correcting RT Codes: A Coding Framework for Parallel Channels](/202607/26/2607.18908v1-function-correcting-rt-codes-a-coding-framework-for-parallel-channels)  
+1. [PrivDNN: A Secure Multi-Party Computation Framework for Deep Learning using Partial DNN Encryption](/202607/27/2607.21895v1-privdnn-a-secure-multi-party-computation-framework-for-deep-learning-using-partial-dnn-encryption)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：用于深度学习评估的安全多方计算框架
+2. [Robust Berrut-Approximated Coded Computing via Discrete Cosine Transforms](/202607/27/2607.22427v1-robust-berrut-approximated-coded-computing-via-discrete-cosine-transforms)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：针对拜占庭工人的鲁棒分布式计算
+3. [Certified in Theory, Broken in Practice: Assumption Gaps in Cryptographic Model Certification](/202607/27/2607.21839v1-certified-in-theory-broken-in-practice-assumption-gaps-in-cryptographic-model-certification)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：用于可靠函数值恢复的函数纠错码
-2. [Information-Theoretically Secure Aggregation for Lightweight Federated Learning: Resilient to Dropouts and Adversaries](/202607/26/2607.20890v1-information-theoretically-secure-aggregation-for-lightweight-federated-learning-resilient-to-dropouts-and-adversaries)  
+   evidence：密码学模型认证与审计协议
+4. [BioZKFHE: Scalable Encrypted Biometric Identification via Verifiable Homomorphic Similarity Evaluation](/202607/27/2607.22065v1-biozkfhe-scalable-encrypted-biometric-identification-via-verifiable-homomorphic-similarity-evaluation)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：分布式学习的信息论安全聚合
+   evidence：外包环境下的可验证同态相似性评估
 
 
 <div class="dpr-home-promo-card">

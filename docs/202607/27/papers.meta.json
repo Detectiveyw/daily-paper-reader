@@ -1,0 +1,65 @@
+{
+  "label": "2026-07-27",
+  "date": "2026-07-27",
+  "generated_at": "2026-07-27T21:30:33",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202607/27/2607.21895v1-privdnn-a-secure-multi-party-computation-framework-for-deep-learning-using-partial-dnn-encryption",
+      "section": "quick",
+      "title_en": "PrivDNN: A Secure Multi-Party Computation Framework for Deep Learning using Partial DNN Encryption",
+      "authors": "Liangqin Ren, Zeyan Liu, Fengjun Li, Kaitai Liang, Zhu Li, Bo Luo",
+      "date": "2026-07-24",
+      "pdf": "https://arxiv.org/pdf/2607.21895v1",
+      "score": "7.0",
+      "evidence": "用于深度学习评估的安全多方计算框架",
+      "tldr": "本研究针对深度学习模型推理中的隐私保护问题，提出了PrivDNN框架。该框架通过部分DNN加密技术，将计算任务卸载至用户端，在保护模型所有权和用户数据隐私的同时，显著提升了推理效率。PrivDNN利用核心神经元选择与加密方案，在保证模型准确率的前提下，将推理时间和内存需求降低了高达97%，为高效安全的机器学习即服务（MLaaS）提供了新方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "In the past decade, we have witnessed an exponential growth of deep learning models, platforms, and applications. While existing DL applications and Machine Learning as a service (MLaaS) frameworks assume fully trusted models, the need for privacy-preserving DNN evaluation arises. In a secure multi-party computation scenario, both the model and the data are considered proprietary, i.e., the model owner does not want to reveal the highly valuable DL model to the user, while the user does not wish to disclose their private data samples either. Conventional privacy-preserving deep learning solutions ask the users to send encrypted samples to the model owners, who must handle the heavy lifting of ciphertext-domain computation with homomorphic encryption. In this paper, we present a novel solution, namely, PrivDNN, which (1) offloads the computation to the user side by sharing an encrypted deep learning model with them, (2) significantly improves the efficiency of DNN evaluation using partial DNN encryption, (3) ensures model accuracy and model privacy using a core neuron selection and encryption scheme. Experimental results show that PrivDNN reduces privacy-preserving DNN inference time and memory requirement by up to 97% while maintaining model performance and privacy. Codes can be found at https://github.com/LiangqinRen/PrivDNN",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/27/2607.22427v1-robust-berrut-approximated-coded-computing-via-discrete-cosine-transforms",
+      "section": "quick",
+      "title_en": "Robust Berrut-Approximated Coded Computing via Discrete Cosine Transforms",
+      "authors": "Rimpi Borah, J. Harshan",
+      "date": "2026-07-24",
+      "pdf": "https://arxiv.org/pdf/2607.22427v1",
+      "score": "7.0",
+      "evidence": "针对拜占庭工人的鲁棒分布式计算",
+      "tldr": "本研究针对分布式计算中的拜占庭故障问题，提出了鲁棒Berrut近似编码计算（RBACC）框架。通过引入离散余弦变换（DCT）编码选择评估点，RBACC在有限精度算术下实现了对非多项式函数的错误定位与纠正。该框架不仅能有效应对掉队节点，还能在存在恶意节点的情况下提供可证明的近似保证，显著提升了计算任务的重构精度。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Coded computing is a reliable and fault-tolerant paradigm for executing large-scale computational tasks over distributed worker nodes. Among existing coded computing frameworks, Berrut Approximated Coded Computing (BACC) enables distributed computation of arbitrary non-polynomial functions through rational interpolation. Although BACC provides provable approximation guarantees and resilience against straggling workers, its robustness against Byzantine workers remains largely unexplored. To fill this research gap, we propose Robust Berrut Approximated Coded Computing (RBACC), which establishes a coding-theoretic framework for BACC by enabling error localization and error correction in the presence of Byzantine workers. In particular, RBACC introduces a new choice of evaluation points that establishes a connection between Berrut interpolation and Discrete Cosine Transform (DCT) codes, thereby enabling error localization and error correction under finite-precision arithmetic. We derive analytical upper bounds on the approximation error of RBACC under multiple operating scenarios, including straggler-only systems and systems with Byzantine workers under finite-precision arithmetic. Building upon this analysis, we formulate several optimization problems for selecting the DCT code dimension and for assigning encoded evaluations to unreliable workers. We show that these are previously unexplored design parameters that can be systematically optimized to improve the reconstruction accuracy. Experimental results demonstrate that the proposed RBACC framework effectively mitigates stragglers and Byzantine workers while offering improved reconstruction accuracy over the baselines.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/27/2607.21839v1-certified-in-theory-broken-in-practice-assumption-gaps-in-cryptographic-model-certification",
+      "section": "quick",
+      "title_en": "Certified in Theory, Broken in Practice: Assumption Gaps in Cryptographic Model Certification",
+      "authors": "Carter Luck, Olive Franzese-McLaughlin, Elisaweta Masserova, Akira Takahashi, Antigoni Polychroniadou, Nicolas Papernot",
+      "date": "2026-07-23",
+      "pdf": "https://arxiv.org/pdf/2607.21839v1",
+      "score": "6.0",
+      "evidence": "密码学模型认证与审计协议",
+      "tldr": "本研究探讨了隐私保护机器学习审计中的安全漏洞。虽然基于零知识证明（ZKP）的加密模型认证（CMC）旨在保护模型隐私的同时验证其性能，但现有协议往往只针对固定审计数据集提供保证，忽略了模型在实际部署中的泛化能力。作者展示了攻击者如何通过精心设计训练数据，使模型在审计时表现优异但在实际应用中失效。为此，本文提出了严谨的加密安全定义和通用协议模板，为构建更可靠的审计系统提供了理论与实践指导。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Privacy-preserving machine learning auditing protocols allow auditors to assess models for properties such as accuracy or fairness, without revealing their internals or training data. This makes them especially attractive for auditing models deployed in sensitive domains such as healthcare or finance. For these protocols to be meaningful in real-world audit settings, though, their guarantees must reflect how the model will behave once deployed, rather than merely certifying its behavior during an audit. Existing security definitions often miss this mark: most certify model behavior only on a fixed audit dataset, without ensuring that the same guarantees generalize to other datasets drawn from the same distribution.   As we show, this gap allows a model provider to attack many cryptographic model certification (CMC) schemes built on secure zero knowledge proofs (ZKP) by carefully engineering training data, resulting in models that exhibit benign behavior during an audit, but pathological behavior in practice. For example, we empirically demonstrate that an attacker can certify that a model achieves over 99% accuracy on an audit dataset, but less than 30% accuracy on fresh samples from the same distribution.   To address this gap, we formalize rigorous cryptographic security notions tailored to CMC frameworks, introduce a generic protocol template, and prove that it satisfies these requirements. Our results thus offer both cautionary evidence about existing approaches and constructive guidance for designing secure, privacy-preserving ML auditing protocols.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/27/2607.22065v1-biozkfhe-scalable-encrypted-biometric-identification-via-verifiable-homomorphic-similarity-evaluation",
+      "section": "quick",
+      "title_en": "BioZKFHE: Scalable Encrypted Biometric Identification via Verifiable Homomorphic Similarity Evaluation",
+      "authors": "Rundong Xin, Taotao Wang, Xiaoxiao Wu, Weizhi Meng, Shengli Zhang, Shui Yu",
+      "date": "2026-07-24",
+      "pdf": "https://arxiv.org/pdf/2607.22065v1",
+      "score": "6.0",
+      "evidence": "外包环境下的可验证同态相似性评估",
+      "tldr": "本研究针对外包生物识别中的隐私保护与结果可验证性难题，提出了BioZKFHE框架。该框架结合了BGV全同态加密与委员会介导的证明开启机制，通过创新的单系数多值（SCMV）打包技术显著降低了加密存储开销并规避了高成本的旋转操作。同时，利用可并行验证相似度计算（PVSC）优化了证明生成效率。实验表明，该方案在保持识别精度的同时，大幅提升了大规模检索的性能与安全性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large-scale biometric identification in outsourced settings requires two properties simultaneously: biometric templates and queries must remain protected during computation, and the encrypted similarity outputs produced by an untrusted compute node must be verifiably correct before any application result is released. Existing FHE-based biometric systems primarily address confidentiality, while practical verifiability introduces two bottlenecks in the underlying encrypted 1:N matching layer: rotation- and bandwidth-heavy similarity evaluation and the high cost of proving repeated homomorphic similarity traces. We present BioZKFHE, a framework for scalable encrypted biometric identification via verifiable homomorphic similarity evaluation that combines BGV homomorphic computation with committee-mediated proof opening/decryption and smart-contract verification of opened proof batches. To reduce encrypted storage and avoid rotation-heavy encrypted 1:N matching, we propose Single-Coefficient Multi-Value (SCMV) packing, which binds multiple quantized embedding values into each plaintext entry through base-T expansion. To make proof generation practical, we propose Parallelizable and Verifiable Similarity Computation (PVSC), which exploits the Double-CRT execution structure of BGV to decompose each blockwise similarity trace into parallel proof instances that are opened and checked before result release. Under standard lattice assumptions and explicit committee/verifier assumptions, we analyze recoverability, noise growth, confidentiality, encrypted-output integrity, and finalized-result integrity. Experiments on FaceNet and MobileFaceNet show near-lossless biometric utility, up to 67 percent encrypted-storage reduction, and about 22 to 44 seconds end-to-end proof-verified runtime for 10k to 40k templates.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
