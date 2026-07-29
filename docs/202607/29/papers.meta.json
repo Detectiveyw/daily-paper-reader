@@ -1,0 +1,37 @@
+{
+  "label": "2026-07-29",
+  "date": "2026-07-29",
+  "generated_at": "2026-07-29T20:46:11",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202607/29/2607.23478v1-atlas-automated-approximation-of-transformers-for-efficient-homomorphic-inference-in-one-hour",
+      "section": "deep",
+      "title_en": "ATLAS: Automated Approximation of Transformers for Efficient Homomorphic Inference in One Hour",
+      "authors": "Jianhang Xie, Sicheng Tan, Vishnu Naresh Boddeti, Zhichao Lu",
+      "date": "2026-07-26",
+      "pdf": "https://arxiv.org/pdf/2607.23478v1",
+      "score": "8.0",
+      "evidence": "使用同态加密进行Transformer模型的隐私推理",
+      "tldr": "针对全同态加密（FHE）下Transformer推理成本极高的问题，本文提出ATLAS框架。它通过多目标优化自动配置各层的多项式近似参数，打破了以往手动统一配置的局限。ATLAS采用两阶段优化策略和代理模型，在极大的搜索空间中高效寻找延迟与精度的平衡点，显著提升了同态推理的效率并降低了部署门槛。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Fully homomorphic encryption (FHE) provides strong cryptographic guarantees for private inference, but deploying transformer models under FHE remains prohibitively expensive. A key bottleneck is that non-linear operations such as softmax, normalization, and activation must be replaced with polynomial approximations compatible with the CKKS scheme, and the multiplicative depth consumed by these approximations dominates inference cost. Recent frameworks have advanced approximation techniques, yet all rely on manually configured approximation hyperparameters (e.g., number of iterations, polynomial degree), applied uniformly across all layers. While convenient, this uniform-configuration approach is overly rigid: different layers can tolerate different levels of approximation error without degrading predictive accuracy, and uniform configurations cannot exploit this variability to reduce latency. Allowing each layer to adopt its own configuration, however, causes the search space to explode with model depth, reaching roughly $10^{84}$ configurations for BERT/ViT (12 layers) and $10^{225}$ for LLaMA3 (32 layers), rendering manual exploration practically impossible. We present ATLAS, an automated framework that configures per-layer approximation settings by formulating the problem as a multi-objective optimization over latency and predictive accuracy. The resulting problem is inherently difficult: 1) competing objectives over a large decision space (120 or 320 variables for BERT/ViT or LLaMA3); 2) expensive evaluation, as each configuration takes 70-1,000 seconds even in cleartext; and 3) sparse optimization signals, as 35-50% of candidate configurations yield numerically invalid solutions. ATLAS addresses these challenges through a two-stage optimization strategy that progressively relaxes layer-wise constraints, combined with surrogate models to accelerate evaluation.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/29/2607.25430v1-safestats-efficient-2pc-protocols-for-data-statistic-related-functions",
+      "section": "quick",
+      "title_en": "SafeStats: Efficient 2PC Protocols for Data Statistic-Related Functions",
+      "authors": "Tanren Liu, Xianjia Meng, Yang Liu, Xin Kang, Chenhui You, Yong Zeng, Zhuo Ma",
+      "date": "2026-07-28",
+      "pdf": "https://arxiv.org/pdf/2607.25430v1",
+      "score": "6.0",
+      "evidence": "针对非线性和排序函数的安全两方计算协议",
+      "tldr": "SafeStats是一个专为两方安全计算（2PC）设计的高效统计分析工具包。针对医疗和金融等敏感数据的隐私统计需求，该研究总结出频率计数、排序和非线性数学函数三大核心操作，并分别提出了基于移位的计数策略、基于分段指示器的计数排序以及基于二分的范围缩减协议。实验表明，SafeStats在卡方检验等14个场景中显著提升了计算效率并大幅降低了通信开销，为隐私保护下的数据统计提供了高性能解决方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Statistical analysis on sensitive datasets like medical records and financial transactions is essential for decision-making, but raises significant privacy concerns. While existing secure Two-Party Computation (2PC) makes extensive efforts in designing the common secure primitives (e.g., addition and multiplication) or machine learning-related functions, few pay attention to the statistical functions. In this paper, we propose SafeStats, a secure toolkit tailored for 2PC secure statistical analysis. Specifically, to develop SafeStats, we first refer to Microsoft Excel's statistical library and summarize that most statistical operations can be achieved with three core functions:1) frequency counting, 2) sorting, and 3) non-linear math functions. Then, for each core statistical function, SafeStats presents an efficient 2PC implementation. For secure frequency counting, SafeStats adopts a secure shift-based strategy to avoid invoking expensive 2PC equality test protocols. For secure sort, SafeStats involves a secure segment-indicator protocol to achieve secure counting-based sort, which enables fast element sorting over specific statistical scenarios without the need for secure comparison. For non-linear math functions, we enhance the current reduce-then-approximate paradigm by introducing a bisection-based range reduction protocol. Finally, we implement SafeStats and test it on 14 common statistical analysis cases. As an example, for the chi-square test, SafeStats achieves a 1.5 $\\times$ runtime speedup and a 4.2 $\\times$ reduction in communication compared to directly using the current general-purpose 2PC library to realize it.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

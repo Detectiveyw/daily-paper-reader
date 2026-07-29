@@ -1,0 +1,96 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-29T20:45:06.633397+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2607.23478v1",
+      "title": "ATLAS: Automated Approximation of Transformers for Efficient Homomorphic Inference in One Hour",
+      "abstract": "Fully homomorphic encryption (FHE) provides strong cryptographic guarantees for private inference, but deploying transformer models under FHE remains prohibitively expensive. A key bottleneck is that non-linear operations such as softmax, normalization, and activation must be replaced with polynomial approximations compatible with the CKKS scheme, and the multiplicative depth consumed by these approximations dominates inference cost. Recent frameworks have advanced approximation techniques, yet all rely on manually configured approximation hyperparameters (e.g., number of iterations, polynomial degree), applied uniformly across all layers. While convenient, this uniform-configuration approach is overly rigid: different layers can tolerate different levels of approximation error without degrading predictive accuracy, and uniform configurations cannot exploit this variability to reduce latency. Allowing each layer to adopt its own configuration, however, causes the search space to explode with model depth, reaching roughly $10^{84}$ configurations for BERT/ViT (12 layers) and $10^{225}$ for LLaMA3 (32 layers), rendering manual exploration practically impossible. We present ATLAS, an automated framework that configures per-layer approximation settings by formulating the problem as a multi-objective optimization over latency and predictive accuracy. The resulting problem is inherently difficult: 1) competing objectives over a large decision space (120 or 320 variables for BERT/ViT or LLaMA3); 2) expensive evaluation, as each configuration takes 70-1,000 seconds even in cleartext; and 3) sparse optimization signals, as 35-50% of candidate configurations yield numerically invalid solutions. ATLAS addresses these challenges through a two-stage optimization strategy that progressively relaxes layer-wise constraints, combined with surrogate models to accelerate evaluation.",
+      "authors": [
+        "Jianhang Xie",
+        "Sicheng Tan",
+        "Vishnu Naresh Boddeti",
+        "Zhichao Lu"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-07-26T06:08:13+00:00",
+      "link": "https://arxiv.org/pdf/2607.23478v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Private inference for transformer models using homomorphic encryption",
+      "llm_evidence_cn": "使用同态加密进行Transformer模型的隐私推理",
+      "llm_evidence": "使用同态加密进行Transformer模型的隐私推理",
+      "canonical_evidence": "使用同态加密进行Transformer模型的隐私推理",
+      "llm_tldr_en": "Automates polynomial approximation of non-linear transformer layers for efficient private inference under FHE.",
+      "llm_tldr_cn": "自动执行Transformer非线性层的多项式逼近，以实现高效的全同态加密隐私推理。",
+      "llm_tldr": "自动执行Transformer非线性层的多项式逼近，以实现高效的全同态加密隐私推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.25430v1",
+      "title": "SafeStats: Efficient 2PC Protocols for Data Statistic-Related Functions",
+      "abstract": "Statistical analysis on sensitive datasets like medical records and financial transactions is essential for decision-making, but raises significant privacy concerns. While existing secure Two-Party Computation (2PC) makes extensive efforts in designing the common secure primitives (e.g., addition and multiplication) or machine learning-related functions, few pay attention to the statistical functions. In this paper, we propose SafeStats, a secure toolkit tailored for 2PC secure statistical analysis. Specifically, to develop SafeStats, we first refer to Microsoft Excel's statistical library and summarize that most statistical operations can be achieved with three core functions:1) frequency counting, 2) sorting, and 3) non-linear math functions. Then, for each core statistical function, SafeStats presents an efficient 2PC implementation. For secure frequency counting, SafeStats adopts a secure shift-based strategy to avoid invoking expensive 2PC equality test protocols. For secure sort, SafeStats involves a secure segment-indicator protocol to achieve secure counting-based sort, which enables fast element sorting over specific statistical scenarios without the need for secure comparison. For non-linear math functions, we enhance the current reduce-then-approximate paradigm by introducing a bisection-based range reduction protocol. Finally, we implement SafeStats and test it on 14 common statistical analysis cases. As an example, for the chi-square test, SafeStats achieves a 1.5 $\\times$ runtime speedup and a 4.2 $\\times$ reduction in communication compared to directly using the current general-purpose 2PC library to realize it.",
+      "authors": [
+        "Tanren Liu",
+        "Xianjia Meng",
+        "Yang Liu",
+        "Xin Kang",
+        "Chenhui You",
+        "Yong Zeng",
+        "Zhuo Ma"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-28T08:25:30+00:00",
+      "link": "https://arxiv.org/pdf/2607.25430v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Secure 2PC protocols for non-linear and sorting functions",
+      "llm_evidence_cn": "针对非线性和排序函数的安全两方计算协议",
+      "llm_evidence": "针对非线性和排序函数的安全两方计算协议",
+      "canonical_evidence": "针对非线性和排序函数的安全两方计算协议",
+      "llm_tldr_en": "Develops efficient 2PC protocols for statistical functions like sorting and non-linear math, relevant to FSS goals.",
+      "llm_tldr_cn": "为排序和非线性数学等统计函数开发了高效的2PC协议，与FSS的目标相关。",
+      "llm_tldr": "为排序和非线性数学等统计函数开发了高效的2PC协议，与FSS的目标相关。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

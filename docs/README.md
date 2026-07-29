@@ -6,35 +6,28 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-27
-- 运行时间：2026-07-27 21:30:19 UTC
+- 最新运行日期：2026-07-29
+- 运行时间：2026-07-29 20:46:03 UTC
 - 运行状态：成功
-- 本次总论文数：4
-- 精读区：0
-- 速读区：4
+- 本次总论文数：2
+- 精读区：1
+- 速读区：1
 
 ### 今日简报（AI）
-今日聚焦深度学习隐私保护与加密认证，深入探讨从算法加密到系统鲁棒性的前沿进展。
-重点推荐 PrivDNN 部分加密框架，以及揭示加密认证中理论假设与现实鸿沟的深度分析。
-建议在部署隐私计算方案时，需格外警惕理论证明与工程实现之间的安全偏差。
-- 详情：[/202607/27/README](/202607/27/README)
+今日聚焦隐私计算效率突破，重点解析 Transformer 同态加密推理的自动化优化方案。
+ATLAS 框架实现了一小时内完成模型近似，显著提升了隐私推理性能，同时 SafeStats 优化了两方统计协议。
+建议关注如何利用自动化工具降低隐私计算的部署门槛，实现安全与效率的平衡。
+- 详情：[/202607/29/README](/202607/29/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [ATLAS: Automated Approximation of Transformers for Efficient Homomorphic Inference in One Hour](/202607/29/2607.23478v1-atlas-automated-approximation-of-transformers-for-efficient-homomorphic-inference-in-one-hour)  
+   标签：评分：8.0/10、query:fss-llm
+   evidence：使用同态加密进行Transformer模型的隐私推理
 
 ### 速读区论文标签
-1. [PrivDNN: A Secure Multi-Party Computation Framework for Deep Learning using Partial DNN Encryption](/202607/27/2607.21895v1-privdnn-a-secure-multi-party-computation-framework-for-deep-learning-using-partial-dnn-encryption)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：用于深度学习评估的安全多方计算框架
-2. [Robust Berrut-Approximated Coded Computing via Discrete Cosine Transforms](/202607/27/2607.22427v1-robust-berrut-approximated-coded-computing-via-discrete-cosine-transforms)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：针对拜占庭工人的鲁棒分布式计算
-3. [Certified in Theory, Broken in Practice: Assumption Gaps in Cryptographic Model Certification](/202607/27/2607.21839v1-certified-in-theory-broken-in-practice-assumption-gaps-in-cryptographic-model-certification)  
+1. [SafeStats: Efficient 2PC Protocols for Data Statistic-Related Functions](/202607/29/2607.25430v1-safestats-efficient-2pc-protocols-for-data-statistic-related-functions)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：密码学模型认证与审计协议
-4. [BioZKFHE: Scalable Encrypted Biometric Identification via Verifiable Homomorphic Similarity Evaluation](/202607/27/2607.22065v1-biozkfhe-scalable-encrypted-biometric-identification-via-verifiable-homomorphic-similarity-evaluation)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：外包环境下的可验证同态相似性评估
+   evidence：针对非线性和排序函数的安全两方计算协议
 
 
 <div class="dpr-home-promo-card">
