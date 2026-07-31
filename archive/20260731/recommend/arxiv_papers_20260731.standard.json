@@ -1,0 +1,197 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-31T21:37:36.710768+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [
+    {
+      "id": "2607.27696v1",
+      "title": "Distributed Point Functions and Function Secret Sharing",
+      "abstract": "A distributed point function (DPF) is a cryptographic primitive that enables compressed additive sharing of a secret weight-1 vector (equivalently, a point function) across two or more parties. The appealing lightweight structure of DPF constructions has enabled a wide range of applications. These include private information retrieval, anonymous messaging, secure computation with preprocessing, and pseudorandom correlation generators for expanding small correlated seeds into large pseudorandom instances of cryptographic correlations.   In this article, we survey definitions, constructions, and applications of DPFs. We also discuss the extension of DPF to function secret sharing (FSS), which generalizes point functions to support richer function classes. Efficient FSS schemes yield a similar generalization for most of the applications of DPFs.",
+      "authors": [
+        "Elette Boyle",
+        "Niv Gilboa",
+        "Yuval Ishai",
+        "Peter Scholl"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-30T05:27:27+00:00",
+      "link": "https://arxiv.org/pdf/2607.27696v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Comprehensive survey of DPF and FSS definitions, constructions, and applications",
+      "llm_evidence_cn": "关于 DPF 和 FSS 定义、构造及应用的全面综述",
+      "llm_evidence": "关于 DPF 和 FSS 定义、构造及应用的全面综述",
+      "canonical_evidence": "关于 DPF 和 FSS 定义、构造及应用的全面综述",
+      "llm_tldr_en": "A detailed survey of Distributed Point Functions and their generalization to Function Secret Sharing.",
+      "llm_tldr_cn": "对分布式点函数及其向函数秘密共享推广的详细综述。",
+      "llm_tldr": "对分布式点函数及其向函数秘密共享推广的详细综述。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.23752v1",
+      "title": "ZKP Security Tools and Verification: Coverage, Effectiveness, Adoption, and Challenges",
+      "abstract": "Zero-knowledge proofs (ZKPs) have become a core technology for privacy and verifiable computing. They are used to secure blockchains that handle billions of dollars and identity applications dealing with sensitive personal data. However, ZKP systems are complex, and subtle implementation errors can completely break their guarantees, letting attackers forge money or false proofs of identity. Researchers and practitioners have therefore developed a growing set of bug detection and formal verification methods to secure these systems. Yet their real-world effectiveness and adoption remain unclear. In this paper, we aim to shed light on the state of ZKP security tooling. We first systematize the landscape of these tools and observe that most target Circom, leaving newer DSLs and zkVMs with limited support. We then evaluate six tools across 70 real-world vulnerabilities and find that while the tools detect 45.7% of bugs on isolated targets, their effectiveness drops to 19.6% on full codebases, with important vulnerability classes left unaddressed. We also present the first systematic analysis of formal verification efforts, revealing that current work focuses primarily on constraint correctness and identifying key gaps and risks. Finally, we survey 48 practitioners, showing that development and security remain human-led, LLMs are widely used, and practitioners prioritize tools with clearer guarantees and lower integration effort. Overall, our results highlight the need for better integration of security tooling with the development and auditing process, and we provide actionable insights for researchers and practitioners.",
+      "authors": [
+        "Arman Kolozyan",
+        "Tom Sorger",
+        "Alexander Hicks",
+        "Stefanos Chaliasos"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-26T16:54:31+00:00",
+      "link": "https://arxiv.org/pdf/2607.23752v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "verifiable computing and ZKP security verification",
+      "llm_evidence_cn": "可验证计算与零知识证明安全验证",
+      "llm_evidence": "可验证计算与零知识证明安全验证",
+      "canonical_evidence": "可验证计算与零知识证明安全验证",
+      "llm_tldr_en": "Systematizes the landscape of security tools and verification methods for zero-knowledge proofs.",
+      "llm_tldr_cn": "系统化梳理了零知识证明的安全工具和验证方法现状。",
+      "llm_tldr": "系统化梳理了零知识证明的安全工具和验证方法现状。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.21325v1",
+      "title": "Toward cryptographically verifiable authorization for autonomous AI agents: A security hypothesis, preliminary formal model, and proof-of-concept implementation",
+      "abstract": "Autonomous AI agents increasingly execute actions, invoke tools, and operate on protected resources with limited human oversight. Existing authentication and authorization mechanisms establish identity and delegate authority, but do not inherently provide cryptographic evidence that a concrete request issued by a specific agent satisfies the applicable policy in a specific execution context. This paper hypothesizes that agent authorization can be formalized as a cryptographically verifiable relation, denoted $R_{CVA}$, that jointly binds an agent principal, a concrete authorization request, an execution context, and the satisfaction of an applicable policy, while selectively preserving the confidentiality of private authorization attributes. We introduce a preliminary formal abstraction for Cryptographically Verifiable Agent Authorization (CVA), define a compact set of candidate security properties including authorization soundness, principal binding, request binding, policy binding, and replay resistance, and provide an executable zero-knowledge proof of concept that instantiates selected elements of the model over a Groth16 zk-SNARK construction. We further identify and formalize the structural separation among identity binding, authorization-request binding, and runtime execution binding as a central open problem in the design of secure agentic systems (a distinction {not explicitly addressed by} current agentic security frameworks) and present a falsifiable research agenda for its resolution.",
+      "authors": [
+        "M. Llambí-Morillas",
+        "D. Fernández-Fernández"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-07-23T13:55:02+00:00",
+      "link": "https://arxiv.org/pdf/2607.21325v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Cryptographically verifiable authorization for AI agents",
+      "llm_evidence_cn": "AI智能体的密码学可验证授权",
+      "llm_evidence": "AI智能体的密码学可验证授权",
+      "canonical_evidence": "AI智能体的密码学可验证授权",
+      "llm_tldr_en": "Formalizes cryptographically verifiable authorization for autonomous AI agents to ensure policy compliance.",
+      "llm_tldr_cn": "为自主AI智能体形式化了密码学可验证授权，以确保其操作符合既定策略。",
+      "llm_tldr": "为自主AI智能体形式化了密码学可验证授权，以确保其操作符合既定策略。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.22033v1",
+      "title": "Exponentially Fewer-Server PIR from Sparser $S$-Decoding Polynomials",
+      "abstract": "We show that under a plausible number-theoretic conjecture, for any constant $s$ there exists an $s$-server private information retrieval (PIR) protocol that on an $n$-bit database requires communication $\\exp(O((\\log n)^{1/s} (\\log \\log n)^{1-1/s}))$. Previous constructions attaining the same communication required $2^{O(s)}$ servers. Our number-theoretic conjecture is implied by existing conjectures, namely the generalized repunit conjecture and Schinzel's hypothesis H (either one of these conjectures would suffice alone).   Our result builds on the ``matching vector family + $S$-decoding polynomials'' framework pioneered by Efremenko (STOC 2009) and recently refined by Ghasemi, Kopparty, and Sudan (STOC 2025). The main ingredient is a framework for constructing $S$-decoding polynomials with only $k+1$ nonzero coefficients modulo special products of $k$ primes, resolving an open problem posed by Ghasemi and Kopparty (ITCS 2026). By the lower bound shown by Ghasemi and Kopparty, this is the minimum achievable sparsity. We also empirically validate our construction and make our result unconditional for all $s \\leq 15$.   We also apply our techniques to regimes where $s$ grows with $n$, showing under a stronger variant of our number-theoretic conjecture that the communication complexity of $s$-server matching-vector PIR can be superpolynomially reduced from the previous state of the art for any $s \\leq \\exp(o(\\sqrt{\\log \\log n/\\log \\log \\log n}))$.   The main result for $s = O(1)$ and its proof were discovered in a GPT-5.5 Pro conversation prompted by the authors.",
+      "authors": [
+        "Aparna Gupte",
+        "Seyoon Ragavan"
+      ],
+      "primary_category": "cs.CC",
+      "categories": [
+        "cs.CC",
+        "cs.CR"
+      ],
+      "published": "2026-07-24T06:59:30+00:00",
+      "link": "https://arxiv.org/pdf/2607.22033v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Multi-server Private Information Retrieval (PIR) which is a core application of DPF",
+      "llm_evidence_cn": "多服务器隐私信息检索 (PIR)，这是 DPF 的核心应用",
+      "llm_evidence": "多服务器隐私信息检索 (PIR)，这是 DPF 的核心应用",
+      "canonical_evidence": "多服务器隐私信息检索 (PIR)，这是 DPF 的核心应用",
+      "llm_tldr_en": "Constructs efficient multi-server PIR protocols with reduced communication using number-theoretic conjectures.",
+      "llm_tldr_cn": "利用数论猜想构建了通信开销更低的高效多服务器 PIR 协议。",
+      "llm_tldr": "利用数论猜想构建了通信开销更低的高效多服务器 PIR 协议。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Distributed Point Functions (DPF) in FSS",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.25222v1",
+      "title": "How to Watermark the RLWE Homomorphic Ciphertexts",
+      "abstract": "In recent years, homomorphic encryption (HE) schemes based on the Ring Learning with Errors (RLWE) problem have rapidly developed and been widely applied to secure computation tasks, including privacy-preserving deep learning inference, privacy-preserving database queries, and related applications. However, most existing HE schemes focus primarily on the feasibility and efficiency of homomorphic computation, often neglecting practical requirements such as copyright protection of ciphertexts, source authentication, and supervision during computation. To address these issues, we propose a watermarking technique for RLWE-based HE ciphertexts. The algebraic structure of RLWE polynomials allows us to embed small noise as watermarking information into the ciphertext polynomials without affecting the plaintext values. However, HE ciphertexts typically undergo multiple homomorphic operations, which can distort or even remove the embedded watermark information. To address this challenge, we propose two practical solutions. The first, ARWMark, is a watermarking scheme based on noise stratification and is robust to homomorphic additive operations. The second scheme, MRWMark, is constructed using the roots of a linear equation and is resilient to both homomorphic additive and multiplicative operations, while supporting zero-bit watermarking. We provide a detailed theoretical analysis, proving that our schemes do not compromise the original security of HE, while ensuring the correctness and robustness of the proposed watermarking techniques. Furthermore, we conduct extensive experiments to demonstrate the effectiveness of both watermarking schemes.",
+      "authors": [
+        "Yufei Zhou"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-28T02:53:30+00:00",
+      "link": "https://arxiv.org/pdf/2607.25222v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy-preserving deep learning inference using HE",
+      "llm_evidence_cn": "使用同态加密的隐私保护深度学习推理",
+      "llm_evidence": "使用同态加密的隐私保护深度学习推理",
+      "canonical_evidence": "使用同态加密的隐私保护深度学习推理",
+      "llm_tldr_en": "Proposes a watermarking technique for RLWE-based homomorphic ciphertexts to protect computation sources.",
+      "llm_tldr_cn": "为基于RLWE的同态加密密文提出水印技术，以实现计算过程中的版权保护和监管。",
+      "llm_tldr": "为基于RLWE的同态加密密文提出水印技术，以实现计算过程中的版权保护和监管。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
