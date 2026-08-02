@@ -1,0 +1,51 @@
+{
+  "label": "2026-08-02",
+  "date": "2026-08-02",
+  "generated_at": "2026-08-02T20:52:27",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202608/02/2607.28191v1-secure-aggregation-for-privacy-preserving-federated-learning-on-clinical-eeg-data",
+      "section": "quick",
+      "title_en": "Secure Aggregation for Privacy-Preserving Federated Learning on Clinical EEG Data",
+      "authors": "Pouya Rajabi, Mohsen Toorani",
+      "date": "2026-07-30",
+      "pdf": "https://arxiv.org/pdf/2607.28191v1",
+      "score": "7.0",
+      "evidence": "恶意环境下的门限秘密共享与可验证性",
+      "tldr": "本研究针对临床脑电图（EEG）数据的隐私保护，提出了一种基于掩码安全聚合的联邦学习框架。该框架集成了图通信、阈值秘密共享、容错聚合及可验证性机制，支持半诚实和恶意设置。实验表明，该方案在保护个体模型更新隐私的同时，能有效支持跨机构模型训练，虽增加了计算和通信开销，但显著提升了数据的安全性和一致性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Federated learning enables multiple institutions to train shared models without exchanging raw clinical EEG data, but it does not fully prevent privacy leakage from individual model updates. This paper presents a privacy-preserving federated learning framework for clinical EEG data using masking-based secure aggregation as the core protection mechanism. The framework combines graph-based communication, threshold secret sharing, dropout-resilient aggregation, local update clipping, an optional Bloom filter-based privacy-preserving record-linkage initialization module, and auxiliary-notary-based verifiability. It supports both semi-honest and malicious aggregation settings and is implemented using the Flower federated learning framework. The secure-aggregation variants are evaluated in a simulated cross-silo healthcare setting using TUH EEG-derived data under different client configurations. Under the stated assumptions, the secure variants hide individual updates from the aggregation server. The results show that these variants remain compatible with federated model training, although malicious-setting safeguards and lightweight consistency-checking mechanisms introduce additional computation, communication, and round-duration overhead. The semi-honest variant provides the lowest overhead among the secure configurations, while malicious and auxiliary-notary variants offer stronger consistency, integrity, and lightweight verification support at higher cost.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/02/2607.25107v1-mosaic-fl-a-micro-service-based-privacy-preserving-framework-with-application-to-genomics",
+      "section": "quick",
+      "title_en": "MOSAIC-FL, a micro-service based privacy-preserving framework with application to genomics",
+      "authors": "Paul Largillier, Karl Paygambar, Cédric Gouy-Pailler, Vincent Meyer, Mallek Mziou, Oana Stan",
+      "date": "2026-07-27",
+      "pdf": "https://arxiv.org/pdf/2607.25107v1",
+      "score": "6.0",
+      "evidence": "用于分布式计算的安全聚合协议",
+      "tldr": "本研究针对医疗和基因组学中联邦学习的隐私与安全挑战，提出了MOSAIC-FL框架。该框架采用微服务架构，结合gRPC通信和有限状态机实现高效同步与威胁检测。核心采用基于阈值CKKS同态加密的容错安全聚合协议，确保模型盲聚合，并通过噪声泛滥和密钥更新机制增强安全性。实验证明其在图像识别和癌症亚型分类任务中具有出色的性能和鲁棒性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Security and privacy are primordial requirements for Federated Learning (FL), especially in fields such as healthcare and genomics where sensitive information has to be analyzed. Our FL framework is designed to address these challenges while proposing a modular, flexible and micro-service architecture. More precisely, it integrates an efficient gRPC communication layer and a Finite State Machine to ensure robust component synchronization and threat detection, while relying on a fault-tolerant secure aggregation protocol using a Threshold variant of the CKKS homomorphic cryptosystem. This allows blind model aggregation by an orchestration server, requiring a minimum of $t$-out-of-$N$ active clients for decryption while minimizing communication overhead thanks to both cryptographic and network protocols. We ensure IND-CPA-D security through noise flooding and mitigate the recent key-recovery attack on synchronized decryptors by renewing the collective key material at every round. We demonstrate the framework's effectiveness through diverse use cases, ranging from standard image recognition (EMNIST) to complex genomic classification including breast cancer subtyping on TCGA, evaluating system performance across different threshold values and model scales.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/02/2607.27401v1-low-latency-bootstrapping-for-ckks-using-roots-of-unity",
+      "section": "quick",
+      "title_en": "Low-Latency Bootstrapping for CKKS using Roots of Unity",
+      "authors": "Jean-Sebastien Coron, Robin Koestler",
+      "date": "2026-07-29",
+      "pdf": "https://arxiv.org/pdf/2607.27401v1",
+      "score": "6.0",
+      "evidence": "用于近似算术的同态加密",
+      "tldr": "本研究提出了一种名为SPRU（稀疏单位根）的新型CKKS同态加密自举算法。传统方法依赖多项式逼近模运算，而SPRU直接将模q加法群嵌入到复数单位根中，利用CKKS原生支持的特性进行评估。该方法显著降低了自举所需的乘法深度，允许使用更小的环维度，从而大幅提升效率。在OpenFHE库的测试中，针对少量槽位的密文，其延迟降低了高达5倍。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We introduce Sparse Roots of Unity (SPRU) bootstrapping, a new bootstrapping algorithm for the CKKS homomorphic encryption scheme for approximate arithmetic. The original CKKS bootstrapping method relies on homomorphically evaluating a polynomial that approximates modular reduction modulo q. In contrast, SPRU bootstrapping directly embeds the additive group modulo q into the complex roots of unity, which can be evaluated natively in the CKKS scheme. This approach significantly reduces the multiplicative depth required for bootstrapping, enabling the use of a smaller ring dimension and improving efficiency. In practice, using the OpenFHE C++ library, SPRU bootstrapping achieves up to a 5x reduction in latency when applied to ciphertexts with a small number of slots.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

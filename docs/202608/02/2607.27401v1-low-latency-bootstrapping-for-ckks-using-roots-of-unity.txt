@@ -1,0 +1,2309 @@
+Title: Low-Latency Bootstrapping for CKKS using Roots of Unity
+
+URL Source: https://arxiv.org/pdf/2607.27401v1
+
+Published Time: Fri, 31 Jul 2026 00:09:32 GMT
+
+Number of Pages: 42
+
+Markdown Content:
+# Low-Latency Bootstrapping for CKKS using Roots of Unity 
+
+Jean-S´ ebastien Coron and Robin K¨ ostler           
+
+> University of Luxembourg
+> Abstract. We introduce Sparse Roots of Unity (SPRU) bootstrapping, a new bootstrapping algorithm for the CKKS homomorphic encryption scheme for approximate arithmetic. The original
+> CKKS bootstrapping method relies on homomorphically evaluating a polynomial that approximates modular reduction modulo q. In contrast, SPRU bootstrapping directly embeds the additive group modulo qinto the complex roots of unity, which can be evaluated natively in the CKKS scheme. This approach significantly reduces the multiplicative depth required for bootstrapping, enabling the use of a smaller ring dimension and improving efficiency. In practice, using the OpenFHE C ++ library, SPRU bootstrapping achieves up to a 5 reduction in latency when applied to ciphertexts with a small number of slots.
+
+1 Introduction 
+
+Fully Homomorphic Encryption. Homomorphic encryption (HE) enables to perform oper-ations on encrypted data without knowing the decryption key. Fully homomorphic encryption 
+
+(FHE) extends this capability, enabling the evaluation of arbitrary circuits on encrypted data. FHE has a wide range of applications, including secure cloud computing, multi-party computation, and secure machine learning. Since Gentry’s invention of FHE in 2009 [ Gen09 ], numerous homomorphic encryption schemes have been developed, leading to significant improvements in FHE performance. Gentry’s key innovation was the introduction of bootstrapping , a ciphertext refreshing procedure based on homomorphically evaluating the decryption circuit. Building on this breakthrough, schemes such as BGV [ BGV11 ] and BFV [ Bra12 ,FV12 ] further enhanced FHE by basing their security on the hardness of the ring learning with errors (RLWE) problem [ SSTX09 , LPR10 ]. These schemes can achieve high computational throughput by utilizing Single Instruction, Multiple Data (SIMD) operations [GHS12a,SV14]. The FHEW scheme, introduced in [ DM15 ], reduced the time for bootstrapping a single-bit encryption to under one second, building on the approach from [ AP14 ] and the matrix-based scheme of [ GSW13 ]. This was further improved in [ CGGI16 ] with the torus-FHE (TFHE) scheme, achieving a bootstrapping time of less than 0.1 second. 
+
+The CKKS scheme. In [ CKKS17 ], the authors presented a construction for homomorphic encryption supporting approximate arithmetic, based on the RLWE problem. The core idea involves adding noise to the plaintext to ensure security, with this noise being treated as part of the error inherent in approximate computations. Given a ciphertext ct , for a secret key sk , the decryption equation ⟨ct , sk ⟩ (mod q) outputs an approximation m + e of the original message m,for a small error e. The authors introduced a rescaling procedure to control the magnitude of plaintexts, enabling the construction of a leveled homomorphic encryption scheme, where the ciphertext modulus grows linearly with the depth of the evaluated circuit. Through rescaling, the scheme can emulate fixed-point addition and multiplication on encrypted messages. Additionally, they described a packing method that allows the encryption of up to N/ 2 complex numbers in a single ciphertext to perform SIMD operations. arXiv:2607.27401v1 [cs.CR] 29 Jul 2026 CKKS bootstrapping. In [ CHK +18a ], the authors introduced a novel ciphertext refreshing procedure for CKKS, extending the leveled homomorphic encryption scheme to fully homomorphic encryption based on Gentrys bootstrapping technique. Specifically, the initial leveled scheme from [ CKKS17 ] can only evaluate circuits of a fixed depth, as each homomorphic multiplication reduces the ciphertext modulus until it becomes too small to support further computation.  
+
+> Fig. 1. Approximating modular reduction via a scaled sine function.
+
+As illustrated in Figure 1, CKKS bootstrapping relies on approximating the modular reduction modulo q using a scaled sine function. Since the sine function is 2 π-periodic, the decryption function can be expressed as: [⟨ct , sk ⟩]q ≈ q
+
+2π · sin 
+
+ 2πq · ⟨ ct , sk ⟩
+
+
+
+.
+
+which is periodic modulo q and closely approximates ⟨ct , sk ⟩ near 0. Given that m ≪ q, the polynomial approximation only has to be good for small values modulo q. The bootstrapping procedure homomorphically evaluates this polynomial approximation, producing a refreshed ciphertext that encrypts the same message but under a larger modulus, thereby enabling further computation. The error resulting from bootstrapping is kept sufficiently small to preserve plaintext precision. The authors also demonstrated how to refresh packed ciphertexts containing n slots with 
+
+O(n) complexity. In particular, they use a linear transformation that moves the polynomial coefficients into the plaintext slots via the coefficient-to-slot (CoeffToSlot ) procedure, and reverses the latter using the slot-to-coefficient (SlotToCoeff ) operation. The complexity of these operations was further reduced to O(log n) in [ CHH18 ,CCS19 ]. We recall the original CKKS bootstrapping procedure in more details in Appendix C, first for a single slot, and then for multiple slots, using the CoeffToSlot and SlotToCoeff operations. The main drawback of CKKS bootstrapping is its relatively high runtime, primarily due to its substantial multiplicative depth, which necessitates a large modulus. Reducing the multiplicative depth would free up more levels for useful computations after bootstrapping, thereby improving overall throughput. Additionally, it would allow for the selection of a smaller ring dimension, leading to reduced latency. 
+
+Sparse Roots of Unity (SPRU) bootstrapping. Our main contribution is SPRU bootstrap-ping, a new bootstrapping algorithm for CKKS that achieves reduced multiplicative depth. The key idea is to embed the additive group Zq into the complex roots of unity via the homomorphism: 
+
+f : Zq −→ C, x 7 −→ exp(2 iπ · x/q ).
+
+This embedding enables modular reduction to be evaluated natively within the CKKS scheme, avoiding expensive polynomial approximations and enabling more efficient ciphertext refreshing, especially for a small number of slots. 2Considering for simplicity an LWE ciphertext c, we can compute the decryption equation 
+
+m = ⟨s, c⟩ = PN −1 
+
+> k=0
+
+skck (mod q) over this multiplicative group, using sk ∈ { 0, 1} as a selector: exp(2 iπ · ⟨ s, c⟩/q ) =  
+
+> N−1
+
+Y
+
+> k=0
+
+exp(2 iπ · cksk/q ) =  
+
+> N−1
+
+Y
+
+> k=0
+
+(1 + (exp(2 iπ · ck/q ) − 1) · sk) .
+
+Moreover, considering a message m ∈ Z such that m = [ ⟨c, s⟩]q ≪ q, we can use the approximation exp( x) ≃ 1 + x for small x, which yields: 1 + m · 2iπ q ≃ 
+
+> N−1
+
+Y
+
+> k=0
+
+(1 + (exp(2 iπ · ck/q ) − 1) · sk) (1) We claim that this provides a new bootstrapping equation for CKKS , as it can be homomor-phically evaluated to provide a refreshed ciphertext. Specifically, it suffices to encrypt each sk,and following (1), homomorphically multiply it by exp (2 iπ · ck/q ) − 1. The full product is then computed homomorphically using CKKS multiplications. Eventually, by extracting the imaginary part and applying appropriate scaling, we obtain a new ciphertext encrypting the same m ∈ Z,but under a larger modulus q · p than the original modulus q, enabling further computation. This bootstrapping equation differs significantly from the original CKKS bootstrapping algorithm, as we avoid using a polynomial approximation of the sine function. Instead, the modular reduction modulo q is achieved by directly embedding the ciphertext coefficients ck ∈ Z
+
+into the complex circle group, where computations are performed using CKKS ’ homomorphic operations. Notably, when bootstrapping multiple slots, the coefficient-to-slot procedure from the 
+
+CKKS bootstrapping is dispensable, as the ciphertext is already embedded within the complex slots. However, the slot-to-coefficient (STC) operation is still needed to revert to the coefficient representation. Our approach shares conceptual similarities with the blind rotation algorithms used in FHEW/TFHE bootstrapping [ DM15 ,CGGI16 ], where the additive group Zq is embedded into the set Y i of roots of unity of XN + 1, for N = k · q and Y = X2k. In both cases, the computation involves a chain of products with factors selected homomorphically over the encrypted coefficients of the secret key. However, we stress that the underlying mathematics of FHEW/TFHE and 
+
+CKKS are fundamentally different. FHEW/TFHE bootstrapping is optimized for low-latency processing of single-slot messages with limited precision (typically Boolean to 5-bit integers). In contrast, CKKS supports the encryption and bootstrapping of up to N/ 2 high-precision complex values in a single ciphertext, albeit at the cost of significantly higher latency. The goal of this paper is therefore to explore this new bootstrapping approach, prove a corresponding bootstrapping theorem, and introduce several optimizations that make it practical. Finally, we present concrete parameter sets and benchmark our results based on the OpenFHE C++ library [ BAB +22 ], comparing the performance of our bootstrapping with the original CKKS 
+
+bootstrapping. 
+
+First optimization: packing the secret-key bits. We introduce a first optimization for the homomorphic evaluation of our bootstrapping equation (1), where the N secret-key bits si are packed into the N/ 2 slots of CKKS ciphertexts. As a consequence, the bootstrapping key size decreases from N to only two CKKS ciphertexts. The product of the slots is then computed using a product operator (corresponding to the standard field norm, see Sec. 3.5), most notably 3reducing the number of ciphertext-ciphertext multiplications from O(N ) to O(log N ). When homomorphically evaluating (1), we further take advantage of CKKS natively supporting complex numbers in the slots. 
+
+Second optimization: a sparse block secret-key. As a second optimization, we assume that the secret key is structured into h blocks, each of size B = N/h , with exactly one non-zero bit per block. This technique was previously explored in the context of TFHE bootstrapping [ LMSS23 ]. Leveraging this structure, we can rewrite the bootstrapping equation (1) using partial sums over each block instead of products. For a packed ciphertext, these sums are efficiently computed using the trace operator, while the remaining products are still handled by the product operator. Since most homomorphic multiplications are replaced by additions, this approach reduces the multiplicative depth from log 2 N + 1 to log 2 h + 1. Additionally, the number of homomorphic multiplications decreases from O(log N ) to O(log h), further improving efficiency. We formally describe our bootstrapping algorithm for a single slot by combining the two previous optimizations in Section 4.4. 
+
+Bootstrapping any number of slots. Equation (1) applies to bootstrapping a single slot 
+
+m ∈ Z, but it can be naturally extended to handle multiple slots. We first generalize the approach to n slots for n ≤ B/ 2, where B is the block size in the secret key. To achieve this, we treat each coefficient of the polynomial message as the decryption of an independent LWE ciphertext. The key bits and the corresponding embeddings of the LWE ciphertext coefficients are then packed into the N/ 2 slots of 2 n CKKS ciphertexts. As before, the sum is computed in two steps: first, by summing across 2 n distinct ciphertexts, and then by applying the trace operator to the result. The product is again evaluated using the product operator. Finally, we apply the 
+
+SlotToCoeff operation to move the slots into the polynomial coefficients. Note that, as opposed to the original CKKS bootstrapping, we do not need the CoeffToSlot operation. To support ciphertexts with up to n ≤ N/ 2 slots, we apply the above bootstrapping procedure sequentially over ciphertexts containing B/ 2 slots. Asymptotically, our method has a complexity of O(n + log N ) homomorphic operations, whereas the original CKKS bootstrapping scales as O( log n + log N ). Consequently, the original 
+
+CKKS bootstrapping is more efficient for large n. However, for a small number of slots, our approach is significantly faster in practice due to its lower multiplicative depth. Additionally, our bootstrapping method is highly parallelizable; with n processors, it achieves the same O( log N )complexity as the original CKKS bootstrapping. 
+
+Open-source implementation based on OpenFHE. We present our open-source imple-mentation of the new bootstrapping algorithm, developed using the OpenFHE C ++ library. This enables a direct comparison with the existing implementation of the original CKKS bootstrapping provided in OpenFHE. We recall the parameter set used for the original bootstrapping and introduce a concrete parameter set for our method, both ensuring a 128-bit security level. Our results demonstrate that, in practice, the reduced multiplicative depth of our approach yields up to an 5 speedup when bootstrapping ciphertexts with a small number of slots. The source code is provided in 
+
+https://github.com/coron/spru_boot 
+
+4Efficient implementations of CKKS . Efficient implementations of CKKS use a residue number system (RNS), which decomposes the ciphertext modulus into several smaller moduli. This allows operations to be performed on native 64-bit word-sized integers, providing significant computational advantages. The first RNS-CKKS scheme was introduced in [ CHK +18b ], achieving an order of magnitude improvement in efficiency, by adapting the double-CRT representation in the BGV scheme [ GHS12b ]. Since the RNS technique is implemented in the OpenFHE C ++ library, we are able to directly compare our method against the state-of-the-art implementation of the original CKKS bootstrapping available in OpenFHE. A significant portion of CKKS runtime is attributed to its linear transformations, specifi-cally SlotToCoeff and CoeffToSlot , which perform homomorphic encoding and decoding. These transformations can be executed using matrix multiplication, requiring O(n) homomorphic oper-ations [ CHK +18a ]. This was later optimized to O(log n) by employing a homomorphic Discrete Fourier Transform (DFT) [ CHH18 , CCS19 ]. Both techniques are implemented in the OpenFHE C++ library for the original CKKS bootstrapping. Our bootstrapping implementation reuses the existing SlotToCoeff implementation without modification. Another optimization involves GPU-accelerated implementations, as described in [ SYL +23 ]and [ JKA +21 ]. Additionally, the authors of [ CCKS23 ] proposed a new technique for performing a ciphertext multiplication that consumes fewer bits of the ciphertext modulus. All these optimizations are fully compatible with our new bootstrapping algorithm. 
+
+Related work. The CKKS approximation of the modular reduction function, specifically the 
+
+EvalMod algorithm, has been optimized in [ KPK +23 ] and [ LLK +22 ] to consume fewer bits of the ciphertext modulus. The approximation of the sine function has been improved in [ LLL +21 ]and [JM22], improving the bootstrapping precision. In [ KDE +21 ], the authors introduced a new bootstrapping approach for BGV, BFV and CKKS ,based on the blind rotation technique used in FHEW/TFHE bootstrapping. For CKKS , their approach enables high-precision bootstrapping with a relatively small ring dimension of N = 2 13 .Since FHEW/TFHE can only bootstrap a single slot, the ciphertext is split according to the number of slots. Then, each part is bootstrapped independently, and the results are recombined into a single ciphertext. However, this approach requires O(N ) homomorphic operations for a single slot, which could render it impractical for CKKS . The authors do not provide timing results for their implementation. In [ BCC +22 ], the authors introduced a method for achieving high-precision bootstrapping by combining multiple low-precision bootstrapping steps. As a result, it is possible to keep the same parameters (in particular, the same modulus size) for bootstrapping while achieving higher precision, albeit with the trade-off of requiring more iterations. Finally, it was recently shown that CKKS can be used in a black-box manner to perform computations on binary data [ DMPS24 ]. This was further improved in [ BCKS24 ] with a CKKS bootstrapping algorithm designed specifically for ciphertexts encoding binary data. 
+
+Independent work. Recently, Cheon, Hanrot, Kim, and Stehl introduced a new bootstrapping algorithm for CKKS at Eurocrypt 2025 [ CHKS25 ]. Like our approach, their method is based on complex roots of unity and achieves a reduction in multiplicative depth compared to the original 
+
+CKKS bootstrapping. The main difference is that they focus on a full N/ 2-slots bootstrapping using a large number of processors, while we focus on efficient bootstrapping for a small number of slots, with a 5single or few processors. Additionally, the underlying techniques are fundamentally different. Their method homomorphically evaluates the polynomial shift arising in the decryption process through a blind rotation procedure inspired by the DM/CGGI bootstrapping technique. This involves encrypting the index j of each of the h non-zero secret-key elements (where h is the Hamming weight), and then performing a blind rotation by j positions on a vector of complex roots of unity. In contrast, our method does not encode the secret-key coefficients by their indices. Instead, the secret-key coefficients are packed directly into the slots of a CKKS ciphertext, and bootstrapping is performed by homomorphically evaluating the decryption equation for each slot over the complex roots of unity. 
+
+2 Preliminaries 
+
+Basic notations. For a real number r, we denote by ⌊r⌉ the nearest integer to r, rounding upwards. We denote vectors in bold, and ⟨a, b⟩ denotes the scalar product of the vectors a and 
+
+b. For an integer q, we use Z ∩ (−q/ 2, q/ 2] as a representative of Zq, and use [ z]q or z mod q
+
+to denote the central reduction of the integer z modulo q into that interval. For a finite set S,we denote by v ← S the sampling of v uniformly at random from S. By v ← D we also denote sampling v from a distribution D. We utilize the same notations for sampling coefficients of vectors/polynomials independently and identically from a set/distribution. For an integer κ > 0, we let v ← χκ be sampled from the centered binomial distribution χκ. It is defined as outputting 
+
+v := Pκj=1 (ai − bi), where a, b ← { 0, 1}κ. In this case, it holds that |v| ≤ κ. We denote by λ the security parameter; all known attacks should take Ω(2 λ) bit operations. 
+
+Cyclotomic rings. For a power-of-two N , we set R := Z[X]/(XN + 1) as the 2 N -th cyclotomic ring. We also write Rq := Zq[X]/(XN + 1) for the residue ring of R modulo q. As previously, coefficients of elements of Rq are represented as integers in ( −q/ 2, q/ 2]. We represent an arbitrary element of the cyclotomic ring S = R[X]/(XN + 1) as a polynomial a(X) = PN −1 
+
+> j=0
+
+aj Xj of degree strictly less than N , and identify it with its coefficient vector ( a0, . . . , a N −1) ∈ RN . We consider the norms ∥a∥∞ = max i∈{ 0,...,N −1} |ai| and ∥a∥1 = PN −1 
+
+> i=0
+
+|ai| on the coefficient vector of a.
+
+3 The CKKS scheme 
+
+3.1 Basic RLWE -based encryption 
+
+In [ CKKS17 ], the authors described a fully homomorphic encryption scheme designed for ap-proximate arithmetic. Given ciphertexts encrypting m1 and m2, the scheme enables secure computations of encrypted approximate values of m1 + m2 and m1 · m2, with a predefined level of precision. We recall the concrete instantiation based on the BGV scheme [ BGV11 ], using the multiplication from [ GHS12b ] based on raising the ciphertext modulus. Note that the 
+
+CKKS scheme differs from BGV in the sense that the plaintext space is the polynomial ring 
+
+R = Z[X]/(XN + 1), instead of Zt[X]/(XN + 1) for a small t.Let q be an integer and let s be a secret key with small components in R. A CKKS ciphertext 
+
+ct = ( c0, c 1) for a plaintext m ∈ R satisfies: 
+
+⟨ct , sk ⟩ = c0 + c1 · s = m + e (mod ( q, X N + 1)) 6for some small error e ∈ R . This implies that during decryption, the message m is not recovered exactly, as the low-order bits of the coefficients of m(X) are masked by the error e(X). Such an error e is inserted to guarantee the security of the hardness assumption of the ring learning with error ( RLWE ) problem. During homomorphic operations, the coefficients of the plaintext polynomial m(X) should remain sufficiently small compared to the ciphertext modulus q.
+
+Definition 1 (RLWE ). For an integer q, a ring dimension N and distributions Ds and De, the decisional RLWE problem consists, for s ← D s, in distinguishing polynomially many samples 
+
+(a, a · s + e) ∈ R 2 
+
+> q
+
+from uniform in R2 
+
+> q
+
+, where a ← R q and e ← D e.
+
+We now formally describe the scheme, following [ CHK +18a ], beginning with the construction of a leveled homomorphic encryption scheme for approximate arithmetic. The plaintext space is R = Z[X]/(XN + 1), while the ciphertext space is R2 
+
+> q
+
+. The scheme defines various layers of moduli, i.e. qℓ = q0 · ∆ℓ for 1 ≤ ℓ ≤ L and a base ∆. For the error sampling, for simplicity we use the centered binomial distribution χκ with parameter κ, rather than a discrete Gaussian distribution. For h ∈ N, we let HW (h) be the set of ternary vectors in {0, ±1}N whose Hamming weight is exactly h. For a real 0 ≤ ρ ≤ 1, let ZO (ρ) denote the distribution that outputs a vector in {0, ±1}N , where each entry is sampled independently, with probability ρ/ 2 for both −1 and 1, and probability 1 − ρ for 0. 
+
+• KeyGen (1 λ): - For a base ∆, a base modulus q0 and an integer L, let qℓ = q0 · ∆ℓ for ℓ = 1 , . . . , L . Given the security parameter λ, choose a power-of-two N , an integer P , and an integer κ > 0for an RLWE problem that achieves a security level of λ-bits, for a modulus P · qL and a ring degree N .- Sample s ← HW (h), a ← R qL and e ← χκ. Set the secret key as sk ← (1 , s ) and the public key as pk ← (b, a ) ∈ R 2 
+
+> qL
+
+where b = −as + e (mod qL). 
+
+• KSGen sk (s′): for s′ ∈ R , sample a ← R P ·qL and e′ ← χκ. Return the switching key as 
+
+swk ← (b′, a ′) ∈ R P ·qL where b′ = −a′s + e′ + P s ′ (mod P · qL). - Set the evaluation key as evk ← KSGen sk (s2). 
+
+• Enc pk (m): for m ∈ R , sample v ← ZO (1 /2) and e0, e 1 ← χκ. Output ct = v · pk + ( m + e0, e 1)(mod qL). 
+
+• Dec sk (ct ): for ct = ( c0, c 1) ∈ R 2 
+
+> qℓ
+
+, output m = c0 + c1 · s (mod qℓ). We now define the homomorphic operations Add (ct 1, ct 2) and Mult evk (ct 1, ct 2). We also define the more lightweight external multiplication ExtMult , which multiplies a ciphertext by a plaintext 
+
+v ∈ R .
+
+• Add (ct 1, ct 2): for ct 1, ct 2 ∈ R 2 
+
+> qℓ
+
+, output ct add = ct 1 + ct 2 (mod qℓ). 
+
+• Mult evk (ct 1, ct 2): for ct 1 = ( b1, a 1), ct 2 = ( b2, a 2) ∈ R 2 
+
+> qℓ
+
+, let ( d0, d 1, d 2) = ( b1b2, a 1b2 +
+
+a2b1, a 1a2) (mod qℓ). Output ct mult ← (d0, d 1) + ⌊P −1 · d2 · evk ⌉ (mod qℓ). 
+
+• ExtMult (ct , v ): for ct = ( b, a ) ∈ R 2 
+
+> qℓ
+
+and v ∈ R , output ct extmult = ( b · v, a · v) (mod qℓ). The rescaling procedure below transforms an encryption of m modulo q into an encryption of 
+
+m/∆ , while also scaling its inherent noise e to around e/∆ . As will be seen in Section 3.2, the composition of homomorphic multiplication and rescaling enables to mimic fixed-point arithmetic, while managing the error growth. 
+
+• RS ℓ→ℓ′ (ct ): for a ciphertext ct ∈ R 2 
+
+> qℓ
+
+at level ℓ, output ct ′ =
+
+j
+
+∆ℓ′−ℓ · ct 
+
+m
+
+(mod qℓ′ ). We omit the subscript ℓ → ℓ′ when ℓ′ = ℓ − 1. 7RNS arithmetic. In practice, efficient implementations of CKKS use the so-called RNS-CKKS variant [ CHK +18b ], which relies on the Residue Number System (RNS) representation. In this setting, the ciphertext moduli have the form Qr = Q 
+
+> 0≤i≤r
+
+qi, where each qi is a small (word-size) prime and 0 ≤ r ≤ ℓm.
+
+Noise growth. In [ CKKS17 ], the authors state some lemmata for estimating the noise, although their noise estimation is only heuristic. Our lemmata below are with rigorous proofs, though with larger upper bounds; we refer to Appendix A for the proofs. 
+
+Lemma 1. Let ct ← Enc pk (m) be an encryption of m ∈ R . Then ⟨ct , sk ⟩ = m + eclean ( mod qL)
+
+for some clean encryption error eclean ∈ R satisfying ∥eclean ∥∞ ≤ Bclean := 3 N κ .
+
+Lemma 2. Let ct ′ ← RS ℓ→ℓ′ (ct ) for a ciphertext ct ∈ R 2 
+
+> qℓ
+
+. Then ⟨ct ′, sk ⟩ = ⌊⟨ ct , sk ⟩ · qℓ′ /q ℓ⌉ + ers 
+
+(mod qℓ′ ) for some rescaling error ers ∈ R satisfying ∥ers ∥∞ ≤ Brs := 2 N .
+
+Lemma 3. Let ct mult ← Mult evk (ct 1, ct 2) for two ciphertexts ct 1, ct 2 ∈ R 2 
+
+> qℓ
+
+. If P ≥ N q ℓκ, then 
+
+⟨ct mult , sk ⟩ = ⟨ct 1, sk ⟩·⟨ ct 2, sk ⟩+ emult ( mod qℓ) for some emult satisfying ∥emult ∥∞ ≤ Bmult := 2 N .
+
+Writing ⟨ct 1, sk ⟩ = m1 + e1 (mod qℓ) and ⟨ct 2, sk ⟩ = m2 + e2 (mod qℓ), the previous lemma shows that only the high-order bits of m1m2 can be recovered, as we get ⟨ct mult , sk ⟩ = ( m1 +
+
+e1) · (m2 + e2) + emult = m1m2 + e⋆ ( mod qℓ), and the low-order bits of m1m2 are masked by the quite large error e⋆ = e1m2 + e2m1 + e1e2 + emult . Applying Lemma 2, one can then perform a modulus switching to rescale the product, which then gives: 
+
+⟨ct ′
+
+> mult
+
+, sk ⟩ = ⌊m1m2/∆ ⌉ + e′ 
+
+> mult
+
+(mod qℓ−1).
+
+Therefore, one obtains an encryption of the scaled product ⌊m1m2/∆ ⌉.
+
+3.2 Encrypting single real numbers 
+
+For simplicity, we first recall the CKKS encryption of single real numbers. We then recall the encryption of N/ 2 complex numbers in parallel in Section 3.3. Specifically, the CKKS scheme can encrypt a real value x ∈ R with a specified precision, by rounding to an integer after scaling. This enables to define (approximate) homomorphic operations directly over R. More precisely, to encode a real value x ∈ R with precision ∆, we use 
+
+Ecd (x) = ⌊x · ∆⌉. (2) Therefore, to encrypt x ∈ R, we first encode x into m = Ecd (x), and then encrypt m into 
+
+ct = Enc pk (m), which gives ⟨ct , sk ⟩ = Ecd (x) + e ( mod qL). Since Ecd (x) ∈ Z, we are using only a single coefficient of the plaintext space R = Z[X]/(XN + 1). Formally, we define the following encryption procedure for real numbers, and the homomorphic multiplication of two ciphertexts of real numbers. 
+
+• EncR pk (x): for x ∈ R, return ct ← Enc pk (Ecd (x)). 
+
+• MultR evk (ct 1, ct 2): return RS (Mult evk (ct 1, ct 2)) 
+
+• ExtMultR (ct , v ): return RS (ExtMult (ct , v )) 8Thanks to the rescaling by a factor ∆, given as input two ciphertexts ct 1, ct 2 encrypting 
+
+x1, x 2 ∈ R under a modulus qℓ, we can obtain a new ciphertext ct = MultR evk (ct 1, ct 2) encrypting 
+
+Ecd (x1) · Ecd (x2)/∆ ≃ Ecd (x1 · x2), therefore an encryption of the product x1 · x2 ∈ R. However, the new encryption is under a smaller modulus qℓ−1 = qℓ/∆ . This is captured in the following lemma; see Fig. 2 for an illustration. 
+
+Lemma 4. Let ct multR ← MultR evk (ct 1, ct 2) for two ciphertexts ct 1, ct 2 ∈ R 2 
+
+> qℓ
+
+such that ⟨ct i, sk ⟩ =
+
+Ecd (xi) + ei ( mod qℓ) for i = 1 , 2, for xi ∈ R with |xi| ≤ ν < N , and ∥ei∥∞ ≤ E, where E2 ≤ ∆.Then ⟨ct mult , sk ⟩ = Ecd (x1 · x2) + emultR ( mod qℓ−1) for some emultR satisfying ∥emultR ∥∞ ≤
+
+2νE + 8 N .                 
+
+> e1q
+> Ecd (x1)
+> e2q
+> Ecd (x2)×e⋆q
+> Ecd (x1)·Ecd (x2)
+> e′q/∆
+> Ecd (x1·x2)
+> Fig. 2. Homomorphic multiplication of real numbers in CKKS : given two encryptions of x1, x 2∈R, we obtain an encryption of x1·x2∈R, albeit for a smaller modulus q/∆ .
+
+3.3 Packing method for parallel encryption of complex numbers 
+
+In [ CKKS17 , CHK +18a ], the authors described a packing method to encrypt multiple messages in a single ciphertext. Through a ring isomorphism, the set S = R[X]/(XN + 1) can be identified with the complex coordinate space CN/ 2. This enables to encrypt N/ 2 complex numbers is a single ciphertext, and perform parallel operations in a SIMD manner. More precisely, the authors considered a variant of the Fourier transform 
+
+DFT : R[X]/(XN + 1) → CN/ 2, p 7 →
+
+
+
+p
+
+
+
+ζ50 
+
+, p 
+
+
+
+ζ51 
+
+, . . . , p 
+
+
+
+ζ5N/ 2−1  
+
+where ζ is a primitive (2 N )-th root of unity. We denote by iDFT : CN/ 2 → S the inverse transform. The DFT function is a ring isomorphism from the ring S (the coefficients space) to the ring of complex vectors in CN/ 2 (the slots space). Its purpose is therefore to map polynomial addition/multiplication in the ring S to component-wise addition/multiplication in CN/ 2.
+
+Encoding. For RLWE -type schemes, we must encode our N/ 2 complex values into polynomials with integer coefficients in the plaintext ring R = Z[X]/(XN + 1), instead of R[X]/(XN + 1). Therefore, the encoding map Ecd : CN/ 2 → R uses an integer approximation of iDFT , with a scaling factor ∆:
+
+∀z ∈ CN/ 2 : Ecd (z) = ⌊∆ · iDFT (z)⌉
+
+and the corresponding decoding map Dcd : R → CN/ 2 is defined as ∀p ∈ R : Dcd (p) = 1 
+
+> ∆
+
+· DFT (p). We denote by × the scaled multiplication over R, i.e. p1 × p2 = ⌊p1 · p2/∆ ⌉ for any p1, p 2 ∈ R .We then have the approximate homomorphic properties: 
+
+Ecd (z1 + z2) ≃ Ecd (z1) + Ecd (z2)
+
+Ecd (z1 ⊙ z2) ≃ Ecd (z1) × Ecd (z2)9where the vectors z1 and z2 are added and multiplied component-wise. Therefore, to perform parallel addition/multiplication on N/ 2 complex values, we can first encode them as a polynomial 
+
+p(X) using Ecd , and then perform ring addition / multiplication in R. Eventually, we can decode the polynomial into N/ 2 complex values using Dcd ; see Fig. 3 for an illustration.                        
+
+> z= ( z1,· · · , z N/ 2)m(X) = Ecd (z)c=Enc (m)
+> Component-wise Polynomial Homomorphic
+> add .and mult .add .and mult .add .and mult .
+> Slots space = CN/ 2Coefficient space = RCiphertext space = Rq
+> Encode Encrypt
+> Fig. 3. Packing method for CKKS .
+
+Sparse packing. For efficiency reasons, it can be advantageous to encode fewer than N/ 2components. We consider a power-of-two n dividing N/ 2. The sub-ring R[XN/ (2 n)]/(XN + 1) ≃
+
+R[Y ]/(Y 2n + 1) is isomorphic to Cn. In particular, if p ∈ R[XN/ (2 n)]/(XN + 1), then DFT (p)contains N/ (2 n) repetitions of the same n components. We can therefore extend the encoding map Ecd to encode vectors of n complex values instead of N/ 2, as follows: 
+
+∀z ∈ Cn : Ecd (z) = ⌊∆ · iDFT (z, . . . . . . , z
+
+| {z }
+
+> N/ (2 n) rep.
+
+)⌉ ∈ Z[XN/ (2 n)]/(XN + 1) . (3) In particular, for n = 1, we have Ecd (z) = ⌊∆ · Re (z)⌉ + XN/ 2 · ⌊ ∆ · Im (z)⌉ for any z ∈ C.Therefore, the encoding map Ecd defined in (3) is a generalization of the encoding function defined in (2) for encoding x ∈ R.
+
+Message packing into a ciphertext. Thanks to this generalized encoding function for any 
+
+z ∈ Cn, we can extend the encryption procedure EncR pk (x) from Section 3.2 to any z ∈ Cn, for any power-of-two 1 ≤ n ≤ N/ 2: 
+
+• EncR pk (z): for z ∈ Cn, return ct ← Enc pk (Ecd (z)). To perform a homomorphic multiplication, we employ the same rescaled multiplication procedure MultR evk (ct 1, ct 2) as in the previous section. Given ciphertexts ct 1 ← EncR pk (z1) and 
+
+ct 2 ← EncR pk (z2), when applying Add (ct 1, ct 2) and MultR evk (ct 1, ct 2), the vectors z1, z2 ∈ Cn
+
+are homomorphically added and multiplied component-wise; see Figure 3 for an illustration. 
+
+3.4 Rotation and conjugation of the slots 
+
+As demonstrated in [ CKKS17 ], rotation and conjugation of slots can be performed homomorphi-cally by applying an automorphism Ψ to both components of a ciphertext. However, Ψ is also applied to the secret key, meaning the new ciphertext only decrypts correctly with the modified key s′ = Ψ (s). Therefore, a key-switching procedure is required to revert to the original key s.
+
+Key switching. The goal of key switching is to convert a ciphertext under a secret key 
+
+sk ′ = (1 , s ′) into a ciphertext for the same message with respect to another secret key sk = (1 , s ). The switching key is generated by the procedure swk ← KSGen sk (s′). Formally, the key switching proceeds as follows: 10 • KS swk (ct ): for ct = ( c0, c 1), return ct ′ ← (c0, 0) + ⌊P −1 · c1 · swk ⌉ (mod qℓ). The noise growth from key switching is captured in the following lemma. 
+
+Lemma 5 (Key switching). Let ct = ( c0, c 1) ∈ R 2 
+
+> qℓ
+
+be a ciphertext with respect to a secret key sk ′ = (1 , s ′) and let swk ← KSGen sk (s′). If P ≥ N q ℓκ, then ct ′ ← KS swk (ct ) satisfies 
+
+⟨ct ′, sk ⟩ = ⟨ct , sk ′⟩ + eks (mod qℓ) for some eks ∈ R with ∥eks ∥∞ ≤ 2N. 
+
+Rotation. For S = R[X]/(XN + 1), the automorphism Ψr : S → S , given m(X) ∈ S , returns 
+
+m(X5r
+
+) ( mod XN + 1). It induces a rotation by r positions to the left on the vector of encoded values. Namely for any m(X) ∈ S , letting DFT (m) = ( zj )0≤j<N/ 2, we get: 
+
+DFT (Ψr(m)( X)) = ( Ψr(m)( ζ5j
+
+)) 0≤j<N/ 2 = ( m(( ζ5j
+
+)5r
+
+)) 0≤j<N/ 2
+
+= ( m(ζ5r+j
+
+)) 0≤j<N/ 2 = ( zr+j mod N/ 2)0≤j<N/ 2.
+
+Conjugation. We also consider the automorphism conj : S → S defined as conj (m)( X) = 
+
+m(X−1) ( mod XN + 1). It enables to compute the conjugate of the values encoded into a polynomial, namely, we have that DFT (conj (m)) = DFT (m). We also denote by Im2 : S → S the operator 
+
+Im2 (m) = −XN/ 2 · (m − conj (m)) .
+
+Since −∆ · XN/ 2 = Ecd (1 /i ), given any z ∈ CN/ 2, we have DFT (Im2 (iDFT (z))) = 2 · Im (z). Therefore, the Im2 operator enables to extract the imaginary part of the slots, up to a factor 2. Similarly, we define the Re2 operator with Re2 (m) = conj (m) + m, so that DFT (Re2 (iDFT (z))) = 2 · Re (z). 
+
+Homomorphic rotation/conjugation of the slots. We summarize below the procedures for homomorphic rotation/conjugation of the slots for a ciphertext ct = ( c0, c 1): 
+
+• GenRot sk (r): generate the rotation key rk r ← KSGen sk (Ψr(s)). 
+
+• Rot (ct , r ): return KS rk r (( Ψr(c0), Ψ r(c1))). 
+
+• GenConj sk : generate the conjugation key ck ← KSGen sk (conj (s)). 
+
+• Conj (ct ): return KS ck (( conj (c0), conj (c1))). 
+
+• Im2 (ct ): return the ciphertext ExtMult (Conj (ct ) − ct , X N/ 2). 
+
+3.5 The trace and product operators Summing the slots. We recall how to homomorphically compute partial or full summation of the slots. The sum of all slots could be obtained by repeatedly rotating the slots by one position and then accumulating the result by summing. However, this would require N/ 2 − 1 rotations for 
+
+N/ 2 slots, which would be impractical. In the following, we recall the technique from [ CHK +18a ,Alg. 2], which uses only O( log N ) homomorphic operations. Summing all slots is algebraically known as the field trace operator [CDKS20]. Formally, for a power-of-two integer a dividing N/ 2, using the Ψr automorphism from the previous section, we define the operator Tr N/ 2→a as 
+
+Tr N/ 2→a = ( id + Ψa) ◦ (id + Ψ2a) ◦ (id + Ψ4a) ◦ · · · ◦ (id + ΨN/ 4).
+
+11 We show in Appendix B.1 that the Tr N/ 2→a operator computes partial sums of the slots sharing the same index modulo a:
+
+Tr N/ 2→a(iDFT (z0, . . . , z N/ 2−1)) = iDFT (t, . . . . . . , t
+
+| {z }
+
+> N/ (2 a) rep.
+
+)for t = ( tk)0≤k<a , with tk = zk + zk+a + · · · + zk+( N/ (2 a)−1) ·a. Therefore, the Tr N/ 2→a operator outputs an encoding of the a slots t0, . . . , t a−1, which are repeated N/ (2 a) times to get N/ 2 slots. The Tr N/ 2→a operator can be homomorphically evaluated, requiring log 2(N/ (2 a)) automorphisms and key switchings, while consuming no multiplicative levels; see Appendix B.1. 
+
+Multiplying the slots. Similarly to the trace operator, we can define the product operator to compute the partial or full product of all slots, by replacing sums by scaled products in the definition. For powers-of-two b < a ≤ N/ 2, we define the Pr a→b operator as 
+
+Pr a→b := ( id × Ψb) ◦ (id × Ψ2b) ◦ (id × Ψ4b) ◦ · · · ◦ (id × Ψa/ 2)where as in Section 3.3 we denote by × the scaled multiplication over R, with p1 ×p2 = ⌊p1 ·p2/∆ ⌉
+
+for any p1, p 2 ∈ R . Letting z ∈ Ca, the Pr a→b operator computes partial products of the slots sharing the same index modulo b:
+
+Pr a→b(Ecd (z)) ≃ Ecd (t)where t = ( tk)0≤k<b , with tk = zk · zk+b · · · zk+( a/b −1) ·b for 0 ≤ k < b . The Pr a→b operator can be homomorphically evaluated using log 2(a/b ) automorphisms and multiplications; thus, it consumes log 2(a/b ) levels; see Appendix B.2. Note that the product operator Pr a→b corresponds to the standard field norm of Q(ζa) over Q(ζb), where ζk denotes a primitive k-th root of unity. 
+
+3.6 From slots back to polynomial coefficients 
+
+Our bootstrapping algorithm for multiple slots requires putting the slots back to the coefficients of a polynomial; this is the SlotToCoeff operation. The original CKKS bootstrapping requires both CoeffToSlot and SlotToCoeff operations [ CHK +18a ], while our technique only requires 
+
+SlotToCoeff , so we only describe the latter; the two operations are the inverse of each other. Formally, SlotToCoeff n takes as input a polynomial v(X) encoding n slots t = ( t0, . . . , t n−1) ∈
+
+Rn:
+
+v(X) = Ecd (t0, . . . , t n−1) ∈ Z[XN/ (2 n)]/(XN + 1) and outputs a polynomial m(X) ∈ Z[XN/n ]/(XN + 1) whose n coefficients are the tj ’s, scaled by a factor ∆ ∈ Z:
+
+m(X) = SlotToCoeff n(v) = 
+
+> n−1
+
+X
+
+> j=0
+
+⌊∆ · tj ⌉ · Xj·N/n (4) Since SlotToCoeff is a linear map, it can be homomorphically evaluated as a matrix-vector multiplication, requiring O(n) homomorphic operations [ CHK +18a ]. However, the homomorphic Discrete Fourier Transform (DFT), which is the primary computation within SlotToCoeff , can be performed more efficiently with only O( log n) homomorphic operations [ CHH18 , CCS19 ]. In this case, the polynomial coefficients in (4) are recovered in a bit-reversed order. We refer to Appendix D for a detailed description. 12 4 New bootstrapping equation for CKKS : single slot 
+
+We now introduce our new bootstrapping algorithm, which is quite different from the original 
+
+CKKS bootstrapping recalled in the previous section. For simplicity, we first consider a CKKS 
+
+ciphertext ct encrypting a single slot, that is ⟨ct , sk ⟩ = m + e ( mod q) for m ∈ Z and e ∈ R . We will describe the bootstrapping of n ≥ 2 slots in parallel in Section 5. An RLWE-format ciphertext can be viewed as (multiple) LWE-format ciphertexts. Therefore, we first convert ct = ( b, a ) into an LWE ciphertext c ∈ ZNq for the same m ∈ Z, i.e. we set 
+
+c = ( a0 + b0, −aN −1, −aN −2, . . . , −a1) and s = ( s0, . . . , s N −1), assuming that s0 = 1. LWE decryption now comprises computing the dot product ⟨c, s⟩ = m + e0 ( mod q) for e0 ∈ Z. Unlike the original CKKS bootstrapping, which uses sparse ternary secrets, we first assume that s is a random binary vector, not necessarily constrained to a low Hamming weight. 
+
+4.1 Our new bootstrapping equation 
+
+Our new bootstrapping equation consists in embedding the additive group Zq into the multi-plicative circle group of complex numbers, using the homomorphism: 
+
+f : Zq → C, x 7 −→ exp(2 iπ · x/q ).
+
+We can therefore compute the decryption equation m = ⟨s, c⟩ = PN −1 
+
+> k=0
+
+skck (mod q) over the multiplicative circle group in C:exp(2 iπ · m/q ) =  
+
+> N−1
+
+Y
+
+> k=0
+
+exp(2 iπ · cksk/q )Moreover, since sk ∈ { 0, 1} works as a selector, we can write: exp(2 iπ · m/q ) =  
+
+> N−1
+
+Y
+
+> k=0
+
+(1 + (exp(2 iπ · ck/q ) − 1) · sk) . (5) By isolating the imaginary part and assuming m ≪ q, we obtain: 2π · mq ≃ sin 
+
+ 2π · mq
+
+
+
+= Im  
+
+> N−1
+
+Y
+
+> k=0
+
+(1 + (exp(2 iπ · ck/q ) − 1) · sk)
+
+!
+
+. (6) We want to obtain an encryption of m ∈ Z, which corresponds to an encoding of m/∆ ∈ R.Therefore, we scale the above equation by a factor q/ (2 π∆ ), and we use the approximation: 
+
+q
+
+2π∆ · sin 
+
+ 2πm q
+
+
+
+= q
+
+2π∆ ·
+
+ 2πm q + O
+
+ m3
+
+q3
+
+ 
+
+= m∆ + O
+
+ m3
+
+q2∆
+
+
+
+. (7) Eventually, we obtain from (6): 
+
+m∆ ≃ q
+
+2π∆ · Im  
+
+> N−1
+
+Y
+
+> k=0
+
+(1 + (exp(2 iπ · ck/q ) − 1) · sk)
+
+!
+
+. (8) From (7), the above approximation requires m = O(q2/3), the same condition as in the original 
+
+CKKS bootstrapping. 13 Bootstrapping. We claim that (8) provides a new bootstrapping equation for CKKS , as it can be homomorphically evaluated to provide a new ciphertext for the same m ∈ Z, but under a larger modulus q · p than the original modulus q. For this, we stress that in the above equation, we consider all variables over R, and since exp (2 iπ · ck/q ) ∈ C, we treat its real and imaginary part separately. Each complex multiplication decomposes into 4 multiplications and 2 additions over R. Since a complex addition also decomposes into two real additions, we can work entirely over R. Similarly, we view the final scaling as a multiplication by q/ (2 π∆ ) ∈ R, and the final output m/∆ ∈ R.Correspondingly, for the homomorphic evaluation of (8), we consider all ciphertexts as encryptions of real numbers, using the encryption function EncR (x) for x ∈ R introduced in Section 3.2. Consequently, all homomorphic operations are performed on encryptions of reals. Eventually, since m/∆ ∈ R is encoded as m = Ecd (m/∆ ) ∈ Z, the encryption of m/∆ will correspond to an encryption of the original plaintext m ∈ Z, but under a larger modulus q · p.Therefore, for bootstrapping, we assume that we are given encryptions Sk ← EncR pk (sk)of each bit sk ∈ { 0, 1} of the secret key s. Here, although sk ∈ { 0, 1}, we again view sk ∈ R.Then, by homomorphic multiplications (using ExtMultR ) and homomorphic additions, we obtain encryptions of 1 + (exp(2 iπ · ck/q ) − 1) · sk for each 0 ≤ k < N , while still encrypting the real/imaginary parts separately. The product of the N terms can then be homomorphically computed with a tree of multiplicative depth log 2 N , such that, according to (5), we obtain an encryption of exp (2 iπ · m/q ). Eventually, we only keep the encryption of its imaginary part and scale by q/ (2 π∆ ). According to (8), this provides an encryption of the real m/∆ , or equivalently, an encryption of the integer m = Ecd (m/∆ ). The circuit corresponding to (8) has a total multiplicative depth of ℓ = log 2(N ) + 2. Thus, starting with a modulus Q = q · p · ∆ℓ for the encryptions Sk, after ℓ rescalings, we end up with an encryption of m under the modulus q · p > q . This achieves bootstrapping since there remains a level for a single homomorphic multiplication. For this last level, we can use a smaller scaling factor p ≃ q2/3, because the plaintext message m must be encoded under the condition 
+
+m = O(q2/3) for (7). On the other hand, we must use a scaling factor ∆ = O(q) for the main bootstrapping evaluation. We prove the following bootstrapping theorem summarizing the above in Appendix E. 
+
+Theorem 1 (Bootstrapping). Given a ciphertext ct such that ∥[⟨ct , sk ⟩]q∥∞ < q 2/3 and 
+
+⟨ct , sk ⟩ = m + e (mod q) for m ∈ Z and e ∈ R , the above evaluation procedure with ∆ ≥
+
+max (4 N 2κq, (20 N 3κ)2) outputs a new ciphertext ct ′ such that ⟨ct ′, sk ⟩ = m+e(0)+ ebt (mod p·q),where e(0) is the constant coefficient of e, and ∥ebt ∥ ≤ Bbt with Bbt := 10 N .
+
+As opposed to the original CKKS bootstrapping, our new bootstrapping equation (8) does not require a small Hamming weight secret key; however, we describe an optimization based on such a secret key in Section 4.3. We note that the above bootstrapping method is fully compatible with RNS arithmetic. In that case, the moduli are of the form Qr = Q 
+
+> 0≤i≤r
+
+qi, for small primes 
+
+qi.
+
+4.2 First optimization: packing the secret-key bits 
+
+For a ring degree N , the above bootstrapping algorithm requires O(N ) homomorphic operations, which would be impractical. Recall that the CKKS scheme provides a packing method where 
+
+N/ 2 plaintext slots can be packed into a single ciphertext. These N/ 2 slots can then be added and multiplied independently, by performing homomorphic operations on ciphertexts (see Fig. 14 3 in Section 3.3). Therefore, the first natural optimization consists of packing the N secret key bits sk from (8) into the N/ 2 slots of two CKKS ciphertexts, instead of encrypting each bit separately. Similarly, we pack the terms exp (2 iπ · ck/q ) − 1 into two polynomial encodings. The products (exp(2 iπ · ck/q ) − 1) · sk are then computed independently and in parallel in the slots, thus requiring only two homomorphic external multiplications ( ExtMultR ). Moreover, the bootstrapping key size is also reduced from N to only two ciphertexts. Another advantage of the packing method is that CKKS natively supports complex numbers in the slots, so we do not need to encrypt the real/imaginary part separately anymore. To compute the product in (8), we can homomorphically apply the Pr N/ 2→1 operator from Section 3.5 to compute the product of the N/ 2 slots in each ciphertext. As a consequence, in the entire procedure, the multiplicative depth remains ℓ = log 2(N )+2, but now the number of homomorphic multiplications is reduced from O(N ) to O(log N ). We will describe this optimization more formally in Section 4.4, when combined with the following second optimization. 
+
+4.3 Second optimization: using the trace operator 
+
+In order to be competitive with the original CKKS bootstrapping, we describe a second opti-mization. It further reduces the multiplicative depth from O( log N ) to O( log h), with h ≪ N , by replacing most homomorphic multiplications by additions, thus boosting efficiency. For this, we still consider a binary secret key s but with a small Hamming weight h, where h
+
+is a power-of-two, moreover with a special block structure (as in e.g. [ LMSS23 ]). We assume that the coefficient vector s ∈ { 0, 1}N can be split into h blocks, each of size B = N/h , where each block contains a single 1. Formally, we write s = ( sb·B+j )0≤b<h, 0≤j<B where in the b-th block, 
+
+sb·B+j = 0 for all j ∈ { 0, . . . , B − 1} \ { j⋆b }, and sb·B+j⋆b = 1 for some 0 ≤ j⋆b < B .As previously, we consider an LWE ciphertext c ∈ ZNq derived from the original RLWE 
+
+ciphertext, with decryption equation: 
+
+m ≃ ⟨ s, c⟩ = 
+
+> N−1
+
+X
+
+> k=0
+
+skck =
+
+> h−1
+
+X
+
+> b=0
+> B−1
+
+X
+
+> j=0
+
+sb·B+j · cb·B+j (mod q)and, again, we embed the above equation into the multiplicative circle group of complex numbers: exp(2 iπ · ⟨ s, c⟩/q ) = 
+
+> h−1
+
+Y
+
+> b=0
+> B−1
+
+Y
+
+> j=0
+
+exp(2 iπ · sb·B+j · cb·B+j /q ).
+
+Since within a given block there is only a single sb·B+j equal to 1 and the others are zero, we can replace the products within a block by a sum: exp(2 iπ · ⟨ s, c⟩/q ) = 
+
+> h−1
+
+Y
+
+> b=0
+> B−1
+
+X
+
+> j=0
+
+sb·B+j · exp(2 iπ · cb·B+j /q ).
+
+As previously, this enables to derive the following bootstrapping equation: 
+
+m∆ ≃ q
+
+2π∆ · Im 
+
+
+
+> h−1
+
+Y
+
+> b=0
+> B−1
+
+X
+
+> j=0
+
+sb·B+j · exp(2 iπ · cb·B+j /q )
+
+ .
+
+15 We can remove the last multiplication by q/ (2 π∆ ) by scaling by a factor δ ∈ R such that 
+
+δh = q/ (2 π∆ ). This yields our final bootstrapping equation in the single slot case: 
+
+m∆ ≃ Im 
+
+
+
+> h−1
+
+Y
+
+> b=0
+> B−1
+
+X
+
+> j=0
+
+sb·B+j · exp(2 iπ · cb·B+j /q ) · δ
+
+ . (9) The advantage of the above equation is that it has a smaller multiplicative depth than (8), since we are only computing the product of h factors instead of N . More precisely, the multiplicative depth is now ℓ = log 2(h) + 1 instead of ℓ = log 2(N ) + 2. By lowering the multiplicative depth, we can decrease the size of the largest modulus Q = q · p · ∆ℓ. After bootstrapping, the refreshed ciphertext is encrypted under the larger modulus p · q rather than the initial modulus q, enabling a single additional homomorphic multiplication between two bootstrapped ciphertexts. Similar to the original CKKS bootstrapping, further homomorphic operations after bootstrapping can be supported by choosing a larger Q.
+
+4.4 Our bootstrapping algorithm for a single component 
+
+We now formally describe our bootstrapping algorithm for a single slot by combining the two previous optimizations. We consider the sparse block secret key s as in Section 4.3, split into 
+
+h blocks, each of size B = N/h . In order to combine the two optimizations, we must rewrite equation (9) to support packed slots. Recall that we must encode N secret-key bits, but a polynomial over the plaintext space Z[X]/(XN + 1) can only encode N/ 2 slots, so we need two polynomial encodings. To speed up computation, we split each block of the secret key in two halves. The first halves of each block will be placed in the first polynomial encoding, and the second halves in the second encoding; see Figure 4 for an illustration. After the external multiplications by the encoding of the exp (2 iπ · cb·B+j /q ) values, we compute the sum in (9) by first adding the two polynomial encodings, while the rest of the sum’s evaluation within each block is handled by the Tr N/ 2→h operator applied to a single encoding. 
+
+sb·B+j
+
+sb·B+j+ B
+
+> 2
+> ×
+> ×
+
+exp(2 iπc b·B+j /q ) · δ
+
+exp(2 iπc b·B+j+ B
+
+> 2
+
+/q ) · δ
+
+> =
+> =
+
+· · · 
+
+· · · 
+
+> +
+
+· · · 
+
+exp(2 iπ · cb·B+j⋆b /q )0 ≤ j < B/ 2
+
+Tr N/ 2→h                   
+
+> Fig. 4. Illustration of the computation within the half-blocks of size B/ 2. After the application of the Tr N/ 2→h
+> operator, all B/ 2 slots contain the same value exp (2 iπ ·cb·B+j⋆b), where j⋆bis the index for which sb·B+j⋆b= 1. Note that each polynomial encoding contains hsuch half-blocks, for a total of h·B/ 2 = N/ 2 slots.
+
+However, we must be careful with the indexing of the slots when applying the Tr N/ 2→h
+
+operator. As illustrated in Appendix B.1, Tr N/ 2→h computes the partial sums of slots sharing the 16 same index modulo h. This implies that we cannot encode the elements of the blocks contiguously in the slots, but only separated modulo h. Therefore, we utilize a “reversed” indexing, in which we put the j-th element of the b-th block at index j · h + b for all 0 ≤ j < B/ 2 for the first half, and similarly at index ( j − B/ 2) · h + b for all B/ 2 ≤ j < B for the second half. More precisely, we denote by ˜s0 
+
+> ι
+
+and ˜s1 
+
+> ι
+
+the corresponding slots, for 0 ≤ ι < N/ 2. According to the above indexing, we let ˜s0 
+
+> j·h+b
+
+= sb·B+j for 0 ≤ j < B/ 2 (first block halves), and ˜s1(j−B/ 2) ·h+b = sb·B+j
+
+for B/ 2 < j < B (second block halves), for all 0 ≤ b < h . In total, the N secret-key bits sk are encoded into the two polynomials: 
+
+S0(X) = Ecd ((˜ s0 
+
+> ι
+
+)0≤ι<N/ 2), S1(X) = Ecd ((˜ s1 
+
+> ι
+
+)0≤ι<N/ 2).
+
+We encode the ciphertext’s components following the same indexing. More precisely, we define the slots ( e0 
+
+> ι
+
+)0≤ι<N/ 2 and ( e1 
+
+> ι
+
+)0≤ι<N/ 2, with e0 
+
+> j·h+b
+
+= exp (2 iπ · cb·B+j /q ) · δ for 0 ≤ j < B/ 2, and 
+
+e1(j−B/ 2) ·h+b = exp (2 iπ · cb·B+j /q ) · δ for B/ 2 ≤ j < B , for all 0 ≤ b < h . This yields the following polynomial encodings: 
+
+E0(X) = Ecd (( e0 
+
+> ι
+
+)0≤ι<N/ 2), E1(X) = Ecd (( e1 
+
+> ι
+
+)0≤ι<N/ 2).
+
+Under this indexing, the bootstrapping equation (9) can be rewritten as: 
+
+m∆ ≃ Im 
+
+
+
+> h−1
+
+Y
+
+> b=0
+> B/ 2−1
+
+X
+
+> j=0
+
+ ˜s0 
+
+> j·h+b
+
+· e0 
+
+> j·h+b
+
++ ˜ s1 
+
+> j·h+b
+
+· e1
+
+> j·h+b
+
+ . (10) With this new indexing now compatible with the Tr N/ 2→h operator, we can perform the same operation homomorphically on polynomials. Specifically, we use Tr N/ 2→h to compute the sums over each half-block and Pr h→1 to calculate the product of the h factors, after which the N/ 2slots contain the same value. Finally, we extract the imaginary part using the Im2 operator (see Section 3.4). Eventually, from (10), we obtain m/∆ in all N/ 2 slots, which corresponds to an encoding of m = Ecd (m/∆ ) ∈ Z. In total, we arrive at our bootstrapping equation for polynomial encodings: 
+
+m ≃ Im2  Pr h→1
+
+ Tr N/ 2→h (S0(X) × E0(X) + S1(X) × E1(X))  . (11) Note that we must use a scaling factor δ ∈ R such that δh = q/ (4 π∆ ) instead of δh = q/ (2 π∆ ), because of the factor 2 in the Im2 operator. 
+
+Bootstrapping. As before, we claim that Equation (11) provides a decryption equation that is compatible with bootstrapping. Namely, all the previous polynomial operations can be applied homomorphically to ciphertexts. More precisely, let cs denote the bootstrapping key consisting of CKKS encryptions cs 0, cs 1
+
+of S0(X) and S1(X), modulo the largest modulus Q. The products Si(X) × Ei(X) are then performed homomorphically on ciphertexts using ExtMultR (cs i, E i), including rescaling. Similarly, the operators Tr N/ 2→h, Pr h→1 and Im2 are applied homomorphically on ciphertexts, as explained in sections 3.4 and 3.5. Eventually, we obtain an encryption of m/∆ ∈ R over all slots, and equivalently an encryption of m = Ecd (m/∆ ) ∈ Z. This corresponds to a new CKKS ciphertext 
+
+ct ′ such that ⟨ct ′, sk ⟩ = m + e ( mod pq ), for a new modulus pq > q . For this, it suffices to set the largest modulus Q := q · p · ∆ℓ, where ℓ = log 2(h) + 1 is the multiplicative depth. We provide a pseudo-code description of this bootstrapping algorithm in Appendix F. 17 The main advantage of the packing approach is that the total number of homomorphic operations is now O( log N ) instead of O(N ), which makes our bootstrapping equation practical. In terms of the costly homomorphic multiplications, which dominate the number of bit-operations, the complexity further decreases to O(log h). We will consider the bootstrapping of n ≥ 2 slots in parallel in Section 5, and concrete implementation results in Section 6. 
+
+4.5 Security analysis of block binary secret key 
+
+Our scheme uses a block binary secret key, divided into h blocks, each of size B = N/h , with exactly one ’1’ in each block. This distribution slightly differs from that used in the original 
+
+CKKS bootstrapping: a ternary secret key with Hamming weight h, but without the regular block structure. To ensure security against the best-known attacks, we provide a specific security analysis for this modified distribution and present corresponding parameter sets in Section 6. We follow the analysis from [LMSS23], which uses the same distribution in the context of TFHE. We first consider the hybrid dual attack on LWE with a sparse secret [ Alb17 ]. This attack, which combines a dual lattice attack with exhaustive search, is used in the Lattice Estimator [APS15 ] to estimate the security of LWE. In the first phase, the secret key s is partitioned as 
+
+s = ( s0, s1). Using lattice reduction, the LWE problem is reduced to a single LWE instance with a smaller dimension. The secret key s0 can then be recovered using combinatorial techniques such as exhaustive search or a meet-in-the-middle algorithm. For the second, combinatorial phase, the authors of [ LMSS23 ] considered two possible approaches. The original method involves guessing the positions of the zeros in the secret key. However, for the block binary distribution, the lattice dimension can be reduced by the block size 
+
+B = N/h by guessing the position of a ’1’ among B possible cases. While the latter approach seemed potentially more efficient, the authors provide an analysis showing that the original approach of guessing the zero positions is, in fact, more efficient. Consequently, the block binary structure seems to offer no advantage for an attacker. Thus, the hybrid dual attack, as modeled in the Lattice Estimator, remains the best attack. Since, for convenience, we assume s0 = 1, we must adjust the ring dimension to N ′ = N · (1 − 1/h ) and the Hamming weight to h′ = h − 1 in the estimator. The authors of [ LMSS23 ] also considered the recently improved meet-in-the-middle attack algorithm from May [ May21 ]. It is based on recursively splitting the secret vector s, which requires at least S0.25 time, where S is the size of the key space. In our case, the search space is S = ( N/h )h−1. Therefore, the complexity of May’s attack is at least S = ( N/h )0.25( h−1) . As in [ CHK +18a ], we will take h = 64 in the concrete parameters. In that case, for N ≥ 215 , the complexity is at least 2 141 operations. Finally, we observe that the complexity of our bootstrapping algorithm grows only as O( log h)homomorphic multiplications, making it relatively insensitive to increases in h. Even if the attacks exploiting the sparsity of the secret key were to improve significantly, increasing h would not result in a substantial performance penalty. For example, augmenting h from 64 to 128 would only increase the number of homomorphic operations in our bootstrapping by about 7%. Conversely, the complexity of May’s attack would escalate from 2 141 to 2 254 . This originates from the double-exponential gap between the complexity of our bootstrapping and that of May’s attack. We conclude that, as in the TFHE case, the use of block binary secrets in CKKS does not affect the hardness of RLWE in the usual parameter setup. 18 5 Bootstrapping for multiple slots 
+
+In the previous section, we have described our new CKKS bootstrapping algorithm for a single slot only. That is, we considered a CKKS ciphertext ct such that ⟨ct , sk ⟩ = m + e (mod q), for a message m ∈ Z. In this section, we generalize our bootstrapping equation (9) to handle multiple slots in parallel. 
+
+5.1 Bootstrapping equation for multiple slots 
+
+For a power-of two n ≥ 2, we consider the plaintext space Pn = Z[XN/n ]/(XN +1) ≃ Z[Y ]/(Y n+1) for Y = XN/n . Therefore, the plaintext space contains only n coefficients. We consider a ciphertext 
+
+ct = ( c0, c 1) encrypting a message m ∈ P n.Our first step is to extract the n corresponding LWE ciphertexts. For this, we consider the decryption equation ⟨ct , sk ⟩ = c0 + s · c1 = m + e (mod q), where 
+
+m(X) = 
+
+> n−1
+
+X
+
+> a=0
+
+maXaN/n ∈ P n,
+
+and e ∈ Z[X]/(XN +1). For ease of notation, in the decryption equation, we include the coefficients of XaN/n in the error e(X) directly in m(X). By the linearity of polynomial multiplication, we can rewrite the decryption equation as a vector-matrix multiplication, keeping only the coefficients in 
+
+XaN/n for 0 ≤ a < n . By setting s(X) = PN −1 
+
+> i=0
+
+siXi, the decryption equation can be written as: 
+
+> n−1
+
+X
+
+> a=0
+
+maXaN/n + e = c0 + c1 · 
+
+> N−1
+
+X
+
+> i=0
+
+siXi = c0 + 
+
+> N−1
+
+X
+
+> i=0
+
+si · c1 · Xi (mod q).
+
+Therefore, we consider the vector c0 ∈ Znq of coefficients of powers of XN/n of c0(X), and the matrix C1 ∈ ZN ×nq whose i-th row contains the n coefficients of powers of XN/n of c1(X) · Xi, for 0 ≤ i < N . Using this notation, we arrive at the equivalent decryption equation m = c0 + s · C1
+
+(mod q). Assuming that s0 = 1, we can add the row vector c0 to the first row of C1 and obtain the decryption equation for m ∈ Zn, s ∈ ZN and C ∈ ZN ×nq :
+
+m = s · C (mod q) (12) We call C the decryption matrix , and by C ← DecMat (ct ) we denote the above algorithm extracting C ∈ ZN ×nq from the ciphertext ct .As in Section 4.3, we consider a binary secret key s with a small power-of-two Hamming weight h, such that when written as a coefficient vector s ∈ { 0, 1}N , it can be separated into h
+
+blocks, each of size B = N/h , where there is exactly a single 1 in each block. From (12), for each component ma of m ∈ Zn, we can write ma = ⟨s, Ca⟩ ( mod q) for the corresponding column vector Ca of C. Therefore, each ma is decrypted as an independent LWE ciphertext given by the column vector Ca. This implies that Equation (9) generalizes to the following bootstrapping equation for each of the ma for 0 ≤ a < n :
+
+ma
+
+∆ ≃ Im 
+
+
+
+> h−1
+
+Y
+
+> b=0
+> B−1
+
+X
+
+> j=0
+
+sb·B+j · exp(2 iπ · Cb·B+j,a /q ) · δ
+
+ . (13) In the next section, we show how to perform this computation efficiently in parallel using all available N/ 2 slots of polynomials in Z[X]/(XN + 1), and then homomorphically over ciphertexts to achieve bootstrapping. 19 5.2 Bootstrapping algorithm 
+
+Our approach for evaluating (13) homomorphically is essentially the same as in Section 4.4. The difference is that we must compute (13) for the n components ma in parallel instead of a single one. Since each polynomial encoding provides a maximum of N/ 2 slots, we only have N/ (2 n)slots per component ma at our disposal in each polynomial encoding. Recall that the binary secret key s is split into h blocks of size B = N/h , each containing a single 1. With only N/ (2 n)slots at our disposal and h blocks, we will consider sub-blocks of size N/ (2 n)/h = B/ (2 n). In other words, we split each block of B components into 2 n sub-blocks with B/ (2 n) components each, and we encode each of the 2 n sub-blocks in a separate polynomial. 
+
+sb·B+k
+
+> ...
+
+sb·B+k+(2 n−1) B
+
+> 2n
+> ×
+> ×
+
+exp(2 iπ · Cb·B+k,a /q )
+
+> ...
+
+exp(2 iπ · Cb·B+k+·,a /q )
+
+> =
+> =
+
+· · · 
+
+· · · 
+
+> +
+> ...
+> +
+
+· · · 
+
+exp(2 iπ · Cb·B+j⋆b ,a /q )0 ≤ k < B/ (2 n)
+
+Tr N/ 2→hn 
+
+2n           
+
+> Fig. 5. Illustration of the computation within a given block. After application of the Tr N/ 2→hn operator, all B/ (2 n)slots contain the same value exp(2 iπ ·Cb·B+j⋆b,a /q ), where j⋆bis the index for which sb·B+j⋆b= 1.
+
+As illustrated in Figure 5, we first compute the products sb·B+j · exp (2 iπ · Cb·B+j,a /q ) · δ from (13) in parallel over each sub-block of size B/ (2 n), for each of the 2 n sub-blocks. To compute the sum in (13), we first compute the sum of the 2 n corresponding encodings, such that we end up with a single sub-block with B/ (2 n) components. Then we can apply the trace operator to finish the computation of the sum of each block. After the application of the trace operator, each of the 
+
+B/ (2 n) slots contains the same value exp (2 iπ · Cb·B+j⋆b ,a /q ) · δ. This computation is performed in parallel for each of the h blocks and for each of the n components ma of the plaintext. In total, this corresponds to h · n independent slots; therefore, we must use the Tr N/ 2→hn operator. Eventually we apply the Pr hn →n operator to compute the final product of the h elements, for each of the n components of the message in parallel. As previously, we must use an indexing of the slots that is compatible with the Tr N/ 2→hn 
+
+operator, which computes partial sums of the slots sharing the same index modulo hn (see Appendix B.1 for an illustration). This implies that we must not encode the block’s elements contiguously in the slots, but separated modulo nh . Therefore, we use a “reversed” indexing as in Section 4.4. In this reversed indexing, the index 0 ≤ j < B in (13) is decomposed as 
+
+j = u · B/ (2 n) + k for 0 ≤ u < 2n and 0 ≤ k < B/ (2 n). Consequently, for an index 0 ≤ u < 2n,we consider the slots ( ˜suι )0≤ι<N/ 2, such that for all 0 ≤ k < B/ (2 n), 0 ≤ b < h and 0 ≤ a < n ,we have: ˜suk·hn +b·n+a = sb·B+u·B/ (2 n)+ k.
+
+20 We use the same reversed indexing for the ciphertext components, with the slots ( euι )0≤ι<N/ 2,such that for all 0 ≤ k < B/ (2 n), 0 ≤ b < h and 0 ≤ a < n , we have: 
+
+euk·hn +b·n+a = exp(2 iπ · Cb·B+u·B/ (2 n)+ k,a /q ) · δ. 
+
+Under this new indexing, we may rewrite the bootstrapping equation (13) as: 
+
+ma
+
+∆ ≃ Im 
+
+
+
+> h−1
+
+Y
+
+> b=0
+> B/ (2 n)−1
+
+X
+
+> k=0 2n−1
+
+X
+
+> u=0
+
+˜suk·hn +b·n+a · euk·hn +b·n+a
+
+
+
+Since the indexing is now compatible with the Tr N/ 2→hn operator, we can transfer the above equation to polynomial notation. Namely, we consider for an index 0 ≤ u < 2n the polynomials Su(X) = Ecd (( ˜suι )0≤ι<N/ 2) and Eu(X) = Ecd (( euι )0≤ι<N/ 2), and we obtain the equivalent equation: 
+
+Ecd 
+
+ ma
+
+∆
+
+
+
+> 0≤a<n
+
+
+
+≃ Im2 Pr hn →n Tr N/ 2→hn 
+
+> 2n−1
+
+X
+
+> u=0
+
+Su(X) × Eu(X)
+
+!!! 
+
+.
+
+Note that in the above equation, we only have the decrypted values ma/∆ in the slots, so we need to move the ma’s to the coefficient space, using the same SlotToCoeff procedure as in the original CKKS bootstrapping procedure (see Section 3.6). This eventually gives us the decrypting equation: 
+
+> n−1
+
+X
+
+> a=0
+
+maXaN/n ≃ StC Im2 Pr hn →n Tr N/ 2→hn 
+
+> 2n−1
+
+X
+
+> u=0
+
+Su(X) × Eu(X)
+
+!!!! 
+
+.
+
+Finally, since SlotToCoeff is based on a homomorphic DFT computation to achieve O( log n)complexity, the coefficients ma are, in fact, recovered in bit-reversed order 1. To recover the ma
+
+coefficients with the normal order, we must therefore encode the slots in the polynomials Su(X)and Eu(X) with bit-reversed order. 
+
+Bootstrapping. As previously, we claim that this equation is compatible with bootstrapping, since it can be homomorphically evaluated over ciphertexts, such that eventually, we obtain a refreshed ciphertext of the same plaintext m(X) = Pn−1 
+
+> a=0
+
+maXaN/n , but under a larger modulus 
+
+q · p.As in the single slot case, the bootstrapping key consists of CKKS encryptions of the poly-nomials Su(X) for 0 ≤ u < 2n; see Alg. 1 below. The products Su(X) × Eu(X) are evaluated homomorphically on ciphertexts using the ExtMultR procedure. 2 Similarly, the operators Tr N/ 2→hn ,
+
+Pr hn →1 and Im2 are applied homomorphically on ciphertexts; see Alg. 2 below. The multiplicative depth is now ℓ = log 2 h + 1 + ℓStC , where ℓStC is the depth of SlotToCoeff 
+
+(see Appendix D). Therefore, we set the big modulus Q = ∆ℓ · q · p. The total number of homomorphic operations is O(n + log N ).          
+
+> 1In the OpenFHE library, this is also the case for the matrix-vector implementation of SlotToCoeff .
+> 2As an optimization, we may compute the rescaling operation inside the ExtMultR procedure only after computing the sum over 0 ≤u < 2n. This way, we only rescale once compared to 2 nrescalings.
+
+21 Algorithm 1 Bootstrapping key generation, multiple slots 
+
+Input : A length N secret key s with Hamming weight h, and B = N/h 
+
+Output : A bootstrapping key cs = ( cs u)0≤u< 2n
+
+1: for all 0 ≤ u < 2n do 
+
+2: for all 0 ≤ k < B/ (2 n) and 0 ≤ b < h and 0 ≤ a < n do 
+
+3: ˜suk·hn +b·n+a = sb·B+u·B/ (2 n)+ k
+
+4: Su(X) ← Ecd ((˜ suι )0≤ι<N/ 2)5: cs u ← Enc pk (Su(X)) 6: return (cs u)0≤u< 2n
+
+Algorithm 2 Bootstrapping, for at most B/ 2 slots 
+
+Input : A modulus q, a bootstrapping key ( cs u)0≤u< 2n, an RLWE ciphertext ct containing n ≤ B/ 2 slots, where 
+
+B = N/h , and δ = ( q/ (4 π∆ )) 1/h 
+
+Output : A refreshed ciphertext ct ′ modulo p · q.1: C ← DecMat (ct )2: acc ← (0 , 0) 3: for u = 0 to 2 n − 1 do 
+
+4: for all 0 ≤ k < B/ (2 n) and 0 ≤ b < h and 0 ≤ a < n do 
+
+5: euk·hn +b·n+a = exp(2 iπ · Cb·B+u·B/ (2 n)+ k,a /q ) · δ
+
+6: Eu(X) ← Ecd (( euι )0≤ι<N/ 2)7: Tu ← ExtMultR (cs u, E u)8: acc ← Add (acc , T u)9: return SlotToCoeff (Im2 (Pr hn →n(Tr N/ 2→hn (acc )))) 
+
+Note that as previously, the above bootstrapping method is fully compatible with RNS arithmetic. 
+
+5.3 Bootstrapping up to N slots. 
+
+The previous bootstrapping algorithm is limited to bootstrapping up to n ≤ nmax = B/ 2 = N/ (2 h)components. However, it can be extended to support more slots, specifically n′ ≤ N , by shifting the coefficients of the input ciphertext and applying the previous bootstrapping procedure as a black box for each group of nmax coefficients. We refer to Appendix G for the details. The number of homomorphic operations remains O(n + log N ) for n slots and the depth also remains unchanged. Note that our bootstrapping method is highly parallelizable; with n processors, it achieves the same O(log N ) complexity as the original CKKS bootstrapping. We summarize the asymptotic complexities of CKKS bootstrapping approaches in Table 1, expressed in the number of homomorphic operations. 
+
+Complexity Original CKKS bootstrapping [CHK +18a] O(log n + log N )Blind rotation bootstrapping [KDE +21] O(n · N )Our new bootstrapping O(n + log N )
+
+Table 1. Complexities of different bootstrapping approaches for CKKS , expressed in number of ciphertext multiplications, for a ring dimension N and n slots. 
+
+22 6 Implementation and performance comparison 
+
+In this section, we describe the results of an implementation of our new bootstrapping based on the OpenFHE library [ BAB +22 ]. We compare it against the state-of-the-art implementation of the original CKKS bootstrapping also available in OpenFHE. The source code is provided in 
+
+https://github.com/coron/spru_boot 
+
+6.1 Parameter sets 
+
+In the OpenFHE library [ BAB +22 ], the ring dimension is automatically determined based on the size of the largest modulus and the desired security level, which is 128-bit by default. We also independently verified the security level of our parameter sets using the standard Lattice Estimator [APS15 ]. The complete parameter sets used for both the original and our new bootstrapping methods are summarized in Table 2. 
+
+Fixing the precision. With the RNS arithmetic, the ciphertext moduli have the form Qr =Q 
+
+> 0≤i≤r
+
+qi, where each qi is a small prime and 0 ≤ r ≤ ℓm, with ℓm being the maximum depth. OpenFHE allows to determine the bit-size of q0 and the bit-size of the qi’s for i ≥ 1 separately. For the original CKKS bootstrapping, OpenFHE uses log 2 q0 ≃ 60 and log 2 qi ≃ 59 for i ≥ 1achieving roughly 14 bits of precision, with a scaling factor ∆ = 2 59 . For our bootstrapping, we use log 2 q0 ≃ 60 and log 2 qi ≃ 49 for i ≥ 1 to reach the same level of precision, with scaling factor 
+
+∆ = 2 49 . In Table 2, we denote by Q = Qℓm the largest modulus in the ladder, and by P Q the modulus used for key switching. 
+
+Bootstrapping depth. We denote by ℓc the number of levels consumed by bootstrapping, excluding CoeffToSlot and SlotToCoeff . Let ℓop be the number of levels available after bootstrap-ping. The total depth ℓm is then given by ℓm = ℓCtS + ℓc + ℓStC + ℓop , where ℓCtS and ℓStC are the number of levels consumed by CoeffToSlot and SlotToCoeff , respectively. Since our goal is to minimize bootstrapping latency, we only leave a single level for computation after bootstrapping, that is ℓop = 1, for both schemes. The implementation of the original CKKS 
+
+bootstrapping in OpenFHE has depth ℓc = 11. For our bootstrapping, we use a Hamming weight 
+
+h = 64 (see our analysis in Section 4.5), which gives ℓc = log 2 h + 1 = 7. 
+
+Depth of CoeffToSlot and SlotToCoeff . In the OpenFHE C ++ library, one can directly fix the number of levels ℓCtS and ℓStC for CoeffToSlot and SlotToCoeff . The complexity (in number of homomorphic operations) is then O(ρ · n1/ρ ) where ρ is the number of levels and n the number of slots in sparse packing. Therefore, when bootstrapping a small number of slots (up to n = 16), it is more advantageous to use the matrix-vector multiplication technique for both CoeffToSlot 
+
+and SlotToCoeff , which gives ℓCtS = ℓStC = 1. When increasing the number of slots, one can allocate a larger level budget, up to ℓCtS = ℓStC = 4 for full slot ( n = N/ 2) bootstrapping. Note that our new bootstrapping does not use CoeffToSlot , therefore ℓCtS = 0 for our bootstrapping. In the following, we consider bootstrapping only for a relatively small number of slots n, with 1 ≤ n ≤ 1024. For the original CKKS bootstrapping, we use ℓCtS = ℓStC = 1 for 1 ≤ n ≤ 16, and 
+
+ℓCtS = ℓStC = 2 for 32 ≤ n ≤ 1024. For our new bootstrapping, internally we use at most 32 slots, following the technique from Section 5.3. Therefore, we can use ℓStC = 1, except for n = 1 for which ℓStC = 0, since no SlotToCoeff is required in that case. We summarize the parameters in 23 Table 2 below. Note that to bootstrap n ≥ 2 complex slots, we must consider the plaintext space 
+
+P2n = Z[XN/ (2 n)]/(XN + 1), which corresponds to polynomials with 2 n coefficients (see Section 5.1). Due to its smaller multiplicative depth, our new bootstrapping can operate with a smaller ring dimension N = 2 15 , compared to N = 2 16 for the original CKKS bootstrapping. 
+
+N log q0 log qi ℓc n ℓcts ℓstc ℓm log Q log P Q precision 
+
+CKKS boot. 216 60 59 10 1 ≤ n ≤ 16 1 1 13 828 1128 14 bits 32 ≤ n ≤ 1024 2 2 15 946 1306 New boot. 215 60 49 7 n = 1 0 0 8 453 633 14 bits 2 ≤ n ≤ 1024 0 1 9 502 742    
+
+> Table 2. Parameter sets for the two CKKS bootstrapping, for 128 bits of security.
+
+6.2 Running time comparison 
+
+We benchmark our implementation using the parameters in Table 2, on an Apple M2 CPU with 8 cores. We also run the OpenFHE implementation of the original CKKS bootstraping for comparison. 
+
+Number of slots 1 2 4 8 16 32 64 128 256 512 1024 
+
+CKKS boot. 1.7 s 1.7 s 1.7 s 1.7 s 1.8 s 2.0 s 2.2 s 2.8 s 3.1 s 3.6 s 3.6 s New boot. 0.3 s 0.4 s 0.4 s 0.4 s 0.5 s 0.6 s 1.3 s 2.7 s 5.6 s 11.3 s 23.6 s     
+
+> Table 3. Running time comparison of the original CKKS bootstrapping and our new bootstrapping, for a variable number of slots n.
+
+Table 3 shows that, due to its reduced multiplicative depth, our bootstrapping is approximately 5 faster than the original CKKS bootstrapping for a single slot ( n = 1). It remains significantly faster up to n = 64 slots. As illustrated in Figure 6, the crossover point lies around n = 128 slots, after which the original CKKS bootstrapping scales as O( log n), whereas our new bootstrapping scales as O(n), thus it becomes impractical for n > 1024.    
+
+> Fig. 6. Comparison of the running times of CKKS bootstrapping and our new bootstrapping.
+
+24 7 Conclusion 
+
+In this paper, we presented an alternative bootstrapping algorithm for the CKKS scheme, based on embedding the additive group modulo q into the circle group of complex numbers, which can be evaluated natively in CKKS . Due to its lower multiplicative depth, our new bootstrapping algorithm can operate with a smaller ring dimension N , resulting in significant efficiency improvements for few slots n. This new bootstrapping approach could be particularly useful in scenarios where circuit evaluation requires a dynamic number of slots, offering an alternative to scheme-switching methods. 
+
+References 
+
+Alb17. Martin R. Albrecht. On dual lattice attacks against small-secret LWE and parameter choices in HElib and SEAL. In Jean-S´ ebastien Coron and Jesper Buus Nielsen, editors, Advances in Cryptology - EUROCRYPT 2017 - 36th Annual International Conference on the Theory and Applications of Cryptographic Techniques, Paris, France, April 30 - May 4, 2017, Proceedings, Part II , volume 10211 of Lecture Notes in Computer Science , pages 103–129, 2017. AP14. Jacob Alperin-Sheriff and Chris Peikert. Faster bootstrapping with polynomial error. In Juan A. Garay and Rosario Gennaro, editors, Advances in Cryptology - CRYPTO 2014 - 34th Annual Cryptology Conference, Santa Barbara, CA, USA, August 17-21, 2014, Proceedings, Part I , volume 8616 of Lecture Notes in Computer Science , pages 297–314. Springer, 2014. APS15. Martin Albrecht, Rachel Player, and Sam Scott. On the concrete hardness of learning with errors. 
+
+Journal of Mathematical Cryptology , 9, 10 2015. BAB +22. Ahmad Al Badawi, Andreea Alexandru, Jack Bates, Flavio Bergamaschi, David Bruce Cousins, Saroja Erabelli, Nicholas Genise, Shai Halevi, Hamish Hunt, Andrey Kim, Yongwoo Lee, Zeyu Liu, Daniele Micciancio, Carlo Pascoe, Yuriy Polyakov, Ian Quah, Saraswathy R.V., Kurt Rohloff, Jonathan Saylor, Dmitriy Suponitsky, Matthew Triplett, Vinod Vaikuntanathan, and Vincent Zucca. OpenFHE: Open-source fully homomorphic encryption library. Cryptology ePrint Archive, Paper 2022/915, 2022. BCC +22. Youngjin Bae, Jung Hee Cheon, Wonhee Cho, Jaehyung Kim, and Taekyung Kim. META-BTS: Bootstrapping precision beyond the limit. In Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security , CCS ’22, page 223234, New York, NY, USA, 2022. Association for Computing Machinery. BCKS24. Youngjin Bae, Jung Hee Cheon, Jaehyung Kim, and Damien Stehl´ e. Bootstrapping bits with CKKS. In Marc Joye and Gregor Leander, editors, Advances in Cryptology - EUROCRYPT 2024 - 43rd Annual International Conference on the Theory and Applications of Cryptographic Techniques, Zurich, Switzerland, May 26-30, 2024, Proceedings, Part II , volume 14652 of Lecture Notes in Computer Science , pages 94–123. Springer, 2024. BGV11. Zvika Brakerski, Craig Gentry, and Vinod Vaikuntanathan. Fully homomorphic encryption without bootstrapping. Electron. Colloquium Comput. Complex. , page 111, 2011. Bra12. Zvika Brakerski. Fully homomorphic encryption without modulus switching from classical GapSVP. In Reihaneh Safavi-Naini and Ran Canetti, editors, Advances in Cryptology - CRYPTO 2012 - 32nd Annual Cryptology Conference, Santa Barbara, CA, USA, August 19-23, 2012. Proceedings , volume 7417 of Lecture Notes in Computer Science , pages 868–886. Springer, 2012. CCKS23. Jung Hee Cheon, Wonhee Cho, Jaehyung Kim, and Damien Stehl´ e. Homomorphic multiple precision multiplication for CKKS and reduced modulus consumption. In Proceedings of the 2023 ACM SIGSAC Conference on Computer and Communications Security , CCS ’23, page 696710, New York, NY, USA, 2023. Association for Computing Machinery. CCS19. Hao Chen, Ilaria Chillotti, and Yongsoo Song. Improved bootstrapping for approximate homomorphic encryption. In Yuval Ishai and Vincent Rijmen, editors, Advances in Cryptology - EUROCRYPT 2019 - 38th Annual International Conference on the Theory and Applications of Cryptographic Techniques, Darmstadt, Germany, May 19-23, 2019, Proceedings, Part II , volume 11477 of Lecture Notes in Computer Science , pages 34–54. Springer, 2019. https://eprint.iacr.org/2018/1043.pdf. CDKS20. Hao Chen, Wei Dai, Miran Kim, and Yongsoo Song. Efficient homomorphic conversion between (ring) LWE ciphertexts. Cryptology ePrint Archive, Paper 2020/015, 2020. https://eprint.iacr.org/ 2020/015 .
+
+25 CGGI16. Ilaria Chillotti, Nicolas Gama, Mariya Georgieva, and Malika Izabach` ene. Faster fully homomorphic encryption: Bootstrapping in less than 0.1 seconds. In Jung Hee Cheon and Tsuyoshi Takagi, editors, 
+
+Advances in Cryptology - ASIACRYPT 2016 - 22nd International Conference on the Theory and Application of Cryptology and Information Security, Hanoi, Vietnam, December 4-8, 2016, Proceedings, Part I , volume 10031 of Lecture Notes in Computer Science , pages 3–33, 2016. CHH18. Jung Hee Cheon, Kyoohyung Han, and Minki Hhan. Faster homomorphic discrete fourier transforms and improved FHE bootstrapping. Cryptology ePrint Archive, Paper 2018/1073, 2018. CHK +18a. Jung Hee Cheon, Kyoohyung Han, Andrey Kim, Miran Kim, and Yongsoo Song. Bootstrapping for approximate homomorphic encryption. In Jesper Buus Nielsen and Vincent Rijmen, editors, 
+
+Advances in Cryptology - EUROCRYPT 2018 - 37th Annual International Conference on the Theory and Applications of Cryptographic Techniques, Tel Aviv, Israel, April 29 - May 3, 2018 Proceedings, Part I , volume 10820 of Lecture Notes in Computer Science , pages 360–384. Springer, 2018. CHK +18b. Jung Hee Cheon, Kyoohyung Han, Andrey Kim, Miran Kim, and Yongsoo Song. A full RNS variant of approximate homomorphic encryption. In Carlos Cid and Michael J. Jacobson Jr., editors, Selected Areas in Cryptography - SAC 2018 - 25th International Conference, Calgary, AB, Canada, August 15-17, 2018, Revised Selected Papers , volume 11349 of Lecture Notes in Computer Science , pages 347–368. Springer, 2018. CHKS25. Jung Hee Cheon, Guillaume Hanrot, Jongmin Kim, and Damien Stehl´ e. Ship: A shallow and highly parallelizable ckks bootstrapping algorithm. In Serge Fehr and Pierre-Alain Fouque, editors, Advances in Cryptology – EUROCRYPT 2025 , 2025. CKKS17. Jung Hee Cheon, Andrey Kim, Miran Kim, and Yong Soo Song. Homomorphic encryption for arithmetic of approximate numbers. In Tsuyoshi Takagi and Thomas Peyrin, editors, Advances in Cryptology - ASIACRYPT 2017 - 23rd International Conference on the Theory and Applications of Cryptology and Information Security, Hong Kong, China, December 3-7, 2017, Proceedings, Part I ,volume 10624 of Lecture Notes in Computer Science , pages 409–437. Springer, 2017. DM15. L´ eo Ducas and Daniele Micciancio. FHEW: bootstrapping homomorphic encryption in less than a second. In Elisabeth Oswald and Marc Fischlin, editors, Advances in Cryptology - EUROCRYPT 2015 - 34th Annual International Conference on the Theory and Applications of Cryptographic Techniques, Sofia, Bulgaria, April 26-30, 2015, Proceedings, Part I , volume 9056 of Lecture Notes in Computer Science , pages 617–640. Springer, 2015. DMPS24. Nir Drucker, Guy Moshkowich, Tomer Pelleg, and Hayim Shaul. BLEACH: cleaning errors in discrete computations over CKKS. J. Cryptol. , 37(1):3, 2024. FV12. Junfeng Fan and Frederik Vercauteren. Somewhat practical fully homomorphic encryption. IACR Cryptol. ePrint Arch. , page 144, 2012. Gen09. Craig Gentry. Fully homomorphic encryption using ideal lattices. volume 9, pages 169–178, 05 2009. GHS12a. Craig Gentry, Shai Halevi, and Nigel P. Smart. Fully homomorphic encryption with polylog overhead, 2012. GHS12b. Craig Gentry, Shai Halevi, and Nigel P. Smart. Homomorphic evaluation of the AES circuit. In 
+
+Advances in Cryptology - CRYPTO 2012 - 32nd Annual Cryptology Conference, Santa Barbara, CA, USA, August 19-23, 2012. Proceedings , volume 7417 of Lecture Notes in Computer Science , pages 850–867. Springer, 2012. GSW13. Craig Gentry, Amit Sahai, and Brent Waters. Homomorphic encryption from learning with errors: Conceptually-simpler, asymptotically-faster, attribute-based. In Advances in Cryptology - CRYPTO 2013 - 33rd Annual Cryptology Conference, Santa Barbara, CA, USA, August 18-22, 2013. Proceedings, Part I , pages 75–92, 2013. JKA +21. Wonkyung Jung, Sangpyo Kim, Jung Ho Ahn, Jung Cheon, and Younho Lee. Over 100x faster bootstrapping in fully homomorphic encryption through memory-centric optimization with GPUs. 
+
+IACR Transactions on Cryptographic Hardware and Embedded Systems , 2021:114–148, 08 2021. JM22. Charanjit S. Jutla and Nathan Manohar. Sine series approximation of the mod function for bootstrap-ping of approximate he. In Orr Dunkelman and Stefan Dziembowski, editors, Advances in Cryptology – EUROCRYPT 2022 , pages 491–520, Cham, 2022. Springer International Publishing. KDE +21. Andrey Kim, Maxim Deryabin, Jieun Eom, Rakyong Choi, Yongwoo Lee, Whan Ghang, and Donghoon Yoo. General bootstrapping approach for RLWE-based homomorphic encryption. Cryptology ePrint Archive, Paper 2021/691, 2021. https://eprint.iacr.org/2021/691 .KPK +23. Seonghak Kim, Minji Park, Jaehyung Kim, Taekyung Kim, and Chohong Min. EvalRound algorithm in CKKS bootstrapping. In Advances in Cryptology ASIACRYPT 2022: 28th International Conference on the Theory and Application of Cryptology and Information Security, Taipei, Taiwan, December 59, 2022, Proceedings, Part II , page 161187, Berlin, Heidelberg, 2023. Springer-Verlag. 
+
+26 LLK +22. Yongwoo Lee, Joon-Woo Lee, Young-Sik Kim, Yongjune Kim, Jong-Seon No, and HyungChul Kang. High-precision bootstrapping forapproximate homomorphic encryption byerror variance minimization. In Orr Dunkelman and Stefan Dziembowski, editors, Advances in Cryptology – EUROCRYPT 2022 ,pages 551–580, Cham, 2022. Springer International Publishing. LLL +21. Joon-Woo Lee, Eunsang Lee, Yongwoo Lee, Young-Sik Kim, and Jong-Seon No. High-precision boot-strapping of RNS-CKKS homomorphic encryption using optimal minimax polynomial approximation and inverse sine function. In Advances in Cryptology EUROCRYPT 2021: 40th Annual International Conference on the Theory and Applications of Cryptographic Techniques, Zagreb, Croatia, October 1721, 2021, Proceedings, Part I , page 618647, Berlin, Heidelberg, 2021. Springer-Verlag. LMSS23. Changmin Lee, Seonhong Min, Jinyeong Seo, and Yongsoo Song. Faster TFHE bootstrapping with block binary keys. In Joseph K. Liu, Yang Xiang, Surya Nepal, and Gene Tsudik, editors, Proceedings of the 2023 ACM Asia Conference on Computer and Communications Security, ASIA CCS 2023, Melbourne, VIC, Australia, July 10-14, 2023 , pages 2–13. ACM, 2023. LPR10. Vadim Lyubashevsky, Chris Peikert, and Oded Regev. On ideal lattices and learning with errors over rings. In Henri Gilbert, editor, Advances in Cryptology - EUROCRYPT 2010, 29th Annual International Conference on the Theory and Applications of Cryptographic Techniques, Monaco / French Riviera, May 30 - June 3, 2010. Proceedings , volume 6110 of Lecture Notes in Computer Science , pages 1–23. Springer, 2010. May21. Alexander May. How to meet ternary LWE keys. In Tal Malkin and Chris Peikert, editors, Advances in Cryptology - CRYPTO 2021 - 41st Annual International Cryptology Conference, CRYPTO 2021, Virtual Event, August 16-20, 2021, Proceedings, Part II , volume 12826 of Lecture Notes in Computer Science , pages 701–731. Springer, 2021. SSTX09. Damien Stehl´ e, Ron Steinfeld, Keisuke Tanaka, and Keita Xagawa. Efficient public key encryption based on ideal lattices. In Mitsuru Matsui, editor, Advances in Cryptology - ASIACRYPT 2009, 15th International Conference on the Theory and Application of Cryptology and Information Security, Tokyo, Japan, December 6-10, 2009. Proceedings , volume 5912 of Lecture Notes in Computer Science ,pages 617–635. Springer, 2009. SV14. N. P. Smart and F. Vercauteren. Fully homomorphic SIMD operations. Designs, Codes and Cryptog-raphy , 71(1):57–81, Apr 2014. SYL +23. S. Shen, H. Yang, Y. Liu, Z. Liu, and Y. Zhao. CARM: CUDA-accelerated RNS multiplication in word-wise homomorphic encryption schemes for internet of things. IEEE Transactions on Computers ,72(07):1999–2010, jul 2023. 
+
+A Proof of lemmas 1, 2, 3, 4 and 5 
+
+For the following proofs, we will use two facts. For real numbers r1, r 2 ∈ R, it holds that 
+
+∥⌊ r1 ± r2⌉∥ ∞ ≤ ∥⌊ r1⌉ ± ⌊ r2⌉∥ ∞ + 1. Moreover, for r ∈ R[X]/(XN + 1) and s ∈ Z[X]/(XN + 1) with hamming weight h and ∥s∥∞ = 1, we have that ∥s · ⌊ r(X)⌉ − ⌊ s · r(X)⌉∥ ∞ ≤ h ≤ N , which can be seen by applying the real number case to polynomial multiplication. 
+
+A.1 Proof of Lemma 1 
+
+Let pk = ( −a′s + e′, a ′) be the public key and ct be the ciphertext, i.e. ct = Enc pk (m) = 
+
+v · pk + ( m + e0, e 1) = (( −a′s + e′)v + m + e0, a ′v + e1), which gives 
+
+⟨ct , sk ⟩ = ( −a′s + e′)v + m + e0 + s(a′v + e1) (mod qL)= m + e0 + e′v + se 1 (mod qL).
+
+Writing ⟨ct , sk ⟩ = m + eclean (mod qL), we get for a signed binary secret key: 
+
+∥eclean ∥∞ ≤ ∥ e0∥∞ + e′ · v ∞ + ∥s · e1∥∞ ≤ κ + N · κ · 1 + N · 1 · κ ≤ 3N κ. 
+
+27 A.2 Proof of Lemma 2 
+
+Let γ = qℓ/q ℓ′ . We write ct = ( b, a ), which gives ct ′ = ( ⌊b/γ ⌉ , ⌊a/γ ⌉). We have ⟨ct , sk ⟩ =
+
+b + s · a + ξ · qℓ for some ξ ∈ Z, which gives: 
+
+⟨ct , sk ⟩/γ = b/γ + s · a/γ + ξ · qℓ′ ,
+
+and therefore we obtain: 
+
+⌊⟨ ct , sk ⟩/γ ⌉ = ⌊b/γ ⌉ + s · ⌊ a/γ ⌉ − ers (mod qℓ′ )= ⟨ct ′, sk ⟩ − ers (mod qℓ′ ),
+
+where ers = ⌊b/γ ⌉ − b/γ + s · (⌊a/γ ⌉ − a/γ ) + ⟨ct , sk ⟩/γ − ⌊⟨ ct , sk ⟩/γ ⌉. This implies ∥ers ∥∞ ≤∥s∥1 + 1 ≤ 2N , with ⟨ct ′, sk ⟩ = ⌊⟨ ct , sk ⟩ · qℓ′ /q ℓ⌉ + ers (mod qℓ′ ) as required. 
+
+A.3 Proof of Lemma 3 
+
+We use as an input an evaluation key evk = ( b′, a ′) = ( −a′s + e′ + P s 2, a ′) with ∥e′∥∞ ≤ κ and ciphertexts ct i satisfying ⟨ct i, sk ⟩ = bi + s · ai (mod qℓ) for i ∈ { 1, 2}. We have: 
+
+⟨ct 1, sk ⟩ · ⟨ ct 2, sk ⟩ = b1b2 + s(b1a2 + b2a1) + s2a1a2 (mod qℓ).
+
+Letting ( d0, d 1, d 2) := ( b1b2, b 1a2 + b2a1, a 1a2), we rewrite the above as: 
+
+⟨ct 1, sk ⟩ · ⟨ ct 2, sk ⟩ = d0 + sd 1 + s2d2 (mod qℓ).
+
+We consider d2 over Z[X]/(XN + 1), with ∥d2∥∞ ≤ qℓ. By definition, ct mult = ( d0, d 1) + P −1d2 · evk , where we evaluate d2 · evk modulo P q L and then divide the latter by P over the reals. This implies, using qℓ|qL and some γ1, γ 2 ∈ Z:
+
+d2 · evk = d2 · (−a′s + e′ + P s 2, a ′) + P q L(γ1, γ 2) over Z, and 
+
+P −1d2 · evk  =   P −1d2(−a′s + e′) + d2s2, P −1a′d2
+
+ (mod qℓ).
+
+The above now gives: 
+
+⟨ct mult , sk ⟩ = d0 + d1s + P −1d2(−a′s + e′) + d2s2 + s P −1a′d2
+
+ (mod qℓ)= ⟨ct 1, sk ⟩ · ⟨ ct 2, sk ⟩ + emult (mod qℓ),
+
+and now we can estimate the size of emult as follows: 
+
+∥emult ∥∞ = P −1d2(−a′s + e′) + s P −1d2a′
+
+> ∞
+
+≤ P −1d2(−a′s + e′) + s · P −1d2a′ 
+
+> ∞
+
++ ∥s∥1
+
+≤ − sP −1d2a′ + P −1d2e′ + sP −1d2a′ 
+
+> ∞
+
++ ∥s∥1 + 1 
+
+≤ P −1 · N q ℓκ + N + 2 .
+
+Finally, if P ≥ N q ℓκ, then ∥emult ∥∞ ≤ 2N .28 A.4 Proof of Lemma 4 
+
+Letting ct mult ← Mult pk (ct 1, ct 2), we obtain by applying Lemma 3: 
+
+⟨ct mult , sk ⟩ = ⟨ct 1, sk ⟩ · ⟨ ct 2, sk ⟩ + emult (mod qℓ)= ( Ecd (x1) + e1)( Ecd (x2) + e2) + emult (mod qℓ)= Ecd (x1)Ecd (x2) + em + emult (mod qℓ),
+
+for em = e1e2 +Ecd (x1)e2 +Ecd (x2)e1, and ∥emult ∥∞ ≤ 2N . Letting ct multR ← RS (ct mult ), applying Lemma 2, and using qℓ/q ℓ−1 = ∆, we get: 
+
+⟨ct multR , sk ⟩ = ⌊⟨ ct mult , sk ⟩/∆ ⌉ + ers (mod qℓ−1)= ⌊(Ecd (x1)Ecd (x2) + em + emult )/∆ ⌉ + ers (mod qℓ−1),
+
+where ∥ers ∥∞ ≤ 2N . By writing Ecd (x1)Ecd (x2)/∆ = Ecd (x1x2) + eecd , we now reformulate the above as: 
+
+⟨ct multR , sk ⟩ = Ecd (x1x2) + ⌊eecd + ( em + emult )/∆ ⌉ + ers (mod qℓ−1)= Ecd (x1x2) + emultR (mod qℓ−1)Therefore, we have: 
+
+∥emultR ∥∞ ≤ | eecd | + ∥em∥∞
+
+∆ + ∥emult ∥∞
+
+∆ + ∥ers ∥∞ + 1 .
+
+We first bound the error eecd :
+
+eecd = 1
+
+∆ · (Ecd (x1)Ecd (x2) − ∆ · Ecd (x1x2)) = 1
+
+∆ · (⌊∆x 1⌉ ⌊ ∆x 2⌉ − ∆ ⌊∆x 1x2⌉)= 1
+
+∆ · (( ∆x 1 + ε1)( ∆x 2 + ε2) − ∆(∆x 1x2 + ε12 )) = 1
+
+∆ (∆x 1ε2 + ∆x 2ε1 + ε1ε2 − ∆ε 12 )for some |ε1|, |ε2|, |ε12 | ≤ 1/2. Using |xi| ≤ ν, this implies 
+
+|eecd | ≤ ν + 1 .
+
+Recall that em = e1e2 + Ecd (x1)e2 + Ecd (x2)e1. Using Ecd (xi) ∈ Z and |Ecd (xi)| = | ⌊ xi · ∆⌉ | ≤ 
+
+∆ν + 1, this gives: 
+
+∥em∥∞ ≤ N E 2 + 2 E · (∆ν + 1) ≤ 2N E 2 + 2 νE∆. 
+
+Now, for emultR , we have: 
+
+∥emultR ∥∞ ≤ ν + 1 + 2N E 2
+
+∆ + 2 νE + 2N∆ + 2 N + 1 .
+
+Assuming E2 ≤ ∆ and ν < N , we eventually get: 
+
+∥emultR ∥∞ ≤ 2νE + 8 N. 
+
+29 A.5 Proof of Lemma 5 
+
+The proof is similar to the proof of Lemma 3. We input the key-switching key swk = ( b′, a ′), for which b′ = −a′s + e′ + P s ′ (mod P q L). Let ct = ( b, a ) be the input ciphertext under 
+
+sk ′ = (1 , s ′). We consider a over Z[X]/(XN + 1) with ∥a∥∞ ≤ qℓ. The output ciphertext is defined as ct ′ = ( b, 0) + P −1a · swk  (mod qℓ), where we evaluate a · swk modulo P q L and then divide by P over the reals. As in the proof of Lemma 3, this gives: 
+
+P −1a · swk  =   P −1a(−a′s + e′) + as ′, P −1a′a (mod qℓ).
+
+The decryption equation of ct ′ now indeed satisfies: 
+
+⟨ct ′, sk ⟩ = b + P −1a(−a′s + e′) + as ′ + s · P −1a′a (mod qℓ)= ⟨ct , sk ′⟩ + P −1a(−a′s + e′) + s · P −1a′a (mod qℓ)= ⟨ct , sk ′⟩ + eks (mod qℓ).
+
+Finally, we estimate the size of eks as follows: 
+
+∥eks ∥∞ = P −1a(−a′s + e′) + s · P −1a′a
+
+> ∞
+
+≤ P −1a(−a′s + e′) + sP −1a′a 
+
+> ∞
+
++ ∥s∥1
+
+≤ − P −1aa ′s + P −1ae ′ + sP −1a′a 
+
+> ∞
+
++ ∥s∥1 + 1 
+
+≤ N + 2 + P −1a · e′ 
+
+> ∞
+
+≤ N + 2 + P −1 · N q ℓκ ≤ N + 3 ≤ 2N. 
+
+B The trace and product operators 
+
+B.1 The trace operator 
+
+For a power-of-two a, we define the operator Tr N/ 2→a as: 
+
+Tr N/ 2→a = ( id + Ψa) ◦ (id + Ψ2a) ◦ (id + Ψ4a) ◦ · · · ◦ (id + ΨN/ 4).
+
+One can show recursively that the Tr N/ 2→a operator computes partial sums of the slots sharing the same index modulo a, namely for any z ∈ CN/ 2:
+
+Tr N/ 2→a(iDFT (z0, . . . , z N/ 2−1)) = iDFT (t, . . . . . . , t
+
+| {z }
+
+> N/ (2 a) rep.
+
+)where t = ( tk)0≤k<a , with tk = zk + zk+a + · · · + zk+( N/ (2 a)−1) ·a. Therefore, the Tr N/ 2→a operator outputs an encoding of the a slots t0, . . . , t a−1, which are repeated N/ (2 a) times to get N/ 2 slots; see Fig. 7 for an illustration. Namely, the operator Tr N/ 2→N/ 4 = id + ΨN/ 4 computes the sum of pairs of slots sharing the same index modulo N/ 4. Assuming the property for Tr N/ 2→a and using Tr N/ 2→a/ 2 =(id + Ψa/ 2) ◦ Tr N/ 2→a, the operator Tr N/ 2→a/ 2 computes the sum of slots with the same index modulo a/ 2. As described in Alg. 3 below, the Tr N/ 2→a operator can be homomorphically evaluated, requiring log 2(N/ (2 a)) automorphisms and key switchings, while consuming no multiplicative levels. 30 Tr N/ 2→a a
+
+> N/ 2
+
+Fig. 7. Illustration of the Tr N/ 2→a operator with N/ 2 = 32 slots and a = 4. Each slot in the output polynomial is the sum of all input slots with the same index modulo a. Therefore, the output polynomial contains identical blocks of a slots each. 
+
+Algorithm 3 Homomorphic trace operator 
+
+Input : A ciphertext ct , a power-of-two parameter a
+
+Output : Computes Tr N/ 2→a(ct )1: r = N/ 42: while r ≥ a do 
+
+3: ct = Add (ct , Rot (ct , r )) 4: r = r/ 25: return ct 
+
+B.2 The product operator Algorithm 4 Homomorphic product operator 
+
+Input : A ciphertext ct , two power-of-two parameters a > b 
+
+Output : Computes Pr a→b(ct )1: r = a/ 22: while r ≥ b do 
+
+3: ct = MultR evk (ct , Rot (ct , r )) 4: r = r/ 25: return ct 
+
+C The original CKKS bootstrapping procedure 
+
+Bootstrapping a single coefficient. We recall the original CKKS bootstrapping approach [CHK +18a ]. For simplicity, we first consider the bootstrapping of a single coefficient, that is a 
+
+CKKS ciphertext ct encrypting a message m ∈ Z, with ⟨ct , sk ⟩ = m + e (mod q), where q is the smallest modulus in the ladder. We first perform a modulus lifting to a larger modulus Q, which gives: 
+
+⟨ct , sk ⟩ = qI + m + e (mod Q)for some I ∈ Z[X]/(XN + 1). The goal of bootstrapping is to get rid of the qI term. Using the 
+
+Tr N/ 2→1 operator and also Re2 = id + conj , we have Re2 (Tr N/ 2→1(qI + m)) = qN · ˜I + N · m
+
+where ˜I ∈ Z. Therefore, by applying these operators homomorphically, we can obtain a new ciphertext ct ′ such that 
+
+⟨ct ′, sk ⟩ = qN · ˜I + N m + e′ (mod Q)31 for a small error e′, so we must remove the term qN · ˜I, where now ˜I ∈ Z instead of I ∈
+
+Z[X]/(XN + 1). Such a ciphertext ct ′ corresponds to an encoding of x = ( qN · ˜I + N m )/∆ ∈ R. Eventually, we want to obtain an encryption of m, which corresponds to an encoding of m/∆ ∈ R. Therefore, we homomorphically evaluate on ct ′ a polynomial P (t) such that m/∆ ≃ P (x). This yields the condition m/∆ ≃ P (( qN · ˜I + N m )/∆ ), which must hold for any small ˜I ∈ Z. We expect the integer ˜I to be small because the secret key sk has a small Hamming weight. For P (t), we can therefore use a polynomial approximation of a periodic function with period 
+
+qN/∆ , with the appropriate scaling factor: 
+
+P (t) ≃ q
+
+2π∆ sin 
+
+ 2π∆ · tqN 
+
+
+
+.
+
+One could use a Taylor series approximation of the sine function, but the required degree would be too large. Instead, we work over the complex numbers and first consider a degree-d Taylor series approximation of the complex exponential function, with a scaling factor 2 r as input: 
+
+Q(t) = 
+
+> d
+
+X
+
+> k=0
+
+1
+
+k!
+
+ 2iπ∆ · tqN 2r
+
+k
+
+≃ exp 
+
+ 2iπ∆ · tqN 2r
+
+
+
+.
+
+Due to the scaling factor 2 r, much fewer coefficients are needed in the Taylor series approximation. Note that Q(t) is a polynomial with complex coefficients, so when homomorphically evaluating 
+
+Q(t) on ct ′, we consider the encryptions of the real part and the imaginary part separately. Finally, we can write 
+
+P (t) = q
+
+2π∆ · Im  Q(t)2r  , (14) which we evaluate homomorphically by performing r successive squarings. Eventually, we only keep the encryption of the imaginary part and apply the scaling factor. Finally, we obtain a new ciphertext ct ′′ such that 
+
+⟨ct ′′ , sk ⟩ ≃ Ecd (P (x)) ≃ Ecd (m/∆ ) (mod q′)= m + e′′ (mod q′)for a small error e′′ . Therefore, we have obtained a new encryption of m for the modulus q′. The previous evaluation procedure has a multiplicative depth of ℓ = d + r + 1. Therefore, starting from the largest modulus Q = q · p · ∆ℓ, after ℓ rescalings, we end up with a modulus q′ = q · p. This enables to perform one more homomorphic multiplication on ct ′, thereby achieving bootstrapping. We can reduce the depth to ℓ = d + r by using a scaling factor δ in Q(t) such that δ2r
+
+= q/ (2 π∆ ). Moreover, the depth required to evaluate a polynomial of degree d can be reduced to O(log d)at the expense of additional multiplications [ CKKS17 ]. For our parameters, where d = 7 is relatively small, this approach slightly reduces the largest modulus Q. However, in practice, we did not observe a significant improvement in running time. 
+
+Bootstrapping multiple components. The bootstrapping of multiple components proceeds similarly, which we describe briefly below. For a power-of-two n with 2 ≤ n ≤ N/ 2, we consider the plaintext space Z[XN/n ]/(XN + 1) ≃ Z[Y ]/(Y n + 1) for Y = XN/n ; therefore, the plaintext space has n non-trivial coefficients. Thus, we start from a ciphertext ct with ⟨ct , sk ⟩ = m + e
+
+(mod q) for m ∈ Z[XN/n ]/(XN + 1). 32 1. Modulus raising: As previously, we consider the same ct modulo a larger modulus Q, which gives ⟨ct , sk ⟩ = qI + m + e (mod Q) for a small I ∈ Z[X]/(XN + 1), where m(X) = Pn−1 
+
+> i=0
+
+mi · Xi·N/n .2. Error packing: We homomorphically apply the Tr N/ 2→n/ 2 operator, which yields a new ciphertext ct 1, for which ⟨ct 1, sk ⟩ = q ˜I ·N/n +m·N/n +e (mod Q), where ˜I ∈ Z[XN/n ]/(XN +1). 3. Coefficients to slots: We use the CoeffToSlot procedure recalled previously to homomorphically compute a new ciphertext ct 2, such that ⟨ct 2, sk ⟩ = Ecd (m0 + q ˜I0, . . . , m n−1 + q ˜In−1) + e2
+
+(mod Q2). 4. Approximate modular reduction: The polynomial approximation of the reduction function modulo q gets independently applied on each of the n slots, which then yields a new ciphertext 
+
+ct 3, for which ⟨ct 3, sk ⟩ = Ecd (m0, . . . , m n−1) + e3 (mod Q3). 5. Slots to coefficients: We use the SlotToCoeff procedure recalled previously to homomorphically compute a new ciphertext ct 4, such that ⟨ct 4, sk ⟩ = m(X) + e4 (mod q · p), for a modulus 
+
+q · p, which is larger than the initial modulus q.Since the complexity of CoeffToSlot and SlotToCoeff is O( log n) for n slots (using the ho-momorphic Fast Fourier Transform; see Appendix D), the complexity of the original CKKS 
+
+bootstrapping for n slots is also O(log n). 
+
+D Fast DFT s and the SlotToCoeff operation 
+
+D.1 The DFT and iDFT isomorphisms 
+
+Recall that the M -th cyclotomic polynomial is defined as: 
+
+ΦM (x) = Y 
+
+> 1≤j≤M
+> gcd( j,M )=1
+
+
+
+x − e2Iπj/M 
+
+For a power-of-two M , we have ΦM (x) = xN + 1 where N = M/ 2. For a power-of-two N , the integer 5 has order N/ 2 modulo 2 N , and generates Z∗ 
+
+> 2N
+
+together with the integer {− 1}. Let 
+
+ζ = eIπ/N be a primitive 2 N -th root of unity. Then letting ζj := ζ5j
+
+for 0 ≤ j < N/ 2, the set 
+
+{ζj , ζ j : 0 ≤ j < N/ 2} forms the set of the primitive 2 N -th roots of unity. The variant of the Fourier transform DFT N over SN considered in [CKKS17] is defined as 
+
+DFT N : SN → CN/ 2
+
+p 7 →
+
+
+
+p
+
+
+
+ζ50 
+
+, p 
+
+
+
+ζ51 
+
+, . . . , p 
+
+
+
+ζ5N/ 2−1  
+
+.
+
+We denote by iDFT N : CN/ 2 → S N the inverse transform. The DFT N function is a ring homomorphism from the ring SN (the coefficients space) to the ring of complex vectors in CN/ 2 (the slots space). Its purpose is therefore to map polynomial addition and multiplication in the ring SN to component-wise addition and multiplication in 
+
+CN/ 2.33 D.2 DFT and iDFT on sub-rings 
+
+We consider any divisor n of N with 1 ≤ n ≤ N/ 2, and a polynomial p in the subring 
+
+R[XN/n ]/(XN + 1). We can write p(X) = ˜ p(Y ) ∈ R[Y ]/(Y n + 1) where Y = XN/n . Then 
+
+DFT N (p) = 
+
+
+
+p(ζ5i
+
+)
+
+ 
+
+> 0≤i<N/ 2
+
+=
+
+
+
+˜p(ζ5i·N/n )
+
+
+
+> 0≤i<N/ 2
+
+Since 5 has order n/ 2 modulo 2 n, DFT N (p) is periodic with period n/ 2, with N/n repetitions of the same pattern: 
+
+DFT N (p) = ( DFT n(˜ p), . . . , DFT n(˜ p)
+
+| {z } 
+
+> N/n rep.
+
+).
+
+Conversely, for any z ∈ Cn/ 2, we have: 
+
+iDFT N
+
+ (z, . . . , z
+
+| {z } 
+
+> N/n rep.
+
+) = iDFT n(z)( XN/n )
+
+D.3 Computing DFT and iDFT 
+
+Let m(X) = N −1P
+
+> i=0
+
+miXi ∈ R[X]/(XN + 1) and let m = ( m0, . . . , m N −1) ∈ RN be the vector of its coefficients. Letting ζ = eIπ/N and ζj := ζ5j
+
+for 0 ≤ j < N/ 2 with ζ = eIπ/N , we have 
+
+z = DFT N (m) = U · m ∈ CN/ 2 where 
+
+U =
+
+
+
+1 ζ0 . . . ζ N −10
+
+... ... . . . ...1 ζN/ 2−1 . . . ζ N −1
+
+> N/ 2−1
+
+
+
+is the ( N/ 2) × N Vandermonde matrix generated by {ζj : 0 ≤ j < N/ 2}. The decoding algorithm 
+
+DFT is therefore a linear transformation from RN to CN/ 2, given by the matrix U .We consider the full Vandermonde matrix CRT generated by the set {ζj , ζ j : 0 ≤ j < N/ 2},which gives CRT = ( U ; U ), and ( z, z) = ( U m; U m) = CRT · m. We can then compute m =
+
+CRT −1(z, z), where CRT −1 = 1 
+
+> N
+
+CRT T . This enables to write the coefficients m of the polynomial 
+
+m(X) = iDFT N (z) as the linear transformation from CN/ 2 to RN :
+
+m = 1
+
+N
+
+
+
+U T · z + U T · z
+
+
+
+D.4 Fast computation of the DFT and bit-reversed order 
+
+The drawback of the technique from the previous section to compute the DFT is that its complexity is O(N 2) operations. In this section, we recall the fast computation of the DFT function, with complexity O(N log N ). We work in the ring S = R[X]/(XN + 1). Using XN + 1 = ( XN/ 2 − I)( XN/ 2 + I), we have the isomorphism: 
+
+Φ : R[X]/(XN + 1) ≃ C[X]/(XN/ 2 − I)
+
+a 7 → (a′ = a mod ( XN/ 2 − I)) .
+
+34 The coefficients a′ 
+
+> j
+
+∈ C of a′ can be computed as a′ 
+
+> j
+
+= aj + I · aj+N/ 2. Conversely, we have 
+
+aj = ( a′ 
+
+> j
+
++ ¯a′ 
+
+> j
+
+)/2 and aj+N/ 2 = ( a′ 
+
+> j
+
+− ¯a′ 
+
+> j
+
+)/(2 I). Therefore, the real part of the complex coefficients of a′ originates from the first N/ 2 coefficients of a ∈ S , while the imaginary part comes from the last N/ 2 coefficients of a.We now consider the ring C[X]/(XN/ 2 − I). We use ζ = eIπ/N . Using ζN/ 4 = eIπ/ 4 and 
+
+ζ5N/ 4 = e5Iπ/ 4 = −ζN/ 4, we can further split the ring as follows: 
+
+C[X]/(XN/ 2 − I) ≃ C[X]/(XN/ 4 − ζN/ 4·(5 0 mod 8) ) × C[X]/(XN/ 4 − ζN/ 4·(5 1 mod 8) ).
+
+We can generalize this approach as follows. Fix any integer k ≥ 1 such that 2 k < N . For any 0 ≤ j < 2k−1, consider the root ζN/ 2k ·5j
+
+. It has two square roots ζN/ 2k+1 ·5j
+
+and −ζN/ 2k+1 ·5j
+
+.Moreover, we have 5 2k−1
+
+= 1 + 2 k+1 (mod 2 k+2 ). This gives, for any 0 ≤ j < 2k−1:5j+2 k−1
+
+= 5 j · (1 + 2 k+1 ) = 5 j + 2 k+1 (mod 2 k+2 ).
+
+This enables to write the two square roots as ζN/ 2k+1 ·5j
+
+and ζN/ 2k+1 ·5j+2 k−1
+
+, which yields the isomorphism for 0 ≤ j < 2k−1:
+
+C[X]/(XN/ 2k
+
+− ζN/ 2k ·5j
+
+) ≃ C[X]/
+
+
+
+XN/ 2k+1 
+
+− ζN/ 2k+1 ·5j 
+
+× C[X]/
+
+
+
+XN/ 2k+1 
+
+− ζN/ 2k+1 ·5j+2 k−1 
+
+.
+
+For the corresponding isomorphism with u = ζN/ 2k+1 ·5j
+
+Φk(a) = 
+
+
+
+a′ = a mod ( XN/ 2k+1 
+
+− u), a ′′ = a mod ( XN/ 2k+1 
+
++ u)
+
+
+
+,
+
+The coefficients of a′ and a′′ can be computed efficiently via 
+
+a′ 
+
+> i
+
+= ai + u · ai+m
+
+a′′  
+
+> i
+
+= ai − u · ai+m
+
+for 0 ≤ i < m , for m = N/ 2k+1 . This is known as the Cooley-Tukey butterfly. We can then apply this technique recursively. After step k for 1 ≤ k ≤ log 2(N/ 2), we arrive at the isomorphism: 
+
+C[X]/(XN/ 2 − I) ≃ 
+
+> 2k−1
+
+Y
+
+> i=0
+
+C[X]/
+
+
+
+XN/ 2k+1 
+
+− ζN/ 2k+1 ·5br k (i) 
+
+.
+
+where br k(i) is the bit-reversal of the k-bit integer i. It has the properties br k(2 i) = br k−1(i) and 
+
+br k(2 i + 1) = 2 k−1 + br k−1(i). Eventually, for N = 2 ℓ, we obtain the evaluation of the input polynomial at the roots 
+
+ζ5br ℓ−1(i)
+
+for 0 ≤ i < N/ 2, therefore in bit-reversed order. Recall that we have defined DFT N (p)as 
+
+
+
+p(ζ5i
+
+)
+
+
+
+> 0≤i<N/ 2
+
+. Let Br k denote the function taking as input a sequence of 2 k integers and outputting it in bit-reversed order. With this notation, the above procedure yields a sequence (vi)0≤i<N/ 2 =
+
+
+
+p(ζ5br ℓ−1(i)
+
+)
+
+ 
+
+> 0≤i<N/ 2
+
+= Br ℓ−1(DFT N (p)). In total, we obtain the following fast 
+
+DFT N algorithm, from normal order ( no ) to bit-reversed order ( bo ). 35 Algorithm 5 Fast computation of DFT N , no → bo 
+
+Input : A polynomial p(X) ∈ R[X]/(XN + 1), with p(X) = PN −1 
+
+> j=0
+
+pj Xj , ζ = exp( Iπ/N ) and N = 2 ℓ.
+
+Output : A sequence ( vi)0≤i<N/ 2 = Br ℓ−1(DFT N (p)) = 
+
+
+
+p(ζ5br ℓ−1(i)
+
+)
+
+
+
+> 0≤i<N/ 2
+
+.1: ( vj )0≤j<N/ 2 = ( pj + I · pj+N/ 2)0≤j<N/ 2
+
+2: for k = 1 to ℓ − 1 do 
+
+3: for j = 0 to 2 k−1 − 1 do 
+
+4: u = ζ5br k−1(j)·N/ 2k+1 
+
+5: for i = 0 to N/ 2k+1 − 1 do 
+
+6: a, b ← vj·N/ 2k +i, v j·N/ 2k +i+N/ 2k+1 
+
+7: vj·N/ 2k +i = a + u · b
+
+8: vj·N/ 2k +i+N/ 2k+1 = a − u · b
+
+9: return (vi)0≤i<N/ 2
+
+We describe the corresponding iDFT algorithm, that computes the same operations in reverse order. 
+
+Algorithm 6 Fast computation of iDFT N , bo → no 
+
+Input : A sequence ( vi)0≤i<N/ 2, ζ = exp( Iπ/N ) and N = 2 ℓ.
+
+Output : A polynomial p(x) ∈ R[X]/(XN + 1), such that ( vi)0≤i<N/ 2 = Br ℓ−1(DFT N (p)) 1: for k = ℓ − 1 downto 1 do 
+
+2: for j = 0 to 2 k−1 − 1 do 
+
+3: u = ζ5br k−1(j)·N/ 2k+1 
+
+4: for i = 0 to N/ 2k+1 − 1 do 
+
+5: a, b ← vj·N/ 2k +i, v j·N/ 2k +i+N/ 2k+1 
+
+6: vj·N/ 2k +i = ( a + b)/27: vj·N/ 2k +i+N/ 2k+1 = u−1 · (a − b)/28: return p(x) = 
+
+> N/ 2−1
+
+P
+
+> i=0
+
+Re (vi)xi + Im (vi)xi+N/ 2
+
+In Algorithm 7, we describe the same DFT N algorithm as in Alg. 5, but with the input coefficients of the polynomial in bit-reversed order, and the output coefficients in normal order. In fact, we use a modified bit-reversed indexing, in which the first and second half of the coefficients are encoded separately in bit-reversed order. This will later facilitate the homomorphic evaluation of the algorithm. Due to this modified bit-reversed encoding, Line 1 of Alg. 5 remains the same. At Line 3, we can equivalently run j′ from 0 to 2 k−1 − 1, and let j = br k−1(j′). At lines 6, 7, 8, we have 
+
+br ℓ−1(j · N/ 2k + i) = br ℓ−k−1(i) · 2k + br k−1(j)
+
+br ℓ−1(j · N/ 2k + i + N/ 2k+1 ) = br ℓ−k−1(i) · 2k + 2 k−1 + br k−1(j)This gives the following algorithm. 36 Algorithm 7 Fast computation of DFT N , bo ′ → no 
+
+Input : A sequence ( pi)0≤i<N/ 2 ∈ RN/ 2, ζ = exp( Iπ/N ) and N = 2 ℓ.
+
+Output : A sequence (vi)0≤i<N/ 2 = DFT (p) =
+
+
+
+p(ζ5i
+
+)
+
+
+
+> 0≤i<N/ 2
+
+, where p(X) =
+
+> N/ 2−1
+
+P
+
+> j=0
+
+pbr ℓ−1(j)Xj +
+
+> N/ 2−1
+
+P
+
+> j=0
+
+pN/ 2+ br ℓ−1(j)XN/ 2+ j .1: ( vj )0≤j<N/ 2 = ( pj + I · pj+N/ 2)0≤j<N/ 2
+
+2: for k = 1 to ℓ − 1 do 
+
+3: for j = 0 to 2 k−1 − 1 do 
+
+4: u = ζ5j ·N/ 2k+1 
+
+5: for i = 0 to N/ 2k+1 − 1 do 
+
+6: a, b ← vi·2k +j , v i·2k +2 k−1+j
+
+7: vi·2k +j = a + u · b
+
+8: vi·2k +2 k−1+j = a − u · b
+
+9: return (vi)0≤i<N/ 2
+
+D.5 Definition of the SlotToCoeff function 
+
+For convenience, we define the SlotToCoeff N operation over the cyclotomic ring SN , but the procedure will indeed be the same over the integer ring R = Z[X]/(XN + 1). The SlotToCoeff N
+
+function takes as input a polynomial v(X) encoding N/ 2 slots t = ( t0, . . . , t N/ 2−1) ∈ RN/ 2, that is v(X) = iDFT N (t). It outputs a polynomial m(X) ∈ R[X2]/(XN + 1), whose N/ 2 coefficients are the tj ’s: 
+
+m(X) = SlotToCoeff N (v) = 
+
+> N/ 2−1
+
+X
+
+> j=0
+
+tj · X2j .
+
+We can therefore write m(X) = ˜m(X2) for ˜m(Y ) = PN/ 2−1 
+
+> j=0
+
+tj · Y j , and we let α = DFT N/ 2( ˜m) ∈
+
+CN/ 4. This implies DFT N (m) = ( α, α) ∈ CN/ 2.We generalize the DFT function to take as input the coefficient vector of a polynomial, instead of the polynomial itself, with the same output. Therefore, since α = DFT N/ 2( ˜m) and by definition ˜m(Y ) = Pn−1 
+
+> j=0
+
+tj · Y j , we can write α = DFT N/ 2(t). In total, we can summarize the above in a commutative diagram: Coefficient space Slot space 
+
+v(X) t
+
+m(X) (α, α) 
+
+> DFT N
+> SlotToCoeff DFT N/ 2
+> DFT N
+
+From the above commutative diagram, the goal is therefore to compute the function RN/ 2 → CN/ 2,
+
+t → (DFT N/ 2(t), DFT N/ 2(t)) over the slot space, homomorphically over the coefficient space. 
+
+D.6 The SlotToCoeff algorithm 
+
+In fact, we cannot compute α = DFT N/ 2(t) directly with a fast O(log N ) algorithm. Either the input or the output must be indexed in bit-reversed order. We will use the function DFT N/ 2,bo ′→no 
+
+computed by Alg. 7, whose input is bit-reversed and whose output is in normal order, which gives 37 DFT N/ 2,bo ′→no (t′) = DFT N/ 2(t) where t′ = Br ′(t). We therefore have the updated commutative diagram: Coefficient space Slot space 
+
+v(X) Br ′(t)
+
+m(X) (α, α) 
+
+> DFT N
+> SlotToCoeff DFT ′
+> N
+> DFT N
+
+where we define the function DFT ′ 
+
+> N
+
+(t) = ( DFT N/ 2,bo ′→no (t), DFT N/ 2,bo ′→no (t)). The goal is therefore to evaluate the function DFT ′ 
+
+> N
+
+(t′) homomorphically over the coefficient space. 
+
+Algorithm 8 Fast computation of DFT ′
+
+> N
+
+Input : A sequence ( pi)0≤i<N/ 2 ∈ RN/ 2, ζ = exp( Iπ/N ) and N = 2 ℓ.
+
+Output : A sequence ( vi)0≤i<N/ 2 = DFT ′(p)1: ( vj )0≤j<N/ 2 = ( w, w), where w = ( pj + I · pj+N/ 4)0≤j<N/ 4
+
+2: for k = 1 to ℓ − 2 do 
+
+3: for j = 0 to 2 k−1 − 1 do 
+
+4: u = ζ5j ·N/ 2k+1 
+
+5: for i = 0 to N/ 2k+1 − 1 do 
+
+6: a, b ← vi·2k +j , v i·2k +2 k−1+j
+
+7: vi·2k +j = a + u · b
+
+8: vi·2k +2 k−1+j = a − u · b
+
+9: return (vi)0≤i<N/ 2
+
+To perform the homomorphic evaluation of the previous algorithm, we first rewrite the operations in vector form. For a vector v = ( vi)0≤i<N/ 2, we write 
+
+Rot r(r) = ( vr+j mod N/ 2)0≤j<N/ 2 = ( vr, . . . , v N/ 2−1, v 0, . . . , v r−1)the rotation of v by r positions to the left. For a vector a, we denote by an the repetition n
+
+times of a.For the first line, we can write: 
+
+v = p ⊙ ((1) N/ 4, (I)N/ 4) + Rot N/ 4(p) ⊙ (( I)N/ 4, (1) N/ 4)We can rewrite the first butterfly equation as: 
+
+vi·2k +j ← vi·2k +j + ζ5j ·N/ 2k+1 
+
+· (Rot 2k−1 (v)) i·2k +j
+
+Similarly, we can rewrite the second butterfly equation as: 
+
+vi·2k +2 k−1+j ← (Rot −2k−1 (v)) i·2k +2 k−1+j − ζ5j ·N/ 2k+1 
+
+· vi·2k +2 k−1+j
+
+We can therefore write: 
+
+v ← v ⊙ ω0 + Rot 2k−1 (v) ⊙ ω1 + Rot −2k−1 (v) ⊙ ω2
+
+38 where 
+
+ω0 =
+
+
+
+(1) 2k−1
+
+,
+
+
+
+−ζ5j ·N/ 2k+1 
+
+0≤j< 2k−1
+
+N/ 2k+1 
+
+ω1 =
+
+
+
+ζ5j ·N/ 2k+1 
+
+0≤j< 2k−1 , (0) 2k−1
+
+N/ 2k+1 
+
+ω2 =
+
+
+
+(0) 2k−1
+
+, (1) 2k−1 N/ 2k+1 
+
+Finally, we can now define the SlotToCoeff algorithm, which is a homomorphic evaluation of the previous algorithm (Alg. 8). 
+
+Algorithm 9 SlotToCoeff 
+
+Input : A polynomial v = iDFT N (Br ′(t)) for t ∈ RN/ 2, ζ = exp( Iπ/N ) and N = 2 ℓ.
+
+Output : A polynomial m(X) = SlotToCoeff N (v) ≃
+
+> N/ 2−1
+
+P
+
+> j=0
+
+tj · X2j
+
+1: v ← v × Ecd ((1) N/ 4, (I)N/ 4)) + ΨN/ 4(v) × Ecd (( I)N/ 4, (1) N/ 4)2: for k = 1 to ℓ − 2 do 
+
+3: w0 =
+
+
+
+(1) 2k−1
+
+,
+
+
+
+−ζ5j ·N/ 2k+1 
+
+> 0≤j< 2k−1
+
+
+
+∈ C2k
+
+4: W0 = Ecd (w0)5: w1 =
+
+
+
+ζ5j ·N/ 2k+1  
+
+> 0≤j< 2k−1
+
+, (0) 2k−1
+
+
+
+∈ C2k
+
+6: W1 = Ecd (w1)7: w2 =
+
+
+
+(0) 2k−1
+
+, (1) 2k−1 
+
+∈ C2k
+
+8: W2 = Ecd (w2)9: v ← v × W0 + Ψ2k−1 (v) × W1 + Ψ−2k−1 (v) × W2
+
+10: return v
+
+The above SlotToCoeff algorithm is essentially the same as in [ CHH18 ], although in the latter it is described via a matrix approach. It has multiplicative depth log 2(N/ 2), and requires 2 log 2(N/ 2) − 1 homomorphic rotations and 3 log 2(N/ 2) − 1 external multiplications. Note that the polynomials W0, W1, and W2 are independent of the input and can thus be precomputed. 
+
+D.7 SlotToCoeff for n slots 
+
+We have the updated commutative diagram: Coefficient space Coefficient space Slot space 
+
+Z[XN/ (2 n)]/(XN + 1) Z[Y ]/(Y 2n + 1) Cn
+
+v(X) ˜v(Y ) Br ′(t)
+
+m(X) ˜m(Y ) (α, α)
+
+SlotToCoeff N,n 
+
+DFT 2n
+
+SlotToCoeff 2n DFT ′
+
+> 2n
+
+DFT 2n
+
+39 Algorithm 10 SlotToCoeff N,n                                                                              
+
+> Input : A polynomial v=iDFT N(Br ′(t)N/ (2 n)) for t∈Rn,ζ= exp( Iπ/ (2 n)) and n= 2 ℓ.
+> Output : A polynomial m(X) = SlotToCoeff N,n (v)≃n−1P
+> j=0
+> tj·Xj·N/n
+> 1: v←v×Ecd ((1) n/ 2,(I)n/ 2)) + Ψn/ 2(v)×Ecd (( I)n/ 2,(1) n/ 2)2: for k= 1 to ℓ−1do
+> 3: w0=
+> 
+> (1) 2k−1
+> ,
+> 
+> −ζ5j·n/ 2k
+> 0≤j< 2k−1
+> 
+> ∈C2k
+> 4: W0=Ecd (w0)5: w1=
+> 
+> ζ5j·n/ 2k
+> 0≤j< 2k−1,(0) 2k−1
+> 
+> ∈C2k
+> 6: W1=Ecd (w1)7: w2=
+> 
+> (0) 2k−1
+> ,(1) 2k−1
+> ∈C2k
+> 8: W2=Ecd (w2)9: v←v×W0+Ψ2k−1(v)×W1+Ψ−2k−1(v)×W2
+> 10: return v
+
+D.8 Radix implementation 
+
+As in [ CHH18 ], one can reduce the multiplicative depth by using radices. For a power-of-two radix 
+
+r, [ CHH18 ] shows that the homomorphic linear transform requires roughly 2 r log r n homomorphic rotations and 3 r log r n external multiplications. The advantage of the radix-based approach is that it yields a smaller multiplicative depth of around log r n compared to the initial depth of log 2 n. However, since the complexity increases as the radix does, the radix variant can be seen as a trade-off, which becomes disadvantageous for a too large r. As also described in [ CHH18 ], without affecting the depth, the number of homomorphic rotations can be even further reduced to O(√r log r n) by using a baby-step giant-step approach. In practice, the authors of [ CHH18 ] suggest to use r = 2 5 for a full slots implementation of 
+
+CKKS , i.e. with common parameters n = N/ 2 and N = 2 15 or N = 2 16 . They show that the running times for radices ranging from 2 1 to 2 4 are quite similar. However, for few slots n, we can use a smaller radix since a radix r is only of avail if r ≤ √n.
+
+E Proof of Theorem 1 
+
+We start with fresh encryptions of the secret-key bits sk. By Lemma 1, their initial noise size is bounded by E = 3 N κ . By Lemma 4, since we perform external products with encodings of real values of absolute value less than ν = 1, the size of the noise of each product is at most 2νE + 8 N ≤ 14 N κ .For the product tree, we must consider the error obtained when computing the product of the encryptions of two complex values, whose real and imaginary part are encrypted separately. Given the plaintexts z1 = x1 + i · y1 and z2 = x2 + i · y2, we have z1z2 = x1x2 − y1y2 + i · (x1y2 + x2y1). Therefore, for x = x1x2 − y1y2, we must compute the homomorphic difference: 
+
+ct x ← MultR evk (ct x1 , ct x2 ) − MultR evk (ct y1 , ct y2 ),
+
+and similarly for ct y for y = x1y2 + x2y1. Since all plaintext values x1, y 1, x 2, y 2 are bounded by 1 in absolute value, the errors in MultR (ct x1 , ct x2 ) and MultR (ct y1 , ct y2 ) are upper bounded by 2E + 8 N , where E is an upper bound of the errors in ct x1 , ct x2 , ct y1 and ct y2 . Therefore, the error magnitudes of ct x and ct y are both upper-bounded by 4 E + 16 N .40 We now consider the product tree of depth ℓ = log 2 N . For 0 ≤ i ≤ ℓ, we can upper-bound the noise of the current ciphertext at level i by uiN κ , where u0 = 14, and the recursive relation 
+
+ui+1 = 4 ui + 16 holds. One can show that ui ≤ 20 · 22i − 6 by a recursive approach. For i = ℓ,the error size after all multiplications is thus upper-bounded by 20 · 22ℓN κ = 20 N 3κ. We must therefore assume that ∆ ≥ (20 N 3κ)2 since we require ∆ ≥ E2 in each multiplication. After the final scaling by q/ (2 π∆ ), and by applying Lemma 4 again, the noise size becomes 20 N 3κ · q/ (2 π∆ ) + 8 N . Therefore, for ∆ ≥ 4N 3κq , the size of the noise is at most 9 N . This implies that by writing m = ⟨ct , sk ⟩(0) = ⟨s, c⟩ ∈ Z, our final ciphertext ct ′ satisfies: 
+
+⟨ct ′, sk ⟩ = Ecd (F (m)) + e′ (mod p · q),
+
+for some e′ with ∥e′∥∞ ≤ 9N and 
+
+F (m) = q
+
+2π∆ sin 
+
+ 2iπm q
+
+
+
+.
+
+Given the condition |m| < q 2/3, we obtain by bounding the residual term in the Taylor expansion: 
+
+F (m) − m∆ ≤ q
+
+2π∆ · 13! ·
+
+ 2π|m|
+
+q
+
+3
+
+≤ 7|m|3
+
+q2∆ ≤ 7
+
+∆ .
+
+This implies |Ecd (F (m)) − m| ≤ ∆ · | F (m) − m/∆ | + 1 ≤ 8. We can eventually write: 
+
+⟨ct ′, sk ⟩ = ⟨ct , sk ⟩(0) + ebt (mod p · q),
+
+where ∥ebt ∥∞ ≤ 10 N as claimed. 
+
+F Algorithms for the single slot bootstrapping 
+
+Algorithm 11 Bootstrapping key generation, single slot 
+
+Input : A length N secret key s with Hamming weight h and B = N/h 
+
+Output : A bootstrapping key cs = ( cs 0, cs 1)1: for all 0 ≤ j < B/ 2 and 0 ≤ b < h do 
+
+2: ˜s0 
+
+> j·h+b
+
+= sb·B+j
+
+3: ˜s1 
+
+> j·h+b
+
+= sb·B+B/ 2+ j
+
+4: S0(X), S 1(X) ←− Ecd ((˜ s0 
+
+> ι
+
+)0≤ι<N/ 2), Ecd ((˜ s1 
+
+> ι
+
+)0≤ι<N/ 2)5: return cs = ( Enc pk (S0(X)) , Enc pk (S1(X))) 
+
+Algorithm 12 Bootstrapping, single slot 
+
+Input : A modulus q, a bootstrapping key cs , an RLWE ciphertext ct = ( b, a ), and δ = ( q/ (4 π∆ )) 1/h 
+
+Output : A refreshed ciphertext ct ′
+
+1: c = ( a0 + b0, −aN −1, −aN −2, . . . , −a1)2: for all 0 ≤ j < B/ 2 and 0 ≤ b < h do 
+
+3: e0 
+
+> j·h+b
+
+= exp(2 iπ · cb·B+j /q ) · δ
+
+4: e1 
+
+> j·h+b
+
+= exp(2 iπ · cb·B+B/ 2+ j /q ) · δ
+
+5: E0, E 1 ←− Ecd (( eiι)0≤ι<N/ 2), Ecd (( e1 
+
+> ι
+
+)0≤ι<N/ 2)6: T0, T 1 ←− ExtMultR (cs 0, E 0), ExtMultR (cs 1, E 1)7: return ct ′ = Im2 (Pr h→1(Tr N/ 2→h(T0 + T1))) 
+
+41 G Bootstrapping algorithm for more than B/ 2 slots 
+
+The bootstrapping algorithm from Section 5.2 is limited to bootstrapping up to n ≤ nmax = B/ 2 = 
+
+N/ (2 h) components. However, it can be extended to support more slots, specifically n′ ≤ N ,by shifting the coefficients of the input ciphertext and applying the previous bootstrapping procedure as a black box for each group of nmax coefficients. More precisely, the previous bootstrapping algorithm (Alg. 2) inputs a ciphertext ct for the plaintext polynomial m(X) = PN −1 
+
+> i=0
+
+mi · Xi, and outputs a refreshed ciphertext for the polynomial m′(X) = Pn−1 
+
+> i=0
+
+mi·N/n · Xi·N/n . In other words, only the n coefficients mi of m(X)such that i ≡ 0 ( mod N/n ) are kept and bootstrapped, while the others are lost, because of the initial C ← DecMat (ct ) procedure which only considers the coefficients of Xi·N/n in m(X). To bootstrap n′ > n coefficients, we can therefore proceed by repeatedly shifting the coefficients of the input plaintext (homomorphically on the input ciphertext), by a shifting polynomial 
+
+X−j·N/n ′
+
+. We obtain a bootstrapped ciphertext, which we shift back by Xj·N/n ′
+
+. We then compute the sum for all 0 ≤ j < n ′/n of all such ciphertexts. At the end, we obtain a refreshed ciphertext for all the n′ components. We describe the concrete algorithm below. The number of homomorphic operations becomes O(n′ + ( n′/n ) · log N ), where n = nmax = B/ 2 and n′ ≤ N/ 2, which gives n′/n ≤ h. Assuming h = O(1), the complexity remains O(n′ + log N ), while the depth remains unchanged. 
+
+Algorithm 13 Bootstrapping, more than B/ 2 slots                                    
+
+> Input : A modulus q, a bootstrapping key ( CS u)0≤u< 2n, an RLWE ciphertext ct = ( b, a ) containing n′≥nslots
+> Output : A refreshed ciphertext ct ′
+> 1: acc ←(0 ,0) 2: for j= 0 to n′/n −1do
+> 3: ct s←ExtMult (ct , X −j·N/n ′
+> )4: ct ′
+> s←Bootstrap (q, cs ,ct s)5: acc ←Add (acc ,ExtMult (ct ′
+> s, X j·N/n ′
+> )) 6: return acc
+
+42

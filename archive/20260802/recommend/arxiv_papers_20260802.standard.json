@@ -1,0 +1,129 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-02T20:51:56.470274+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.28191v1",
+      "title": "Secure Aggregation for Privacy-Preserving Federated Learning on Clinical EEG Data",
+      "abstract": "Federated learning enables multiple institutions to train shared models without exchanging raw clinical EEG data, but it does not fully prevent privacy leakage from individual model updates. This paper presents a privacy-preserving federated learning framework for clinical EEG data using masking-based secure aggregation as the core protection mechanism. The framework combines graph-based communication, threshold secret sharing, dropout-resilient aggregation, local update clipping, an optional Bloom filter-based privacy-preserving record-linkage initialization module, and auxiliary-notary-based verifiability. It supports both semi-honest and malicious aggregation settings and is implemented using the Flower federated learning framework. The secure-aggregation variants are evaluated in a simulated cross-silo healthcare setting using TUH EEG-derived data under different client configurations. Under the stated assumptions, the secure variants hide individual updates from the aggregation server. The results show that these variants remain compatible with federated model training, although malicious-setting safeguards and lightweight consistency-checking mechanisms introduce additional computation, communication, and round-duration overhead. The semi-honest variant provides the lowest overhead among the secure configurations, while malicious and auxiliary-notary variants offer stronger consistency, integrity, and lightweight verification support at higher cost.",
+      "authors": [
+        "Pouya Rajabi",
+        "Mohsen Toorani"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.DC",
+        "cs.LG"
+      ],
+      "published": "2026-07-30T13:28:39+00:00",
+      "link": "https://arxiv.org/pdf/2607.28191v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "threshold secret sharing and verifiability in malicious settings",
+      "llm_evidence_cn": "恶意环境下的门限秘密共享与可验证性",
+      "llm_evidence": "恶意环境下的门限秘密共享与可验证性",
+      "canonical_evidence": "恶意环境下的门限秘密共享与可验证性",
+      "llm_tldr_en": "Presents a federated learning framework using secret sharing and verifiability for malicious environments.",
+      "llm_tldr_cn": "提出一个在恶意环境下使用秘密共享和可验证性的联邦学习框架。",
+      "llm_tldr": "提出一个在恶意环境下使用秘密共享和可验证性的联邦学习框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.25107v1",
+      "title": "MOSAIC-FL, a micro-service based privacy-preserving framework with application to genomics",
+      "abstract": "Security and privacy are primordial requirements for Federated Learning (FL), especially in fields such as healthcare and genomics where sensitive information has to be analyzed. Our FL framework is designed to address these challenges while proposing a modular, flexible and micro-service architecture. More precisely, it integrates an efficient gRPC communication layer and a Finite State Machine to ensure robust component synchronization and threat detection, while relying on a fault-tolerant secure aggregation protocol using a Threshold variant of the CKKS homomorphic cryptosystem. This allows blind model aggregation by an orchestration server, requiring a minimum of $t$-out-of-$N$ active clients for decryption while minimizing communication overhead thanks to both cryptographic and network protocols. We ensure IND-CPA-D security through noise flooding and mitigate the recent key-recovery attack on synchronized decryptors by renewing the collective key material at every round. We demonstrate the framework's effectiveness through diverse use cases, ranging from standard image recognition (EMNIST) to complex genomic classification including breast cancer subtyping on TCGA, evaluating system performance across different threshold values and model scales.",
+      "authors": [
+        "Paul Largillier",
+        "Karl Paygambar",
+        "Cédric Gouy-Pailler",
+        "Vincent Meyer",
+        "Mallek Mziou",
+        "Oana Stan"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-07-27T22:09:46+00:00",
+      "link": "https://arxiv.org/pdf/2607.25107v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Secure aggregation protocol for distributed computation",
+      "llm_evidence_cn": "用于分布式计算的安全聚合协议",
+      "llm_evidence": "用于分布式计算的安全聚合协议",
+      "canonical_evidence": "用于分布式计算的安全聚合协议",
+      "llm_tldr_en": "MOSAIC-FL uses a threshold homomorphic cryptosystem for secure aggregation in federated learning.",
+      "llm_tldr_cn": "MOSAIC-FL利用阈值同态加密系统在联邦学习中实现安全的数据聚合。",
+      "llm_tldr": "MOSAIC-FL利用阈值同态加密系统在联邦学习中实现安全的数据聚合。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.27401v1",
+      "title": "Low-Latency Bootstrapping for CKKS using Roots of Unity",
+      "abstract": "We introduce Sparse Roots of Unity (SPRU) bootstrapping, a new bootstrapping algorithm for the CKKS homomorphic encryption scheme for approximate arithmetic. The original CKKS bootstrapping method relies on homomorphically evaluating a polynomial that approximates modular reduction modulo q. In contrast, SPRU bootstrapping directly embeds the additive group modulo q into the complex roots of unity, which can be evaluated natively in the CKKS scheme. This approach significantly reduces the multiplicative depth required for bootstrapping, enabling the use of a smaller ring dimension and improving efficiency. In practice, using the OpenFHE C++ library, SPRU bootstrapping achieves up to a 5x reduction in latency when applied to ciphertexts with a small number of slots.",
+      "authors": [
+        "Jean-Sebastien Coron",
+        "Robin Koestler"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-29T19:15:10+00:00",
+      "link": "https://arxiv.org/pdf/2607.27401v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Homomorphic encryption for approximate arithmetic",
+      "llm_evidence_cn": "用于近似算术的同态加密",
+      "llm_evidence": "用于近似算术的同态加密",
+      "canonical_evidence": "用于近似算术的同态加密",
+      "llm_tldr_en": "Introduces SPRU bootstrapping for CKKS to improve efficiency in approximate homomorphic arithmetic.",
+      "llm_tldr_cn": "为CKKS方案引入SPRU自举算法，显著降低近似同态算术的延迟。",
+      "llm_tldr": "为CKKS方案引入SPRU自举算法，显著降低近似同态算术的延迟。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing supporting floating point operations and verifiable security",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
