@@ -1,0 +1,93 @@
+{
+  "label": "2026-08-03",
+  "date": "2026-08-03",
+  "generated_at": "2026-08-03T20:23:17",
+  "count": 6,
+  "papers": [
+    {
+      "paper_id": "202608/03/2607.29221v1-mosaic-masked-outsourcing-of-secure-ai-computations",
+      "section": "deep",
+      "title_en": "MOSAIC: Masked Outsourcing of Secure AI Computations",
+      "authors": "James Hsin-yu Chiang, Sheila Zingg, Kari Kostiainen, Srdjan Capkun",
+      "date": "2026-07-31",
+      "pdf": "https://arxiv.org/pdf/2607.29221v1",
+      "score": "9.0",
+      "evidence": "大型Transformer推理的安全外包",
+      "tldr": "MOSAIC 提出了一种新型矩阵乘法掩码协议，旨在将 AI 计算从弱客户端安全外包给强大的非信服务器。通过引入少量噪声并放宽精确度要求，该方法在保证安全性的同时实现了极低的客户端开销，支持 70B 参数的大型 Transformer 模型推理。其核心技术包括基于 LWE/LPN 的掩码机制和控制误差增长的随机 Hadamard 旋转，在保持模型性能的同时显著提升了计算效率。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We address the challenge of securely and efficiently outsourcing AI computations from a trusted but computationally weak client to an untrusted but powerful server, in the setting where the client holds both the input and the model, and the server must learn neither. We present MOSAIC, whose core is a novel matrix-multiplication masking protocol that scales to far larger matrices than prior work, enabling the safe outsourcing of modern workloads such as large transformer inference. By introducing small amounts of noise to the multiplication result and thereby relaxing correctness, MOSAIC achieves optimal asymptotic client overhead and concrete runtimes orders of magnitude faster than prior work. Its security reduces to the decisional LWE and LPN assumptions.   Because this noise accumulates across the many layers of a transformer, a key technical challenge is bounding error growth; MOSAIC addresses this with an error-scaling mechanism based on random Hadamard rotations. On large 70B transformer models, MOSAIC's perplexity is comparable to popular quantization approaches and even matches full-precision BF16 inference on HumanEval.   Finally, we present an end-to-end implementation showing how ideas like MOSAIC can promise a path towards large-scale confidential AI in modern data centers. Non-confidential inference is already distributed across phase (prefill/decode), layer, and time to maximize utilization of heterogeneous hardware, using RDMA-like networking to move activations, cached KV values, and weights across nodes. MOSAIC enables scaling of confidential compute by keeping the trusted computing base (TCB) small and outsourcing the bulk of the AI computation to untrusted accelerators.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/03/2607.28884v1-hollow-llm-attack-computationally-trivial-weights-in-zero-knowledge-verification-of-llm-inference",
+      "section": "deep",
+      "title_en": "Hollow-LLM Attack: Computationally Trivial Weights in Zero-Knowledge Verification of LLM Inference",
+      "authors": "Chen Gong, Beijie Liu, Mengyuan Li",
+      "date": "2026-07-30",
+      "pdf": "https://arxiv.org/pdf/2607.28884v1",
+      "score": "8.0",
+      "evidence": "大模型推理的零知识验证及其安全漏洞",
+      "tldr": "本研究揭示了零知识（ZK）大语言模型推理验证中的一个关键漏洞，即“Hollow-LLM攻击”。虽然ZK证明能确保推理过程符合公开架构和私有权重，但攻击者可以通过嵌入具有特殊代数结构的“幽灵权重”，在保持架构不变的情况下大幅降低实际计算量。这种攻击使得服务商能以小模型成本生成有效证明，却虚报大模型规模。研究强调，现有的推理正确性证明并不等同于大模型计算量的保证，亟需新的保护机制。",
+      "tags": "query:fss-llm",
+      "abstract_en": "As large language models (LLMs) grow in scale and are predominantly served from remote platforms, verifying faithful inference execution becomes critical (i.e., ensuring that a provider actually executes the advertised model and computational workload rather than a tampered or downsized variant). Zero-knowledge (ZK) LLM inference offers an appealing approach. It promises public verifiability and delivers per-instance guarantees of equational correctness by proving that an output is consistent with executing a public architecture under committed, private weights. Though, we show that it does not bind the effort expended to produce the output. In this paper, we formalize this overlooked effort gap and introduce the Hollow-LLM Attack, in which a dishonest provider retains the declared architecture and parameter count but embeds ghost weights whose algebraic structure collapses effective computation. These witnesses satisfy the verification circuit and yield valid proofs, even though the dishonest model owner, who serves as the prover, performs computation commensurate with a much smaller model than the declared public architecture. This creates a profitable equilibrium in which providers deliver provably correct outputs at small-model cost while overclaiming model size. Accordingly, we characterize concrete families of ghost weights that compose with standard transformer blocks and show that such hollow deployments substantially reduce serving cost with zero quality loss under the same verification circuit. These findings underscore that proof of correct inference is not proof of large-model execution and necessitate additional protections to bind correctness to verifiable computational work.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/03/2607.26339v1-raguard-a-layered-defense-framework-for-retrieval-augmented-generation-systems-against-data-poisoning",
+      "section": "quick",
+      "title_en": "RAGuard: A Layered Defense Framework for Retrieval-Augmented Generation Systems Against Data Poisoning",
+      "authors": "Pushkal Kumar, Tucker Nielson, Tanish Kolhe, Shubham Zala, Vincent Li",
+      "date": "2026-07-28",
+      "pdf": "https://arxiv.org/pdf/2607.26339v1",
+      "score": "6.0",
+      "evidence": "用于大语言模型防御的零知识推理补丁",
+      "tldr": "本研究针对检索增强生成（RAG）系统面临的语料库投毒攻击，提出了分层防御框架 RAGuard。该框架结合了对抗性微调的密集检索器（用于降低恶意文档排名）和零知识推理补丁（ZKIP，通过留一法解码分析语义偏移和熵变来过滤毒化内容）。实验表明，RAGuard 能在保持高检索召回率的同时，将攻击成功率降至零，为 RAG 系统提供了强有力的安全保障。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Retrieval-Augmented Generation (RAG) systems ground large language models (LLMs) in external corpora, but this reliance exposes them to corpus poisoning: maliciously injected passages that manipulate retrieved evidence. We introduce RAGuard, a layered defense against \\emph{factual} corpus-poisoning attacks on RAG pipelines. The first layer adversarially fine-tunes a dense retriever on synthetic poisoned documents (fabricated facts, contradictions, and reasoning traps), teaching it to downrank malicious passages before generation. The second layer, the Zero-Knowledge Inference Patch ZKIP, is a label-free, black-box filter: for each retrieved document, it performs a leave-one-out decode and scores the document by the semantic shift and output-entropy change that its removal induces. ZKIP requires no poison labels, no ground-truth answers, and no access to model internals; it compares the model's own answers under counterfactual contexts. On poisoned Natural Questions at 5--30\\% poison ratios, adversarial retriever training alone reduces but does not eliminate attack success, while ZKIP drives the measured attack success rate to 0.000 in every defended configuration, keeping Recall@5 within 0.03 of the clean-corpus baseline. Supervised analyses on both Natural Questions and BEIR (NFCorpus) confirm that the counterfactual signals ZKIP relies on carry learnable poison structure. The defense costs $k{+}1$ generator passes per query ($6\\times$ for $k{=}5$); we analyze batching and early-stopping approximations that reduce this overhead. We also show that keyword-preserving poisons leave lexical retrievers such as BM25 essentially unaffected, an observation that delineates the boundary of the threat model. Code, datasets, and evaluation harnesses are released for reproducibility.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/03/2607.27491v1-flock-fast-proving-for-batch-boolean-computations",
+      "section": "quick",
+      "title_en": "Flock: Fast Proving for Batch Boolean Computations",
+      "authors": "Benedikt Bünz, Ron D. Rothblum, William Wang",
+      "date": "2026-07-29",
+      "pdf": "https://arxiv.org/pdf/2607.27491v1",
+      "score": "6.0",
+      "evidence": "批量布尔计算与 SNARKs 的快速证明",
+      "tldr": "Flock 是一种新型基于哈希的 SNARK 方案，专门用于加速大规模批量布尔计算（如 SHA-256、Keccak 和 BLAKE3 哈希评估）。该研究通过优化 lincheck 和 zerocheck 协议，并结合 AI 辅助的高性能代码实现，显著降低了证明生成的开销。实验表明，Flock 在证明速度上比当前最先进的 Binius64 快 9 倍，比传统椭圆曲线 SNARK 快 500 倍以上，极大地提升了哈希链和 Merkle 树证明的效率。",
+      "tags": "query:fss-llm",
+      "abstract_en": "For many applications of SNARKs, a key bottleneck is proving large batches of standard cryptographic hash evaluations, such as SHA-256, Keccak, or BLAKE3. We introduce Flock, a hash-based SNARK for extremely fast proving of such batched Boolean computations. Flock proves batches of the same R1CS circuit (plus input/output relations between them), can prove hash-chains and Merkle path openings, and in principle can be extended to full-fledged hash-based signature verification. At its core, Flock combines new optimizations for the lincheck and zerocheck protocols with an aggressively optimized proof-of-concept implementation co-designed by coding agents.   On a single core of an M4 Max processor, Flock proves 82k evaluations of the BLAKE3 compression function, 42k SHA-256 compressions, and 30k Keccak permutations per second --- less than a $250\\times$ overhead over native execution. On ten cores, throughput exceeds 660k BLAKE3 compressions per second; in proving SHA-256, Flock is more than $9\\times$ faster than Binius64, the prior state of the art, and more than $500\\times$ faster than the fastest elliptic curve-based SNARK we measured against.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/03/2607.28757v1-partial-derandomization-for-leakage-resilient-shamirs-secret-sharing-over-composite-order-fields",
+      "section": "quick",
+      "title_en": "Partial Derandomization for Leakage-Resilient Shamir's Secret Sharing over Composite Order Fields",
+      "authors": "S. Venkitesh",
+      "date": "2026-07-30",
+      "pdf": "https://arxiv.org/pdf/2607.28757v1",
+      "score": "6.0",
+      "evidence": "抗泄露秘密共享理论",
+      "tldr": "本研究针对复合阶域上的抗泄漏Shamir秘密共享方案，提出了一种评估点的部分去随机化方法。基于前人关于线性码秘密共享方案安全性的二分性结论，作者将原本需要n个独立随机评估点的方案改进为仅需一个随机初始点，通过固定有理函数的迭代生成后续点。该方法在特定参数范围内实现了针对单块泄漏的完美安全性，显著降低了生成评估点所需的随机比特数，为构造显式抗泄漏秘密共享方案做出了重要贡献。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We make progress on the question of constructing explicit evaluation places for leakage-resilient Shamir's secret sharing, over composite order fields. Previously, Maji et al. (EUROCRYPT 2024) showed that random evaluation places yield Shamir's secret sharing over the composite order field $\\mathbb{F}_{p^d}$ that is statistically secure against physical-bit leakage. Later, Nguyen (EUROCRYPT 2025) established a dichotomy that linear code-based secret-sharing scheme over the field $\\mathbb{F}_{p^d}$ is either statistically secure or completely insecure against such leakage.   Building upon Nguyen's dichotomy, we present a partial derandomization of evaluation places, improving upon the Maji et al. result for a restricted regime of parameters. We replace the random choice of $n$ independent evaluation places by the iterates $x_j = Φ^j(x_0)$ of a simple fixed rational function $Φ$, where the initial point $x_0 \\in \\mathbb{F}_{p^d}^*$ is randomly chosen. The randomness in the evaluation places thus drops from $nd \\log p$ bits to $d\\log p$ bits. Our construction is valid for the regime $n = O(d/\\log_p d)$, and any reconstruction threshold $k \\ge 2$; in fact, the scheme attains perfect security (statistical distance exactly zero) against single-block leakage. Our technique is a partial fraction nondegeneracy argument that exploits the distinct poles of the rational iterates.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/03/2607.29019v1-goldenretriever-non-interactive-homomorphic-encrypted-retrieval-for-privacy-preserving-rag",
+      "section": "quick",
+      "title_en": "GoldenRetriever: Non-Interactive Homomorphic Encrypted Retrieval for Privacy-Preserving RAG",
+      "authors": "Yang Gao, Gang Quan, Scott Piersall, Qian Lou, Dongdong Wang, Liqiang Wang",
+      "date": "2026-07-31",
+      "pdf": "https://arxiv.org/pdf/2607.29019v1",
+      "score": "6.0",
+      "evidence": "使用同态加密的隐私保护RAG",
+      "tldr": "本研究针对检索增强生成（RAG）中的隐私泄露问题，提出了GoldenRetriever框架。该框架利用同态加密（HE）实现非交互式加密检索，通过阈值选择机制替代高延迟的Top-k排序，将计算复杂度从平方级降至线性。结合CKKS加密方案和掩码极化技术，GoldenRetriever在保护查询隐私的同时，显著提升了加密检索的效率，为构建可扩展且安全的RAG系统提供了实用方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Retrieval-Augmented Generation (RAG) enhances large language models by incorporating external knowledge, but existing pipelines typically operate on plaintext data, raising significant privacy concerns. Prior work on privacy-preserving retrieval leverages cryptographic techniques such as homomorphic encryption (HE) and private information retrieval (PIR), but often relies on interactive protocols or ranking-based selection mechanisms that incur high latency and potential information leakage. In this paper, we propose a practical non-interactive encrypted retrieval framework for RAG based on threshold selection. Instead of performing expensive top-$k$ ranking under encryption, our approach selects documents whose similarity scores exceed a predefined threshold, reducing computational complexity from quadratic to linear in the corpus size. We implement this design using CKKS-based homomorphic computation, enabling fully encrypted similarity evaluation and document selection without revealing query content, intermediate scores, or selected indices. To bridge the gap between approximate encrypted computation and discrete token reconstruction, we introduce a precision-stable mask polarization method that ensures accurate recovery of selected documents. Experiments on standard retrieval benchmarks demonstrate that our approach achieves competitive retrieval effectiveness while significantly reducing latency compared to ranking-based encrypted methods. These results highlight threshold-based selection as a practical foundation for scalable and secure RAG systems.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

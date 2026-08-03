@@ -6,32 +6,40 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-02
-- 运行时间：2026-08-02 20:52:16 UTC
+- 最新运行日期：2026-08-03
+- 运行时间：2026-08-03 20:23:05 UTC
 - 运行状态：成功
-- 本次总论文数：3
-- 精读区：0
-- 速读区：3
+- 本次总论文数：6
+- 精读区：2
+- 速读区：4
 
 ### 今日简报（AI）
-今日聚焦隐私计算在脑电图与基因组学中的联邦学习实战，并探索 CKKS 同态加密的低延迟优化。
-重点推荐临床 EEG 数据的安全聚合方案，以及利用单位根显著提升 CKKS 自举效率的性能突破。
-建议关注微服务架构与底层算法优化如何共同推动隐私保护技术在医疗大数据领域的落地。
-- 详情：[/202608/02/README](/202608/02/README)
+今日聚焦 AI 安全外包计算与大模型零知识验证漏洞，深度解析 6 篇密码学与安全前沿成果。
+重点关注 MOSAIC 掩码安全计算方案及 Hollow-LLM 攻击研究，揭示了 LLM 推理验证中权重冗余带来的安全隐患。
+建议开发者关注大模型部署中的隐私合规，并警惕针对检索增强生成（RAG）系统的底层数据投毒风险。
+- 详情：[/202608/03/README](/202608/03/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [MOSAIC: Masked Outsourcing of Secure AI Computations](/202608/03/2607.29221v1-mosaic-masked-outsourcing-of-secure-ai-computations)  
+   标签：评分：9.0/10、query:fss-llm
+   evidence：大型Transformer推理的安全外包
+2. [Hollow-LLM Attack: Computationally Trivial Weights in Zero-Knowledge Verification of LLM Inference](/202608/03/2607.28884v1-hollow-llm-attack-computationally-trivial-weights-in-zero-knowledge-verification-of-llm-inference)  
+   标签：评分：8.0/10、query:fss-llm
+   evidence：大模型推理的零知识验证及其安全漏洞
 
 ### 速读区论文标签
-1. [Secure Aggregation for Privacy-Preserving Federated Learning on Clinical EEG Data](/202608/02/2607.28191v1-secure-aggregation-for-privacy-preserving-federated-learning-on-clinical-eeg-data)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：恶意环境下的门限秘密共享与可验证性
-2. [MOSAIC-FL, a micro-service based privacy-preserving framework with application to genomics](/202608/02/2607.25107v1-mosaic-fl-a-micro-service-based-privacy-preserving-framework-with-application-to-genomics)  
+1. [RAGuard: A Layered Defense Framework for Retrieval-Augmented Generation Systems Against Data Poisoning](/202608/03/2607.26339v1-raguard-a-layered-defense-framework-for-retrieval-augmented-generation-systems-against-data-poisoning)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：用于分布式计算的安全聚合协议
-3. [Low-Latency Bootstrapping for CKKS using Roots of Unity](/202608/02/2607.27401v1-low-latency-bootstrapping-for-ckks-using-roots-of-unity)  
+   evidence：用于大语言模型防御的零知识推理补丁
+2. [Flock: Fast Proving for Batch Boolean Computations](/202608/03/2607.27491v1-flock-fast-proving-for-batch-boolean-computations)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：用于近似算术的同态加密
+   evidence：批量布尔计算与 SNARKs 的快速证明
+3. [Partial Derandomization for Leakage-Resilient Shamir's Secret Sharing over Composite Order Fields](/202608/03/2607.28757v1-partial-derandomization-for-leakage-resilient-shamirs-secret-sharing-over-composite-order-fields)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：抗泄露秘密共享理论
+4. [GoldenRetriever: Non-Interactive Homomorphic Encrypted Retrieval for Privacy-Preserving RAG](/202608/03/2607.29019v1-goldenretriever-non-interactive-homomorphic-encrypted-retrieval-for-privacy-preserving-rag)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：使用同态加密的隐私保护RAG
 
 
 <div class="dpr-home-promo-card">

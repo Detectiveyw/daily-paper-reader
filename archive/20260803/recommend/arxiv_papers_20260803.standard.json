@@ -1,0 +1,241 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-03T20:19:58.461907+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [
+    {
+      "id": "2607.29221v1",
+      "title": "MOSAIC: Masked Outsourcing of Secure AI Computations",
+      "abstract": "We address the challenge of securely and efficiently outsourcing AI computations from a trusted but computationally weak client to an untrusted but powerful server, in the setting where the client holds both the input and the model, and the server must learn neither. We present MOSAIC, whose core is a novel matrix-multiplication masking protocol that scales to far larger matrices than prior work, enabling the safe outsourcing of modern workloads such as large transformer inference. By introducing small amounts of noise to the multiplication result and thereby relaxing correctness, MOSAIC achieves optimal asymptotic client overhead and concrete runtimes orders of magnitude faster than prior work. Its security reduces to the decisional LWE and LPN assumptions.   Because this noise accumulates across the many layers of a transformer, a key technical challenge is bounding error growth; MOSAIC addresses this with an error-scaling mechanism based on random Hadamard rotations. On large 70B transformer models, MOSAIC's perplexity is comparable to popular quantization approaches and even matches full-precision BF16 inference on HumanEval.   Finally, we present an end-to-end implementation showing how ideas like MOSAIC can promise a path towards large-scale confidential AI in modern data centers. Non-confidential inference is already distributed across phase (prefill/decode), layer, and time to maximize utilization of heterogeneous hardware, using RDMA-like networking to move activations, cached KV values, and weights across nodes. MOSAIC enables scaling of confidential compute by keeping the trusted computing base (TCB) small and outsourcing the bulk of the AI computation to untrusted accelerators.",
+      "authors": [
+        "James Hsin-yu Chiang",
+        "Sheila Zingg",
+        "Kari Kostiainen",
+        "Srdjan Capkun"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-07-31T09:53:51+00:00",
+      "link": "https://arxiv.org/pdf/2607.29221v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "secure outsourcing of large transformer inference",
+      "llm_evidence_cn": "大型Transformer推理的安全外包",
+      "llm_evidence": "大型Transformer推理的安全外包",
+      "canonical_evidence": "大型Transformer推理的安全外包",
+      "llm_tldr_en": "MOSAIC enables secure outsourcing of large transformer inference using a novel masking protocol.",
+      "llm_tldr_cn": "MOSAIC通过新型掩码协议实现了大型Transformer推理的安全外包。",
+      "llm_tldr": "MOSAIC通过新型掩码协议实现了大型Transformer推理的安全外包。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.28884v1",
+      "title": "Hollow-LLM Attack: Computationally Trivial Weights in Zero-Knowledge Verification of LLM Inference",
+      "abstract": "As large language models (LLMs) grow in scale and are predominantly served from remote platforms, verifying faithful inference execution becomes critical (i.e., ensuring that a provider actually executes the advertised model and computational workload rather than a tampered or downsized variant). Zero-knowledge (ZK) LLM inference offers an appealing approach. It promises public verifiability and delivers per-instance guarantees of equational correctness by proving that an output is consistent with executing a public architecture under committed, private weights. Though, we show that it does not bind the effort expended to produce the output. In this paper, we formalize this overlooked effort gap and introduce the Hollow-LLM Attack, in which a dishonest provider retains the declared architecture and parameter count but embeds ghost weights whose algebraic structure collapses effective computation. These witnesses satisfy the verification circuit and yield valid proofs, even though the dishonest model owner, who serves as the prover, performs computation commensurate with a much smaller model than the declared public architecture. This creates a profitable equilibrium in which providers deliver provably correct outputs at small-model cost while overclaiming model size. Accordingly, we characterize concrete families of ghost weights that compose with standard transformer blocks and show that such hollow deployments substantially reduce serving cost with zero quality loss under the same verification circuit. These findings underscore that proof of correct inference is not proof of large-model execution and necessitate additional protections to bind correctness to verifiable computational work.",
+      "authors": [
+        "Chen Gong",
+        "Beijie Liu",
+        "Mengyuan Li"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-30T23:00:59+00:00",
+      "link": "https://arxiv.org/pdf/2607.28884v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Zero-knowledge verification of LLM inference and security vulnerabilities",
+      "llm_evidence_cn": "大模型推理的零知识验证及其安全漏洞",
+      "llm_evidence": "大模型推理的零知识验证及其安全漏洞",
+      "canonical_evidence": "大模型推理的零知识验证及其安全漏洞",
+      "llm_tldr_en": "Analyzes security gaps in zero-knowledge LLM inference verification and introduces the Hollow-LLM attack.",
+      "llm_tldr_cn": "分析了大模型推理零知识验证中的安全漏洞，并提出了Hollow-LLM攻击。",
+      "llm_tldr": "分析了大模型推理零知识验证中的安全漏洞，并提出了Hollow-LLM攻击。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.26339v1",
+      "title": "RAGuard: A Layered Defense Framework for Retrieval-Augmented Generation Systems Against Data Poisoning",
+      "abstract": "Retrieval-Augmented Generation (RAG) systems ground large language models (LLMs) in external corpora, but this reliance exposes them to corpus poisoning: maliciously injected passages that manipulate retrieved evidence. We introduce RAGuard, a layered defense against \\emph{factual} corpus-poisoning attacks on RAG pipelines. The first layer adversarially fine-tunes a dense retriever on synthetic poisoned documents (fabricated facts, contradictions, and reasoning traps), teaching it to downrank malicious passages before generation. The second layer, the Zero-Knowledge Inference Patch ZKIP, is a label-free, black-box filter: for each retrieved document, it performs a leave-one-out decode and scores the document by the semantic shift and output-entropy change that its removal induces. ZKIP requires no poison labels, no ground-truth answers, and no access to model internals; it compares the model's own answers under counterfactual contexts. On poisoned Natural Questions at 5--30\\% poison ratios, adversarial retriever training alone reduces but does not eliminate attack success, while ZKIP drives the measured attack success rate to 0.000 in every defended configuration, keeping Recall@5 within 0.03 of the clean-corpus baseline. Supervised analyses on both Natural Questions and BEIR (NFCorpus) confirm that the counterfactual signals ZKIP relies on carry learnable poison structure. The defense costs $k{+}1$ generator passes per query ($6\\times$ for $k{=}5$); we analyze batching and early-stopping approximations that reduce this overhead. We also show that keyword-preserving poisons leave lexical retrievers such as BM25 essentially unaffected, an observation that delineates the boundary of the threat model. Code, datasets, and evaluation harnesses are released for reproducibility.",
+      "authors": [
+        "Pushkal Kumar",
+        "Tucker Nielson",
+        "Tanish Kolhe",
+        "Shubham Zala",
+        "Vincent Li"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CR",
+        "cs.IR"
+      ],
+      "published": "2026-07-28T23:21:04+00:00",
+      "link": "https://arxiv.org/pdf/2607.26339v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Zero-Knowledge Inference Patch for LLM defense",
+      "llm_evidence_cn": "用于大语言模型防御的零知识推理补丁",
+      "llm_evidence": "用于大语言模型防御的零知识推理补丁",
+      "canonical_evidence": "用于大语言模型防御的零知识推理补丁",
+      "llm_tldr_en": "Introduces a layered defense for RAG systems using zero-knowledge inference to filter poisoned data.",
+      "llm_tldr_cn": "引入了一种RAG系统分层防御框架，利用零知识推理过滤中毒数据。",
+      "llm_tldr": "引入了一种RAG系统分层防御框架，利用零知识推理过滤中毒数据。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.27491v1",
+      "title": "Flock: Fast Proving for Batch Boolean Computations",
+      "abstract": "For many applications of SNARKs, a key bottleneck is proving large batches of standard cryptographic hash evaluations, such as SHA-256, Keccak, or BLAKE3. We introduce Flock, a hash-based SNARK for extremely fast proving of such batched Boolean computations. Flock proves batches of the same R1CS circuit (plus input/output relations between them), can prove hash-chains and Merkle path openings, and in principle can be extended to full-fledged hash-based signature verification. At its core, Flock combines new optimizations for the lincheck and zerocheck protocols with an aggressively optimized proof-of-concept implementation co-designed by coding agents.   On a single core of an M4 Max processor, Flock proves 82k evaluations of the BLAKE3 compression function, 42k SHA-256 compressions, and 30k Keccak permutations per second --- less than a $250\\times$ overhead over native execution. On ten cores, throughput exceeds 660k BLAKE3 compressions per second; in proving SHA-256, Flock is more than $9\\times$ faster than Binius64, the prior state of the art, and more than $500\\times$ faster than the fastest elliptic curve-based SNARK we measured against.",
+      "authors": [
+        "Benedikt Bünz",
+        "Ron D. Rothblum",
+        "William Wang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-29T22:11:08+00:00",
+      "link": "https://arxiv.org/pdf/2607.27491v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Fast proving for batch Boolean computations and SNARKs",
+      "llm_evidence_cn": "批量布尔计算与 SNARKs 的快速证明",
+      "llm_evidence": "批量布尔计算与 SNARKs 的快速证明",
+      "canonical_evidence": "批量布尔计算与 SNARKs 的快速证明",
+      "llm_tldr_en": "Introduces Flock, a hash-based SNARK for fast proving of batched Boolean computations.",
+      "llm_tldr_cn": "引入了 Flock，一种基于哈希的 SNARK，用于快速证明批量布尔计算。",
+      "llm_tldr": "引入了 Flock，一种基于哈希的 SNARK，用于快速证明批量布尔计算。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.28757v1",
+      "title": "Partial Derandomization for Leakage-Resilient Shamir's Secret Sharing over Composite Order Fields",
+      "abstract": "We make progress on the question of constructing explicit evaluation places for leakage-resilient Shamir's secret sharing, over composite order fields. Previously, Maji et al. (EUROCRYPT 2024) showed that random evaluation places yield Shamir's secret sharing over the composite order field $\\mathbb{F}_{p^d}$ that is statistically secure against physical-bit leakage. Later, Nguyen (EUROCRYPT 2025) established a dichotomy that linear code-based secret-sharing scheme over the field $\\mathbb{F}_{p^d}$ is either statistically secure or completely insecure against such leakage.   Building upon Nguyen's dichotomy, we present a partial derandomization of evaluation places, improving upon the Maji et al. result for a restricted regime of parameters. We replace the random choice of $n$ independent evaluation places by the iterates $x_j = Φ^j(x_0)$ of a simple fixed rational function $Φ$, where the initial point $x_0 \\in \\mathbb{F}_{p^d}^*$ is randomly chosen. The randomness in the evaluation places thus drops from $nd \\log p$ bits to $d\\log p$ bits. Our construction is valid for the regime $n = O(d/\\log_p d)$, and any reconstruction threshold $k \\ge 2$; in fact, the scheme attains perfect security (statistical distance exactly zero) against single-block leakage. Our technique is a partial fraction nondegeneracy argument that exploits the distinct poles of the rational iterates.",
+      "authors": [
+        "S. Venkitesh"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-30T18:24:52+00:00",
+      "link": "https://arxiv.org/pdf/2607.28757v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "leakage-resilient secret sharing theory",
+      "llm_evidence_cn": "抗泄露秘密共享理论",
+      "llm_evidence": "抗泄露秘密共享理论",
+      "canonical_evidence": "抗泄露秘密共享理论",
+      "llm_tldr_en": "Advances theory of leakage-resilient Shamir's secret sharing over composite order fields.",
+      "llm_tldr_cn": "推进了复合阶域上抗泄露 Shamir 秘密共享的理论研究。",
+      "llm_tldr": "推进了复合阶域上抗泄露 Shamir 秘密共享的理论研究。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.29019v1",
+      "title": "GoldenRetriever: Non-Interactive Homomorphic Encrypted Retrieval for Privacy-Preserving RAG",
+      "abstract": "Retrieval-Augmented Generation (RAG) enhances large language models by incorporating external knowledge, but existing pipelines typically operate on plaintext data, raising significant privacy concerns. Prior work on privacy-preserving retrieval leverages cryptographic techniques such as homomorphic encryption (HE) and private information retrieval (PIR), but often relies on interactive protocols or ranking-based selection mechanisms that incur high latency and potential information leakage. In this paper, we propose a practical non-interactive encrypted retrieval framework for RAG based on threshold selection. Instead of performing expensive top-$k$ ranking under encryption, our approach selects documents whose similarity scores exceed a predefined threshold, reducing computational complexity from quadratic to linear in the corpus size. We implement this design using CKKS-based homomorphic computation, enabling fully encrypted similarity evaluation and document selection without revealing query content, intermediate scores, or selected indices. To bridge the gap between approximate encrypted computation and discrete token reconstruction, we introduce a precision-stable mask polarization method that ensures accurate recovery of selected documents. Experiments on standard retrieval benchmarks demonstrate that our approach achieves competitive retrieval effectiveness while significantly reducing latency compared to ranking-based encrypted methods. These results highlight threshold-based selection as a practical foundation for scalable and secure RAG systems.",
+      "authors": [
+        "Yang Gao",
+        "Gang Quan",
+        "Scott Piersall",
+        "Qian Lou",
+        "Dongdong Wang",
+        "Liqiang Wang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.CL",
+        "cs.IR"
+      ],
+      "published": "2026-07-31T04:44:24+00:00",
+      "link": "https://arxiv.org/pdf/2607.29019v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy-preserving RAG using homomorphic encryption",
+      "llm_evidence_cn": "使用同态加密的隐私保护RAG",
+      "llm_evidence": "使用同态加密的隐私保护RAG",
+      "canonical_evidence": "使用同态加密的隐私保护RAG",
+      "llm_tldr_en": "A non-interactive encrypted retrieval framework for RAG to ensure privacy during LLM knowledge augmentation.",
+      "llm_tldr_cn": "一种用于RAG的非交互式加密检索框架，确保大模型知识增强过程中的隐私。",
+      "llm_tldr": "一种用于RAG的非交互式加密检索框架，确保大模型知识增强过程中的隐私。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
