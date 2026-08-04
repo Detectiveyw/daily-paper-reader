@@ -1,0 +1,51 @@
+{
+  "label": "2026-08-04",
+  "date": "2026-08-04",
+  "generated_at": "2026-08-04T20:52:07",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202608/04/2608.02378v1-gecko-fast-private-inference-via-secure-public-encoder-offloading",
+      "section": "quick",
+      "title_en": "Gecko: Fast Private Inference via Secure Public Encoder Offloading",
+      "authors": "Cheng'an Wei, Kai Chen, Yue Zhao, Congyi Li, Shenchen Zhu",
+      "date": "2026-08-03",
+      "pdf": "https://arxiv.org/pdf/2608.02378v1",
+      "score": "7.0",
+      "evidence": "神经网络的快速隐私推理",
+      "tldr": "本研究针对隐私推理速度慢的问题，提出了Gecko框架。它通过将预训练的公共编码器卸载到加密边界外，并结合Fastfood投影压缩和私有特征门控技术，在保证模型安全性的同时显著提升了推理效率。Gecko在图像和音频任务上实现了秒级推理，且能有效抵御模型提取攻击。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Private inference protects both user inputs and server models during neural network inference, but existing solutions remain too slow for practical deployment. This motivates recent efforts to run a public encoder, such as a pretrained backbone, outside the protection boundary and evaluate only a small private predictor cryptographically. While appealing for efficiency, this design is not inherently secure: naively offloading a public encoder may create a feature-space shortcut: an extraction adversary may learn the remaining private predictor's feature-to-output mapping more easily than the original model's input-to-output behavior.   We present Gecko, designed to limit this additional risk while retaining a compact encrypted predictor. We leverage a frozen backbone that contributes hierarchical features, fixed Fastfood projections that compress them, and private feature gating that prepares them for prediction. We formalize ideal independence and information-preservation conditions as design guidance, then separately evaluate component-reuse extraction attacks. Across image and audio tasks, Gecko achieves 0.4-2.2 second inference with at most 10.8 MB communication and accuracy comparable to transfer-learning baselines. Under the evaluated attacks, reusing the offloaded public encoder provides no significant advantage to model-extraction adversaries. Source code and a demo are available at https://github.com/CassiniHuy/gecko-infer.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/04/2608.01020v1-inverting-the-hidden-unveiling-multimodal-privacy-leakage-in-collaborative-lvlm-inference",
+      "section": "quick",
+      "title_en": "Inverting the Hidden: Unveiling Multimodal Privacy Leakage in Collaborative LVLM Inference",
+      "authors": "Shuaifan Jin, Zhibo Wang, Qiyuan Wang, Yiting Han, Yajie Zhou, Yuanfan Zhang, Jiahui Hu, Xiaoyi Pang",
+      "date": "2026-08-02",
+      "pdf": "https://arxiv.org/pdf/2608.01020v1",
+      "score": "6.0",
+      "evidence": "协作式多模态大模型推理中的隐私泄露",
+      "tldr": "本研究探讨了大型视觉语言模型（LVLM）在协作推理中的隐私泄露风险。尽管原始输入被隐藏，但传输的中间隐藏状态仍可能泄露敏感信息。作者从理论上证明了深层隐藏状态中视觉语义的可恢复性，并提出了RASR攻击方法，通过模态特定逆路径和一致性精炼实现图像与文本的高精度重构。实验表明，该方法能显著提升重构质量，揭示了协作推理中严峻的隐私威胁。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Collaborative inference deploys Large Vision-Language Models (LVLMs) by partitioning computation between edge devices and the cloud. While withholding raw inputs supposedly ensures privacy, transmitting intermediate hidden states exposes a critical attack surface. However, it remains unclear whether deep-layer LVLM hidden states retain recoverable private information, given that visual content has been projected into the language embedding space. To address this concern, we theoretically analyze LVLM hidden-state recoverability and show that, under regularity assumptions and a positive semantic--nuisance margin, privacy-relevant visual semantics remain identifiable and stably recoverable. Motivated by this analysis, we propose RASR, a novel coarse-to-fine multimodal reconstruction attack. RASR obtains initial image and text reconstructions through modality-specific inverse paths that follow their respective forward processing pipelines in reverse, and then uses hidden-state consistency to refine both reconstructions. Evaluations on Qwen3-VL-8B-Instruct and LLaVA-1.5-7B across five datasets demonstrate that RASR reduces image reconstruction MSE by \\(\\sim\\)50\\% compared to the strongest baselines, while achieving up to 99\\% token accuracy for text recovery. These results show that privacy-sensitive visual and textual information can be recovered even from deep-layer LVLM hidden states, exposing the privacy risks of collaborative inference.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/04/2608.01390v1-pivot-proactive-and-verifiable-threshold-oblivious-pseudorandom-functions-from-isogeny-group-actions",
+      "section": "quick",
+      "title_en": "Pivot: Proactive and Verifiable Threshold Oblivious Pseudorandom Functions From Isogeny Group Actions",
+      "authors": "Abhinav Sharma, Vikas Srivastava",
+      "date": "2026-08-02",
+      "pdf": "https://arxiv.org/pdf/2608.01390v1",
+      "score": "6.0",
+      "evidence": "可验证阈值不经意函数",
+      "tldr": "本研究针对同源密码学中阈值不忘随机函数（OPRF）在静态腐败模型下的安全局限，提出了PIVOT框架。PIVOT是一种基于有效同源群作用的无分发者、主动式且可验证的阈值VOPRF。它通过定期刷新服务器分片而不改变主密钥，有效抵御移动攻击者，并支持委员会重组和公开验证。该方案在向量化和隐藏群作用假设下被证明是安全的，为长期运行的分布式隐私查询服务提供了强有力的技术支撑。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Oblivious pseudorandom functions (OPRFs) allow a client to evaluate a keyed pseudorandom function on a private input without revealing that input to the server. In a threshold OPRF, the secret key is distributed among (n) servers so that any qualified set of at least (t) servers can complete an evaluation, while fewer than (t) shares reveal no information about the key. Existing isogeny-based threshold OPRFs, however, are primarily designed for static corruption models. If the same shares remain valid throughout the lifetime of the service, a mobile adversary can compromise different servers over time, accumulate (t) shares from the same sharing state, and eventually recover the master key. We introduce PIVOT (Proactive Isogeny-based Verifiable Oblivious Threshold PRF), a dealerless threshold VOPRF framework based on effective isogeny group actions. PIVOT periodically refreshes the server shares without changing the master key, public key, or previously generated OPRF outputs. The construction combines Shamir secret sharing, additively homomorphic coefficient commitments, sequential Lagrange-weighted group actions, and joint zero-knowledge relations that link certified shares to their corresponding isogeny actions. It also supports coordinated epoch transitions, publicly verifiable blame, secure erasure, and committee resharing under a possibly different threshold. We formalize the functionality of a long-lived proactive threshold VOPRF, prove the correctness of distributed key generation, threshold evaluation, proactive refresh, and committee resharing, and provide a simulation-based security analysis under the vectorization and one-more hidden-group- action assumptions. As an application, we describe a distributed private lookup service whose encrypted database remains valid across repeated share renewals and committee migrations.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

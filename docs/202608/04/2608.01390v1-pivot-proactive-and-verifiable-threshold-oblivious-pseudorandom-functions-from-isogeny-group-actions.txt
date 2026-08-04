@@ -1,0 +1,2940 @@
+Title: Pivot: Proactive and Verifiable Threshold Oblivious Pseudorandom Functions From Isogeny Group Actions
+
+URL Source: https://arxiv.org/pdf/2608.01390v1
+
+Published Time: Tue, 04 Aug 2026 01:30:04 GMT
+
+Number of Pages: 41
+
+Markdown Content:
+# PIVOT : P ROACTIVE AND VERIFIABLE THRESHOLD 
+
+# OBLIVIOUS PSEUDORANDOM FUNCTIONS FROM ISOGENY GROUP ACTIONS 
+
+A P REPRINT 
+
+Abhinav Sharma ∗
+
+Indian Institute of Technology Hyderabad Hyderabad, Telangana, India 
+
+abhisha8055@gmail.com 
+
+Vikas Srivastava 
+
+Department of Mathematics National Institute of Technology Warangal Warangal, Telangana, India 
+
+vikas.math123@gmail.com 
+
+# ABSTRACT 
+
+Oblivious pseudorandom functions (OPRFs) allow a client to evaluate a keyed pseudorandom function on a private input without revealing that input to the server. In a threshold OPRF, the secret key is distributed among (n) servers so that any qualified set of at least (t) servers can complete an evaluation, while fewer than (t) shares reveal no information about the key. Existing isogeny-based threshold OPRFs, however, are primarily designed for static corruption models. If the same shares remain valid throughout the lifetime of the service, a mobile adversary can compromise different servers over time, accumulate (t) shares from the same sharing state, and eventually recover the master key. We introduce PIVOT (Proactive Isogeny-based Verifiable Oblivious Threshold PRF ), a dealerless threshold VOPRF framework based on effective isogeny group actions. PIVOT periodically refreshes the server shares without changing the master key, public key, or previously generated OPRF outputs. The construction combines Shamir secret sharing, additively homomorphic coefficient commitments, sequential Lagrange-weighted group actions, and joint zero-knowledge relations that link certified shares to their corresponding isogeny actions. It also supports coordinated epoch transitions, publicly verifiable blame, secure erasure, and committee resharing under a possibly different threshold. We formalize the functionality of a long-lived proactive threshold VOPRF, prove the correctness of distributed key generation, threshold evaluation, proactive refresh, and committee resharing, and provide a simulation-based security analysis under the vectorization and one-more hidden-group-action assumptions. As an application, we describe a distributed private lookup service whose encrypted database remains valid across repeated share renewals and committee migrations. 
+
+Keywords OPRF · threshold cryptography · proactive security · isogenies · CSIDH · multiparty computation 
+
+# 1 Introduction 
+
+Cryptographic services that remain in operation for many years face a different threat model from short-lived protocols. In a conventional threshold system, a secret key is divided among several servers so that no individual server can use the key alone. This protects against the failure or compromise of a small number of machines at a fixed point in time. It does not, however, prevent an adversary from compromising different servers at different times. An attacker may learn the share held by one server during the first month, the share held by a second server during a later intrusion, and so on. If the shares remain unchanged throughout the lifetime of the service, the attacker can store each exposed share and eventually collect enough information to reconstruct the long-lived master key. The adversary may therefore break the system without ever controlling the threshold number of servers simultaneously. 
+
+> ∗
+
+This work was carried out as part of a one-year remote research internship undertaken by Abhinav Sharma when he was doing his Masters at RIE Mysore under the supervision of Vikas Srivastava. arXiv:2608.01390v1 [cs.CR] 2 Aug 2026 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+This threat is commonly described through the model of a mobile adversary . The set of corrupted servers is allowed to change over time, although the number of servers under the adversary’s control during any individual time period remains below the threshold. Proactive secret sharing [Herzberg et al., 1995] addresses this problem by periodically replacing the current shares with fresh shares of the same secret. Once the old shares and the temporary refresh data have been securely erased, information obtained during one period cannot simply be combined with information obtained during a later period. The secret itself remains unchanged, but the local representation of that secret is continually renewed. The need for such protection is particularly clear in services built from oblivious pseudorandom functions. An oblivious pseudorandom function (OPRF) [Jarecki and Liu, 2009] is an interactive protocol between a client holding a private input x and a server holding a secret key k. At the end of the interaction, the client learns the value Fk(x), while the server learns nothing about x beyond what is inherently revealed by the surrounding application. The client should not learn the key or obtain useful information about the function on inputs that were not evaluated through the protocol. This combination of input privacy and controlled access to a keyed function makes OPRFs useful in password-authenticated key exchange, private set intersection, private keyword search, anonymous credentials, rate limiting, and encrypted database lookup. A verifiable OPRF strengthens this functionality by allowing the client to verify that the server evaluated the function under the key associated with a public commitment or public key. Verifiability prevents a malicious server from changing the key from one request to another, returning an unrelated value, or selectively evaluating under a key chosen to influence the surrounding application. A threshold OPRF distributes the secret key among n servers and requires the cooperation of at least t of them to complete an evaluation. This removes the monolithic OPRF server as a single point of compromise and makes the service more tolerant of failures. Nevertheless, an ordinary threshold OPRF remains vulnerable to gradual share accumulation if its shares are never refreshed. The central problem considered in this work is therefore the following, how can one construct a post-quantum threshold VOPRF that remains secure for a long period of time, even when the adversary compromises different servers in different epochs? A satisfactory construction must preserve the OPRF key and all previously derived outputs while replacing the server shares. It must also ensure that every partial evaluation is performed with a share certified for the current epoch, that all servers agree on the active sharing state, and that a malformed contribution can be detected and attributed. In addition, the system should support committee migration, since a genuinely long-lived deployment may need to replace machines, rotate administrative domains, or change its threshold parameters without re-encrypting all application data. 
+
+1.1 Why isogeny group actions? 
+
+Post-quantum OPRFs have been studied from several algebraic foundations, including lattices, codes, and isogenies. Isogeny group actions are particularly attractive for this setting because they provide a commutative action on compact public objects. Informally, if [a]E denotes the action of a secret scalar a on a curve object E, then the defining composition law 
+
+[a]([ b]E) = [ a + b]E
+
+resembles the exponent-addition property used in classical Diffie–Hellman-based constructions. This algebraic structure is well suited to threshold evaluation as Lagrange-weighted secret shares can be applied one after another, and the accumulated action is equal to the action of the reconstructed secret even though the secret is never explicitly reconstructed. The same property also makes client blinding natural. A client can map its input to a curve X, apply a fresh random action [r], and send the blinded value B = [ r]X to the server committee. After the servers apply the secret-key action, the client removes the blinding by applying [−r]. The result is the desired value [k]X. The client-side randomization hides the original curve from the servers, while the commutativity of the action permits the server-side contributions to be combined in any fixed order. At the same time, isogeny group actions introduce an important verification challenge. The secret-sharing layer is naturally expressed over field elements and polynomial commitments, whereas the OPRF evaluation takes place in the curve-action domain. A server must therefore prove that the scalar used in its group action is exactly the same scalar that opens its certified share commitment. The protocol cannot safely treat these as two unrelated statements. This cross-domain witness-consistency requirement plays a central role in the design of the proof relations used by PIVOT .
+
+2PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+1.2 Prior work and remaining gap 
+
+The literature on OPRFs, threshold cryptography, proactive sharing, and isogeny-based protocols has developed along several largely independent directions. Classical OPRF constructions and applications were developed in works such as Jarecki and Liu [Jarecki and Liu, 2009], and OPRFs later became a central component of password-authenticated protocols such as OPAQUE [Jarecki et al., 2018]. These constructions established the importance of oblivious evaluation but were not designed to provide post-quantum security. In the isogeny setting, Heimberger et al. [Heimberger et al., 2024] introduced OPUS, an OT-free Naor–Reingold-style OPRF based on CSIDH, with security studied in the semi-honest setting. Delpech de Saint Guilhem and Pedersen [de Saint Guilhem and Pedersen, 2024] developed proof techniques for CSIDH arithmetic and constructed a VOPRF with protection against malicious clients. Basso [Basso, 2023] investigated round-efficient isogeny-based OPRFs. Levin and Pedersen [Levin and Pedersen, 2025] developed faster proof techniques and related verifiable-function constructions. More recently, Pedersen [Pedersen, 2026] presented a robust threshold VOPRF from isogeny group actions, obtaining verifiability and identifiable aborts through an MPC-among-servers architecture. Threshold mechanisms for isogeny-based systems were considered earlier by De Feo and Meyer [Feo and Meyer, 2020], while Beullens et al. [Beullens et al., 2021] studied distributed key generation for CSIDH. These works provide important techniques for distributing isogeny-based secrets, but they do not by themselves solve the long-term share accumulation problem for a threshold OPRF service. Proactive secret sharing originates in the work of Herzberg et al. [Herzberg et al., 1995]. Its core idea is to add a random sharing of zero to the current sharing polynomial, thereby preserving the secret while replacing the shares. Proactive threshold OPRF constructions have also begun to appear in classical groups. For example, Baecker et al. [Baecker et al., 2025] proposed a proactive threshold OPRF based on a one-more gap Diffie–Hellman assumption. That construction, however, is not isogeny-based and does not provide the same verifiability mechanisms considered here. To the best of our knowledge, the combination required for a long-lived isogeny-based service has not previously been addressed in one construction i.e. dealerless threshold key generation, verifiable oblivious evaluation, proactive renewal against a mobile adversary, secure transition between epochs, public attribution of malformed contributions, and committee resharing without changing the OPRF key. Existing isogeny-based threshold OPRFs generally protect against a bounded static corruption set. If the same shares remain valid indefinitely, a mobile adversary can eventually accumulate a reconstruction set even though the instantaneous number of corruptions never reaches t.
+
+1.3 Overview of PIVOT 
+
+We introduce PIVOT (Proactive Isogeny-based Verifiable Oblivious Threshold PRF ), a protocol framework for long-lived threshold OPRF evaluation from effective isogeny group actions. PIVOT maintains a single master key k, but represents that key by a different Shamir polynomial in each epoch. During epoch e, the servers hold 
+
+s(e) 
+
+> i
+
+= Fe(i), Fe(0) = k. 
+
+The public coefficient-commitment vector A(e) certifies the current polynomial, while the public isogeny key 
+
+pk = [ k]E0
+
+remains unchanged throughout the lifetime of the system. The construction separates three forms of state. The first is the long-lived semantic state consisting of the master key and public key. The second is the epoch-specific secret-sharing state consisting of the current polynomial and server shares. The third is the public verification state consisting of coefficient commitments, certificates, proofs, and signatures. Proactive refresh changes only the epoch-specific state. Committee resharing changes both the committee and the sharing polynomial. Neither operation changes the master key, the public key, or the value of the OPRF on a fixed input. The protocol comprises five main procedures. A dealerless distributed key-generation protocol establishes the initial sharing and public key. A threshold evaluation protocol allows a client to obtain the OPRF output from a quorum of servers. A proactive refresh protocol replaces the current shares with fresh shares of the same key. A verification and blame mechanism identifies malformed contributions and supports restart with a new quorum. Finally, a committee-resharing protocol transfers the same secret to a new committee and may simultaneously change the threshold. 
+
+1.4 Our contributions 
+
+The principal contributions of this work may be summarized as follows. 
+
+3PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+1. We formulate an ideal functionality for a long-lived proactive threshold verifiable oblivious pseudorandom function. The functionality, denoted by FpTVOPRF , captures the complete operational life cycle of the service, including dealerless distributed key generation, threshold OPRF evaluation, epoch-specific public verification state, proactive renewal of secret shares, secure erasure of obsolete information, migration to a new server committee, and identifiable aborts in the presence of malformed protocol contributions. The corresponding adversarial model allows the set of corrupted servers to change from one epoch to another, subject to the requirement that the adversary obtains fewer than t valid shares from every individual epoch. This formulation makes explicit the distinction between ordinary threshold security, which is usually defined with respect to a fixed corruption set, and proactive security, which must remain meaningful when compromises occur gradually over the lifetime of the system. 2. We present a dealerless construction that combines an effective isogeny group action with Shamir secret sharing and an additively homomorphic commitment scheme. Every server contributes independently to the initial distributed key-generation polynomial, and the qualified contributions are aggregated to define a master key k that is never reconstructed by any individual participant. The public coefficient-commitment vector certifies the active sharing polynomial, while the isogeny public key 
+
+pk = [ k]E0
+
+remains associated with its constant term. Threshold evaluation is performed through a sequential chain of Lagrange-weighted group actions on the client’s blinded input. If I denotes the selected quorum, then the accumulated exponent satisfies X
+
+> i∈I
+
+λIi s(e) 
+
+> i
+
+= k. 
+
+Consequently, the final curve produced by the server chain is the result of applying the master-key action, even though every server uses only its own local share. 3. We develop a proactive maintenance mechanism that renews the server shares without changing the underlying OPRF key. During the transition from epoch e to epoch e + 1 , every refresh dealer distributes a verifiable sharing of a random polynomial zj (X) satisfying 
+
+zj (0) = 0 .
+
+The next sharing polynomial is defined by 
+
+Fe+1 (X) = Fe(X) + X
+
+> j∈R e
+
+zj (X),
+
+where Re denotes the set of qualified refresh dealers, and therefore 
+
+Fe+1 (0) = Fe(0) = k. 
+
+The public coefficient commitments are updated homomorphically, while a coordinated epoch-transition procedure ensures that every successful evaluation is associated with one consistent epoch certificate. We also provide a committee resharing procedure in which the Lagrange-weighted shares of an old committee are redistributed as the constant terms of fresh sharing polynomials for a new committee. This permits changes in committee membership and threshold parameters without replacing the master key, changing the public key, or invalidating previously generated OPRF outputs. 4. We identify and formalize the joint NP relations required to connect the polynomial-sharing and isogeny-action components of the construction. These relations enforce that a scalar committed in the secret-sharing domain is the same scalar used in the corresponding group action. In particular, we define the relations 
+
+Rlink , Reval , Rblind , Rreshare ,
+
+which respectively bind DKG constant terms to public-key contributions, certify partial threshold evaluations, establish correct client blinding, and connect resharing polynomials to certified old shares. We explain why separately proving a commitment-opening statement and a group-action statement does not automatically establish equality of the witnesses used in the two proofs. The construction therefore requires proofs for the complete joint relations, or an explicit witness-equality mechanism, rather than an unlinked conjunction of independent algebraic statements. 5. We provide a detailed correctness and simulation-based security analysis of the construction and illustrate its use in long-lived private lookup services. The correctness analysis establishes that the dealerless DKG creates a valid sharing of the master key, that every successful threshold evaluation returns the intended value 
+
+4PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+Fk(x), and that proactive refresh and committee resharing preserve the same key k. The security analysis is carried out in the stated hybrid model under the vectorization and one-more hidden-group-action assumptions, together with the hiding and binding properties of the commitment scheme, the security of the NIZK and signature systems, and the secure-erasure assumption. As an application, we describe a distributed private lookup service whose database is indexed or encrypted using OPRF-derived values. Since the refresh and resharing procedures preserve 
+
+Fk(x) = H2
+
+ PIVOT − out ∥ctx ∥pk ∥x∥enc  [k]H1(ctx ∥x) ,
+
+the database remains valid across repeated share-renewal operations and committee migrations. 
+
+1.5 Technical overview 
+
+We now give an informal description of the construction. The formal notation and assumptions appear in Section 2, and the complete protocol is specified in Section 3. Each server Sj samples a degree-at-most-(t − 1) polynomial 
+
+fj (X) = 
+
+> t−1
+
+X
+
+> ℓ=0
+
+aj,ℓ Xℓ
+
+and distributes its evaluations using verifiable secret sharing. The contributions of the qualified dealers (the set Q of dealers that passed VSS verification) are added to obtain 
+
+F0(X) = X
+
+> j∈Q
+
+fj (X).
+
+Server Si stores s(0)  
+
+> i
+
+= F0(i), and the master key is 
+
+k = F0(0) = X
+
+> j∈Q
+
+aj, 0.
+
+The homomorphic coefficient commitments aggregate into a public vector A(0) that certifies the initial sharing polynomial. The public key is formed through a sequential chain of constant-term actions. Each dealer proves that the exponent used in its contribution is the same value committed as the constant coefficient of its DKG polynomial. The final public curve is therefore 
+
+pk = [ k]E0.
+
+This link is necessary because a commitment to a scalar and an isogeny action by that scalar live in different algebraic domains. For an application context string ctx , the protocol evaluates the keyed function 
+
+Fk(x) = H2
+
+ PIVOT − out ∥ctx ∥pk ∥x∥enc  [k]H1(ctx ∥x) . (1) Here H1 hashes the input to the group-action orbit, PIVOT − out is a fixed domain-separator string that prevents cross-protocol hash collisions, ctx identifies the OPRF application, pk = [ k]E0 is the public key, enc is a canonical byte-encoding of the resulting curve, and H2 derives the final pseudorandom output. The epoch number is not included in the output hash because the intended function must remain unchanged when the shares are refreshed. The client computes 
+
+X = H1(ctx ∥x),
+
+samples a random scalar r from the field Zq = Z/q Z, and sends 
+
+B = [ r]X
+
+to an ordered quorum I = {i1, . . . , i t}. Server Sih computes the next curve in the evaluation chain 
+
+Qh = [ λIih s(e) 
+
+> ih
+
+]Qh−1, Q0 = B, 
+
+5PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+where λIih is the Lagrange coefficient for interpolation at zero. After all t actions, 
+
+Qt =
+
+"X
+
+> i∈I
+
+λIi s(e)
+
+> i
+
+#
+
+B = [ k]B. 
+
+The client removes the blinding, 
+
+Y = [ −r]Qt = [ k]X. 
+
+It then derives Fk(x) using Equation (1). Every server proves that the share used in its partial action opens the share commitment derived from the current epoch commitment vector. The proof statement is bound to the context, session, epoch, certificate, quorum, and position in the chain. Consequently, a partial response cannot be transplanted into an unrelated evaluation or combined with shares certified under a different epoch state. At the transition from epoch e to epoch e + 1 , each refresh dealer Sj samples 
+
+zj (X) = 
+
+> t−1
+
+X
+
+> ℓ=1
+
+bj,ℓ Xℓ.
+
+Because the constant term is zero, adding this polynomial to the current sharing leaves the secret unchanged. The next sharing polynomial is 
+
+Fe+1 (X) = Fe(X) + X
+
+> j∈R e
+
+zj (X),
+
+and hence 
+
+Fe+1 (0) = Fe(0) = k. 
+
+Each server updates its share by adding the refresh evaluations it receives. The higher-degree coefficient commitments are updated homomorphically, while the commitment to the constant term remains unchanged. The refresh is completed through a coordinated epoch transition. The servers first agree on the next commitment vector and certificate, then activate the new state. Evaluation requests are bound to a single certificate, so shares from 
+
+Fe and Fe+1 cannot be combined in one successful chain. After activation, honest servers erase their old shares and refresh randomness. Under the mobile-adversary bound, the adversary therefore obtains fewer than t shares from every individual epoch. Suppose the old committee uses threshold t and the new committee uses threshold t′. An old quorum I satisfies 
+
+X
+
+> i∈I
+
+λIi s(e) 
+
+> i
+
+= k. 
+
+Each old server Si samples a degree-at-most-(t′ − 1) polynomial whose constant term is λIi s(e) 
+
+> i
+
+. The new servers add the evaluations received from all old dealers. Their aggregate polynomial G(X) satisfies 
+
+G(0) = X
+
+> i∈I
+
+λIi s(e) 
+
+> i
+
+= k. 
+
+The resharing proof links every old dealer’s new constant-term commitment to its certified old share. The new committee therefore obtains a fresh sharing of the same key, while the public key and all previous OPRF outputs remain unchanged. 
+
+1.6 Architectural comparison with prior threshold VOPRFs 
+
+The recent threshold VOPRF of Pedersen [Pedersen, 2026] follows an MPC-among-servers architecture. From the client’s perspective, the committee behaves like one virtual server, and the protocol can achieve a transcript whose size is independent of the threshold. PIVOT adopts a different design. It exposes the threshold structure directly, each server contributes one signed and proven partial group action to a sequential chain. This native-threshold architecture has an O(t) evaluation transcript, and therefore does not match the constant-size client transcript of an MPC-emulated virtual server. Its advantage is that the secret-sharing state is explicit. Proactive refresh can be expressed as the addition of zero-sharing polynomials, and each server’s contribution remains individually attributable. The construction should therefore be understood as a different point in the design space rather than a strict improvement in every performance dimension. 
+
+6PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+Adding proactive security to an MPC-based threshold VOPRF may require refreshing the secret-shared MPC state and coordinating the transition of the virtual server. In PIVOT , by contrast, the maintained state is already represented as Shamir shares with public coefficient commitments. Refresh and committee migration are consequently integrated directly into the protocol architecture. 
+
+1.7 Comparison with related protocols 
+
+Table 1 summarizes the qualitative properties of the most closely related OPRF and threshold constructions. The table is intended to place the protocol in context rather than to provide a full performance comparison. Concrete efficiency also depends on parameter selection, the proof system used for the group-action relations, and the network model. Table 1: Qualitative comparison with selected OPRF and threshold constructions. The notation ⋆ indicates that the referenced construction does not provide VOPRF-style verifiability, † indicates a classical Diffie–Hellman foundation and ‡ indicates a client transcript independent of the threshold through MPC among the servers.                                                             
+
+> Protocol Threshold Oblivious Verifiable Proactive PQ Transcript Jarecki–Liu [Jarecki and Liu, 2009] ×✓×××†O(1)
+> OPAQUE [Jarecki et al., 2018] ×✓×××†O(1)
+> OPUS [Heimberger et al., 2024] ×✓××✓O(1)
+> DSGP [de Saint Guilhem and Pedersen, 2024] ×✓✓×✓O(1)
+> Basso [Basso, 2023] ×✓××✓O(1)
+> Baecker et al. [Baecker et al., 2025] ✓✓×⋆✓×†O(1)
+> De Feo–Meyer [Feo and Meyer, 2020] ✓×××✓–Pedersen [Pedersen, 2026] ✓✓✓×✓O(1) ‡
+> PIVOT ✓✓✓✓✓O(t)
+
+1.8 Applications 
+
+The intended use of PIVOT is not a one-time cryptographic exchange but a service that must preserve one logical OPRF key over an extended period. In a password-authenticated key-exchange deployment, for example, several authentication servers may jointly provide the OPRF operation used to protect password records. Proactive refresh limits the value of a temporary server compromise without requiring the entire credential database to be rebuilt. Since the OPRF key remains unchanged, records derived under the existing public key remain valid. A second application is distributed private set intersection or private membership testing. A service can encode set elements using OPRF outputs while distributing the OPRF key across several administrative domains. Refresh protects the long-lived key against gradual compromise, and committee resharing permits a provider to replace or reorganize the server set without recomputing the encoded database. The same property is useful in private lookup services. A provider may publish an encrypted decision table whose lookup keys are derived from Fk(x). Clients privately evaluate the OPRF and use the result to recover the matching encrypted entry. Since neither refresh nor resharing changes Fk, the table remains valid across system maintenance operations. This is particularly important when the table is large or widely replicated, because re-encryption under a new key would otherwise be operationally expensive. Finally, the construction may support anonymous rate-limiting and credential-checking systems in which stable pseudorandom tags are required, but no single machine should hold the tagging key. In such applications, proactive maintenance provides protection against a sequence of temporary compromises while preserving stable tags for legitimate clients. 
+
+1.9 Organization of the paper 
+
+Section 2 introduces the algebraic notation, group-action model, Shamir secret sharing, homomorphic commitments, NIZK proof systems, and distributed primitives used throughout the construction. Section 3 specifies the five sub-protocols of PIVOT : dealerless distributed key generation, threshold evaluation, proactive share refresh, blame and robust restart, and committee resharing. Section 4 establishes correctness of each sub-protocol and states an overall invariant that is preserved across the full system lifetime. Section 5 provides the adversarial model, the ideal functionality, and a simulation-based security proof showing input privacy, key secrecy, and proactive protection. Section 6 analyses communication and computational costs, compares the construction with prior work, and concludes with the properties and limitations of the design. 
+
+7PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+# 2 Preliminaries 
+
+This section introduces the algebraic notation and cryptographic tools used throughout the construction. We begin with the basic computational and protocol notation, then describe the effective group-action abstraction on which the OPRF is built. We next recall Shamir secret sharing and the coefficient-wise homomorphic commitments used to certify server shares. Finally, we summarize the proof systems, communication assumptions, and distributed primitives required by the protocol. The presentation is intentionally self-contained. In particular, we state the precise algebraic identities used later in the correctness proof and explain how the public commitment state, the isogeny public key, and the epoch mechanism are related. The security assumptions associated with these objects are stated formally in Section 5, the present section fixes their syntax and the functionality expected from each primitive. 
+
+2.1 General notation and computational conventions 
+
+The security parameter is denoted by λ ∈ N. All algorithms are probabilistic polynomial-time algorithms unless stated otherwise. We write 1λ for the unary representation of the security parameter and use poly (λ) for an unspecified polynomial in λ. A function ϵ : N → R≥0 is negligible , written ϵ(λ) = negl (λ), if for every positive polynomial p
+
+there exists λ0 such that ϵ(λ) < 1/p (λ) for every λ ≥ λ0. Two distribution ensembles {Xλ}λ∈N and {Yλ}λ∈N are computationally indistinguishable, written X ≈c Y , if no probabilistic polynomial-time distinguisher separates them with more than negligible advantage. For a finite set S, the notation x ← S means that x is sampled uniformly from S. More generally, x ← D denotes sampling from a distribution D, and y ← Alg (x) denotes the output of a randomized algorithm. Concatenation of bit strings is written u∥v. The notation [n] = {1, . . . , n } is used for server indices. We assume throughout that 1 ≤ t ≤ n,where n is the number of servers and t is the reconstruction threshold. Let q be a prime and let Zq = Z/q Z. Server identifiers 1, . . . , n are interpreted as distinct nonzero elements of Zq , in particular, we require n < q . This condition ensures that the denominators occurring in Lagrange interpolation are nonzero and hence invertible in Zq . Unless explicitly stated otherwise, all scalar addition, subtraction, multiplication, inversion, and polynomial evaluation are performed in Zq . An element of Zq written as a plain integer denotes the unique representative of that residue class lying in {0, . . . , q − 1}.We use calligraphic letters such as A, S, and F for adversaries, simulators, and ideal functionalities, respectively. Bold symbols such as A = ( A0, . . . , A t−1) denote vectors. A statement–witness pair for an NP relation R is written 
+
+(stmt ; wit ), with the semicolon separating public and private data. 
+
+2.2 Protocol identities, sessions, epochs, and certificates 
+
+The protocol is intended to support a long-lived distributed service. It therefore distinguishes the identity of the application, the identity of an individual evaluation session, and the epoch to which the active server shares belong. The string 
+
+ctx ∈ { 0, 1}∗
+
+is an application-specific context string. It identifies the logical OPRF instance and serves as a domain separator. For ex-ample, two applications operated by the same server committee may use distinct contexts such as password-vault-v1 
+
+and private-lookup-v1 . The context is included in the hash-to-orbit computation and in the final output hash, so an OPRF value derived in one application cannot be reused as a valid value in another application. Every evaluation is associated with a session identifier 
+
+sid ∈ { 0, 1}∗.
+
+The identifier must be fresh for the relevant protocol instance, and servers maintain sufficient replay state to reject a second request with the same identifier. The session identifier binds together the client request, the chosen quorum, the sequence of server actions, the NIZK proofs, and the corresponding signatures. It therefore prevents a message produced in one evaluation from being silently inserted into a different evaluation. For malicious-client security, freshness alone is not always sufficient when sid is also used to determine the evaluation quorum. A client that can try arbitrarily many candidate identifiers may grind over them until a preferred quorum is selected. When unbiased quorum selection is required by the security or liveness analysis, sid must therefore contain an unpredictable contribution from the servers, a public random beacon, or another source that the client cannot choose 
+
+8PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+adaptively. The correctness of the OPRF evaluation does not depend on quorum unpredictability, it requires only that the selected indices are distinct and that all participating servers agree on the same quorum. Time is divided into epochs e ∈ N. The system begins in epoch 0, immediately after the distributed key-generation procedure, and advances from epoch e to epoch e + 1 after a successful proactive refresh. During epoch e, the servers hold shares 
+
+s(e) 
+
+> i
+
+= Fe(i)
+
+of a polynomial Fe(X) satisfying Fe(0) = k, where k is the long-lived master key. A refresh replaces Fe with a new polynomial Fe+1 having the same constant term. The public state of epoch e is summarized by an epoch certificate 
+
+cert e =  e, ctx , pk , A(e), Qe, digest e, . . . ,
+
+where A(e) is the vector of commitments to the coefficients of Fe, Qe records the active or qualified server set, and 
+
+digest e binds the relevant DKG, complaint, or refresh transcript. The exact certificate fields depend on the sub-protocol, but every certificate must bind the epoch number, public key, and active commitment vector. An evaluation request includes the epoch number and a collision-resistant hash of cert e. Each server checks these values before applying its share. This check is necessary because shares from different epochs generally lie on different polynomials and must never be combined in one interpolation. We use 
+
+H : {0, 1}∗ −→ { 0, 1}κ
+
+for a collision-resistant hash function used to derive transcript digests, certificate hashes, and public seeds. This function is distinct from the two OPRF-related hash functions H1 and H2 introduced below. 
+
+Deterministic quorum selection. The public algorithm 
+
+SelectQuorum (sid , e, n, t )
+
+returns an ordered t-element subset I = ( i1, . . . , i t) of [n]. A convenient implementation derives a public seed from 
+
+H(sid ∥e∥ctx ), expands it into a permutation of [n], and selects the first t indices. The output is ordered because the sequential evaluation transcript must identify which server acts at each position. Every party recomputes the same ordered quorum and rejects a request containing a different set or ordering. As noted above, resistance to quorum grinding additionally requires an unbiasable source in the derivation of sid .
+
+2.3 Execution and communication model 
+
+The protocol is described in a hybrid model that provides authenticated point-to-point channels, authenticated broadcast, a public-key infrastructure for signatures, a commitment functionality, a NIZK functionality, and secure erasure. These abstractions isolate the main group-action and proactive-sharing ideas from lower-level network mechanisms. An authenticated private channel guarantees that the receiver learns the identity of the sender and that the message is neither modified nor read by parties other than the designated sender and receiver. Such channels are used for distributing VSS shares and refresh contributions. Authenticated broadcast guarantees that all honest parties receive the same message attributed to the same sender. It is used for coefficient commitments, complaints, qualification decisions, epoch certificates, and transition messages. Digital signatures make protocol evidence portable, a signed partial evaluation or refresh contribution can later be included in a publicly verifiable blame certificate. The protocol does not require all honest servers to change epochs at the same physical instant. Instead, correctness is formulated through epoch-consistent evaluation , every successful evaluation must be bound to one epoch certificate, and every server in the chain must act using the share certified by that certificate. If servers temporarily disagree about the active epoch during a transition, a request that crosses the boundary is rejected or retried rather than completed using a mixture of old and new shares. 
+
+2.4 Effective isogeny group actions 
+
+The OPRF is built from an efficiently computable action of a finite abelian group on a set of elliptic-curve objects. We first present the abstract structure needed by the protocol and then explain its relation to CSIDH-style actions. Let G = ⟨g⟩ be a cyclic group of prime order q, and let E be a finite set. An action of G on E is a map 
+
+⋆ : G × E −→ E 
+
+9PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+satisfying 
+
+1G ⋆ E = E and (uv ) ⋆ E = u ⋆ (v ⋆ E )
+
+for all u, v ∈ G and E ∈ E . We write 
+
+[a]E := ga ⋆ E for a ∈ Zq .
+
+Under this notation, the action law becomes 
+
+[0] E = E, [a]([ b]E) = [ a + b]E. (2) The inverse action is represented by [−a]E, and therefore 
+
+[−a]([ a]E) = E. 
+
+These identities are the algebraic reason that the client can blind and later unblind an input and that the servers can accumulate Lagrange-weighted shares through a sequential chain of actions. The action is free if 
+
+[a]E = E =⇒ a = 0 (mod q),
+
+and it is transitive if, for every E, E ′ ∈ E , there exists a ∈ Zq such that E′ = [ a]E. A free and transitive action makes 
+
+E a principal homogeneous space, or torsor, for G. In particular, for every ordered pair (E, E ′) ∈ E 2, there is a unique scalar a ∈ Zq satisfying E′ = [ a]E.In the intended isogeny setting, E consists of canonical representatives of isomorphism classes of supersingular elliptic curves within one class-group orbit, and the action is induced by ideal classes. The protocol requires the following operations to be efficient, (i) Testing whether an encoded object is a valid member of E,(ii) Computing [a]E for a ∈ Zq and E ∈ E ,(iii) Computing inverse actions [−a]E,(iv) Canonically encoding the resulting curve object. The associated vectorization problem is the following, given E, E ′ ∈ E with E′ = [ a]E, recover a. A hard homogeneous space is, informally, a free and transitive action for which the action is efficient but vectorization is computationally infeasible. The formal vectorization assumption used by PIVOT is stated in Section 5. 
+
+Remark 2.1 (Prime-order abstraction and CSIDH) . The scalar notation above assumes a publicly specified cyclic prime-order action. This abstraction is convenient because Shamir sharing, Lagrange interpolation, and all proof witnesses then live in the same field Zq . The full ideal class group used in standard CSIDH descriptions is generally an arbitrary finite abelian group rather than a known cyclic group of prime order. A concrete instantiation must therefore either identify a suitable prime-order cyclic subgroup with an efficiently computable action or generalize the sharing layer from field scalars to an appropriate product or module representation of the class group. The protocol and proofs in this paper apply directly to the prime-order abstraction stated above, adapting them to a full vector-exponent CSIDH representation requires an explicit parameter and encoding treatment. 
+
+2.5 Hashing to the action set and canonical encodings 
+
+We fix a public base element E0 ∈ E . The long-lived public key is 
+
+pk = [ k]E0,
+
+where k ∈ Zq is the master secret shared among the servers. The function 
+
+H1 : {0, 1}∗ −→ E 
+
+maps arbitrary strings to valid elements of the action set. We model H1 as a random oracle into E, or equivalently assume a hash-to-orbit procedure whose output distribution is computationally indistinguishable from uniform over the relevant orbit. The context is included in every call, 
+
+X = H1(ctx ∥x).
+
+This domain separation prevents the same raw input from being interpreted as the same OPRF point under unrelated applications. The function 
+
+enc : E −→ { 0, 1}∗
+
+10 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+is a canonical injective encoding. Canonicality is important because elliptic curves may admit several mathematically equivalent representations. The protocol hashes an encoding of the resulting curve object, so two parties acting on the same element of E must obtain the same byte string. The injectivity requirement is with respect to the canonical representatives used by the protocol. The output hash 
+
+H2 : {0, 1}∗ −→ { 0, 1}ℓ
+
+is modelled as a random oracle and is domain-separated from H1. For a fixed public string PIVOT − out , the keyed function evaluated by the protocol is 
+
+Fk(x) = H2
+
+ PIVOT − out ∥ctx ∥pk ∥x∥enc  [k]H1(ctx ∥x) . (3) Including ctx , pk , and x in the final hash binds the output to the application, the public key, and the exact client input. The epoch number is deliberately omitted, proactive refresh changes the sharing polynomial but not k, and therefore the OPRF output should remain stable across epochs. 
+
+2.6 Shamir secret sharing 
+
+Shamir secret sharing distributes a field element among n parties so that any t shares reconstruct the secret, whereas fewer than t shares reveal no information about it. To share a secret k ∈ Zq , sample coefficients a1, . . . , a t−1 ← Zq and define 
+
+f (X) = k +
+
+> t−1
+
+X
+
+> ℓ=1
+
+aℓXℓ.
+
+The share of server Si is 
+
+si = f (i).
+
+The polynomial has degree at most t − 1, its degree may be smaller if one or more leading coefficients happen to be zero. Let I ⊆ [n] contain at least t distinct indices. For each i ∈ I, define the Lagrange coefficient for interpolation at zero by 
+
+λIi = Y 
+
+> j∈Ij̸=i
+
+−ji − j (mod q). (4) Then 
+
+f (0) = X
+
+> i∈I
+
+λIi f (i) = X
+
+> i∈I
+
+λIi si. (5) In the evaluation protocol, I has exactly t elements, but the identity holds for any larger set as well when the coefficients are computed for that set. The privacy of Shamir sharing is information-theoretic. For any set J ⊆ [n] with |J| < t , the joint distribution of {f (j)}j∈J is uniform over Z|J| 
+
+> q
+
+for every fixed secret k. Equivalently, the observed shares can be extended to a degree-at-most-(t − 1) polynomial having any desired constant term. This property is the basis for threshold key privacy and for the simulation of corrupted servers. The following consequence connects Shamir interpolation to the group action used by the OPRF. 
+
+Lemma 2.2 (Interpolation through the group action) . Let si = f (i) be Shamir shares of k = f (0) , and let I ⊆ [n] be a reconstruction set. Then, for every E ∈ E , "X
+
+> i∈I
+
+λIi si
+
+#
+
+E = [ k]E. 
+
+Moreover, if the actions are applied sequentially in any order, then 
+
+[λIit sit ] · · · [λIi2 si2 ][ λIi1 si1 ]E = [ k]E. 
+
+Proof. Equation (5) gives P 
+
+> i∈I
+
+λIi si = k. Repeated application of Equation (2) shows that sequential actions add their exponents. The claimed identities follow immediately. 
+
+11 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+Zero-sharing polynomials. A polynomial 
+
+z(X) = 
+
+> t−1
+
+X
+
+> ℓ=1
+
+bℓXℓ
+
+is called a zero-sharing polynomial because z(0) = 0 . If f shares k, then 
+
+f ′(X) = f (X) + z(X)
+
+also shares k, since f ′(0) = f (0) . The refreshed shares are s′ 
+
+> i
+
+= si + z(i). This elementary identity is the algebraic foundation of proactive refresh. 
+
+2.7 Additively homomorphic coefficient commitments 
+
+The protocol uses commitments to certify the coefficients of sharing polynomials without publishing those coefficients. We stress that this is a vector of ordinary commitments to coefficients, not a succinct polynomial-commitment scheme in the sense of KZG-style commitments. A commitment scheme consists of algorithms 
+
+Com : Zq × R −→ C and Open ,
+
+where R is the randomness space and C is the commitment space. We write Com (a; ρ) for a commitment to a ∈ Zq
+
+using randomness ρ ∈ R . The scheme must satisfy the following properties. (i) Correctness. An honestly generated commitment opens successfully to the committed value and randomness. (ii) Hiding. Commitments to any two values are computationally indistinguishable, or statistically indistinguish-able when a statistically hiding instantiation is used. (iii) Binding. No probabilistic polynomial-time adversary can produce one commitment together with valid openings to two distinct field elements, except with negligible probability. (iv) Additive homomorphism. There is a public operation ⊕ on commitments such that 
+
+Com (a; ρ) ⊕ Com (b; η) = Com (a + b; ρ + η).
+
+(v) Public scalar multiplication. For every public c ∈ Zq , there is a public operation ⊙ satisfying 
+
+c ⊙ Com (a; ρ) = Com (ca ; cρ ).
+
+Post-quantum instantiations may be obtained from standard lattice-based commitment techniques, provided that the chosen scheme supports the required additive operations over the scalar domain used by the sharing scheme. The security proof treats the commitment layer modularly and uses only the properties listed above. Let 
+
+f (X) = 
+
+> t−1
+
+X
+
+> ℓ=0
+
+aℓXℓ
+
+and let 
+
+Aℓ = Com (aℓ; ρℓ) for 0 ≤ ℓ < t. 
+
+The vector 
+
+A = ( A0, . . . , A t−1)
+
+is called the coefficient-commitment vector of f . For a public index i ∈ [n], define 
+
+EvalCom (A, i ) := 
+
+> t−1
+
+M
+
+> ℓ=0
+
+iℓ ⊙ Aℓ. (6) By homomorphism, 
+
+EvalCom (A, i ) = Com 
+
+> t−1
+
+X
+
+> ℓ=0
+
+aℓiℓ;
+
+> t−1
+
+X
+
+> ℓ=0
+
+ρℓiℓ
+
+!
+
+= Com (f (i); ωi), (7) 
+
+12 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+where 
+
+ωi =
+
+> t−1
+
+X
+
+> ℓ=0
+
+ρℓiℓ.
+
+Thus anyone can derive a commitment to the share that server Si should hold, while only Si needs to know the opening 
+
+(f (i), ω i).This mechanism is used repeatedly. During the DKG, each dealer commits to its polynomial and receivers verify the shares they obtain. After aggregation, the public coefficient commitments add to a commitment vector for the aggregate sharing polynomial. During proactive refresh, commitments to zero-polynomial coefficients are added to the active vector. During evaluation, a server proves that the share used in its group action opens the publicly derived commitment 
+
+EvalCom (A(e), i ).
+
+2.8 NP relations and witness consistency 
+
+The proof obligations appearing in PIVOT are expressed as NP relations . Introducing this abstraction explicitly is useful because the protocol does not merely require a party to prove knowledge of an isolated secret. Instead, a prover must often demonstrate that the same private value is consistent with several public objects produced in different algebraic domains. An NP relation is a polynomial-time decidable relation 
+
+R ⊆ X × W ,
+
+where X is the statement space and W is the witness space. A pair (x, w ) ∈ R means that the public statement x is true with respect to the private witness w. Membership can be checked efficiently by a deterministic polynomial-time verification algorithm 
+
+Check R(x, w ) ∈ { 0, 1}.
+
+The language associated with R is 
+
+LR = x ∈ X : ∃ w ∈ W such that (x, w ) ∈ R .
+
+A zero-knowledge proof convinces the verifier that x ∈ LR without revealing the witness w.In the present construction, the public statement normally contains protocol metadata together with algebraic objects such as commitments, curve encodings, server indices, Lagrange coefficients, epoch certificates, and input/output curves. The witness contains private field elements and commitment randomness, such as a Shamir share s(e) 
+
+> i
+
+, an opening ω(e) 
+
+> i
+
+, a blinding scalar r, or the constant coefficient of a resharing polynomial. It is important that every relation include all public values needed to identify the precise protocol execution in which the proof is valid. Accordingly, a concrete implementation should bind the statement to the protocol name, relation identifier, context ctx , session identifier sid , epoch e, certificate hash, server identity, quorum, and position in the evaluation chain whenever these values are relevant. This prevents a proof generated for one session, epoch, or sub-protocol from being replayed as a valid proof in another. 
+
+Simple and joint relations. Some NP relations assert one algebraic property. For example, a commitment-opening relation may be written as 
+
+Ropen = (C; a, ρ ) : C = Com (a; ρ) .
+
+Similarly, an action relation may assert 
+
+Ract = (Q, Q ′; a) : Q′ = [ a]Q .
+
+The relations required by PIVOT , however, are generally joint relations . A joint relation requires one witness to satisfy several conditions simultaneously. A representative example is 
+
+Rjoint = (C, Q, Q ′; a, ρ ) : C = Com (a; ρ) ∧ Q′ = [ a]Q .
+
+The significance of this formulation is that the scalar opening the commitment must be exactly the scalar used in the group action. It is not enough to prove separately that C opens to some value a and that Q′ is obtained from Q using some possibly different value a′. The correctness and security of the protocol depend on witness equality across the two conditions. 
+
+13 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+Relations used by PIVOT . The protocol later defines four concrete relations. (i) The link relation Rlink binds a DKG dealer’s committed constant coefficient to the exponent used in its public-key contribution. (ii) The evaluation relation Reval proves that a server’s partial group action was computed with the same Shamir share that opens the share commitment derived from the active epoch commitment vector. (iii) The blinding relation Rblind proves that a client request is a correctly blinded hash-derived input rather than an arbitrary curve chosen independently of an input. (iv) The resharing relation Rreshare binds the constant term of an old server’s resharing polynomial to its certified Lagrange-weighted share. They are logically distinct and must be domain-separated at the proof-system level. In particular, an accepting proof for 
+
+Reval must never be interpretable as a proof for Rlink , even when some of their public inputs have similar encodings. 
+
+Relation completeness and soundness. For every honest protocol execution, the prescribed witness must satisfy the corresponding relation. This is the relation-level correctness condition underlying NIZK completeness. Conversely, if a statement is false, for example, if a server applies an action using a scalar different from its certified share then no valid witness should exist. NIZK soundness ensures that such a false statement cannot be accepted except with negligible probability. 
+
+Relation efficiency. An NP relation is useful only when its verification predicate can be evaluated efficiently. Commitment equations are usually inexpensive, whereas the predicate 
+
+Q′ = [ a]Q
+
+may require evaluating the complete isogeny group action inside the proof system. The abstract protocol therefore treats proofs for these relations as modular cryptographic building blocks. A concrete implementation must specify how the action predicate is represented and must account for its proof-generation and verification costs. The distinction between defining a relation and instantiating a proof system for that relation is important. The protocol and its security proof require the four relations to be well defined and efficiently decidable. They do not, by themselves, imply that a practically efficient circuit or proof system for the isogeny-action predicate is already available. 
+
+2.9 Non-interactive zero-knowledge proofs 
+
+Several protocol steps require a party to prove that one private scalar is used consistently in two different algebraic domains. For example, an evaluation server must show both that s(e) 
+
+> i
+
+opens its certified share commitment and that the same scalar determines the action applied to the incoming curve. These statements are expressed as NP relations and proved using non-interactive zero-knowledge proofs. For an NP relation 
+
+R ⊆ X × W ,
+
+a common-reference-string NIZK system consists of algorithms 
+
+ NIZK .Setup , NIZK .Prove , NIZK .Verify .
+
+The setup algorithm generates a common reference string crs . Given a statement x ∈ X and a witness w ∈ W satisfying 
+
+(x, w ) ∈ R , the prover computes 
+
+π ← NIZK .Prove R(crs , x ; w).
+
+The verifier outputs 
+
+b ← NIZK .Verify R(crs , x, π ).
+
+We require the following properties. (i) Completeness. An honestly generated proof for a true statement is accepted, except with negligible probability. Perfect completeness may be assumed when provided by the selected proof system. (ii) Soundness. No probabilistic polynomial-time prover can produce an accepting proof for a false statement, except with negligible probability. 
+
+14 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+(iii) Zero knowledge. There exists a simulator NIZK .Sim that, given an appropriate simulation trapdoor and a statement, produces a proof computationally indistinguishable from a real proof without knowing a witness. (iv) Simulation extractability. There exists an extractor NIZK .Ext such that, even after observing simulated proofs, an adversary that produces a fresh accepting proof for a new statement yields a corresponding valid witness, except with negligible probability. The full malicious-security analysis uses simulation extractability to recover the witnesses underlying adversarially generated proofs. A semi-honest analysis does not require this extraction property because all parties are assumed to follow the prescribed algorithms. We retain the stronger primitive in the protocol specification because PIVOT also aims to provide public verifiability and identifiable misbehaviour. We use the notation 
+
+NIZK .Prove R(stmt ; wit )
+
+and 
+
+NIZK .Verify R(stmt , π )
+
+when the common reference string is understood. The simulator and extractor are written NIZK .Sim and NIZK .Ext ,respectively. The protocol uses four domain-separated proof relations, Rlink , Reval , Rblind , and Rreshare . Domain separation means that a proof created for one relation cannot be interpreted as a proof for another relation, even if their public inputs have similar encodings. 
+
+Remark 2.3 (Joint-relation requirement) . The relations used by PIVOT are not merely independent conjunctions of a commitment-opening statement and a group-action statement. They require the same scalar witness to satisfy both components. Accordingly, a concrete NIZK instantiation must prove the complete joint relation and enforce equality of the witness across the commitment and isogeny domains. Independent proofs of the two components are insufficient unless they are connected by an explicit witness-equality mechanism. 
+
+2.10 Verifiable secret sharing 
+
+A verifiable secret-sharing protocol allows a dealer to distribute evaluations of a polynomial while enabling each receiver to verify that its share is consistent with one common committed polynomial. VSS is required because ordinary Shamir sharing offers no mechanism for detecting a dealer that sends unrelated values to different receivers. In the commitment-based VSS used by PIVOT , a dealer samples 
+
+f (X) = 
+
+> t−1
+
+X
+
+> ℓ=0
+
+aℓXℓ
+
+and publishes the coefficient commitments 
+
+Aℓ = Com (aℓ; ρℓ).
+
+For receiver Si, it computes 
+
+ui = f (i), ϱi =
+
+> t−1
+
+X
+
+> ℓ=0
+
+iℓρℓ
+
+and sends (ui, ϱ i) through an authenticated private channel. The receiver checks 
+
+Com (ui; ϱi) = EvalCom (A, i ). (8) If the equation holds, the share is consistent with the committed coefficients. If it fails, the receiver issues a complaint according to the complaint-resolution procedure of the protocol. Complaint resolution must satisfy two goals. First, all honest parties must reach the same decision about whether the dealer remains qualified. Second, the resolution transcript must not disclose enough valid shares to violate the threshold privacy guarantee. The protocol records a collision-resistant digest of the resolution transcript in the relevant certificate so that later parties can verify which dealers were included in the aggregate state. We write Q for the set of dealers that remain qualified after VSS verification and complaint resolution. A dealer is qualified if and only if its shares are accepted by at least t honest receivers after complaint resolution. In an all-honest execution, every dealer is qualified. 
+
+15 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+2.11 Dealerless distributed key generation 
+
+A distributed key-generation protocol produces a sharing of a randomly generated key without appointing a trusted dealer. In PIVOT , every server acts as a VSS dealer. Server Sj samples a polynomial fj (X), distributes its evaluations, and publishes commitments to its coefficients. After the qualification phase, each server adds all accepted contributions. If fewer than t dealers qualify, the DKG aborts and is restarted with a fresh session identifier, while the public state remains uninitialised until a successful run completes. Otherwise, the qualified set Q is nonempty and each server computes 
+
+si = X
+
+> j∈Q
+
+fj (i).
+
+The resulting aggregate polynomial is 
+
+F (X) = X
+
+> j∈Q
+
+fj (X),
+
+and its constant term 
+
+k = F (0) = X
+
+> j∈Q
+
+fj (0) 
+
+is the distributed master key. No server needs to reconstruct this sum. The coefficient commitments aggregate homomorphically, 
+
+Aℓ = M
+
+> j∈Q
+
+Aj,ℓ .
+
+The DKG additionally constructs the public key pk = [ k]E0. Since the commitment space and the group-action space are distinct algebraic domains, the protocol uses link proofs to show that each public-key contribution is formed with the same constant coefficient committed by the corresponding dealer. This link is what binds the Shamir sharing to the public isogeny key. 
+
+2.12 Digital signatures and public-key infrastructure 
+
+Each server Si holds a post-quantum digital-signature key pair 
+
+(sk sig  
+
+> i
+
+, vk sig  
+
+> i
+
+).
+
+Verification keys are authenticated through a public-key infrastructure and are known to all protocol participants. We require correctness and existential unforgeability under chosen-message attack (EUF–CMA). Signatures serve three purposes. They authenticate partial evaluation messages and refresh contributions, prevent one server from being framed for a message generated by another party, and make blame evidence transferable to third parties. Every signed message includes sufficient domain separation, including the protocol name, context, session identifier, epoch, message type, and relevant public values. This prevents a signature issued in one sub-protocol from being replayed as a valid signature in another. 
+
+2.13 Secure erasures and proactive security 
+
+Proactive security is meaningful only if obsolete local state can be removed. After a successful transition from epoch e
+
+to epoch e + 1 , an honest server erases its old share s(e) 
+
+> i
+
+, the corresponding commitment-opening randomness, received refresh contributions, temporary VSS randomness, and any other state from which the old share could be reconstructed. We model erasure through an ideal functionality Ferase . Once a value has been erased, a later corruption of the server does not reveal that value. This assumption is standard in proactive secret-sharing models. Without secure erasure, a mobile adversary could compromise one server in each epoch and recover all historical shares stored on disk, eventually collecting enough same-epoch information to reconstruct the master key. Erasure is invoked only after the next epoch state has been accepted. Erasing the old state too early could destroy availability if the epoch transition later aborts. Conversely, retaining the old state after activation weakens proactive security. The transition protocol therefore separates preparation of the next shares from their activation and performs erasure only after the next certificate has been committed. 
+
+16 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+2.14 Summary of the maintained public and private state 
+
+At the beginning of an active epoch e, server Si holds the private state 
+
+st (e) 
+
+> i
+
+=  s(e) 
+
+> i
+
+, ω (e) 
+
+> i
+
+, sk sig  
+
+> i
+
+, ReplayState i
+
+,
+
+while the public state contains 
+
+pst (e) =  ctx , e, pk , A(e), cert e, {vk sig  
+
+> i
+
+}ni=1 
+
+.
+
+The fundamental state invariant is that there exists a polynomial 
+
+Fe(X) = 
+
+> t−1
+
+X
+
+> ℓ=0
+
+a(e) 
+
+> ℓ
+
+Xℓ
+
+such that 
+
+Fe(0) = k, s(e) 
+
+> i
+
+= Fe(i), A(e) 
+
+> ℓ
+
+= Com (a(e) 
+
+> ℓ
+
+; ρ(e) 
+
+> ℓ
+
+), pk = [ k]E0.
+
+The DKG establishes this invariant, threshold evaluation uses it, proactive refresh preserves it while changing the nonconstant coefficients, and committee resharing transfers it to a new committee. The correctness analysis in Section 4 proves these claims formally. 
+
+# 3 The PIVOT Protocol 
+
+This section presents the complete PIVOT construction. Before giving the individual algorithms, it is useful to describe how the different components fit together. The protocol maintains a long-lived master key k ∈ Zq , but no server stores 
+
+k directly. Instead, during every epoch e, the servers hold evaluations of a degree-at-most-(t − 1) Shamir polynomial 
+
+Fe(X) ∈ Zq [X] with Fe(0) = k. 
+
+Server Si stores the share s(e) 
+
+> i
+
+= Fe(i). The public coefficient-commitment vector A(e) certifies the polynomial that defines the current shares, while the public key pk = [ k]E0 commits to the unchanged master secret in the isogeny group-action domain. The protocol can be viewed as a sequence of state-creation, state-use, and state-maintenance procedures. The dealerless DKG creates the initial sharing and public key. The threshold evaluation protocol uses any qualified set of t current shares to evaluate the OPRF without reconstructing k. Proactive refresh replaces Fe by a newly randomized polynomial 
+
+Fe+1 having the same constant term, thereby invalidating previously exposed shares. The verification and blame mechanism makes malformed contributions publicly attributable. Finally, committee resharing transfers the same master key to a new collection of servers, possibly under a different threshold. Three forms of consistency are maintained throughout the construction. First, the shares held by the servers must be evaluations of the polynomial represented by the public commitment vector. Second, the constant coefficient of that polynomial must correspond to the exponent used to form pk . Third, all servers participating in one evaluation must use the same epoch certificate. The NIZK relations enforce the first two forms of consistency, while explicit epoch and session identifiers enforce the third. We describe PIVOT in the (Fauth , Fbroadcast , Fcom , Fnizk , Fsig , Ferase )-hybrid model, following the universal-composability framework of Canetti [Canetti, 2001]. Fauth provides authenticated private channels for share delivery, 
+
+Fbroadcast guarantees that every honest party receives identical copies of public announcements such as commitments, complaints, and certificates, Fcom realizes the homomorphic commitment scheme of Section 2.7, Fnizk realizes the simulation-extractable NIZK of Section 2.9, and Fsig provides EUF-CMA signatures. Secure erasure is handled by 
+
+Ferase and is invoked after a successful epoch transition. The setup phase fixes the algebraic environment and the auxiliary cryptographic mechanisms used by every later sub-protocol. These parameters are system-wide rather than epoch-specific. In particular, the group-action parameters, base curve, hash functions, commitment scheme, and NIZK reference string remain unchanged when the shares are refreshed. This stability is important because proactive maintenance is intended to protect a long-lived service without changing its public key or invalidating previously derived OPRF outputs. The setup also establishes the authenticated identities of the servers. Signatures do not hide any data, their role is to bind each public message to its sender and to make later blame certificates independently verifiable. The epoch counter begins at zero and is advanced only after the refresh transition has completed. 
+
+17 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+P1. A prime q and base curve E0 ∈ E are fixed for the target security level. 
+
+P2. Hash functions H1 : {0, 1}∗ → E and H2 : {0, 1}∗ → { 0, 1}ℓ are fixed (random oracles). 
+
+P3. An additively homomorphic commitment scheme Com : Zq × R → C is fixed. 
+
+P4. A CRS for the four SE-NIZK relations is generated and published. 
+
+P5. Each server Si generates a signing keypair and verification keys are distributed via a PKI. 
+
+P6. The epoch counter e ← 0 is initialised. 
+
+3.1 Protocol 1: Dealerless distributed key generation 
+
+The first task is to create the master key without appointing a trusted dealer. A conventional trusted-dealer construction would sample a polynomial F0, distribute F0(i) to server Si, and publish the corresponding verification information. Such a dealer would, however, learn the complete master key and become a permanent point of trust. 
+
+PIVOT avoids this problem by allowing every server to contribute an independently sampled polynomial. The sum of all qualified contributions becomes the initial sharing polynomial. More precisely, each server Sj acts as a VSS dealer for a polynomial fj (X). The servers verify the received evaluations against homomorphic commitments to the coefficients. Once invalid dealers, if any, have been excluded, server Si adds all accepted evaluations and obtains 
+
+s(0)  
+
+> i
+
+= X
+
+> j∈Q
+
+fj (i) = F0(i), F0(X) = X
+
+> j∈Q
+
+fj (X).
+
+The resulting master key is the constant term, 
+
+k = F0(0) = X
+
+> j∈Q
+
+aj, 0
+
+No server needs to assemble this sum explicitly. The coefficient commitments certify the Shamir sharing, but they do not by themselves show that the public isogeny key was formed from the same constant coefficients. The link-proof chain closes this gap. Each qualified dealer applies its constant-term action to the current curve and proves, with one common witness, that the action exponent is the value committed in Aj, 0. The final curve is therefore pk = [ k]E0. The epoch-zero certificate records the public key, aggregate coefficient commitments, qualified set, and supporting transcript as the initial public state of the service. 
+
+Protocol 1: Dealerless Distributed Key Generation Parties : Servers S1, . . . , S n. Output : Shamir shares {s(0)  
+
+> i
+
+} of master key k, public key pk = [ k]E0, epoch certificate 
+
+cert 0.
+
+D1. Polynomial generation. Each Sj samples aj, 0, . . . , a j,t −1 ← Zq and sets fj (X) = Pt−1 
+
+> ℓ=0
+
+aj,ℓ Xℓ.
+
+D2. Coefficient commitment broadcast. Sj samples ρj,ℓ ← R and broadcasts Aj,ℓ = Com (aj,ℓ ; ρj,ℓ ) for all ℓ.
+
+D3. Private share distribution. For each receiver Si, Sj privately sends uj,i = fj (i) and ϱj,i = Pt−1 
+
+> ℓ=0
+
+iℓρj,ℓ .
+
+D4. Share verification. Si accepts if and only if Com (uj,i ; ϱj,i ) = Lt−1 
+
+> ℓ=0
+
+iℓ ⊙ Aj,ℓ . Complaints are resolved via broadcast, and disqualified dealers are removed from the qualified set Q.
+
+D5. Share aggregation. Each Si computes 
+
+s(0)  
+
+> i
+
+= X
+
+> j∈Q
+
+uj,i (mod q), ω(0)  
+
+> i
+
+= X
+
+> j∈Q
+
+ϱj,i .
+
+Public aggregate coefficients: A(0)  
+
+> ℓ
+
+= L 
+
+> j∈Q
+
+Aj,ℓ . The implicit master key is k = P 
+
+> j∈Q
+
+aj, 0.
+
+D6. Link proofs. Order Q = ( j1, . . . , j m) arbitrarily. Set P0 = E0. For h = 1 , . . . , m , server Sjh computes 
+
+Ph = [ ajh,0]Ph−1, generates πlink  
+
+> h
+
+← NIZK .Prove Rlink (Ajh,0, P h−1, P h; ajh,0, ρ jh,0), and broadcasts (Ph, π link  
+
+> h
+
+).A dealer whose proof fails is removed. The public key is pk = Pm = [ k]E0.
+
+D7. Epoch-zero certificate. Servers sign cert 0 = ( e, ctx , pk , A(0) , Q, {πlink  
+
+> h
+
+}|Q| 
+
+> h=1
+
+, digest VSS ).
+
+Figure 1: Dealerless distributed key generation for PIVOT .
+
+18 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+3.2 Protocol 2: Threshold evaluation 
+
+Once the initial state has been established, clients can evaluate the keyed function without revealing their inputs and without causing the servers to reconstruct the master key. The central idea is to combine input blinding with Lagrange interpolation in the exponent of the group action. For an input x, the client first maps the domain-separated input to a curve 
+
+X = H1(ctx ∥x).
+
+It then chooses a fresh scalar r and sends the blinded curve B = [ r]X. Because the action is free and transitive, a uniformly sampled blinding action hides the original curve from the servers. The blinding proof is included to show that the submitted curve is a well-formed blinding of a hash-derived input, rather than an arbitrary curve selected to turn the committee into an unrestricted action oracle. The selected quorum I = {i1, . . . , i t} does not reconstruct k as a scalar. Instead, server Si applies the action associated with its Lagrange-weighted share λIi s(e) 
+
+> i
+
+. Since group actions compose additively, the sequential chain accumulates the sum X
+
+> i∈I
+
+λIi s(e) 
+
+> i
+
+= k. 
+
+The final server therefore returns [k]B. The client applies [−r] and obtains [k]X, from which the final OPRF output is derived. The order of the servers is operational rather than algebraically significant because the underlying group is abelian. Nevertheless, a fixed order is included in the session transcript so that every partial action has an unambiguous predecessor and successor. Each server signs its transition and proves that it used the share certified for the current epoch. As a result, the client can verify not only the final curve, but the complete sequence by which that curve was produced. 
+
+Protocol 2: Threshold Evaluation Parties : Client C with private input x, quorum I = {i1, . . . , i t} in epoch e. Output : Client learns y = Fk (x).
+
+E1. Client blinding. C verifies cert e, computes X = H1(ctx ∥x), samples r ← Zq , sets B = [ r]X, and gen-erates πblind ← NIZK .Prove Rblind (ctx , sid , B ; x, r ). The client sends req = ( sid , e, I, H (cert e), B, π blind ) to 
+
+Si1 . The quorum I ⊆ [n] of size |I| = t is selected via the deterministic, publicly verifiable function 
+
+SelectQuorum (sid , e, n, t ), instantiated as a pseudorandom permutation over [n] seeded by a collision-resistant hash 
+
+H(sid ∥e∥ctx ). Every party can independently recompute I and verify its correctness, preventing a malicious client or coordinator from biasing server selection across retries. 
+
+E2. Request validation. Si1 verifies πblind , checks that sid is fresh, e is the current epoch, H(cert e) matches its active epoch certificate, and B ∈ E . It rejects on failure and sets Q0 ← B.
+
+E3. Sequential partial evaluation. For h = 1 , . . . , t , server Sih ,(a) Computes λIih = Q  
+
+> j∈I, j ̸=ih
+
+(−j)/(ih − j) (mod q).(b) Computes Qh = [ λIih · s(e) 
+
+> ih
+
+] Qh−1.(c) Generates πeval  
+
+> h
+
+← NIZK .Prove Reval (A(e), i h, Q h−1, Q h, λ Iih ; s(e) 
+
+> ih
+
+, ω (e) 
+
+> ih
+
+).(d) Signs Mh = ( sid , e, I, h, Q h−1, Q h, π eval  
+
+> h
+
+) as σh.(e) Forwards (sid , e, I, Q 0, {Qℓ, π eval  
+
+> ℓ
+
+, σ ℓ}hℓ=1 ) to Sih+1 (or to C if h = t). (f) Before acting, Sih+1 checks the epoch and certificate hash and verifies all prior signatures and proofs. 
+
+E4. Client unblinding. C receives resp = ( Qt, {Qh, π eval  
+
+> h
+
+, σ h}th=1 , cert e). The client recomputes all λIi , verifies every 
+
+πeval  
+
+> h
+
+and σh, recomputes each share commitment EvalCom (A(e), i h) from the coefficient vector A(e) contained in 
+
+cert e, and computes, 
+
+Y = [ −r]Qt,y = H2(PIVOT − out ∥ctx ∥pk ∥x∥enc (Y )) .
+
+The epoch number is excluded from the output hash so that OPRF values remain invariant across refresh boundaries. 
+
+Figure 2: Threshold evaluation protocol for PIVOT .
+
+19 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+Client C Q0
+
+Si1
+
+> Q1
+
+Si2
+
+· · · Qt−1
+
+Sit   
+
+> Qt
+> B=[ r]X[λ1s1][λtst]
+> Y=[ −r]Qt=[ k]X
+
+Figure 3: Sequential evaluation chain in PIVOT . The client sends a blinded input Q0 = B = [ r]X to the first server. Each server Sih applies its Lagrange-weighted share to produce Qh = [ λIih sih ]Qh−1, accompanied by a NIZK proof 
+
+πeval  
+
+> h
+
+. The accumulated result Qt = [ k]B is returned to the client, who unblinds to recover Y = [ k]X.
+
+Lemma 3.1 (Evaluation correctness) . For any epoch e, if all servers in quorum I honestly apply their certified shares, the client’s output equals Fk(x) as defined in Equation 1. Proof. By induction on h,
+
+Qh =
+
+
+
+> h
+
+X
+
+> j=1
+
+λIij s(e)
+
+> ij
+
+ B
+
+using [a]([ b]E) = [ a + b]E from Section 2.4. For h = t,
+
+Qt =
+
+"X
+
+> i∈I
+
+λIi s(e)
+
+> i
+
+#
+
+B = [ k]B
+
+Since B = [ r]X, the composition law [a]([ b]E) = [ a + b]E gives Qt = [ k]([ r]X) = [ k + r]X. Then Y = [ −r]Qt =[−r]([ k + r]X) = [ −r + k + r]X = [ k]X by the same law. Hence 
+
+y = H2(PIVOT − out ∥ctx ∥pk ∥x∥enc ([ k]X)) = Fk(x)
+
+3.3 Protocol 3: Proactive share refresh 
+
+Threshold sharing protects the master key only as long as the adversary does not collect t shares belonging to the same sharing polynomial. In a long-lived service, this requirement cannot be enforced merely by assuming that one fixed set of servers remains honest forever. A mobile adversary may compromise different servers at different times and retain the shares that it learns. Proactive refresh addresses this threat by periodically replacing the current shares with fresh shares of the same secret. The refresh mechanism relies on a simple algebraic observation. Adding a polynomial z(X) satisfying z(0) = 0 to the current sharing polynomial changes every nonconstant coefficient but leaves the secret unchanged, 
+
+Fe+1 (X) = Fe(X) + z(X), Fe+1 (0) = Fe(0) = k. 
+
+To avoid placing trust in a single refresh dealer, every server contributes its own random zero polynomial. The qualified contributions are added together, so that one honest contribution is sufficient to re-randomize the nonconstant coefficients from the adversary’s perspective. The coefficient commitments evolve in parallel with the shares. There is deliberately no commitment to a refresh constant term, zero is enforced syntactically by defining the refresh polynomial only from powers X, . . . , X t−1. Consequently, the commitment A(e)0 remains unchanged, whereas the higher-degree commitments are updated homomorphically. Refresh also requires a careful transition rule. It is not sufficient for servers to compute correct next-epoch shares independently, they must agree on the same commitment vector and must not combine shares from different epochs in one evaluation. The PROPOSE, PREPARE, COMMIT, and ACTIVATE stages establish a common certificate for the next state. During the transition, the old state remains the active state. A server begins using s(e+1)  
+
+> i
+
+only after accepting the common next-epoch certificate. Evaluation requests are bound to an epoch number and certificate, so a mixed-epoch 
+
+20 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+chain is rejected rather than interpolated. Finally, after activation, honest servers erase the old share, old opening randomness, received zero-shares, and temporary refresh state. The algebraic refresh creates independence between successive sharing polynomials and secure erasure ensures that a later corruption cannot recover the obsolete local state. At the boundary from epoch e to epoch e + 1 , the servers execute the following procedure, 
+
+Protocol 3: Proactive Share Refresh Parties : All n servers at epoch boundary e → e+1 . Output : Fresh shares {s(e+1)  
+
+> i
+
+} of the same master key k.
+
+R1. Zero-polynomial generation. Each refresh dealer Sj samples bj, 1, . . . , b j,t −1 ← Zq and constructs zj (X) = 
+
+Pt−1 
+
+> ℓ=1
+
+bj,ℓ Xℓ. The constant term is syntactically zero, no Dj, 0 is published. Sj broadcasts Dj,ℓ = Com (bj,ℓ ; ηj,ℓ )
+
+for ℓ = 1 , . . . , t − 1.
+
+R2. Zero-share distribution. Sj sends to each Si: δj,i = zj (i) and νj,i = Pt−1 
+
+> ℓ=1
+
+iℓηj,ℓ .
+
+R3. Zero-share verification. Si accepts if and only if 
+
+Com (δj,i ; νj,i ) = 
+
+> t−1
+
+M
+
+> ℓ=1
+
+iℓ ⊙ Dj,ℓ . (9) Complaints are resolved as in the DKG. Let Re denote the qualified refresh-dealer set. 
+
+R4. Share and commitment update. 
+
+s(e+1)  
+
+> i
+
+= s(e) 
+
+> i
+
++ X
+
+> j∈R e
+
+δj,i (mod q), ω(e+1)  
+
+> i
+
+= ω(e) 
+
+> i
+
++ X
+
+> j∈R e
+
+νj,i ,A(e+1) 0 = A(e)0 (unchanged) , A(e+1)  
+
+> ℓ
+
+= A(e) 
+
+> ℓ
+
+⊕ M
+
+> j∈R e
+
+Dj,ℓ , 1 ≤ ℓ < t. 
+
+R5. Coordinated epoch transition. A designated epoch leader Sℓ (e.g., S(e mod n)+1 , rotating per epoch) coordinates the transition, 
+
+PROPOSE. Sℓ computes the proposed certificate cert ′ 
+
+> e+1
+
+= ( pk , A(e+1) , e +1 , Re, digest complaints ) and broadcasts it with a signature. Honest servers independently verify cert ′ 
+
+> e+1
+
+against their local updates. 
+
+PREPARE. Each server that verifies cert ′ 
+
+> e+1
+
+broadcasts a signed PREPARE (e, e +1 , H (cert ′
+
+> e+1
+
+)) . During the PREPARE state, servers continue responding to evaluation requests with epoch-e shares. If a server detects inconsistency, it broadcasts a complaint and the leader is replaced. 
+
+COMMIT. Upon receiving t valid PREPARE messages for the same certificate hash, each server broadcasts a signed COMMIT (e, e +1 , h ) and enters COMMIT-pending state, still responding with epoch-e shares. 
+
+ACTIVATE. Upon receiving t valid COMMIT messages, each server advances epoch ← e+1 , signs cert e+1 , and begins responding with epoch-(e+1) shares. No server uses epoch-(e+1) shares before this point, preventing mixed-epoch quorums. 
+
+R6. Secure erasure. Honest servers securely erase s(e) 
+
+> i
+
+, ω(e) 
+
+> i
+
+, all received δj,i , and all refresh randomness. 
+
+Figure 4: Proactive share refresh protocol for PIVOT .
+
+ACTIVE 
+
+epoch e PROPOSE PREPARE 
+
+COMMIT 
+
+ACTIVE 
+
+epoch e + 1      
+
+> Leader broadcasts
+> cert ′
+> e+1
+> Verify certificate and sign PREPARE
+> Receive ≥t
+> PREPARE messages
+> ≥tCOMMIT messages erase epoch-eshares
+
+Servers continue responding with epoch-e shares during the transition. 
+
+Figure 5: Epoch transition state machine for proactive refresh. Servers continue responding with epoch-e shares during the PROPOSE, PREPARE, and COMMIT phases, switching to epoch-(e+1) shares only after receiving t valid COMMIT messages. 
+
+21 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+Lemma 3.2 (Refresh correctness) . After Protocol 3, Fe+1 (0) = k and A(e+1) 0 = A(e)0 .Proof. Fe+1 (X) = Fe(X) + P 
+
+> j∈R e
+
+zj (X). We must show that zj (0) = 0 for every qualified dealer j ∈ R e.The verification check (Equation (9)) requires Com (δj,i ; νj,i ) = Lt−1 
+
+> ℓ=1
+
+iℓ ⊙ Dj,ℓ . By the homomorphic property, the right-hand side equals Com (Pt−1 
+
+> ℓ=1
+
+bj,ℓ iℓ; · ). The binding property of Com then forces δj,i = Pt−1 
+
+> ℓ=1
+
+bj,ℓ iℓ for every receiver Si that accepts. Since every accepted share lies on the polynomial ˆzj (X) = Pt−1 
+
+> ℓ=1
+
+bj,ℓ Xℓ and at least t
+
+receivers accept (otherwise Sj is disqualified), the unique polynomial of degree at most t − 1 through these t points is 
+
+ˆzj itself. In particular, zj (0) = ˆ zj (0) = 0 .Hence Fe+1 (0) = Fe(0) + P 
+
+> j
+
+zj (0) = k + 0 = k, and A(e+1) 0 = A(e)0 since the zero-polynomial constant terms contribute nothing. 
+
+3.4 Protocol 4: Verification, blame, and robust restart 
+
+The preceding protocols describe the computations performed during an honest execution. In a distributed deployment, however, an evaluation or refresh may fail because a party submits a malformed proof, applies an incorrect action, distributes an inconsistent share, or simply refuses to continue. Verifiability is useful only when such failures can be attributed to a specific signed message and when honest parties have a well-defined recovery procedure. 
+
+PIVOT therefore separates detection , attribution , and recovery . Detection is local, the next server in an evaluation chain, the client, or a refresh recipient checks the relevant NIZK, signature, or commitment equation. Attribution is public, the detecting party packages the signed offending message together with the failed verification instance. Any observer can then check the complaint without learning an honest share. Recovery is handled by removing the identified server from the eligible pool and restarting the session with a fresh identifier and a newly selected quorum. A restart uses a fresh sid because signatures, proofs, and quorum selection are session-bound. Reusing the failed identifier would make the new execution difficult to distinguish from a continuation or replay of the old one. The wrapper provides progress as long as at least t eligible servers remain. It does not guarantee availability once the active pool falls below the threshold, in that case, abort is the only correct outcome. 
+
+Protocol 4: Verification, Blame, and Robust Restart Purpose : Identify and remove misbehaving servers and ensure liveness through retry. 
+
+V1. Invalid blinding proof. A server detecting an invalid πblind broadcasts a signed rejection 
+
+(sid , π blind , “invalid blinding” ). No secret material is involved. 
+
+V2. Invalid server evaluation. If πeval  
+
+> h
+
+for Sih fails verification (detected by Sih+1 or the client), the detecting party produces a blame certificate blame = ( sid , e, I, h, Q h−1, Q h, π eval  
+
+> h
+
+, σ h). Any third party can verify that σh is valid yet πeval  
+
+> h
+
+is invalid. The blamed server is removed from the active pool. 
+
+V3. Invalid refresh contribution. A complaint against a refresh dealer includes the signed (δj,i , ν j,i ) and the public 
+
+{Dj,ℓ }, any third party verifies Equation (9). 
+
+V4. Robust wrapper. Maintain a pool of n certified servers. On evaluation failure, remove the blamed server, generate a fresh sid , and retry with a new quorum via SelectQuorum (sid , e, n, t ). If fewer than t servers remain, abort. Otherwise, the wrapper completes within at most n − t + 1 retries. The wrapper assumes that the total number of servers satisfies n ≥ 2t, so that removing up to t − 1 misbehaving servers still leaves at least t honest servers available for a successful evaluation. 
+
+Figure 6: Verification, blame, and robust restart for PIVOT .
+
+3.5 Protocol 5: Committee resharing 
+
+Proactive refresh protects a fixed committee over time, but it does not address changes in membership. Long-lived services may need to replace failed machines, rotate administrative domains, increase the committee size, or adopt a new threshold. Re-running the DKG would generate a new master key and would therefore change the public key and all OPRF outputs. Committee resharing instead transfers the existing secret k to a new Shamir sharing without ever reconstructing k.
+
+22 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+Let I be a qualified old-committee quorum. The Lagrange-weighted values {λIi s(e) 
+
+> i
+
+}i∈I satisfy 
+
+X
+
+> i∈I
+
+λIi s(e) 
+
+> i
+
+= k. 
+
+Each old server Si treats its weighted value as the constant term of a fresh degree-at-most-(t′ − 1) polynomial gi(X)
+
+and distributes that polynomial to the new committee using VSS. The new servers add the received evaluations. Their aggregate polynomial 
+
+G(X) = X
+
+> i∈I
+
+gi(X)
+
+has constant term G(0) = k, while its nonconstant coefficients are freshly randomized for the new threshold t′.The reshare proof is necessary because a commitment to the constant term of gi must be linked to the old server’s certified share. Without this link, an old server could distribute a perfectly consistent polynomial having an unrelated constant term, thereby changing the aggregate secret. Once the proofs and VSS checks have been accepted, the new committee signs a certificate for its aggregate commitment vector. The public key remains pk = [ k]E0, and previously computed OPRF outputs remain valid. Protocol 5 therefore migrates the sharing of k from the old committee to a new committee (S′
+
+> 1
+
+, . . . , S ′ 
+
+> n′
+
+) with threshold t′, without revealing or reconstructing the master key. 
+
+Protocol 5: Committee Resharing Parties : Old committee (S1, . . . , S n) with threshold t, new committee (S′
+
+> 1
+
+, . . . , S ′ 
+
+> n′
+
+) with threshold t′. Output : New Shamir shares {s′ 
+
+> j
+
+} of the same master key k.
+
+M1. Quorum selection. Select a quorum I of size ≥ t from the old committee. 
+
+M2. Reshare VSS. Each old-committee server Si (i ∈ I) acts as a VSS dealer and samples gi(X) = λIi s(e) 
+
+> i
+
++
+
+Pt′−1 
+
+> ℓ=1
+
+ci,ℓ Xℓ (constant term λIi s(e) 
+
+> i
+
+), publishes coefficient commitments Bi,ℓ with sampled randomness, and generates πreshare  
+
+> i
+
+← NIZK .Prove Rreshare (A(e), i, B i, 0, λ Ii ; s(e) 
+
+> i
+
+, ω (e) 
+
+> i
+
+, ρ i, 0).
+
+M3. New share aggregation. Each new server S′ 
+
+> j
+
+receives gi(j) and its commitment randomness from every i ∈ I,verifies against {Bi,ℓ }, and sets s′ 
+
+> j
+
+= P 
+
+> i∈I
+
+gi(j).
+
+M4. Correctness. The aggregate polynomial G(X) = P 
+
+> i∈I
+
+gi(X) satisfies G(0) = P 
+
+> i∈I
+
+λIi s(e) 
+
+> i
+
+= k. The new committee signs cert e+1 after confirmation. 
+
+Figure 7: Committee resharing protocol for PIVOT .
+
+# 4 Correctness Analysis 
+
+This section establishes the functional correctness of PIVOT under honest execution. The purpose of the analysis is to show that the distributed key-generation, evaluation, proactive-refresh, and committee-resharing procedures preserve a single well-defined master key throughout the lifetime of the system. In particular, every successful evaluation must produce the same value as a direct evaluation of the underlying function Fk with the master key k.Correctness is distinct from security. The arguments below assume that all participating parties follow the prescribed algorithms and that all messages required by a successful execution are delivered without modification. Privacy against corrupted parties, simulation of protocol transcripts, robustness against malformed contributions, and identifiable aborts are addressed separately in the security analysis. We use the following standard assumptions throughout this section. (i) The server identifiers 1, . . . , n are distinct nonzero elements of Zq , and n < q . Hence every denominator in the Lagrange coefficients is invertible in Zq .(ii) The group action satisfies [0] E = E and [a]([ b]E) = [ a + b]E for all a, b ∈ Zq and E ∈ E .(iii) The commitment scheme is correct and additively homomorphic. (iv) The NIZK proof system is complete, and the signature scheme is correct. (v) Every evaluation session is executed using shares and coefficient commitments belonging to one common epoch. The final condition is essential. Shares taken from two different epochs generally lie on two different Shamir polynomials, even though both polynomials have the same constant term. Consequently, Lagrange interpolation over a mixed-epoch 
+
+23 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+quorum need not recover k. The protocol must therefore require every server in an evaluation chain to check the epoch number and the hash of the corresponding epoch certificate before applying its share. The correctness of the complete construction is most naturally expressed through an invariant that is maintained by the DKG, refresh, and resharing procedures. 
+
+Definition 4.1 (Valid epoch state) . An epoch-e state is said to be valid for threshold t and master key k if there exist coefficients a(e)0 , . . . , a (e) 
+
+> t−1
+
+∈ Zq and commitment randomness ρ(e)0 , . . . , ρ (e) 
+
+> t−1
+
+such that, for 
+
+Fe(X) = 
+
+> t−1
+
+X
+
+> ℓ=0
+
+a(e) 
+
+> ℓ
+
+Xℓ,
+
+the following conditions hold, (i) Fe(0) = a(e)0 = k,(ii) Every server Si holds s(e) 
+
+> i
+
+= Fe(i),(iii) The public coefficient commitments satisfy 
+
+A(e) 
+
+> ℓ
+
+= Com (a(e) 
+
+> ℓ
+
+; ρ(e) 
+
+> ℓ
+
+) for 0 ≤ ℓ < t 
+
+(iv) For every server index i,
+
+EvalCom (A(e), i ) = Com (s(e) 
+
+> i
+
+; ω(e) 
+
+> i
+
+), ω(e) 
+
+> i
+
+=
+
+> t−1
+
+X
+
+> ℓ=0
+
+iℓρ(e)
+
+> ℓ
+
+(v) The public key is pk = [ k]E0.
+
+The polynomial Fe may have degree strictly smaller than t − 1 if its highest coefficients cancel. Thus, throughout this section, “degree-(t − 1) Shamir sharing” means a sharing defined by a polynomial of degree at most t − 1.
+
+4.1 Correctness of dealerless distributed key generation 
+
+Protocol 1 must produce an initial valid epoch state without any party explicitly reconstructing the master key. 
+
+Lemma 4.2 (Correctness of the DKG) . Assume that all servers execute Protocol 1 honestly and let Q denote the resulting qualified dealer set. Define 
+
+fj (X) = 
+
+> t−1
+
+X
+
+> ℓ=0
+
+aj,ℓ Xℓ for each j ∈ Q .
+
+Then Protocol 1 produces a valid epoch-0 state with 
+
+F0(X) = X
+
+> j∈Q
+
+fj (X) and k = F0(0) = X
+
+> j∈Q
+
+aj, 0.
+
+Moreover, if Q̸ = ∅, then k is uniformly distributed in Zq .Proof. For each qualified dealer Sj , the polynomial fj (X) has degree at most t − 1. Dealer Sj sends 
+
+uj,i = fj (i) and ϱj,i =
+
+> t−1
+
+X
+
+> ℓ=0
+
+iℓρj,ℓ 
+
+24 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+to server Si. Because all parties are honest, the share-verification equation holds, 
+
+Com (uj,i ; ϱj,i ) = 
+
+> t−1
+
+M
+
+> ℓ=0
+
+iℓ ⊙ Aj,ℓ 
+
+=
+
+> t−1
+
+M
+
+> ℓ=0
+
+iℓ ⊙ Com (aj,ℓ ; ρj,ℓ )= Com 
+
+> t−1
+
+X
+
+> ℓ=0
+
+aj,ℓ iℓ;
+
+> t−1
+
+X
+
+> ℓ=0
+
+ρj,ℓ iℓ
+
+!
+
+= Com (fj (i); ϱj,i ).
+
+Thus every accepted contribution is the evaluation of the polynomial committed to by the dealer. Each server aggregates its received values as 
+
+s(0)  
+
+> i
+
+= X
+
+> j∈Q
+
+uj,i = X
+
+> j∈Q
+
+fj (i) = F0(i).
+
+Since a sum of polynomials of degree at most t − 1 again has degree at most t − 1, the values {s(0)  
+
+> i
+
+}ni=1 form a valid threshold-t Shamir sharing of 
+
+F0(0) = X
+
+> j∈Q
+
+fj (0) = X
+
+> j∈Q
+
+aj, 0 = k. 
+
+We next verify consistency of the aggregate coefficient commitments. For every ℓ,
+
+A(0)  
+
+> ℓ
+
+= M
+
+> j∈Q
+
+Aj,ℓ = Com 
+
+X
+
+> j∈Q
+
+aj,ℓ ; X
+
+> j∈Q
+
+ρj,ℓ 
+
+ .
+
+Let 
+
+a(0)  
+
+> ℓ
+
+= X
+
+> j∈Q
+
+aj,ℓ , ρ(0)  
+
+> ℓ
+
+= X
+
+> j∈Q
+
+ρj,ℓ .
+
+Then A(0)  
+
+> ℓ
+
+= Com (a(0)  
+
+> ℓ
+
+; ρ(0)  
+
+> ℓ
+
+), and 
+
+EvalCom (A(0) , i ) = 
+
+> t−1
+
+M
+
+> ℓ=0
+
+iℓ ⊙ A(0) 
+
+> ℓ
+
+= Com 
+
+> t−1
+
+X
+
+> ℓ=0
+
+a(0)  
+
+> ℓ
+
+iℓ;
+
+> t−1
+
+X
+
+> ℓ=0
+
+ρ(0)  
+
+> ℓ
+
+iℓ
+
+!
+
+= Com (s(0)  
+
+> i
+
+; ω(0)  
+
+> i
+
+).
+
+This establishes the commitment component of the epoch invariant. It remains to verify the public key. Let Q = ( j1, . . . , j m) be the ordering used in the link-proof chain. Protocol 1 sets 
+
+P0 = E0 and 
+
+Ph = [ ajh,0]Ph−1 for 1 ≤ h ≤ m. 
+
+Repeated application of the group-action law gives 
+
+Ph =
+
+" hX
+
+> u=1
+
+aju,0
+
+#
+
+E0.
+
+Consequently, 
+
+pk = Pm =
+
+X
+
+> j∈Q
+
+aj, 0
+
+ E0 = [ k]E0.
+
+Every link proof verifies by completeness of the NIZK system. 
+
+25 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+Finally, each constant term aj, 0 is sampled independently and uniformly from Zq . The sum of one or more independent uniform elements of Zq is itself uniform. Hence, when Q̸ = ∅, the resulting master key k is uniformly distributed in 
+
+Zq .
+
+4.2 Correctness of threshold evaluation 
+
+The evaluation protocol must reproduce the action of the master key even though no server individually holds k.
+
+Lemma 4.3 (Correctness of threshold evaluation) . Let epoch e satisfy Definition 4.1, and let I = {i1, . . . , i t} be a quorum of t distinct servers. Assume that every server in I uses its certified epoch-e share and that the client follows Protocol 2 honestly. Then the client obtains 
+
+Y = [ k]H1(ctx ∥x)
+
+and outputs Fk(x) as defined in Equation 1. Proof. Let 
+
+X = H1(ctx ∥x) and B = [ r]X, 
+
+where r ← Zq is the client’s blinding value. The servers construct the evaluation chain 
+
+Q0 = B, Qh = [ λIih s(e) 
+
+> ih
+
+]Qh−1 for 1 ≤ h ≤ t. 
+
+We first prove by induction on h that 
+
+Qh =
+
+" hX
+
+> u=1
+
+λIiu s(e)
+
+> iu
+
+#
+
+B. 
+
+The claim is immediate for h = 0 , since the empty sum is 0 and [0] B = B. Suppose that it holds for h − 1. Then 
+
+Qh = [ λIih s(e) 
+
+> ih
+
+]Qh−1
+
+= [ λIih s(e) 
+
+> ih
+
+]
+
+"h−1X
+
+> u=1
+
+λIiu s(e)
+
+> iu
+
+#
+
+B
+
+=
+
+" hX
+
+> u=1
+
+λIiu s(e)
+
+> iu
+
+#
+
+B, 
+
+where the last equality follows from [a]([ b]E) = [ a + b]E.For h = t, Lagrange interpolation of the sharing polynomial Fe at zero gives 
+
+X
+
+> i∈I
+
+λIi s(e) 
+
+> i
+
+= X
+
+> i∈I
+
+λIi Fe(i) = Fe(0) = k. 
+
+Therefore, 
+
+Qt = [ k]B. 
+
+Since B = [ r]X, another application of the group-action law yields 
+
+Qt = [ k]([ r]X) = [ k + r]X. 
+
+The client removes the blinding action, 
+
+Y = [ −r]Qt = [ −r]([ k + r]X) = [ k]X. 
+
+It consequently computes 
+
+y = H2(PIVOT − out ∥ctx ∥pk ∥x∥enc ([ k]H1(ctx ∥x))) = Fk(x).
+
+Because all statements and witnesses used by honest parties satisfy the corresponding proof relations, every blinding proof and evaluation proof is accepted by NIZK completeness. Similarly, all signatures verify by correctness of the signature scheme. Hence an honest client accepts the transcript and obtains the claimed output. 
+
+26 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+4.3 Correctness of proactive share refresh 
+
+A proactive refresh must change the sharing polynomial while preserving its constant term. Therefore, the individual shares and their public commitments may change, but the master key and public key must remain unchanged. 
+
+Lemma 4.4 (Correctness of proactive refresh) . Suppose that the epoch-e state is valid for threshold t and master key k.Assume that all parties execute Protocol 3 honestly. Then the resulting epoch-(e + 1) state is also valid for threshold t
+
+and the same master key k. In particular, 
+
+Fe+1 (0) = k, A(e+1) 0 = A(e)0 , pk = [ k]E0.
+
+Proof. For each qualified refresh dealer Sj , let 
+
+zj (X) = 
+
+> t−1
+
+X
+
+> ℓ=1
+
+bj,ℓ Xℓ.
+
+By construction, zj has degree at most t − 1 and satisfies zj (0) = 0 . Define the aggregate refresh polynomial 
+
+Ze(X) = X
+
+> j∈R e
+
+zj (X)
+
+and the next sharing polynomial 
+
+Fe+1 (X) = Fe(X) + Ze(X).
+
+Both Fe and Ze have degree at most t − 1, so Fe+1 also has degree at most t − 1. Its constant term is 
+
+Fe+1 (0) = Fe(0) + Ze(0) = k + X
+
+> j∈R e
+
+zj (0) = k. 
+
+For every server Si, Protocol 3 computes 
+
+s(e+1)  
+
+> i
+
+= s(e) 
+
+> i
+
++ X
+
+> j∈R e
+
+δj,i 
+
+= Fe(i) + X
+
+> j∈R e
+
+zj (i)= Fe+1 (i).
+
+Thus the refreshed values form a valid sharing of the same secret. We next verify the public commitments. Write 
+
+Fe(X) = 
+
+> t−1
+
+X
+
+> ℓ=0
+
+a(e) 
+
+> ℓ
+
+Xℓ.
+
+Then 
+
+Fe+1 (X) = a(e)0 +
+
+> t−1
+
+X
+
+> ℓ=1
+
+a(e) 
+
+> ℓ
+
++ X
+
+> j∈R e
+
+bj,ℓ 
+
+ Xℓ.
+
+Hence 
+
+a(e+1) 0 = a(e)0 = k
+
+and, for 1 ≤ ℓ < t ,
+
+a(e+1)  
+
+> ℓ
+
+= a(e) 
+
+> ℓ
+
++ X
+
+> j∈R e
+
+bj,ℓ .
+
+27 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+By the additive homomorphism of the commitment scheme, 
+
+A(e+1)  
+
+> ℓ
+
+= A(e) 
+
+> ℓ
+
+⊕ M
+
+> j∈R e
+
+Dj,ℓ 
+
+= Com 
+
+a(e) 
+
+> ℓ
+
++ X
+
+> j∈R e
+
+bj,ℓ 
+
+ ;
+
+ρ(e) 
+
+> ℓ
+
++ X
+
+> j∈R e
+
+ηj,ℓ 
+
+
+
+for 1 ≤ ℓ < t , while 
+
+A(e+1) 0 = A(e)0
+
+because no refresh dealer contributes a constant coefficient. Let 
+
+ρ(e+1) 0 = ρ(e)0
+
+and, for 1 ≤ ℓ < t ,
+
+ρ(e+1)  
+
+> ℓ
+
+= ρ(e) 
+
+> ℓ
+
++ X
+
+> j∈R e
+
+ηj,ℓ .
+
+Then A(e+1)  
+
+> ℓ
+
+= Com (a(e+1)  
+
+> ℓ
+
+; ρ(e+1)  
+
+> ℓ
+
+), and therefore 
+
+EvalCom (A(e+1) , i ) = Com (s(e+1)  
+
+> i
+
+; ω(e+1)  
+
+> i
+
+)
+
+for every server Si.Finally, the public key depends only on the constant term, 
+
+pk = [ Fe+1 (0)] E0 = [ k]E0.
+
+Thus all components of the epoch invariant are preserved. 
+
+4.4 Correctness of the epoch transition 
+
+The algebraic refresh procedure and the activation procedure serve different purposes. The refresh procedure constructs a correct next sharing, whereas the transition procedure determines when that sharing may be used. 
+
+Lemma 4.5 (Epoch-consistent activation) . Assume an honest execution of the PROPOSE, PREPARE, COMMIT, and ACTIVATE phases. Suppose additionally that every evaluation request is bound to an epoch certificate and that each server applies a share only when the request epoch and certificate hash match its active local state. Then every successful evaluation chain uses shares from one common epoch. Proof. An evaluation request contains an epoch number e and is bound to the corresponding certificate cert e. Before acting, each server checks that e equals its active epoch and that the certificate hash equals the hash stored in its local active state. Therefore, a server that has already activated epoch e + 1 will not apply an epoch-e share, and a server that remains in epoch e will not apply an epoch-(e + 1) share. Consequently, a chain can complete only if every participating server accepts the same epoch identifier and certificate. Otherwise the evaluation aborts or is retried after the transition. Hence every successful chain is epoch-consistent. 
+
+Remark 4.6 (Asynchronous activation) . Receiving t COMMIT messages does not, by itself, imply that all honest servers activate the next epoch simultaneously in an asynchronous network. The correctness claim needed here is therefore not simultaneous activation, but epoch-consistent evaluation, a successful evaluation must use one certificate and one sharing polynomial throughout the chain. If the intended model requires uninterrupted availability during asynchronous transitions, the protocol should additionally specify a grace-period, final-certificate, or synchronized-activation mechanism. 
+
+4.5 Correctness of committee resharing 
+
+Committee resharing transfers the sharing of k from an old committee with threshold t to a new committee with threshold t′.
+
+Lemma 4.7 (Correctness of committee resharing) . Let I be an old-committee quorum of size at least t, and suppose that the old epoch state is valid with sharing polynomial Fe and master key k. Assume that all old and new committee 
+
+28 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+members execute Protocol 5 honestly. Then the new committee obtains evaluations of a polynomial G(X) of degree at most t′ − 1 satisfying 
+
+G(0) = k. 
+
+The new shares and the aggregate resharing commitments are mutually consistent. Proof. Each old server Si, for i ∈ I, samples a polynomial 
+
+gi(X) = λIi s(e) 
+
+> i
+
++
+
+> t′−1
+
+X
+
+> ℓ=1
+
+ci,ℓ Xℓ.
+
+This polynomial has degree at most t′ − 1 and constant term 
+
+gi(0) = λIi s(e) 
+
+> i
+
+.
+
+Define 
+
+G(X) = X
+
+> i∈I
+
+gi(X).
+
+Since each summand has degree at most t′ − 1, so does G. Its constant term is 
+
+G(0) = X
+
+> i∈I
+
+gi(0) = X
+
+> i∈I
+
+λIi s(e)
+
+> i
+
+= X
+
+> i∈I
+
+λIi Fe(i)= Fe(0) = k. 
+
+The fourth equality is the Lagrange interpolation formula evaluated at zero. Each new server S′ 
+
+> j
+
+receives gi(j) from every old server Si ∈ I and computes 
+
+s′ 
+
+> j
+
+= X
+
+> i∈I
+
+gi(j) = G(j).
+
+Therefore, the values {s′ 
+
+> j
+
+}n′ 
+
+> j=1
+
+form a threshold-t′ Shamir sharing of the same master key k.For commitment consistency, let 
+
+Bi,ℓ = Com (ci,ℓ ; ρi,ℓ )
+
+for ℓ ≥ 1, and let Bi, 0 commit to λIi s(e) 
+
+> i
+
+. The reshare proof establishes that this constant-term commitment is linked to the certified old share. By homomorphic evaluation of the coefficient commitments, 
+
+EvalCom (( Bi, 0, . . . , B i,t ′−1), j ) = Com (gi(j); ωi,j )
+
+for the corresponding opening randomness ωi,j . Summing over all i ∈ I gives 
+
+M
+
+> i∈I
+
+EvalCom (( Bi, 0, . . . , B i,t ′−1), j ) = Com X
+
+> i∈I
+
+gi(j); X
+
+> i∈I
+
+ωi,j 
+
+!
+
+= Com (s′ 
+
+> j
+
+; ω′ 
+
+> j
+
+).
+
+Hence the new shares are consistent with the aggregate resharing commitments. 
+
+Remark 4.8. The statement that no party learns k during resharing is a privacy claim rather than a correctness claim. It should therefore be proved in the security section under the relevant corruption threshold and erasure assumptions. Correctness establishes only that the protocol computes a new sharing whose constant term is k.
+
+4.6 Overall correctness 
+
+We can now combine the preceding lemmas into a global correctness theorem. 
+
+29 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+Theorem 4.9 (Overall correctness of PIVOT ). Assume that all parties execute the protocol honestly, that every successful evaluation is epoch-consistent, and that the primitive correctness assumptions stated at the beginning of this section hold. Let Protocol 1 generate the initial master key k, public key pk , and server shares. Then the following statements hold, (i) For every valid epoch e, every input x ∈ { 0, 1}∗, and every epoch-e quorum I of size t, Protocol 2 outputs 
+
+y = Fk(x).
+
+(ii) After any finite sequence of proactive refresh operations, the active shares form a valid threshold sharing of the same master key k, and the public key remains 
+
+pk = [ k]E0.
+
+(iii) After any valid committee resharing from threshold t to threshold t′, the new committee holds a valid threshold-
+
+t′ sharing of the same master key k.(iv) For every fixed input x, the value Fk(x) is invariant across all refreshes and resharings. Proof. The proof proceeds by induction over the sequence of state-changing protocol executions. 
+
+Initial state. By Lemma 4.2, Protocol 1 establishes a valid epoch-0 state for a uniformly distributed master key k,with public key pk = [ k]E0.
+
+Evaluation. Assume the currently active state is valid. By Lemma 4.5, every successful evaluation uses a single epoch certificate and shares from one common sharing polynomial. Lemma 4.3 then implies that the client recovers 
+
+[k]H1(ctx ∥x)
+
+and outputs Fk(x).
+
+Refresh step. Assume epoch e is valid. Lemma 4.4 shows that Protocol 3 produces a valid epoch-(e + 1) state whose sharing polynomial has the same constant term k. The public key therefore remains [k]E0. This proves preservation of the invariant across every proactive refresh. 
+
+Resharing step. Assume the old committee holds a valid sharing of k. By Lemma 4.7, Protocol 5 constructs a new sharing polynomial G with G(0) = k. Thus the new committee satisfies the same invariant, with threshold t′ and its corresponding commitment vector. 
+
+Output invariance. The OPRF value is 
+
+Fk(x) = H2(PIVOT − out ∥ctx ∥pk ∥x∥enc ([ k]H1(ctx ∥x))) .
+
+Neither proactive refresh nor committee resharing changes k, pk = [ k]E0, ctx , or x. Therefore the input to H2 is unchanged, and so the resulting OPRF output is identical throughout the lifetime of the protocol. 
+
+Corollary 4.10 (Correctness after arbitrary maintenance operations) . Let the system undergo any finite sequence consisting of proactive refreshes and valid committee resharings. If the resulting active committee completes an epoch-consistent evaluation on input x, then the client obtains the same value Fk(x) that it would have obtained immediately after the original DKG. Proof. Each refresh and resharing operation preserves the master key k by Theorem 4.9. The conclusion therefore follows from the correctness of threshold evaluation. 
+
+# 5 Security Analysis 
+
+This section proves the security of PIVOT against a mobile semi-honest (honest-but-curious) adversary. A corrupted party executes the prescribed algorithms faithfully, uses correctly distributed randomness, sends all required messages, and does not abort or modify a message. The adversary may nevertheless retain and jointly analyse the complete internal states and transcripts of the parties that it corrupts. Consequently, the proof in this section addresses confidentiality and privacy. Robustness, blame, and resistance to malformed proofs belong to the malicious-security analysis. 
+
+30 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+5.1 Adversarial model and ideal functionality 
+
+Time is divided into epochs. In epoch e, the adversary corrupts a set Ce ⊆ [n] satisfying |C e| < t . The set may change between epochs. Corruptions are epoch respecting and after an epoch transition, an honest server erases its epoch-e
+
+share and refresh randomness before a corruption in epoch e + 1 reveals its state. Thus, a mobile adversary never obtains both the erased and current states of an honest server. This condition is necessary for every proactive secret sharing protocol, without it, an adversary could sequentially collect t shares from one epoch and reconstruct the key. Clients may also be corrupted. The corruption status of a client is fixed before the beginning of each evaluation session and an honest client remains uncorrupted for that session, whereas a corrupted client is passive from the start. This standard static-per-session restriction avoids the stronger problem of explaining an already transmitted blinded curve after a later client corruption. Supporting such post-session adaptive client corruption would require a non-committing simulation mechanism or an explicit simulator-only input interface. A corrupted client forms B = [ r]H1(ctx ∥x) with a fresh uniform r, submits a valid blinding proof, verifies the server proofs, and computes the specified output. Network metadata including sid , epoch number, quorum identity, message lengths, and success of a session is treated as public leakage. We compare the real execution with an ideal functionality Fsh pTVOPRF having the following external behaviour. • On Setup (n, t ), it samples k ← Zq , forms a uniformly random degree-(t − 1) Shamir sharing of k, and publishes pk = [ k]E0.• On Eval (x), it returns Fk(x) to the requesting client and leaks only the public session metadata to the adversary. • On Refresh , it replaces the current sharing by an independently random degree-(t − 1) sharing of the same k
+
+and erases the old sharing. • On Reshare (n′, t ′), it replaces the old sharing by an independently random degree-(t′ − 1) sharing of the same 
+
+k among the new committee and erases the old-committee state. • On corruption of server Si in epoch e, it reveals only the current share s(e) 
+
+> i
+
+and the current local state. On corruption of a client, it reveals that client’s input, randomness, intermediate value Y = [ k]H1(ctx ∥x), and output, exactly as a real passive corruption would. For proof convenience, the simulator and the ideal functionality jointly sample the same uniform key and Shamir shares, the simulator never releases the key to the adversary. Equivalently, one may regard this as a private simulation interface that does not change the external input/output behaviour of the functionality. 
+
+Definition 5.1 (Semi-honest realization) . Protocol PIVOT securely realizes Fsh pTVOPRF if, for every PPT semi-honest adversary A corrupting fewer than t servers in each epoch, there exists a PPT simulator S such that the joint distribution of the environment’s output and the adversary’s view in the real execution is computationally indistinguishable from the corresponding distribution in the ideal execution with S.
+
+5.2 Elementary privacy lemmas Lemma 5.2 (Privacy of fewer than t Shamir shares) . Let f (X) = k + Pt−1 
+
+> j=1
+
+aj Xj , where a1, . . . , a t−1 ← Zq
+
+independently. For every set C = {i1, . . . , i c} with c < t , the vector (f (i1), . . . , f (ic)) is uniformly distributed over 
+
+Zcq and is independent of k.Proof. Write 
+
+f (i1)
+
+...
+
+f (ic)
+
+ = k1 +
+
+
+
+i1 i21 · · · it−11
+
+... ... ...
+
+ic i2 
+
+> c
+
+· · · it−1
+
+> c
+
+
+
+a1
+
+...
+
+at−1
+
+ .
+
+The displayed Vandermonde submatrix has row rank c because the indices are distinct and non-zero in Zq . Hence the associated linear map from Zt−1 
+
+> q
+
+to Zcq is surjective. A uniform coefficient vector is therefore mapped to a uniform vector in Zcq . Adding the fixed vector k1 only translates the uniform distribution and does not change it. Thus fewer than t shares contain no information about k.
+
+Lemma 5.3 (Perfect privacy of the blinded input) . For every two inputs x0, x 1, the curve-valued portions of an honest client’s evaluation transcript have identical distributions. After including πblind , the complete request transcripts are computationally indistinguishable under the zero-knowledge property of the blinding NIZK. 
+
+31 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+Proof. Fix x and write X = H1(ctx ∥x). Since the action is free and transitive and |G| = |E| = q, the map 
+
+ϕX : Zq −→ E , r 7 −→ [r]X
+
+is a bijection. Therefore, for uniform r ← Zq , the blinded curve B = [ r]X is uniform over E, independently of X and hence independently of x.For a fixed quorum I = ( i1, . . . , i t), define αh = Phj=1 λIij s(e) 
+
+> ij
+
+. The curve chain is 
+
+(Q0, Q 1, . . . , Q t) = ( B, [α1]B, . . . , [αt]B).
+
+It is a deterministic function of the uniform curve B and values that do not depend on x. Consequently, its joint distribution is identical for x0 and x1, this is stronger than equality of the individual marginal distributions. The evaluation proofs and signatures are generated from the curve statements and the servers’ shares, all of which are independent of x once B is fixed. Finally, zero knowledge permits replacement of the honest client’s blinding proof by a simulated proof without revealing the witness (x, r ). Thus the complete server-side view is computationally independent of the client input. 
+
+Lemma 5.4 (Refresh re-randomizes the sharing) . Assume that at least one refresh dealer is honest. Conditioned on the fixed master key k, the refreshed polynomial Fe+1 is uniformly distributed over 
+
+Pk = {f ∈ Zq [X] : deg( f ) < t and f (0) = k},
+
+and is independent of Fe from the adversary’s perspective. Proof. Let 
+
+Z0 = {z ∈ Zq [X] : deg( z) < t and z(0) = 0 }.
+
+An honest refresh dealer samples its non-constant coefficients uniformly, so its polynomial is uniform in the additive group Z0. The sum of this uniform polynomial and any fixed or adversarially known collection of other zero-polynomials is still uniform in Z0. Therefore the aggregate refresh polynomial Ze = P 
+
+> j
+
+zj is uniform in Z0 and independent of Fe.Since translation by Fe is a bijection from Z0 to Pk, the polynomial Fe+1 = Fe + Ze is uniform in Pk.A corrupted set of size c < t receives only c evaluations of each honest zero-polynomial. The same rank argument as in Lemma 5.2, now with the constant term fixed to zero, shows that these evaluations are uniform over Zcq . The broadcast coefficient commitments reveal no additional information by statistical hiding. After activation, secure erasure removes 
+
+Fe-shares and refresh randomness, hence a later corruption cannot link the two independently random sharings through erased state. 
+
+Lemma 5.5 (Privacy of committee resharing) . Suppose fewer than t old servers and fewer than t′ new servers are corrupted. Protocol 5 gives the new committee a uniformly random degree-(t′ − 1) Shamir sharing of the same key k
+
+and reveals no additional information about the honest old shares. Proof. For each old server Si ∈ I, the resharing polynomial is 
+
+gi(X) = λIi s(e) 
+
+> i
+
++
+
+> t′−1
+
+X
+
+> ℓ=1
+
+ci,ℓ Xℓ.
+
+Consider an honest old server Si and a corrupted new-server set C′ of size c′ < t ′. By the Vandermonde-rank argument, the vector (gi(j)) j∈C′ is uniform over Zc′ 
+
+> q
+
+independently of the constant term λIi s(e) 
+
+> i
+
+. Thus the individual messages sent by an honest old dealer to corrupted new servers hide that dealer’s old share. The coefficient commitments are statistically hiding, and the reshare NIZK is zero knowledge. The aggregate polynomial G(X) = P 
+
+> i∈I
+
+gi(X) has 
+
+G(0) = X
+
+> i∈I
+
+λIi s(e) 
+
+> i
+
+= k. 
+
+At least one old server in I is honest because |I| ≥ t and fewer than t old servers are corrupted. The higher coefficients contributed by that honest dealer are uniform and adding the remaining dealers’ coefficients leaves the aggregate higher-coefficient vector uniform in Zt′−1 
+
+> q
+
+. Hence G is a uniformly random element of the set of degree-(t′ − 1) 
+
+32 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+polynomials with constant term k. Erasure of the old committee’s state prevents later combination of obsolete and current local states. 
+
+Theorem 5.6 (Semi-honest security of PIVOT ). Assume that the commitment scheme is statistically hiding, the four NIZKs are computationally zero knowledge, the isogeny action is free and transitive, and honest servers securely erase obsolete state. Then PIVOT securely realizes Fsh pTVOPRF against every PPT mobile semi-honest adversary corrupting fewer than t servers in each epoch and, during committee migration, fewer than t′ new servers, with client corruption fixed at the start of each evaluation session. The simulation error is bounded by the sum of the zero-knowledge advantages of the simulated NIZK proofs, the hiding advantages of any commitments that are replaced in the simulation, and a negligible secure-erasure failure probability. In particular, simulation-extractability, signature unforgeability, and complaint soundness are not needed for this passive result. Proof. We construct a simulator S that runs an internal copy of A and simulates all messages sent by honest parties. The simulator maintains a uniform master key k, the current Shamir polynomial Fe, all current shares and commitment openings, and the random-oracle tables. This state is private to S and is never released except to the extent prescribed by a passive corruption. 
+
+Simulation of the DKG. For every corrupted dealer, S lets the internal adversary sample the dealer’s coefficients, commitment randomness, and VSS messages exactly as in the real protocol. Let kcor be the sum of the corrupted dealers’ constant terms. For the honest dealers, S samples their polynomials uniformly subject only to 
+
+X
+
+> j∈honest
+
+aj, 0 = k − kcor .
+
+This is exactly the real conditional distribution. Indeed, in a real DKG all dealer constants are independent and uniform, and, conditioned on their total being k and on the corrupted constants, the honest constants are uniform over the displayed affine hyperplane. All non-constant coefficients remain independent and uniform. The simulator computes the honest-to-corrupted VSS shares and openings, publishes honest coefficient commitments, and generates the link proofs and signatures with the genuine witnesses it knows. Since all parties are semi-honest, no complaint occurs. The aggregate polynomial has constant term k, the public key is exactly [k]E0, and every corrupted server’s share, received subshares, openings, random tape, and public transcript have the same distribution as in the real DKG. Honest dealers erase their DKG polynomials and distribution randomness after the epoch-zero certificate is finalized, later corruptions therefore reveal only the retained current share and opening. 
+
+Evaluation with an honest client. The ideal functionality does not reveal the honest input x to S. The simulator samples bB ← E uniformly and produces a simulated proof bπblind for the public statement (ctx , sid , bB). By Lemma 5.3, 
+
+bB has exactly the same distribution as [r]H1(ctx ∥x), and zero knowledge makes the simulated proof indistinguishable from the real one. Starting with bQ0 = bB, the simulator uses the maintained shares to compute 
+
+bQh = [ λIih s(e) 
+
+> ih
+
+] bQh−1
+
+for every honest and corrupted position in the chain. It creates genuine evaluation proofs and signatures because it knows all corresponding shares and openings. The resulting chain is distributed exactly as a real chain conditioned on its first curve. The ideal functionality returns Fk(x) to the honest client. The server adversary learns neither x nor the client’s blinding scalar, its complete view is therefore indistinguishable from real by Lemma 5.3. Notice that no assumption that the simulator learns the honest client’s input is required. For the actual hidden 
+
+X = H1(ctx ∥x), transitivity implies that there exists a unique scalar r satisfying bB = [ r]X. Thus the simulated curve chain is algebraically consistent with some correctly distributed client randomness even though S does not know that scalar. 
+
+Evaluation with a corrupted client. A semi-honest corrupted client exposes its input x and randomness r to the internal adversary and forms the prescribed request. The simulator checks the request only as an honest server would, computes all honest-server partial evaluations from the maintained shares, and produces genuine proofs and signatures. At the end, 
+
+Qt = [ k + r]H1(ctx ∥x), Y = [ −r]Qt = [ k]H1(ctx ∥x),
+
+33 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+so the corrupted client’s complete internal state and output are identical to those in a real execution. This argument also covers sessions in which some servers and the client are corrupted simultaneously. 
+
+Simulation of proactive refresh. For corrupted refresh dealers, S lets A generate the prescribed uniform zero-polynomials. It samples every honest dealer’s zero-polynomial and commitment randomness exactly as in Protocol 3, sends the corresponding zero-shares to corrupted receivers, and simulates the public PREPARE, COMMIT, and ACTIVATE messages. Because the adversary is passive, all checks succeed and every honest party signs the same certificate. The simulator updates Fe+1 = Fe + P 
+
+> j
+
+zj and the associated openings. By Lemma 5.4, the resulting sharing is a fresh uniform sharing of the same key and is independent of the old sharing from the adversary’s perspective. At activation, 
+
+S deletes the old shares, received zero-shares, and refresh randomness. A corruption in epoch e + 1 therefore reveals exactly the state prescribed by the ideal functionality and no erased epoch-e value. 
+
+Simulation of committee resharing. The simulator executes every corrupted old dealer according to its real random tape and samples the honest resharing polynomials exactly as in Protocol 5. It generates all commitments, private evaluations, proofs, and signatures, and computes the aggregate new polynomial G. By Lemma 5.5, G is a fresh, uniformly random threshold-t′ sharing of k, and the messages received by fewer than t′ corrupted new servers hide the constants of the honest old dealers. After the new certificate is accepted, S erases the old committee’s local shares, matching the ideal execution. 
+
+Adaptive passive corruptions. When A corrupts server Si in epoch e, S reveals the already sampled current share 
+
+s(e) 
+
+> i
+
+, its opening, current certificate, and all non-erased local data. These values were generated before the corruption with the correct real distribution, so no equivocation is required. The epoch-respecting corruption rule and secure erasure guarantee that obsolete shares and refresh randomness are absent. Lemma 5.2 and Lemma 5.4 show that the collection of states obtained in different epochs cannot be combined into t points on a single sharing polynomial. All simulated values are therefore identically distributed to real values, except for honest-client blinding proofs (and any optionally simulated proofs or commitments), whose replacement is indistinguishable by NIZK zero knowledge (and commitment hiding). A standard hybrid replacing those objects one at a time gives 
+
+Pr[ REAL A,PIVOT = 1] − Pr[ IDEAL S,Fsh pTVOPRF = 1] ≤ qzk Adv ZK (λ) + qcom Adv hide (λ) + negl (λ),
+
+where qzk and qcom are polynomial bounds on the number of replaced proofs and commitments. This quantity is negligible, which completes the simulation proof. The realization theorem establishes that passive protocol transcripts reveal no more than the ideal leakage. The following corollaries state the main cryptographic consequences explicitly. 
+
+Corollary 5.7 (Client-input privacy) . For any two equal-length inputs x0, x 1, any PPT coalition of fewer than t
+
+semi-honest servers has negligible advantage in distinguishing an evaluation of x0 from an evaluation of x1.Proof. The curve transcript is identically distributed by Lemma 5.3, only the zero-knowledge replacement of the blinding proof contributes a negligible distinguishing term. 
+
+Corollary 5.8 (Master-key privacy) . A coalition of fewer than t semi-honest servers learns no information about k from its shares. Recovering k from the public key or from the public evaluation pairs is no easier than solving vectorization in the underlying group action. Proof. Information-theoretic secrecy of the share vector follows from Lemma 5.2. Statistical hiding protects the committed coefficients, while zero knowledge protects the witnesses in the link, evaluation, and resharing proofs. The public key is the vectorization instance (E0, [k]E0). Moreover, a complete evaluation exposes a pair (B, [k]B).Polynomially many such random-base pairs do not make the problem easier under random self-reducibility, from a challenge (E0, [k]E0), a reduction chooses u ← Zq and forms B = [ u]E0 and [u]([ k]E0) = [ k]B. Therefore an algorithm recovering k from the public transcript yields an algorithm for vectorization. 
+
+Required one-more assumption. A corrupted client learns the unblinded group-action value 
+
+Yx = [ k]H1(ctx ∥x)
+
+34 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+before hashing it. Hence a one-more assumption whose oracle returns only Fk(x) does not fully model the real client view. For a fresh-output claim, we use the following stronger and protocol-faithful game. 
+
+Definition 5.9 (One-more hidden-group-action game) . The challenger samples k ← Zq , publishes pk = [ k]E0, and gives the adversary oracle access to 
+
+Oact  
+
+> k
+
+(x) = [ k]H1(ctx ∥x).
+
+After at most q queries, the adversary outputs (x∗, Y ∗) and wins if x∗ was not queried and Y ∗ = [ k]H1(ctx ∥x∗). The 
+
+OM -HGA assumption states that every PPT adversary wins with negligible probability. 
+
+Corollary 5.10 (Fresh-output pseudorandomness) . In the random-oracle model for H2, a semi-honest client making at most q evaluations cannot compute Fk(x∗) for a fresh input x∗ except with probability 
+
+Adv OM -HGA (λ) + qH2
+
+2ℓ ,
+
+where qH2 is the number of its H2 queries. Proof. Suppose an adversary outputs y∗ = Fk(x∗) for a fresh x∗. If it never queries H2 at 
+
+PIVOT-out ∥ctx ∥pk ∥x∗∥enc ([ k]H1(ctx ∥x∗)) ,
+
+then y∗ is an independent ℓ-bit random value and is guessed with probability at most 2−ℓ per relevant attempt. Otherwise, the correct random-oracle query contains Y ∗ = [ k]H1(ctx ∥x∗), extracting that query gives a successful OM -HGA 
+
+adversary. A union bound over the qH2 oracle queries gives the stated bound. 
+
+Remark 5.11 (Assumptions needed only for malicious security) . In the semi-honest model, parties never produce malformed NIZKs, equivocate commitments, forge signatures, submit invalid refresh contributions, or abort strategically. Consequently, simulation-extractability, commitment binding, EUF-CMA unforgeability, blame soundness, and the robust-restart argument are not used in Theorem 5.6. They should be retained for the malicious-security theorem, but invoking them in the passive proof obscures which assumptions protect privacy and which protect active correctness. 
+
+# 6 Efficiency, Applications, and Conclusion 
+
+This section examines the communication and computational costs of PIVOT at the level of its individual sub-protocols. The purpose of the analysis is not to claim that the construction is as lightweight as a conventional single-server OPRF. Such a comparison would overlook the additional functionality provided by the protocol. In addition to oblivious evaluation, PIVOT provides dealerless threshold key generation, public certification of epoch shares, proactive protection against a mobile adversary, identifiable failures, secure epoch transitions, and migration to a new committee without changing the master key. These properties necessarily introduce communication and computation that are absent from protocols designed for a shorter-lived or less demanding security model. We separate one-time setup costs, per-evaluation online costs, periodic maintenance costs, and occasional committee-migration costs. This distinction is important in practice. Distributed key generation is normally executed only once, proactive refresh is performed once per epoch, and committee resharing is expected to be comparatively rare. Only threshold evaluation lies on the critical path of every client request. Consequently, a high setup or refresh cost may be acceptable when it is amortized over a large number of evaluations, whereas the sequential cost of evaluation directly affects client-visible latency. 
+
+Cost notation. Let n denote the size of the current committee, t its threshold, qDKG = |Q| the number of qualified DKG dealers, and re = |R e| the number of qualified refresh dealers in epoch e. For committee resharing, let m = |I|
+
+be the size of the old reconstruction quorum, n′ the number of new servers, and t′ the new threshold. In a normal all-honest execution, qDKG ≈ n, re ≈ n, and the old resharing quorum is usually chosen with m = t.We denote the encoded sizes of a scalar, commitment opening randomness, commitment, curve, signature, certificate, and relation-specific NIZK proof by 
+
+ℓZ, ℓR, ℓC, ℓE, ℓsig , ℓcert , ℓlink  
+
+> π
+
+, ℓ eval  
+
+> π
+
+, ℓ blind  
+
+> π
+
+, ℓ reshare  
+
+> π
+
+,
+
+respectively. A privately delivered VSS value and its opening randomness have size 
+
+ℓsh = ℓZ + ℓR.
+
+Small metadata fields, such as protocol tags, indices, counters, quorum descriptions, and fixed-length hashes, are suppressed in the asymptotic expressions but must be included in a concrete implementation. 
+
+35 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+For computation, let Tact be the cost of one isogeny group action, Tcom the cost of generating one commitment, and 
+
+Tec (d) the cost of evaluating a coefficient-commitment vector of length d. We write T R 
+
+> P
+
+and T R 
+
+> V
+
+for proof generation and verification for relation R, and TS and TSV for signature generation and verification. The NIZK costs are left symbolic because they depend strongly on the eventual proof-system instantiation. In particular, it would be misleading to convert every proof directly into a fixed number of group actions before a concrete proof system for the joint commitment–isogeny relations has been specified. 
+
+6.1 Communication cost 
+
+Communication can be measured in two different ways. The logical transcript size counts each broadcast object once and is useful for describing the public protocol transcript. The aggregate network traffic counts the number of point-to-point deliveries required to disseminate those objects. Under an ideal broadcast functionality, these two views are often conflated. In an actual network, however, broadcasting one object to n − 1 recipients may require n − 1
+
+deliveries or an equivalent multicast service. We therefore discuss both views in cases where the distinction changes the asymptotic cost. 
+
+Dealerless distributed key generation. During the DKG, each of the n servers publishes t commitments to the coefficients of its polynomial. The public commitment transcript therefore contains 
+
+nt ℓ C
+
+bits. Each dealer also privately sends one polynomial evaluation and the corresponding opening randomness to every other server. Ignoring the dealer’s local self-share, this contributes 
+
+n(n − 1) ℓsh 
+
+bits of point-to-point communication. After the VSS qualification phase, every qualified dealer contributes one curve and one link proof to the public-key chain. This adds 
+
+qDKG 
+
+ ℓE + ℓlink 
+
+> π
+
+
+
+bits to the logical transcript. Finally, the epoch-zero certificate and its server signatures contribute approximately 
+
+ℓcert + nℓ sig .
+
+Thus, in a complaint-free execution, the logical DKG payload is 
+
+Comm DKG = nt ℓ C + n(n − 1) ℓsh + qDKG 
+
+ ℓE + ℓlink 
+
+> π
+
+ + nℓ sig + ℓcert . (10) The private-share term is quadratic in n, as is usual for dealerless VSS in which every server acts as a dealer. If broadcast is implemented by independent delivery to all recipients, the coefficient-commitment and link-proof terms also acquire an additional factor of approximately n in aggregate network traffic. The DKG is not constant-round in the current specification. Polynomial commitment, share delivery, and complaint resolution require a small number of VSS phases, but the public-key link chain contains qDKG sequential actions because the next curve depends on the preceding curve. Consequently, the latency of the DKG contains an O(qDKG ) sequential component even though most VSS messages can be sent in parallel. This is acceptable for a one-time initialization procedure, but it should be stated explicitly. 
+
+Threshold evaluation. A client request contains the blinded curve, the blinding proof, and session metadata. Its principal payload is 
+
+ℓE + ℓblind  
+
+> π
+
+.
+
+The final verifiable response contains one record for every server in the quorum. A record consists, up to fixed metadata, of the output curve of the partial action, one evaluation proof, and one signature. Define 
+
+ℓrec = ℓE + ℓeval  
+
+> π
+
++ ℓsig .
+
+If the client already stores the active epoch certificate, the client-visible communication for one evaluation is approxi-mately 
+
+Comm client = ℓE + ℓblind  
+
+> π
+
++ t ℓ rec . (11) 
+
+36 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+If the certificate is transmitted with every response, an additional ℓcert bits are required. The client transcript is therefore linear in the threshold: 
+
+Comm client = O(t).
+
+There is an important distinction between this client transcript and the aggregate traffic generated by the literal forwarding rule in Protocol 2. At position h, the server forwards the complete prefix of h evaluation records so that the next server can verify all preceding contributions. The number of transmitted records is then 
+
+1 + 2 + · · · + t = t(t + 1) 2 .
+
+Accordingly, the aggregate evaluation traffic is approximately 
+
+Comm network eval = ℓE + ℓblind  
+
+> π
+
++ t(t + 1) 2 ℓrec + ℓcert , (12) which is O(t2) under the protocol as presently written. This does not contradict the O(t) client-transcript claim: the quadratic term arises because earlier records are retransmitted across multiple server-to-server hops. An implementation may reduce this aggregate traffic by storing the append-only transcript on an authenticated bulletin board, by forwarding only the newly created record together with a transcript hash, or by using a reliable multicast channel. Such an optimization reduces the physical traffic toward O(t), although its effect on the verification and robustness argument must be specified carefully. The evaluation still requires t sequential server actions, because Qh
+
+depends on Qh−1.
+
+Proactive share refresh. During refresh, every qualified refresh dealer publishes t − 1 commitments to its nonconstant zero-polynomial coefficients and sends one zero-share/opening pair to every other server. The complaint-free payload is therefore 
+
+Comm refresh = re(t − 1) ℓC + re(n − 1) ℓsh + ℓcert + O(nℓ sig ). (13) The first line covers polynomial distribution. The second line covers the proposed next-epoch certificate and the signed PREPARE, COMMIT, and activation or certificate messages. With re ≈ n, the point-to-point zero-share distribution is O(n2). If each transition signature is independently broadcast to all servers, the aggregate delivery cost of the transition messages is also quadratic in n, although their logical transcript contains only O(n) signatures. Unlike evaluation, refresh has no inherently sequential chain of n group-action messages. Its main phases, that are, commitment broadcast, private zero-share delivery, verification, certificate proposal, PREPARE, COMMIT, and activation form a constant number of communication phases in a complaint-free synchronous execution. Complaint resolution or leader replacement may add further phases. Refresh can normally be performed outside the critical path of client requests and amortized over all evaluations completed in the epoch. 
+
+Verification, blame, and restart. An evaluation blame certificate contains the adjacent curves involved in the failed transition, the offending evaluation proof, the server signature, and session metadata. Its principal size is 
+
+2ℓE + ℓeval  
+
+> π
+
++ ℓsig .
+
+A refresh complaint is smaller because the coefficient commitments are already public and it principally contains the disputed share-opening pair, the dealer signature, and references to the public commitments. Blame communication is exceptional rather than part of the honest-case cost. A failed evaluation may be restarted with a new quorum. If f
+
+servers are identified and removed before a successful attempt, the communication is approximately (f + 1) times the honest evaluation cost, plus f blame certificates. The robust wrapper permits at most n − t + 1 failed attempts before fewer than t eligible servers remain. This worst-case bound is intentionally conservative and should not be confused with the normal per-evaluation cost. 
+
+Committee resharing. Let I contain m old servers. Every old server publishes t′ commitments to the coefficients of its new sharing polynomial, produces one resharing proof, and sends one share-opening pair to each of the n′ new servers. The resulting payload is 
+
+Comm reshare = mt ′ℓC + mn ′ℓsh + mℓ reshare  
+
+> π
+
++ n′ℓsig + ℓcert . (14) For the common choice m = t, this becomes 
+
+O tt ′ℓC + tn ′ℓsh + tℓ reshare 
+
+> π
+
+.
+
+37 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+Resharing is therefore more expensive than one evaluation but is expected to occur only when the committee or threshold changes. The protocol avoids the considerably larger application-level cost of generating a new OPRF key and recomputing or re-encrypting all data derived from the old key. Table 2: Dominant communication terms in a complaint-free execution. Broadcast objects are counted once in the logical transcript. The literal cumulative forwarding rule of Protocol 2 produces O(t2) aggregate network traffic even though the final client transcript is O(t).                                         
+
+> Sub-protocol Dominant payload Main scaling term DKG nt commitments, n(n−1) private shares, qDKG link records O(n2+nt )
+> Evaluation: client view one blinded request and tevaluation records O(t)
+> Evaluation: literal network cumulative prefixes of trecords O(t2)
+> Refresh re(t−1) commitments and re(n−1) zero-shares O(n2)when re≈n
+> Resharing mt ′commitments and mn ′private shares O(m(t′+n′))
+
+6.2 Computation cost 
+
+The computational profile of PIVOT is heterogeneous. Polynomial evaluation and commitment processing dominate the distributed maintenance protocols, whereas isogeny actions and joint NIZK proofs dominate online OPRF evaluation. Because proof generation for an isogeny-action relation may be substantially more expensive than the underlying action itself, the analysis keeps action and proof costs separate. 
+
+Dealerless distributed key generation. Each server acts simultaneously as one VSS dealer and as a receiver of the contributions of the other dealers. In its dealer role, a server samples t coefficients and commitment randomness values, generates t commitments, and evaluates both its polynomial and its randomness polynomial at n server indices. With straightforward Horner evaluation, this requires O(nt ) field operations per dealer and O(n2t) field operations over the complete committee. In its receiver role, each server verifies one contribution from every dealer. A verification computes EvalCom (Aj , i ),which requires t public scalar multiplications and t−1 additions in the commitment space, followed by one commitment to the received share. Across all dealer–receiver pairs, the system performs O(n2) VSS checks, each involving a length-t
+
+commitment vector. The total commitment-processing cost is therefore O(n2t). Every qualified dealer additionally performs one group action and generates one proof for Rlink . All servers verify the public link chain. Ignoring signatures and inexpensive field operations, the system-wide cryptographic cost can be summarized as 
+
+Comp DKG ≈ nt T com + n2Tec (t) + qDKG 
+
+ Tact + T Rlink 
+
+> P
+
+ + nq DKG T Rlink  
+
+> V
+
+. (15) The qDKG group actions and link-proof generations lie on a sequential chain. Other polynomial and VSS operations can be parallelized across dealers and receivers. Since the DKG is executed once, this relatively high cost is primarily a setup concern. 
+
+Threshold evaluation. The client computes one hash-to-orbit operation, one group action to blind the input, and one proof for Rblind . After receiving the response, it verifies t evaluation proofs and t signatures, performs one inverse group action to remove the blinding, and evaluates the final output hash. Its principal cost is therefore 
+
+Comp client ≈ TH1 + 2 Tact + T Rblind  
+
+> P
+
++ t
+
+
+
+T Reval  
+
+> V
+
++ TSV 
+
+
+
++ TH2 . (16) Each of the t servers in the quorum computes its Lagrange coefficient, performs one partial group action, generates one evaluation proof, and signs the resulting record. The basic server-side generation cost is 
+
+t
+
+
+
+Tact + T Reval  
+
+> P
+
++ TS
+
+
+
+. (17) Computing each Lagrange coefficient independently requires O(t) field operations, giving O(t2) field operations across the quorum. The coefficients may instead be computed together using standard batch techniques or cached when a quorum is reused. The present protocol requires the server at position h to verify all h − 1 earlier proofs and signatures. 
+
+38 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+The total number of intermediate verification operations is therefore 
+
+> t
+
+X
+
+> h=1
+
+(h − 1) = t(t − 1) 2 .
+
+Consequently, the literal server-side cost is 
+
+Comp servers eval ≈ t
+
+
+
+Tact + T Reval  
+
+> P
+
++ TS
+
+
+
++ t(t − 1) 2
+
+
+
+T Reval  
+
+> V
+
++ TSV 
+
+
+
+. (18) The t action-and-proof generation steps are sequential and determine online latency. This is the principal efficiency limitation of the native threshold design. Parallel hardware can accelerate the internal arithmetic of each proof, but it cannot remove the dependency Qh ← Qh−1. The quadratic intermediate-verification term is not intrinsic to the mathematical OPRF computation, it follows from the conservative rule that each server rechecks the complete prefix. A variant in which every server verifies only its immediate predecessor and the client performs the final global verification would reduce intermediate verification to O(t), but the corresponding blame and robustness argument would need to be adjusted. The efficiency claims of the present paper should therefore use Equation (18) unless such a variant is formally adopted. 
+
+Proactive share refresh. Refresh performs no isogeny group action and, in the current protocol, requires no joint NIZK proof. Each qualified refresh dealer generates t − 1 commitments and evaluates a degree-at-most-(t − 1) 
+
+zero-polynomial and its randomness polynomial at n points. This requires 
+
+re(t − 1) Tcom + O(rent )
+
+field operations. Each server verifies one zero-share contribution from every qualified refresh dealer. The verification of one contribution evaluates a length-(t − 1) commitment vector and compares it with a commitment to the received zero-share. Across the complete committee, this gives approximately 
+
+nr eTec (t − 1) 
+
+commitment-evaluation work. Servers then add the accepted zero-shares to their local shares and update the t − 1
+
+nonconstant public commitments. The transition additionally requires signature generation and verification for the certificate, PREPARE, and COMMIT messages. A compact system-wide expression is 
+
+Comp refresh ≈ re(t − 1) Tcom + nr eTec (t − 1) + O(nT S) + O(ntT SV ) + O(rent ) (19) field operations. For re ≈ n, the refresh cost is quadratic in the committee size, but it is composed primarily of parallelizable field and commitment operations. It does not contain the expensive sequential isogeny-proof chain that appears in online evaluation. 
+
+Verification, blame, and restart. A party constructing an evaluation blame certificate has already performed the failed proof or signature verification. Producing the certificate requires only transcript packaging and a signature, while every observer independently repeats the relevant verification. A refresh complaint similarly requires one commitment-consistency check and signature verification. These costs occur only when a deviation or fault is detected. A retry repeats the complete online evaluation cost with a new quorum. If f attempts fail before success, the total computational work is approximately (f + 1) evaluations plus the verification of f blame certificates. This cost is the price of identifiable robustness, the protocol does not silently accept a malformed response, but obtains public evidence and continues with a different server set. 
+
+Committee resharing. Each of the m old servers samples t′ − 1 fresh coefficients, generates t′ commitments, and evaluates its new polynomial at n′ points. The old committee therefore performs mt ′ commitment generations and 
+
+O(mn ′t′) field operations. Every old server also generates one proof for Rreshare .Each new server verifies m VSS contributions and m resharing proofs. The system-wide cost is approximately 
+
+Comp reshare ≈ mt ′Tcom + mn ′Tec (t′) + mT Rreshare  
+
+> P
+
++ mn ′T Rreshare  
+
+> V
+
++ O(mn ′t′). (20) The resharing relation contains commitment consistency but no isogeny-action assertion. It may therefore admit a substantially cheaper proof than Rlink or Reval , depending on the selected NIZK instantiation. Resharing can also be parallelized across the m old dealers and n′ new receivers. 
+
+39 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+Table 3: Dominant computational operations. NIZK generation and verification costs remain symbolic because they depend on the concrete proof-system instantiation. Sub-protocol Group actions Proof generation Other dominant work DKG qDKG qDKG link proofs O(n2t) field/commitment work Evaluation t + 2 one blind proof and t eval proofs O(t2) intermediate verification Refresh 0 0 O(nr et) field/commitment work Resharing 0 m reshare proofs O(mn ′t′) field/commitment work 
+
+Amortized maintenance cost. Suppose epoch e contains Ne successful OPRF evaluations before the next refresh. The refresh overhead amortized over one evaluation is 
+
+Comm refresh 
+
+Ne
+
+and Comp refresh 
+
+Ne
+
+.
+
+For a high-volume service, these quantities can be much smaller than the online cost of one evaluation. The DKG cost is amortized over the full lifetime of the key, while resharing is amortized over the period during which the new committee remains active. The dominant recurring bottleneck is therefore not proactive refresh itself, but the sequential generation and verification of the joint evaluation proofs. 
+
+6.3 Comparative analysis and interpretation 
+
+A direct comparison based only on communication size or round count places PIVOT at a disadvantage. A conventional single-server OPRF can have a constant-size transcript and a constant number of rounds because one server already possesses the complete key. A threshold protocol implemented through an MPC-emulated virtual server may also hide the internal committee structure from the client and produce a constant-size client transcript. In contrast, PIVOT 
+
+exposes every server’s contribution so that the client can verify and attribute the complete evaluation chain. This design results in t sequential partial actions, t evaluation proofs, and t signatures. The additional cost should therefore be interpreted as the price of a different functionality profile. The protocol does not merely divide a static OPRF key. It supports dealerless creation of the key, public certification of the current sharing polynomial, proactive renewal against a mobile adversary, explicit epoch transitions, public blame, and committee migration while preserving the key. Several of these features have no counterpart in a non-threshold or non-proactive OPRF, and their costs cannot be removed by a more favorable accounting convention. Table 4: Qualitative efficiency–functionality comparison. The asymptotic values describe the interfaces considered in this paper and do not normalize the concrete costs of different algebraic assumptions or proof systems.                          
+
+> Protocol Online rounds Client transcript Verifiable Proactive PQ Jarecki–Liu [Jarecki and Liu, 2009] O(1) O(1) No No No Baecker et al. [Baecker et al., 2025] O(1) O(1) No Yes No Pedersen [Pedersen, 2026] O(1) O(1) Yes No Yes
+> PIVOT O(t)O(t)Yes Yes Yes
+
+Relative to the classical OPRF of Jarecki and Liu, PIVOT incurs threshold coordination, post-quantum group-action costs, and proof overhead, but removes the single key-holding server and adds proactive maintenance. Relative to the proactive threshold OPRF of Baecker et al., the present construction additionally targets post-quantum security and verifiable partial evaluation, at the cost of a larger and sequential online transcript. Relative to the isogeny-based threshold VOPRF of Pedersen, PIVOT gives up the constant-size virtual-server interface in order to maintain explicit, independently refreshable Shamir shares and individually attributable server actions. The most significant online disadvantage is the sequential evaluation path. Even if all servers compute quickly, the next action cannot begin until the preceding curve has been received and verified. The NIZK proof for Reval is also likely to dominate computation because it must connect a committed scalar to an isogeny action. The present construction should therefore be viewed as a feature-complete protocol framework rather than as a claim of immediate low-latency deployment. The maintenance costs are more favorable when viewed over the lifetime of a service. DKG is a one-time operation. Refresh is quadratic in the committee size but contains no isogeny action or joint action proof, can be parallelized, and is amortized over an epoch. Resharing is more expensive than refresh but occurs only when committee 
+
+40 PIVOT : Proactive Threshold VOPRF from Isogenies A P REPRINT 
+
+membership or the threshold changes. In return, both operations preserve 
+
+k, pk = [ k]E0, Fk(x).
+
+This preservation has an application-level efficiency benefit that is not visible in the protocol transcript alone, a large encrypted database indexed by OPRF outputs does not need to be recomputed or re-encrypted after a refresh or committee migration. 
+
+# 7 Conclusion 
+
+We have introduced PIVOT , the first threshold VOPRF from isogeny group actions that provides proactive security against a mobile adversary. The protocol periodically refreshes all server shares without changing the master key, public key, or any previously generated OPRF output, and supports committee migration, publicly verifiable blame, and coordinated epoch transitions. The construction makes one architectural choice, it exposes the threshold structure as an explicit sequential chain rather than hiding it behind an MPC-emulated virtual server. This makes the secret-sharing state directly visible and amendable, so proactive refresh reduces to adding verifiable zero-sharing polynomials, no isogeny evaluations, no new proofs. Committee resharing operates on the same explicit sharing polynomial. Correctness is established by an invariant maintained across DKG, evaluation, refresh, and resharing: the master key, public key, and OPRF outputs are preserved throughout the system lifetime. A simulation-based security proof shows that fewer than t shares per epoch reveal nothing about the key, that evaluation transcripts are independent of client inputs, and that cross-epoch share accumulation provides no advantage to the adversary. The cost is an O(t) online transcript where t is the threshold. This is the price of making every server individually accountable and keeping the sharing state amenable to periodic renewal. For long-lived services that must survive gradual compromise over years, the protocol purchases operational longevity that shorter-lived designs cannot offer. 
+
+Acknowledgments 
+
+Vikas Srivastava acknowledges the support received from the ANRF-PMECRG project with Ref. 
+
+ANRF/ECRG/2025/002808/PMS and NIT Warangal Research Seed Grant. 
+
+# References 
+
+Amir Herzberg, Stanisław Jarecki, Hugo Krawczyk, and Moti Yung. Proactive secret sharing or: How to cope with perpetual leakage. In CRYPTO , pages 339–352, 1995. Stanisław Jarecki and Xiaomin Liu. Efficient oblivious pseudorandom function with applications to adaptive OT and secure computation of set intersection. In TCC , pages 133–152, 2009. Stanisław Jarecki, Hugo Krawczyk, and Jiayu Xu. OPAQUE: An asymmetric PAKE protocol secure against pre-computation attacks. In EUROCRYPT , pages 456–486, 2018. Lena Heimberger, Tobias Hennerbichler, Fredrik Meisingseth, Sebastian Ramacher, and Christian Rechberger. OPRFs from isogenies: Designs and analysis. In ACM AsiaCCS , 2024. IACR ePrint 2023/639. Cyprien Delpech de Saint Guilhem and Robi Pedersen. New proof systems and an OPRF from CSIDH. In PKC , 2024. IACR ePrint 2023/1614. Andrea Basso. A post-quantum round-optimal oblivious PRF from isogenies, 2023. IACR ePrint 2023/225. Shai Levin and Robi Pedersen. Faster proofs and VRFs from isogenies, 2025. IACR ePrint 2024/1626. Robi Pedersen. Threshold oblivious pseudorandom functions from isogeny group actions. In PKC , 2026. IACR ePrint 2026/489. Luca De Feo and Michael Meyer. Threshold schemes from isogeny assumptions. In PKC , pages 187–212, 2020. Ward Beullens, Lucas Disson, Robi Pedersen, and Frederik Vercauteren. CSI-RAShi: Distributed key generation for CSIDH. In PQCrypto , pages 257–276, 2021. Ruben Baecker, Paul Gerhart, and Daniel Rausch. A fully-adaptive threshold partially-oblivious PRF, 2025. IACR ePrint 2025/1433. Ran Canetti. Universally composable security: A new paradigm for cryptographic protocols. In FOCS , pages 136–145, 2001. 
+
+41

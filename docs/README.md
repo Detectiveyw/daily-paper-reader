@@ -6,40 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-03
-- 运行时间：2026-08-03 20:23:05 UTC
+- 最新运行日期：2026-08-04
+- 运行时间：2026-08-04 20:51:56 UTC
 - 运行状态：成功
-- 本次总论文数：6
-- 精读区：2
-- 速读区：4
+- 本次总论文数：3
+- 精读区：0
+- 速读区：3
 
 ### 今日简报（AI）
-今日聚焦 AI 安全外包计算与大模型零知识验证漏洞，深度解析 6 篇密码学与安全前沿成果。
-重点关注 MOSAIC 掩码安全计算方案及 Hollow-LLM 攻击研究，揭示了 LLM 推理验证中权重冗余带来的安全隐患。
-建议开发者关注大模型部署中的隐私合规，并警惕针对检索增强生成（RAG）系统的底层数据投毒风险。
-- 详情：[/202608/03/README](/202608/03/README)
+今日深入探讨大模型推理安全，重点解析了 Gecko 隐私推理加速方案及多模态协作推理中的泄露风险。
+核心结论指出，通过安全卸载公共编码器可显著提升私有推理效率，但需警惕隐藏层数据反推带来的隐私威胁。
+建议关注密码学技术与大模型推理的深度融合，以应对日益复杂的多模态数据安全挑战。
+- 详情：[/202608/04/README](/202608/04/README)
 
 ### 精读区论文标签
-1. [MOSAIC: Masked Outsourcing of Secure AI Computations](/202608/03/2607.29221v1-mosaic-masked-outsourcing-of-secure-ai-computations)  
-   标签：评分：9.0/10、query:fss-llm
-   evidence：大型Transformer推理的安全外包
-2. [Hollow-LLM Attack: Computationally Trivial Weights in Zero-Knowledge Verification of LLM Inference](/202608/03/2607.28884v1-hollow-llm-attack-computationally-trivial-weights-in-zero-knowledge-verification-of-llm-inference)  
-   标签：评分：8.0/10、query:fss-llm
-   evidence：大模型推理的零知识验证及其安全漏洞
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [RAGuard: A Layered Defense Framework for Retrieval-Augmented Generation Systems Against Data Poisoning](/202608/03/2607.26339v1-raguard-a-layered-defense-framework-for-retrieval-augmented-generation-systems-against-data-poisoning)  
+1. [Gecko: Fast Private Inference via Secure Public Encoder Offloading](/202608/04/2608.02378v1-gecko-fast-private-inference-via-secure-public-encoder-offloading)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：神经网络的快速隐私推理
+2. [Inverting the Hidden: Unveiling Multimodal Privacy Leakage in Collaborative LVLM Inference](/202608/04/2608.01020v1-inverting-the-hidden-unveiling-multimodal-privacy-leakage-in-collaborative-lvlm-inference)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：用于大语言模型防御的零知识推理补丁
-2. [Flock: Fast Proving for Batch Boolean Computations](/202608/03/2607.27491v1-flock-fast-proving-for-batch-boolean-computations)  
+   evidence：协作式多模态大模型推理中的隐私泄露
+3. [Pivot: Proactive and Verifiable Threshold Oblivious Pseudorandom Functions From Isogeny Group Actions](/202608/04/2608.01390v1-pivot-proactive-and-verifiable-threshold-oblivious-pseudorandom-functions-from-isogeny-group-actions)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：批量布尔计算与 SNARKs 的快速证明
-3. [Partial Derandomization for Leakage-Resilient Shamir's Secret Sharing over Composite Order Fields](/202608/03/2607.28757v1-partial-derandomization-for-leakage-resilient-shamirs-secret-sharing-over-composite-order-fields)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：抗泄露秘密共享理论
-4. [GoldenRetriever: Non-Interactive Homomorphic Encrypted Retrieval for Privacy-Preserving RAG](/202608/03/2607.29019v1-goldenretriever-non-interactive-homomorphic-encrypted-retrieval-for-privacy-preserving-rag)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：使用同态加密的隐私保护RAG
+   evidence：可验证阈值不经意函数
 
 
 <div class="dpr-home-promo-card">

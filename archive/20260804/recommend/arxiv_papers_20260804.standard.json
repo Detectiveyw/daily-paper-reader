@@ -1,0 +1,131 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-04T20:51:25.642818+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2608.02378v1",
+      "title": "Gecko: Fast Private Inference via Secure Public Encoder Offloading",
+      "abstract": "Private inference protects both user inputs and server models during neural network inference, but existing solutions remain too slow for practical deployment. This motivates recent efforts to run a public encoder, such as a pretrained backbone, outside the protection boundary and evaluate only a small private predictor cryptographically. While appealing for efficiency, this design is not inherently secure: naively offloading a public encoder may create a feature-space shortcut: an extraction adversary may learn the remaining private predictor's feature-to-output mapping more easily than the original model's input-to-output behavior.   We present Gecko, designed to limit this additional risk while retaining a compact encrypted predictor. We leverage a frozen backbone that contributes hierarchical features, fixed Fastfood projections that compress them, and private feature gating that prepares them for prediction. We formalize ideal independence and information-preservation conditions as design guidance, then separately evaluate component-reuse extraction attacks. Across image and audio tasks, Gecko achieves 0.4-2.2 second inference with at most 10.8 MB communication and accuracy comparable to transfer-learning baselines. Under the evaluated attacks, reusing the offloaded public encoder provides no significant advantage to model-extraction adversaries. Source code and a demo are available at https://github.com/CassiniHuy/gecko-infer.",
+      "authors": [
+        "Cheng'an Wei",
+        "Kai Chen",
+        "Yue Zhao",
+        "Congyi Li",
+        "Shenchen Zhu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-08-03T15:21:45+00:00",
+      "link": "https://arxiv.org/pdf/2608.02378v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Fast private inference for neural networks",
+      "llm_evidence_cn": "神经网络的快速隐私推理",
+      "llm_evidence": "神经网络的快速隐私推理",
+      "canonical_evidence": "神经网络的快速隐私推理",
+      "llm_tldr_en": "Gecko enables fast private inference by offloading public encoders while maintaining cryptographic security.",
+      "llm_tldr_cn": "Gecko通过卸载公共编码器并保持加密安全性，实现了快速的隐私推理。",
+      "llm_tldr": "Gecko通过卸载公共编码器并保持加密安全性，实现了快速的隐私推理。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.01020v1",
+      "title": "Inverting the Hidden: Unveiling Multimodal Privacy Leakage in Collaborative LVLM Inference",
+      "abstract": "Collaborative inference deploys Large Vision-Language Models (LVLMs) by partitioning computation between edge devices and the cloud. While withholding raw inputs supposedly ensures privacy, transmitting intermediate hidden states exposes a critical attack surface. However, it remains unclear whether deep-layer LVLM hidden states retain recoverable private information, given that visual content has been projected into the language embedding space. To address this concern, we theoretically analyze LVLM hidden-state recoverability and show that, under regularity assumptions and a positive semantic--nuisance margin, privacy-relevant visual semantics remain identifiable and stably recoverable. Motivated by this analysis, we propose RASR, a novel coarse-to-fine multimodal reconstruction attack. RASR obtains initial image and text reconstructions through modality-specific inverse paths that follow their respective forward processing pipelines in reverse, and then uses hidden-state consistency to refine both reconstructions. Evaluations on Qwen3-VL-8B-Instruct and LLaVA-1.5-7B across five datasets demonstrate that RASR reduces image reconstruction MSE by \\(\\sim\\)50\\% compared to the strongest baselines, while achieving up to 99\\% token accuracy for text recovery. These results show that privacy-sensitive visual and textual information can be recovered even from deep-layer LVLM hidden states, exposing the privacy risks of collaborative inference.",
+      "authors": [
+        "Shuaifan Jin",
+        "Zhibo Wang",
+        "Qiyuan Wang",
+        "Yiting Han",
+        "Yajie Zhou",
+        "Yuanfan Zhang",
+        "Jiahui Hu",
+        "Xiaoyi Pang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-08-02T05:56:23+00:00",
+      "link": "https://arxiv.org/pdf/2608.01020v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy leakage in collaborative LVLM inference",
+      "llm_evidence_cn": "协作式多模态大模型推理中的隐私泄露",
+      "llm_evidence": "协作式多模态大模型推理中的隐私泄露",
+      "canonical_evidence": "协作式多模态大模型推理中的隐私泄露",
+      "llm_tldr_en": "Analyzes privacy risks in collaborative inference where hidden states are transmitted to the cloud.",
+      "llm_tldr_cn": "分析了协作推理中传输中间隐藏状态导致的隐私泄露风险。",
+      "llm_tldr": "分析了协作推理中传输中间隐藏状态导致的隐私泄露风险。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.01390v1",
+      "title": "Pivot: Proactive and Verifiable Threshold Oblivious Pseudorandom Functions From Isogeny Group Actions",
+      "abstract": "Oblivious pseudorandom functions (OPRFs) allow a client to evaluate a keyed pseudorandom function on a private input without revealing that input to the server. In a threshold OPRF, the secret key is distributed among (n) servers so that any qualified set of at least (t) servers can complete an evaluation, while fewer than (t) shares reveal no information about the key. Existing isogeny-based threshold OPRFs, however, are primarily designed for static corruption models. If the same shares remain valid throughout the lifetime of the service, a mobile adversary can compromise different servers over time, accumulate (t) shares from the same sharing state, and eventually recover the master key. We introduce PIVOT (Proactive Isogeny-based Verifiable Oblivious Threshold PRF), a dealerless threshold VOPRF framework based on effective isogeny group actions. PIVOT periodically refreshes the server shares without changing the master key, public key, or previously generated OPRF outputs. The construction combines Shamir secret sharing, additively homomorphic coefficient commitments, sequential Lagrange-weighted group actions, and joint zero-knowledge relations that link certified shares to their corresponding isogeny actions. It also supports coordinated epoch transitions, publicly verifiable blame, secure erasure, and committee resharing under a possibly different threshold. We formalize the functionality of a long-lived proactive threshold VOPRF, prove the correctness of distributed key generation, threshold evaluation, proactive refresh, and committee resharing, and provide a simulation-based security analysis under the vectorization and one-more hidden-group- action assumptions. As an application, we describe a distributed private lookup service whose encrypted database remains valid across repeated share renewals and committee migrations.",
+      "authors": [
+        "Abhinav Sharma",
+        "Vikas Srivastava"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-08-02T17:11:35+00:00",
+      "link": "https://arxiv.org/pdf/2608.01390v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "verifiable threshold oblivious functions",
+      "llm_evidence_cn": "可验证阈值不经意函数",
+      "llm_evidence": "可验证阈值不经意函数",
+      "canonical_evidence": "可验证阈值不经意函数",
+      "llm_tldr_en": "Introduces PIVOT, a proactive and verifiable threshold OPRF protocol using isogeny group actions.",
+      "llm_tldr_cn": "引入 PIVOT，一种基于同源群作用的可主动更新且可验证的阈值 OPRF 协议。",
+      "llm_tldr": "引入 PIVOT，一种基于同源群作用的可主动更新且可验证的阈值 OPRF 协议。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
