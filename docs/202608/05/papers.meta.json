@@ -1,0 +1,51 @@
+{
+  "label": "2026-08-05",
+  "date": "2026-08-05",
+  "generated_at": "2026-08-05T20:21:31",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202608/05/2608.01148v1-latency-optimal-adaptive-split-inference-for-privacy-preserving-cloud-edge-end-collaboration",
+      "section": "quick",
+      "title_en": "Latency-Optimal Adaptive Split Inference for Privacy-Preserving Cloud-Edge-End Collaboration",
+      "authors": "Yi Li, Peng Zhang, Man Ho Au",
+      "date": "2026-08-02",
+      "pdf": "https://arxiv.org/pdf/2608.01148v1",
+      "score": "7.0",
+      "evidence": "使用同态加密的隐私保护拆分推理",
+      "tldr": "针对物联网设备计算资源有限且隐私敏感的推理需求，本文提出一种延迟最优的自适应切分推理框架。该框架通过云-边-端协同，在端侧执行明文前缀并利用全同态加密（FHE）保护中间特征，由边缘和云端在密文上完成后续计算。通过联合优化切分点选择，实现了在保证模型精度的同时，显著降低端到端推理延迟。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Internet of Things (IoT) end devices are increasingly expected to support privacy-sensitive batch inference, yet their limited computational resources often make full local execution of convolutional neural networks impractical. This paper presents a latency-optimal adaptive split inference framework for privacy-preserving cloud-edge-end collaboration. The end device acts as the trust anchor, executes the plaintext model prefix, encrypts the split activation using fully homomorphic encryption (FHE), and keeps the secret key locally, while the edge and cloud execute assigned model segments only on FHE ciphertexts. We formulate collaborative encrypted inference as a split-pair selection problem over an end-side split point and an edge-side termination point. The proposed planner jointly models plaintext prefix execution, encryption, communication, edge-side FHE execution, and cloud-side FHE completion, and supports both convolution-level and block-level split granularities. Experiments on CIFAR-10 and PathMNIST show that the proposed convolution-level collaborative scheme achieves amortized end-to-end speedups of approximately 12.9 times over full-cloud FHE and 3.9 times over the block-level alternative, while preserving the corresponding plaintext-model accuracy. Including modeled communication, the amortized latencies are 1033.279 s/sample on CIFAR-10 and 1023.429 s/sample on PathMNIST.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/05/2608.00965v1-an-ai-approach-to-verified-production-cryptographic-libraries",
+      "section": "quick",
+      "title_en": "An AI Approach to Verified Production Cryptographic Libraries",
+      "authors": "Chuyue Sun, Su Fong, Zhiyi Kuang, Yizheng Jiao, Nina Narodytska, Haoze Wu, David L. Dill, Clark Barrett",
+      "date": "2026-08-02",
+      "pdf": "https://arxiv.org/pdf/2608.00965v1",
+      "score": "6.0",
+      "evidence": "加密库的形式化验证",
+      "tldr": "密码学代码的正确性至关重要，但生产级库的形式化验证极具挑战。本文提出 CryptoProver，一个基于 AI 的系统，能从高级 API 合约自动合成内部规范和 Verus 验证证明。该系统在不修改代码的情况下，成功验证了 curve25519-dalek 和 chacha20 等广泛使用的加密库。相比于耗时数月的人工验证，CryptoProver 仅需 11.4 小时和约 467 美元成本，显著提升了生产级加密软件的验证效率与安全性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Cryptographic code is critical infrastructure that must be correct, yet formally verifying production libraries remains difficult. Existing language-model proof systems solve isolated obligations with specifications and premises already given, leaving production-library verification unresolved.   We present CryptoProver, an AI-based system that synthesizes internal specifications and Verus-checked proofs from high-level API contracts. Without changing executable code, CryptoProver constructs a new independent proof of curve25519-dalek and verifies RustCrypto's previously unverified chacha20 implementation against an RFC 8439 specification. These cryptographic lineages underpin deployed systems including Signal and Shadowsocks; Signal has an estimated 218M global downloads. The independent, human-led curve25519-dalek verification was developed publicly over eight months by five main contributors. Given the API contracts and a fixed trusted library of field specifications, arithmetic facts, axioms, and vstd, CryptoProver synthesizes the internal specifications and proofs in 11.4 hours with USD 466.99 in recorded API cost. CryptoProver follows a trust-first design principle: mechanical gates reject specification weakening, invented axioms, and cross-module breakage, while isolation blocks reference proof retrieval, including from git history.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/05/2608.02774v1-privacy-preserving-ai-verification-via-minimal-information-disclosure",
+      "section": "quick",
+      "title_en": "Privacy-Preserving AI Verification via Minimal Information Disclosure",
+      "authors": "Sleem Abdelghafar, Gabriel Kulp",
+      "date": "2026-08-03",
+      "pdf": "https://arxiv.org/pdf/2608.02774v1",
+      "score": "6.0",
+      "evidence": "隐私保护AI验证与最小信息披露",
+      "tldr": "本研究针对AI验证过程中敏感信息泄露的问题，提出了“最小信息披露”（MID）框架。MID通过条件互信息量化验证证据中的附带泄露，旨在仅披露建立授权声明所需的信息，同时保护模型、工作负载或硬件的隐私。该框架具有通用性，支持多种验证目标和硬件环境，并能与零知识证明（ZKP）结合。实验表明，MID在多个任务中实现了零泄露的完美验证，为隐私保护下的AI验证提供了有效的权衡方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "AI verification crosses a trust boundary: a verifier must learn enough to establish an authorized claim, yet the same evidence can reveal sensitive details about the model, workload, or hardware. We introduce minimal information disclosure (MID), which designs and quantifies the information content of verifier-facing evidence itself. MID measures collateral leakage with conditional mutual information: what the release reveals about the protected property after the authorized result is known. MID is general by design: it can accommodate different verification goals, protected properties, evidence sources, and deployment constraints. To demonstrate MID's practicality, we evaluate it on four physical measurements and six verification tasks spanning execution type, hardware identity, compute scale, and model identity. These experiments use three mechanism-design variables--the evidence channel, collection policy, and release transformation--but MID is not limited to these choices and can accommodate other deployable mechanisms. Across these tasks, MID produces three releases with perfect held-out verification and zero measured collateral leakage, while the remaining tasks yield explicit privacy--utility frontiers. MID also supports ZKP-certified releases: we demonstrate our proposed linear-projection mechanism using a Groth16 zk-SNARK.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

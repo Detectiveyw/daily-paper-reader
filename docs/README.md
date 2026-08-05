@@ -6,32 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-04
-- 运行时间：2026-08-04 20:51:56 UTC
+- 最新运行日期：2026-08-05
+- 运行时间：2026-08-05 20:21:22 UTC
 - 运行状态：成功
 - 本次总论文数：3
 - 精读区：0
 - 速读区：3
 
 ### 今日简报（AI）
-今日深入探讨大模型推理安全，重点解析了 Gecko 隐私推理加速方案及多模态协作推理中的泄露风险。
-核心结论指出，通过安全卸载公共编码器可显著提升私有推理效率，但需警惕隐藏层数据反推带来的隐私威胁。
-建议关注密码学技术与大模型推理的深度融合，以应对日益复杂的多模态数据安全挑战。
-- 详情：[/202608/04/README](/202608/04/README)
+今日聚焦 AI 隐私保护与性能优化的前沿交叉，涵盖云边端协同推理及加密库的自动化验证。
+重点关注通过自适应拆分推理实现云边端延迟最优化的方案，以及利用 AI 提升生产级加密库验证效率的新路径。
+建议关注边缘计算与隐私计算结合的读者优先研读延迟优化相关的拆分推理技术。
+- 详情：[/202608/05/README](/202608/05/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Gecko: Fast Private Inference via Secure Public Encoder Offloading](/202608/04/2608.02378v1-gecko-fast-private-inference-via-secure-public-encoder-offloading)  
+1. [Latency-Optimal Adaptive Split Inference for Privacy-Preserving Cloud-Edge-End Collaboration](/202608/05/2608.01148v1-latency-optimal-adaptive-split-inference-for-privacy-preserving-cloud-edge-end-collaboration)  
    标签：评分：7.0/10、query:fss-llm
-   evidence：神经网络的快速隐私推理
-2. [Inverting the Hidden: Unveiling Multimodal Privacy Leakage in Collaborative LVLM Inference](/202608/04/2608.01020v1-inverting-the-hidden-unveiling-multimodal-privacy-leakage-in-collaborative-lvlm-inference)  
+   evidence：使用同态加密的隐私保护拆分推理
+2. [An AI Approach to Verified Production Cryptographic Libraries](/202608/05/2608.00965v1-an-ai-approach-to-verified-production-cryptographic-libraries)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：协作式多模态大模型推理中的隐私泄露
-3. [Pivot: Proactive and Verifiable Threshold Oblivious Pseudorandom Functions From Isogeny Group Actions](/202608/04/2608.01390v1-pivot-proactive-and-verifiable-threshold-oblivious-pseudorandom-functions-from-isogeny-group-actions)  
+   evidence：加密库的形式化验证
+3. [Privacy-Preserving AI Verification via Minimal Information Disclosure](/202608/05/2608.02774v1-privacy-preserving-ai-verification-via-minimal-information-disclosure)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：可验证阈值不经意函数
+   evidence：隐私保护AI验证与最小信息披露
 
 
 <div class="dpr-home-promo-card">

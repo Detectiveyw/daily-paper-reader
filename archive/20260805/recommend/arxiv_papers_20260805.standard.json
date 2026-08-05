@@ -1,0 +1,132 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-05T20:20:59.303173+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2608.01148v1",
+      "title": "Latency-Optimal Adaptive Split Inference for Privacy-Preserving Cloud-Edge-End Collaboration",
+      "abstract": "Internet of Things (IoT) end devices are increasingly expected to support privacy-sensitive batch inference, yet their limited computational resources often make full local execution of convolutional neural networks impractical. This paper presents a latency-optimal adaptive split inference framework for privacy-preserving cloud-edge-end collaboration. The end device acts as the trust anchor, executes the plaintext model prefix, encrypts the split activation using fully homomorphic encryption (FHE), and keeps the secret key locally, while the edge and cloud execute assigned model segments only on FHE ciphertexts. We formulate collaborative encrypted inference as a split-pair selection problem over an end-side split point and an edge-side termination point. The proposed planner jointly models plaintext prefix execution, encryption, communication, edge-side FHE execution, and cloud-side FHE completion, and supports both convolution-level and block-level split granularities. Experiments on CIFAR-10 and PathMNIST show that the proposed convolution-level collaborative scheme achieves amortized end-to-end speedups of approximately 12.9 times over full-cloud FHE and 3.9 times over the block-level alternative, while preserving the corresponding plaintext-model accuracy. Including modeled communication, the amortized latencies are 1033.279 s/sample on CIFAR-10 and 1023.429 s/sample on PathMNIST.",
+      "authors": [
+        "Yi Li",
+        "Peng Zhang",
+        "Man Ho Au"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.DC"
+      ],
+      "published": "2026-08-02T10:59:07+00:00",
+      "link": "https://arxiv.org/pdf/2608.01148v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "privacy-preserving split inference using homomorphic encryption",
+      "llm_evidence_cn": "使用同态加密的隐私保护拆分推理",
+      "llm_evidence": "使用同态加密的隐私保护拆分推理",
+      "canonical_evidence": "使用同态加密的隐私保护拆分推理",
+      "llm_tldr_en": "Develops a latency-optimal split inference framework using FHE for secure cloud-edge collaboration.",
+      "llm_tldr_cn": "开发了一个利用全同态加密进行云边协作安全推理的延迟优化拆分框架。",
+      "llm_tldr": "开发了一个利用全同态加密进行云边协作安全推理的延迟优化拆分框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.00965v1",
+      "title": "An AI Approach to Verified Production Cryptographic Libraries",
+      "abstract": "Cryptographic code is critical infrastructure that must be correct, yet formally verifying production libraries remains difficult. Existing language-model proof systems solve isolated obligations with specifications and premises already given, leaving production-library verification unresolved.   We present CryptoProver, an AI-based system that synthesizes internal specifications and Verus-checked proofs from high-level API contracts. Without changing executable code, CryptoProver constructs a new independent proof of curve25519-dalek and verifies RustCrypto's previously unverified chacha20 implementation against an RFC 8439 specification. These cryptographic lineages underpin deployed systems including Signal and Shadowsocks; Signal has an estimated 218M global downloads. The independent, human-led curve25519-dalek verification was developed publicly over eight months by five main contributors. Given the API contracts and a fixed trusted library of field specifications, arithmetic facts, axioms, and vstd, CryptoProver synthesizes the internal specifications and proofs in 11.4 hours with USD 466.99 in recorded API cost. CryptoProver follows a trust-first design principle: mechanical gates reject specification weakening, invented axioms, and cross-module breakage, while isolation blocks reference proof retrieval, including from git history.",
+      "authors": [
+        "Chuyue Sun",
+        "Su Fong",
+        "Zhiyi Kuang",
+        "Yizheng Jiao",
+        "Nina Narodytska",
+        "Haoze Wu",
+        "David L. Dill",
+        "Clark Barrett"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-08-02T03:32:08+00:00",
+      "link": "https://arxiv.org/pdf/2608.00965v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Formal verification of cryptographic libraries",
+      "llm_evidence_cn": "加密库的形式化验证",
+      "llm_evidence": "加密库的形式化验证",
+      "canonical_evidence": "加密库的形式化验证",
+      "llm_tldr_en": "CryptoProver uses AI to synthesize formal proofs for production cryptographic libraries like Curve25519.",
+      "llm_tldr_cn": "CryptoProver利用人工智能为Curve25519等生产级加密库合成形式化证明。",
+      "llm_tldr": "CryptoProver利用人工智能为Curve25519等生产级加密库合成形式化证明。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing supporting floating point operations and verifiable security",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.02774v1",
+      "title": "Privacy-Preserving AI Verification via Minimal Information Disclosure",
+      "abstract": "AI verification crosses a trust boundary: a verifier must learn enough to establish an authorized claim, yet the same evidence can reveal sensitive details about the model, workload, or hardware. We introduce minimal information disclosure (MID), which designs and quantifies the information content of verifier-facing evidence itself. MID measures collateral leakage with conditional mutual information: what the release reveals about the protected property after the authorized result is known. MID is general by design: it can accommodate different verification goals, protected properties, evidence sources, and deployment constraints. To demonstrate MID's practicality, we evaluate it on four physical measurements and six verification tasks spanning execution type, hardware identity, compute scale, and model identity. These experiments use three mechanism-design variables--the evidence channel, collection policy, and release transformation--but MID is not limited to these choices and can accommodate other deployable mechanisms. Across these tasks, MID produces three releases with perfect held-out verification and zero measured collateral leakage, while the remaining tasks yield explicit privacy--utility frontiers. MID also supports ZKP-certified releases: we demonstrate our proposed linear-projection mechanism using a Groth16 zk-SNARK.",
+      "authors": [
+        "Sleem Abdelghafar",
+        "Gabriel Kulp"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-08-03T18:18:11+00:00",
+      "link": "https://arxiv.org/pdf/2608.02774v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Privacy-preserving AI verification and minimal information disclosure",
+      "llm_evidence_cn": "隐私保护AI验证与最小信息披露",
+      "llm_evidence": "隐私保护AI验证与最小信息披露",
+      "canonical_evidence": "隐私保护AI验证与最小信息披露",
+      "llm_tldr_en": "Introduces a framework for AI verification that minimizes sensitive information leakage during the process.",
+      "llm_tldr_cn": "引入了一种在验证过程中最小化敏感信息泄露的AI验证框架。",
+      "llm_tldr": "引入了一种在验证过程中最小化敏感信息泄露的AI验证框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
