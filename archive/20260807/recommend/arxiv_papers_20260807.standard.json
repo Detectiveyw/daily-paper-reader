@@ -1,0 +1,90 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-07T01:44:17.045746+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2608.04889v1",
+      "title": "Minimal Binary Linear Codes of Dimension n+4 from Partial Spreads and Their Dual Access Structures",
+      "abstract": "Minimal linear codes have significant applications in secret sharing schemes, secure multi-party computation, and cryptography. In this paper, we propose a generic construction of a new family of minimal binary linear codes with dimension n+4 from a special class of Boolean functions. By leveraging the geometric properties of partial spreads in finite fields, we determine the explicit weight distribution and weight enumerator of the constructed codes. Furthermore, we derive a necessary and sufficient condition for these codes to be minimal, and establish that the proposed family yields minimal codes that structurally violate the well-known Ashikhmin-Barg condition, making them highly desirable for advanced communication systems.",
+      "authors": [
+        "Apurba Sarkar",
+        "Kalyan Hansda",
+        "Makhan Maji"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-08-05T14:16:15+00:00",
+      "link": "https://arxiv.org/pdf/2608.04889v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Minimal linear codes for secret sharing and secure MPC",
+      "llm_evidence_cn": "用于秘密共享和安全多方计算的极小线性码",
+      "llm_evidence": "用于秘密共享和安全多方计算的极小线性码",
+      "canonical_evidence": "用于秘密共享和安全多方计算的极小线性码",
+      "llm_tldr_en": "Constructs new minimal binary linear codes applicable to secret sharing and secure multi-party computation.",
+      "llm_tldr_cn": "构造了适用于秘密共享和安全多方计算的新型极小二进制线性码。",
+      "llm_tldr": "构造了适用于秘密共享和安全多方计算的新型极小二进制线性码。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.26988v1",
+      "title": "A Compositional Theory of Causally Masked Transformers",
+      "abstract": "What types of decision problems can a causally masked, finite-precision transformer solve for inputs of arbitrary length? Existing answers often rely on idealized arithmetic, but under finite precision, rounding and evaluation order can change what information attention retains and therefore what the model can compute. We develop an algebraic formalization that derives expressivity directly from the model's implemented dynamics. Its central object is its memory; the finite internal state computed by attention that summarizes the information from the prefix available to all future queries. Each attention head updates its own state independently within a layer, while layers compose hierarchically, providing a uniform route from model assumptions to expressivity bounds. Applying this method to transformers without positional embeddings, we obtain an expressivity hierarchy governed by the attention type under specific numerical semantics. Width-one sliding-window attention supports bounded-suffix memory, while a modified form of soft attention supports irreversible, checklist-like state, and combining the two mechanisms provides an interplay of both. Ordinary left-to-right floating-point soft attention can realize more expressive memory operations than any of the above. Algebraically, the four cases correspond to definite, R-trivial, locally R-trivial, and aperiodic semigroups. Under an explicit free-wiring assumption, all four bounds are tight.",
+      "authors": [
+        "Franz Nowak",
+        "Ryan Cotterell",
+        "Reda Boumasmoud"
+      ],
+      "primary_category": "cs.FL",
+      "categories": [
+        "cs.FL",
+        "cs.LG"
+      ],
+      "published": "2026-07-29T14:47:19+00:00",
+      "link": "https://arxiv.org/pdf/2607.26988v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "theory of finite-precision transformer dynamics",
+      "llm_evidence_cn": "有限精度Transformer动力学理论",
+      "llm_evidence": "有限精度Transformer动力学理论",
+      "canonical_evidence": "有限精度Transformer动力学理论",
+      "llm_tldr_en": "Develops an algebraic formalization for the expressivity of causally masked transformers under finite precision.",
+      "llm_tldr_cn": "为有限精度下因果掩码Transformer的表达能力开发了一种代数形式化方法。",
+      "llm_tldr": "为有限精度下因果掩码Transformer的表达能力开发了一种代数形式化方法。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

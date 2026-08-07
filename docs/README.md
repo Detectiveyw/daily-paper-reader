@@ -6,32 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-05
-- 运行时间：2026-08-05 20:21:22 UTC
+- 最新运行日期：2026-08-07
+- 运行时间：2026-08-07 01:44:43 UTC
 - 运行状态：成功
-- 本次总论文数：3
+- 本次总论文数：2
 - 精读区：0
-- 速读区：3
+- 速读区：2
 
 ### 今日简报（AI）
-今日聚焦 AI 隐私保护与性能优化的前沿交叉，涵盖云边端协同推理及加密库的自动化验证。
-重点关注通过自适应拆分推理实现云边端延迟最优化的方案，以及利用 AI 提升生产级加密库验证效率的新路径。
-建议关注边缘计算与隐私计算结合的读者优先研读延迟优化相关的拆分推理技术。
-- 详情：[/202608/05/README](/202608/05/README)
+今日聚焦编码理论与 Transformer 架构，速读两篇关于极小线性码构造及因果掩码理论的学术前沿。
+核心结论涉及利用偏展开式构建 n+4 维极小码，以及为因果掩码 Transformer 建立的组合理论框架。
+推荐关注密码学安全协议与大模型底层数学逻辑的跨界融合。
+- 详情：[/202608/07/README](/202608/07/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Latency-Optimal Adaptive Split Inference for Privacy-Preserving Cloud-Edge-End Collaboration](/202608/05/2608.01148v1-latency-optimal-adaptive-split-inference-for-privacy-preserving-cloud-edge-end-collaboration)  
+1. [Minimal Binary Linear Codes of Dimension n+4 from Partial Spreads and Their Dual Access Structures](/202608/07/2608.04889v1-minimal-binary-linear-codes-of-dimension-n4-from-partial-spreads-and-their-dual-access-structures)  
    标签：评分：7.0/10、query:fss-llm
-   evidence：使用同态加密的隐私保护拆分推理
-2. [An AI Approach to Verified Production Cryptographic Libraries](/202608/05/2608.00965v1-an-ai-approach-to-verified-production-cryptographic-libraries)  
+   evidence：用于秘密共享和安全多方计算的极小线性码
+2. [A Compositional Theory of Causally Masked Transformers](/202608/07/2607.26988v1-a-compositional-theory-of-causally-masked-transformers)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：加密库的形式化验证
-3. [Privacy-Preserving AI Verification via Minimal Information Disclosure](/202608/05/2608.02774v1-privacy-preserving-ai-verification-via-minimal-information-disclosure)  
-   标签：评分：6.0/10、query:fss-llm
-   evidence：隐私保护AI验证与最小信息披露
+   evidence：有限精度Transformer动力学理论
 
 
 <div class="dpr-home-promo-card">

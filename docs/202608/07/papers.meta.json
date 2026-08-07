@@ -1,0 +1,37 @@
+{
+  "label": "2026-08-07",
+  "date": "2026-08-07",
+  "generated_at": "2026-08-07T01:44:54",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202608/07/2608.04889v1-minimal-binary-linear-codes-of-dimension-n4-from-partial-spreads-and-their-dual-access-structures",
+      "section": "quick",
+      "title_en": "Minimal Binary Linear Codes of Dimension n+4 from Partial Spreads and Their Dual Access Structures",
+      "authors": "Apurba Sarkar, Kalyan Hansda, Makhan Maji",
+      "date": "2026-08-05",
+      "pdf": "https://arxiv.org/pdf/2608.04889v1",
+      "score": "7.0",
+      "evidence": "用于秘密共享和安全多方计算的极小线性码",
+      "tldr": "本研究针对秘密共享和多方计算等应用，提出了一类基于布尔函数和有限域偏展开几何特性的新二元线性码。该类码的维度为 n+4，研究者确定了其显式权重分布，并证明了其在违反 Ashikhmin-Barg 条件的情况下仍具有极小性，为高级通信系统提供了理想的编码方案。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Minimal linear codes have significant applications in secret sharing schemes, secure multi-party computation, and cryptography. In this paper, we propose a generic construction of a new family of minimal binary linear codes with dimension n+4 from a special class of Boolean functions. By leveraging the geometric properties of partial spreads in finite fields, we determine the explicit weight distribution and weight enumerator of the constructed codes. Furthermore, we derive a necessary and sufficient condition for these codes to be minimal, and establish that the proposed family yields minimal codes that structurally violate the well-known Ashikhmin-Barg condition, making them highly desirable for advanced communication systems.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/07/2607.26988v1-a-compositional-theory-of-causally-masked-transformers",
+      "section": "quick",
+      "title_en": "A Compositional Theory of Causally Masked Transformers",
+      "authors": "Franz Nowak, Ryan Cotterell, Reda Boumasmoud",
+      "date": "2026-07-29",
+      "pdf": "https://arxiv.org/pdf/2607.26988v1",
+      "score": "6.0",
+      "evidence": "有限精度Transformer动力学理论",
+      "tldr": "本研究探讨了有限精度、因果掩码 Transformer 在处理任意长度输入时的表达能力。通过建立代数形式化理论，研究者将注意力机制产生的内部状态视为“记忆”，并分析了层级组合下的表达边界。研究发现，不同类型的注意力机制（如滑动窗口、软注意力等）在特定数值语义下对应不同的半群代数结构，从而揭示了 Transformer 的表达能力层级，并证明了这些边界在自由布线假设下是紧致的。",
+      "tags": "query:fss-llm",
+      "abstract_en": "What types of decision problems can a causally masked, finite-precision transformer solve for inputs of arbitrary length? Existing answers often rely on idealized arithmetic, but under finite precision, rounding and evaluation order can change what information attention retains and therefore what the model can compute. We develop an algebraic formalization that derives expressivity directly from the model's implemented dynamics. Its central object is its memory; the finite internal state computed by attention that summarizes the information from the prefix available to all future queries. Each attention head updates its own state independently within a layer, while layers compose hierarchically, providing a uniform route from model assumptions to expressivity bounds. Applying this method to transformers without positional embeddings, we obtain an expressivity hierarchy governed by the attention type under specific numerical semantics. Width-one sliding-window attention supports bounded-suffix memory, while a modified form of soft attention supports irreversible, checklist-like state, and combining the two mechanisms provides an interplay of both. Ordinary left-to-right floating-point soft attention can realize more expressive memory operations than any of the above. Algebraically, the four cases correspond to definite, R-trivial, locally R-trivial, and aperiodic semigroups. Under an explicit free-wiring assumption, all four bounds are tight.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
