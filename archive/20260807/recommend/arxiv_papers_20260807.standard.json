@@ -1,18 +1,93 @@
 {
   "mode": "standard",
-  "generated_at": "2026-08-07T01:44:17.045746+00:00",
+  "generated_at": "2026-08-07T21:12:21.267991+00:00",
   "stats": {
     "mode": "standard",
     "tag_count": 1,
     "deep_divecandidates": 0,
     "deep_cap": 6,
     "deep_selected": 0,
-    "quick_candidates": 2,
+    "quick_candidates": 3,
     "quick_skim_target": 11,
-    "quick_selected": 2
+    "quick_selected": 3
   },
   "deep_dive": [],
   "quick_skim": [
+    {
+      "id": "2608.01192v1",
+      "title": "A Unified Benchmark for Privacy-preserving Vector Search",
+      "abstract": "Vector search powers semantic search, recommendation systems, and retrieval-augmented generation (RAG). By design, the service answering a query sees both the query embedding and, usually, the corpus against which it is matched. This is a privacy breach for both the user issuing the query and the owner of the corpus. A family of cryptographic schemes (e.g., SAP, EMVP, BNTM, Tip-toe) addresses that leak. However, as each scheme is published and evaluated on its own corpus, threat model, parameter choices, hardware, and metric conventions, the numbers cannot be compared directly. Consequently, a practitioner asking which one to deploy today has no defensible way to choose. We close that gap with a uniform experimental comparison, including a Plaintext baseline and four cryptographic backends running over the same workload, hardware, and metric definitions. Under that ruler, the schemes spread across a Pareto frontier in privacy, performance, and recall rather than imposing a flat penalty on performance. We find that the performance of SAP matches Plaintext, EMVP delivers cryptographic indistinguishability at a 4x throughput cost on CPU, BNTM adds malicious-server verifiability at a further 22x median-latency cost, and Tiptoe hides the cluster choice itself, but incurs a 190x per-query cost compared to Plaintext. GPU acceleration pays off for Plaintext and SAP but not for EMVP or BNTM. All our experiment artifacts are publicly available for reproducibility",
+      "authors": [
+        "Anne-Marie Kermarrec",
+        "Rafael Pires",
+        "Mathis Randl",
+        "Martijn de Vos"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.DB",
+        "cs.PF"
+      ],
+      "published": "2026-08-02T12:16:01+00:00",
+      "link": "https://arxiv.org/pdf/2608.01192v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Privacy-preserving vector search and cryptographic schemes",
+      "llm_evidence_cn": "隐私保护向量搜索与加密方案",
+      "llm_evidence": "隐私保护向量搜索与加密方案",
+      "canonical_evidence": "隐私保护向量搜索与加密方案",
+      "llm_tldr_en": "Benchmarks cryptographic schemes for privacy-preserving vector search in RAG and LLM contexts.",
+      "llm_tldr_cn": "对RAG和LLM背景下的隐私保护向量搜索加密方案进行了统一基准测试。",
+      "llm_tldr": "对RAG和LLM背景下的隐私保护向量搜索加密方案进行了统一基准测试。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.04039v1",
+      "title": "AMD SEV-SNP: A Confidential Computing Primer",
+      "abstract": "This paper is a technical primer on AMD Secure Encrypted Virtualization with Secure Nested Paging (SEV-SNP), a hardware confidential computing implementation that provides Trusted Execution Environments (TEEs) for virtual machines. SEV-SNP treats the hypervisor as adversarial. It encrypts guest memory and register state with keys the hypervisor never possesses, detects any tampering with guest memory at the point of access, and lets a guest prove to a remote verifier exactly what code it is running. The paper constructs each of these guarantees from the hardware up. It opens with the threat model that drives the design and the hardware that enforces it, the AMD Secure Processor and the encryption engine in the memory controller. It then develops the mechanisms that make a confidential guest practical. The Reverse Map Table provides memory integrity against an adversary who controls the page tables. The privilege and communication machinery (VM Privilege Levels, the encrypted VM Save Area, and the GHCB protocol) lets the guest cooperate with a hypervisor it does not trust. The attestation pipeline binds a hardware-signed measurement of the guest's initial state to AMD's certificate chain, so a remote verifier can confirm independently what is running.",
+      "authors": [
+        "Amean Asad",
+        "Patrick McClurg",
+        "Patrick Woodhead"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-08-03T20:59:25+00:00",
+      "link": "https://arxiv.org/pdf/2608.04039v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Hardware-based confidential computing and remote verification",
+      "llm_evidence_cn": "基于硬件的机密计算与远程验证",
+      "llm_evidence": "基于硬件的机密计算与远程验证",
+      "canonical_evidence": "基于硬件的机密计算与远程验证",
+      "llm_tldr_en": "Provides a technical primer on AMD SEV-SNP for hardware-based trusted execution environments.",
+      "llm_tldr_cn": "提供了AMD SEV-SNP的技术入门指南，介绍基于硬件的可信执行环境实现。",
+      "llm_tldr": "提供了AMD SEV-SNP的技术入门指南，介绍基于硬件的可信执行环境实现。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Secure Transformer Inference",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
     {
       "id": "2608.04889v1",
       "title": "Minimal Binary Linear Codes of Dimension n+4 from Partial Spreads and Their Dual Access Structures",
@@ -33,10 +108,10 @@
         "query:FSS LLM"
       ],
       "llm_score": 7.0,
-      "llm_evidence_en": "Minimal linear codes for secret sharing and secure MPC",
-      "llm_evidence_cn": "用于秘密共享和安全多方计算的极小线性码",
-      "llm_evidence": "用于秘密共享和安全多方计算的极小线性码",
-      "canonical_evidence": "用于秘密共享和安全多方计算的极小线性码",
+      "llm_evidence_en": "minimal linear codes for secret sharing and secure computation",
+      "llm_evidence_cn": "用于秘密共享和安全计算的极小线性码",
+      "llm_evidence": "用于秘密共享和安全计算的极小线性码",
+      "canonical_evidence": "用于秘密共享和安全计算的极小线性码",
       "llm_tldr_en": "Constructs new minimal binary linear codes applicable to secret sharing and secure multi-party computation.",
       "llm_tldr_cn": "构造了适用于秘密共享和安全多方计算的新型极小二进制线性码。",
       "llm_tldr": "构造了适用于秘密共享和安全多方计算的新型极小二进制线性码。",
@@ -48,43 +123,6 @@
       "matched_requirement_id": "req-6",
       "selection_source": "fresh_fetch",
       "quick_tier": "7"
-    },
-    {
-      "id": "2607.26988v1",
-      "title": "A Compositional Theory of Causally Masked Transformers",
-      "abstract": "What types of decision problems can a causally masked, finite-precision transformer solve for inputs of arbitrary length? Existing answers often rely on idealized arithmetic, but under finite precision, rounding and evaluation order can change what information attention retains and therefore what the model can compute. We develop an algebraic formalization that derives expressivity directly from the model's implemented dynamics. Its central object is its memory; the finite internal state computed by attention that summarizes the information from the prefix available to all future queries. Each attention head updates its own state independently within a layer, while layers compose hierarchically, providing a uniform route from model assumptions to expressivity bounds. Applying this method to transformers without positional embeddings, we obtain an expressivity hierarchy governed by the attention type under specific numerical semantics. Width-one sliding-window attention supports bounded-suffix memory, while a modified form of soft attention supports irreversible, checklist-like state, and combining the two mechanisms provides an interplay of both. Ordinary left-to-right floating-point soft attention can realize more expressive memory operations than any of the above. Algebraically, the four cases correspond to definite, R-trivial, locally R-trivial, and aperiodic semigroups. Under an explicit free-wiring assumption, all four bounds are tight.",
-      "authors": [
-        "Franz Nowak",
-        "Ryan Cotterell",
-        "Reda Boumasmoud"
-      ],
-      "primary_category": "cs.FL",
-      "categories": [
-        "cs.FL",
-        "cs.LG"
-      ],
-      "published": "2026-07-29T14:47:19+00:00",
-      "link": "https://arxiv.org/pdf/2607.26988v1",
-      "tags": [
-        "keyword:FSS LLM",
-        "query:FSS LLM"
-      ],
-      "llm_score": 6.0,
-      "llm_evidence_en": "theory of finite-precision transformer dynamics",
-      "llm_evidence_cn": "有限精度Transformer动力学理论",
-      "llm_evidence": "有限精度Transformer动力学理论",
-      "canonical_evidence": "有限精度Transformer动力学理论",
-      "llm_tldr_en": "Develops an algebraic formalization for the expressivity of causally masked transformers under finite precision.",
-      "llm_tldr_cn": "为有限精度下因果掩码Transformer的表达能力开发了一种代数形式化方法。",
-      "llm_tldr": "为有限精度下因果掩码Transformer的表达能力开发了一种代数形式化方法。",
-      "llm_tags": [
-        "query:fss-llm"
-      ],
-      "matched_query_tag": "query:fss-llm",
-      "matched_query_text": "Secure Transformer Inference",
-      "matched_requirement_id": "req-2",
-      "selection_source": "fresh_fetch",
-      "quick_tier": "6"
     }
   ]
 }

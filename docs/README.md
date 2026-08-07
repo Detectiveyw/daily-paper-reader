@@ -7,28 +7,31 @@
 
 ## 每次日报
 - 最新运行日期：2026-08-07
-- 运行时间：2026-08-07 01:44:43 UTC
+- 运行时间：2026-08-07 21:12:45 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：3
 - 精读区：0
-- 速读区：2
+- 速读区：3
 
 ### 今日简报（AI）
-今日聚焦编码理论与 Transformer 架构，速读两篇关于极小线性码构造及因果掩码理论的学术前沿。
-核心结论涉及利用偏展开式构建 n+4 维极小码，以及为因果掩码 Transformer 建立的组合理论框架。
-推荐关注密码学安全协议与大模型底层数学逻辑的跨界融合。
+1) 今日聚焦隐私保护与安全计算，深入探讨了向量搜索基准测试及 AMD 硬件级机密计算技术。
+2) 重点推荐隐私保护向量搜索的统一评测框架，以及基于偏传播构造的极小二元线性码研究。
+3) 建议开发者关注隐私计算在向量检索中的落地，并同步了解底层安全架构的最新演进。
 - 详情：[/202608/07/README](/202608/07/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Minimal Binary Linear Codes of Dimension n+4 from Partial Spreads and Their Dual Access Structures](/202608/07/2608.04889v1-minimal-binary-linear-codes-of-dimension-n4-from-partial-spreads-and-their-dual-access-structures)  
+1. [A Unified Benchmark for Privacy-preserving Vector Search](/202608/07/2608.01192v1-a-unified-benchmark-for-privacy-preserving-vector-search)  
    标签：评分：7.0/10、query:fss-llm
-   evidence：用于秘密共享和安全多方计算的极小线性码
-2. [A Compositional Theory of Causally Masked Transformers](/202608/07/2607.26988v1-a-compositional-theory-of-causally-masked-transformers)  
+   evidence：隐私保护向量搜索与加密方案
+2. [Minimal Binary Linear Codes of Dimension n+4 from Partial Spreads and Their Dual Access Structures](/202608/07/2608.04889v1-minimal-binary-linear-codes-of-dimension-n4-from-partial-spreads-and-their-dual-access-structures)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：用于秘密共享和安全计算的极小线性码
+3. [AMD SEV-SNP: A Confidential Computing Primer](/202608/07/2608.04039v1-amd-sev-snp-a-confidential-computing-primer)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：有限精度Transformer动力学理论
+   evidence：基于硬件的机密计算与远程验证
 
 
 <div class="dpr-home-promo-card">
