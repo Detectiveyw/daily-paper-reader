@@ -6,32 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-07
-- 运行时间：2026-08-07 21:12:45 UTC
+- 最新运行日期：2026-08-08
+- 运行时间：2026-08-08 20:31:25 UTC
 - 运行状态：成功
-- 本次总论文数：3
+- 本次总论文数：1
 - 精读区：0
-- 速读区：3
+- 速读区：1
 
 ### 今日简报（AI）
-1) 今日聚焦隐私保护与安全计算，深入探讨了向量搜索基准测试及 AMD 硬件级机密计算技术。
-2) 重点推荐隐私保护向量搜索的统一评测框架，以及基于偏传播构造的极小二元线性码研究。
-3) 建议开发者关注隐私计算在向量检索中的落地，并同步了解底层安全架构的最新演进。
-- 详情：[/202608/07/README](/202608/07/README)
+今日聚焦分布式大模型推理优化，探索 RAC 激活压缩技术以突破通信瓶颈。
+该研究通过参考感知机制压缩激活值，旨在提升拆分推理模式下的数据传输效率。
+建议关注边缘计算或多设备协同推理的读者，重点参考其降低带宽占用的实现思路。
+- 详情：[/202608/08/README](/202608/08/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [A Unified Benchmark for Privacy-preserving Vector Search](/202608/07/2608.01192v1-a-unified-benchmark-for-privacy-preserving-vector-search)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：隐私保护向量搜索与加密方案
-2. [Minimal Binary Linear Codes of Dimension n+4 from Partial Spreads and Their Dual Access Structures](/202608/07/2608.04889v1-minimal-binary-linear-codes-of-dimension-n4-from-partial-spreads-and-their-dual-access-structures)  
-   标签：评分：7.0/10、query:fss-llm
-   evidence：用于秘密共享和安全计算的极小线性码
-3. [AMD SEV-SNP: A Confidential Computing Primer](/202608/07/2608.04039v1-amd-sev-snp-a-confidential-computing-primer)  
+1. [RAC: Reference-Aware Activation Compression for Communication-Efficient Split LLM Inference](/202608/08/2608.04991v1-rac-reference-aware-activation-compression-for-communication-efficient-split-llm-inference)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：基于硬件的机密计算与远程验证
+   evidence：大语言模型拆分推理与隐私敏感上下文
 
 
 <div class="dpr-home-promo-card">

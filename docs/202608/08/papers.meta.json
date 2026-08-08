@@ -1,0 +1,23 @@
+{
+  "label": "2026-08-08",
+  "date": "2026-08-08",
+  "generated_at": "2026-08-08T20:31:36",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202608/08/2608.04991v1-rac-reference-aware-activation-compression-for-communication-efficient-split-llm-inference",
+      "section": "quick",
+      "title_en": "RAC: Reference-Aware Activation Compression for Communication-Efficient Split LLM Inference",
+      "authors": "Guotao Yang, Mingxi Zhao, Haopeng Li, Zhengchao Wang, Sheng Chen, Yitao Hu, Keqiu Li",
+      "date": "2026-08-05",
+      "pdf": "https://arxiv.org/pdf/2608.04991v1",
+      "score": "6.0",
+      "evidence": "大语言模型拆分推理与隐私敏感上下文",
+      "tldr": "针对大模型拆分推理中本地与云端通信带宽受限的问题，本文提出RAC（参考感知激活压缩）框架。RAC通过检索历史片段、重用重建状态以及轻量级因果预测器生成参考信息，结合分组仿射对齐和校准残差量化技术，显著降低了预填充和解码阶段的通信开销。实验表明，RAC在保持模型精度的同时，大幅提升了首字响应时间和每字生成速度。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Large language model (LLM) agents repeatedly process long, privacy-sensitive contexts, while cloud-only deployment exposes user data beyond the trusted endpoint and fully local deployment often requires costly hardware. Split inference offers a middle ground by executing the model head, tail, and tools locally and the middle layers in the cloud, but its local-cloud-local path transfers boundary hidden states at every invocation and creates a critical communication bottleneck. We present \\system, a reference-aware codec that retrieves exact-token historical spans for prefill uplinks, reuses the reconstructed uplink state for same-round prefill downlinks, and generates boundary-specific decode references with lightweight causal predictors. RAC applies grouped affine alignment and calibrated residual quantization with optional prefill outliers, while sender-side wire-format reconstruction synchronizes subsequent references and offline calibration accounts for quality and packed representation costs. Across three models and nine evaluated model-link pairs, Raw-to-RAC mean time to first token (TTFT) and time per output token (TPOT) ratios are 1.24-2.72$\\times$ and 1.01-2.79$\\times$, while the 12 non-perplexity task-score changes range from $-0.40$ to $+2.50$ points.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

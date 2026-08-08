@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-08-08 <!--dpr-date:20260808-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202608/08/2608.04991v1-rac-reference-aware-activation-compression-for-communication-efficient-split-llm-inference" data-sidebar-item="{&quot;title&quot;: &quot;RAC: Reference-Aware Activation Compression for Communication-Efficient Split LLM Inference&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2608.04991v1-rac-reference-aware-activation-compression-for-communication-efficient-split-llm-inference&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;大语言模型拆分推理与隐私敏感上下文&quot;}">RAC: Reference-Aware Activation Compression for Communication-Efficient Split LLM Inference</a>
   * 2026-08-07 <!--dpr-date:20260807-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202608/07/2608.01192v1-a-unified-benchmark-for-privacy-preserving-vector-search" data-sidebar-item="{&quot;title&quot;: &quot;A Unified Benchmark for Privacy-preserving Vector Search&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2608.01192v1-a-unified-benchmark-for-privacy-preserving-vector-search&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;隐私保护向量搜索与加密方案&quot;}">A Unified Benchmark for Privacy-preserving Vector Search</a>
