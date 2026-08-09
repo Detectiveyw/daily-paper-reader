@@ -1,0 +1,768 @@
+Title: PriDyG: Privacy-preserving Dynamic Graph Inference with LLM-GNN Collaboration
+
+URL Source: https://arxiv.org/pdf/2608.04255v1
+
+Published Time: Thu, 06 Aug 2026 00:15:09 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# PriDyG: Privacy-preserving Dynamic Graph Inference with LLM-GNN Collaboration 
+
+# Yuyang Xia 
+
+Emory University Atlanta, Georgia, USA yuyang.xia@emory.edu 
+
+# Ruixuan Liu 
+
+Emory University Atlanta, Georgia, USA ruixuan.liu2@emory.edu 
+
+# Li Xiong 
+
+Emory University Atlanta, Georgia, USA lxiong@emory.edu 
+
+## Abstract 
+
+Graph inference over relational data can expose sensitive edge in-formation, and this risk becomes more severe in dynamic graphs, where repeated model updates cause privacy loss to accumulate. We formulate Edge-level Differentially Private Dynamic Graph In-ference (EDG) and propose PriDyG, a private inference framework that combines GNN-based structural learning with LLM-based se-mantic reasoning. PriDyG introduces incremental private multi-hop aggregation, which buffers newly arrived edges and processes each edge exactly once. By parallel composition, the total privacy cost equals that of a single static release, independent of the number or schedule of model updates. Compared with geometrically decaying budget allocation, incremental aggregation avoids exponentially increasing noise while preserving exact one-hop signals and at least half of two-hop information transfers. PriDyG further com-plements privatized GNN outputs with LLM predictions derived solely from node text, incurring no additional edge-level privacy cost. Experiments on four benchmarks for node classification and link prediction show that PriDyG consistently outperforms geo-metrically decaying baselines under the same privacy budget and matches the utility of naive per-update retraining while reducing cumulative privacy cost by up to three orders of magnitude. 
+
+ACM Reference Format: 
+
+Yuyang Xia, Ruixuan Liu, and Li Xiong. 2018. PriDyG: Privacy-preserving Dynamic Graph Inference with LLM-GNN Collaboration. In Proceedings of Make sure to enter the correct conference title from your rights confirmation email (Conference acronym ’XX). ACM, New York, NY, USA, 12 pages. https: //doi.org/XXXXXXX.XXXXXXX 
+
+## 1 Introduction 
+
+Graphs support many real-world applications, such as social net-work analysis, citation analysis, and e-commerce recommendation. Graph inference tasks [28, 34, 36], such as node classification and link prediction, are fundamental to these applications. However, graph structure inherently encodes sensitive information: edges may represent social connections, financial transactions, or medi-cal consultations. Answering inference queries over such graphs 
+
+> Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the full citation on the first page. Copyrights for components of this work owned by others than the author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or republish, to post on servers or to redistribute to lists, requires prior specific permission and/or a fee. Request permissions from permissions@acm.org.
+> Conference acronym ’XX, Woodstock, NY
+> © 2018 Copyright held by the owner/author(s). Publication rights licensed to ACM. ACM ISBN 978-1-4503-XXXX-X/2018/06 https://doi.org/XXXXXXX.XXXXXXX
+
+may therefore expose sensitive relationships encoded in their struc-ture, even when individual node attributes are considered non-sensitive [8]. Differential privacy (DP) [6] offers a principled framework for protecting sensitive information. In the graph setting, edge-level DP guarantees that the presence or absence of any single edge cannot be reliably inferred from a mechanism’s output [18]. Recent work has made significant progress on privacy-preserving graph learning. GAP [22] and ProGAP [21] introduce aggregation perturbation to achieve edge-level DP for Graph Neural Networks (GNNs), while other works [5, 17, 31, 37] explore alternative privacy notions and mechanisms, including node-level DP. However, this protection comes at a steep utility cost ( Challenge 1 ): enforcing edge-level DP requires injecting calibrated noise into the neighborhood ag-gregation process, which distorts precisely the structural signal that GNNs rely on. Under practical privacy budgets, DP-GNNs suf-fer substantial accuracy degradation relative to their non-private counterparts. This challenge is further compounded when the graph evolves (Challenge 2 ). In practice, graphs are rarely static; they evolve as new events and interactions occur [13, 23, 25, 35], and infer-ence models must be updated to reflect the current graph state. Continual inference on an evolving private graph raises a distinct privacy-accounting difficulty: as new edges arrive and the pipeline is repeatedly updated, historical edges are accessed again at ev-ery update, so privacy loss accumulates over time. Recent efforts have explored privacy protection for dynamic graphs. For example, Raskhodnikova et al. [19] design private algorithms for traditional tasks, such as triangle counting, on fully dynamic graphs, and DyGAN-EDP [10] studies edge-level DP dynamic graph publish-ing by modeling a dynamic graph as a sequence of snapshots and synthesizing privacy-preserving future snapshots with a genera-tive adversarial framework. However, these methods target private statistics or synthetic graph release rather than continual private inference over an evolving graph, and none of them addresses the accumulation of privacy loss across model updates. To the best of our knowledge, this is the first work to formulate and study edge-level DP graph inference over continually updated graphs, with the goal of ensuring that privacy cost does not grow with the number of graph updates. To address these two challenges, we propose PriDyG , a privacy-preserving dynamic graph inference framework that couples LLM-based semantic reasoning with dynamic DP-GNN structural learn-ing, as illustrated in Figure 1. PriDyG runs two complementary branches: an LLM branch that answers queries from node tex-tual attributes alone, and a DP-GNN branch that learns from the graph structure under edge-level DP; their predictions are combined arXiv:2608.04255v1 [cs.CR] 4 Aug 2026 Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Yuyang Xia, Ruixuan Liu, and Li Xiong 
+
+through a confidence-gated fusion mechanism. The key insight be-hind the collaborative design is that edge-level DP protects only the graph structure : node-level textual attributes fall outside the pro-tected data under this threat model, so LLM predictions computed solely from them consume zero privacy budget. This privacy-free semantic signal compensates for the utility loss incurred by the privatized GNN, directly narrowing the privacy–utility gap of Chal-lenge 1. Dynamic  
+
+> Graph
+> Dynamic
+> DP-GNN
+> LLM
+> Gated Fusion
+> Semantic
+> Embedding
+> of node text
+> Boost
+> Query
+> GNN
+> Answer
+> Initial LLM Answer
+> LLM Refined LLM Answer
+> Final
+> Answer
+> , ... ,
+
+Figure 1: Overall architecture of PriDyG. 
+
+For the dynamic DP-GNN branch, we build on aggregation-perturbation methods [22], whose privacy cost is dominated by the Private Multi-hop Aggregation (PMA) step that perturbs the multi-hop neighborhood aggregation over the entire graph. Naively, every model update re-invokes PMA on the full graph; after 𝑀 up-dates, sequential composition yields a total cost of 𝑀 · 𝜖 PMA , which grows linearly and quickly becomes prohibitive. A seemingly vi-able alternative, following continual-release practice [7], is to keep re-running full PMA while allocating a geometrically decaying bud-get to successive updates: the total cost then stays bounded, but the per-update budget decays exponentially toward zero, so the required noise scale grows exponentially and later models rapidly become unusable. Our key observation is that the pre-normalization aggregation is linear in the adjacency matrix, so newly inserted edges can be folded into the cached noisy aggregations as an additive delta—each edge’s raw topology is accessed exactly once, and the parallel com-position theorem of DP bounds the total privacy cost by a constant 
+
+𝜖 PMA , independent of the number of updates 𝑀 . The cost of this con-stant budget is paid in signal rather than privacy: the incremental aggregation only approximates a full retrain, omitting certain multi-hop propagation paths and accumulating noise across updates. We prove that this approximation is structured and bounded—one-hop aggregation is signal-exact, higher hops retain provable capture guarantees, and noise grows only polynomially , in contrast to the exponential blow-up of geometric decay—resolving Challenge 2. Importantly, the two components are coupled rather than in-dependent fixes to separate problems. Node textual attributes re-main fixed as the graph evolves, so the LLM branch provides a sta-ble, privacy-free semantic anchor throughout the dynamic process, whereas the accuracy of the incremental GNN branch gradually erodes as noise accumulates across updates. The confidence-gated fusion mediates between the two adaptively. As accumulating noise shrinks the GNN’s prediction margins, more queries fall below the confidence threshold and are routed to fusion. We observe this in both node classification and link prediction tasks: over a long in-sertion stream the GNN branch alone causes substaintial accuracy drop relative to static training, whereas PriDyG’s accuracy remains stable. Hence, the pipeline’s reliance naturally shifts toward the stable LLM anchor over the course of the stream. The LLM-GNN collaboration is therefore most valuable precisely in the dynamic regime—where the structural branch is at its weakest—rather than being a generic accuracy boost bolted onto a dynamic mechanism. Our main contributions are as follows: 
+
+• LLM-GNN collaborative framework. We design PriDyG, a unified pipeline that combines DP-GNN structural learning with privacy-free LLM semantic reasoning via confidence-gated fu-sion. The LLM branch compensates for the utility loss caused by privacy protection, thereby narrowing the privacy–utility gap. 
+
+• Constant-budget dynamic graph inference. We propose in-cremental PMA, which exploits the disjointness of inserted edge batches to achieve 𝑂 (1) total privacy cost under arbitrarily many model updates. This fundamentally resolves the privacy budget tension in dynamic graph inference, allowing frequent model updates without additional privacy degradation. 
+
+• Comprehensive evaluation. We evaluate PriDyG on four bench-mark datasets (Cora, PubMed, ogbn-arxiv, ogbn-products) for node classification and link prediction. Under graph updates it is the most accurate private method on all four datasets while main-taining formal edge-level DP guarantee, and remains competitive with non-private baselines. 
+
+## 2 Preliminaries 
+
+We introduce the key concepts underlying our work and then for-mally define the problem. Table 1 summarizes important notations used in our paper.          
+
+> Notations Definitions
+> EEdge set
+> XNode feature
+> TTextual attribute
+> 𝑞 Graph query
+> AAdjacency matrix
+> ¯ZNormalized encodings for GNN
+> NGaussian noise
+> BEdge buffer
+
+Table 1: Notations. 
+
+## 2.1 Attributed and Dynamic Graphs 
+
+Let G = (V , E, X, T) denote an attributed undirected graph with 𝑛 
+
+nodes, edge set E ⊆  V
+
+> 2
+
+, node features X ∈ R𝑛 ×𝑑 , and textual at-tributes T = {𝑡 𝑣 }𝑣 ∈ V ; each node carries a label 𝑦 𝑣 ∈ Y = {1, . . . , 𝐶 }.A dynamic graph evolves through a stream of edge insertions :arriving edges accumulate in a buffer and are incorporated when a retraining command is issued, starting from an initial state G (0)
+
+(e.g., containing only edges between training nodes). At any point, two types of inference queries may be issued: a node classifica-tion query 𝑞 nc (𝑣 ) predicts ˆ 𝑦 𝑣 ∈ Y , and a link prediction query 
+
+𝑞 lp (𝑢, 𝑣 ) predicts a score 𝑠 (𝑢, 𝑣 ) ∈ [ 0, 1] for the likelihood that edge 
+
+{𝑢, 𝑣 } exists. PriDyG: Privacy-preserving Dynamic Graph Inference with LLM-GNN Collaboration Conference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+## 2.2 Differential Privacy 
+
+A randomized mechanism M : D → R satisfies (𝜖, 𝛿 )-DP [6] if for all neighboring 𝐷, 𝐷 ′ ∈ D and all measurable 𝑆 ⊆ R , Pr [M ( 𝐷 ) ∈ 
+
+𝑆 ] ≤ 𝑒 𝜖 Pr [M ( 𝐷 ′) ∈ 𝑆 ] + 𝛿 . We use the following standard facts. 
+
+Edge-level DP. Two graphs are neighbors if they differ by a single undirected edge, |E△E ′ | = 1; DP under this adjacency protects the existence of any individual edge. Removing one undirected edge 
+
+{𝑢, 𝑣 } changes the neighbor aggregation of both endpoints, each by at most one unit-norm vector, so the ℓ2-sensitivity of aggregation is √2 (vs. 1 under the directed-edge convention of GAP [22]). 
+
+Gaussian mechanism and accounting. For 𝑓 with ℓ2-sensitivity 
+
+Δ2 (𝑓 ), releasing 𝑓 (𝐷 ) + N ( 0, 𝜎 2I) satisfies (𝜖, 𝛿 )-DP with 𝜎 cal-ibrated by a standard accountant; we use the Rényi-DP accoun-tant [12] of GAP [22]. Our analysis is accountant-agnostic (Sec-tion 3.5). 
+
+Parallel composition. If 𝐷 is partitioned into disjoint subsets 
+
+𝐷 1, . . . , 𝐷 𝑀 and M𝑚 accesses only 𝐷 𝑚 with cost 𝜖 𝑚 , the total cost of releasing all outputs is max 𝑚 𝜖 𝑚 , not the sum [24]. This is the structural tool behind our constant budget: naive retraining ac-cesses all edges each time (sequential composition, linear growth), whereas incremental PMA partitions edges into disjoint batches across retrains. 
+
+Post-processing immunity. Any function of a DP release satisfies the same guarantee; downstream computations on privatized out-puts (classifier training, fusion, LLM use of released scores) incur no additional cost. 
+
+## 2.3 Edge-Level DP Graph Learning 
+
+Our GNN module builds directly on GAP [22], whose decoupled three-stage pipeline—encoder pre-training, private multi-hop ag-gregation, and classifier training—we recall here; the construction in this subsection is entirely from [22], except for the sensitivity constant noted below. 
+
+Encoder. An MLP encoder 𝑓 𝜃 maps node features to lower-dimensional representations z𝑣 = 𝑓 𝜃 (x𝑣 ). Since the encoder accesses only node features and labels, never edges, this stage is privacy-free under edge-level DP. 
+
+Private multi-hop aggregation (PMA).. Let A be the adjacency matrix of the current graph and let ¯ Z(0) be the ℓ2-row-normalized encodings. For each hop 𝑘 = 1, . . . , 𝐾 :˜Z(𝑘 ) = A ¯Z(𝑘 −1) + N ( 0, 𝜎 2I), ¯Z(𝑘 ) = Normalize ( ˜Z(𝑘 ) ), (1) where Normalize (·) applies row-wise ℓ2-normalization. Because every row of ¯ Z(𝑘 −1) has unit norm, the aggregation in (1) has ℓ2-sensitivity Δ2 = √2 under the undirected-edge adjacency of Sec-tion 2.2. The Gaussian mechanism applied over the 𝐾 hops therefore yields an edge-level (𝜖 PMA , 𝛿 )-DP guarantee, where 𝜖 PMA (𝜎, 𝛿 ) de-notes the cost of a single 𝐾 -hop PMA invocation. 
+
+Classifier. A classifier 𝑔 𝜙 takes the multi-hop features { ¯Z(0) , . . . , ¯Z(𝐾 ) }
+
+as input and predicts node labels. As it operates on already-privatized features, training it incurs no additional privacy cost by post-processing immunity. 
+
+## 2.4 Problem Formulation 
+
+Definition 2.1 (EDG Problem). Given a dynamic graph {G (0) , G (1) , . . . }
+
+evolving through edge insertions and a stream of queries {𝑞 1, 𝑞 2, . . . },where each query 𝑞 𝑖 is either a node classification query 𝑞 nc (𝑣 ) or a link-prediction query 𝑞 lp (𝑢, 𝑣 ), our goal is to design a mechanism 
+
+M that (1) answers each query using the current graph state; (2) sat-isfies edge-level (𝜖, 𝛿 )-DP over the entire execution ; and (3) main-tains high prediction accuracy and ranking quality despite privacy constraints and graph evolution. Our threat model protects only edge existence; node text and node labels are treated as public. Under this assumption, LLM pre-dictions derived solely from node text incur no additional edge-level privacy cost. The central challenge is the privacy budget tension :each retraining consumes budget under sequential composition, growing as 𝑀 · 𝜖 PMA after 𝑀 retrains. Our incremental PMA pro-cesses each edge exactly once, so parallel composition applies and 
+
+𝜖 total = 𝜖 PMA , independent of 𝑀 and of the retraining schedule. 
+
+## 3 Methodology 
+
+In this section, we present PriDyG, a privacy-preserving dynamic graph inference pipeline that combines GNN-based structural learn-ing with LLM-based semantic reasoning under edge-level differ-ential privacy. Throughout this section, we present PriDyG using node classification as the default task; Section 3.3 describes how the framework is adapted to link prediction. Figure 1 illustrates the overall architecture. 
+
+## 3.1 Overview 
+
+PriDyG operates in a streaming setting where edges arrive over time and inference queries must be answered on the fly. The pipeline consists of three modules: (1) GNN module : A DP GNN based on the GAP framework [22] that learns structural representations through private multi-hop aggregation (PMA). (2) LLM module : An LLM that performs zero-shot classification using node textual attributes, consuming no privacy budget. (3) Fusion module : A confidence-gated mechanism that dynami-cally combines GNN and LLM predictions. Since the LLM operates solely on node-level textual attributes, its predictions are a function of data outside the protected domain: edge-level DP constrains only the edge set, while node text is public in our setting (Definition 2.1). LLM inference therefore consumes zero privacy budget, allowing PriDyG to maintain high-quality predictions even when the GNN module operates under a tight privacy budget. 
+
+## 3.2 Node Classification 
+
+GNN Module. The GNN module is the edge-level DP pipeline of Section 2.3. The encoder maps node text embeddings to ¯ Z(0) ;
+
+𝐾 rounds of Gaussian-perturbed aggregation (1) over the current graph state yield the privatized multi-hop features { ¯Z(𝑘 ) }𝐾 𝑘 =0 at an edge-level cost of 𝜖 PMA ; and the classifier 𝑔 𝜙 maps them to label logits for a query node 𝑞 :ˆy𝑞 = 𝑔 𝜙 
+
+ ¯Z(0) 
+
+> 𝑞
+
+, . . . , ¯Z(𝐾 )
+
+> 𝑞
+
+
+
+∈ R𝐶 . (2) Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Yuyang Xia, Ruixuan Liu, and Li Xiong 
+
+The module exposes two quantities downstream: the logit vector ˆy𝑞 , from which the fusion step below forms sgraph  
+
+> 𝑞
+
+, and the top-
+
+𝑚 labels induced by ˆ y𝑞 , which seed the second-stage candidate set of the LLM module. Since { ¯Z(𝑘 ) }𝐾 𝑘 =0 is a DP release, both are post-processing and incur no cost beyond 𝜖 PMA .
+
+LLM Module: Semantic Reasoning. For a query node 𝑞 with textual attributes 𝑡 𝑞 , the LLM computes a probability distribution over candidate labels via token log-probabilities: 
+
+𝑃 LLM (𝑙 | 𝑡 𝑞 ) ∝ exp  
+
+> |𝑙 |
+
+∑︁ 
+
+> 𝑗 =1
+
+log 𝑃 (𝑙 𝑗 | 𝑙 <𝑗 , prompt )
+
+!
+
+. (3) where 𝑙 𝑗 denotes the 𝑗 -th token of label 𝑙 , and prompt contains the query node’s textual attributes and the candidate label set. We employ a two-stage boost query as shown in Figure 1: the first stage scores all 𝐶 candidate labels; the second stage re-scores a smaller candidate set formed by the union of top-𝑚 labels from the GNN score and the LLM score, so the total size of the union is 2 𝑟 . This strategy shrinks the context window and helps the LLM reduce the prompt length and focus on the most likely labels. Since the LLM accesses only public node text (not edges) and DP GNN predictions, it introduces no additional privacy cost. 
+
+Confidence-Gated Fusion. Let sgraph  
+
+> 𝑞
+
+= softmax ( ˆy𝑞 ) and pLLM 
+
+> 𝑞
+
+denote the GNN and LLM score vectors, respectively. Since invoking the LLM for every query incurs substantial computational overhead, we adopt confidence-gated fusion to selectively use the LLM only when the graph-based prediction is uncertain. This design reduces unnecessary LLM inference while allowing complementary textual information to assist with ambiguous queries. Specifically, we define the GNN confidence margin as 𝑚 𝑞 = 𝑠 (1) 
+
+> 𝑞
+
+− 𝑠 (2) 
+
+> 𝑞
+
+, where 𝑠 (1) 
+
+> 𝑞
+
+and 
+
+𝑠 (2) 
+
+> 𝑞
+
+are the largest and second-largest probabilities, respectively. If 
+
+𝑚 𝑞 > 𝜏 , we directly use the GNN prediction. Otherwise, we fuse the GNN and LLM predictions over the top-2 𝑚 candidates: 
+
+pfused  
+
+> 𝑞
+
+[𝑙 ] = 𝛼 · ¯sgraph  
+
+> 𝑞
+
+[𝑙 ] + ( 1 − 𝛼 ) · ¯pLLM  
+
+> 𝑞
+
+[𝑙 ], 𝑙 ∈ top-2 𝑚, (4) where ¯ s and ¯ p are re-normalized to the top-2 𝑚 set. The parameters 
+
+(𝛼, 𝜏 ) are tuned via grid search on a validation set. Since node labels are treated as public under our edge-level privacy model, this tuning incurs no additional privacy cost. 
+
+## 3.3 Link Prediction 
+
+We now turn to the second query type of Definition 2.1. Link pre-diction is particularly delicate under edge-level DP, because the prediction target is the existence of an edge, which is exactly the information to be protected. In node classification, labels are public supervision, so that channel is privacy-free; any supervised link predictor instead reads edge-existence labels and thus protected data. PriDyG therefore stays in post-processing: its default link predictor is a training-free function of the privatized PMA repre-sentations, and the only component that requires edge labels is calibrated on randomized-response labels on a disjoint set of node pairs. 
+
+Cosine Scoring as the Default Link Predictor. After private multi-hop aggregation, each node 𝑣 obtains a privatized multi-hop representation ¯ z𝑣 = [¯z(0) 
+
+> 𝑣
+
+∥¯z(1) 
+
+> 𝑣
+
+∥ · · · ∥ ¯z(𝐾 ) 
+
+> 𝑣
+
+], where ¯ z(𝑘 ) 
+
+> 𝑣
+
+is de-rived from PMA. For a candidate node pair (𝑢, 𝑣 ), PriDyG com-putes a structural link score as the cosine similarity of these rep-resentations: 𝑠 cos (𝑢, 𝑣 ) = ¯z⊤     
+
+> 𝑢 ¯z𝑣
+> ∥¯z𝑢 ∥2∥¯z𝑣 ∥2
+
+. For fusion and calibration, we map the cosine score to [0, 1] by the deterministic transformation ˜𝑠 cos (𝑢, 𝑣 ) = 𝑠 cos (𝑢,𝑣 )+ 12 .
+
+This cosine-based predictor is the default link prediction method in PriDyG. It does not access raw edge labels and does not inspect the original graph during inference. Since it only operates on al-ready privatized PMA representations, it is a post-processing step of the edge-level DP PMA mechanism and incurs no additional privacy cost. 
+
+LLM semantic score. Cosine scoring captures privatized struc-tural similarity, but DP noise perturbs every ¯ z𝑣 and can damage the fine-grained ordering that ranking metrics depend on. As comple-mentary evidence, PriDyG computes a semantic score from node text alone: 𝑠 LLM (𝑢, 𝑣 ) = 𝑃 LLM (“Yes” | 𝑡 𝑢 , 𝑡 𝑣 ), where 𝑡 𝑢 and 𝑡 𝑣 are the textual attributes of nodes 𝑢 and 𝑣 . The prompt is instantiated per domain: for citation graphs, it asks whether two papers are likely connected by citation or topical relevance; for product graphs, whether two products are likely co-purchased. Since the prompt contains only public node text and no topology, 𝑠 LLM consumes no privacy budget. 
+
+Private fusion-weight calibration. The two scores are combined by the confidence-gated rule of node classification, with the gate measured on a scalar score. The fusion is post-processing, so the choice of (𝛼, 𝜏 ) is not free. Unlike node classification, where these are tuned on public node labels, the tuning signal is the edge exis-tence itself, which edge-level DP protects. We therefore calibrate on randomized-response labels. We randomly partition the candidate pairs in  V
+
+> 2
+
+ into the fusion partition P𝑓 𝑢𝑠 (with 𝑟 = 5% assigned to P𝑓 𝑢𝑠 ) and the remainder 
+
+P𝑡𝑟𝑎𝑖𝑛 . At 𝑡 = 0, for every pair (𝑢, 𝑣 ) ∈ P 𝑓 𝑢𝑠 , we release a single privatized copy of its existence bit 𝑏 𝑢𝑣 = ⊮[( 𝑢, 𝑣 ) ∈ E (0) ] via randomized response [30], ˜𝑏 𝑢𝑣 = 𝑏 𝑢𝑣 w.p. 𝑒 𝜖 RR   
+
+> 𝑒 𝜖 RR +1
+
+, ˜𝑏 𝑢𝑣 = 1 − 𝑏 𝑢𝑣 otherwise , (5) where 𝜖 RR is the privacy budget allocated to randomized response. Parallel composition applies only if each edge is touched by one mechanism, so we exclude the initial edges in P𝑓 𝑢𝑠 from the initial PMA adjacency. A pair of P𝑓 𝑢𝑠 that becomes an edge at some 𝑡 > 0 is instead processed by incremental PMA (Section 3.4). Hence, initial calibration edges are protected through randomized response, while subsequent edge insertions are protected through incremental PMA. The weight 𝛼 and threshold 𝜏 are then selected by grid search, maximizing the empirical AUC computed on the privatized link labels { ˜𝑏 𝑢𝑣 }.Lemma 3.1 (Privacy of fusion calibration). The release of 
+
+{ ˜𝑏 𝑢𝑣 }(𝑢,𝑣 ) ∈ P fus satisfies edge-level (𝜖 RR , 0)-DP. Moreover, the joint release of the full PriDyG output, incremental PMA outputs (Theo-rem 3.3) and the calibration bits, satisfies edge-level  max (𝜖 PMA , 𝜖 RR ), 𝛿 -DP, for any number of retrains and any schedule. 
+
+The proof of Lemma 3.1 is in Appendix A. PriDyG: Privacy-preserving Dynamic Graph Inference with LLM-GNN Collaboration Conference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+In all experiments, we set 𝜖 RR = 𝜖 PMA , so the end-to-end guaran-tee of PriDyG remains (𝜖 PMA , 𝛿 )-DP, unchanged from Theorem 3.3. 
+
+## 3.4 Dynamic Graph Handling via Incremental PMA 
+
+A central challenge in dynamic graph inference under DP is that structural changes require re-running PMA, yet each invocation consumes privacy budget. Naively re-running PMA on the entire 
+
+graph at every retrain would cause the total privacy cost to grow linearly as 𝑀 · 𝜖 PMA , where 𝑀 is the number of retrains. We intro-duce incremental PMA , which keeps the total privacy budget at a 
+
+constant 𝜖 PMA regardless of the number of retrains. 
+
+3.4.1 Baseline: Geometrically Decaying Budget Allocation. A straight-forward baseline is to rerun full PMA over the entire current graph whenever a retraining command is issued, while assigning a geomet-rically decaying privacy budget to successive retraining operations. Specifically, given a total privacy budget 𝜖 tot , the budget allocated to the 𝑚 -th retraining can be defined as 𝜖 𝑚 = (1 − 𝑞 )𝑞 𝑚 𝜖 tot , 0 < 𝑞 < 1.
+
+Since Í∞ 
+
+> 𝑚 =0
+
+𝜖 𝑚 = 𝜖 tot , this strategy supports an unbounded number of retraining operations without exceeding the prescribed total privacy budget. Similar geometric budget-allocation strategies have been adopted for continual DP release [7]. However, this baseline suffers from severe utility degradation over long-running update streams. As the number of retraining op-erations increases, the privacy budget available to later retraining operations decays exponentially toward zero. Consequently, the required noise grows rapidly, making the updated model increas-ingly inaccurate. Moreover, because each retraining still accesses the entire graph, historical edges are repeatedly processed; the method controls the cumulative privacy loss only by progressively weakening the utility of later releases. 
+
+3.4.2 Incremental PMA Algorithm. The graph evolves through edge insertions. As shown in Figure 2, incremental PMA maintains an 
+
+edge buffer B that accumulates newly arrived edges since the last retrain. When a retraining command is issued (by any external policy), incremental PMA processes all edges in B, updates the cached aggregations, and clears B. We denote the edges processed at the 𝑚 -th retrain as ΔE (𝑚 ) and write E (𝑚 ) = E (𝑚 −1) ∪ ΔE (𝑚 ) .The retraining schedule itself is not part of the algorithm and does not affect the privacy guarantee. At the initial retrain ( 𝑚 = 0), we run full PMA on E (0) and cache both the pre-normalization aggregations ˜ Z(𝑘 ) and their row-normalized counterparts ¯ Z(𝑘 ) for all hops 𝑘 . At each subsequent retrain 𝑚 ≥ 1, the hops are updated sequentially, in increasing order 
+
+𝑘 = 1, 2, . . . , 𝐾 ; the update for hop 𝑘 begins only after the update for hop 𝑘 − 1 has completed. Each retrain proceeds as follows: (1) Build delta adjacency matrix. Construct ΔA(𝑚 ) from the new edges ΔE (𝑚 ) .(2) Compute delta aggregation with noise. For each hop 
+
+𝑘 = 1, . . . , 𝐾 in order :
+
+Δ ˜Z(𝑘 ) = ΔA(𝑚 ) ¯Z(𝑘 −1) 
+
+> new
+
++ N ( 0, 𝜎 2I), (6) where ¯ Z(𝑘 −1) 
+
+> new
+
+denotes the hop-(𝑘 −1) normalized features 
+
+finalized in Step 3 of the current retrain , i.e., strictly before hop 𝑘 is processed. For the base case 𝑘 = 1, ¯ Z(0) 
+
+> new
+
+= ¯Z(0) is the row-normalized encoder output, which depends only on node text and is therefore identical across all retrains. (3) Update the cached features. 
+
+˜Z(𝑘 ) 
+
+> new
+
+= ˜Z(𝑘 ) 
+
+> cached
+
++ Δ ˜Z(𝑘 ) , ¯Z(𝑘 ) 
+
+> new
+
+= Normalize   ˜Z(𝑘 )
+
+> new
+
+, (7) where ˜ Z(𝑘 ) 
+
+> cached
+
+is the pre-normalization aggregation carried over from the previous PMA. Store ˜ Z(𝑘 ) 
+
+> new
+
+and ¯ Z(𝑘 ) 
+
+> new
+
+for the next retrain. 
+
+Sequential hop updates . Equation (6) intentionally multiplies 
+
+ΔA(𝑚 ) by the updated lower-hop features ¯ Z(𝑘 −1) 
+
+> new
+
+rather than by the stale cache ¯ Z(𝑘 −1)
+
+> cached
+
+. This introduces no circularity: within a retrain, hop 𝑘 consumes only the finalized output of hop 𝑘 − 1, exactly mirroring the sequential hop structure of full PMA in Eqs. (1), and hop 𝑘 never depends on its own output. The choice is also important for utility: using the stale cache would let new edges aggregate only pre-update features, so a two-hop path traversing two newly inserted edges would transfer no information at all. With Eq. (6), hop 1 is exact (since ¯ Z(0) is edge-independent, ˜ Z(1) 
+
+> new
+
+equals the hop-1 aggregation of a full retrain up to the noise realization), and higher hops satisfy the capture guarantees of Section 3.6. Privacy is unaffected by this adaptivity: as shown in the proof of Theorem 3.3, conditional on the outputs released so far, each hop is a Gaussian mechanism of sensitivity √2, and the 𝐾 hops of a retrain have exactly the same mechanism structure as one static PMA invocation, so any accounting valid for static PMA applies unchanged. 
+
+Which modules are retrained. Incremental PMA caches aggre-gations of fixed input features. Accordingly, after the initial retrain, the encoder 𝑓 𝜃 is frozen; only the classification head 𝑔 𝜙 , whose output is never re-aggregated, is retrained at each retrain, and since 𝑔 𝜙 consumes only already-privatized features, its retraining is post-processing and incurs no privacy cost. 32       
+
+> 1
+> 45
+> Old graph
+> 32
+> 1
+> 45
+> New graph
+> ෨𝑍 𝑐𝑎𝑐ℎ𝑒𝑑 (𝑘)
+> ҧ𝑍 𝑐𝑎𝑐ℎ𝑒𝑑 (𝑘)
+> ෨𝑍 𝑛𝑒𝑤 (𝑘)
+> ҧ𝑍 𝑛𝑒𝑤 (𝑘)
+> 3
+> 1
+> 45
+> Edge buffer
+> ∆ ෨ 𝑍 (𝑘) = ∆𝐴 ∗ ҧ𝑍 𝑛𝑒𝑤 (𝑘−1) + 𝑁(0, 𝜎 2𝐼)
+> ෨𝑍 𝑛𝑒𝑤 (𝑘) = ∆ ෨ 𝑍 (𝑘) + ෨ 𝑍 𝑐𝑎𝑐ℎ𝑒𝑑 (𝑘)
+> ҧ𝑍 𝑛𝑒𝑤 (𝑘) = 𝑁𝑜𝑟𝑚𝑎𝑙𝑖𝑧𝑒 ( ෨ 𝑍 𝑛𝑒𝑤 (𝑘) )
+
+Figure 2: Example for incremental PMA. 
+
+Example 3.2. As shown in Figure 2, the edge buffer is {( 1, 5), (3, 4)} .When the next retraining command is issued, incremental PMA builds the delta adjacency ΔA, whose only nonzero entries corre-spond to the two undirected edges: ΔA[1, 5] = ΔA[5, 1] = ΔA[3, 4] =
+
+ΔA[4, 3] = 1. The delta aggregation at hop 𝑘 therefore touches only the four endpoints of the buffered edges: 
+
+ΔA ¯Z(𝑘 −1) 
+
+> new
+
+=  ¯Z(𝑘 −1) 
+
+> new
+
+[5], 0, ¯Z(𝑘 −1) 
+
+> new
+
+[4], ¯Z(𝑘 −1) 
+
+> new
+
+[3], ¯Z(𝑘 −1) 
+
+> new
+
+[1]  .Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Yuyang Xia, Ruixuan Liu, and Li Xiong 
+
+The entries correspond to node 1 through 5, respectively. That is, node 1 receives node 5’s (already updated) hop-(𝑘 −1) representa-tion and vice versa, nodes 3 and 4 receive each other’s representa-tions, and node 2—incident to no new edge—receives the zero vector. The noisy delta is then added to the cached pre-normalization fea-tures ˜ Z(𝑘 ) 
+
+> cached
+
+and re-normalized. 
+
+## 3.5 Privacy Analysis of Incremental PMA 
+
+The privacy guarantee of incremental PMA follows from a simple structural property: each edge is processed exactly once. When an edge arrives, it enters the buffer; when a retraining command is issued, the buffer is cleared. Regardless of the retraining schedule, each edge incurs the privacy cost of one static PMA invocation. This decouples the privacy analysis from the retraining policy entirely. Theorem 3.3 (Constant privacy budget under incremental PMA). Fix the noise scale 𝜎 , the number of hops 𝐾 , and 𝛿 ∈ ( 0, 1),and let 𝜖 PMA be any value such that a single static 𝐾 -hop PMA in-vocation with noise scale 𝜎 satisfies edge-level (𝜖 PMA , 𝛿 )-DP (e.g., as certified by the accountant of [22]). Let 𝐵 0 = E (0) and 𝐵 𝑚 = ΔE (𝑚 )
+
+for 𝑚 ≥ 1 denote the edge batches drained at each retrain. Then for any number of retrains 𝑀 and any retraining schedule, the full out-put of incremental PMA, 𝑌 0: 𝑀 = (𝑌 0, 𝑌 1, . . . , 𝑌 𝑀 ), 𝑌 𝑚 = Δ ˜Z(𝑘 )
+
+> 𝑚
+> 𝐾 𝑘 =1
+
+,
+
+satisfies edge-level (𝜖 PMA , 𝛿 )-DP. In particular, the privacy cost does not grow with 𝑀 , does not depend on the retraining schedule, and equals that of a single static PMA invocation. 
+
+Proof of Theorem 3.3 can be found in Appendix A. 
+
+## 3.6 Error Analysis of Incremental PMA 
+
+We now characterize the approximation error of incremental PMA relative to a full retrain on the current graph. There are two sources of errors. First, because cached contributions from older edges are not recomputed, incremental PMA omits propagation paths that traverse a newer edge followed by an older edge. This yields a structured approximation error: one-hop propagation is exact, and at least half of all two-hop transfers are retained. Second, each re-train adds fresh Gaussian noise to the cached aggregation, causing the accumulated noise variance to grow linearly with the num-ber of retrains. We formalize these two sources of error below. We first analyze path capture in Theorem 3.4 using noiseless, pre-normalization linear propagation (row-wise ℓ2-normalization is a per-hop post-processing and does not change which path can contribute information). We then analyze noise accumulation sepa-rately in Proposition 3.7. 
+
+Captured-path analysis. Assign each edge the index of the retrain at which it was drained from the buffer, with the initial edge set 
+
+E (0) as batch 0, and let A𝑖 denote the adjacency matrix of 𝑖 th batch 
+
+𝐵 𝑖 . Write Z = ¯Z(0) , which depends only on node text and is identical across retrains, and let F(𝑘 ) and I(𝑘 ) denote the 𝑘 -hop aggregations after retrain 𝑚 under a full retrain and under incremental PMA, respectively. Theorem 3.4 (Captured-path characterization). After any retrain 𝑚 and for every hop 𝑘 ,
+
+I(𝑘 ) =∑︁      
+
+> 0≤𝑖 1≤···≤ 𝑖 𝑘 ≤𝑚
+
+A𝑖 𝑘 · · · A𝑖 1 Z, (8) 
+
+whereas the full retrain F(𝑘 ) =  Í 𝑖 ≤𝑚 A𝑖 
+
+𝑘 Z expands into all length-
+
+𝑘 paths over {A0, . . . , A𝑚 }. Equivalently, a 𝑘 -hop path contributes to I(𝑘 ) if and only if the batch indices of its edges, read in traversal order, are non-decreasing: information may flow from older edges onto newer ones, but never from newer edges back across older ones. 
+
+Proof of Theorem 3.4 can be found in Appendix A, which unrolls the update recursion across retrains; the error F(𝑘 ) − I(𝑘 ) collects exactly the words containing an older-batch step after a newer-batch step, whose source is the staleness of the cache: old edges, frozen in the cache, never re-aggregate features refreshed by later insertions. The error is thus structured and bounded—incremental PMA omits only these “backward-in-time” paths—rather than an unbounded drift, and it vanishes entirely for 𝐾 = 1: Corollary 3.5 (One hop: lossless in signal). After every re-train, I(1) = F(1) , thus incremental PMA preserves all one hop infor-mation in the noiseless aggregation. 
+
+Corollary 3.6 (Two hops: at least half of all wedge trans-fers). Two-hop information flows along wedges 𝑢 −𝑤 −𝑣 , each carrying two distinct information transfers, one per traversal direction. Let 𝜌 be the fraction of wedge transfers whose two edges lie in distinct batches. Then captured fraction at hop 2 = 1 − 12 𝜌 ≥ 12 .
+
+In Example 3.2, edges (1, 3) and (1, 5) arrive in different batches, so the transfer 3 → 1 → 5 is the captured path and 5 → 1 → 3 is the lost one. 
+
+Noise accumulation analysis. We next quantify how the Gauss-ian perturbations introduced across incremental retrains accumu-late in the cached representations and compare this growth with the geometrically decaying baseline. Proposition 3.7 (Noise accumulation: linear vs. exponen-tial). Fix the noise scale 𝜎 in each PMA invocation. After 𝑀 in-cremental retrains, the hop-𝑘 cache ˜Z(𝑘 ) contains the sum of 𝑀 +1
+
+independent Gaussian noise N ( 0, 𝜎 2I), yielding a total variance of 
+
+(𝑀 +1)𝜎 2 and a √𝑀 +1-fold inflation in noise magnitude over a single full PMA on the final graph under the same privacy budget. At hop 
+
+1, Corollary 3.5 shows that the noiseless signal matches the one-shot full retrain, so this noise is the only deviation. In contrast, under the geometrically decaying baseline of Section 3.4.1, the per-retrain noise scale grows exponentially , 𝜎 𝑚 = Θ 𝑞 −𝑚  at fixed 𝛿 , and perturbs the entire released representation. 
+
+The one-shot reference is an oracle that observes the entire final graph in advance and therefore cannot answer any query while the stream is evolving. So the √𝑀 +1 overhead should be interpreted as the intrinsic cost of continual release relative to the unattainable oracle, and price is an 𝑂 (𝑀 ) accumulation of noise variance. Incre-mental PMA therefore trades a structured, bounded approximation error (omitting newer-to-older paths while retaining at least half of all two-hop transfers) and a polynomially growing noise floor for a constant privacy budget, whereas geometric decay is structurally unbiased but exponentially noisy. Proofs of Corollary 3.5, 3.6, and Proposition 3.7 can be found in Appendix A. PriDyG: Privacy-preserving Dynamic Graph Inference with LLM-GNN Collaboration Conference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+## 4 Experiments 
+
+We evaluate PriDyG on node classification and link prediction across four benchmark datasets under edge-level DP, in both static and dynamic settings. 
+
+## 4.1 Experimental Setup 
+
+Datasets. We use four graph benchmarks spanning different do-mains and scales: Cora [11]: A citation network of machine learn-ing papers, where each node represents a paper with title and abstract, and edges denote citation links. The task is to classify papers into 7 categories (e.g., Neural Networks, Reinforcement Learning). PubMed [33]: A biomedical citation network of diabetes-related publications. Nodes are papers classified into 3 categories of diabetes research. ogbn-arxiv [9]: A large-scale citation net-work of computer science arXiv papers spanning 40 subject areas (e.g., cs.CV, cs.LG, cs.CL). ogbn-products [9]: A co-purchasing network from Amazon, where nodes are products with textual de-scriptions and edges connect frequently co-purchased items. Prod-ucts are classified into 44 categories. Each dataset is integrated with a train/valid/test node split. Therefore, each node in the graph belongs to one of the train/valid/test sets. For all datasets, we encode node text (title and abstract/description) into 1024-dimensional embeddings using BGE-large-en-v1.5 [32] as node features. 
+
+Dynamic Setting. In the streaming evaluation, we consider the edge insertion case. The graph starts with only train-train edges. Remaining edges are inserted one by one in random order. Every insertion has an independent probability 𝑝 to trigger retraining (default 𝑝 = 0 .5%). 
+
+Privacy and Model Configuration. Unless otherwise stated, we use 𝛿 = 10 −5 for all experiments. We set 𝜖 PMA = 6.0 with 𝐾 = 2hops, calibrating the noise scale 𝜎 to this budget with the Rényi-DP accountant of GAP [22]. The GNN module uses a 3-layer MLP encoder (hidden dim = 256, encoding dim = 128, dropout = 0.5) pre-trained for 100 epochs, followed by a 2-layer MLP classification head trained for 200 epochs. The LLM module uses Llama-3-8B-Instruct [2] for logit scoring. 
+
+Baselines. For node classification, we compare PriDyG against the following methods: ProGAP [21]: the state-of-the-art static edge-level DP GNN and a stronger static backbone than the DP GNN pipeline inside PriDyG; we adopt it so that our comparisons are against the stronger baseline. In the dynamic setting, it is retrained from scratch at each retrain, with 𝜖 accumulating under sequential composition (trivial retrain) or with geometrically decaying budgets. 
+
+LLM-only : The ablation baseline uses LLM logit scoring using only node text, without any graph-based component. PriDyG w/o LLM :The ablation baseline uses Graph score without any LLM-based component. Other non-private baselines : results on the same datasets as reported in [26], marked with ‘*’. For link prediction, we compare these baseline methods: Cosine :GNN-based node embeddings with cosine similarity scoring. LLM-only : LLM logit scoring using only node text, without any graph-based component. DPLP [17] : A private-training link prediction method that relies on query-specific subgraph extraction, which does not protect the queried graph structure at inference time. 
+
+Table 2: Static node classification accuracy.                                                       
+
+> Method Cora PubMed Arxiv Products 𝜖 𝛿
+> LLM-only 0.613 0.887 0.520 0.631 00GCN* 0.751 0.864 0.726 0.756 N/A N/A LLaGA-HO* [3] 0.886 0.888 0.740 0.736 N/A N/A GraphGPT* [27] N/A 0.847 0.622 N/A N/A N/A GraphICL-70B*[26] 0.836 0.931 0.737 0.815 N/A N/A ProGAP 0.725 0.914 0.729 0.859 6.0 10 −5
+> PriDyG w/o LLM 0.722 0.914 0.726 0.850 6.0 10 −5
+> PriDyG 0.742 0.915 0.734 0.872 6.0 10 −5
+
+Table 3: Node classification accuracy under edge insertion.                                                            
+
+> Cora PubMed Arxiv Products Method Acc 𝜖 Acc 𝜖 Acc 𝜖 Acc 𝜖
+> ProGAP + Without retrain 0.709 60.908 60.726 60.860 6ProGAP + Trivial retrain 0.722 168 0.917 924 0.759 12,372 0.875 18,192 ProGAP + Geometric Decay 0.703 60.878 60.708 60.856 6LLM-only 0.621 00.900 00.543 00.614 0PriDyG w/o LLM 0.719 60.914 60.740 60.873 6PriDyG 0.738 60.918 60.760 60.881 6
+
+## 4.2 Node Classification Results 
+
+Static Evaluation. Table 2 reports node classification accuracy in the static setting, where the full graph is available, and the model is trained once. PriDyG achieves accuracy comparable to the ProGAP baseline and other non-DP baselines. 
+
+Dynamic Evaluation: Edge Insertion. Table 3 reports results under the edge insertion protocol: edges arrive sequentially, and at each insertion we query their endpoints that belong to the test set. PriDyG achieves the highest accuracy among all constant-budget methods, and matches naive retraining, which consumes up to three orders of magnitude more privacy budget. Most of this gain comes from the GNN branch (PriDyG w/o LLM), yet the LLM branch— despite its lower standalone accuracy—still contributes a consistent improvement, since the two branches are accurate on complemen-tary label sets. Among the constant-budget alternatives, geometric decay performs worst—falling below even ProGAP without retrain-ing, i.e., a model frozen at G (0) that ignores all subsequent edges. This ordering is intuitive: geometric decay pays for freshness with exponentially growing noise, which ultimately destroys the graph signal and negates the benefit of incorporating the new edges. In contrast, the frozen model at least retains a clean snapshot. Accuracies here exceed those in Table 2 because the query sets differ: the streaming protocol queries only endpoints of inserted edges, which skew toward high-degree nodes, whereas the static setting also includes isolated and low-degree test nodes. This selec-tion effect inflates all methods uniformly, so comparisons should be read within each table; Table 4, which evaluates the full test set after the stream ends, is the like-for-like counterpart to Table 2. 
+
+Table 4: Node classification accuracy after edge insertion.             
+
+> Method Cora PubMed Arxiv Product
+> PriDyG w/o LLM 0.703 0.896 0.705 0.842 PriDyG 0.731 0.915 0.721 0.851
+
+Long-term effectiveness. Table 4 reports the accuracy of PriDyG on the full test set after all the edge insertions. PriDyG loses only Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Yuyang Xia, Ruixuan Liu, and Li Xiong 
+
+1% on average relative to static training on the same graph, against around 2% for its GNN branch alone, indicating that the LLM-GNN collaboration remains effective under long-term updates. 
+
+Table 5: Effect of privacy budgets 𝜖 on node classification.                                            
+
+> Dataset ProGAP PriDyG
+> 𝜖 =1𝜖 =6𝜖 =10 𝜖 =1𝜖 =6𝜖 =10
+> Cora 0.712 0.725 0.723 0.731 0.742 0.739 PubMed 0.904 0.914 0.915 0.907 0.915 0.927 Arxiv 0.711 0.729 0.727 0.730 0.734 0.745 Products 0.847 0.859 0.859 0.853 0.872 0.874
+
+Effect of the privacy budget. Table 5 shows the accuracy of PriDyG under different 𝜖 for static node classification. The accuracy increases noticeably from 𝜖 = 1 to 𝜖 = 6, while the increase from 
+
+𝜖 = 6 to 𝜖 = 10 is small, suggesting that the high 𝜖 has reached the saturation point. PriDyG consistently outperforms or matches ProGAP across privacy budgets. 
+
+## 4.3 Link Prediction Results 
+
+Static Evaluation. Table 6 reports link prediction performance in the static setting. We use AUC as the evaluation metric, i.e., the model’s ability to separate true edges from randomly sampled neg-ative (non-existent) edges by predicted scores. PriDyG achieves the highest AUC on all four datasets, outperforming both the graph-only cosine baseline and LLM-only scoring. The LLM supplies se-mantic similarity that compensates for DP noise in the embeddings at zero additional privacy cost. DPLP does not complete training on Arxiv or Products within 72 hours, reported as ‘N/A’. 
+
+Dynamic Evaluation: Edge Insertion. Table 7 compares link prediction AUC under edge insertion. PriDyG achieves the best AUC with the smallest budget cost across all four datasets. 
+
+Long-term effectiveness. Table 8 reports the accuracy of PriDyG on the test set after all the edge insertions. As in the node classifi-cation task, compared with fully training, PriDyG’s accuracy drops by only roughly 1%, while the GNN part drops by at most more than 5%, demonstrating PriDyG’s effectiveness under long-term updates. 
+
+Effect of the privacy budget. In Table 9, we show the accuracy of PriDyG under different 𝜖 for static link prediction. The conclusion is similar to that of Table 5: the AUC increases noticeably from 
+
+𝜖 = 1 to 𝜖 = 6. The AUC difference between 𝜖 = 6 and 𝜖 = 10 is quite small. PriDyG also consistently outperforms ProGAP across privacy budgets, with a significant margin in most cases. 
+
+## 5 Related Works 
+
+Differentially Private Graph Learning. Differential privacy [6] is well established for deep learning [1] and increasingly applied to graph-structured data [14]. Under edge-level DP, existing works per-turb node features before aggregation [20], decouple graph convolu-tions [5, 37], or protect edges specifically for link prediction [16, 17]. Most relevant to us, GAP [22] adds calibrated Gaussian noise to multi-hop aggregation, and ProGAP [21] extends it with progres-sive training. All of them, however, assume static graphs and a single round of training. When the graph evolves over time, and the model must be periodically retrained, sequential composition 
+
+Table 6: Static link prediction AUC ( 𝜖 = 6.0, 𝛿 = 10 −5).                     
+
+> Method Cora PubMed Arxiv Products
+> Cosine 0.888 0.853 0.961 0.976 DPLP 0.910 0.949 N/A N/A LLM-only 0.943 0.965 0.983 0.975 PriDyG 0.947 0.977 0.989 0.986
+
+Table 7: Link prediction AUC under edge insertion.                                                            
+
+> Cora PubMed Arxiv Products Method AUC 𝜖 AUC 𝜖 AUC 𝜖 AUC 𝜖
+> ProGAP + Without retrain 0.840 60.783 60.910 60.921 6ProGAP + Trivial retrain 0.852 150 0.787 732 0.923 9,828 0.939 14,286 ProGAP + Geometrically Decaying 0.824 60.774 60.893 60.902 6LLM-only 0.916 00.961 00.975 00.972 0PriDyG w/o LLM 0.852 60.786 60.924 60.936 6PriDyG 0.929 60.967 60.983 60.978 6
+
+Table 8: Link prediction AUC after edge insertion.             
+
+> Method Cora PubMed Arxiv Product
+> PriDyG w/o LLM 0.855 0.793 0.927 0.934 PriDyG 0.938 0.964 0.977 0.980
+
+Table 9: Effect of the privacy budgets 𝜖 on link prediction.                                            
+
+> Dataset Cosine PriDyG
+> 𝜖 =1𝜖 =6𝜖 =10 𝜖 =1𝜖 =6𝜖 =10
+> Cora 0.860 0.888 0.897 0.935 0.947 0.948 PubMed 0.808 0.853 0.855 0.954 0.977 0.969 Arxiv 0.954 0.961 0.959 0.988 0.989 0.989 Products 0.967 0.976 0.977 0.983 0.986 0.986
+
+causes the privacy budget to grow linearly with the number of retrains. We close this gap with incremental PMA, which exploits parallel composition over disjoint edge batches to achieve constant total privacy cost. 
+
+Privacy-Preserving Dynamic Graph Analysis. Prior work on dynamic graphs under edge-level DP targets traditional graph queries such as graph density [15, 19], or graph publishing —e.g., DyGAN-EDP [10] models a dynamic graph as discrete snapshots and synthesizes privacy-preserving future ones with a GAN. To the best of our knowledge, PriDyG is the first framework for edge-level DP inference over continually updated graphs at a constant privacy budget. 
+
+LLMs for Graph Learning. LLMs have shown strong poten-tial for graph tasks by leveraging node-level textual attributes [4, 29], through graph-to-token mappings [3], graph instruction tun-ing [27], or structured prompting for in-context learning [26]. None of them consider privacy constraints. PriDyG instead exploits the fact that LLM inference relies solely on node text, which edge-level DP does not protect: the LLM branch incurs zero privacy cost, making it an ideal complement to the DP-constrained GNN. PriDyG: Privacy-preserving Dynamic Graph Inference with LLM-GNN Collaboration Conference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+## 6 Conclusion 
+
+We formulated the Edge-level DP Dynamic Graph Inference (EDG) problem and proposed PriDyG, which combines GNN-based struc-tural learning with LLM-based semantic reasoning under edge-level DP. PriDyG introduces two contributions: (1) incremental PMA, which exploits the linearity of graph aggregation and dis-joint edge batching to keep the total privacy budget independent of the number of model updates, and (2) privacy-free LLM aug-mentation, which uses node text at zero additional privacy cost to complement the DP-constrained GNN through confidence-gated fusion. Experiments on four benchmarks show that PriDyG attains utility with non-private baselines on both node classification and link prediction, while reducing cumulative privacy cost by orders of magnitude over naive retraining. Future work includes extend-ing PriDyG to node-level privacy and to graph streams with edge deletions. 
+
+## References 
+
+[1] Martin Abadi, Andy Chu, Ian Goodfellow, H Brendan McMahan, Ilya Mironov, Kunal Talwar, and Li Zhang. 2016. Deep learning with differential privacy. In 
+
+Proceedings of the 2016 ACM SIGSAC conference on computer and communications security . 308–318. [2] AI@Meta. 2024. Llama 3 Model Card. (2024). https://github.com/meta-llama/ llama3/blob/main/MODEL_CARD.md [3] Runjin Chen, Tong Zhao, Ajay Jaiswal, Neil Shah, and Zhangyang Wang. 2024. Llaga: Large language and graph assistant. arXiv preprint arXiv:2402.08170 (2024). [4] Zhikai Chen, Haitao Mao, Hang Li, Wei Jin, Hongzhi Wen, Xiaochi Wei, Shuaiqiang Wang, Dawei Yin, Wenqi Fan, Hui Liu, et al. 2024. Exploring the potential of large language models (llms) in learning on graphs. ACM SIGKDD Explorations Newsletter 25, 2 (2024), 42–61. [5] Eli Chien, Wei-Ning Chen, Chao Pan, Pan Li, Ayfer Ozgur, and Olgica Milenkovic. 2023. Differentially private decoupled graph convolutions for multigranular topology protection. Advances in Neural Information Processing Systems 36 (2023), 45381–45401. [6] Cynthia Dwork and Aaron Roth. 2014. The algorithmic foundations of differential privacy. Foundations and trends® in theoretical computer science 9, 3-4 (2014), 211–487. [7] Shuya Feng, Meisam Mohammady, Han Wang, Xiaochen Li, Zhan Qin, and Yuan Hong. 2024. Dpi: Ensuring strict differential privacy for infinite data streaming. In 2024 IEEE Symposium on Security and Privacy (SP) . IEEE, 1009–1027. [8] Dongqi Fu, Wenxuan Bao, Ross Maciejewski, Hanghang Tong, and Jingrui He. 2023. Privacy-preserving graph machine learning from data to computation: A survey. ACM SIGKDD Explorations Newsletter 25, 1 (2023), 54–72. [9] Weihua Hu, Matthias Fey, Marinka Zitnik, Yuxiao Dong, Hongyu Ren, Bowen Liu, Michele Catasta, and Jure Leskovec. 2020. Open graph benchmark: Datasets for machine learning on graphs. Advances in neural information processing systems 
+
+33 (2020), 22118–22133. [10] Liya Ma, Siqi Sun, Chen Li, Lu Liu, and Lihong Wang. 2026. A novel dynamic graph generative adversarial network with edge-level differential privacy. Neu-rocomputing 676 (2026), 132926. [11] Andrew Kachites McCallum, Kamal Nigam, Jason Rennie, and Kristie Seymore. 2000. Automating the construction of internet portals with machine learning. 
+
+Information Retrieval 3, 2 (2000), 127–163. [12] Ilya Mironov. 2017. Rényi differential privacy. In 2017 IEEE 30th computer security foundations symposium (CSF) . IEEE, 263–275. [13] Anirban Mitra and Subrata Paul. 2025. Analyzing social networks with dynamic graphs: Unravelling the ever-evolving connections. In Applied Graph Data Science .Elsevier, 195–214. [14] Tamara T Mueller, Dmitrii Usynin, Johannes C Paetzold, Daniel Rueckert, and Georgios Kaissis. 2022. SoK: Differential privacy on graph-structured data. arXiv preprint arXiv:2203.09205 (2022). [15] Sudipta Paul, Julián Salas, and Vicenç Torra. 2023. Edge local differential privacy for dynamic graphs. In International Symposium on Security and Privacy in Social Networks and Big Data . Springer, 224–238. [16] Yuxin Qi, Xi Lin, Ziyao Liu, Gaolei Li, Jingyu Wang, and Jianhua Li. 2024. Link-guard: Link locally privacy-preserving graph neural networks with integrated denoising and private learning. In Companion Proceedings of the ACM Web Con-ference 2024 . 593–596. [17] Xun Ran, Qingqing Ye, Haibo Hu, Xin Huang, Jianliang Xu, and Jie Fu. 2024. Differentially private graph neural networks for link prediction. In 2024 IEEE 40th International Conference on Data Engineering (ICDE) . IEEE, 1632–1644. [18] Sofya Raskhodnikova and Adam Smith. 2016. Differentially private analysis of graphs. Encyclopedia of Algorithms (2016). [19] Sofya Raskhodnikova and Teresa Anna Steiner. 2025. Fully dynamic algorithms for graph databases with edge differential privacy. Proceedings of the ACM on Management of Data 3, 2 (2025), 1–28. [20] Sina Sajadmanesh and Daniel Gatica-Perez. 2021. Locally private graph neural networks. In Proceedings of the 2021 ACM SIGSAC conference on computer and communications security . 2130–2145. [21] Sina Sajadmanesh and Daniel Gatica-Perez. 2024. Progap: Progressive graph neural networks with differential privacy guarantees. In Proceedings of the 17th ACM International Conference on Web Search and Data Mining . 596–605. [22] Sina Sajadmanesh, Ali Shahin Shamsabadi, Aurélien Bellet, and Daniel Gatica-Perez. 2023. {GAP }: Differentially private graph neural networks with aggre-gation perturbation. In 32nd USENIX Security Symposium (USENIX Security 23) .3223–3240. [23] Vedran Sekara, Arkadiusz Stopczynski, and Sune Lehmann. 2016. Fundamental structures of dynamic social networks. Proceedings of the national academy of sciences 113, 36 (2016), 9977–9982. [24] Josh Smith, Hassan Jameel Asghar, Gianpaolo Gioiosa, Sirine Mrabet, Serge Gaspers, and Paul Tyler. 2021. Making the most of parallel composition in differential privacy. arXiv preprint arXiv:2109.09078 (2021). [25] Li Sun, Zhongbao Zhang, Feiyang Wang, Pengxin Ji, Jian Wen, Sen Su, and Philip S Yu. 2022. Aligning dynamic social networks: An optimization over dynamic graph autoencoder. IEEE Transactions on Knowledge and Data Engineering 35, 6 (2022), 5597–5611. [26] Yuanfu Sun, Zhengnan Ma, Yi Fang, Jing Ma, and Qiaoyu Tan. 2025. Graphicl: Unlocking graph learning potential in llms through structured prompt design. In 
+
+Findings of the Association for Computational Linguistics: NAACL 2025 . 2440–2459. [27] Jiabin Tang, Yuhao Yang, Wei Wei, Lei Shi, Lixin Su, Suqi Cheng, Dawei Yin, and Chao Huang. 2024. Graphgpt: Graph instruction tuning for large language models. In Proceedings of the 47th International ACM SIGIR Conference on Research and Development in Information Retrieval . 491–500. [28] Jean-Philippe Vert and Yoshihiro Yamanishi. 2004. Supervised graph inference. 
+
+Advances in neural information processing systems 17 (2004). [29] Duo Wang, Yuan Zuo, Fengzhi Li, and Junjie Wu. 2024. Llms as zero-shot graph learners: Alignment of gnn representations with llm token embeddings. Advances in neural information processing systems 37 (2024), 5950–5973. [30] Yue Wang, Xintao Wu, and Donghui Hu. 2016. Using randomized response for differential privacy preserving data collection.. In EDBT/ICDT Workshops ,Vol. 1558. 0090–6778. [31] Ruofan Wu, Mingyang Zhang, Lingjuan Lyu, Xiaolong Xu, Xiuquan Hao, Xinyi Fu, Tengfei Liu, Tianyi Zhang, and Weiqiang Wang. 2023. Privacy-preserving design of graph neural networks with applications to vertical federated learning. 
+
+arXiv preprint arXiv:2310.20552 (2023). [32] Shitao Xiao, Zheng Liu, Peitian Zhang, and Niklas Muennighoff. 2023. C-Pack: Packaged Resources To Advance General Chinese Embedding. arXiv:2309.07597 [cs.CL] [33] Jian Xu, Chao Yu, Jiawei Xu, Vetle I Torvik, Jaewoo Kang, Mujeen Sung, Min Song, Yi Bu, and Ying Ding. 2025. PubMed knowledge graph 2.0: Connecting papers, patents, and clinical trials in biomedical science. Scientific data 12, 1 (2025), 1018. [34] Keyulu Xu, Weihua Hu, Jure Leskovec, and Stefanie Jegelka. 2018. How powerful are graph neural networks? arXiv preprint arXiv:1810.00826 (2018). [35] Yuanyuan Zeng, Yixiang Fang, Kun Chen, Yangfan Li, and Chenhao Ma. 2025. Efficient Maintenance of 2-Hop Labeling Index on Dynamic Small-World Graphs. 
+
+Proceedings of the VLDB Endowment 18, 7 (2025), 2005–2017. [36] Dalong Zhang, Xianzheng Song, Zhiyang Hu, Yang Li, Miao Tao, Binbin Hu, Lin Wang, Zhiqiang Zhang, and Jun Zhou. 2023. InferTurbo: A scalable system for boosting full-graph inference of graph neural network over huge graphs. In 2023 IEEE 39th International Conference on Data Engineering (ICDE) . IEEE, 3235–3247. [37] Qiuchen Zhang, Hong kyu Lee, Jing Ma, Jian Lou, Carl Yang, and Li Xiong. 2024. Dpar: Decoupled graph neural networks with node-level differential privacy. In 
+
+Proceedings of the ACM Web Conference 2024 . 1170–1181. 
+
+## A Proofs 
+
+Proof for Lemma 3.1 . Neighboring graphs differ in one undi-rected edge 𝑒 ★ = {𝑢 ★, 𝑣 ★}. Each pair’s bit is perturbed by Eq. (5) at most once, and the likelihood ratio of the two-point RR channel is bounded by 𝑒 𝜀 RR , giving pure 𝜀 RR -DP for the calibration release. For the joint statement: since ℎ is graph-independent, 𝑒 ★ lies in exactly one of Ptrain , Pfus . If 𝑒 ★ ∈ P train , the calibration bits are identically distributed under both graphs and the PMA transcript is (𝜀 PMA , 𝛿 )-DP by Theorem 3.3; if 𝑒 ★ ∈ P fus , the PMA transcript is identically Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Yuyang Xia, Ruixuan Liu, and Li Xiong 
+
+distributed (the pair is excluded from all adjacency matrices) and the calibration release is (𝜀 RR , 0)-DP. Parallel composition over the disjoint partition yields the maximum of the two guarantees. □
+
+Proof for Theorem 3.3 . Since each edge enters the buffer exactly once and is drained exactly once, the batches {𝐵 𝑚 }𝑀 𝑚 =0
+
+are disjoint by construction. Consider two neighboring dynamic graphs 𝐷 and 𝐷 ′ that differ in one undirected edge 𝑒 ★ = {𝑢 ★, 𝑣 ★},and let 𝑚 ★ be the unique retrain with 𝑒 ★ ∈ 𝐵 𝑚 ★ . We decompose the transcript into three segments and compare their conditional distributions under 𝐷 and 𝐷 ′.
+
+Before 𝑚 ★. For 𝑚 < 𝑚 ★, the computation accesses only batches disjoint from {𝑒 ★}, so (𝑌 0, . . . , 𝑌 𝑚 ★−1) has identical distribution under 𝐷 and 𝐷 ′.
+
+At 𝑚 ★. All features consumed at retrain 𝑚 ★—the cached aggre-gations carried over from previous retrains, and the lower-hop features ¯ Z(𝑘 −1) 
+
+> new
+
+finalized earlier within the same retrain—are deter-ministic functions of the transcript released so far. Conditional on that transcript, the only fresh access to 𝐵 𝑚 ★ at hop 𝑘 is the multipli-cation by ΔA(𝑚 ★ ) in Eq. (6), whose ℓ2-sensitivity to one undirected edge is √2: removing {𝑢 ★, 𝑣 ★} changes the rows of 𝑢 ★ and 𝑣 ★, each by at most one unit-norm vector. Hence 𝑌 𝑚 ★ , conditional on the pre-fix, is a sequence of 𝐾 adaptively composed Gaussian mechanisms with sensitivity √2 and scale 𝜎 —exactly the mechanism structure of one static 𝐾 -hop PMA invocation with respect to the edge 𝑒 ★.
+
+After 𝑚 ★. For 𝑚 > 𝑚 ★, the raw edge 𝑒 ★ is never re-accessed: later retrains touch only batches disjoint from {𝑒 ★} and otherwise depend on 𝑒 ★ solely through the already-released transcript. These segments are therefore (randomized) post-processing with respect to 𝑒 ★ and incur no additional privacy loss. Consequently, for any pair of neighboring graphs, the privacy loss of the full transcript is exactly that of a single static 𝐾 -hop PMA invocation with noise scale 𝜎 . Any (𝜖 PMA , 𝛿 )-DP guarantee certified for static PMA therefore transfers verbatim to 𝑌 0: 𝑀 , for every 𝑀 and every retraining schedule. □
+
+Proof of Theorem 3.4 . Let I(𝑘 ) 
+
+> 𝑚
+
+denote the noiseless hop-𝑘 
+
+cache after retrain 𝑚 . By Steps (2)–(3) of the algorithm with the noise omitted, the caches obey 
+
+I(𝑘 ) 
+
+> 𝑚
+
+= I(𝑘 ) 
+
+> 𝑚 −1
+
++ A𝑚 I(𝑘 −1) 
+
+> 𝑚
+
+, I(0) 
+
+> 𝑚
+
+= Z for all 𝑚, (9) since ¯ Z(0) depends only on node text, and hop 𝑘 multiplies the delta adjacency by the finalized hop-(𝑘 −1) features of the current retrain. We prove (8) by induction on (𝑚, 𝑘 ) in lexicographic order. For 
+
+𝑚 = 0, the initial retrain runs full PMA on 𝐵 0, so I(𝑘 ) 
+
+> 0
+
+= A𝑘  
+
+> 0
+
+Z, the unique (trivially non-decreasing) length-𝑘 word over {0}. For 𝑘 = 0, both sides equal Z (the empty path). For the inductive step, assume the claim for (𝑚 − 1, 𝑘 ) and (𝑚, 𝑘 − 1). In (9), the first term is the sum over all non-decreasing paths with indices in {0, . . . , 𝑚 − 1},i.e., those with 𝑖 𝑘 ≤ 𝑚 − 1; the second term equals 
+
+A𝑚 ∑︁    
+
+> 0≤𝑖 1≤···≤ 𝑖 𝑘 −1≤𝑚
+
+A𝑖 𝑘 −1 · · · A𝑖 1 Z =∑︁    
+
+> 0≤𝑖 1≤···≤ 𝑖 𝑘 ≤𝑚 𝑖 𝑘 =𝑚
+
+A𝑖 𝑘 · · · A𝑖 1 Z,
+
+exactly the non-decreasing paths with 𝑖 𝑘 = 𝑚 (the constraint 𝑖 𝑘 −1 ≤
+
+𝑚 is automatic). The two index sets are disjoint and their union is the set of all non-decreasing paths over {0, . . . , 𝑚 }, proving (8). Expanding F(𝑘 ) =  Í 𝑖 ≤𝑚 A𝑖 
+
+𝑘 Z yields all length-𝑘 paths. For a single retrain ( Anew = Aold + ΔA, i.e., 𝑚 = 1 with A0 = Aold 
+
+and A1 = ΔA), (8) specializes to 
+
+I(𝑘 ) =
+
+> 𝑘
+
+∑︁ 
+
+> 𝑖 =0
+
+ΔA𝑖 A𝑘 −𝑖  
+
+> old
+
+Z, (10) the paths in which every old-edge step precedes every new-edge step. Writing C(𝑘 ) = A𝑘 
+
+> old
+
+Z for the cached aggregation, the error 
+
+D(𝑘 ) = F(𝑘 ) − I(𝑘 ) collects all remaining paths—those containing at least one old-edge step after a new-edge step—and obeys the recursion 
+
+D(𝑘 ) = Aold 
+
+ F(𝑘 −1) − C(𝑘 −1)  + ΔA D (𝑘 −1) , D(1) = 0. (11) The first term of (11) exposes the source of the error: it is Aold 
+
+propagating the staleness of the cache—new edges always aggregate up-to-date features, but old edges, frozen in the cache, never re-aggregate features that were refreshed by later insertions. □
+
+Proof of Corollary 3.5 . For 𝑘 = 1, every length-1 word is trivially non-decreasing, so by Theorem 3.4, I(1) = Í𝑏 ≤𝑚 A𝑏 Z =
+
+Anew Z = F(1) . □
+
+Proof of Corollary 3.6 . A wedge with edges 𝑒 1, 𝑒 2 carries two transfers, corresponding to the paths  𝑒 1, 𝑒 2
+
+ and  𝑒 2, 𝑒 1
+
+. If the two edges were inserted in the same batch, or both lie in E (0) —then both paths are non-decreasing, and both transfers are captured by Theorem 3.4. If the two edges were inserted in different batches, then one edge is necessarily older than the other and exactly one path (older edge first) is non-decreasing: 50%. Hence the captured fraction is (1 − 𝜌 ) · 1 + 𝜌 · 12 = 1 − 12 𝜌 ≥ 12 . For a single retrain, this recovers D(2) = Aold ΔA Z from (11): the traversal crossing the old edge first is captured ( ΔA A old Z appears in (10)), while the traversal crossing the new edge first is lost. □
+
+Proof of Proposition 3.7 . The initial retrain injects one draw of N ( 0, 𝜎 2I) per hop (Eq. (4)), and each of the 𝑀 subsequent retrains injects one fresh draw per hop via Eq. (8), accumulated additively into the cache by Eq. (9). The 𝑀 +1 draws are mutually independent, so their variances sum to (𝑀 +1)𝜎 2. By Theorem 3.3, parallel compo-sition over disjoint batches lets every incremental retrain use the full per-invocation noise scale 𝜎 ; a one-shot full PMA on the final graph at the same (𝜖 PMA , 𝛿 ) calibrates to the same 𝜎 but perturbs each hop with a single draw, giving the √𝑀 +1 inflation in noise magnitude at identical privacy cost. At hop 1, the noiseless aggregations coin-cide by Corollary 3.5, so the deviation from the one-shot release is exactly this injected noise. For the geometrically decaying baseline, the Gaussian noise scale required for budget 𝜖 𝑚 = (1 − 𝑞 )𝑞 𝑚 𝜖 tot 
+
+at fixed 𝛿 satisfies 𝜎 𝑚 ∝ 1/𝜖 𝑚 = 𝑞 −𝑚 / (1 − 𝑞 )𝜖 tot 
+
+ = Θ 𝑞 −𝑚 ; and because that baseline re-runs full PMA, the entire representation released at retrain 𝑚 is perturbed at scale 𝜎 𝑚 , so utility collapses exponentially fast in the number of retrains. □
+
+## B LLM Prompt Templates 
+
+This appendix documents all LLM prompt templates used in our experiments. We use zero-shot prompting with logit-based scoring: the LLM computes log-probabilities over candidate answer tokens PriDyG: Privacy-preserving Dynamic Graph Inference with LLM-GNN Collaboration Conference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+(e.g., category names or “Yes”/“No”), and the candidate with the highest probability is selected. All prompts follow a consistent structure tailored to each task and dataset. 
+
+## B.1 Node Classification Prompts 
+
+Cora Node Classification Prompt 
+
+You are a scientific paper classification assistant. Choose the single best paper category for this paper. Paper title: {title} Paper abstract: {abstract} Choose the single best paper category for this paper from the candidate list. Candidates: Case Based: Papers on case-based reasoning, instance-based learning, and analogy-driven problem solving. Genetic Algorithms: Papers on evolutionary computation, genetic programming, and optimization via natural selection. Neural Networks: Papers on artificial neural networks, deep learning, backpropagation, and connectionist models. Probabilistic Methods: Papers on Bayesian methods, graphical models, expectation-maximization, and statistical inference. Reinforcement Learning: Papers on reward-based learning, policy optimization, Markov decision processes, and Q-learning. Rule Learning: Papers on inductive logic programming, decision rules, association rules, and symbolic rule extraction. Theory: Papers on computational learning theory, PAC learning, VC dimension, and formal analysis of algorithms. Output ONLY the category name from the candidate list. Do not output anything else. Answer: 
+
+ogbn-arxiv Node Classification Prompt 
+
+Classify this computer science paper into exactly one arXiv category. Title: {title} Abstract: {abstract} Categories: 0: cs.AI (Artificial Intelligence) 1: cs.AR (Hardware Architecture) 2: cs.CC (Computational Complexity) ... 39: cs.SY (Systems and Control) Output ONLY the integer label id from the candidate list. Do not output anything else. Answer: 
+
+The full list of 40 arXiv CS subcategories used as candidates is shown in Table 10. 
+
+Table 10: arXiv CS subcategories used as candidate labels.                                                                
+
+> Code Description Code Description
+> cs.AI Artificial Intelligence cs.IT Information Theory cs.AR Hardware Architecture cs.LG Machine Learning cs.CC Computational Complexity cs.LO Logic in Computer Science cs.CE Comp. Eng., Finance, & Sci. cs.MA Multiagent Systems cs.CG Computational Geometry cs.MM Multimedia cs.CL Computation and Language cs.MS Mathematical Software cs.CR Cryptography and Security cs.NA Numerical Analysis cs.CV Computer Vision & Pattern Rec. cs.NE Neural & Evolutionary Comp. cs.CY Computers and Society cs.NI Networking & Internet Arch. cs.DB Databases cs.OH Other Computer Science cs.DC Distributed & Parallel Comp. cs.OS Operating Systems cs.DL Digital Libraries cs.PF Performance cs.DM Discrete Mathematics cs.PL Programming Languages cs.DS Data Structures & Algorithms cs.RO Robotics cs.ET Emerging Technologies cs.SC Symbolic Computation cs.FL Formal Lang. & Automata Th. cs.SD Sound cs.GL General Literature cs.SE Software Engineering cs.GR Graphics cs.SI Social & Info. Networks cs.GT CS and Game Theory cs.SY Systems and Control cs.HC Human-Computer Interaction cs.IR Information Retrieval Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Yuyang Xia, Ruixuan Liu, and Li Xiong
+
+PubMed Node Classification Prompt 
+
+You are a biomedical paper classification assistant. Choose the single best diabetes category for this paper. Paper title: {title} Paper abstract: {abstract} Choose the single best diabetes category for this paper from the candidate list. Candidates: Diabetes Mellitus, Experimental Diabetes Mellitus, Type 1 Diabetes Mellitus, Type 2 Output ONLY the category name from the candidate list. Do not output anything else. Answer: 
+
+ogbn-products Node Classification Prompt 
+
+You are a product classification assistant. Choose the single best top-level product category for this Amazon product from the candidate list. Product title: {title} Product description: {content} Choose the single best top-level product category for the given product. Candidates: 0: Home & Kitchen 1: Health & Personal Care 2: Beauty ... Output ONLY the integer label id from the candidate list. Do not output anything else. Answer: 
+
+## B.2 Link Prediction Prompts 
+
+For link prediction, we use a unified prompt template parameterized by dataset-specific context. The LLM scores the log-probabilities of “Yes” and “No” tokens, and we use 𝑃 (Yes ) as the link likelihood score. Link Prediction Prompt – Citation Networks 
+
+You are an expert in analyzing {context}. Given the descriptions of two papers below, determine whether they are likely to cite each other (i.e., one paper references the other). Paper A: {description of paper A} Paper B: {description of paper B} Based on the content similarity and topical relevance, are these two papers likely to cite each other (i.e., one paper references the other)? Output ONLY 'Yes' or 'No'. Answer: 
+
+The {context} field is set to: 
+
+• Cora : “academic papers in computer science (Cora citation network)” 
+
+• ogbn-arxiv : “academic papers from arXiv (OGB-arxiv cita-tion network)” 
+
+• PubMed : “biomedical research papers from PubMed (cita-tion network)” Link Prediction Prompt – Co-purchasing Network 
+
+You are an expert in analyzing products from Amazon (co-purchasing network). Given the descriptions of two products below, determine whether they are likely to are frequently co-purchased together. Product A: {description of product A} Product B: {description of product B} Based on the content similarity and topical relevance, are these two products likely to are frequently co-purchased together? Output ONLY 'Yes' or 'No'. Answer:

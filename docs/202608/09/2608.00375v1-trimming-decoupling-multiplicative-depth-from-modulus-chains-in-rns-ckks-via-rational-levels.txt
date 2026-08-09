@@ -1,0 +1,499 @@
+Title: Trimming: Decoupling Multiplicative Depth from Modulus Chains in RNS-CKKS via Rational Levels
+
+URL Source: https://arxiv.org/pdf/2608.00375v1
+
+Published Time: Tue, 04 Aug 2026 00:20:28 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+# Trimming: Decoupling Multiplicative Depth from Modulus Chains in RNS-CKKS via Rational Levels 
+
+# John Chiang 
+
+john.chiang.smith@gmail.com 
+
+## Abstract 
+
+The Residue Number System variant of CKKS (RNS-CKKS) has become the standard approach for practical approximate homo-morphic encryption due to its efficient modular arithmetic and NTT-based polynomial operations. However, existing RNS-CKKS schemes inherently couple the supported multiplicative depth with the predefined modulus chain, where each level transition requires consuming an entire modulus factor. Consequently, the available computation depth is determined by the granularity of the modulus chain, resulting in coarse-grained depth management. Recent work on Grafting [4] decouples scale factors from ci-phertext moduli, enabling more flexible precision management in RNS-CKKS. However, the multiplicative depth remains fundamen-tally constrained by the modulus chain structure. In this paper, we propose Trimming , a novel fine-grained level management mechanism that decouples multiplicative depth from modulus chains in RNS-CKKS via rational levels. The key idea is to introduce an auxiliary trimming modulus chain composed of smaller NTT-friendly modulus factors, which enables partial modulus transitions instead of directly discarding an entire modulus factor. By replacing conventional discrete level reductions with fine-grained modulus factor refinement, Trimming provides a rational-level abstraction beyond the traditional integer-based modulus chain representation. Our approach preserves the compatibility with existing RNS-CKKS arithmetic while enabling more flexible depth management and adaptive modulus transitions. Similar to Grafting, which ad-dresses the precision bottleneck, Trimming targets the depth bot-tleneck in RNS-CKKS and contributes toward a fully decoupled RNS-CKKS architecture. The proposed framework will be further validated through con-crete implementation and experimental evaluation to investigate its practical performance and computational overhead in real-world homomorphic encryption applications. 
+
+## Keywords 
+
+Homomorphic Encryption, CKKS, Residue Number System, 
+
+## 1 Introduction 1.1 Background 
+
+The CKKS homomorphic encryption scheme has become the de facto standard for approximate homomorphic computation due to its high efficiency and support for real-number arithmetic. Mod-ern implementations adopt the Residue Number System (RNS) to represent the ciphertext modulus as a product of multiple pair-wise coprime primes, enabling efficient polynomial arithmetic, key switching, and rescaling. A fundamental operation in RNS-CKKS is ModDown , which re-duces the ciphertext modulus after homomorphic multiplication. In conventional RNS-CKKS, ModDown is implemented by perma-nently removing the highest RNS modulus from the modulus chain. Consequently, every ModDown operation consumes one modulus level, making the available multiplicative depth strictly determined by the initial modulus chain. Although this design greatly simplifies modulus management, it also introduces an inherent coupling between the effective ci-phertext modulus and the modulus chain. The ciphertext modulus can only evolve through a sequence of discrete predefined modu-lus levels, preventing flexible modulus scheduling and restricting applications such as adaptive bootstrapping and arbitrary modulus reduction. 
+
+## 1.2 Related Work 
+
+Several approaches have been proposed to improve modulus man-agement in CKKS homomorphic encryption. The original CKKS scheme performs modulus reduction by removing one RNS modulus during each rescaling operation, and this strategy has been adopted by most modern implementations, including HEAAN, OpenFHE, SEAL, and Lattigo. Recent studies have attempted to improve the flexibility of mod-ulus management. For example, Grafting introduces rational scale factors to decouple ciphertext scales from the predefined modulus chain, allowing more flexible scale scheduling without modify-ing the RNS basis. However, existing approaches still rely on the conventional ModDown mechanism, in which ciphertext modulus reduction is realized by discarding an RNS modulus. Consequently, the ciphertext modulus remains constrained by the discrete modu-lus levels determined during parameter generation. To the best of our knowledge, no existing work directly addresses the problem of performing ModDown through modulus replace-ment while preserving the original RNS structure. 
+
+First Generation: HElib Modulus Switching (2011–2015). The first practical implementations of lattice-based homomorphic encryp-tion adopted modulus switching to control ciphertext noise and improve computational efficiency. HElib, introduced by Halevi and Shoup [8], employs the DoubleCRT representation to support effi-cient polynomial arithmetic and modulus switching. However, its modulus reduction relies on scale-and-round techniques, which require expensive large-integer operations and do not fully exploit the advantages of the Residue Number System (RNS). 
+
+Full-RNS BFV (2016). Bajard et al. [2] introduced the first Full-RNS variant of the FV/BFV homomorphic encryption scheme. By representing ciphertexts entirely in the RNS domain, their ap-proach eliminates expensive CRT reconstruction and enables effi-cient ModUp/ModDown operations through fast basis conversion techniques. This work established the foundation for modern RNS-based homomorphic encryption libraries. 
+
+> 1arXiv:2608.00375v1 [cs.CR] 1 Aug 2026 John Chiang
+
+Original CKKS (2017). Cheon et al. [7] proposed CKKS, an ap-proximate homomorphic encryption scheme supporting efficient computation over real and complex numbers. The original CKKS construction performs rescaling through large integer division, where the ciphertext modulus and scale factor are reduced simulta-neously. Although highly effective for approximate computation, the original scheme does not fully exploit RNS arithmetic. 
+
+Full-RNS CKKS (2018–2019). Cheon et al. [6] introduced a Full-RNS variant of CKKS that replaces expensive large-integer oper-ations with efficient RNS arithmetic. The proposed approximate rescaling and modulus reduction techniques rely on fast basis con-version and approximate floor operations, enabling practical CKKS implementations with NTT-friendly RNS moduli. This work became the basis of many modern CKKS libraries. 
+
+Improved CKKS Bootstrapping (2018–2021). CKKS bootstrapping was first introduced by Cheon et al. [5], which demonstrated that ap-proximate homomorphic encryption can support unlimited-depth computation. Subsequent works, including improved bootstrap-ping techniques [3], optimized polynomial approximation, modu-lus management, and evaluation procedures to significantly reduce bootstrapping latency. These approaches heavily rely on efficient ModUp and ModDown operations to manage intermediate cipher-text moduli. 
+
+OpenFHE and PALISADE.. PALISADE [10] and its successor OpenFHE [1] integrate advanced RNS techniques, including hybrid key switch-ing, approximate basis conversion, and optimized modulus reduc-tion. These libraries provide efficient implementations of CKKS and other RNS-based schemes while inheriting the conventional mod-ulus chain design, where each ModDown operation permanently removes one RNS modulus. 
+
+Lattigo. Lattigo [9] is an efficient Go-based homomorphic en-cryption library supporting BFV and CKKS schemes. It adopts ad-vanced RNS arithmetic and Shenoy–Kumaresan style basis con-version methods for efficient ModUp and ModDown operations. Similar to other Full-RNS implementations, Lattigo follows the tra-ditional modulus chain paradigm in which ciphertext levels are restricted to predefined modulus values. 
+
+Summary of Full-RNS ModDown. Modern Full-RNS libraries, in-cluding HElib, HEAAN, OpenFHE, and Lattigo, mainly focus on improving the efficiency and accuracy of ModDown through tech-niques such as exact/approximate ModDown, basis conversion, and fast floor computation. However, existing approaches share the same limitation: after ModDown, the highest RNS modulus is per-manently removed from the modulus chain. Therefore, the available ciphertext levels and effective modulus values remain restricted to the discrete chain generated during parameter selection. In contrast, our proposed Trimming technique preserves the Full-RNS ModDown procedure while redesigning the modulus chain up-date strategy. Instead of discarding the last RNS modulus, Trimming replaces it with a smaller modulus, enabling continuous modulus adjustment without reducing the number of RNS components. Con-sequently, Trimming provides more flexible modulus scheduling. Existing works optimize how to perform ModDown, while Trim-ming changes what ModDown means by replacing modulus re-moval with modulus replacement. 
+
+## 1.3 Our Contributions 
+
+In this work, we propose Trimming , a new modulus management framework for RNS-CKKS homomorphic encryption. Unlike the conventional ModDown operation, which removes the highest RNS modulus, Trimming replaces the last modulus with a smaller modu-lus. As a result, the ciphertext modulus can be reduced continuously while maintaining the same number of RNS components. The main contributions of this paper are summarized as follows. 
+
+• We propose a novel Trimming operation that realizes Mod-Down by replacing the highest RNS modulus with a smaller modulus rather than discarding an RNS channel. This en-ables continuous modulus adjustment while preserving the overall RNS representation. 
+
+• We demonstrate that Trimming decouples the effective ciphertext modulus from the predefined modulus chain. Consequently, ciphertexts are no longer restricted to the discrete modulus levels determined during parameter gen-eration, allowing much more flexible modulus scheduling. 
+
+• We analyze the correctness and computational complexity of Trimming and discuss its compatibility with existing RNS-CKKS implementations. Although Trimming intro-duces additional computations compared with conventional ModDown, it significantly expands the design space of mod-ulus management for homomorphic encryption. 
+
+## 2 Preliminaries 
+
+This section briefly reviews the background of the CKKS homo-morphic encryption scheme, the RNS representation adopted by modern CKKS implementations, and the rescaling operation. These concepts establish the notation and terminology used throughout the remainder of the paper. 
+
+## 2.1 Notation 
+
+Let 
+
+𝑅 = Z[𝑋 ]/( 𝑋 𝑁 + 1)
+
+denote the cyclotomic polynomial ring, where 𝑁 is a power of two. For a positive integer modulus 𝑄 , define 
+
+𝑅 𝑄 = 𝑅 /𝑄𝑅. 
+
+Bold lowercase letters denote polynomials in 𝑅 . For an integer 𝑎 ,let 
+
+[𝑎 ]𝑞 
+
+denote its residue modulo 𝑞 .A CKKS ciphertext is represented as 
+
+ct = (𝑐 0, 𝑐 1) ∈ 𝑅 2 
+
+> 𝑄
+
+,
+
+encrypting a plaintext polynomial 𝑚 with scaling factor Δ. Unless otherwise specified, all ciphertexts are assumed to be stored in the Residue Number System (RNS) representation. 
+
+> 2Trimming: A Rational-Level Framework for Decoupling Multiplicative Depth from Modulus Chains in RNS-CKKS
+
+## 2.2 Residue Number System 
+
+Modern CKKS implementations employ the Residue Number Sys-tem (RNS) to efficiently support large ciphertext moduli. Instead of representing a ciphertext modulus as a single large integer, the modulus is decomposed into a product of pairwise coprime primes, 
+
+𝑄 =
+
+> 𝐿
+
+Ö
+
+> 𝑖 =0
+
+𝑞 𝑖 ,
+
+where each 𝑞 𝑖 is an NTT-friendly prime. Accordingly, a polynomial 
+
+𝑎 ∈ 𝑅 𝑄 
+
+is represented by its residues 
+
+([ 𝑎 ]𝑞 0 , [𝑎 ]𝑞 1 , . . . , [𝑎 ]𝑞 𝐿 ),
+
+allowing arithmetic to be performed independently over each modulus. This decomposition substantially accelerates polynomial arithmetic, basis conversion, and key switching while maintaining exact equivalence through the Chinese Remainder Theorem (CRT). 
+
+## 2.3 Number Theoretic Transform 
+
+For each RNS modulus 𝑞 𝑖 satisfying 2𝑁 | ( 𝑞 𝑖 − 1),
+
+the Number Theoretic Transform (NTT) converts polynomial multiplication into coefficient-wise multiplication. Given a polynomial 
+
+𝑎 (𝑋 ) ∈ 𝑅 𝑞 𝑖 ,
+
+its forward NTT is NTT (𝑎 ) = (𝑎 (𝜔 0), . . . , 𝑎 (𝜔 𝑁 −1)) ,
+
+where 𝜔 is a primitive 𝑁 -th root of unity modulo 𝑞 𝑖 . The inverse transform recovers the polynomial exactly. Since all polynomial multiplications in CKKS are performed in the NTT domain, the computational complexity decreases from 
+
+𝑂 (𝑁 2) to 𝑂 (𝑁 log 𝑁 ).
+
+## 2.4 Rescaling in RNS-CKKS 
+
+One distinctive feature of the CKKS scheme is the rescaling opera-tion. After ciphertext multiplication, the plaintext scaling factor is approximately squared, 
+
+Δ −→ Δ2,
+
+which increases both the plaintext magnitude and ciphertext noise. To restore the original precision, RNS-CKKS removes the last modulus prime 
+
+𝑞 ℓ
+
+from the modulus chain, 
+
+𝑄 ℓ = 𝑄 ℓ −1𝑞 ℓ ,
+
+while simultaneously dividing the ciphertext by 𝑞 ℓ ,Rescale : 𝑅 𝑄 ℓ → 𝑅 𝑄 ℓ −1 .
+
+Consequently, the ciphertext modulus and scaling factor are reduced together, 
+
+Δ′ ≈ Δ2
+
+𝑞 ℓ
+
+.
+
+This tight coupling between the modulus chain and the scal-ing factor is a defining characteristic of conventional RNS-CKKS and directly determines the multiplicative depth supported by a parameter set. To overcome precision degradation and modulus constraints in RNS-CKKS, Samardzic and Sanchez [11] enabled rational rescal-ing by appending new RNS primes during rescaling—a technique, broadly recognized as Grafting [4], that explicitly decouples scale factors from the coefficient modulus. By relaxing the strict align-ment between the rescaling factor and the RNS primes, Grafting allows for more flexible scale management during homomorphic operations. This decoupling reduces cumulative noise growth and mitigates the bootstrapping overhead, offering fine-grained control over ciphertext precision in deep homomorphic circuits. 
+
+## 2.5 RNS Modulus Chain 
+
+The ciphertext modulus in RNS-CKKS forms a descending modulus chain, 
+
+𝑄 𝐿 > 𝑄 𝐿 −1 > · · · > 𝑄 0,
+
+where 
+
+𝑄 𝑖 =
+
+> 𝑖
+
+Ö
+
+> 𝑗 =0
+
+𝑞 𝑗 .
+
+Each ciphertext multiplication consumes one modulus level through the rescaling operation. Therefore, the number of available modulus levels directly limits the multiplicative depth of encrypted computations. In conventional RNS-CKKS, the modulus chain simultaneously determines 
+
+• the ciphertext modulus, 
+
+• the ciphertext precision, 
+
+• and the available multiplicative depth. This inherent dependency motivates the decoupling strategy proposed in this work. 
+
+## 3 Methodology 
+
+All computations in RNS-CKKS are performed over an RNS decom-posed ciphertext modulus, 
+
+𝑄 =
+
+> 𝐿
+
+Ö
+
+> 𝑖 =0
+
+𝑞 𝑖 ,
+
+where each 𝑞 𝑖 is an NTT-friendly prime. The computational level of a ciphertext is implicitly determined by the remaining modulus chain. Therefore, a conventional modulus transition consumes an entire RNS factor, resulting in a coarse-grained level management mechanism. 
+
+> 3John Chiang
+
+An appealing approach is to reduce the modulus consumption of each level transition by introducing finer-grained modulus factors. However, directly inserting additional small primes into the origi-nal modulus chain may significantly increase the number of RNS components and degrade the efficiency of homomorphic operations. In this section, we introduce Trimming , a novel, fine-grained level-management mechanism for RNS-CKKS. By breaking the rigid coupling between logical computation levels and physical modulus chains, Trimming enables rational modulus transitions during homomorphic evaluation. The key idea is to refine each conventional modulus level into multiple sub-levels by replacing the consumed modulus factor with a smaller NTT-friendly modulus factor. Unlike conventional RNS-CKKS, where the computation level is tightly coupled with the modulus chain, Trimming decouples the logical level factor from the ciphertext modulus by introduc-ing additional fine-grained sub-levels. This enables flexible level adjustment without strictly following the original discrete modulus chain. 
+
+## 3.1 Motivation and Overview 
+
+In conventional RNS-CKKS, the multiplicative depth is represented by an integer level. Let 
+
+𝑄 ℓ =
+
+> ℓ
+
+Ö
+
+> 𝑖 =0
+
+𝑞 𝑖 
+
+denote the ciphertext modulus at level ℓ. A single modulus re-duction operation decreases the level by one: 
+
+ℓ → ℓ − 1.
+
+Therefore, the available computation depth is determined by the number of predefined RNS factors. This discrete level representation introduces unnecessary rigid-ity. For example, removing a 60-bit modulus consumes the same level regardless of whether the computation only requires a 10-bit or 30-bit modulus reduction. To overcome this limitation, Trimming introduces a finer ab-straction of computation levels. Conventional RNS-CKKS tightly ties the logical computation level to the physical modulus chain 
+
+𝑄 = {𝑞 0, 𝑞 1, . . . , 𝑞 𝐿 }. Consequently, each multiplicative depth re-duction (i.e., conventional modulus dropping ) irrevocably consumes a full primary RNS modulus prime 𝑞 𝑖 (typically word-sized, e.g., 32-bit or 64-bit). This integer-restricted progression (Level ∈ Z)causes coarse-grained depth allocation, leading to redundant mod-ulus expansion and severe inflexibility. To resolve this limitation, Trimming decouples the computation level from the ciphertext modulus by introducing fine-grained sub-moduli. Instead of directly dropping a primary modulus, Trimming replaces the tail of the primary RNS basis with a smaller, NTT-friendly sub-modulus, generalizing conventional modulus dropping into a fractional-level modulus transition . This establishes a rational-level abstraction (Level ∈ Q), enabling precise, adaptive depth management without redundant modulus consumption. 
+
+## 3.2 Trimming Modulus Chain 
+
+The proposed Trimming mechanism constructs an auxiliary modu-lus chain consisting of smaller NTT-friendly primes. Given an original RNS-CKKS modulus chain 
+
+𝑄 = 𝑞 0𝑞 1 · · · 𝑞 𝐿 ,
+
+we introduce a trimming modulus set 
+
+𝑇 = {𝑡 0, 𝑡 1, · · · , 𝑡 𝑀 },
+
+where each trimming modulus is selected independently from the original modulus chain and satisfies 
+
+𝑡 𝑖 ≠ 𝑞 𝑗 , ∀𝑖, 𝑗, (1) and the introduced modulus maintains the RNS basis coprimality requirement with respect to the currently active modulus set. Each trimming modulus satisfies 
+
+𝑡 𝑖 ∉ {𝑞 0, 𝑞 1, . . . , 𝑞 𝐿 },
+
+and can be dynamically introduced to replace the terminal mod-ulus during modulus reduction. The selected trimming modulus only needs to be coprime with the active RNS basis, rather than requiring all elements in 𝑇 to be pairwise coprime. For efficient implementation, we preferably choose 𝑡 𝑖 smaller than the original chain moduli and compatible with efficient NTT computation. In practice, choosing 𝑡 𝑖 < 𝑞 𝑗 is preferred, as smaller trimming moduli simplify modular arithmetic and reduce imple-mentation overhead. In other words, 
+
+The trimming moduli do not necessarily need to be pair-wise coprime within the auxiliary set, since only one trim-ming modulus is activated at each modulus-switching operation. The coprimality requirement is imposed only between the selected trimming modulus and the remain-ing active RNS basis. 
+
+The trimming modulus set does not require pairwise coprimality among its elements, since only one trimming modulus is introduced into the active RNS basis at each modulus-switching operation. Therefore, the coprimality requirement is imposed only between the selected trimming modulus and the remaining active moduli. For CKKS parameters with 𝑁 = 2𝑚 , any modulus satisfying 
+
+𝑡 ≡ 1 (mod 2 𝑁 )
+
+supports efficient negacyclic NTT computation. Hence, trimming moduli can be generated from the form 
+
+𝑡 = 𝑎 (2𝑁 ) + 1,
+
+where 𝑎 is chosen such that 𝑡 is a valid RNS modulus. 
+
+In particular, when 2𝑛 ≥ 2𝑁 , 2𝑛 + 1 provides a natural NTT-compatible candidate. 
+
+Meanwhile, each 𝑡 𝑖 is selected as an NTT-friendly candidate to maintain efficient polynomial arithmetic. In practical RNS-CKKS implementations, the main modulus fac-tors are usually selected close to the machine word size, such as 32-bit or 60-bit primes, to maximize NTT efficiency. However, the 
+
+> 4Trimming: A Rational-Level Framework for Decoupling Multiplicative Depth from Modulus Chains in RNS-CKKS
+
+number of available NTT-friendly primes decreases as the bit length becomes smaller, especially for large ring dimensions. Trimming exploits the unused modulus space between the mini-mum valid NTT-friendly prime and the word-sized modulus fac-tors. These smaller primes form an auxiliary modulus chain, which provides fine-grained modulus transitions without modifying the original parameter set. For each original modulus factor 𝑞 𝑖 , we select trimming factors that are close to powers of two while satisfying the NTT require-ments. For example, for ring dimension 
+
+𝑁 = 216 ,
+
+the trimming factors can be selected from the NTT-friendly primes shown in Table 1. 
+
+3.2.1 Generation of NTT-Friendly Primes. To construct the modu-lus chain for CKKS, each modulus must satisfy the Number Theo-retic Transform (NTT) requirement. Specifically, for a polynomial degree 𝑁 , every modulus 𝑞 is required to satisfy 
+
+𝑞 ≡ 1 (mod 2 𝑁 ), (2) which guarantees the existence of a primitive 2 𝑁 -th root of unity modulo 𝑞 . In this work, we consider 𝑁 = 216 and search for the nearest prime of the form 
+
+𝑞 = 𝑎 (2𝑁 ) + 1, (3) where 𝑎 is a positive integer. A Miller–Rabin primality test is em-ployed to verify primality while minimizing the distance between 
+
+𝑞 and the target power of two. Table 1 summarizes the nearest NTT-friendly primes correspond-ing to target values from 2 16 to 2 65 . It can be observed that, for some target bit lengths, no prime satisfying the NTT condition exists sufficiently close to the corresponding power of two. Consequently, the nearest valid prime may have a larger bit length. As the target bit length increases, the relative distance between the selected prime and the corresponding power of two becomes negligible, making these primes suitable for constructing CKKS modulus chains. The relative error between the selected NTT-friendly prime 𝑞 
+
+and the target power of two 2 𝑘 is defined as Relative Error = 𝑞 − 2𝑘 
+
+2𝑘 , (4) where 𝑞 denotes the selected prime satisfying 𝑞 ≡ 1 (mod 2 𝑁 ),and 𝑘 is the target bit length. A smaller relative error indicates that the selected prime is closer to the desired power of two. As shown in Table 1, the relative error decreases rapidly as the target bit length increases, reaching the order of 10 −14 for 64-bit moduli. It is worth noting that the bit length of the selected prime is not always identical to the target bit length. This is because the search is restricted to primes satisfying the NTT constraint 𝑞 ≡ 1 (mod 2 𝑁 ).When no such prime exists sufficiently close to 2 𝑘 , the nearest valid prime may lie in the next bit range. Nevertheless, the relative error decreases rapidly as the target bit length increases, indicating that the selected primes provide excellent approximations to powers of two while preserving the NTT property. 
+
+## 3.3 Trimming-Based ModDown 
+
+The conventional ModDown operation reduces the ciphertext mod-ulus by directly removing the highest RNS modulus: 
+
+𝑄 = 𝑞 0 · · · 𝑞 𝐿 −1𝑞 𝐿 
+
+to 
+
+𝑄 ′ = 𝑞 0 · · · 𝑞 𝐿 −1.
+
+Although efficient, this operation inevitably consumes one com-plete level of the modulus chain. In contrast, Trimming replaces the last modulus factor with a smaller trimming modulus: 
+
+e𝑄 = 𝑞 0 · · · 𝑞 𝐿 −1𝑡, 
+
+where 
+
+𝑡 < 𝑞 𝐿 .
+
+The replacement is efficiently realized through RNS basis conver-sion. Instead of reconstructing the ciphertext under a completely new modulus, Trimming performs a partial basis transition from 
+
+{𝑞 0, · · · , 𝑞 𝐿 }
+
+to 
+
+{𝑞 0, · · · , 𝑞 𝐿 −1, 𝑡 }.
+
+Therefore, the proposed approach preserves the RNS structure while reducing the effective modulus size. Compared with conventional ModDown, which only supports discrete level transitions, Trimming enables fine-grained modulus transitions by selecting different trimming factors. As a result, the logical computation level is no longer determined solely by the number of remaining RNS primes. 
+
+3.3.1 Technical Realization: Partial Basis Transition. Mechanically, Trimming avoids costly ciphertext reconstruction by formulating the level transition as a Partial RNS Basis Conversion paired with 
+
+Fine-Grained Modulus Factor Replacement .Instead of stripping the entire prime factor 𝑞 𝐿 during level re-duction, Trimming performs a partial basis conversion from the current primary basis Bmain = {𝑞 0, 𝑞 1, . . . , 𝑞 𝑘 } to a refined target basis Btrim = {𝑞 0, 𝑞 1, . . . , 𝑟 𝑘,𝑗 }. Since the structural transformation is confined strictly to the tail element of the RNS chain, the partial basis conversion overhead scales almost linearly with the polyno-mial ring dimension 𝑁 and current level 𝐿 , maintaining an efficient computational complexity of O( 𝑁 · 𝐿 ).
+
+3.3.2 Fractional-Level Abstraction (Level ∈ Q). Let 𝑞 𝑖 ≈ 2𝑛 𝑖 denote a primary RNS prime in the main modulus chain. To construct fine-grained intermediate levels, we define an auxiliary sub-modulus set R = {𝑟 𝑖,𝑘 }, where each sub-modulus 𝑟 𝑖,𝑘 ≈ 2𝑛 𝑘 satisfies 𝑟 𝑖,𝑘 < 𝑞 𝑖 
+
+and remains NTT-friendly (i.e., 𝑟 𝑖,𝑘 ≡ 1 (mod 2 𝑁 )). We quantify the fractional depth consumption incurred by sub-stituting 𝑞 𝑖 with 𝑟 𝑖,𝑘 via a level transition factor 𝜆 𝑖,𝑘 :
+
+𝜆 𝑖,𝑘 = log 𝑟 𝑖,𝑘 
+
+log 𝑞 𝑖 
+
+∈ ( 0, 1) (5) 
+
+> 5John Chiang
+
+By replacing 𝑞 𝑖 with 𝑟 𝑖,𝑘 , the logical computation level transitions from 𝑖 to a rational level 𝑖 − 𝜆 𝑖,𝑘 . Because a significant numerical margin exists between the smallest valid NTT-friendly prime and the word-sized primary prime 𝑞 𝑖 , the auxiliary chain R offers a vast search space to select optimal powers-of-two adjacent primes (e.g., tailored for 𝑁 = 216 ). 
+
+## 3.4 Fully Decoupled RNS-CKKS 
+
+In conventional RNS-CKKS, the ciphertext modulus chain implicitly determines the available computation depth. Specifically, the mod-ulus chain is divided into discrete levels, and each level transition requires consuming one complete modulus factor. Therefore, the relationship among the modulus chain, logical level, and supported multiplicative depth can be represented as: Modulus Chain → Level → Multiplication Depth .
+
+Such an inherent coupling makes multiplicative depth manage-ment coarse-grained. Even when a computation only requires a fraction of a modulus factor, conventional CKKS must consume an entire level from the predefined modulus chain. Consequently, the supported multiplicative depth is strictly constrained by the number and size of modulus factors selected during parameter generation. Trimming breaks this limitation by introducing fine-grained modulus factors and rational-level transitions. Instead of defining the computation depth solely according to the discrete modulus chain, Trimming introduces an intermediate level-factor abstrac-tion, where each conventional modulus factor can be further refined into multiple sub-level factors. Therefore, the relationship between modulus representation and computation capability is transformed into: Modulus Chain . Logical Level . Multiplication Depth In this new abstraction, the modulus chain only determines the underlying RNS representation, while the introduced level factors control the granularity of modulus consumption. As a result, the supported multiplication depth is no longer restricted by the dis-crete structure of the original modulus chain. This decoupling enables flexible depth management without modifying the fundamental RNS-CKKS arithmetic framework. In particular, Trimming allows a computation to consume only the required fraction of modulus resources, providing a fine-grained alternative to conventional level-based depth management. In addition to Trimming, Grafting represents another comple-mentary approach toward relaxing the inherent coupling in con-ventional RNS-CKKS. Grafting focuses on the relationship between the scale factor and the ciphertext modulus. By introducing rational rescaling, Grafting enables flexible precision management beyond the predefined modulus chain. In contrast, Trimming focuses on the relationship between the logical computation level and the ciphertext modulus chain. By introducing fine-grained modulus factors and rational-level transitions, Trimming enables flexible depth management without strictly consuming an entire modulus factor for each level transition. The conceptual relationship between Grafting and Trimming is summarized as follows: More specifically, conventional RNS-CKKS tightly couples the logical computation level with the modulus chain: Logical Level ≡ Modulus Chain .
+
+Each level transition requires removing one complete modulus factor, which results in coarse-grained depth management. Trim-ming breaks this coupling by introducing independent logical level factors: Logical Level . Modulus Chain where the logical level is determined by the consumed modulus factors, while the ciphertext modulus only defines the underlying RNS representation. Consequently, Trimming enables rational-level computation, al-lowing a single conventional level to be further divided into multiple fine-grained sub-levels. This provides adaptive depth management while preserving compatibility with existing RNS-CKKS modulus structures. Together with Grafting, which decouples scale factors from ci-phertext moduli, Scale Factor . Modulus ,
+
+Trimming establishes a more flexible abstraction of RNS-CKKS: 
+
+Fully Decoupled RNS-CKKS Architecture 
+
+where scale factors and logical computation levels are no longer intrinsically determined by the predefined modulus chain. Specifi-cally, Grafting addresses the precision bottleneck, while Trimming addresses the depth bottleneck. Together, these techniques remove two fundamental constraints of conventional RNS-CKKS and pro-vide a more adaptive architecture for future homomorphic compu-tation systems. 
+
+## 4 Applications 
+
+The proposed Trimming operation provides a flexible mechanism for modifying the effective ciphertext modulus without perma-nently shortening the modulus chain. Unlike the conventional RNS-CKKS scheme, where the modulus chain is fixed after parameter generation, Trimming allows the last RNS modulus to be replaced by a smaller modulus. Consequently, the ciphertext modulus can be adjusted continuously rather than discretely, enabling several applications that are not supported by the conventional ModDown operation. In this section, we demonstrate two representative applications of Trimming: flexible ModDown and bootstrapping. 
+
+## 4.1 Flexible ModDown 
+
+In conventional RNS-CKKS, the ModDown operation always re-moves the last modulus from the modulus chain. Let 
+
+𝑄 = 𝑞 0𝑞 1 · · · 𝑞 ℓ −1𝑞 ℓ .
+
+After ModDown, the ciphertext modulus becomes 
+
+𝑄 ′ = 𝑞 0𝑞 1 · · · 𝑞 ℓ −1,
+
+which corresponds to a modulus reduction by exactly one RNS prime. 
+
+> 6Trimming: A Rational-Level Framework for Decoupling Multiplicative Depth from Modulus Chains in RNS-CKKS
+
+This restriction forces the ciphertext modulus to evolve only along the predefined modulus chain, making the attainable modulus values discrete. Using Trimming, the last modulus 𝑞 ℓ is replaced with a smaller modulus 𝑡 , producing 
+
+e𝑄 = 𝑞 0𝑞 1 · · · 𝑞 ℓ −1𝑡, 
+
+where 
+
+𝑡 < 𝑞 ℓ .
+
+By choosing different values of 𝑡 , the resulting ciphertext modu-lus can approximate our desired bit length without modifying the remaining RNS basis. Consequently, Trimming generalizes the conventional ModDown operation. Instead of reducing the modulus only to the next level in the modulus chain, a ciphertext can be reduced to an target modulus while preserving the same number of RNS components. This flexibility enables much finer control over ciphertext scale and noise growth, which is particularly beneficial for homomorphic evaluation involving heterogeneous ciphertexts. 
+
+## 4.2 Bootstrapping 
+
+Bootstrapping refreshes a ciphertext by reducing accumulated noise and restoring the available multiplicative depth. The efficiency of bootstrapping is highly dependent on the ciphertext modulus used throughout the procedure. Conventional RNS-CKKS employs a fixed modulus chain, re-quiring the bootstrapping algorithm to operate on predetermined modulus levels. As a result, the ciphertext modulus before and after bootstrapping cannot be adjusted according to the computational requirements. Trimming removes this restriction by allowing the last RNS modulus to be replaced with an smaller modulus. Immediately before bootstrapping, the ciphertext modulus can be trimmed to the minimum value sufficient for evaluating the bootstrapping cir-cuit, thereby reducing the computational complexity of polynomial arithmetic and basis conversion. After bootstrapping, the trimmed modulus can be replaced with a larger modulus to restore the desired ciphertext precision without changing the remaining modulus chain. Therefore, Trimming provides a flexible interface between mod-ulus management and bootstrapping, allowing different stages of the bootstrapping procedure to operate under different effective modulus sizes while preserving compatibility with the original RNS basis. 
+
+## 4.3 Discussion 
+
+The proposed Trimming operation decouples the effective cipher-text modulus from the predefined modulus chain. Unlike conventional RNS-CKKS, where ciphertext moduli are restricted to the discrete values determined during parameter gen-eration, Trimming enables continuous modulus adjustment by re-placing the last RNS modulus with a smaller modulus. This capability naturally supports flexible ModDown, adaptive bootstrapping, and other modulus management techniques without requiring additional RNS levels or regenerating switching keys. Consequently, Trimming significantly improves the flexibility of modulus scheduling while maintaining compatibility with existing RNS-CKKS implementations. 
+
+## 5 Experiments 
+
+to be done 
+
+## 6 Limitations 
+
+Compared with the conventional ModDown operation, which re-moves the highest RNS modulus by simply dropping an RNS chan-nel, the proposed Trimming operation incurs additional compu-tational overhead due to the replacement of the highest modulus with a smaller one. Specifically, Trimming requires extra basis con-version and coefficient adjustment to preserve the correctness of the RNS representation. Therefore, its computational complexity is moderately higher than that of the conventional ModDown opera-tion. This additional overhead, however, enables flexible modulus scheduling, and adaptive bootstrapping, which are not supported by existing RNS-CKKS schemes. 
+
+## 7 Conclusion 
+
+In this paper, we proposed Trimming , a novel modulus management technique for RNS-CKKS homomorphic encryption. Unlike the conventional ModDown operation, which permanently removes the highest RNS modulus from the modulus chain, Trimming replaces the last modulus with a smaller modulus while preserving the overall RNS structure. This enables the effective ciphertext modulus to be adjusted continuously without reducing the number of RNS components. Based on this mechanism, Trimming decouples the effective ciphertext modulus from the predefined modulus chain, providing significantly greater flexibility for modulus scheduling. In particular, the proposed approach supports ModDown to target moduli instead of being restricted to the discrete modulus levels determined during parameter generation. Although Trimming incurs additional computational overhead compared with the conventional ModDown operation due to mod-ulus replacement and the associated RNS transformations, it sub-stantially expands the design space of modulus management in RNS-CKKS. The proposed framework is compatible with existing RNS-CKKS implementations and does not require modifications to the underlying homomorphic encryption scheme. 
+
+## References          
+
+> [1] Ahmad Al Badawi, Jack Bates, Flavio Bergamaschi, David Bruce Cousins, Saroja Erabelli, Nicholas Genise, Shai Halevi, Hamish Hunt, Andrey Kim, Yongwoo Lee, et al. 2022. Openfhe: Open-source fully homomorphic encryption library. In
+> proceedings of the 10th workshop on encrypted computing & applied homomorphic cryptography . 53–63. [2] Jean-Claude Bajard et al. 2016. A Full RNS Variant of FV Like Somewhat Homo-morphic Encryption Schemes. In ACNS .[3] Hao Chen, Ilaria Chillotti, and Yongsoo Song. 2019. Improved Bootstrapping for Approximate Homomorphic Encryption. In EUROCRYPT .[4] Jung Hee Cheon, Hyeongmin Choe, Minsik Kang, Jaehyung Kim, Seonghak Kim, Johannes Mono, and Taeyeong Noh. 2025. Grafting: decoupled scale factors and modulus in RNS-CKKS. In Proceedings of the 2025 ACM SIGSAC Conference on Computer and Communications Security . 1098–1112. [5] Jung Hee Cheon, Kyoohyung Han, Andrey Kim, Miran Kim, and Yongsoo Song. 2018. Bootstrapping for approximate homomorphic encryption. In Annual Inter-national Conference on the Theory and Applications of Cryptographic Techniques .7
+
+John Chiang 
+
+Springer, 360–384. doi:10.1007/978-3-319-78381-9_14 [6] Jung Hee Cheon, Kyoohyung Han, Andrey Kim, Miran Kim, and Yongsoo Song. 2018. A Full RNS Variant of Approximate Homomorphic Encryption. In SAC .[7] Jung Hee Cheon, Andrey Kim, Miran Kim, and Yongsoo Song. 2017. Homo-morphic encryption for arithmetic of approximate numbers. In International Conference on the Theory and Application of Cryptology and Information Security .Springer, 409–437. doi:10.1007/978-3-319-70694-8_15 [8] Shai Halevi and Victor Shoup. 2014. Algorithms in HElib. In CRYPTO .[9] Christian Vincent Mouchet, Jean-Philippe Bossuat, Juan Ramón Troncoso-Pastoriza, and Jean-Pierre Hubaux. 2020. Lattigo: A multiparty homomorphic encryption library in go. In Proceedings of the 8th Workshop on Encrypted Com-puting and Applied Homomorphic Cryptography . 64–70. [10] Yuriy Polyakov, Kurt Rohloff, and Gerard W Ryan. 2018. PALISADE lattice cryptography library. URL https://palisade-crypto. org (2018). [11] Nikola Samardzic and Daniel Sanchez. 2024. Bitpacker: Enabling high arithmetic efficiency in fully homomorphic encryption accelerators. In Proceedings of the 29th ACM International Conference on Architectural Support for Programming Languages and Operating Systems, Volume 2 . 137–150. 8Trimming: A Rational-Level Framework for Decoupling Multiplicative Depth from Modulus Chains in RNS-CKKS 
+
+Table 1: Nearest NTT-friendly primes satisfying 𝑞 ≡ 1 (mod 2 𝑁 ) for 𝑁 = 216 .
+
+Target Nearest Prime 𝑞 Bits Relative Error 216 786433 20 1.10 × 10 1
+
+217 786433 20 5.00 × 10 0
+
+218 786433 20 2.00 × 10 0
+
+219 786433 20 5.00 × 10 −1
+
+220 1179649 21 1.25 × 10 −1
+
+221 2752513 22 3.13 × 10 −1
+
+222 2752513 22 3.44 × 10 −1
+
+223 8257537 23 1.56 × 10 −2
+
+224 16515073 24 1.56 × 10 −2
+
+225 33292289 25 7.81 × 10 −3
+
+226 67239937 27 1.95 × 10 −3
+
+227 134348801 28 9.77 × 10 −4
+
+228 268042241 28 1.46 × 10 −3
+
+229 536608769 29 4.88 × 10 −4
+
+230 1073872897 31 1.22 × 10 −4
+
+231 2147352577 31 6.10 × 10 −5
+
+232 4293918721 32 2.44 × 10 −4
+
+233 8590458881 34 6.10 × 10 −5
+
+234 17180262401 35 2.29 × 10 −5
+
+235 34359214081 35 1.53 × 10 −5
+
+236 68718428161 36 1.53 × 10 −5
+
+237 137438822401 37 9.54 × 10 −7
+
+238 274876334081 38 5.72 × 10 −6
+
+239 549754109953 39 3.10 × 10 −6
+
+240 1099512938497 41 1.19 × 10 −6
+
+241 2199021813761 41 6.56 × 10 −7
+
+242 4398044938241 42 3.58 × 10 −7
+
+243 8796090007553 43 3.43 × 10 −7
+
+244 17592186175489 45 7.45 × 10 −9
+
+245 35184372744193 46 1.86 × 10 −8
+
+246 70368744570881 47 5.59 × 10 −9
+
+247 140737488486401 48 9.31 × 10 −10 
+
+248 281474976317441 48 1.40 × 10 −9
+
+249 562949951979521 49 2.56 × 10 −9
+
+250 1125899908022273 51 1.05 × 10 −9
+
+251 2251799813554177 51 5.82 × 10 −11 
+
+252 4503599627763713 53 8.73 × 10 −11 
+
+253 9007199255658497 54 1.02 × 10 −10 
+
+254 18014398510661633 55 6.55 × 10 −11 
+
+255 36028797019488257 56 1.46 × 10 −11 
+
+256 72057594038321153 57 5.46 × 10 −12 
+
+257 144115188075593729 57 1.82 × 10 −12 
+
+258 288230376155250689 59 1.23 × 10 −11 
+
+259 576460752300015617 59 5.91 × 10 −12 
+
+260 1152921504606584833 60 2.27 × 10 −13 
+
+261 2305843009211596801 61 9.09 × 10 −13 
+
+262 4611686018425815041 62 3.41 × 10 −13 
+
+263 9223372036855300097 64 5.68 × 10 −14 
+
+264 18446744073711255553 65 9.24 × 10 −14 
+
+265 36893488147418054657 65 2.84 × 10 −14 9John Chiang 
+
+10 Trimming: A Rational-Level Framework for Decoupling Multiplicative Depth from Modulus Chains in RNS-CKKS 
+
+11 
+
+,

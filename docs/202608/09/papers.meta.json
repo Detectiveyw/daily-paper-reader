@@ -1,0 +1,51 @@
+{
+  "label": "2026-08-09",
+  "date": "2026-08-09",
+  "generated_at": "2026-08-09T20:37:29",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202608/09/2608.00375v1-trimming-decoupling-multiplicative-depth-from-modulus-chains-in-rns-ckks-via-rational-levels",
+      "section": "quick",
+      "title_en": "Trimming: Decoupling Multiplicative Depth from Modulus Chains in RNS-CKKS via Rational Levels",
+      "authors": "John Chiang",
+      "date": "2026-08-01",
+      "pdf": "https://arxiv.org/pdf/2608.00375v1",
+      "score": "6.0",
+      "evidence": "RNS-CKKS中的灵活精度管理",
+      "tldr": "针对RNS-CKKS方案中乘法深度受限于模数链结构的瓶颈，本文提出Trimming机制。该方法通过引入由小型NTT友好模数因子组成的辅助链，实现了“有理数级别”的细粒度管理，允许部分模数转换而非直接丢弃整个模数。Trimming成功解耦了乘法深度与模数链，在保持与现有算术兼容的同时，为同态加密提供了更灵活的深度管理和自适应模数转换能力。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Recent work on Grafting decouples scale factors from ciphertext moduli, enabling more flexible precision management in RNS-CKKS. However, the multiplicative depth remains fundamentally constrained by the modulus chain structure.   In this paper, we propose \\emph{Trimming}, a novel fine-grained level management mechanism that decouples multiplicative depth from modulus chains in RNS-CKKS via rational levels. The key idea is to introduce an auxiliary trimming modulus chain composed of smaller NTT-friendly modulus factors, which enables partial modulus transitions instead of directly discarding an entire modulus factor. By replacing conventional discrete level reductions with fine-grained modulus factor refinement, Trimming provides a rational-level abstraction beyond the traditional integer-based modulus chain representation.   Our approach preserves the compatibility with existing RNS-CKKS arithmetic while enabling more flexible depth management and adaptive modulus transitions. Similar to Grafting, which addresses the precision bottleneck, Trimming targets the depth bottleneck in RNS-CKKS and contributes toward a fully decoupled RNS-CKKS architecture.   The proposed framework will be further validated through concrete implementation and experimental evaluation to investigate its practical performance and computational overhead in real-world homomorphic encryption applications.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/09/2608.02986v1-internalising-the-identity-primitive-cryptographic-individuality-for-an-autonomous-agent-on-a-public-blockchain",
+      "section": "quick",
+      "title_en": "Internalising the Identity Primitive: Cryptographic Individuality for an Autonomous Agent on a Public Blockchain",
+      "authors": "Keisuke Suzuki",
+      "date": "2026-08-04",
+      "pdf": "https://arxiv.org/pdf/2608.02986v1",
+      "score": "6.0",
+      "evidence": "自主代理神经网络权重的零知识承诺",
+      "tldr": "本研究探讨了公链上自主智能体的身份定义问题，提出将身份信任根从硬件或操作员转向密码学假设。通过将智能体的神经网络权重设计为私钥的确定性函数，并在每次状态转换时利用零知识证明进行验证，确保了身份的唯一性与不可篡改性。该方案在Solana测试网上成功部署，实现了包含经济代谢成本的链上运行，是首个将身份原语作为密码学不变性并在每步验证的链上智能体，为实现“加密个体化”奠定了基础。",
+      "tags": "query:fss-llm",
+      "abstract_en": "A software agent on a public blockchain accumulates authority and economic stakes, raising the engineering question of what makes it count as an individual. The paper's central contribution is a shift of trust root for the key-to-weights binding of agent identity: from hardware, operator, or wrapper trust to cryptographic assumptions enforced by a pinned implementation (liveness, key custody, oracle trust, and the underlying software stack remain external). We design and deploy on Solana devnet an agent whose neural-network weights are a deterministic function of its private key. The binding is committed in zero knowledge at genesis, re-checked against that commitment at every state transition, and signed by the agent into an on-chain history unforkable once finalized; in a PoC-tier extension, a protocol-imposed metabolic cost is debited each cycle from a key-derived economic account, adding a consumption-side economic-viability constraint to the key-history-economy triple. Empirically, the agent completes a 2.36-day on-chain run with two host-side resumptions but no rejected transition, at bounded per-transition verification cost; a substituted substrate is rejected on chain, and independently keyed agents diverge as predicted while a same-key control stays at zero. To our knowledge, this is the first published on-chain agent whose identity primitive is itself a cryptographic invariant re-checked at every state transition. The resulting transition-time invariant instantiates the cryptographic individuality proposed by Suzuki 2026's Artificial Externality framework.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/09/2608.04255v1-pridyg-privacy-preserving-dynamic-graph-inference-with-llm-gnn-collaboration",
+      "section": "quick",
+      "title_en": "PriDyG: Privacy-preserving Dynamic Graph Inference with LLM-GNN Collaboration",
+      "authors": "Yuyang Xia, Ruixuan Liu, Li Xiong",
+      "date": "2026-08-04",
+      "pdf": "https://arxiv.org/pdf/2608.04255v1",
+      "score": "6.0",
+      "evidence": "LLM协作的隐私保护推理",
+      "tldr": "本研究针对动态图推理中的边隐私泄露问题，提出了PriDyG框架。该框架结合了GNN的结构学习与LLM的语义推理，通过创新的增量式私有多跳聚合技术，使总隐私成本与更新次数无关。PriDyG在保护隐私的同时，显著提升了动态图任务的性能，且隐私开销远低于传统方法。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Graph inference over relational data can expose sensitive edge information, and this risk becomes more severe in dynamic graphs, where repeated model updates cause privacy loss to accumulate. We formulate Edge-level Differentially Private Dynamic Graph Inference (EDG) and propose PriDyG, a private inference framework that combines GNN-based structural learning with LLM-based semantic reasoning. PriDyG introduces incremental private multi-hop aggregation, which buffers newly arrived edges and processes each edge exactly once. By parallel composition, the total privacy cost equals that of a single static release, independent of the number or schedule of model updates. Compared with geometrically decaying budget allocation, incremental aggregation avoids exponentially increasing noise while preserving exact one-hop signals and at least half of two-hop information transfers. PriDyG further complements privatized GNN outputs with LLM predictions derived solely from node text, incurring no additional edge-level privacy cost. Experiments on four benchmarks for node classification and link prediction show that PriDyG consistently outperforms geometrically decaying baselines under the same privacy budget and matches the utility of naive per-update retraining while reducing cumulative privacy cost by up to three orders of magnitude.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

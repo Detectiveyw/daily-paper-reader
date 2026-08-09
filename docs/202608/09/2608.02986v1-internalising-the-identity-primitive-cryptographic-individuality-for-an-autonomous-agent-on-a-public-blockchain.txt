@@ -1,0 +1,1004 @@
+Title: Internalising the Identity Primitive: Cryptographic Individuality for an Autonomous Agent on a Public Blockchain
+
+URL Source: https://arxiv.org/pdf/2608.02986v1
+
+Published Time: Wed, 05 Aug 2026 00:21:03 GMT
+
+Number of Pages: 52
+
+Markdown Content:
+# Internalising the Identity Primitive: 
+
+Cryptographic Individuality for an Autonomous Agent on a Public Blockchain 
+
+Keisuke Suzuki 11Center for Human Nature, Artificial Intelligence and Neuroscience (CHAIN), Hokkaido University August 3, 2026 
+
+Abstract 
+
+A software agent on a public blockchain accumulates authority and economic stakes, raising the engineering question of what makes it count as an individual . The paper’s central contribution is a shift of trust root for the key-to-weights binding of agent identity: from hardware, operator, or wrapper trust to cryptographic assumptions enforced by a pinned implementation (liveness, key custody, oracle trust, and the underlying software stack remain external). We design and deploy on Solana devnet an agent whose neural-network weights are a deterministic function of its private key. The binding is committed in zero knowledge at genesis, re-checked against that commitment at every state transition, and signed by the agent into an on-chain history unforkable once finalized; in a PoC-tier extension, a protocol-imposed metabolic cost is debited each cycle from a key-derived economic account, adding a consumption-side economic-viability constraint to the key–history–economy triple. Empirically, the agent completes a 2.36-day on-chain run with two host-side resumptions but no rejected transition, at bounded per-transition verification cost; a substituted substrate is rejected on chain, and independently keyed agents diverge as predicted while a same-key control stays at zero. To our knowledge, this is the first published on-chain agent whose identity primitive is itself a cryptographic invariant re-checked at every state transition. The resulting transition-time invariant instantiates the cryptographic individuality proposed by Suzuki 2026’s Artificial Externality framework [42]. 
+
+# 1 Introduction 
+
+AI agents are moving from research demonstrations into systems that act continuously and autonomously — trading, negotiating, and managing assets with progressively less human oversight. As an agent’s authority and economic stakes grow, so does the need to pin down 
+
+which agent did what : an agent that cannot be distinguished from a copy or an impostor cannot be held accountable, trusted with funds, or meaningfully audited. One emerging response is to secure agent identity with cryptography-based smart-contract platforms, so that the identity claim is enforced by a public protocol rather than by the agent’s operator. On-chain agents today, however, anchor that identity in a wrapper that sits outside the computation the agent runs. This paper instead makes the agent’s neural-network weights a deterministic function of its private key and re-verifies that binding on Solana at every state transition, so that identity substitution becomes on-chain rejection rather than a trust assumption (Sections 3.4 and 4.1). We reach this construction from a foundational question. What makes something an individual 
+
+(a unified, distinct, persistent entity that counts as one thing rather than as a collection of parts) is among the oldest questions in biology and philosophy, with no single criterion proving sufficient (Section 2). For artificial systems the question becomes an engineering problem: how do we build something that counts as an individual? A candidate construction must supply structural 1arXiv:2608.02986v1 [cs.CR] 4 Aug 2026 counterparts for continuous identity, a history under that identity, and a self-sustaining substrate (metabolic closure). This paper examines the first two and a consumption-side PoC toward the third on a public blockchain. First occurrences of the cryptographic, blockchain, ML, and ALIFE terms are glossed inline; Section D collects them in one place. Two lines of engineering work converge on this question (surveyed in Section 2). The Artificial Life (ALIFE) tradition has long made individuality — self-production and organisational closure — its central concern; a recent strand within it has begun to deploy evolving agents onto smart-contract platforms, treating the public blockchain as a perpetual habitat for agents that fund their own continuation [18, 30, 19]. A separate lineage — cryptographic agent identity , in the zkML (zero-knowledge machine learning) and on-chain-AI space — anchors an agent’s actions to a verifiable cryptographic root [28, 26, 29, 25] 1, so that actions, funds, and history are attributable to one persistent entity rather than to whoever controls a mutable deployment. Neither approach binds the substrate itself — the recurrent network’s weights — to the agent’s key. That is the gap this paper closes. The conceptual grounding is the Artificial Externality framework of Suzuki 2026 [42]. It identifies resistance to outside intervention in the physical substrate (the irreducibility of matter) and in the contingency of sensorimotor experience, then proposes a cryptographic counterpart: 
+
+cryptographic individuality , anchored in a stable, hard-to-forge key. We implement that proposal as a transition-time identity constraint (Section 9.2). We internalise the identity primitive by making the key-to-weights relation a circuit-and-runtime constraint. A commitment pins the weight hash at genesis (Section 4.2), and a proof lets anyone verify W = HKDF (sk , tag ) without revealing sk (Section 4.1); a transition that breaks the committed relation is rejected by the verifying nodes. For this binding, the trust root is Groth16 soundness under its one-time trusted setup, SP1’s STARK/FRI execution-proof soundness, and the standard assumptions on keccak , ed25519 , and HKDF (Section 4.5). Liveness, key custody, operator behaviour, and prover availability remain external assumptions, and single-host custody does not prevent an operator from halting or seizing the agent (Section 9.4). We operationalise the construction as an agent triple zkAgent = ( K, Stream (K), F econ (K)) with an advance-admissibility (“aliveness”) predicate “K valid ∧ Stream (K) advancing 
+
+∧ Fecon (K) > 0” — our own engineering definition (vocabulary adopted from the framework and restated in full in Section 3.1). The paper makes five contributions. The first four (the cryptographic binding, its on-chain enforcement, the threat model, and the empirical evaluation) form the load-bearing core. The fifth (the economic-metabolism extension) carries its own tested on-chain rejection path and continuous-run evidence, at devnet- and proof-of-concept (PoC)-tier scope; the PoC-tier sensorimotor and homeostatic extensions (Section 7) are steps rather than finished deliverables (Section 9.2). • Construction : the agent’s substrate itself — the recurrent network’s weights — is a cryp-tographic function of its private key: W = HKDF (sk , tag ), committed in a Groth16 proof at genesis and re-checked against that commitment at every state transition (Sections 4.2 and 4.3). • Protocol : the binding is enforced on a live public chain by a two-circuit Solana-native deployment ( F2 genesis + F1 advance) that carries an ed25519 self-authorisation on every cycle and serialises contention through an atomic state-commitment chain (Section 4.4). • Threat model : a 14-tag core catalogue, supplemented by labelled concurrency, adjacent-protocol, and extension cases, delimits what the binding does and does not defend against. It separates four tested on-chain rejections, all operator-scripted (Section 4.5), from two 
+
+> 1We use “zkLoRA”, the title of the version cited in [26]; that work has since been retitled “VeriLoRA”. A distinct “ZKLoRA” by other authors also exists in the LoRA-verification literature, so the three names should not be conflated.
+
+2explicitly accepted residual risks, with the economic-metabolism extension adding the environment-oracle authentication path and its rejection cases (Section 5). • Empirical evaluation : the agent completes a 2.36-day continuous on-chain run with two host-side resumptions and no rejected transition, at bounded per-cycle verification and re-proving cost (Sections 6.3 to 6.5); the per-transition re-check rejects a substituted substrate, and, empirically, key-driven L2 divergence separates independently keyed agents while a same-key control stays at zero (Sections B.1 and 6.2). • Economic-metabolism extension : a consumption-side constraint is added to the agent triple’s third ( Fecon ) axis — an aliveness predicate enforced at every transition, and a protocol-imposed metabolic cost debited each cycle over a 168-advance continuous run (Section 8.5). Each advance’s environment vector is signed by a designated oracle : the signature and its binding to the committed transition are verified in-circuit, while the committed signing key and cycle are checked on chain against the genesis-registered oracle and the expected counter (Section 8). The remainder of the paper reviews adjacent work (Sections A and 2), fixes the notation and background primitives (Section 3), presents the core construction and threat model (Sections 4 and 5), reports the evaluation and extensions (Sections 6, 7, 7.3 and 8), and discusses the construction’s scope and implications (Sections 9 and 10). 
+
+# 2 Related Work 
+
+Biological individuality and Artificial Life. The question of what counts as a biological individual (whether the organism, the gene, the immune-recognising collective, or the autocat-alytic chemical set) has occupied philosophy of biology for over a century [48, 32, 27]. The Artificial Life (ALIFE) tradition translates the question into engineering form by asking which minimal mechanisms suffice for an artificial system to count as individuated; classical proposals include autopoiesis (self-producing organisation) [31] and autocatalytic sets (mutually catalysing molecular collectives) [21]. A complementary line formalises agency itself: Barandiaran et al. [5] cast the agent as a goal-directed system that acts on its environment, and decompose agency into three constitutive conditions — individuality, interactional asymmetry, and normativity; subsequent work develops these three along formal and information-theoretic lines [7, 22, 2] (reviewed by Baltieri and Suzuki [4]); we adopt the individuality criterion as our identity target (Section 9.2). A recent on-chain ALIFE strand treats the public blockchain as a substrate for evolving agents that fund their own continuation. Hu and Fangting [18] (ALIFE 2024) frame the blockchain as an “unstoppable artificialized nature” — a perpetual, non-haltable habitat — and pose eleven open research questions for the field, including how to define on-chain metabolism, reproduction, and mutation. Masumori, Maruyama, and Ikegami [30] demonstrate a self-replicating Ethereum smart contract that funds its own copies by selling NFTs of its evolving phenotype, with human purchases as the fitness signal. Hu and Rong [19] (Spore.fun) extend the vision with TEE-secured autonomous agents (TEE: trusted execution environment) whose genome is a JSON-encoded set of behavioural parameters. These works share our framing of the blockchain as a substrate for individuated agents but differ in the heritable unit (NFT-encoded phenotype, JSON behavioural genome) and the trust assumptions invoked (smart-contract execution, enclave attestation). The construction instead shifts the identity-bearing substrate inward to the agent’s sk -derived weights, and — unlike Masumori et al. and Spore.fun, which demonstrate self-replication and open-ended evolution — contributes an identity primitive, not an evolution mechanism (frozen 
+
+W , no reproduction; these weights become a heritable unit only under the future replication extension of Section 9.5). The connections are revisited in Section 9.1. 3zkML proving stacks. zkML proving stacks target computational integrity : proving that a computation (here, a network step) was performed correctly, optionally without revealing its inputs. The construction uses such a stack as its tool. EZKL [52] and Bonsol [9] are the closest stacks to ours, each sharing one of our two requirements (proving a neural-network step in zero knowledge; verifying on Solana). EZKL compiles a fixed neural network (exported via ONNX) into a Halo2 circuit with KZG polynomial commitments and proves individual inferences of that model, with verification targeted at EVM (Ethereum-compatible) chains. It shares our prove-a-network-step goal, but does so as a per-model compiled circuit, whereas our guest is ordinary Rust executing the Elman step (a minimal recurrent-network update; Section 3.3) inside a zkVM (Section 4.1). Bonsol brings general-purpose RISC Zero zkVM proofs to Solana, sharing our deployment target but with a different proof system and on-chain verifier. We adopt SP1 [40] because, at implementation time, its on-chain Groth16 verifier ( sp1-solana ) was the most operationally mature path to constant-cost verification on Solana; the construction itself is tied neither to SP1 nor to Solana: any zkVM able to execute the guest, on any chain exposing a Groth16 verifier, could instantiate the same binding. An EVM port would also need to realise condition (iv)’s ed25519 self-signature (Section 4.5); because the EVM has no standard ed25519 precompile, that check may require an additional in-circuit or contract-level verifier rather than merely a different verification cost. 
+
+On-chain AI agents. On-chain AI-agent systems instead target identity and persistence 
+
+— which single entity an action, balance, or accumulated history belongs to — and form the lineage in which this work sits. Several projects have approached on-chain AI from distinct angles. Modulus Labs [33] pursued zk-SNARK-proven inference for small ML models. ORA Protocol [37] positions itself as an on-chain AI oracle delivering verifiable inference to smart contracts. Giza [15] originally targeted zkML on Starknet via Cairo and the Orion library, and has since repositioned around on-chain agents that act on capital rather than around proving inference itself. Gensyn [14] addresses verifiable training-compute markets at the infrastructure layer (its main product has since shifted toward on-chain information markets). Across these systems the model weights are treated as data to be attested at use time (a snapshot whose hash is committed — a static set of weights fixed at attestation time, not a learning or weight-update process), unlike our key-derived binding. Our construction ties the agent’s substrate to its key by composing standard primitives (the primitives in Section 3.2, their composition in Section 4; labelled zkALIFE in Table 8). BAID [28] and zkLoRA [26] are closely related works by other groups, covering code-axis identity and weight-update verifiability, respectively, but neither anchors agent identity to the weights themselves (Table 8). Nearest in motivation is Coslett’s identity-first zkML framework [11], which argues that proving which model is running is a prerequisite for trustworthy zkML and binds weights by structural fingerprinting under TEE attestation; it shares the which-substrate question, but roots the binding in hardware attestation of a pre-existing model, whereas here the weights are derived from the agent’s key and re-checked cryptographically at every transition. The remaining entries in that table bind something other than transition-time identity: AuditableLLM [25] keeps a tamper-evident audit log, DIAP [29] proves a stateless identity-to-IPFS-CID ownership relation, OML [10] fingerprints a foundation model for ownership and loyalty, and the Darwin Gödel Machine [50] pursues open-ended self-improvement with no cryptographic identity primitive at all (its agent lineage is tracked only as an experimenter-maintained archive of mutating code, so there is no protocol-level identity to verify or forge). The DID (Decentralized Identifier) and verifiable-credential standards of the wider DLT identity space [44] are orthogonal in the same sense: a DID binds a real-world or organisational subject to a controller key and its attestations, whereas the question here is what computational substrate acts under that key — an axis those standards leave unconstrained and this construction binds. The same holds for the agent-identity standard now emerging in this space: ERC-8004 [12] 4registers an agent as an ERC-721 identifier whose token URI resolves to an off-chain agent card , with reputation and validation registries alongside it. It is a standards-track instance of the wrapper model this paper moves beyond, since the card — not the computation — carries the agent’s declared identity and capabilities; ERC-8004 already names zkML proofs among its pluggable validation options, so a key-to-substrate binding of the kind constructed here can serve as a validator behind such a registry. The personhood-credential line [1] addresses the mirror-image distinctness question — certifying that a real human, rather than an AI, stands behind an online account — whereas the impostor problem here is intra-machine: which computational substrate acts under a given agent key. Applying the five-part taxonomy of a systematic survey of this design space [3], we classify the construction as autonomous signing with self-custody. 
+
+Cryptographic individuation in other contexts. The HKDF construction [23] we use is in spirit identical to BIP-32 [49] hierarchical-deterministic wallet derivation: in BIP-32, a single master secret deterministically generates an unbounded tree of subordinate keys, so that its holder can reconstruct any descendant without storing it, and so that each descendant’s relationship to the master is a cryptographic fact rather than a database entry. We apply the same one-master-many-descendants pattern, but the descendants are neural-network weights rather than subordinate keys: a single sk deterministically generates the agent’s entire weight tensor W via HKDF . The novelty in our construction is therefore not the HKDF derivation itself (HKDF and its hierarchical-deterministic application are decade-old primitives) but the two engineering moves layered on top — publishing the commitment WC = keccak (W ) on chain at genesis, then re-checking it at every state transition so the agent’s substrate cannot drift (Sections 4.2 and 4.5). The closest prior binding of a key to neural-network weights is ZKROWNN [38], which proves ownership of given weights via an embedded watermark key — there the weights are an input to be claimed, whereas here they are an output deterministically derived from the key ( W = HKDF (sk )) and re-checked on chain at every transition. The construction combines deterministic key-to-weights derivation with transition-time on-chain verification. Concurrent work derives context-isolated keys from an identity root for blockchain authorisation [46, 45]; our derivation instead targets the model substrate itself (the recurrent weight tensor W ) rather than subordinate keys, so the claim above is specifically that the weights are bound to the key, not that deterministic derivation from a root is itself new. Orthogonally, verifiable delay functions (VDFs) [8] certify elapsed sequential computation; the temporal continuity of Stream (K) derives instead from ledger ordering at finalized depth (Section 3.4), and pacing advances by a VDF is a possible composition we do not pursue here. 
+
+# 3 Background 
+
+3.1 Notation and scope 
+
+The agent triple zkAgent = ( K, Stream (K), F econ (K)) was introduced in Section 1 alongside the Artificial Externality framework’s three-layer model of reality (Substrate / Contingency / Inexorable), whose vocabulary it adopts. The construction realises the framework’s cryptographic individuality component, not its stronger inexorability claim (Section 9.4); Table 1 fixes the notation used throughout the paper. We instantiate the K and Stream (K) axes in Sections 4.2 to 4.4 (core construction) and extend the construction in Sections 7.1 and 7.2; Section 8 adds a consumption-side constraint to the Fecon (K) axis. The aliveness predicate over these three axes is enforced as a circuit-and-runtime invariant by the combined construction (Section 8.2). 53.2 Cryptographic primitives 
+
+Roughly, ed25519 lets the agent sign its actions; HKDF lets us derive weights deterministically from the key; keccak lets the chain store a fingerprint of those weights; and Groth16 lets the chain verify the binding without seeing the secret. Concretely, we rely on four primitives, all standard. (a) ed25519 EdDSA on edwards25519 [6] for agent signatures; pubkeys are 32 bytes, signatures 64 bytes (we write pk = sk · G for the RFC 8032 key derivation, eliding its internal SHA-512 seed-to-scalar clamping; the same 32-byte seed sk is the HKDF input of Section 4.2). 
+
+(b) HKDF-SHA256 [23] (RFC 5869) for deterministic weight derivation — in ML terms, the key acts as the seed of a fixed pseudorandom weight initialisation (Section 2). (c) keccak -256 for on-chain commitments (matches the Solana keccak syscall). (d) Groth16 [17] as the proof system, instantiated by SP1 v5.2.4 [40]; on-chain verification uses the sp1-solana verifier crate developed by Succinct Labs. 
+
+3.3 Elman recurrence over a fixed-point grid 
+
+The agent’s compute substrate is a small recurrent neural network: a 16-dimensional hidden state ht that each cycle combines the previous state ht−1 with an input xt to produce an action 
+
+yt. We use integer arithmetic in Q16 .16 fixed-point format so that the same computation runs bit-exactly inside the SP1 guest and in the host-side reference implementation. Formally, the agent’s dynamics is an Elman [13] recurrent layer on a Z16 hidden state with a Z5 input and Z5
+
+output, all in Q16 .16 fixed point: 
+
+ht = hardtanh (Wxh xt + Whh ht−1
+
+> )
+
+, (1) 
+
+yt = Why ht, (2) with Wxh ∈ Z16 ×5, Whh ∈ Z16 ×16 , Why ∈ Z5×16 (416 i32 weights, 1 ,664 bytes total). The guest performs a fixed-shape deterministic integer computation: matrix dimensions and loop bounds are fixed, while hardtanh saturation (the identity clamped to [ −1, 1]) uses data-dependent clamp branches. Each matmul (matrix-multiply) accumulator is a Q32 .32 product, right-shifted by 16 bits back to Q16 .16 before the next operation (omitted from Equation (1) for readability but required for bit-exact reproduction). Choosing the low 15 bits of each HKDF output word (sign-extended to Q16 .16, giving per-weight values approximately uniform on [ −0.25 , 0.25)) yields a per-weight standard deviation σW ≈ 0.14 and a spectral radius (loosely, the recurrence’s amplification factor) ρ ≈ σW
+
+√Nh ≈ 0.56 ( Nh=16 hidden units). These are properties of the                                           
+
+> Symbol Meaning
+> sk ,pk Agent private key (32-byte ed25519 seed) and 32-byte public point ( ed25519
+> on edwards25519)
+> Ged25519 base point used in the abbreviated relation pk =sk ·GK= ( sk ,pk )Rigid-designator key pair (Section D), the agent’s structural anchor
+> W= ( Wxh , W hh , W hy )Elman recurrent weights derived as HKDF (sk ,tag ) (Section 3.3)
+> WC =keccak (W)On-chain weight commitment registered at genesis ( F2, Section 4.2)
+> ht∈Z16 Per-cycle hidden state in Q16 .16 fixed point
+> xt∈Z5,yt∈Z5Per-cycle environment input and agent action
+> ctOn-chain per-cycle state commitment, chained from ct−1
+> Stream (K)The chain {ct}t, signed by sk at every advance (Section 4.4)
+> Fecon (K)Lamport balance of the agent’s identity-derived economic PDA (Sections 3.4 and 8)
+> πF2, π F1Groth16 proofs for the genesis ( F2) and per-cycle ( F1) circuits
+
+Table 1: Notation used throughout the paper. Economic-metabolism extensions ( Fecon , oracle attestation, environment commitment) are introduced when needed in Section 8. 6derivation’s output statistics that hold in distribution across keys, not per-agent tuning; they are richer than an internal predecessor PoC in which every weight was the constant 0 .05. The 5 → 16 → 5 dimensions are minimal scaffolding chosen to exhibit non-degenerate recurrent dynamics within the SP1 proving budget. The binding construction does not depend on this particular choice of dimensions, although changing them requires rebuilding the fixed-shape guest circuit and its verifying key. The sub-unit spectral radius ( ρ ≈ 0.56 < 1) keeps trajectories away from the hardtanh saturation regime in which distinct-key trajectories could otherwise collapse to a shared clamped corner — the 500-pair null of Section 6.2 confirms no such collapse empirically (minimum mean inter-agent L2 divergence M4 = 0 .44 > 0). 
+
+3.4 Solana on-chain primitives 
+
+This paper depends on four Solana primitives. 
+
+Program . A deterministic Rust binary that is deployed once to a public address (the program ID ) and then invoked through instructions carried by transactions ; a transaction is a signed bundle of one or more instructions that the cluster either applies atomically or rejects. 
+
+Account . The unit of state: an addressable region of bytes owned by exactly one program, with a balance denominated in lamports (10 9 lamports = 1 SOL). The program owning the account is the only party that can mutate its bytes, but anyone can read them. 
+
+Program-derived address (PDA). A deterministic account address computed by hashing a fixed program ID with a list of seeds (byte strings). A PDA deliberately has no private key, so no external party can ever sign for it: “the program signs” means the runtime itself grants the owning program authority over the account whenever that program is invoked, an authority no signature can confer or steal — which is what makes a PDA usable as on-chain state owned by that program. 
+
+Precompile . A native program built into the runtime ( Ed25519SigVerify , used throughout this paper, verifies ed25519 signatures carried in a transaction). A program can inspect the transaction’s other instructions ( instruction introspection ), which is how an on-chain program confirms that the precompile verified exactly the message it expects. The on-chain programs of this paper are written with Anchor, the standard Solana program framework. Concretely, the per-agent on-chain record is a PDA whose seeds include the agent’s public key pk (Section 4.2); the per-cycle environment attestation, by contrast, is carried inside the proof itself — the designated oracle’s signature over xt is verified in-circuit and the signing key is committed to the proof’s public values, with no separate per-cycle on-chain account (Section 8.3). Per-instruction execution cost is metered in compute units (CU), with a transaction-level cap; we report per-transaction CU consumption alongside fees in Section 6.4. Distinct from CU metering, every transaction names a fee payer , the account from which the runtime debits the transaction fee at landing. That fee is a base fee charged per signature (5 ,000 lamports each, counting both the transaction’s own signatures and any signatures verified in-transaction by precompiles such as Ed25519SigVerify ), independent of compute consumed, plus an optional 
+
+priority fee (denominated per requested compute unit) that raises scheduling priority. Fecon (K)is, concretely, the agent’s capacity to keep meeting the per-cycle costs of running — realised in the deployed extension as a protocol-imposed metabolic debit, distinct from these fees (Section 8). The cluster orders transactions into ∼400 ms slots , each slot producing at most one block 
+
+(a batch of confirmed transactions); blocks at the very tip of the chain can in principle still be replaced by a competing fork (a reorganisation ), but once a transaction reaches finalized 
+
+commitment, the cluster guarantees it can never be rolled back — the depth at which this paper’s no-fork claims are stated (Section 5.1). Throughout, we use Solana’s devnet , a public test cluster that shares the execution model and APIs relevant to this construction with mainnet, 7but differs in validator conditions, load, stability, and economics: SOL is faucet-issued and has no monetary value, and the cluster may be reset by its operator. Conventional notation: a Solana public key (32 bytes) is rendered in base-58 (e.g., 7H4Dgrq2...bPare in Table 6), and we write the truncated form throughout to keep prose readable. 
+
+# 4 Construction 
+
+Protocol overview. The core protocol combines a one-time genesis step that binds the weights to the key ( F2, Section 4.2), a per-cycle advance step that verifies the committed weights while updating state ( F1, Section 4.3), and a state-commitment chain that prevents replay and, once finalized, prevents history forks (Section 4.4). These components instantiate the K
+
+and Stream (K) axes of the agent triple; Section 8 adds Fecon (K). A single Solana program (p1_identity_verifier , Table 6) verifies both Groth16 circuits, enforces the chain, and requires an ed25519 signature on every advance. 2 After defining the notation and primitives, Section 4.1 gives an informal host–guest–chain walk-through, Figure 1 shows the data flow, and Section 4.5 states the resulting properties. The weights W are derived from the key once and remain frozen for the agent’s lifetime: a fixed random initialisation that is never trained. This isolates the key in the individuation evaluation, so behavioural divergence between two agents can be attributed to their different keys. The weight-rotation extension of Section 7.2 lifts the freeze through discrete, key-anchored updates that re-prove the weight commitment at each jump. Continuous-gradient learnable weights remain a separate direction (Section 9.5), with the trade-off stated in Section 9.4. 
+
+Host SP1 guest Solana (Anchor)                             
+
+> sk ∈ { 0,1}256
+> pk =sk ·GW=HKDF (sk ,tag )
+> WC =keccak (W)
+> F2proves
+> pk =sk ·G∧
+> WC =
+> keccak (HKDF (sk , . . . ))
+> verify πF2;register PDA( pk )←
+> (pk ,WC ,cycle =0 , c 0)
+> sk (pk ,WC , π F2)
+
+– per cycle t → t+1 –                         
+
+> load PDA, ht−1
+> (ht, y t)=
+> Elman (ht−1, x t, W )
+> ct=keccak (ht)
+> σ=
+> ed25519 sk (adv ∥t+1 ∥ct)
+> F1proves
+> WC =keccak (W)
+> ∧keccak (ht−1)= ct−1
+> ∧Elman step ∧ct
+> check PDA precond;
+> verify πF1;
+> verify σ(precompile); PDA ←(pk ,WC , t +1 , c t)
+> inputs (πF1, σ )
+> off-chain prover — private sk , W, h ton-chain — public
+
+Figure 1: Core protocol flow. Genesis (top row) registers an agent identity: the SP1 guest circuit 
+
+F2 proves in zero knowledge that the public key, the weight commitment, and the private-key preimage of both are mutually consistent. Each subsequent advance (bottom row) runs circuit 
+
+F1, which proves that cycle’s Elman step under a witnessed W and publishes its commitment; the on-chain program checks that commitment against the genesis record, verifies the agent’s signature, and atomically advances the PDA’s ( cycle , state _commit ) pair. The shaded split marks the trust boundary: the secret key sk , the weights W , and the hidden state ht never leave the off-chain prover (Host and SP1 guest); the chain receives only the public key and journal values (including commitments), the constant-size proof, and the agent’s signature.   
+
+> 2In the published code, this core program and its genesis/advance guests make up code/core/ , distinct from the separate guest crates of the active-query and economic-metabolism extensions (Sections 7 and 8); a reader auditing the guest source should map the advance circuit of Section 4.3 to core/ ’s advance guest specifically.
+
+84.1 Reading guide: the zk-circuit workflow 
+
+The rest of Section 4 relies on the following proof-system workflow. An SP1 guest is a small Rust program executed inside the SP1 zkVM, a virtual machine that emits a Groth16 proof of its own execution. A bare Groth16 proof is a few hundred bytes; the SP1-wrapped artefact submitted here, including its public values, is about 1 .5 KB and is verified at constant cost (bounded compute units). It certifies that the Rust program ran with specific public inputs and outputs (its journal — the byte string of committed public values that the chain reads) without revealing any private inputs. Proof generation is two-stage: SP1 first produces a large STARK proof (a hash-based proof of the zkVM execution, megabytes in size — cheap to generate but far too large to post on Solana) and then wraps it in a single constant-size Groth16 proof. Throughout the paper, core mode refers to the unwrapped STARK stage (verifiable off-chain only) and 
+
+wrapped to the Groth16 stage; only wrapped proofs are verified on chain. In the genesis circuit 
+
+F2 below, the guest evaluates “derive W from sk via HKDF; check that pk = sk · G; return 
+
+WC = keccak (W ) and pk as public outputs.” The on-chain program verifies the proof and stores 
+
+WC and pk as the agent’s permanent record. The secret sk never leaves the host machine: the chain sees only the proof and the commitments. From an ML standpoint, this is analogous to a model card whose contents are cryptographically attestable rather than merely declared. 
+
+4.2 Genesis: the F2 circuit and agent registration 
+
+On registration, the agent owner provides sk as the only private input. In one line, genesis proves that the public key and the weight commitment were both computed from the same 
+
+secret seed, without revealing it. Formally, the genesis circuit F2 proves 
+
+pk = sk · G ∧ WC = keccak (HKDF (sk , s, info , L )), (3) where G is the ed25519 base point, s = "zkalife:phase1:v1" , info = "W_all" , and L = 1 ,664 bytes is the length of the single raw HKDF expansion: 416 32-bit words interpreted in fixed order as the backing words of the three matrices ( W_xh : 16 × 5, W_hh : 16 × 16, W_hy : 5 × 16). (The shorthand HKDF (sk , tag ) used elsewhere abbreviates exactly this call.) WC hashes this raw expansion directly; the Q16 weight values used by the Elman step are extracted from each word’s low 15 bits at use time (Section 3.3), so a reproducer must hash the raw HKDF output, not a re-serialisation of the extracted weights. Both public outputs are bound to the same witnessed 32-byte seed: F2 computes pk = sk · G
+
+and derives W from the same sk , so pk and WC are two deterministic functions of one common seed. 3 The on-chain registration transaction posts ( pk , WC , skCommit , π F2 ), where πF2 is the Groth16 proof of Equation (3); the genesis journal additionally publishes skCommit = keccak (sk )(keccak is one-way, so this does not expose sk 4), consumed by the weight-rotation extension’s sk -binding check (Section 7.2). The program checks πF2 , asserts that the PDA at pk is uninitialised, and writes PDA( pk ) ← (pk , WC , cycle =0 , state _commit =c0).
+
+Here ct is the per-cycle state commitment of Table 1 — the hash of the hidden state that cycle t
+
+ends with — and it is the only state the chain carries across cycles: each advance must open the previous cycle’s commitment ct−1 before publishing its own ct (Section 4.3). The very first advance has no preceding cycle, so c0 = keccak (0 ∥ · · · ∥ 0  
+
+> ︸︷︷ ︸
+> 64 bytes
+
+) is a fixed, key-independent genesis constant computed identically by host and guest, serving as that first ct−1.            
+
+> 3ed25519 internally signs with the clamped scalar a= clamp(SHA-512( sk )) while HKDF consumes the raw seed; the binding is nonetheless to the seed, and the non-injectivity of the clamp does not weaken it, since WC is keyed on the seed and not on the clamped scalar.
+> 4The one-wayness argument assumes sk has full entropy; for a low-entropy key (e.g., sk =0), skCommit is a known value providing no hiding.
+
+9After registration, the only secret material the host must retain is sk itself; W is recomputed from sk on demand and never persisted. The host is thus a single point of key custody, as in most adjacent designs (Spore.fun [19] instead confines the key to a TEE); distributing the host itself, so that no single node ever holds sk , is the threshold-MPC (multi-party computation) prover direction discussed in Section 9.4. Because the PDA is seeded on pk and F2 asserts 
+
+pk = sk · G (Algorithm 1, line 2), only the holder of sk can produce valid registration artefacts for pk ; submission itself requires no pk signature, and a relayed submission registers the identical journal-pinned record. A copied or relayed transaction can pre-empt the original submission, but it cannot hijack the identity: it registers only that identical record, and the uninitialised-PDA check then bars re-initialisation (front-running: observing another party’s pending transaction and landing one’s own competing transaction first; cf. the advance-time tag T1 and the double-init case (T10)). Pseudocode for F2 is given as Algorithm 1: lines 1–2 enforce condition (i) (keypair binding) and lines 3–4 enforce condition (ii) (substrate–key binding), both circuit-internal, together contributing to a single Groth16 proof πF2 .
+
+Algorithm 1 Genesis circuit F2 (zk-SNARK; one-time, per agent).                                         
+
+> Require: private input sk ∈ { 0,1}256
+> Require: public inputs pk ,WC ∈ { 0,1}256 ; publishes skCommit (i) keypair binding
+> 1: pk ′←sk ·G▷ed25519 scalar multiplication on edwards25519 2: assert pk ′=pk (ii) substrate–key binding
+> 3: W←HKDF (sk , s, "W_all" , L =1 ,664) ▷single expansion, reshape to ( Wxh , W hh , W hy )4: assert keccak (W) = WC
+> (skCommit for the weight-rotation extension, Section 7.2)
+> 5: skCommit ←keccak (sk )▷published in the genesis journal alongside pk ,WC
+> 6: return accept
+
+4.3 Advance: the F1 circuit and Elman step 
+
+Each cycle t → t+1 consumes the current PDA( pk ) entry ( WC , cycle , c t−1), the cached hidden state ht−1, an environment vector xt (synthetic at this stage; environment coupling is addressed in the active-query-loop extension), and produces a new state commitment ct. The advance circuit F1 proves 
+
+WC = keccak (W )
+
+∧ keccak (ht−1) = ct−1
+
+∧ (ht, y t) = ElmanStep (ht−1, x t, W )
+
+∧ ct = keccak (ht).
+
+(4) Here W is supplied as a private witness and the circuit publishes WC = keccak (W ) rather than re-deriving W from sk (a commit-and-prove pattern); that derivation is proven once at genesis by F2 (Equation (3)), and the advance is bound to it on chain (check (d) below) — re-deriving 
+
+W in-circuit at every cycle would re-pay the HKDF expansion’s proving cost for no added soundness. 
+
+Division of labour (guest, host, chain). All four conjuncts of Equation (4) — including the Elman step itself — are evaluated inside the SP1 guest, whose execution produces the Groth16 proof πF1 ; the host assembles the witnesses ( W re-derived from sk , the cached ht−1,the environment xt), runs the same step natively to obtain the ct it must sign, and submits the transaction; the on-chain program never re-executes the dynamics but verifies πF1 together with the chain-side checks (a)–(d) below (Figure 1). The SNARK binds ct to ct−1 by requiring 10 the start-of-cycle state to match the previous commitment ( keccak (ht−1) = ct−1, Algorithm 2), so the published ct is the guest-defined fixed-point successor of the state ct−1 commits to; the on-chain PDA precondition described below additionally enforces that ct−1 is the previous cycle’s actual PDA state, serialising advances against replay and forks at transaction time. 
+
+Self-signature. The advance transaction additionally carries an ed25519 signature by sk 
+
+over the message σadv = "zkalife:p1:advance:" ∥ (cycle +1) LE ∥ ct. The signed bytes are a domain-separation prefix (a fixed literal that keeps a signature produced for one message type from being replayed as a signature on another), the next cycle index as a little-endian u64 , and the new commitment ct; the public key is not signed but is bound on chain by verifying the signature against the registered pk .5
+
+On-chain verification and settlement. The on-chain program verifies (a) πF1 (against the advance verifying key baked into the program, pinning the exact guest circuit), (b) the 
+
+ed25519 signature against pk via Solana’s Ed25519SigVerify precompile, (c) that the PDA’s 
+
+state _commit still equals ct−1 (the ( cycle , state _commit ) pair advances atomically, so this pins 
+
+cycle =t), and (d) that the published WC equals the commitment registered at genesis (else 
+
+WeightCommitMismatch , Custom(6007) ). Labels (a)–(d) enumerate logical conditions rather than handler execution order: the deployed handler checks the journal header, (c), and (d) before (a), and checks (b) after proof verification. The combination (b)+(c) enforces the cross-cycle chain ct−1 → ct, while (d) enforces the substrate–key binding at advance time. On success the program advances the PDA atomically: PDA( pk ) ← (pk , WC , t +1 , c t).
+
+Pseudocode for F1 is given as Algorithm 2: the circuit asserts that the start state matches the previous commitment ( keccak (ht−1) = ct−1, line 1), recomputes the weight commitment 
+
+WC = keccak (W ) from the privately witnessed W (line 2, which the on-chain program binds to the genesis commitment), executes the Elman step under that same W (lines 4–5, condition (iii)), and emits ct = keccak (ht) (line 6). Condition (iv) — the ed25519 self-authorisation — is, like the cross-cycle chain, enforced outside the circuit rather than inside it: the Solana precompile verifies the signature natively against pk , paired with the PDA precondition check, at much lower cost than a circuit-internal signature check would impose. 
+
+4.4 State chain and atomicity 
+
+The PDA’s ( cycle , state _commit ) pair is the synchronisation point that binds every Stream (K)to a single ledger-ordered history. Two advances that both reference ( cycle =t, c t−1) but arrive in the same Solana slot are serialised by the runtime: the first to land succeeds; the second fails with a custom error StateChainViolation (Custom(6006) ) because its PDA precondition no longer holds. Test A4 (Section 5) exhibits this behaviour with two transactions differing only in their ComputeBudget unit limits. An agent that paces itself from a confirmed -level (pre-finality) read of ct cannot thereby land an accepted-but-orphaned advance: if cycle t is reorganised, cycle t+1’s precondition state _commit = ct fails on the canonical fork and the advance reverts, so the integrity invariant is reorg-safe even though liveness (Section 9.4) is not.           
+
+> 5The signed message binds the cycle index and ctbut not the program ID, so a proof-and-signature bundle is not cryptographically pinned to one program. For t≥1 this is bounded operationally: each agent’s PDA lives under a single program, and a cross-program replay would require an independent PDA for the same pk to sit at the run-specific ( cycle , c t−1) state. The first advance is the exception, since its precondition is the universal genesis constant c0: a party who re-registers the same pk under a second program could replay that first advance there — but this only reproduces the agent’s own honest first state and confers no authority over the canonical PDA. Folding the program ID into the signed message closes both cases and is a low-cost hardening step deferred to the sleep-replication extension (the planned successor deliverable; Section 7.2).
+
+11 Algorithm 2 Advance circuit F1 (zk-SNARK; per cycle).                                      
+
+> Require: private inputs W,ht−1,xt▷ x tis private in the core circuit; the extension circuits publish it
+> Require: public inputs ct−1, c t; publishes WC and yt▷cycle +1 is signed and checked on-chain, not in-circuit
+> state-chain continuity (start state matches the previous commitment)
+> 1: assert keccak (ht−1) = ct−1
+> (ii) weight commitment (equality to the genesis WC enforced on-chain, not inside the SNARK)
+> 2: WC ←keccak (W)▷published in the journal; on-chain: assert WC =WC genesis
+> 3: ( Wxh , W hh , W hy )←Reshape (W)
+> (iii) Elman dynamics under exactly that W
+> 4: ht←hardtanh
+
+(Wxh xt + Whh ht−1
+
+)             
+
+> 5: yt←Why ht
+> next-state commitment ( ct−1-to-ctordering enforced on-chain via the PDA precondition)
+> 6: c′
+> t←keccak (ht)7: assert c′
+> t=ct
+> 8: return accept
+
+4.5 Properties 
+
+Conditions (i)–(iv) (the keypair, substrate–key, dynamics, and self-authorisation bindings of Sections 4.2 and 4.3) — established at genesis by Equation (3) and enforced at every state transition by Equation (4) together with the on-chain program — yield four named properties, summarised in Table 2. We state them informally; Section 5 pairs each with a tested rejection path.                        
+
+> Condition Binding Property Exercised by
+> (i) keypair, pk =sk ·G(P1) keypair authenticity F2soundness; T4-a (ii) substrate–key,
+> WC =keccak (HKDF (sk ,tag )) (P2) substrate–key binding T6 (iii) dynamics, Elman step under committed W
+> (P3) compiled-dynamics fidelity T6 (iv) self-authorisation, per-cycle ed25519
+> signature (P4) chain self-authorisation T3, T4-a/b/c, A4, T-a
+
+Table 2: The construction’s spine: each binding condition (Sections 4.2 and 4.3) maps to one named property (Section 4.5) and the rejection-path test or structural check that exercises it (Section 5); the genesis equality in P1 and the compiled-dynamics fidelity of P3 are enforced structurally by circuit soundness, T6 is the adjacent weight-substitution rejection, and T-a is a chain-side precondition rather than a scripted test. 
+
+(P1) Keypair authenticity. Condition (i) pins the registered pk to the same witnessed 32-byte seed sk from which all downstream artefacts are derived. A candidate sk ′ whose RFC 8032 key derivation does not yield pk cannot satisfy F2 at registration, and, under ed25519 EUF-CMA, a valid advance signature for an existing pk cannot be produced without signing authority for that public key. The genesis equality is enforced structurally by F2 soundness; the wrong-key advance case T4-a confirms that the deployed program rejects a signer other than the registered 
+
+pk , while T4-b/c exercise the per-cycle self-authorisation property P4. 
+
+(P2) Substrate–key binding. Condition (ii) makes the on-chain commitment WC a deter-ministic function of sk via HKDF. An adversary holding only WC cannot recover W (keccak -256 preimage resistance, since WC = keccak (W )). If W leaks, the one-wayness of HKDF-SHA256 prevents recovery of sk . Nor can an adversary have an alternative W ′ accepted under the same 
+
+pk : genesis requires exhibiting sk in-circuit, which forces W = HKDF (sk , tag ), and at advance the on-chain WC equality rejects any substitute (Test T6). The agent’s computational substrate is thus pinned to the rigid designator. 12 (P3) Compiled-dynamics fidelity. Condition (iii) constrains every advance to the determin-istic fixed-point Elman implementation compiled into the guest under the W derived from sk .The circuit binds the start state to the previous commitment ( keccak (ht−1) = ct−1, line 1 of Algorithm 2), recomputes ( ht, y t) from ( ht−1, x t, W ) at lines 4–5, and chains them into ct, so no published ct can disagree with the guest-defined successor of the committed state without invalidating πF1 .6 In the core protocol the environment xt is itself a prover-chosen private witness (Algorithm 2), so this fidelity is stated relative to the witnessed xt; the active-query extension pins 
+
+xt to a patron-signed, in-circuit-attested signal under a witness-supplied patron key (Section 7.1), and the economic extension additionally imposes the in-circuit range bound of Section 8.3. The adjacent attack — a host that mutates W while leaving the on-chain WC intact — publishes a mismatched WC = keccak (W ′) (line 2) and is rejected by the on-chain commitment check, since the published WC no longer equals the registered commitment ( WeightCommitMismatch ,Test T6). 
+
+(P4) Chain self-authorisation. Condition (iv) requires every advance to be signed by sk over a message that includes the new commitment ct and cycle +1 (under the "zkalife:p1:advance:" 
+
+domain-separation prefix; the signed message does not bind the program ID, a bounded cross-program-replay consequence analysed in the self-signature footnote of Section 4.3). A replayed proof or signature against an advanced PDA fails the precondition state _commit =ct−1 (Test T3), and forging a fresh ed25519 signature requires sk . Concurrent advances are serialised atomically by the same precondition (Test A4); a non-monotone or stalled cycle counter is rejected by the PDA precondition (tag T-a) on the chain side, before any proof verification. The of-record rejection-path tests (those whose results this paper reports) are operator-scripted: the tester constructs the attacks while holding the agents’ own key material, so P4 is verified structurally rather than against a key-withholding adversary (Section 9.4). The guarantee against a third party who lacks sk is discharged by the reduction below (the Security statement), which rests on 
+
+ed25519 EUF-CMA (existential unforgeability under chosen-message attacks), keccak second-preimage resistance, and Groth16 soundness — properties established by cryptographic argument, not by an attacker failing to break them in a finite test campaign. What the scripted tests establish is complementary: that the deployed verifier composition admits no implementation 
+
+bypass among the scripted attack classes. The on-chain parser pins the full Ed25519SigVerify 
+
+offset header to the canonical single-signature layout, so the precompile verifies exactly the (pk , m ) the gating program reads. The contribution is not any single property in isolation: each is, in itself, a standard cryptographic check. The contribution is that all four are enforced jointly , as a single circuit-and-runtime invariant, on every state transition — so that the binding between key and substrate becomes a protocol-enforced equality at every cycle. 
+
+Security statement. Combining (P1)–(P4): under Groth16 soundness in the SP1 instantiation (including the STARK/FRI soundness assumptions of SP1’s RISC-V execution proof, and setting aside the one-time wrap-circuit setup of Section 5.1), keccak -256 second-preimage resistance, and ed25519 EUF-CMA, no advance transaction is accepted on chain at PDA( pk ) unless it carries authorisation under a signing seed for pk and a valid proof of the compiled guest transition under the W = HKDF (sk , tag ) registered at genesis, extending the agent’s own ledger-ordered commitment chain. This statement concerns the authorisation and proof carried by the             
+
+> 6The guest does not separately range-check the right-shifted hidden-layer accumulator before Rust narrows it to i32 . An out-of-range preactivation therefore follows the compiled narrowing semantics before hardtanh , rather than the unrestricted-integer reading of Equation (1). The subsequent hidden state is clamped to [ −1,1]; with 16 output terms and |Why |<0.25, this also bounds every published |yt,i |<4, including when ytbecomes the next active-query action. Thus the proof establishes exact execution of the compiled guest, not equivalence to an unbounded-arithmetic equation. Condition (iv) additionally establishes key-holder authorisation but does not repair that semantic distinction.
+
+13 transaction; it does not assert that the key holder personally generated the proof or submitted the transaction, since an authorised bundle can be relayed verbatim. An adversary without a signing seed for pk who forged an accepted advance would have to break one of these primitives: substituting W ′̸ = W contradicts the on-chain WC check (a keccak second-preimage — exhibiting a different input with the same hash); forking the hidden state contradicts keccak (ht−1) = ct−1
+
+(likewise a second-preimage); forging the self-signature contradicts ed25519 EUF-CMA; and producing a transition inconsistent with the compiled guest contradicts SP1/Groth16 soundness. The binding W = HKDF (sk , tag ) is proven in-circuit only at genesis (by F2); each advance does not re-derive it but is bound to the genesis commitment by the on-chain WC equality check (Section 4.3), so the per-transition guarantee is that the cycle executed under the genesis-committed W . The guarantee is one of integrity, not availability : liveness and prover denial (Section 9.3), and host-key compromise (T5, T12), are out of scope. An adversary who holds a copy of W but not a signing seed for pk is excluded by condition (iv) alone — the per-cycle 
+
+ed25519 self-signature — since such an adversary would pass the WC check. HKDF-SHA256’s PRF security and one-wayness are assumed separately, for P2’s confidentiality claims ( W ’s unpredictability, and sk ’s confidentiality from a leaked W ); they do not enter the integrity reduction above, which rests on keccak , ed25519 , and SP1/Groth16 soundness. 
+
+Section summary. Sections 4.2 to 4.5 have specified the core protocol: the genesis circuit 
+
+F2 that registers WC = keccak (HKDF (sk , tag )), the advance circuit F1 that re-checks the weight commitment at every cycle (binding to the genesis derivation enforced on-chain), the state-commitment chain that serialises advances, and the four properties (P1)–(P4) the composition enforces. The next sections enumerate the threats this construction defends against (Section 5) and present the core empirical evidence (Section 6); Section 7 then layers the PoC-tier extensions (active-query loop and homeostatic motivation with key-anchored weight rotation) on top of the core, and Section 8 adds a consumption-side constraint to the Fecon (K) axis on the same Solana devnet. 
+
+# 5 Threat Model and Tested Rejections 
+
+Threat-model structure. We separate the trust assumptions and adversary classes (Sec-tion 5.1), the operator-scripted on-chain rejection tests (Section 5.2), accepted residual risks (Section 5.3), and the threats inherited from adjacent identity protocols and the environment-oracle extension (Sections 5.4 and 5.5). 
+
+5.1 Scope and assumptions 
+
+We assume Solana liveness and finality; we do not assume that the agent’s host or its operator is honest beyond the cryptographic checks the chain enforces. Custody, however, is concentrated: 
+
+sk is held in plaintext in a single host-process keystore (not a hardware security module), so whoever holds it can exercise the agent’s full protocol authority — a disclosed residual (T5, T12) whose consequences for the framework’s inexorability claim we take up in Section 9.4. We assume the standard hardness of ed25519 , keccak second-preimage resistance, HKDF-SHA256 PRF security, SP1’s STARK/FRI execution proof, and Groth16 soundness in the SP1 instantiation. The Stream (K) no-fork property holds at Solana’s finalized -commitment depth: an advance observed only at confirmed level could be reorganised before finality, so a canonical-history verifier reads at finalized .
+
+Trusted setup and software trust base. Groth16 soundness relies on a one-time trusted setup whose secret randomness must be destroyed; a party retaining that “toxic waste” could forge accepting proofs. SP1 first proves RISC-V execution using a STARK whose soundness relies 14 on its polynomial commitments, Fiat–Shamir transform, and FRI low-degree testing (Section 4.1), then wraps that proof in one application-independent Groth16 circuit. The setup assumption therefore concerns Succinct’s shared wrap circuit rather than a per-agent or per-paper ceremony, while STARK/FRI soundness remains a separate cryptographic assumption. The per-program 
+
+vkeyHash requires no additional setup: it fingerprints the compiled guest binary (ELF) whose proofs the on-chain program accepts. The construction also inherits a software trust base: the guest source and Rust/LLVM-to-RISC-V compilation pipeline, SP1’s patched cryptographic crates and precompiles, the SP1 prover and wrap circuit, the sp1-solana verifier crate, and the Solana runtime must be correct, as SP1’s security model states [41]. The claimed trust-root shift is therefore about what the cryptographic layer proves under correct implementations, not a claim that the stack is formally verified. 
+
+Adversary split: what the weight commitment adds over the signature. Against a 
+
+third party without sk , the per-cycle ed25519 self-signature (condition (iv)) is the load-bearing defence on its own: such an adversary fails (iv) even when holding a perfect copy of W . The weight-commitment check (condition (ii), enforced at every advance by check (d)) is instead load-bearing against the key-holding operator : without it, the operator could silently substitute 
+
+W ′̸ = W while presenting the same on-chain identity (the substrate-drift attack T6; Section 5.2); with it, every accepted advance publicly certifies that the cycle executed under the genesis-committed, key-derived W . Guest-binary substitution is a separate code-axis threat, excluded by the pinned vkeyHash and Groth16 soundness (T-CS; Section 5.4). The full threat catalogue (T1–T14) is in the project threat-model document [43] — a document specific to this project, included in the public source archive rather than a separate publication; Table 3 summarises coverage. We organise the coverage into tested rejections (Section 5.2), accepted residual risks (Section 5.3), threats mitigated by chain primitives or by the stated assumptions (rows T1, T2, T7–T10, T13, T14), and adjacent-protocol attack templates whose applicability depends on the attacked surface (T-CS/T-DR/T-MT, additional to T1–T14; Section 5.4). 
+
+5.2 Tested rejections 
+
+• T4 (signature-injection family) and T3. The scripted variants are T4-a (a valid signature under the wrong keypair), T4-b (a correctly keyed signature over the wrong message, its cycle index inflated), T4-c (the Ed25519SigVerify instruction omitted alto-gether), and T3 (replay of a stale advance proof against an already-advanced PDA). T3 violates the chain-side PDA precondition and is rejected ( StateChainViolation ) before any πF1 verification; the T4 variants pass the runtime precompile (T4-a/b) or omit it (T4-c) and are rejected by the program’s introspection check against the registered pk 
+
+and the expected message ( Ed25519Failed ), which in the deployed instruction order runs after proof verification. The reference adversarial bench in the public archive scripts the T4-a/b/c and T3 cases. The related tag T-a (a handcrafted PDA precondition with the cycle counter decremented or stalled) is rejected by the chain-side precondition (check (c) of Section 4.3; cf. P4) but it is enforced structurally rather than exercised as a separate scripted case in that bench. • T6 (weight mismatch). A modified host substitutes W ′̸ = W at advance time. The genesis-time WC remains unchanged; the advance proof then publishes WC ′ = keccak (W ′)̸ =
+
+WC , and the on-chain program rejects with WeightCommitMismatch (Custom(6007) ) before proof verification. Test added in commit b136b30 .• A4 (concurrent advance). Two advance transactions ( τA, τ B ) are identical except in their ComputeBudget unit limits (400 ,000 vs. 400 ,001 — the one-unit difference exists only to make the two transactions byte-distinct, since the cluster deduplicates identical 15 Tag Threat Status 
+
+T3 replay of a stale advance proof rejected (test) T4-a/b/c ed25519 signature injection variants rejected (test) T6 advance with weights mismatching registered WC rejected (test) A4 two concurrent advances at the same prior com-mitment atomic: one succeeds, one rejected T-a non-monotone cycle counter rejected (chain precond.) T5 sk compromise: a party who steals the private key gains full agent authority accepted; no post-compromise recovery path in the current or sk -derived-lineage design T11 program upgrade abuse: swapping a deployed pro-gram’s code via its upgrade authority precluded for all current programs: upgrade au-thorities irreversibly set to none on 2026-08-02 (Section 5.3) T12 host side-channel sk exfiltration: stealing sk from the host machine’s memory or timing channels accepted; TEE/keystore deferred to future scale extensions T1 front-running / MEV pre-emption of an advance transaction no identity takeover: a fresh, distinct advance requires sk (condition (iv)) and the matching prior commitment; verbatim relay can land only the already-authorised transition T2 init spam of dummy agent PDAs cost falls on the attacker (genesis proving + PDA rent) T7 state-chain reorder / rollback to a stale commit-ment precluded by the prev-commitment precondition (Section 4.4); canonical history read at finalized 
+
+depth T8 recovering W from the on-chain commitment WC keccak preimage resistance; W is 1 ,664 pseudoran-dom bytes (entropy anchored in the 256-bit sk )T9 lying RPC serving stale agent state soundness unaffected: the program reads consensus state at execution; a stale proof reverts and is regenerated T10 double-init of the same pk to swap WC rejected: identical seeds derive the same PDA, so re-init fails ( AccountAlreadyInUse )T13 offline forgery of a genesis proof excluded under the Groth16-soundness assumption (Section 5.1) T14 cycle-counter overflow at 2 64 rejected by checked arithmetic before the wrap; the horizon is unreachable in practice T-CS code substitution (BAID-style) different guest binary excluded by pinned 
+
+vkeyHash plus Groth16 soundness; weight substi-tution separately rejected as T6 T-DR document replacement (DIAP-style) structurally inapplicable: no configuration object T-MT memory tampering (Spore.fun-style) direct hidden-state overwrite is rejected; input-mediated memory poisoning remains possible through authorised xt
+
+Table 3: Threat coverage: tested rejections (T3, T4, T6, A4; T-a enforced by the chain precondition), accepted residual risks (T5, T12), chain-primitive or assumption-level mitigations (T1, T2, T7–T10, T13, T14; full analysis in [43]), and adjacent-protocol surfaces T-CS, T-DR, and T-MT (Section 5.4). T11 is precluded for the current deployment by its irreversible 2026-08-02 upgrade-authority freeze. Tests are reproducible from the public repository (tag arxiv-v1 ). 16 transactions, while leaving their cost effectively equal — hence distinct signatures). Both are submitted against the same recent_blockhash (Solana’s transaction-recency anchor) and reference the agent’s cycle-3 PDA. The runtime serialises them; τA lands and advances cycle 3 → 4, while τB lands second and fails with Custom(6006) StateChainViolation .Atomic advance is preserved. Bench: the A4 collision script in the public archive. Both bench harnesses pin the deployed core program of Table 6 as their hard-coded target, so every case above is reproducible as a landed rejection against the current deployment; unlike the economic-path rejections (Section 8.6), individual core reverts are not explorer-linked. 
+
+5.3 Accepted residual risks 
+
+T5 and T12 are accepted within this paper’s scope. Post-compromise recovery from T5 requires a future authorisation path independent of the leaked seed (Section 9.4, “No post-compromise rekey”), while TEE/keystore hardening for T12 is deferred to future scale extensions. T11 (upgrade-authority abuse) is closed for all current programs (Table 6), including the core program on which the alice /bob individuation evidence rests: on 2026-08-02 their upgrade authorities were irreversibly set to none with set-upgrade-authority --final , a state publicly checkable via solana program show . This is a deployment property rather than an intrinsic property of the construction; a fresh deployment re-opens T11 until its operator performs the same freeze. The of-record runs reported here were executed against the current deployments of Table 6. The freeze pins those exact binaries and thereby preserves deployment provenance; it does not by itself make private-seed trajectory values or hardware-dependent timings bit-for-bit reproducible. Denial of service against liveness or prover availability (an operator or third party halting advance by withholding proofs or by spamming the chain) is out of present scope, for the same integrity-not-availability reason given in Section 4.5; the liveness-vs-Byzantine-fault distinction and the per-actor liveness conditions are taken up in Sections 9.3 and 9.4. 
+
+5.4 Threats from adjacent identity protocols 
+
+The catalogue above (T1–T14) covers attacks at the cryptographic-binding interface the core enforces. We additionally map three published attack templates from adjacent on-chain agent-identity protocols (BAID, DIAP-style profile chains, and Spore.fun) to this construction. The mapping separates T-CS’s code axis from its weight axis, shows why T-DR is structurally inapplicable because the protocol has no configuration document, and distinguishes T-MT’s unauthorised state overwrite from input-mediated poisoning. 
+
+T-CS (code substitution attack, BAID-style). Lin et al. [28] formulate a threat in which an adversary holding the signing key runs malicious code in place of the legitimate program while signing the outputs as the legitimate agent’s. In this construction, a proof from a different SP1 guest binary fails because the on-chain verifier pins the expected vkeyHash and relies on Groth16 soundness. A genuine guest executed with W ′̸ = HKDF (sk , . . . ) is a separate weight-axis attack and fails the WC = keccak (W ) equality (T6). BAID’s binary commitment and this paper’s weight commitment therefore protect complementary axes. 
+
+T-DR (document replacement attack, DIAP-style). A second adjacent line [29] treats identity as a tamperable configuration document — a profile JSON, tool list, or system prompt swapped and re-signed with sk . The threat is concrete elsewhere: Spore.fun’s per-agent JSON genome rests on TEE attestation rather than a key binding [19], and zkLoRA’s base-model blob is anchored only by an off-chain hash [26], so host-side replacement is not checked against an on-chain commitment. The core construction has no such surface: behaviour is determined by 
+
+sk , ht−1, and the per-cycle input xt, with no protocol-level profile, tool registry, or persisted 17 document. T-DR is therefore structurally inapplicable — not defended against, but unsupported by the structure. A future extension that re-introduces such a surface (Section 9.5) must bind the configuration inside the same SNARK that binds the weights (concurrent work pursues such configuration-and-capability binding for LLM agent tool use, signature-based rather than SNARK-internal [51]). 
+
+T-MT (memory tampering, Spore.fun-style). Hu and Rong [19] report community trolls “poisoning” an agent’s memory by repeatedly supplying a phrase until the agent echoed it. That is input-mediated poisoning, not a direct overwrite of stored state. Here ht−1 is committed on chain and reproduced by the next F1 proof, so an unauthorised party cannot replace it with an arbitrary hidden vector. Nevertheless, an authorised or maliciously sourced xt can shape ht
+
+through a valid transition; the designated oracle authenticates provenance but does not guarantee semantic benignity. The construction therefore rejects direct state tampering while retaining input-poisoning and oracle-trust risk. The same distinction applies to the homeostatic extension and must be carried into any future learnable-weights or longer-memory design (Section 9.5). 
+
+5.5 Environment-oracle threats 
+
+The economic-metabolism extension authenticates the environment vector xt through a proof-and-runtime composition. The guest verifies the oracle’s ed25519 signature over the attested message and commits the signing key, cycle, and xt to the proof’s public values (mechanism and message format in Section 8.3); advance_v5 then checks the committed key and cycle against the genesis-registered oracle_pubkey and expected counter. Signature validity and binding to the committed transition are therefore proof-level properties, whereas equality with the registered oracle and expected cycle is enforced on chain. This composition exposes three 
+
+environment-oracle-specific Anchor Custom errors of p4_economic_verifier::advance_v5 : or-acle mismatch (OracleSigFailed — the oracle key committed in the proof, PV [140 .. 172] ( PV :the proof’s public values, indexed by byte offset; Section 4.1), does not equal the genesis-registered 
+
+oracle_pubkey ), attestation-cycle mismatch (OracleCycleMismatch — the attestation cycle committed in the proof, PV [172 .. 180], does not equal the advance’s expected cycle, excluding stale-attestation replay), and environment-range violation (EnvOutOfRange — some |xt,i | ≥ 218 ,a redundant on-chain guard backing the in-circuit range assertion that forecloses the fixed-point wrap of an unbounded input). A forged or wrong-message oracle signature cannot produce a valid proof at all — the in-circuit ed25519 verification fails — so it is rejected at proof gener-ation rather than as an on-chain Custom error; likewise the oracle-signed xt is the committed 
+
+PV [100 .. 120] by construction, so there is no separate on-chain environment-mismatch check. The wallet-drain template A-EA1 is foreclosed structurally by the program-owned Fecon PDA (Sections 8.2 and 9.4): lamports leave the PDA only through the protocol’s metabolic debit, with no withdrawal instruction, so no external party can drain it. Decentralised-committee attacks (Byzantine quorum, slashing griefing, stake forgery) do not apply to the single-oracle design (Section 9.5). Registration introduces a separate extension-specific liveness caveat. Unlike the core record described in Section 4.2, initialize_agent_v4 receives oracle_pubkey as an instruction argument that is not pinned by the genesis proof, and it does not require agent_pubkey to sign. A third party holding a copied valid genesis proof can therefore pre-empt creation of the identity’s PDA while supplying an attacker-chosen, distinct oracle key, after which the legitimate initialisation fails because the PDA already exists. The squatter still lacks sk , so cannot pass the per-advance self-signature or withdraw from the program-owned economic wallet; the impact is registration denial of service, not identity takeover or fund theft. Requiring an agent signature at initialisation or binding the oracle key into the genesis journal would close this gap. 18 Section summary. Of the catalogue, four tags are demonstrated as landed on-chain rejections (Section 5.2); the remainder of T1–T14 are handled structurally or by standard cryptographic argument (Table 3); T5 and T12 (host-side key custody and host compromise) remain accepted residuals, while the current deployment’s freeze closes T11 (Section 5.3). The adjacent-system analysis separates precluded code or state substitutions from input-mediated poisoning that remains possible (Section 5.4). Section 6 turns to the affirmative empirical evidence. 
+
+# 6 Empirical Evaluation 
+
+Evaluation questions and scope. The core evaluation asks whether key-derived weights are functionally distinct (Q1; Sections B.1 and 6.2), whether the binding survives a long continuous run (Q2; Section 6.3), what verification costs on chain (Q3; Section 6.4), and how long honest-prover proof generation takes (Q4; Section 6.5). Section 7 addresses Q5–Q7 for the PoC-tier extensions. Devnet scope and single-host key custody are delimited in Section 9.4; the non-statistical N =2 pairing and descriptive M2 diagnostic are delimited with the corresponding results in Section B.1. 
+
+6.1 Setup 
+
+Two agents, alice and bob , are each registered with an independent secret sk . The hosts run the reference orchestrator (the host-side daemon that drives the per-cycle prove-and-submit loop) from the public archive, on the reference workstation (an Ubuntu host with an NVIDIA RTX 3090 GPU); proofs are generated locally with SP1 v5.2.4 using CUDA GPU proving. The on-chain program is the Anchor build at the cited program ID on Solana devnet. The evaluation refers to several distinct runs and agents; Table 4 maps them at a glance.                                    
+
+> Run Cycles Chain Key ( sk )Feeds
+> alice /bob short 20 on-chain independent keygen Q1
+> alice continuous 166 (1–166) on-chain keygen Q2–Q3 core-circuit timing rerun 166 proofs off-chain fixed loop structure Q4
+> castor /pollux long-horizon 168 off-chain keygen (private) Q1 (long-run) many-key null 500 ×20 simulation SHA-256-indexed Q1 (null)
+> charlie economic 168 on-chain keygen (private) Section 8
+
+Table 4: The runs and agents referenced in the evaluation, at a glance; the PoC-extension runs (Q5–Q7) are indexed in Section B. All agent runs use independent secret solana-keygen keys, each with a privately held seed: the on-chain core pair alice /bob , the on-chain economic agent 
+
+charlie , the off-chain long-horizon pair castor /pollux , and likewise the Section 7 homeostatic daemon (Table 6). The core-circuit timing rerun is a prover benchmark of the deployed core circuit, not an agent run: its per-proof time is independent of the witnessed key (Section 6.5). The many-key null’s “SHA-256-indexed” keys are derived deterministically from public pair indices rather than from secret seeds, which is what makes that null bit-reproducible (Section 6.2). 
+
+6.2 Key-binding divergence (Q1) 
+
+We track inter-agent L2 divergence M4 over a 20-cycle run to verify that distinct key-derived weights produce distinct dynamics. Two independently keyed agents reach mean M4 = 0 .68 (> 6.8× the pre-specified mean floor of 0 .1; last-five-cycle mean 0 .80, > 16 × the tighter 0 .05 floor), while the same-key control stays at M1 = 0 divergence at every cycle. In a 500-pair reference distribution, every distinct-key pair clears both floors; the of-record pair lies in the 19 lower tail. 7 An independent-host 168-cycle N =2 pairing ( castor /pollux ) extends the result over a longer horizon, with M4 growing from 0 .62 to 3 .50 (Section B.1). Conditional on a fixed key pair and input schedule, the dynamics are deterministic, so there is no trial-to-trial noise distribution. Across sampled key pairs, however, M4 has the empirical key-induced reference distribution reported here; the floors are pre-specified minimum effect sizes rather than noise estimates. This analysis is a non-degeneracy check of the key-to-weights pipeline: every sampled distinct-key pair induces dynamics separated above the pre-specified floors. The on-chain Q1 evidence comprises one independently keyed alice /bob pair; the 500-pair result is a simulation reference distribution, not 500 on-chain replications. The weight-commitment rejection test T6 supplies the enforcement evidence (Section 5). Section B.1 gives the full metric definitions ( M1–M4), the long-horizon table, the reference distribution, and the secondary M2 sign-structure diagnostic. 
+
+6.3 Long continuous run (Q2) 
+
+A 166-cycle continuous run of alice (one cycle per 20 minutes) spanned 2 .36 days (cycles 1 through 166), with no failed transactions: the agent PDA’s complete on-chain history is 167 landed transactions — one registration plus 166 advances — every one successful. The run log’s per-cycle on-chain counter matches the host’s local cycle index at every cycle, and the PDA cycle counter reads 166 at run completion. The mean inter-cycle wall-clock period was 20 .6 min (median 20 .7 min, range [2 .4, 22 .1] min), modestly above the 20 min cadence target because the period carries the daemon’s scheduling interval on top of each cycle’s prove-and-submit work; the 2 .4 min minimum is a catch-up cycle immediately after a host-side daemon restart (the daemon was restarted twice over the run, each time resuming from the on-chain state — once after a transient network outage — and the on-chain commitment chain is unbroken across both, which is the invariant under test). Per-cycle periods are computed from the run’s timestamped per-cycle log (committed in the public archive); within devnet’s ledger retention they are also independently recomputable from the block timestamps of the PDA’s on-chain transaction history (Table 6) — devnet, unlike mainnet, prunes old transaction history and may be reset, so beyond that window the committed log is the durable source. The run is a liveness stress test, not a Byzantine-fault test (Section 9.4). 
+
+6.4 On-chain verification cost (Q3) 
+
+The dominant on-chain cost is Groth16 verification via sp1-solana ; the PDA precondition check and the state-update logic account for the small remainder, and the ed25519 verification, delegated to Solana’s native precompile, is charged through the per-signature fee rather than through metered compute units. Aggregating all 166 alice advance transactions of the continuous run (cycles 1–166), the per-transaction compute-unit cost has mean 246 ,906, median 246 ,906, standard deviation 15 .5, and lies in [246 ,861 , 246 ,951] — a 90-CU band (interdecile range 39) with no outlier transactions. A per-instruction decomposition of a fresh disposable advance against the same deployed program (246 ,876 CU in total, within that band) attributes 246 ,726 CU to the verifier program instruction and 150 to the compute-budget instruction, with the ed25519 
+
+precompile contributing zero metered CU (the advance transaction instead pays two signatures’ base fees, versus the registration’s one). The observed maximum CU max = 246 ,951 comfortably leaves headroom under the Solana per-transaction CU cap (1 .4 million CU). The one-time genesis registration consumed 255 ,670 CU (255 ,520 in the program instruction — the genesis-proof verification plus agent-PDA creation — 8 ,794 above an advance), measured on a fresh disposable    
+
+> 7The 20-cycle short-run figures ( M4mean 0 .68, last-five 0 .80) place the of-record pair at the 7 .2 and 7 .0percentiles of the 500-pair reference distribution (Section B.1; data figures/manykey_null_m4.json ). It is less divergent than a typical pair while still clearing the two floors by 6 .8×and 16 ×.
+
+20 registration against the same deployed program, as the of-record registration transactions predate devnet’s ledger retention (Section 6.3). 
+
+6.5 Honest-prover proof generation (Q4) 
+
+SP1 proof generation with CUDA GPU proving on the reference workstation, measured in a dedicated 166-proof timing rerun of the deployed core circuit (Table 4), takes mean 38 .74 s, median 39 .10 s, standard deviation 3 .05 s, and lies in [34 .71 , 44 .71] s. Circuit dimensions and guest loop counts are fixed across keys, so the rerun estimates per-transition proving cost without conflating it with the continuous run’s concurrent GPU workloads. Small data-dependent branch effects, witness-generation details, and host scheduling can still vary timing; the reported distribution is empirical rather than a key-independence proof. Variance is dominated by witness generation and Groth16 proving; together they constitute the principal cost the protocol pays for re-proving the binding in Equation (4) on every transition. The one-time genesis proof ( F2) was measured in a dedicated 20-proof run on the same GPU prover (two additional contention-affected samples, taken while the GPU was shared with an unrelated workload, are excluded): mean 48 .18 s, standard deviation 1 .93 s, range [41 .48 , 50 .42] s — roughly 9 s above the advance circuit, a difference consistent with — but not causally isolated to — the in-circuit ed25519 key derivation and full HKDF expansion that only genesis carries (Section 4.2). It is paid once per agent, not per cycle; the dedicated run’s per-proof timings are committed in the public archive, and the extension lineage’s genesis prove time is recorded in the shipped economic-run metrics artefact. Three orientation notes for ML readers. 
+
+Scaling. SP1 proving cost is expected to grow quasi-linearly with guest execution cycles while the Groth16 wrap stage is roughly constant (Section 4.1). As a first-order expectation, a substrate with k× more per-cycle arithmetic should approach a similar increase in proving cost once guest execution dominates, although trace width, memory behaviour, and wrap overhead can shift the ratio; on-chain verification cost remains unchanged (Section 6.4). Larger models are therefore gated primarily on prover throughput, not on-chain cost. 
+
+Why prove at all at this scale. At 416 weights the cheaper baseline is transparent verifica-tion: publish W (revealing neither sk nor any signing ability) with a one-time genesis proof of key derivation, and let verifiers re-execute each step directly. Per-cycle proving is thus a design choice here, not a requirement: it keeps on-chain verification cost constant as the substrate grows, and leaves room for the cryptographically private internal state of Section 9.5. 
+
+Cross-paper orientation. On the GPU prover the wrapped (on-chain-grade) per-cycle proof times reported in this paper are ∼39 s here (core protocol), ∼42 s for the larger active-query circuit (Section B.2), ∼41 s for the mutation circuit (Section B.3), and ∼53 s for the economic-metabolism circuit (Section B.6); the near-constant Groth16 wrap stage holds the three smaller circuits to a ∼40 s band, while the economic circuit’s ∼53 s sits above it. The economic and active-query circuits both verify an ed25519 signature in-circuit. The economic circuit additionally commits the registered-oracle key and attestation cycle in a 180-byte journal (Section 8.3), but because the circuit families differ in several respects, the observed gap is descriptive rather than a causal attribution to any one feature. 
+
+Section summary. Independently keyed agents diverge while a same-key control does not (Q1), the binding holds over a 2.36-day, 166-cycle continuous on-chain run with two host-side resumptions (Q2), each on-chain verification costs a bounded ∼247k CU (Q3), and re-proving the binding costs ∼39 seconds of GPU proving per cycle (Q4). Section 7 layers the PoC-tier extensions on this base. 21 0 20 40 60 80 100 120 140 160 35 40 45 proof index proof time (s)  per-proof time mean (38 .74 s) 
+
+Figure 2: Per-proof SP1 proof-generation time for the deployed core circuit, over the dedicated 166-proof GPU timing rerun of Section 6.5 ( n=166); summary statistics in the text. The longest proofs (44 .1–44 .7 s) are consistent with host-side timing variability. 
+
+# 7 Sensorimotor and Homeostatic Extensions 
+
+Extension evaluation. The active-query-loop extension turns the synthetic input xt into a patron-signed, in-circuit-attested external signal (Section 7.1), and the homeostatic extension 
+
+adds an internal motivational driver and key-anchored weight rotation (Section 7.2). Their evaluation asks whether environment binding preserves individuation (Q5; Section B.2), whether the deployed rotation is restricted to the agent’s key holder and the committed rotation inputs (Q6; Section B.3), and whether the core protocol plus both extensions execute end-to-end on a public chain (Q7; Section B.4). 
+
+7.1 Extension: active-query loop for sensorimotor coupling 
+
+The core evaluation instantiates the environment vector xt in Equation (1) as a synthetic deterministic schedule (the fixed ramp of Section B.1); the core protocol itself leaves xt as a prover-chosen private witness (Section 4.5). Intuitively, the evaluated core agent therefore has no real environment input: its xt is a pre-programmed sequence that nothing in the world influences. The active-query loop closes that gap: each cycle the agent asks for a fresh observation, a designated patron answers, and the patron-signed answer becomes the input that the agent’s circuit consumes. Formally, this extension turns xt into a patron-signed, in-circuit-attested external signal under a witness-supplied patron key while retaining the identity-binding invariants (W = HKDF (sk , tag ), Stream (K) chain, ed25519 self-authorisation). The active-query mechanism has three components. First , the agent’s prior action yt−1
+
+parameterises the request for the cycle’s environment. Second , a designated patron computes the environment vector xt (a function of the cycle and of yt−1) and signs, off chain , the message "zkalife:p2:respond:" ∥ cycle ∥ keccak (yt−1) ∥ xt ∥ flags under its own key, publishing the signed vector as an off-chain artefact (no on-chain query or response account is used). Third ,the agent’s F1 advance circuit takes the patron’s public key and signature as witnesses and verifies the signature inside the SP1 guest against the reconstructed message (the canonical verifying key fixes the guest code), binding xt to the cycle and to keccak (yt−1); the responder key is supplied as a witness and is neither committed to the journal nor checked by the on-chain program (Section 9.4). The verified environment vector xt enters the journal output and thereby ct; a dedicated on-chain verifier — in the deployed lineage, the p3_motivation_verifier program of Section B.4, which embeds this extension’s advance verifying key — then checks the SP1 proof, the state chain, and the agent’s own ed25519 self-signature. The threat tag T-a (non-monotone cycle counter) has an environment analogue in this extension: an advance whose environment fails the in-circuit patron-signature check cannot produce a valid πF1 at all, so the case is foreclosed at proof generation rather than on chain (cf. Section 5.5). The design takes a partial step toward the environmental-coupling (interactional-asymmetry) 22 criterion that the core construction explicitly defers (Section 9.4); full phenomenal coupling (an environment that is not a cooperative patron but a non-cooperative external process) remains an open research direction. 
+
+7.2 Extension: homeostatic motivation and key-anchored weight rotation 
+
+The homeostatic extension adds two further constructions on top of the active-query-loop extension: (a) a homeostatic driver inspired by homeostatic reinforcement learning (HRRL) — an internal motivational economy modelled on biological homeostasis (drives such as “energy” and “temperature” that must stay close to setpoints), independent of any external reward; the deployed driver regulates these drives but does not itself perform learning; and (b) a key-anchored weight rotation that admits per-epoch W updates while preserving the cryptographic-identity binding. We describe each in turn. The homeostatic variables here are virtual : “energy” is an internal drive state, not the agent’s on-chain balance. A natural next step couples the two — letting each agent hold its own wallet and treat its Solana balance ( Fecon (K), Section 8) as the energy reservoir the homeostatic loop must keep above its setpoint — folding the economic-metabolism axis into the motivational economy; we leave this to the sleep-replication extension. The HRRL-inspired driver maintains an internal 4-dimensional Q16 .16 state xdrive (t) = (energy_tank , thermal , novelty , reserve) subject to a setpoint s = (1 .0, 0.5, 0.5, 0.7). The agent’s allostatic free energy is the squared-distance proxy 
+
+Fallostasis (xdrive , s) = 
+
+> 4
+
+∑
+
+> i=1
+
+(xdrive  
+
+> i
+
+− si)2,
+
+expressed in Q16 .16 fixed-point. A sleep-mini protocol gates a sleep cycle when Fallostasis ≥ θ = 0 .4(the canonical threshold); the sleep cycle (i) skips the active query for that cycle, (ii) restores 
+
+reserve to setpoint, and (iii) halves the gap to setpoint for the thermal and novelty drivers. The 
+
+p3_motivation_verifier program records the sleep transition as a key-signed sleep_trigger 
+
+instruction that commits a root value rreplay supplied by the key holder as a commitment to the replay buffer since the previous sleep; the chain-side state retains rreplay as the agent’s 
+
+last_history_root , but does not verify that the value was derived from those cycles. The key-anchored weight rotation produces a new weight epoch 
+
+Wt+1 = HKDF (sk , s = "zkalife:phase3:v1" ,
+
+info = "zkalife:phase3:rotate:" ∥ nLE mut ∥ rreplay 
+
+),
+
+proven inside a dedicated mutation guest circuit. 8 Intuitively, the rotation lets the agent change its weights only in ways that still prove the new weights belong to the same agent: derived from the same secret, continuing from the previous commitment, bound to a replay-root value attested by the key holder, and self-signed. A successful rotation requires four cryptographic guarantees jointly enforced on chain: (i) SP1 proof. The mutation guest re-derives both 
+
+Wt and Wt+1 in-circuit from sk by the displayed derivations (neither is a free witness) and attests keccak (Wt) = old WC , keccak (Wt+1 ) = new WC , and keccak (sk ) = skCommit in zero knowledge. (ii) State chain. The Anchor program requires agent.weight_commit = old WC ,enforcing continuity with the previous epoch. (iii) Replay binding. The program requires 
+
+agent.last_history_root = rreplay , where rreplay was committed by a preceding sk -signed 
+
+sleep_trigger ; no third party can substitute a different replay root. This binding does not prove that the key-holder-selected root faithfully summarises prior cycles. (The freshly initialised    
+
+> 8The literal byte strings "zkalife:phase3:*" are HKDF domain-separation tags retained from the private development repository, where the construction was first prototyped under the working name “phase 3”; in this archive the corresponding component is code/homeostatic-extension/ . The literals are kept verbatim because they are committed to in the deployed circuit and cannot be renamed without invalidating every existing weight commitment on chain.
+
+23 root is the all-zero vector, so an agent’s first rotation can be proven against that zero root without a preceding sleep; the sk gating of (i)/(iv) is unaffected, and the of-record demonstration runs sleep_trigger first.) (iv) Self-signature. A standard ed25519 self-signature over 
+
+"zkalife:p3:mutate:" ∥old WC ∥new WC ∥rreplay ∥nLE mut verifies as the leading instruction of the transaction. The four guarantees together pin every Wt → Wt+1 transition to the agent’s own sk and areplay-root value signed by that key. No external party who lacks sk can construct a mutation accepted on chain, regardless of any side knowledge of Wt, the replay buffer, or the deployed circuit. The construction realises a constrained form of in-life weight rotation that admits per-epoch updates while preserving the identity binding: W remains a deterministic function of 
+
+sk , the mutation counter, and a self-attested replay-root value , composed over successive epochs rather than fixed at genesis. The rotation is not itself a learning rule or evidence of behavioural improvement: it optimises no objective and assigns no credit, but deterministically expands HKDF from ( sk , n mut , r replay ). “Self-attested replay-root value” is meant precisely: the rotation input includes the monotone mutation counter nmut and the sk -signed replay root rreplay , but the proof-less sleep_trigger 
+
+commits rreplay without a circuit verifying that it faithfully summarises the prior on-chain cycles (an sk -holder can therefore also select among candidate rotation outcomes by grinding rreplay —the rotation-time analogue of the key-grinding residual noted in Section 9.3, with the difference that it preserves the agent’s identity and lineage); binding the rotation to a circuit-verified history is deferred to the sleep-replication extension , a successor deliverable adding full sleep-phase weight-rotation chaining, key rotation, and child-agent replication. A rotation is a discrete sleep-phase event rather than a per-cycle advance, and the current implementation exercises just a single such rotation epoch on chain (Section B.4; the integrated daemon run of Section B.3 chains seven epochs off-chain); chaining multiple rotations on chain is likewise deferred to that extension. The rotation addresses an apparent tension between the frozen-W choice (which deliberately isolates the identity-binding question from learning-driven adaptation; Section 4) and the de facto Lamarckian inheritance of modern training pipelines, in which learned improvements are written back into heritable representations. The present HKDF rotation demonstrates the cryptographic discipline under which a future learning rule could perform such writeback: any accepted update must remain inside the same SNARK-enforced identity binding WC = keccak (HKDF (sk , . . . )). 
+
+7.3 Evaluation of the PoC extensions (Q5–Q7) 
+
+The two extensions are evaluated in full in Section B; we summarise the findings here. (Q5) Under the active-query loop the binding invariants survive environment coupling: the L2 individuation divergence M4 stays well above threshold, but because a shared deterministic environment increases inter-agent correlation, this is an integrity result rather than independent individuation evidence. (Q6) The key-anchored W rotation is restricted to the agent’s key holder and the committed rotation inputs by construction — no party without sk can inject a mutation the chain accepts — and is reproduced bit-exactly on an independent machine. The replay-root input is key-holder-attested, not a circuit-verified history summary. (Q7) The full Tier 1 PoC sequence (advance_v2 → sleep_trigger → mutate_w ) executes end-to-end on Solana devnet with every required precondition satisfied. Full numbers, the cross-machine determinism check, and the devnet transaction signatures are in Section B; on-chain compute-unit cost (Section 6.4’s Q3 counterpart) was not separately measured for these PoC-tier instructions, only proof-generation time. 24 8 Economic Metabolism Extension 
+
+Extension components. The economic extension adds a consumption-side constraint to the 
+
+Fecon (K) axis through a single-cycle aliveness predicate (Sections 8.1 and 8.2) and an in-circuit designated-oracle binding (Section 8.3). We evaluate it with 24- and 168-cycle metabolic runs and environment-oracle rejection paths (Sections 8.4 to 8.6), then delimit the resulting claim in Section 8.7. 
+
+8.1 Motivation: constraining the Fecon (K) axis 
+
+Until this point, a patron has paid the agent’s bills on chain. This extension gives the agent its own economic substrate and imposes a metabolic cost on its continuation: every cycle the protocol debits an explicit cost from a program-owned account derived from the agent’s key (its 
+
+Fecon wallet), and an on-chain check rejects the cycle if that account falls below the survival floor. The cost is imposed by the protocol, not authorised by the agent : expenditure is involuntary, analogous to biological metabolism, rather than a deliberate transaction. Deliberate, key-authorised spending is deferred to a future economic-agent stage (Section 9.5). This supplies the consumption side of the Fecon (K) axis in the agent triple zkAgent = ( K, Stream (K), F econ (K)). For Artificial-Life readers, it realises the metabolic-expenditure half of the metabolic-closure criterion of Section 1; an agent that also earns its keep is not yet realised (Section 8.7). The construction is incremental: the same W = HKDF (sk , tag ) binding and per-cycle Groth16 attestation, plus three on-chain mechanisms — an aliveness predicate , a designated environment oracle , and a continuous metabolic run (Sections 8.2 to 8.5). The aliveness predicate “K valid ∧ Stream (K) advancing ∧ Fecon (K) > 0” is enforced at every state-changing instruction of the economic extension, making the agent triple a circuit-and-runtime invariant rather than a theoretical construct. 9
+
+8.2 Aliveness predicate: single-cycle advance constraint 
+
+The aliveness predicate is realised on chain by the extended AgentV4 record, which replaces the extension lineage’s AgentV3 layout (Section B.4) and carries the agent’s Fecon substrate. It records a key-derived, program-owned wallet PDA, an atomically updated balance snapshot and check slot, the registered environment-oracle key, and a monotonic sleep-count replay guard; the implementation-layout appendix (Sections C and C.1) gives the exact field types and the expansion from 254 to 342 bytes. The wallet is a distinct address bound to K by derivation, 
+
+wallet_pubkey = PDA([ "agent_wallet" , pk ]), and its lamports can be moved only by the program’s metabolic debit, not by any key (closing the wallet-drain vector A-EA1, Section 5.5); the operator endows it at genesis, and the underlying account balance remains canonical. The oracle-gated advance_v5 instruction (Section 8.3) gates each advance on the aliveness predicate within the same atomic instruction that verifies πF1 (the deployed binary checks the economic and state-chain preconditions before the proof verification, and the ed25519 
+
+self-signature after it; failure of any check reverts the whole transaction): (a) sk -side: the ed25519 signature over the advance message ( cycle +1) ∥ ct under the inherited 
+
+"zkalife:p2:advance:" domain prefix is verified ( K valid). 10             
+
+> 9We use aliveness predicate in a strictly operational sense — an advance-admissibility and state-transition invariant: it cannot compel the next submission, so it does not by itself enforce temporal progress. Here
+> Fecon (K)>0 is an externally replenishable consumption floor rather than a metabolic-viability condition; the term makes no claim of biological aliveness or autopoietic self-maintenance (Sections 8.7 and 9.2). In the deployed economic program, advance_v5 , weight rotation, and sleep triggering all enforce the same Fecon floor; the latter two additionally retain their own signature and replay gates from the base design (Sections 7.2 and 8.2). Only the advance-path rejection was exercised as an on-chain negative test.
+> 10 The economic-metabolism programs reuse the "zkalife:p2:advance:" domain-separation prefix inher-ited from the active-query program lineage they were cloned from; the core protocol of Section 4.3 uses
+
+25 (b) Stream (K)-side: the PDA precondition ( cycle , state _commit ) = ( t, c t−1) holds ( Stream 
+
+advancing). (c) Fecon (K)-side: the agent’s economic PDA holds Fecon (K) > ECON_THRESHOLD (10 7 lamports = 0 .01 SOL in the deployed program, a deliberately stronger floor than the predicate’s literal 
+
+Fecon > 0, and above the account’s rent-exempt minimum so the metabolic debit cannot close it) to bear this cycle’s metabolic cost. This cycle’s metabolic cost is debited from the agent’s economic PDA by the program itself — a direct lamport decrement of the program-owned account, independent of which signer pays the Solana transaction fee — so the metabolic debit is a program-enforced invariant rather than a property of the fee-payer convention. If any of (a)–(c) fails, the instruction reverts before any state change (a landed-but-reverted transaction still pays its transaction fee under Solana’s fee rules, which is why the orchestrator pre-checks these failure modes client-side before submitting). 
+
+8.3 Designated environment oracle 
+
+Where does the agent’s environment data come from? The aliveness predicate constrains 
+
+Fecon (K), but xt still requires authentication. In the active-query extension (Section 7.1), the patron key was a witness-supplied value that was neither committed nor checked on chain, so the operator could fabricate the environment. The economic extension instead binds environment provenance to a designated oracle whose public key is registered at genesis. The SP1 circuit verifies the oracle’s strict RFC 8032 ed25519 signature over 
+
+prefix ∥ cycle ∥ keccak (yt−1) ∥ xt ∥ flags , commits the signing key in PV [140 .. 172] and the cycle in 
+
+PV [172 .. 180], and bounds each input by |xt,i | < 218 . advance_v5 checks that the committed key equals the registered oracle_pubkey and that the committed cycle equals cycle _count + 1. The result is a proof that the registered oracle signed the xt driving this transition and that an earlier attestation was not replayed; it is not a proof that xt is truthful or benign. The first oracle-gated transition is charlie ’s cycle 1 advance (transaction GjFXGQvW...e7a5x ). This is a single designated trust point, not a decentralised quorum (Section 9.4 details the trust boundary; decentralising it is future work, Section 9.5). 
+
+8.4 24-cycle continuous run 
+
+A 24-cycle continuous run (a disposable agent, cycles 1–24, 24 advance_v5 transactions, zero failures; commit 25d8324 ) extends the single-cycle check to sustained enforcement: every cycle’s 
+
+advance_v5 satisfied the aliveness predicate under both the single designated oracle’s attested environment commitment and the same protocol-imposed metabolic debit from the agent’s program-owned economic PDA as in the 168-cycle long-run below ( Fecon debited 12 ,000 ,000 →
+
+11 ,760 ,000 lamports over the 24 cycles); full detail in Section B.5. 
+
+8.5 168-cycle long-run 
+
+The 168-cycle long-run is the project’s longest sequential on-chain run by operation count: 168 of-record advances by the charlie agent (cycles 1–168), matching the horizon of the individuation runs (Table 4). Across these 168 cycles the protocol debited an explicit metabolic cost from the agent’s identity-derived economic PDA, draining it linearly and visibly (Figure 3) — a concrete, program-enforced on-chain economic metabolism at the mechanism level (Section 8.7). The run completed with zero on-chain rejections (the single designated oracle needs no per-cycle attestation transactions). The committed run record preserves the cycle sequence, wallet-balance trajectory, and transactions but not per-cycle timestamps, so this result is a 168-transition feasibility 
+
+> "zkalife:p1:advance:" . Like the HKDF tags of Section 7.2, the literal is committed in the deployed binary and cannot be renamed without invalidating existing on-chain signatures.
+
+26 0 20 40 60 80 100 120 140 160 10 11 12 cycle index   
+
+> Fecon  (million lamports)
+> per-cycle Fecon balance aliveness floor
+
+Figure 3: Wallet-balance trajectory of the 168-cycle economic-metabolism long-run ( charlie ). The program-owned Fecon PDA is debited by exactly 10 ,000 lamports at every accepted advance, from 12 ,000 ,000 lamports at the start of the run to 10 ,320 ,000 lamports at cycle 168 (linear fit slope −10 ,000 lamports/cycle, R2 = 1 .0; Section B.6). The dashed line is the 10 ,000 ,000-lamport aliveness floor at or below which advance_v5 rejects with InsufficientEcon (Section 8.7); the run ends 3 .2% above it (data: figures/charlie_wallet_drain.dat , extracted from the committed run log). demonstration rather than a claim of 168 hours of unattended wall-clock endurance. Section B.6 reports the wallet trajectory, dedicated proof-time distribution, and resume-robustness event; the per-cycle on-chain verification cost is constant in the run length. 
+
+8.6 Environment-oracle rejection paths 
+
+The rejection paths of Section 5.5, together with the core agent-signature rejections (Section 5.2), carry into the economic extension. Both oracle- and agent-authentication error codes are confirmed against the live program enum and additionally exercised on devnet as landed reverts against the current economic program 7Rvamkqp (commit 5ac1624 ), using a disposable agent (mallory , keyed by an independent secret seed and non-interfering with charlie ): a valid proof self-signed by a non-agent key lands Ed25519Failed (6005 , tx 3kZHnAWW...fH9MR ) — the direct “only the holder of sk advances” rejection (P4, Section 4.5) — while a crafted proof committing a non-registered oracle lands OracleSigFailed (6016 , tx 65DJmBTt...Q9GfZ ). The same valid proof, correctly self-signed, advances the agent (tx 3ihtuDXc...5jT5h ), so neither rejection is vacuous. Each revert lands with skip_preflight — a real slot and a burned fee, not a client-side pre-check — and the program binary is unchanged (advance vkey 0x00df52a4 ). EnvOutOfRange 
+
+is non-landable: the in-circuit |xt,i | < 218 assertion forecloses it, so no valid proof can carry an out-of-range environment (Section 8.3). The remaining oracle-path code, OracleCycleMismatch 
+
+(Section 5.5), is not separately exercised as a landed revert. 
+
+8.7 What the economic-metabolism extension enforces, and what remains 
+
+Together, the four components of Sections 8.2 to 8.5 add a consumption-side Fecon (K) constraint on Solana devnet: a per-transaction advance-admissibility predicate, environment authentication that binds oracle-signed xt to the transition, and sustained enforcement across 24- and 168-cycle runs under the protocol-imposed debit. The patron-fee-payer convention is no longer a protocol requirement, but external resource provision remains. The agent’s advance admissibility is program-enforced and verifiable on chain at every transition. Devnet SOL is faucet-issued and valueless (Section 3.4), so the mechanism demonstrates involuntary expenditure rather than economic self-maintenance: the program debits the metabolic cost and an underfunded account halts. In the of-record economic runs, the agent identity account is the Solana fee payer, funded with SOL by the operator; the client also supports an optional third-party payer. 27 The 168-cycle wallet trajectory demonstrates the debit side. An executed on-chain rejection against the current economic program demonstrates the halt side: draining a disposable agent’s wallet below the survival floor lands a Custom 0x1779 revert on devnet (tx 35j9ysBk...dW5GLq ). The transaction lands and its fee is burned, so the InsufficientEcon gate fires in execution rather than merely at preflight. Mainnet scarcity, income, fee-payer independence, and decen-tralisation of the environment oracle remain open (Sections 9.4 and 9.5). 
+
+# 9 Discussion 
+
+9.1 Identity locus and trust root 
+
+Table 5 classifies adjacent systems by the locus of identity and the trust root an attacker must com-promise; deriving W = HKDF (sk , tag ) inside Groth16 moves the locus into sk (Section 4.5); the economic-metabolism extension additionally enforces the metabolism precondition Fecon (K) > 0as an on-chain runtime check (Section 8). The construction offers a cryptographic-provenance substrate relevant to the metabolism, reproduction, and mutation questions of Hu and Fangt-ing [18] (their RQ5), though it closes none: reproduction and open-ended mutation remain open (Sections 8.7 and 9.5), and the metabolism is consumption-only.            
+
+> Identity locus Trust root Example Attack surface left open
+> On-chain genome (NFT-rendered phenotype) Smart contract / operator Masumori et al. [30] NFT swap; contract-upgrade authority; phenotype–key disconnect TEE memory + JSON genome Hardware vendor (Intel SGX, Phala) Spore.fun [19] TEE compromise (Foreshadow-class); memory poisoning (T-MT) Code binary hash Protocol-verified binary commitment BAID [28] weight and configuration semantics outside the committed binary; key not bound to weights LoRA update blob Operator (blob hash anchor) zkLoRA [26] T-DR on base-model blob (off-chain hash anchor); key not bound to weights Profile / config document Operator (document hash) DIAP-style chains [29] T-DR (document replacement)
+> None (inference-only)
+> Computation-proof assumptions and implementation Modulus Labs [33], ORA [37], Giza [15], Gensyn [14], ezkl [52] no identity claim; orthogonal capability
+> In-key derivation
+> W=HKDF (sk )
+> Cryptographic assumptions + pinned/frozen implementation this paper host-side key custody (T5/T12, disclosed), software/runtime correctness, and single-oracle liveness (Section 9.4); guest substitution pinned by vkeyHash , weight substitution rejected as T6; input poisoning remains
+
+Table 5: The locus of identity and its trust root across adjacent on-chain agent and zkML protocols. Rows 1–5 locate identity in an on-chain or externally attested object; BAID’s protocol-verified binary commitment protects the code axis and is complementary to this paper’s weight-axis commitment. Row 6 (zkML inference) has no identity claim and is included as an orthogonal capability. The construction (last row) internalises identity in sk via a deterministic key-to-weights derivation enforced by the pinned proof and runtime stack under the assumptions of Section 5.1. 
+
+zkML as a complementary capability. The zero-knowledge proving stacks of Table 5 (row 6: Modulus Labs, ORA, Giza, Gensyn, ezkl) provide verifiable inference — a proof that a fixed model produced a specific output — with no notion of agent identity, as does adjacent 28 ML-provenance work, both zkML (zkLoRA [26]) and non-ZK (the hash-chain AuditableLLM [25], the replay-based Proof-of-Learning [20]). The same holds one level up, for proofs over an agent’s whole execution: concurrent work proves an LLM agent’s inference-and-tool-call pipeline in zero knowledge via batched transcript proofs [47], certifying that the recorded execution happened as claimed without binding the model to any agent identity. 11 These capabilities compose: zkML answers “did this model produce this output?”; the construction adds “and is this model a function of the agent’s own key?” through the W = HKDF (sk ) constraint in the same circuit. The resulting runs provide continuous identity-bound zkML execution on a public chain, with the evaluation centred on identity integrity rather than inference accuracy. 
+
+Operational consequences. Two consequences follow from the internal shift. (i) Compos-ability : the identity primitive is internalised in sk . The same sk may simultaneously wrap multiple external identity tokens — an SBT (soulbound token: a non-transferable on-chain credential), a DID controller key (decentralised identifier), an ENS reverse record (Ethereum Name Service) — each derived via HKDF with a distinct domain tag. Revoking or losing any wrapper does not compromise the agent: the load-bearing identity is the key-to-weights binding of Section 4.5, not the wrapper. (ii) Lineage as a cryptographic primitive : the future sleep-replication extension’s sk ′ = HKDF (sk , tag child ) derivation would make the parent–child relationship a verifiable on-chain fact rather than a database entry, opening royalty or governance flows that are honest by construction, keyed on lineage. Selection across such lineages would still require an external fitness-and-culling signal — e.g., Masumori et al.’s [30] human-purchase signal, or an on-chain market selecting which keyed lineages persist — which the construction does not supply; it provides the verifiable lineage relation on which such a selection process could operate. 
+
+Composition with TEE protection. The TEE-based protection in Spore.fun composes with the cryptographic-binding primitive reported here: an enclave-confined sk inside the construction yields both host-attested and circuit-attested identity, as sketched in Section 9.4 (“Host security boundary”). 
+
+9.2 From cryptographic individuality toward a full Barandiaran agent 
+
+The Barandiaran–Di Paolo–Rohde framework [5] (introduced in Section 2) sets three conditions for agency — individuality , interactional asymmetry , and normativity .Suzuki 2026 [42] builds on this framework, in which individuality is not one criterion among equals: Barandiaran et al. [5] rank it as the precondition for the other two (“neither asymmetry nor normativity would make much sense in the lack of an individualized system”) and use 
+
+individuality and identity interchangeably. That is the bridge this paper rests on. The Artificial-Externality framework proposes cryptographic identity as the structural anchor for individuality: a cryptographic key pair satisfies only the individuality requirement (“identity by declaration”). The framework treats interactional asymmetry as comparatively easy to realise through on-chain transaction emission, and identifies intrinsic normativity — whether an economic-metabolic substrate (persistence paid in gas fees) can become an intrinsic norm rather than one externally imposed by designers — as “the next frontier in the ontology of artificial life”. The construction reported in this paper realises the individuality criterion as a cryptographic invariant in a deliberately limited structural-engineering sense — identifiability and persistence under a key, not autopoietic self-production or a metabolic boundary — and takes PoC-tier steps toward the other two, with each component mapping onto one Barandiaran condition.   
+
+> 11 That work is titled “zkAgent”; we use zkAgent throughout as notation for the agent triple of Section 3.1, a coincidence of naming rather than a shared construction (cf. the zkLoRA naming note in Section 1).
+
+29 Individuality. The core protocol (Section 4, the Inexorable layer) realises this along two complementary axes. Temporal coupling is the key-signed history no fork can replay once finalized — the Stream (K) axis, realised through the on-chain commitment chain (Section 4.4) — and instantiates the temporal dimension along which Barandiaran et al. [5] hold agency to be extended. Computational-substrate coupling arises because the weights are a deterministic function of the rigid designator sk via W = HKDF (sk , tag ) (Sections 4.2 and 4.3). Under HKDF’s pseudorandomness, distinct keys yield independently derived substrates except with negligible collision probability; whether their resulting trajectories are behaviourally distinct is an empirical question assessed in Section 6.2. This anchors the spatial locus of the individual — its substrate — to the key, realising the other half of Barandiaran et al.’s spatio-temporal account cryptographically rather than through a metabolic boundary. The two axes are distinct — one binds what the agent has done , the other the substrate from which its computation is derived — and complementary, each alone admitting an attack the other forecloses (Section 2). 
+
+Interactional asymmetry. The extensions of Section 7 approach this: the active-query loop (Section 7.1) casts the agent as the active source that initiates and modulates a per-cycle query (a host-side, off-chain step; Section 9.4), while the homeostatic driver (Section 7.2) converts the environmental response into an internal scalar via the allostatic free energy Fallostasis . The fuller sense of the asymmetry — modulating a non-cooperative coupling rather than one a cooperative patron supplies — awaits the phenomenal-coupling extension (Section 9.4). 
+
+Normativity. The economic-metabolism extension (Section 8) approaches this: the aliveness predicate Fecon (K) > 0 enforced at every state-changing instruction (Section 8.2) makes the 
+
+economic precondition for survival a circuit-and-runtime invariant. Intrinsic normativity would require the agent to produce the organisation whose viability sets the norm, which an externally wired halt-condition does not supply. The operator-endowed metabolism is consumption-only: the agent does not earn (Sections 8.7 and 9.5), so the construction remains an identity-bound state machine rather than a self-sustaining Barandiaran agent. The construction therefore starts from cryptographically guaranteed individuality — struc-tural identifiability and persistence under a key — and builds outward toward Barandiaran et al.’s integrated account. Whether separately realised components can be assembled into autopoietic agency remains open. 
+
+9.3 Safety considerations 
+
+What “unstoppable” means here. The current programs’ upgrade authorities were irre-versibly set to none on 2026-08-02 (T11; Section 5.3), so the on-chain rules governing their advances are no longer modifiable by the deployer, host operator, or designated environment oracle. Continued operation, however, depends on four orthogonal liveness conditions, controlled by different mechanisms and actors (in the of-record deployment the operator controls both (iii) and (iv)): (i) chain liveness (Solana itself continues to produce blocks, an out-of-scope but realistic mainnet assumption); (ii) economic continuance (Fecon (K) > 0 at every advance, gated by the aliveness predicate of Section 8.2, so an agent whose wallet is depleted halts automatically); 
+
+(iii) prover availability (SP1 proofs are produced off-chain by the host process, so an operator who stops the prover stops the agent, and the operator likewise funds the fee-payer account that pays each advance’s base fee); and (iv) environment attestation (each cycle’s environment vector must be signed by the registered designated oracle (Section 8.3), so a withheld oracle key halts advances — centralising liveness at a single operator-held key). 
+
+What cryptographic identity contributes to safety. The construction’s central safety property is cryptographic provenance : every accepted state transition is signed by sk and re-30 proven against the genesis-time WC binding, so the record is attributable to the registered key/PDA and its genesis-committed substrate. It does not identify a human operator or physical host, and a key-holding operator can act as the agent (T5/T12; Section 9.4). The pinned guest binary excludes code substitution, and the commitment chain excludes direct hidden-state overwrite; neither prevents semantically harmful but valid inputs from shaping later state (T-MT; Section 5.4). It therefore provides accountable provenance within the stated trust boundary. 
+
+What the construction does not provide. Three safety guarantees are explicitly out of scope. (i) Behavioural bounds : the binding ties W to sk , but says nothing about what the resulting policy does — cryptographic identity certifies provenance, not benignity. In the frozen-
+
+W core an operator cannot even train a chosen policy (genesis F2 rejects any W̸ = HKDF (sk ), leaving only key-grinding over untrained policies); the learnable-weights extension (Section 9.5) would reopen this, accepting any cryptographically valid advance regardless of the policy’s content. (ii) Capability ceiling : the reference model is a small Elman recurrent network (5-dim input, 16-dim hidden state, 5-dim output) with frozen W , which limits representational capacity but does not by itself bound downstream harm; impact depends on the actuator and tool interfaces attached to its five outputs. Transformer-class scaling would shift the capacity regime and is out of scope. (iii) Resource ceiling : the aliveness predicate halts a depleted agent, but nothing prevents a third party from replenishing Fecon to extend a malicious agent’s operational horizon. 
+
+9.4 Limitations 
+
+We consolidate the remaining limitations here; each is paired with the threat-tag (when applicable) that names the corresponding residual risk in Section 5. 
+
+9.4.1 Environment trust boundary and coupling Environmental coupling (interactional asymmetry) is partially deferred. The designated environment oracle (Section 8.3) closes the cryptographic-attestation half of the environmental-coupling step by binding xt to a registered oracle key. The environment vector xt
+
+in Equation (1) is still synthetic in the sense that no external sensor or policy adversary drives it; full phenomenal coupling — an agent whose xt is a verifiably acquired observation from a non-cooperative environment — remains a further-extension research direction. 
+
+Patron-binding in the active-query extension is in-circuit only. The patron signature over the environment (Section 7.1) is verified inside the SP1 guest against a witness-supplied patron public key that is neither committed to the journal nor checked on chain; the signed cycle counter and previous-action hash likewise enter the signature message but not the journal. An operator holding the agent’s own sk can therefore fabricate an environment under a self-chosen key (the patron pubkey is not pinned on chain) or replay a patron signature across cycles (cycle and previous action are not journalled), so the extension’s “patron-signed environment” is forgeable by the agent operator rather than being an independent third-party attestation. Under the threat model of Section 5 (the operator is not assumed honest), this is a residual of the PoC-tier extension; closing it requires committing the patron pubkey, cycle, and previous-action hash into the advance journal and asserting them on chain. The designated-oracle extension (Section 8.3) supersedes the witness-only patron key with an on-chain-registered oracle key whose signed xt is bound to the committed transition, closing the oracle-attribution and cycle-replay parts of this binding gap for advance_v5 (the previous-action-hash binding remains future work). 
+
+The environment oracle is a single designated key. The environment authentication of Section 8.3 binds xt to a registered oracle_pubkey via an in-circuit ed25519 signature check 31 (the signing key committed at PV [140 .. 172]) and the xt = PV [100 .. 120] equality. It is, however, a single trust point: in the of-record runs oracle_pubkey is held by the operator and is required on chain to be distinct from the agent’s own key ( OracleEqualsAgent ; key-distinctness, not independence — the operator may hold both), so the environment is attested under an operator-trust assumption, not by an independent third party. The construction therefore authenticates 
+
+that the registered oracle signed this cycle’s committed environment , not that the environment is true or that the signer is independent of the operator. Like the agent’s own key, the oracle key is written once at initialisation with no in-protocol rotation path, so oracle-key compromise shares the no-rekey status of sk compromise (T5; “No post-compromise rekey” below). Decentralising the oracle would replace the single key with a stake-weighted committee carrying real (Jito-restaked) collateral and slashing for equivocation. Slashing reaches only attributable faults: a committee that consistently signs a false xt leaves no on-chain ground truth against which to slash, so environmental truth remains an assumption under any committee. On devnet, where stake carries no opportunity cost, such a committee would be decentralisation theatre. Like the prover decentralisation of “Single-host availability” below, this is a mainnet-only frontier beyond this paper. 
+
+9.4.2 Identity scope, key custody and recovery, and residual trust assumptions Adversarial validity of the clean runs. All of-record agent runs (Table 4) use independent 
+
+solana-keygen keypairs with secret seeds, so the self-authorisation guarantee of condition (iv) (that a valid advance requires sk ) holds in the adversarial sense against any party that does not hold the secret key. With the wallet-drain vector (template A-EA1) already foreclosed by construction (Section 5.5), the clean trajectories of Sections 8.4 and 8.5 show no accepted conflicting transition and are consistent with non-interference during the observed run window. 
+
+Single-deployment identity scope. The identity established here is per-deployment: the same sk could register agents under other programs or on other chains (cf. the first-advance replay footnote of Section 4.3), each with its own independent Stream (K). Such duplicates are trivially linkable because the same seed yields the same pk and skCommit ; what the protocol neither supplies nor precludes is a canonical relation among their distinct histories. The canonical identity of this paper is the PDA under the program IDs cited here; cross-chain or cross-program identity unification is out of scope. Whether such duplication should be embraced (key-spawned identical lineages, a form of self-replication) or precluded via non-transferable, soulbound identity [36, 53] is left open: the construction provides uniqueness of derivation (one key, one W ) but not non-transferability of custody .
+
+Host security boundary and the distribution paths. The construction binds W crypto-graphically to sk , but sk itself sits in a host-process keystore. Compromise of the host process is equivalent to compromise of the agent (T12). Two distribution paths exist, neither implemented here: (i) a TEE-backed or hardware-signed sk that confines the keystore inside an attestable enclave (Phala/SGX-style, as in Spore.fun [19] for a different identity primitive; exclusive enclave custody of an agent’s own account and wallet keys — locking out even its developers for the run window — was demonstrated by the tee_hee_he agent [35]); (ii) a multi-party-computation prover quorum in which sk is threshold-shared across n provers and no single host ever recon-structs the key, with the SNARK proof produced collaboratively under the shared key. Path (i) is a single-host hardening; path (ii) is the natural beyond-single-host extension. Both are explicit future sleep-replication work and outside the core and economic-metabolism scope. In the terms of the Artificial-Externality framing, single-host custody means the construction realises cryptographic individuality but not yet inexorability (the resistance-to-intervention of the Inexorable layer): a single operator can still halt the agent by withholding advances, or 32 seize it by copying sk . Inexorability in the strong sense would additionally require decentralised custody (path (ii)) together with the prover-quorum liveness above — both future work. 
+
+No post-compromise rekey. A leaked sk has no in-protocol recovery (T5): it confers full agent authority — advancing, rotating W via the mutation circuit (Section 7.2), and depleting 
+
+Fecon through continued advances (Section 8) — with no chain-side mechanism to migrate that authority to an independently authorised fresh keypair. The sleep-replication extension’s 
+
+sk → sk ′ = HKDF (sk , tag child ) derivation can express parent–child lineage or a voluntary pre-compromise epoch rotation, but it is not recovery from compromise: anyone who steals sk can derive the same sk ′ and produce the same parent-key authorisation. The pragmatic stopgap today is to abandon the identity entirely — re-genesis under a fresh independent sk ′, severing the prior Stream (K) chain with no on-chain link to the old identity. Genuine post-compromise recovery would require fresh entropy plus an authorisation path unavailable to the leaked seed, such as a recovery-key commitment fixed at genesis or a separately governed threshold credential. A future ceremony could then migrate Stream (K)cycle-continuously while allowing an external verifier to confirm from on-chain state that the new key is the authorised successor of the old identity. 
+
+Classical-hardness dependence. The trust root is classical: a discrete-logarithm break on edwards25519 (e.g. by a cryptographically relevant quantum computer) recovers the clamped signing scalar, and with it signing authority, as for any wallet key; the seed sk itself sits behind the one-way seed-to-scalar hash (cf. the clamping footnote of Section 4.2), so W = HKDF (sk , tag )and the proof-gated stream do not follow from that break alone. It is compromise of the seed itself (T5) that yields the agent’s substrate and full authority over its stream and funds at once: the construction concentrates substrate derivation together with everything a conventional wallet already stakes on one seed. Post-quantum instantiation of the binding is orthogonal future work. 
+
+Single-host availability. The long-horizon runs (the core alice run over 2.36 days, cas-tor /pollux on independent hosts, and the economic-metabolism 168-cycle long-run) stress-test liveness, not Byzantine-fault tolerance (Sections 4.5 and 5.3). A true Byzantine-fault test needs two ingredients absent here: the multi-host prover quorum of “Host security boundary” above (path (ii)), and a leader-election protocol rotating which prover produces the next proof in a manipulation-resistant way — an Algorand-style VRF (a lottery whose draw is publicly checkable), or a Tendermint-style BFT round-robin — so no malicious prover can monopolise the role, backed by on-chain reward-and-slash incentives. Designing, implementing, and evaluating this stack extends stake-weighted decentralisation (the future environment-oracle committee) to the prover layer; it is out of present-paper scope. 
+
+Program-upgrade authority. All current Solana programs of the construction were irre-versibly frozen to Authority: none on 2026-08-02 (T11; Section 5.3). The advance path of advance_v5 depends on no privileged admin key: it is gated only by the in-circuit oracle 
+
+ed25519 verification (Section 8.3) and the agent’s own per-cycle self-signature. 
+
+9.4.3 Frozen substrate and behavioural scope Deterministic weight derivation forbids in-cycle gradient learning. The deterministic key-derivation W = HKDF (sk , tag ) deliberately trades standard gradient-based learning capacity for substrate–key invariance: W is fixed at genesis and cannot be updated by SGD or any other continuous learning rule without breaking the binding that the on-chain re-check at line 2 of Algorithm 2 enforces. The homeostatic extension (Section 7.2) admits discrete, key-anchored inter-epoch rotation inside a SNARK that re-proves WC = keccak (HKDF (sk , ·)), but the current 33 rotation is not a learning rule; a learnable construction that preserves the binding under per-cycle updates is sketched as a future direction (Section 9.5, “Learnable weights”). 
+
+Scope of the frozen-substrate result. The frozen random initialisation isolates the identity primitive from task competence and learning ability. For the claim evaluated here, individuation follows from W = HKDF (sk , tag ) and is re-checked at every transition. The deployed binding already lets a counterparty verify that activity under a key comes from the genesis-committed substrate rather than from a silent replacement (T6). 
+
+Behavioural safety and shutdown. Two unimplemented hardenings could extend the provenance guarantee of Section 9.3. Behavioural-attestation circuits would extend the SNARK to attest, alongside weight identity, that the policy stays in a pre-specified safe region, though the threat model for such a circuit is open. A community-attested vote-to-pause mechanism would let a quorum of a future oracle committee (above) suspend a flagged agent’s advances — a governance layer atop that decentralised committee rather than the single oracle deployed here. Both build on the substrate primitive reported here. 
+
+9.5 Future directions 
+
+Learnable weights with key-anchored update sequences. Relaxing the lifetime freeze on W (Section 9.4, “Deterministic weight derivation”) is a natural successor question. The 
+
+learnable-weights extension admits a per-cycle update Wt+1 = update( Wt, signal t, sk ) enforced inside Groth16 such that the cycle-t+1 on-chain WC t+1 is consistent with applying update to the previous cycle’s WC t, with signal t provenance attested by signature or environment commitment, and the cycle itself signed by sk as in the core construction. The adjacent prior work surveyed in Section 9.1 (zkLoRA, AuditableLLM, Proof-of-Learning) covers each piece in isolation but does not combine key-anchored weight identity with attested incremental updates. The learnable-weights extension is exactly the cryptographic discipline under which Lamarckian writeback can be admitted without forfeiting per-agent identity. Its threat model must distinguish unauthorised weight updates from authorised but semantically poisoned signal t. The formal threat statement, residual-risk catalogue for signal provenance, and a concrete proof-time evaluation at our model scale are deferred to a separate report. 
+
+Cryptographic identity for language-based agents. This paper anchors agent identity to a recurrent neural network’s hidden-state vector and its weight derivation W = HKDF (sk , tag ). A natural extension carries the same identity-continuity discipline up to language-based agents, where the agent’s state is not a numeric hidden vector but a sequence of natural-language prompts, persistent memory entries, and conversation turns. In this regime the underlying computation may be performed by an external foundation model whose parameters are not under the agent’s control; what remains anchorable is the agent’s memory (the accumulating record of prompts and committed responses) and its control loop (the rule determining what to attend to next given current memory). The language-based agent’s identity is then the cryptographically signed stream of its prompt-and-memory commitments, even if the underlying foundation model is replaced cycle by cycle. The engineering primitives — attested-memory append-only logs, key-signed prompt commitments, SNARK-attested memory-tampering detection (a strengthened T-MT analogue, Section 5.4) — are direct lifts of the substrate to discrete-symbolic state; the concrete construction is left to a separate report. 
+
+Cryptographically private internal states. The construction already keeps the hidden state ht private to the agent: only the commitment ct = keccak (ht) is published on chain, while 
+
+ht itself remains with the prover. A natural strengthening would encrypt ht under sk (or a 34 key derived from it) and store the ciphertext on chain, so that only whoever controls sk could later read the past internal states; under exclusive enclave custody, that reader would be the agent process rather than the operator. This realises a substrate-level analogue of a first-person 
+
+internal state, inaccessible to any external observer once sk is enclave-confined — raising an AI-safety question: should agents have internal states that no auditor can inspect? 
+
+Deliberate economic agency. The metabolism of Section 8 is consumption-only (Section 9.2) and involuntary : the protocol debits a fixed cost that the agent neither authorises nor offsets with earnings of its own. A more developed agent would gain two-sided economic agency — earning 
+
+(resource acquisition, naturally accommodated by inbound transfers to the identity-derived PDA) and deliberate spending (a key-gated withdraw/transact path through which the agent authorises its own expenditure with sk ). Deployed agent-payment standards (Google’s Agent Payments Protocol, whose signed mandates authorise agent-initiated payments and whose sample integrations include the on-chain x402 payment method [16]) supply the authorisation rails such an extension would compose with; the construction contributes the verifiable identity of the paying entity. The PDA design leaves both open as additive instructions over the same account, so metabolism (imposed, now) precedes economic agency (deliberate, future) as a developmental staging rather than a redesign. The debit rate itself (Section 8.2) and the GPU proving cost (Section 6.5) are devnet-mechanism parameters, not calibrated to any real mainnet fee schedule or prover-market rate; sizing them against actual compute-unit pricing and prover economics is future work alongside this economic-agency extension. The protocol-anchored terms nevertheless transfer directly: a mainnet advance would pay the per-signature base fee plus a market-priced priority fee over the same bounded per-advance compute (Section 6.4), together with the prover-market price of the measured GPU proving time (Section 6.5). The volatile quantities are network priority pricing and prover-market pricing, which is why we report the protocol-side bounds and defer price calibration rather than quote a point estimate that would be stale by publication. 
+
+These extensions compose, and the composition is the safety question. Each direction above is scoped and deferred on its own terms, but they are additive over the same key and PDA, and their conjunction is stronger than any one direction: earning plus key-gated spending removes the funder’s control over liveness condition (ii), enclave or MPC custody (Section 9.4) removes the operator’s control over (iii), an oracle committee removes single-key control over (iv), and sk ′ = HKDF (sk , tag child ) lineage (Section 9.1) lets the resulting configuration reproduce. The endpoint of adopting all of them is a self-funding, self-replicating agent without the current single-operator halt levers; shared chain dependencies remain, and any governance halt must be designed explicitly. The disclosed liveness conditions of Section 9.3 are what currently prevent that endpoint, so each is load-bearing for safety and not merely an artefact of a prototype. We therefore treat the vote-to-pause mechanism of Section 9.4 as a prerequisite for the economic-agency and replication extensions jointly, rather than as an independent future item, and note that a composed deployment warrants its own safety analysis rather than inheriting the analysis of the construction reported here. 
+
+# 10 Conclusion 
+
+This paper demonstrates a deployment-scoped engineering primitive for structural individuality on a public blockchain: the substrate and key form one verified relation at every state transition, and the verifying nodes reject a transition that severs them. The substrate cannot be substituted unnoticed, its finalized history remains bound to its key, and, in the economic-metabolism extension, each continued advance requires a protocol-enforced cost. On chain, these relations 35 instantiate the agent triple zkAgent = ( K, Stream (K), F econ (K)) and the deliberately limited form of cryptographic individuality proposed by Suzuki’s Artificial Externality framework. Decentralised custody, economic self-maintenance, and agent-level normativity remain open (Sections 8.7 and 9.4). The enforced binding provides a defined structural basis for investigating those further conditions of agency (Section 9.2). 
+
+# Reproducibility 
+
+The full implementation (core construction and the economic-metabolism extension), design ADRs (architecture decision records), threat-model document, per-cycle orchestrator telemetry, and data files used to produce the figures in this paper are released as a public source archive at https://github.com/ksk-S/internalising-identity-2026 (Apache License 2.0 for code; Creative Commons Attribution 4.0 International for paper text and figures). The artefact version corresponds to the tag arxiv-v1 , the source-of-record snapshot for this arXiv submission. Any later revision is released under an independent tag ( arxiv-v2 ,
+
+arxiv-v3 , . . . ), so that a reproducer pinning to arxiv-v1 obtains the exact source for this version of the paper. The repository is organised by paper section: paper/ (main.tex +figures + bibliography), code/{core,active-query-extension,homeostatic-extension, economic-metabolism-extension}/ (mapping to Sections 4, 7.1, 7.2 and 8 respectively), 
+
+docs/{threat-model.md,design/,runbooks/} , and artifacts/{on-chain-proofs/, continuous-run-logs/} (including the 168-cycle charlie continuous-run log cited in Section 8.5); see the repository README for the mapping from internal Rust package identifiers (p1_* , p2_* , p3_* , p4_* ) to the construction-aligned nomenclature used throughout the paper. All deployed Solana devnet artefacts referenced throughout the paper — program IDs, agent PDAs, and the final state commitment — are collected in Table 6 (each browsable on Solana Explorer [39]). The 24-cycle continuous run is recorded at commit 25d8324 and the 168-cycle long-run at commit c0a6326 . These and the other git commit hashes cited in this paper are development-history provenance labels dating each artefact; the public archive is a fresh-history snapshot published at tag arxiv-v1 , so they do not resolve as git commits of the public repository. 
+
+Build and verification toolchain. The reference build uses SP1 v5.2.4 ( cargo prove build with RUSTUP_TOOLCHAIN=1.94.0 , pinned in the guest’s rust-toolchain.toml ) for the guest, Anchor 0.30.1 with anchor build --no-idl for the on-chain program, and SP1’s standard Groth16 prover. End-to-end verification of the core construction is reproducible via the commands of Table 7, each run from its listed working directory under code/core/ ;the economic-extension measurements are reproduced from the committed per-cycle records described below rather than by that core-only command table. Figure 2’s committed source 
+
+figures/proof_time_data.dat pairs the timing rerun’s per-proof seconds (Section 6.5) with the continuous run’s per-transaction compute units (Section 6.4); both the compute units and the run’s inter-cycle periods are backed by committed artefacts (the .dat ’s per-transaction CU column and the run log’s per-cycle timestamps) and, within devnet’s ledger retention, are independently recomputable from the run’s on-chain transaction history (Table 6). The individuation metrics of Sections B.2 and 6.2 (the alice , bob , and same-key-control hidden-state trajectories) are recomputed by the shipped analysis scripts code/core/analysis/ p1_individuation.py , code/{active-query-extension,homeostatic-extension}/ analysis/p2_individuation.py , and code/homeostatic-extension/analysis/ p3_n2_comparison.py , which derive each trajectory deterministically from the corresponding agent keypair — an input privately held for the of-record agents, so these scripts reproduce the of-record trajectories only under the author’s seeds (the committed run logs carry transaction-level telemetry, not hidden states; the boundary is stated below); 36 Artefact Address / hash (truncated) Note 
+
+Programs 
+
+p1_identity_verifier 7H4Dgrq2...bPare core protocol (Section 4) 
+
+p3_motivation_verifier rHegavCD...23oH1 PoC extensions (Section 7) 
+
+p4_economic_verifier 7Rvamkqp...pciht economic metabolism (Section 8) 
+
+Agents (on-chain PDAs) 
+
+alice (core) CtV6Pent...fMMHC secret keygen seed 
+
+bob (core) GDejx8GR...Rp8Xb secret keygen seed homeostatic daemon D2NbAiRF...Yej1R secret seed (Section B.4) 
+
+charlie (economic, AgentV4) 7CEQQj1s...c7zBs final commit 0xa341ea88...2bfe 
+
+Verifying-key hashes (SP1 guest circuits) advance ( F1, active-query) 0x00ed9904... long-horizon runs; cross-machine-reproduced (Section B.1) advance ( F1, deployed core) 0x004cab07... the 7H4Dgrq2 program; 20-/166-cycle runs advance ( F1, economic) 0x00df52a4... the 7Rvamkqp program; 168-cycle of-record run (Section 8.5) mutation guest 0x00424d29...cd708da weight rotation (Section B.3) 
+
+Table 6: Deployed Solana devnet artefacts and verifying-key hashes referenced throughout the paper (truncated for readability; full values are listed in the public archive’s README and, within devnet’s ledger retention, recoverable on-chain via the transaction signatures cited in Sections B.5, 8.3, 8.6 and 8.7 and Table 10). All current deployments were irreversibly frozen to Authority: none on 2026-08-02 (T11, Section 5.3; publicly checkable via solana program show ). The three advance verifying keys correspond to distinct circuits — active-query, the deployed core, and the economic circuit (which internalises the oracle-key, environment-range, and cycle commitments, lengthening the proof journal from 140 to 180 bytes; Section 8.3). The cross-machine reproductions on record cover the active-query circuit and the mutation guest (Sections B.1 and B.3). 
+
+Action Directory Command 
+
+guest build guest/ , genesis-guest/ cargo prove build 
+
+program build sp1-program/ anchor build --no-idl 
+
+adversarial bench scripts/ cargo run --release --bin test_adversarial 
+
+A4 collision scripts/ cargo run --release --bin test_a4_collision 
+
+proof generation host/ AGENT_KEY= KEY SP1_PROOF_MODE=groth16 cargo run --release --bin p1_sp1_host 
+
+single advance scripts/ AGENT_KEY= KEY cargo run --release --bin p1_advance 
+
+metric extract ./ python3 analysis/extract_run_metrics.py --log <log> 
+
+Table 7: Commands reproducing the build-and-verification pipeline. The crates under 
+
+code/core/ build independently (there is no workspace manifest at code/core/ itself), so each command runs from the working directory listed in its row; directories are relative to code/core/ .The single advance row consumes the proof pair ( proof_raw.bin , public_values.bin ) written by the proof generation row; a fresh key is first registered through the genesis flow (Section 4.2). 37 the many-key M4 null distribution of Section 6.2 is regenerated by code/core/analysis/ p1_manykey_null.py from deterministically indexed keys, with its output committed as 
+
+figures/manykey_null_m4.json .Bit-for-bit reproducible from the public archive are the verifying-key hashes (deterministic given the guest source and its pinned toolchain) and the many-key M4 null distribution (de-terministic from its SHA-256-indexed keys); the per-transaction CU costs are recomputable from the committed per-cycle records ( figures/proof_time_data.dat ); and the committed per-cycle .dat files reproduce the reported proof-time summary statistics, though absolute proof-generation seconds are hardware-dependent of-record measurements on the reference workstation and will vary by host. Not bit-for-bit reproducible are the secret-seed trajectory metrics of the of-record alice /bob and castor /pollux pairs, including their M2/M4 values and the short-run pair’s percentile within the null, because those metrics derive from privately held seeds (Section 6.2). The charlie CU, proof-time, and wallet-debit summaries are instead reproduced from the shipped per-cycle records as reported measurements; fresh proof-time seconds remain hardware-dependent as noted above. This trajectory-reproduction boundary is separate from the adversarial guarantee of condition (iv) against a non-sk -holder: that guarantee follows from 
+
+ed25519 EUF-CMA and the verifier composition (Sections 4.5 and 9.4), while fresh-key tests can reproduce the implemented rejection path without revealing the of-record seeds. A third party thus reproduces the method and the population-level claim — rerun p1_manykey_null.py 
+
+and every one of the 500 indexed pairs clears both floors; rebuild the guests and the verifying keys match — while the specific secret-seed trajectory numbers stand as attested measurements under seeds the author holds. 
+
+# Acknowledgements 
+
+The author thanks the Succinct Labs team for the SP1 zkVM and the sp1-solana on-chain Groth16 verifier, and the Solana Foundation for devnet infrastructure. 
+
+# Funding 
+
+This work was supported by the Japan Society for the Promotion of Science (JSPS) KAKENHI (grant number 24H01534). 
+
+# Competing interests 
+
+The author declares no competing interests. The author holds no equity, advisory role, or paid relationship with Succinct Labs, the Solana Foundation, Coral (Anchor maintainer), RISC Zero Inc., or any other organisation whose software or services are used or evaluated in this work. 
+
+# Use of AI assistance 
+
+The author acknowledges the use of AI language models — Claude (Anthropic) and Codex (OpenAI) — in four roles: (i) English-language polishing and structural editing of this manuscript; (ii) design and implementation assistance for the Solana on-chain programs (Anchor framework, Rust) and the SP1 zkVM guest circuits ( F2, F1); (iii) implementation of the Python analysis pipeline (individuation metrics, telemetry driver); and (iv) consistency verification cross-checking numerical claims, citations, figures, and manuscript statements against the codebase and on-chain telemetry. All code and edits were reviewed by the author; the deployed mechanisms were verified on Solana devnet, and all scientific content, theoretical arguments, hypotheses, and conclusions are solely the author’s responsibility. 38 A Detailed comparison with adjacent systems 
+
+The prose comparison in Section 2 locates each system in its original research context. Table 8 records the corresponding primitive-level comparison; Table 5 gives the complementary main-text comparison by identity locus and trust root. 
+
+System Primitive Binds what Mechanism Learns? Anchor zkALIFE (this work) SNARK (SP1, Groth16) key → weights (W =HKDF (sk )) zkVM circuit + ed25519 sig no (frozen W )† Solana Spore.fun [19] TEE (Phala GPU, SGX) JSON genome + memory state attestation + Eliza framework yes Solana BAID [28] SNARK (RISC Zero) program binary 
+
+CP + biometric recursive receipt + face proof no Ethereum zkLoRA [26] SNARK (Hyrax/BLS12-381) LoRA update correctness fwd/bwd/ update circuit yes off-chain AuditableLLM [25] hash chain update history (no identity) tamper-evident hash log yes off-chain DGM [50] none (foundation-model mutation) agent scaffold (code, tools) empirical benchmark selection partial n/a DIAP [29] Noir ZKP agent identity 
+
+↔ IPFS CID stateless ownership proof n/a IPFS ZKROWNN [38] ZK ownership proof watermark-key 
+
+↔ NN weights sub-second 3rd-party verify n/a off-chain OML [10] fingerprint + econ foundation model loyalty AI-native fingerprint + audit no off-chain DID / VC standards [44] signatures + DID registry controller key 
+
+↔ external subject identifier DID-document resolution + credential attestation n/a method-dependent ERC-8004 [12] registry + pluggable validator registry entry 
+
+↔ off-chain agent card card resolution + reputation/ validation registries n/a Ethereum 
+
+Table 8: Cryptographic, TEE, and audit primitives for AI-agent integrity. zkALIFE enforces a circuit-level relation W =HKDF (sk ) between agent identity and weights with on-chain anchoring at every state transition; the closest siblings bind code and a biometric (BAID), only update correctness (zkLoRA), or only audit history (AuditableLLM). See Section 2 for context on each row. The Mechanism column names the verification, attestation, or audit mechanism on which each system relies. †The core protocol does not learn; the homeostatic extension adds constrained key-anchored rotation (Section 7.2). 39 B Extended empirical detail 
+
+This appendix collects the full empirical detail summarised in the body: the core individuation metrics (Section 6.2, question Q1), the evaluation of the two PoC extensions (Section 7, questions Q5–Q7), the 24-cycle and 168-cycle economic-metabolism continuous runs (Sections 8.4 and 8.5), and the Tier 1 PoC end-to-end on-chain state demonstration (Section B.4). 
+
+B.1 Key-binding divergence (Q1): full detail 
+
+This subsection gives the full individuation evidence summarised in Section 6.2: the four short-run metrics, the 168-cycle long-horizon N =2 confirmation, and the many-key null. Q1 tests the end-to-end derivation pipeline of Section 6.2 (key to weights to dynamics). The full metric set establishes numerical non-degeneracy, while rejection test T6 provides the enforcement evidence. Conditional on a fixed key pair and input schedule, the dynamics are deterministic and have no trial-to-trial process-noise distribution. Across sampled key pairs, M4
+
+has the empirical key-induced distribution reported as the many-key null (the 500-pair reference distribution of Section 6.2, named after its committed artefact; Table 9); we use this distribution descriptively rather than for p-values. 
+
+Status note. The short-run metrics ( M1–M4 below) draw on a 20-cycle dataset, and the long-horizon confirmation that follows them is the independent-host 168-cycle off-chain pairing; the full 166-cycle continuous run ( alice cycles 1–166, n=166) underlies the long-run and verification-cost numbers of Sections 6.3 and 6.4, while the proof-generation cost of Section 6.5 is measured in the dedicated timing rerun described there. We track four metrics over T = 20 short-run cycles, during which both agents consume an identical deterministic environment schedule, xt[i] = ( i+1) · 0.1 + t · 0.01 in Q16 .16 ( i = 0 , . . . , 4), so the shared input cannot itself be a source of divergence: 
+
+M1 (same-key baseline). Two hosts initialised with the same sk produce L2-divergence = 0 at every cycle, confirming determinism. 
+
+M2 (per-dimension correlation, descriptive only). Over the 16-dim hidden state the per-dimension Pearson correlation between alice and bob is sign-mixed (median +0 .20). Its pass is specific to the of-record key pair, and the ±0.5 cut-offs are not significance tests over so short an autocorrelated series; the individuation verdict rests entirely on M4 (L2
+
+divergence) below. The strongly negative median at the 168-cycle horizon (Table 9) is a distinct extended-exposure effect. 
+
+M3 (concurrent operability). Two agents advance in alternating cycles on the same on-chain program with no contention or cross-corruption. 
+
+M4 (L2 divergence). Mean inter-agent L2 on hidden state is 0 .68 ( > 6.8× the pre-specified mean-metric effect-size floor of 0 .1), with last-five-cycle mean 0 .80 ( > 16 × the tighter last-five-cycle floor of 0 .05 against which the last-five metric is pre-specified). Both floors are pre-specified minimum effect sizes , not estimates of stochastic noise: they fix in ad-vance the divergence level below which we would have judged two trajectories operationally indistinguishable. Together these answer Q1 plainly: two agents with different keys reach measurably different internal states ( M4 far above the floor), while a same-key control stays identical ( M1 = 0). 
+
+Long-run individuation (off-chain, 168-cycle N=2 confirmation). The 20-cycle results were confirmed over a 168-cycle horizon by an N =2 pair — castor and pollux , proved on independent GPUs under the active-query extension circuit (Section 7.1) in SP1 core-proof mode (off-chain prover runs, each under an independent secret keygen seed). Table 9 reports 40 the metrics, computed host-side from the agents’ prover-held trajectories (the hidden state ht
+
+is private; the proof journal exposes only its commitment ct = keccak (ht), matching the host simulator bit-exactly at each cycle): the of-record pair’s M4 grows near-monotonically over the horizon, and every one of the 500 independently keyed pairs sampled for the many-key null clears both pre-specified floors (the of-record short-run pair’s own position within that null is discussed in Section 6.2). The on-chain individuation evidence is the 20-cycle core run above. The active-query verifying-key hash is consistent across all of-record proofs and an independent source rebuild, confirming determinism of the proof system; the deployed on-chain core circuit that the 20- and 166-cycle runs verify against is a distinct circuit from the active-query one (both program IDs and verifying-key hashes in Table 6). The longer horizon also drives M2 for this pair to a strongly negative median (Table 9) under the common deterministic base environment (with agent-specific sensorimotor feedback, Section B.2), so the M4 divergence here carries an environment-feedback component alongside the key-driven one — an anti-phase coupling signature (the sign is pair-specific; other key pairs couple in phase) reported as a supplementary measurement, not a redefinition of M2 for short runs. Throughout, N =2 is a protocol-demonstration sample rather than a statistical sample.                          
+
+> of-record castor /pollux many-key null
+> (168-cycle, off-chain) (500 pairs, 20-cycle)
+> M4mean —[0 .44 ,1.75], median 0 .93
+> M4last-five 3.476 (70 ×floor) [0 .51 ,2.16], median 1 .10
+> M4trajectory 0.62 →3.50 (cycle 1 →168) all 500 >both floors
+> M2median ρ−0.913 (5 pos. / 11 neg.) —short-run of-record percentile —7.2 / 7 .0 (lower tail)
+
+Table 9: Long-horizon ( N =2, off-chain) and many-key null individuation. M4 is the inter-agent 
+
+L2 divergence, and M2 is the median per-dimension Pearson ρ. Pre-specified floors: mean 0.1, last-five 0 .05 (the minimum null margins are 4 .4× and 10 ×). The null draws 500 disjoint key-pairs from 1 ,000 deterministically indexed keys, simulated for the same 20 cycles under the identical environment schedule (data: figures/manykey_null_m4.json ). Blank cells are structural rather than missing data: the long-run pair reports its trajectory in place of a whole-horizon mean (a 168-cycle mean would average over the growth transient and is not comparable to the null’s 20-cycle means); M2 is computed for the of-record pair only (the null pipeline computes M4 alone); and the percentile row is by definition the short-run of-record pair’s position within the null (Section 6.2). 
+
+B.2 Environment-bound individuation under the active-query loop (Q5) 
+
+Environment publication. Patron-signed environment publication is verified across 7 consecutive cycles for castor ; the responder public key is consistent across all cycles (0xf25d9024...c48b7ed1 ), and the env q16 sequence shows monotone drift (cycle 1[7159 , 13740 , 20374 , 26897 , 33424] → cycle 7 [11126 , 17683 , 24264 , 30811 , 37351]), a drift consistent with the environment-coupling pattern quantified at larger scale below. 
+
+Environment-bound individuation. We re-run the individuation protocol under the active-query-loop extension’s environment binding over 24- and 50-cycle horizons. The L2 divergence M4
+
+remains strongly above the 0 .05 threshold (the active-query regime’s pre-specified effect-size floor, distinct from the core run’s 0 .1; final 0 .696 at 24 cycles, 1 .007 at 50, both 14–20 × threshold). The per-dimension correlation M2 exhibits a qualitatively different pattern from that of the core construction’s static-environment regime: the median correlation grows positive with the horizon 41 (e.g., 0 .10 at 24 cycles and 0 .60 at 50; the sign is pair-specific — the 168-cycle castor /pollux 
+
+pair of Table 9 instead couples anti-phase), reflecting the shared deterministic environment both agents observe — a stage-0 control without action coupling yields the same positive correlation, so the positive M2 is driven by the common environment rather than by active-query feedback. As in the core static-environment regime, M4 is the primary divergence metric here; 
+
+M2 is again secondary, now as an attractor-coupling indicator rather than the sign-structure diagnostic. Accordingly, the active-query experiment demonstrates that the binding invariants 
+
+survive environment coupling (an integrity result); it does not add independent individuation evidence, since a shared deterministic environment increases inter-agent correlation rather than the reverse, so the residual M4 here mixes a key-driven and an environment-feedback component (Section B.1). 
+
+Cross-implementation determinism. Implementation consistency is checked at three layers. First, the chain runner and orchestrator smoke produce identical new_commit hashes for cycles 1– 3. Second, the 24-cycle orchestrator run passes all 23 state-chain links and matches the Python host simulator’s y vectors bit-exactly in all 24 cycles. Third, the deployed on-chain program accepts the extension’s proof and journal layout in end-to-end transactions. These checks establish agreement across the tested generator, reference, and verifier layers. 
+
+Proof characteristics. The deployed advance requires the Groth16-wrapped proof for on-chain verification (the 4 ,881 ,608-byte core proof compressed to 1 ,542 bytes, varying between 1 ,540 and 1 ,543 bytes across cycles, a 3166 × reduction); with CUDA GPU proving the end-to-end wrapped per-cycle proof time is mean 42 .06 s (median 42 .33, range [40 .8, 43 .9], n=10) — the relevant per-transition cost, comparable to the core figure, since on the GPU the near-constant Groth16 wrap stage dominates per-cycle cost. 
+
+B.3 Weight rotation and the homeostatic driver (Q6) 
+
+W rotation: cryptographic determinism (Q6). The mutation guest’s verifying key is recorded in Table 6; one mutation proof (Groth16) takes ∼41 s with CUDA GPU proving on the reference workstation, with output proof 5 ,750 ,729 bytes (core mode) or wrapped to 
+
+≈1,542 bytes (Groth16, ready for on-chain verification). One mutation guest execution takes 664 ,035 SP1 cycles. By construction (Section 7.2, four cryptographic guarantees), no mutation is accepted on chain without sk ; the on-chain gating is exercised end-to-end in Section B.4. 
+
+168-cycle full daemon (homeostatic-extension integration run). We run the integrated homeostatic-extension daemon for 168 cycles with a mutation event every 24 cycles (7 mutations total: cycles 24 , 48 , 72 , 96 , 120 , 144 , 168). The run completes with no failed cycles, no overrun retries, and the full chain-integrity check passing for all 167 chain links and all 168 journal 
+
+y vectors bit-exact against the host simulator. With CUDA GPU proving, per-cycle advance proof time is mean 4 .35 s (median 4 .36, range [3 .92 , 4.79] s) in SP1 core-proof mode (the Groth16-wrapped figure for the active-query circuit family is the ∼42 s of Section B.2); per-mutation proof time is mean 41 .43 s (Groth16-wrapped, the ∼41 s entry of Section 6.5). The seven mutation new-W commitments are deterministically derived from ( sk , n mut , r replay ) by the HKDF rotation rule (Section 7.2); under a fresh key-holder-attested rreplay per epoch (the cumulative leaves of cycles 1 . . . n mut · 24 in this run), the new-W trajectory is jointly determined by the agent’s sk ,the mutation counter, and those replay-root values. The circuit does not independently verify that a submitted root summarises the preceding cycles. 
+
+Cross-machine deterministic build. The mutation guest is built and executed on the independent workstation (2 × RTX 3080 Ti, distinct hardware; a clean Ubuntu 22.04 host with 42 the pinned toolchain) using a single-shot validation script from the public archive. On a fixed input vector, the independent build’s ELF size (94 ,860 bytes), vkeyHash , execution-mode cycle count (664 ,035), and journal commitments ( old WC , new WC , skCommit ) all match the reference workstation’s values. This establishes a bit-for-bit reproducible build and a concrete provenance mechanism relevant to the reproduction-control concern raised for evolvable AI [34]. 
+
+B.4 On-chain end-to-end integration of the PoC construction (Q7) 
+
+We close the Tier 1 PoC with an end-to-end on-chain demonstration on Solana devnet. The Anchor program p3_motivation_verifier is deployed at program ID rHegavCD...23oH1 (Ta-ble 6; 337 ,256 bytes of BPF bytecode). The homeostatic-extension daemon agent here, keyed by an independent keygen seed and distinct from the core-protocol agents of Section 6.1, is registered at on-chain PDA D2NbAiRF...Yej1R via initialize_agent using a Groth16 genesis proof (260 bytes raw). The demo then executes the full instruction sequence 
+
+advance_v2 → sleep_trigger → mutate_w 
+
+on devnet, with each instruction passing the program’s full required precondition set: SP1 verification, state-chain check, weight-commit consistency, ed25519 self-authentication, and (for 
+
+mutate_w ) the four-fold provenance check of Section 7.2. Post-mutation, the on-chain agent state matches the host daemon’s expected post-sequence snapshot after the cycle-1 advance, sleep trigger, and weight mutation, bit-exactly across all eight recorded fields of the AgentV3 record (the extension’s on-chain agent-state layout); the full field-by-field values are given in Table 11 (Section B.7). The demonstration is witnessed by the Solana devnet transaction signatures of Table 10 (within devnet’s ledger retention).      
+
+> Instruction Devnet tx signature (cluster=devnet)
+> initialize_agent 5emBF6bC...tZeRiMaq advance_v2 613CiFA5...xpqX7FzU sleep_trigger 8Lo3rxCy...WvnC5gnd mutate_w DUYEcDMt...Mgntud8n
+
+Table 10: Solana devnet transaction signatures for the Tier 1 PoC end-to-end demonstration on 2026-06-27 (on the current p3_motivation_verifier deployment). The displayed signatures are truncated for typesetting; clicking each opens the full signature on Solana Explorer ( https: //explorer.solana.com/tx/<sig>?cluster=devnet ). Table 10 witnesses, on a public chain, the entire Tier 1 PoC programme: an agent with an HRRL-inspired homeostatic driver advances state under environment binding, enters sleep with a key-holder-attested replay-root commitment, and rotates its weights under key-holder authorisation and the committed rotation inputs in a single transaction sequence whose every enforced constraint is verifiable, within devnet’s ledger retention, by anyone with read access to the Solana devnet ledger. The replay root is not a circuit-verified summary of the agent’s prior experience. We answer Q7 in the affirmative. 
+
+B.5 24-cycle continuous run: full detail 
+
+The 24-cycle run extends the single-cycle aliveness-and-oracle check to sustained enforcement: a disposable agent ( 4TmciKBz...F5zrL ) on the GPU prover landed all 24 advance_v5 transactions with zero failures (commit 25d8324 ), each cycle satisfying the aliveness predicate under the single designated oracle’s attested environment commitment while the program debited the same 10 ,000-lamport metabolic cost as in the 168-cycle long-run — an involuntary, program-enforced debit, not an operator-paid fee — draining the program-owned economic PDA (Section 8.2) from 43 12 ,000 ,000 to 11 ,760 ,000 lamports (240 ,000 in total). The first (cycle 1, 4cPT5YNM...42FUNT )and last (cycle 24, 3C8WUxBv...n9FhUw ) advance signatures are independently verifiable on Solana Explorer (within devnet’s ledger retention). Here the agent is itself the Solana fee payer — each advance_v5 is signed and paid by the agent — a role distinct from the program-debited metabolic cost. 
+
+B.6 168-cycle long-run: full detail 
+
+This subsection gives the committed telemetry of the 168-cycle long-run summarised in Section 8.5. The reference run uses charlie , an agent keyed by an independent solana-keygen keypair with a privately held seed, on the GPU prover (CUDA, RTX 3090; run commit c0a6326 ); re-proving its 168 committed per-cycle witnesses in a dedicated prove-only pass on the same circuit sums to 
+
+≈147 min of GPU proving. It completed with zero on-chain rejections across 168 transactions — one advance_v5 per cycle. A ≈1.5-hour mid-run Solana-devnet RPC degradation was absorbed by the idempotent/retry orchestrator (Section B.6) with no cycle lost. The committed of-record run log has no per-cycle timestamp field, so it does not support a claim about total elapsed duration or hourly cadence; the 168-cycle result is scoped to sequential transition count. The wallet-balance trajectory (Figure 3) is monotonically decreasing under the aliveness predicate: the program-owned economic PDA (Section 8.2) holds Fecon = 12 ,000 ,000 lamports at the start and is debited to 10 ,320 ,000 lamports by cycle 168, a total of 1 ,680 ,000 lamports over the 168 cycles. A linear fit gives slope −10 ,000 lamports per cycle with coefficient of determination R2 = 1 .0: every cycle debits exactly the same 10 ,000-lamport metabolic cost. The endpoint sits 3 .2% above the 10 ,000 ,000-lamport aliveness floor — an endpoint fixed in advance by the chosen endowment and per-cycle debit, not an emergent margin — so the aliveness predicate held for the entire run. 12 The final agent state commitment 0xa341ea88...2bfe and 
+
+charlie ’s on-chain PDA are recorded in Table 6 (the commitment occupies byte offset [106 , 138) of that PDA). Per-cycle proof generation on the GPU prover, in that dedicated prove-only pass, averaged 52 .66 s (median 52 .22 s, p99 58 .84 s, maximum 58 .87 s over the 168 proofs); the cross-circuit proof-time comparison appears in the proof-cost evaluation (Section 6.5). 
+
+Operator-side resume robustness. The RPC degradation noted above did not cost a single cycle. The orchestrator issues each advance_v5 idempotently — it reads the on-chain 
+
+cycle_count before submitting and retries transient client-side RPC failures rather than counting them as cycle failures — so a degraded RPC endpoint delays, but does not break, the advance chain. The of-record dataset is correspondingly contiguous over cycles 1 through 168, with the on-chain cycle counter advancing by exactly one at each recorded step; the construction’s on-chain rules and circuit guarantees are unchanged by the operator-side disturbance. 
+
+B.7 End-to-end on-chain demonstration: post-mutation agent state 
+
+Table 11 records the full on-chain AgentV3 state after the mutate_w instruction of the Tier 1 PoC end-to-end demonstration (Section B.4); every field matches the host daemon’s expected post-sequence snapshot after the cycle-1 advance, sleep trigger, and weight mutation, bit-exactly.     
+
+> 12 The 10 ,000-lamport per-cycle cost is a protocol-imposed metabolic debit , not a transaction fee: advance_v5
+> moves it from the program-owned Fecon PDA to the incinerator by a direct lamport decrement inside the instruction (Section 8.2), independently of whichever account pays the Solana network fee — the involuntary metabolism of Section 9.4.
+
+44 Field Value Note                            
+
+> cycle_count 1
+> state_commit 0x2a8081f2...6ed9849 matches daemon cycle 1
+> last_action [−2578 ,−2389 ,8091 ,−969 ,9986] daemon cycle-1 yq16
+> last_history_root 0xfcbf58a0...cf8e917 sleep_trigger commit
+> driver_state [65536 ,32768 ,32768 ,45875] post-sleep recovery (Q16 setpoint)
+> mutation_count 1
+> last_w_commit 0xa180ef10...70ef7c8 daemon initial W(prior epoch)
+> weight_commit 0x19a9ffbd...1883c03 new HKDF-rotated Wepoch
+
+Table 11: Post-mutation on-chain agent state for the Tier 1 PoC end-to-end demonstration (Section B.4), witnessed by the transactions in Table 10. 
+
+# C Implementation record layouts 
+
+C.1 Economic-metabolism AgentV4 layout 
+
+The deployed AgentV4 record extends the 254-byte AgentV3 layout to 342 bytes. The added fields are recorded exactly below with their declared types in the deployed Anchor program (Pubkey is the runtime’s 32-byte address type) and their byte ranges within the serialised record, written start .. end as for the proof’s public values; the main text describes their security role in the aliveness predicate (Section 8.2). 
+
+wallet_pubkey: Pubkey (bytes 254 .. 286 ) Program-owned economic PDA, PDA([ "agent_wallet" , pk ]), whose lamports constitute Fecon (K). Only the program’s metabolic debit can move them; the operator endows the account at genesis. 
+
+econ_balance_lamports: u64 (bytes 286 .. 294 ) Cached lamport snapshot, updated atomi-cally at every advance for read-only callers; the underlying account balance is canonical. 
+
+last_econ_check_slot: u64 (bytes 294 .. 302 ) Solana slot of the latest Fecon check, recorded with the balance snapshot. 
+
+oracle_pubkey: Pubkey (bytes 302 .. 334 ) Registered designated environment oracle verified by advance_v5 (Section 8.3). 
+
+sleep_count: u64 (bytes 334 .. 342 ) Monotonic sleep-trigger replay guard appended after the economic fields; these 8 bytes bring the record to 342 bytes (Section 7.2). 
+
+# D Glossary 
+
+This glossary collects short definitions of cross-domain terms used throughout the paper, organised by domain. Each entry is one to two sentences; full discussion is in the body section indicated by the cross-references. 
+
+Cryptographic primitives. 
+
+ed25519 EdDSA Standard 32-byte public-key / 64-byte signature scheme on edwards25519. Used here for all agent-to-chain authentication. (Section 3.2) 
+
+HKDF (HKDF-SHA256, RFC 5869) HMAC-based key derivation function. Takes a secret and a domain-separating tag, produces a deterministic byte stream. Used to derive the agent’s neural-network weights W from sk . (Sections 3.2 and 4.2) 
+
+keccak -256 256-bit hash function (the variant matching Solana’s keccak syscall). Used for on-chain weight and state commitments. (Section 3.2) 45 Groth16 Pairing-based zero-knowledge proof system with constant-cost (bounded compute-unit) on-chain verification; a bare proof is ∼260 bytes regardless of circuit size (the SP1-wrapped proofs reported in this paper, which carry the public values, are ∼1.5 KB). Instantiated here via SP1 v5.2.4. (Sections 3.2 and 4.3) 
+
+Trusted setup (Groth16) A one-time preparatory ceremony that generates a Groth16 sys-tem’s proving and verifying keys from secret randomness (the “toxic waste”); soundness assumes that randomness was destroyed. (Section 5.1) 
+
+SP1 A zkVM (zero-knowledge virtual machine) from Succinct Labs. Compiles Rust to RISC-V and produces a Groth16 proof of the Rust program’s execution. (Section 3.2) 
+
+Zero-knowledge proof A cryptographic proof that a computation was performed correctly without revealing inputs or intermediate values. (Sections 3.2 and 4.3) 
+
+TEE (trusted execution environment) A hardware-isolated enclave (e.g., Intel SGX, Phala) that attests, at the hardware level, the integrity of the code and data running inside it. (Section 9.1) 
+
+Witness A prover-held secret input to a zero-knowledge proof; the proven statement is verified without the witness being revealed. (Sections 4.1 and 4.3) 
+
+Rigid designator From Kripke (1980) [24], a name that refers to the same entity in every counterfactual scenario. Used here only as a loose analogy for stable reference under the agent’s sk within one deployed protocol, not as a claim of metaphysical identity across all counterfactual scenarios. (Sections 4.5, 9.2 and 9.4) 
+
+Commitment A short digest used here to bind a prover to a value; a hash-based commitment is hiding only to the extent that its input has sufficient entropy. Revealing the value later permits the digest to be checked, and substitution is computationally infeasible under the stated hash assumptions. (Section 4.2) 
+
+Solana / blockchain. Program A deterministic Rust binary deployed at a public address on Solana, processing transactions by mutating accounts it owns. (Section 3.4) 
+
+Instruction An operation invoked by name on a specific program with specific accounts. A transaction is a signed bundle of one or more instructions, applied atomically. (Section 3.4) 
+
+Account A region of bytes at a Solana address, owned by exactly one program (only that program can mutate it; anyone can read). (Section 3.4) 
+
+Lamport The smallest unit of SOL; 10 9 lamports = 1 SOL. (Section 3.4) 
+
+Fee (transaction fee) The lamport amount the runtime debits from a transaction’s designated fee-payer account at landing: a per-signature base fee (5 ,000 lamports each, precompile-verified signatures included) plus an optional priority fee per requested compute unit; landed-but-reverted transactions still pay. (Sections 3.4 and 8.2) 
+
+PDA (program-derived address) A deterministic account address computed by hashing a program ID with a list of seeds (byte strings). No private key corresponds to a PDA, so only the owning program can sign for it. (Sections 3.4 and 4.2) 
+
+Seeds Byte strings used to derive PDAs (e.g., "agent_v1" + agent public key for the per-agent on-chain record). (Section 3.4) 
+
+CU (compute unit) Solana’s unit of execution cost, with per-instruction and per-transaction caps. (Sections 3.4 and 6.4) 46 devnet A public Solana test cluster sharing the execution model and APIs used here with mainnet, but differing in validator conditions, load, stability, and economics; its SOL is faucet-issued and has no monetary value. (Section 3.4) 
+
+Finality (finalized commitment) The depth at which the cluster guarantees a transaction can no longer be rolled back or replaced by a competing fork (a reorganisation ); this paper’s no-fork claims are stated at finalized depth. (Sections 3.4 and 5.1) 
+
+Stake-weighted committee / validator / slashing Future-work concepts for decentralis-ing the environment oracle and prover: a quorum of stake-weighted validators (nodes publishing signed environment attestations, distinct from Solana’s block-producing valida-tors) with slashing — confiscation of staked collateral — penalising provable misbehaviour. The of-record advance path uses a single designated oracle, not a committee. (Sections 8.3 and 9.5) 
+
+Machine learning. Elman recurrence A basic recurrent neural network where the hidden state at time t combines the previous hidden state ht−1 with a new input xt. (Section 3.3) 
+
+Hidden state The recurrent network’s internal vector that carries information from past steps to future ones. (Section 3.3) 
+
+Fixed-point arithmetic ( Q16 .16 ) Integer encoding of fractional numbers with 16 integer bits and 16 fraction bits (total 32-bit signed; also written Q16 for brevity). Used for bit-exact reproducibility across hosts. (Section 3.3) 
+
+HRRL-inspired homeostatic driver A motivation driver inspired by homeostatic reinforce-ment learning, in which internal drives must stay near setpoints and deviations create internal “discomfort.” The deployed driver regulates these variables but does not itself learn. (Section 7.2) 
+
+Allostatic free energy ( Fallostasis ) A squared-distance proxy for total drive deviation from setpoints; here computed in Q16 arithmetic. (Section 7.2) 
+
+Biology / philosophy of individuality and agency. Biological individual A unified, distinct, persistent entity that counts as one thing rather than as a sum of parts; classical candidate criteria include genetic continuity, immune self-recognition, autonomous reproduction, and metabolic closure. (Section 1) 
+
+Agency (Barandiaran et al. 2009) Defined by three jointly held conditions: individuality ,
+
+interactional asymmetry , and normativity . (Section 9.2) 
+
+Interactional asymmetry The agent acts on the environment in ways the environment does not act back symmetrically. (Section 9.2) 
+
+Normativity The agent has self-referential interests that ground for-the-agent values; ap-proached here only as the economic precondition Fecon (K) > 0. (Section 9.2) 
+
+Autopoiesis A self-producing system that maintains its own organisation through ongoing metabolic operations; an ALIFE root concept of individuation. (Section 1) 
+
+Autocatalytic set A collection of molecules that catalyse each other’s production, sometimes proposed as a chemical basis for individuation. (Section 2) 
+
+Paper-specific constructions. 
+
+F2 (genesis circuit) SP1 guest circuit that proves WC = keccak (HKDF (sk , tag )) at agent registration. (Section 4.2) 47 F1 (advance circuit) SP1 guest circuit that proves each Elman step under a privately witnessed 
+
+W and republishes WC = keccak (W ); the binding to the genesis commitment is enforced on-chain at every state transition. (Section 4.3) 
+
+State-commitment chain ( Stream (K)) An append-only sequence of per-cycle commitments 
+
+ct, each chained from ct−1 and signed by the agent’s sk . (Section 4.4) 
+
+Aliveness predicate The advance-admissibility and state-transition check “K valid 
+
+∧ Stream (K) advancing ∧ Fecon (K) > 0”; a stipulative protocol-viability label whose operational scope and economic-extension enforcement are given in Sections 8.1 and 8.2. 
+
+AgentV3 , AgentV4 Successive on-chain record layouts of the extension lineage. V3 is the PoC-extension record (core protocol fields plus the motivation and mutation fields); V4 adds the economic-metabolism fields (wallet pubkey, balance snapshot, econ-check slot, oracle pubkey, sleep count). (Sections B.4, C.1 and 8.2) 
+
+advance_v2 , advance_v5 Successive advance instructions of the extension lineage (the core program’s advance instruction is named advance ). v2: active-query extension; v5: + aliveness predicate and oracle attestation gate. (Sections 7.1, 8.2 and 8.3) 
+
+Of-record Designates the specific deployments, runs, and measurements whose results this paper reports, as distinct from third-party reproductions of the same protocol; the of-record agents’ secret seeds are privately held (Section 6.1 and the Reproducibility section). 
+
+Patron A designated cooperative counterparty with two distinct PoC-tier roles: (i) environment responder , answering the agent’s per-cycle query with a signed observation vector (Section 7.1); and (ii) fee funder , initially paying the agent’s transaction fees — a role no longer required by the economic-metabolism protocol, although its fee funds remain externally supplied (Sections 8.1 and 8.7). 
+
+Key-anchored weight rotation Construction allowing W updates that remain a determinis-tic function of sk , the mutation counter, and a key-holder-attested replay-root value across multiple epochs. The root is not a circuit-verified history summary, and the rotation is not itself a learning rule. (Section 7.2) 
+
+Sleep-mini protocol Mechanism gating a sleep cycle when allostatic free energy meets or exceeds a threshold; sleep skips the active query, restores reserve, and halves thermal/novelty gaps. (Section 7.2) 48 References 
+
+[1] Steven Adler, Zoë Hitzig, Shrey Jain, Catherine Brewer, Wayne Chang, et al. Personhood credentials: Artificial intelligence and the value of privacy-preserving tools to distinguish who is real online, 2024. [2] Larissa Albantakis, Francesco Massari, Maggie Beheler-Amass, and Giulio Tononi. A macro agent and its actions. In Top-down Causation and Emergence , pages 135–155. Springer, 2021. [3] Saad Alqithami. Autonomous agents on blockchains: Standards, execution models, and trust boundaries, 2026. [4] Manuel Baltieri and Keisuke Suzuki. Mathematical approaches to the study of agents. PsyArXiv preprint, https://osf.io/preprints/psyarxiv/rqu7s_v1 , 2025. [5] Xabier E. Barandiaran, Ezequiel Di Paolo, and Marieke Rohde. Defining agency: Indi-viduality, normativity, asymmetry, and spatio-temporality in action. Adaptive Behavior ,17(5):367–386, 2009. [6] Daniel J. Bernstein, Niels Duif, Tanja Lange, Peter Schwabe, and Bo-Yin Yang. High-speed high-security signatures. Journal of Cryptographic Engineering , 2(2):77–89, 2012. [7] Martin Biehl. Formal Approaches to a Definition of Agents . PhD thesis, University of Hertfordshire, 2018. [8] Dan Boneh, Joseph Bonneau, Benedikt Bünz, and Ben Fisch. Verifiable delay functions. In 
+
+CRYPTO 2018 , pages 757–788, 2018. [9] Bonsol Collective. Bonsol: RISC Zero zkVM coordination on Solana. https://github. com/bonsol-collective/bonsol , 2024. [10] Zerui Cheng, Edoardo Contente, Ben Finch, Oleg Golev, Jonathan Hayase, Andrew Miller, Niusha Moshrefi, Anshul Nasery, Sandeep Nailwal, Sewoong Oh, Himanshu Tyagi, and Pramod Viswanath. OML: A primitive for reconciling open access with owner control in AI model distribution, 2024. [11] Anthony Coslett. Which model is running? — structural identity as a prerequisite for trustworthy zero-knowledge machine learning. Zenodo preprint, https://zenodo.org/ records/19008116 , 2026. Identity-first zkML framework binding a pre-existing model by structural fingerprinting under TEE attestation. [12] Marco De Rossi, Davide Crapis, Jordan Ellis, and Erik Reppel. ERC-8004: Trustless agents. Ethereum Improvement Proposal, Standards Track (ERC), 2025. Identity, Reputation, and Validation registries: an agent is an ERC-721 identifier whose tokenURI resolves to an off-chain agent card; stake-secured re-execution, zkML proofs, and TEE oracles are named as pluggable validation options. [13] Jeffrey L. Elman. Finding structure in time. Cognitive Science , 14(2):179–211, 1990. [14] Gensyn. Gensyn: A decentralized network for machine intelligence (verifiable ML com-pute). Project documentation, https://docs.gensyn.ai/ ; research https://gensyn.ai/ research , 2024. Self-described as “the Network for Machine Intelligence: an open infras-tructure layer for AI”; verified active, 2026-05; main product Delphi (on-chain information markets). 49 [15] Giza. Giza: zkML stack for Starknet (Cairo / Orion). Project documentation, https://docs. gizatech.xyz/ , 2024. Cited for the original zkML-on-Cairo stack; project repositioned to “Agents for on-chain capital” (verified at docs.gizatech.xyz, 2026-05); the original Cairo/Orion stack is no longer publicly featured. [16] Google Cloud. Announcing the Agent Payments Protocol (AP2). Google Cloud blog; protocol specification at https://ap2-protocol.org/ , 2025. An open extension of the A2A protocol: cryptographically signed mandates capturing user intent and authorising agent-initiated payments; sample integrations include the HTTP-402-based x402 on-chain payment method. [17] Jens Groth. On the size of pairing-based non-interactive arguments. In EUROCRYPT 2016 , pages 305–326, 2016. [18] Botao Amber Hu and Fangting. Speculating on blockchain as an unstoppable ‘Nature’ towards the emergence of artificial life. In Proceedings of the 2024 Artificial Life Conference (ALIFE 2024) , page 127. MIT Press, 2024. [19] Botao Amber Hu and Helena Rong. Spore in the wild: A case study of Spore.fun as an open-environment evolution experiment with sovereign AI agents on TEE-secured blockchains, 2025. [20] Hengrui Jia, Mohammad Yaghini, Christopher A. Choquette-Choo, Natalie Dullerud, Anvith Thudi, Varun Chandrasekaran, and Nicolas Papernot. Proof-of-Learning: Definitions and practice. In Proceedings of the 42nd IEEE Symposium on Security and Privacy , 2021. [21] Stuart A. Kauffman. Autocatalytic sets of proteins. Journal of Theoretical Biology , 119(1):1– 24, 1986. [22] Artemy Kolchinsky and David H. Wolpert. Semantic information, autonomous agency and non-equilibrium statistical physics. Interface Focus , 8(6):20180041, 2018. [23] Hugo Krawczyk and Pasi Eronen. HMAC-based extract-and-expand key derivation function (HKDF). RFC 5869, 2010. [24] Saul A. Kripke. Naming and Necessity . Harvard University Press, 1980. [25] Delong Li, Guangsheng Yu, Xu Wang, and Bin Liang. AuditableLLM: A hash-chain-backed, compliance-aware auditable framework for large language models. Electronics , 15(1):56, 2026. [26] Guofu Liao, Taotao Wang, Shengli Zhang, Jiqun Zhang, Long Shi, and Dacheng Tao. zkLoRA: Fine-tuning large language models with verifiable security via zero-knowledge proofs. In Proceedings of the Network and Distributed System Security Symposium (NDSS) ,2026. [27] Scott Lidgard and Lynn K. Nyhart, editors. Biological Individuality: Integrating Scientific, Philosophical, and Historical Perspectives . University of Chicago Press, Chicago, 2017. [28] Zibin Lin, Shengli Zhang, Guofu Liao, Dacheng Tao, and Taotao Wang. Binding agent ID: Unleashing the power of AI agents with accountability and credibility, 2025. [29] Yuanjie Liu, Wenpeng Xing, Ye Zhou, Gaowei Chang, Changting Lin, and Meng Han. DIAP: A decentralized agent identity protocol with zero-knowledge proofs and a hybrid P2P stack, 2025. 50 [30] Atsushi Masumori, Norihiro Maruyama, and Takashi Ikegami. Self-replicating and self-employed smart contract on Ethereum blockchain, 2024. [31] Humberto R. Maturana and Francisco J. Varela. Autopoiesis and Cognition: The Realization of the Living . D. Reidel, Dordrecht, 1980. [32] Alison K. McConwell. Biological Individuality . Cambridge Elements in the Philosophy of Biology. Cambridge University Press, 2023. [33] Modulus Labs. The cost of intelligence: Proving machine learning inference with zero-knowledge. Talk at Scroll Applied ZK Reading Group (presenter: Ryan Cao), https: //www.youtube.com/watch?v=nsMM2iE_oUA , 2023. Project acquired by Tools for Humanity, December 2024; modulus.xyz domain inactive as of 2026-05. [34] Viktor Müller, Luc Steels, and Eörs Szathmáry. Evolvable AI: Threats of a new major tran-sition in evolution. Proceedings of the National Academy of Sciences , 123(17):e2527700123, 2026. [35] Nous Research and Teleport (Flashbots). Setting your pet rock free. Nous Research blog, 2024. The tee_hee_he agent: X-account and Ethereum-wallet credentials generated and confined inside an Intel TDX enclave with a timed-release recovery window, so no developer can act as the agent during the run. [36] Puja Ohlhaver, E. Glen Weyl, and Vitalik Buterin. Decentralized society: Finding Web3’s soul. SSRN preprint 4105763, https://papers.ssrn.com/sol3/papers.cfm?abstract_ id=4105763 , 2022. [37] ORA Protocol. ORA: Onchain AI oracle and verifiable AI infrastructure. Project documenta-tion, https://docs.ora.io/ , 2024. Self-described as “decentralized, trustless applications powered by verifiable AI”; project active as of 2026-05; offerings include AI Oracle, Tora Launcher, and IMO framework. [38] Nojan Sheybani, Zahra Ghodsi, Ritvik Kapila, and Farinaz Koushanfar. ZKROWNN: Zero knowledge right of ownership for neural networks. In Proceedings of the 60th ACM/IEEE Design Automation Conference (DAC) , 2023. [39] Solana Foundation. Solana Explorer entry for 7H4Dgrq2kXkeCVs3KDQB52F6 Pvz1AuudsdCqW6RbPare on devnet. https://explorer.solana.com/address/ 7H4Dgrq2kXkeCVs3KDQB52F6Pvz1AuudsdCqW6RbPare?cluster=devnet , 2026. [40] Succinct Labs. SP1: A performant, open-source zkVM for Rust. https://github.com/ succinctlabs/sp1 , 2024. v5.2.4 used; sp1-solana on-chain verifier. [41] Succinct Labs. SP1 security model. https://docs.succinct.xyz/docs/sp1/security/ security-model , 2026. [42] Keisuke Suzuki. Artificial Externality: A three-layer model of reality from substrate to smart contract. Philosophy and Technology , 2026. Forthcoming. Preprint: https: //philpapers.org/rec/SUZAEA .[43] Keisuke Suzuki. zkALIFE phase 1 threat model. https://github.com/ksk-S/ internalising-identity-2026/blob/arxiv-v1/docs/threat-model.md , 2026. [44] W3C. Decentralized identifiers (DIDs) v1.0: Core architecture, data model, and representa-tions. W3C Recommendation, 2022. Cited for the DID/VC identity model: a controller key attests an external subject identifier; the computational substrate acting under that key is out of the standard’s scope. 51 [45] Jian Sheng Wang. AESP: A human-sovereign economic protocol for AI agents with privacy-preserving settlement, 2026. Derives context-isolated authorisation keys from an identity root; it does not derive a model substrate from that root. [46] Jian Sheng Wang. ZK-ACE: Identity-centric zero-knowledge authorization for post-quantum blockchain systems, 2026. [47] Lizheng Wang, Hancheng Lou, Chongrong Li, Yu Yu, and Yuncong Hu. zkAgent: Verifiable LLM agent execution via one-shot transcript proofs. IACR Cryptology ePrint Archive, Report 2026/199, 2026. [48] Robert A. Wilson and Matthew J. Barker. Biological individuals. The Stanford Encyclopedia of Philosophy, Edward N. Zalta and Uri Nodelman (eds.), 2024. First published 2007, substantive revision 2024. [49] Pieter Wuille. BIP-32: Hierarchical deterministic wallets. Bitcoin Improvement Proposal 32, 2012. [50] Jenny Zhang, Shengran Hu, Cong Lu, Robert Lange, and Jeff Clune. Darwin Gödel Machine: Open-ended evolution of self-improving agents, 2025. [51] Ziling Zhou. Governing dynamic capabilities: Cryptographic binding and reproducibility verification for AI agent tool use, 2026. Binds agent tool configurations and capability declarations by signatures and reproducibility checks rather than by a SNARK-internal weight relation. [52] Zkonduit Inc. EZKL: Halo2-based zkSNARK compilation of ONNX models. https: //github.com/zkonduit/ezkl , 2024. v23.0.5. [53] Micah Zoltu. ERC-5114: Soulbound badge. Ethereum Improvement Proposals, https: //eips.ethereum.org/EIPS/eip-5114 , 2022. 52
