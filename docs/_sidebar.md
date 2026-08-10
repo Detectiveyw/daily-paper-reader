@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-08-10 <!--dpr-date:20260810-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202608/10/2608.06690v1-policy-masked-private-experts-auditable-and-reversible-capability-access-control-in-sparse-moe-models" data-sidebar-item="{&quot;title&quot;: &quot;Policy-Masked Private Experts: Auditable and Reversible Capability Access Control in Sparse MoE Models&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2608.06690v1-policy-masked-private-experts-auditable-and-reversible-capability-access-control-in-sparse-moe-models&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;稀疏MoE模型中的隐私推理访问控制&quot;}">Policy-Masked Private Experts: Auditable and Reversible Capability Access Control in Sparse MoE Models</a>
   * 2026-08-09 <!--dpr-date:20260809-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202608/09/2608.00375v1-trimming-decoupling-multiplicative-depth-from-modulus-chains-in-rns-ckks-via-rational-levels" data-sidebar-item="{&quot;title&quot;: &quot;Trimming: Decoupling Multiplicative Depth from Modulus Chains in RNS-CKKS via Rational Levels&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2608.00375v1-trimming-decoupling-multiplicative-depth-from-modulus-chains-in-rns-ckks-via-rational-levels&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;fss-llm&quot;}], &quot;evidence&quot;: &quot;RNS-CKKS中的灵活精度管理&quot;}">Trimming: Decoupling Multiplicative Depth from Modulus Chains in RNS-CKKS via Rational Levels</a>
