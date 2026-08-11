@@ -1,0 +1,37 @@
+{
+  "label": "2026-08-11",
+  "date": "2026-08-11",
+  "generated_at": "2026-08-11T20:06:10",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202608/11/2608.09055v1-repeated-game-security-for-restaking-based-verifiable-inference",
+      "section": "quick",
+      "title_en": "Repeated-Game Security for Restaking-Based Verifiable Inference",
+      "authors": "Zhenhang Shang, Yingzhe Yu, Kani Chen",
+      "date": "2026-08-10",
+      "pdf": "https://arxiv.org/pdf/2608.09055v1",
+      "score": "7.0",
+      "evidence": "无需zkML或TEE的可验证大模型推理",
+      "tldr": "本研究探讨了基于再质押的可验证大模型推理协议的安全性。作者发现现有的单轮惩罚机制在重复博弈场景下存在安全漏洞，即“重复博弈差距”，使得攻击者能通过持续作弊获利。为此，本文提出了一种结合历史相关挑战、声誉加权惩罚和质押锁定期的新机制，在无需每轮加密验证的情况下实现了无限期子博弈完美激励相容。实验证明，该机制能显著降低审计成本并有效遏制违规行为。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Restaking-based protocols enable verifiable LLM inference without the high proving cost of zkML or the hardware trust assumptions of TEEs. Their security is commonly justified by a one-round slashing condition: a rational provider should not cheat when the expected penalty exceeds the cost saving from dishonest inference. This paper shows that this condition can overstate security when inference is supplied repeatedly under the same stake. We model verifiable inference as a discounted repeated game and identify a repeated-game gap caused by proportional slashing: detected deviations reduce future penalty exposure, while cost savings are earned again across queries.   We derive the gap in closed form, show that it persists under minimum-stake ejection, and extend it to memoryless bounded-slashing protocols covering deployed designs. We propose a deployable mechanism combining history-dependent challenges, reputation-weighted slashing, and stake vesting. The mechanism restores infinite-horizon subgame-perfect incentive compatibility against stationary mixed-strategy deviations above an explicit discount-factor threshold without per-query cryptographic verification.   Evaluation across nine open-weight model pairs from 0.5B to 14B parameters shows that the audit signal has the required concave detectability response. A Stackelberg audit-budget analysis shows that improved signal responsiveness reduces the baseline audit rate by 2.6x at discount factor 0.95. Calibrated to deployed parameters, surveyed protocols pass one-round incentive compatibility but admit repeated-game deviations for discount factors between 0.92 and 0.98, with deviation-profit fractions of 1.5%--8%. Our mechanism reduces deviation profits by 31%--54% while maintaining low-latency economic verification.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/11/2608.09087v1-joint-lyapunov-certificates-for-k-agent-generative-ai-governance-stochastic-stability-emergent-ensemble-risk-and-zero-knowledge-governance-attestation",
+      "section": "quick",
+      "title_en": "Joint Lyapunov Certificates for K-Agent Generative AI Governance: Stochastic Stability, Emergent Ensemble Risk, and Zero-Knowledge Governance Attestation",
+      "authors": "Sriram Nagaraj",
+      "date": "2026-08-10",
+      "pdf": "https://arxiv.org/pdf/2608.09087v1",
+      "score": "6.0",
+      "evidence": "AI模型的零知识治理证明",
+      "tldr": "本研究针对多智能体生成式AI治理，提出了联合Lyapunov证明（JLP）框架。研究发现，即使单个模型稳定，系统整体仍可能因交互产生涌现性漂移。为此，作者开发了一种结合随机稳定性和零知识证明（SNARK）的协议，在不泄露模型权重的前提下，确保持续监控下的整体动态稳定性，并推导了系统失稳的临界阈值。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We develop a rigorous mathematical framework for the governance of systems of K self-adapting generative AI models under the principles of   Model Risk Management (MRM). When multiple models share a   meta-learning coupling through an interaction matrix, the   per-agent Lyapunov analysis that underpins standard MRM is provably insufficient: individual agents can each satisfy their   declared stability bounds while the joint system is in a   regime of emergent ensemble-level drift. We formalize this gap through the   Joint Lyapunov Proof (JLP)---a cryptographic and stochastic   protocol that attests, without revealing proprietary weights, that the   aggregate dynamics satisfy MRM Ongoing Monitoring standard at every validation epoch.   Our main contributions are the following. We give a complete   characterization of the infinitesimal generator of the joint   quadratic Lyapunov function. We derive the exact critical coupling threshold   above which the system loses mean-square stability. We prove a   Noise-Floor Theorem and identify the correct target for zero-knowledge attestation.   A per-epoch Succinct Non-Interactive Argument of Knowledge (SNARK) on the live weights is derived. All   theoretical claims are validated against five numerical studies using a multi-agent softmax system.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

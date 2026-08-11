@@ -1,0 +1,90 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-11T20:05:30.552825+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2608.09055v1",
+      "title": "Repeated-Game Security for Restaking-Based Verifiable Inference",
+      "abstract": "Restaking-based protocols enable verifiable LLM inference without the high proving cost of zkML or the hardware trust assumptions of TEEs. Their security is commonly justified by a one-round slashing condition: a rational provider should not cheat when the expected penalty exceeds the cost saving from dishonest inference. This paper shows that this condition can overstate security when inference is supplied repeatedly under the same stake. We model verifiable inference as a discounted repeated game and identify a repeated-game gap caused by proportional slashing: detected deviations reduce future penalty exposure, while cost savings are earned again across queries.   We derive the gap in closed form, show that it persists under minimum-stake ejection, and extend it to memoryless bounded-slashing protocols covering deployed designs. We propose a deployable mechanism combining history-dependent challenges, reputation-weighted slashing, and stake vesting. The mechanism restores infinite-horizon subgame-perfect incentive compatibility against stationary mixed-strategy deviations above an explicit discount-factor threshold without per-query cryptographic verification.   Evaluation across nine open-weight model pairs from 0.5B to 14B parameters shows that the audit signal has the required concave detectability response. A Stackelberg audit-budget analysis shows that improved signal responsiveness reduces the baseline audit rate by 2.6x at discount factor 0.95. Calibrated to deployed parameters, surveyed protocols pass one-round incentive compatibility but admit repeated-game deviations for discount factors between 0.92 and 0.98, with deviation-profit fractions of 1.5%--8%. Our mechanism reduces deviation profits by 31%--54% while maintaining low-latency economic verification.",
+      "authors": [
+        "Zhenhang Shang",
+        "Yingzhe Yu",
+        "Kani Chen"
+      ],
+      "primary_category": "cs.GT",
+      "categories": [
+        "cs.GT",
+        "cs.CR"
+      ],
+      "published": "2026-08-10T03:03:56+00:00",
+      "link": "https://arxiv.org/pdf/2608.09055v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "verifiable LLM inference without zkML or TEEs",
+      "llm_evidence_cn": "无需zkML或TEE的可验证大模型推理",
+      "llm_evidence": "无需zkML或TEE的可验证大模型推理",
+      "canonical_evidence": "无需zkML或TEE的可验证大模型推理",
+      "llm_tldr_en": "Analyzes security gaps in restaking-based verifiable LLM inference using repeated-game modeling.",
+      "llm_tldr_cn": "利用重复博弈模型分析了基于再质押的大模型可验证推理中的安全漏洞。",
+      "llm_tldr": "利用重复博弈模型分析了基于再质押的大模型可验证推理中的安全漏洞。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.09087v1",
+      "title": "Joint Lyapunov Certificates for K-Agent Generative AI Governance: Stochastic Stability, Emergent Ensemble Risk, and Zero-Knowledge Governance Attestation",
+      "abstract": "We develop a rigorous mathematical framework for the governance of systems of K self-adapting generative AI models under the principles of   Model Risk Management (MRM). When multiple models share a   meta-learning coupling through an interaction matrix, the   per-agent Lyapunov analysis that underpins standard MRM is provably insufficient: individual agents can each satisfy their   declared stability bounds while the joint system is in a   regime of emergent ensemble-level drift. We formalize this gap through the   Joint Lyapunov Proof (JLP)---a cryptographic and stochastic   protocol that attests, without revealing proprietary weights, that the   aggregate dynamics satisfy MRM Ongoing Monitoring standard at every validation epoch.   Our main contributions are the following. We give a complete   characterization of the infinitesimal generator of the joint   quadratic Lyapunov function. We derive the exact critical coupling threshold   above which the system loses mean-square stability. We prove a   Noise-Floor Theorem and identify the correct target for zero-knowledge attestation.   A per-epoch Succinct Non-Interactive Argument of Knowledge (SNARK) on the live weights is derived. All   theoretical claims are validated against five numerical studies using a multi-agent softmax system.",
+      "authors": [
+        "Sriram Nagaraj"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA",
+        "cs.CR",
+        "q-fin.RM"
+      ],
+      "published": "2026-08-10T03:37:08+00:00",
+      "link": "https://arxiv.org/pdf/2608.09087v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Zero-knowledge governance attestation for AI models",
+      "llm_evidence_cn": "AI模型的零知识治理证明",
+      "llm_evidence": "AI模型的零知识治理证明",
+      "canonical_evidence": "AI模型的零知识治理证明",
+      "llm_tldr_en": "Formalizes a cryptographic protocol for attesting stability in multi-agent AI systems without revealing weights.",
+      "llm_tldr_cn": "形式化了一种加密协议，在不泄露权重的情况下证明多智能体AI系统的稳定性。",
+      "llm_tldr": "形式化了一种加密协议，在不泄露权重的情况下证明多智能体AI系统的稳定性。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

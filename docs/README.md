@@ -6,26 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-10
-- 运行时间：2026-08-10 20:44:04 UTC
+- 最新运行日期：2026-08-11
+- 运行时间：2026-08-11 20:05:56 UTC
 - 运行状态：成功
-- 本次总论文数：1
+- 本次总论文数：2
 - 精读区：0
-- 速读区：1
+- 速读区：2
 
 ### 今日简报（AI）
-今日聚焦 Sparse MoE 模型安全，探索如何通过策略掩码精准管控大模型的能力边界。
-该研究实现了专家模块的可审计与可逆访问控制，为模型能力的按需分配与私密性保障提供新方案。
-建议关注模型权限管理与安全合规的读者，重点研究其针对“私有专家”的权限调度机制。
-- 详情：[/202608/10/README](/202608/10/README)
+今日聚焦 AI 治理与加密经济安全的深度融合，探讨了去中心化推理安全与多智能体系统的稳定性保障。
+研究提出利用重复博弈模型强化再质押推理的安全性，并结合 Lyapunov 证书与零知识证明实现多智能体演化风险的精准管控。
+建议关注区块链激励机制与数学形式化验证在构建可信、可控 AI 基础设施中的关键应用。
+- 详情：[/202608/11/README](/202608/11/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Policy-Masked Private Experts: Auditable and Reversible Capability Access Control in Sparse MoE Models](/202608/10/2608.06690v1-policy-masked-private-experts-auditable-and-reversible-capability-access-control-in-sparse-moe-models)  
+1. [Repeated-Game Security for Restaking-Based Verifiable Inference](/202608/11/2608.09055v1-repeated-game-security-for-restaking-based-verifiable-inference)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：无需zkML或TEE的可验证大模型推理
+2. [Joint Lyapunov Certificates for K-Agent Generative AI Governance: Stochastic Stability, Emergent Ensemble Risk, and Zero-Knowledge Governance Attestation](/202608/11/2608.09087v1-joint-lyapunov-certificates-for-k-agent-generative-ai-governance-stochastic-stability-emergent-ensemble-risk-and-zero-knowledge-governance-attestation)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：稀疏MoE模型中的隐私推理访问控制
+   evidence：AI模型的零知识治理证明
 
 
 <div class="dpr-home-promo-card">

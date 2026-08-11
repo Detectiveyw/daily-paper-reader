@@ -1,0 +1,957 @@
+Title: Repeated-Game Security for Restaking-Based Verifiable Inference
+
+URL Source: https://arxiv.org/pdf/2608.09055v1
+
+Published Time: Tue, 11 Aug 2026 01:46:46 GMT
+
+Number of Pages: 29
+
+Markdown Content:
+# Repeated-Game Security for Restaking-Based Verifiable Inference 
+
+Zhenhang Shang, Yingzhe Yu, and Kani Chen 
+
+The Hong Kong University of Science and Technology, Hong Kong, China 
+
+zshangab@connect.ust.hk 
+
+Abstract. Restaking-based protocols are emerging as a practical way to provide verifiable LLM inference without the high proving cost of zkML or the hardware trust assumptions of TEEs. Their security is usually jus-tified by a one-round slashing condition: a rational provider should not cheat when the expected penalty exceeds the per-query cost saving. This paper shows that this condition can overstate security once inference is supplied repeatedly under the same stake. We model restaking-based ver-ifiable inference as a discounted repeated game and identify a repeated-game gap caused by proportional slashing: detected deviations reduce the stake exposed to future penalties, while the saving from cheaper inference is earned again on every query. We derive the gap in closed form, show that it is robust to minimum-stake ejection, and extend it to memoryless bounded-slashing protocols, a class that captures deployed verifiable-inference systems. We then propose a deployable mechanism combining history-dependent challenges, reputation-weighted slashing, and stake vesting that restores infinite-horizon subgame-perfect incen-tive compatibility against stationary mixed-strategy deviations above an explicit discount-factor threshold, without per-query cryptographic ver-ification. Two further results support the construction: the first direct measurement of the audit signal’s detectability response on open-weight models from 0.5B to 14B parameters, which is concave as the mecha-nism requires in all nine (contracted, substitute) pairs, with amplitude increasing in the cost ratio between the two models and measured se-curity thresholds well below our conservative calibration; and a Stack-elberg audit-budget analysis showing that signal responsiveness substi-tutes for baseline auditing, cutting the required baseline audit rate by 2.6× at target discount factor 0 .95. Calibrating to deployed parameters, surveyed protocols pass the one-round IC test but fail repeated-game IC for δ ∈ [0 .92 , 0.98], with deviation-profit fractions of 1 .5%–8%; in simula-tion, the mechanism cuts deviation profit by 31%–54% while preserving low-latency economic verification. 
+
+Keywords: verifiable computation · restaking · EigenLayer · cryptoe-conomic security · repeated games · mechanism design · LLM inference 
+
+· slashing arXiv:2608.09055v1 [cs.GT] 10 Aug 2026 2 Z. Shang et al. 
+
+## 1 Introduction 
+
+Restaking has become a central economic layer for verifiable services on Ethereum: EigenLayer supports a growing set of AVSs securing billions of dollars in restaked capital [9], and verifiable LLM inference is among the most visible workloads. Protocols such as EigenAI [2], VeriLLM [22], and Sertn AVS [11] follow a com-mon template in which providers post stake, serve low-latency inference, and face randomized re-execution challenges, with disagreement punished through slashing. The appeal is economic rather than purely cryptographic: zkML sys-tems [23,21] remain orders of magnitude more expensive than native execution at frontier scale, while TEE-based approaches [3] shift the trust assumption to hardware. The design’s viability depends on whether the security calculation is calibrated to the way inference is actually supplied. The standard analysis largely inherits the logic of proof-of-stake slashing: honest behavior is treated as optimal whenever the expected penalty cαS ex-ceeds the cheating gain ∆, as formalized in Definition 1. This condition is natural for a single isolated decision, but verifiable inference is supplied repeatedly un-der the same economic contract—a production provider may answer 10 4 to 10 6
+
+queries before exiting—so the relevant object is a discounted repeated game rather than a one-shot incentive constraint [16,10]. Stage-game incentive com-patibility is then only a local condition: it does not control deviations that exploit the continuation value of the relationship, including randomized cheating that remains profitable even under one-round slack. This repeated-interaction gap is absent from the protocol-level analyses of verifiable inference systems that we examined. We address this gap by modeling verifiable inference as a discounted repeated game between a rational provider and an on-chain protocol. The analysis iden-tifies when the single-round condition ceases to be sufficient, measures the re-sulting shortfall in economic security, and leads to a deployable mechanism that restores subgame-perfect incentives at realistic operator patience, as follows. 
+
+– We introduce a repeated-game security model for restaking-based verifiable inference, defining T -round subgame-perfect incentive compatibility and an 
+
+ε-approximate variant. 
+
+– We show that the standard one-round slashing condition can overstate secu-rity: with proportional slashing α < 1, a protocol can satisfy one-round IC with slack and still fail ∞-SPIC whenever η < δcα∆  
+
+> 1−δ
+
+, with deviation profit in closed form. The gap survives minimum-stake ejection and extends to mem-oryless bounded-slashing protocols, a class covering the deployed systems in our survey. 
+
+– We construct a deployable mechanism combining history-dependent chal-lenges, reputation-weighted slashing, and stake vesting that restores repeated-game incentives against stationary mixed-strategy deviations whenever δ ≥
+
+δ∗, the unique solution to (15), without per-query cryptographic verification and within the EigenLayer ServiceManager interface. 
+
+– We provide the first direct measurement of the detectability response μ(p)the mechanism relies on: on open-weight Qwen2.5 models from 0.5B to 14B Repeated-Game Security for Restaking-Based Verifiable Inference 3
+
+parameters across nine (contracted, substitute) pairs, the audit signal is concave in the cheating rate as required ( q ∈ [0 .70 , 0.89]), its amplitude grows with the contracted-to-substitute cost ratio as min(1 , 0.45 x0.41 ), and the measured responses lower δ∗ to 0 .79–0 .92, below the conservative cali-bration (Section E). 
+
+– We calibrate the model to deployed parameters: for δ ∈ [0 .92 , 0.98], every surveyed protocol passes the one-round IC test but fails repeated-game IC, with deviation-profit fractions of 1 .5%–8%. The mechanism’s required stake stays bounded as δ → 1 (Corollary 1), while the strengthened one-round bound diverges. A Stackelberg audit-budget analysis shows that signal re-sponsiveness substitutes for baseline auditing, cutting the required baseline audit rate by 2 .6× at δtarget = 0 .95 (Section D). 
+
+## 2 Background and Related Work 
+
+Restaking turns staked ETH into reusable economic security for external ser-vices: in EigenLayer, validators or LST holders pledge stake to Actively Vali-dated Services, with slashing enforced through the ServiceManager interface [9]. The standard security argument follows proof-of-stake slashing [8] as a single-round condition: deviation is unattractive when expected slashing exceeds the gain. Buterin’s critique of restaking targets systemic risks such as capital reuse and correlated slashing [6]; our focus is orthogonal: even with fixed capital and slashing rules, repeated interaction can invalidate a one-round-correct calcula-tion. Verifiable LLM inference is a natural setting for this distinction: protocols such as EigenAI [2], VeriLLM [22], and Sertn AVS [11] all rely on randomized re-execution, provider stake, and slashing. Our class result shows that the gap is a property of this mechanism family, not of a particular implementation. The analysis draws on repeated games with imperfect public monitoring [10,1,16] and inspection games [4]. Daian et al. [7] show that single-round incentive rea-soning can misstate MEV incentives; single-round audit models also appear in Game of Coding [18] and in trustless verification under uncertainty [20]. Our set-ting differs because the same stake supports many future queries: proportional slashing lowers the penalty base after a detected deviation, while the saving is earned again each round—an intertemporal mismatch invisible in one-round models. The closest repeated-game analysis in the blockchain literature is Arbitrum’s dispute game [13], where one correct challenger deters false assertions because a caught cheater loses its bond in full. Two features separate that setting from ours: Arbitrum’s deterrent relies on full confiscation, the full-slashing regime of Remark 3, whereas restaking-based inference uses partial slashing; and rollup disputes resolve within a fixed window, whereas an inference provider answers 10 4 to 10 6 queries under a slowly depreciating stake. 4 Z. Shang et al. 
+
+## 3 Model and Definitions 
+
+3.1 System Architecture 
+
+We model a restaking-based verifiable LLM inference service with four actors, following EigenAI, VeriLLM, and Sertn AVS. A requester submits a query and pays a fee. A provider P posts stake S, serves inference for a per-query reward r,and privately chooses a ∈ { H, C}: under H it runs the contracted model, under C
+
+a cheaper substitute that saves computation cost ∆. A verifier V re-executes the query with probability c and reports the outcome to the on-chain mechanism 
+
+M , which schedules audits, records outcomes, and slashes a fraction α ∈ (0 , 1] of the provider’s current stake upon detected cheating; slashing is irreversible. The baseline assumes an honest verifier and perfect audit correctness; Section C discusses collusion and noisy audits. 
+
+3.2 The Stage Game 
+
+In the one-shot stage game G, the provider chooses a ∈ AP = {H, C}. The binary action space is without loss for the impossibility result, since richer effort choices reduce to the most profitable detectable deviation (Section 4.4). Let 
+
+ξ ∼ Bernoulli( c) be the audit indicator, sampled independently of the provider’s action. The provider’s payoff is uP (a, S, ξ ) = r if a = H, and uP (a, S, ξ ) = 
+
+r + ∆ − ξαS if a = C, so in expectation honest execution earns r, while cheating earns r + ∆ − cαS . The reward is paid when the response is delivered, before the randomized audit settles: deferring payment until after a possible re-execution would reintroduce the latency this design exists to avoid, so slashing is the only ex post instrument and a detected deviation still nets the reward r.The provider’s action is private; the protocol observes only the audit indicator and its outcome: an audited query reveals cheating perfectly, while an unaudited query carries no information. We write the public history before round t as 
+
+hpub  
+
+> t
+
+=  (ξτ , outcome τ )
+
+> τ <t
+
+. The corresponding one-round security condition is the standard cryptoeconomic slashing constraint. 
+
+Definition 1 (1-Round Incentive Compatibility). Parameters (S, c, α, ∆ )
+
+satisfy 1-Round Incentive Compatibility ( 1-Round IC ) if honest execution weakly dominates cheating in the stage game, equivalently cαS ≥ ∆.
+
+This is the incentive test used, often implicitly, in restaking-based verifiable inference. Section 4 shows that it does not imply security once the same provider interacts with the protocol repeatedly. 
+
+3.3 The Repeated Game 
+
+The repeated game GT , with T ∈ N ∪ {∞} , consists of T rounds of the stage game in Section 3.2. The stake state is carried across rounds. In round t, the provider chooses an action at ∈ {H, C} and the protocol samples an audit Repeated-Game Security for Restaking-Based Verifiable Inference 5
+
+indicator audit t ∈ { 0, 1}. For a provider strategy σ, the discounted payoff is 
+
+UP (σ) = Eσ
+
+P T −1 
+
+> t=0
+
+δtuP (at, S t, audit t).A mixed stationary strategy cheats with a fixed probability p ∈ [0 , 1] every round; a public behavioral strategy maps public histories to cheating probabili-ties, σt : Hpub  
+
+> t
+
+→ [0 , 1]; general behavioral strategies may also use the provider’s private history. By the one-shot deviation principle (Remark 1), it suffices to analyze public behavioral deviations on the equilibrium path. The discount factor δ ∈ (0 , 1) summarizes the provider’s continuation value. One round corresponds to one settlement interval of the service, which we take to be one day: audits are sampled per query, but slashing and reward settlement are batched. We decompose the factor into an operator-retention component and a capital-cost component, 
+
+δ = (1 − rout )(1 − rcap ), (1) where rout is the per-round opt-out hazard and rcap the per-round opportunity cost of locked capital. Two features matter for interpretation: δ is not subjective time preference but the probability that the staking relationship survives another round—pure time preference at a 5%–10% annual rate would imply a daily factor above 0 .9997, negligible at this frequency—and the binding component is the exit hazard, estimated at rout ∈ [0 .5% , 1.5%] per day from EigenLayer deregistration events, with rcap ∈ [0 .013% , 0.020%] per day from on-chain low-risk yields, giving 
+
+δ ∈ [0 .92 , 0.98] at one-day rounds. The corresponding expected operating horizon of 1 /(1 − δ) ≈ 12 to 50 settlement intervals is conservative relative to observed operator tenures of several months (Section E). 
+
+3.4 Equilibrium Concepts 
+
+We use standard concepts for repeated games with imperfect public monitor-ing [16]. A public strategy maps each public history to a (possibly mixed) action, 
+
+σt : Hpub  
+
+> t
+
+→ [0 , 1]. 
+
+Definition 2 (SPE and PPE). A strategy profile σ is a subgame perfect equilibrium (SPE) of GT if, after every history ht, the continuation strategies 
+
+σ ↾ht form a Nash equilibrium of the continuation game. It is a public-perfect equilibrium (PPE) [1] if all strategies are public and, after every public history 
+
+hpub  
+
+> t
+
+, the continuation strategies form a Nash equilibrium of the continuation game. Remark 1 (One-shot deviation principle). Under discounting, a public strategy profile is a PPE if and only if no player has a profitable one-shot deviation :a deviation at a single public history, followed by a return to the prescribed continuation strategy [16, Thm. 2.1.1]. All equilibrium verification in this paper proceeds by ruling out profitable one-shot deviations. Because the provider’s action is private and only audit outcomes are public, PPE is the natural refinement; the mechanism state in our construction is itself 6 Z. Shang et al. 
+
+public, so public strategies are without loss for the analysis of Section 6. The folk theorem explains why repeated incentives need not follow from one-round incentives [1,10], but gives no deployable protocol for a given finite patience level; our construction characterizes the required threshold δ∗ in closed form. 
+
+3.5 Incentive Compatibility Notions 
+
+The stage game has a single strategic player, so the equilibrium concepts above collapse to optimality conditions on the provider: the security notions below are properties of a mechanism design problem in which the protocol commits to an audit and slashing rule and the provider best-responds (Section D discusses a strategic audit policy). Subgame perfection then requires that honesty remains optimal after every history. 
+
+Definition 3 ( T -SPIC and ε-Approximate T -SPIC). Parameters (S0, c, α, ∆ )
+
+satisfy T -Round Subgame-Perfect Incentive Compatibility , or T -SPIC, under discount factor δ if the always-honest strategy is a subgame perfect equilibrium of the repeated game GT . They satisfy ε-Approximate T -SPIC if no strategy im-proves on always-honest behavior by more than an ε fraction of the honest payoff, 
+
+sup σ̸ =HT      
+
+> UP(σ)−UP(HT)
+> UP(HT)
+
+≤ ε.
+
+1-Round IC is necessary but not sufficient for T -SPIC (Proposition 1 in Sec-tion A); the gap between them is the subject of the next section. 
+
+## 4 The Repeated-Game Gap 
+
+4.1 A Mixed-Strategy Deviation 
+
+Consider a stationary mixed strategy σ ≡ p ∈ [0 , 1], cheating independently each round with probability p. If stake were fixed at S, the expected per-round payoff would be E[uP | p] = r + p(∆ − cαS ); under 1-Round IC, cαS ≥ ∆, so this one-round calculation makes mixed cheating appear unprofitable. The calculation fails because proportional slashing changes the future stake at risk: for α < 1, the relevant regime in practice, 1 stake evolves as 
+
+St+1 = St
+
+ 1 − α1[at = C, audited] . (2) Under stationary cheating, E[St | p] = S0(1 −pcα )t: slashing exposure decays ge-ometrically, while the cheating gain ∆ is earned again each round, so a condition binding at the initial stake can fail along the continuation path, giving 
+
+E[ut | p] = r + p ∆ − cαS 0(1 − pcα )t. (3)   
+
+> 1Ethereum slashes only a fraction of validator stake, and EigenLayer AVS designs typically use partial slashing rates. Remark 3 discusses the full-slashing limit. Repeated-Game Security for Restaking-Based Verifiable Inference 7
+
+Lemma 1 (Mixed-Strategy Gap). Fix (S0, c, α, ∆, δ ) ∈ R4 
+
+> >0
+
+× (0 , 1) with 
+
+α ∈ (0 , 1) . Suppose 1-Round IC binds at the initial stake, cαS 0 = ∆. Under (2) ,the always-cheat strategy p = 1 yields a strictly higher discounted payoff than always-honest behavior: 
+
+∆U = UP (p = 1) − UP (H) = δcα∆ 
+
+(1 − δ)(1 − δ + δcα ) > 0. (4) 
+
+Relative to UP (H) = r/ (1 − δ),
+
+∆U UP (H) = δ(cα )2
+
+1 − δ + δcα · S0
+
+r . (5) 
+
+Proof. At p = 1, an audited cheating round occurs with probability c each round, so the expected stake is E[St] = S0(1 − cα )t. Using the binding condition 
+
+cαS 0 = ∆, (3) gives E[ut | p = 1] = r + ∆ 1 − (1 − cα )t. Discounting and summing, 
+
+UP (p = 1) = r
+
+1 − δ + ∆
+
+ 11 − δ − 11 − δ(1 − cα )
+
+
+
+.
+
+Subtracting UP (H) = r/ (1 − δ) and simplifying the bracket yields (4). Both factors in the denominator are positive and the numerator is strictly positive for 
+
+α > 0, so ∆U > 0. Substituting ∆ = cαS 0 and dividing by UP (H) gives (5). Full slashing closes the gap (Remark 3 in Section A): under α = 1, detection terminates the relationship, and the one-round condition alone suffices. As δ → 1, the relative gain approaches a term proportional to cαS 0/r : the gap is largest for patient providers with high stake relative to per-query rewards, the deployed AVS regime. Minimum-stake ejection does not remove the gap: a deviator simply cheats until ejection, and since ejection requires N ∗ audited failures, the provider retains nearly all of the gain in Lemma 1. Theorem 5 in Section A formalizes this: the cheat-until-ejection payoff loses only a factor ζ = E[δτ ] relative to (5), where 
+
+τ is the negative-binomial ejection time. For deployed ranges, ζ ∈ [10 −60 , 10 −9](Remark 2), negligible relative to the 10 −2 scale of (5): ejection affects only the terminal boundary condition. 
+
+4.2 The Main Gap Theorem 
+
+We now allow the one-round condition to hold with strict slack and characterize the extra slashing budget needed to rule out the repeated-game deviation. 
+
+Theorem 1 (Repeated-Game Gap with Slack). Let (S0, c, α, ∆, δ ) be pro-tocol parameters with α ∈ (0 , 1) and δ ∈ (0 , 1) . Define the 1-Round IC slack by 
+
+η = cαS 0 − ∆ ≥ 0. (6) 
+
+If 
+
+η < δcα∆ 
+
+1 − δ , (7) 8 Z. Shang et al. 
+
+then the parameters do not satisfy ∞-SPIC under discount factor δ. Equivalently, 
+
+∞-SPIC requires 
+
+cαS 0 ≥ ∆
+
+
+
+1 + δcα 
+
+1 − δ
+
+
+
+. (8) 
+
+Proof. Consider the always-cheat deviation p = 1. An audited cheating round occurs with probability c each round, so E[St] = S0(1 − cα )t, and the round-
+
+t expected payoff is r + ∆ − cαS 0(1 − cα )t. Summing discounted payoffs and subtracting UP (H) = r/ (1 − δ) gives 
+
+∆U (1) = ∆
+
+1 − δ − cαS 0
+
+1 − δ(1 − cα ) = ∆
+
+1 − δ − ∆ + η
+
+1 − δ + δcα = δcα∆ − η(1 − δ)(1 − δ)(1 − δ + δcα ) ,
+
+(9) where the second equality uses η = cαS 0 − ∆ from (6). The denominator is positive, so ∆U (1) > 0 exactly when (7) holds, and the parameters then fail 
+
+∞-SPIC. Rearranging the complementary condition η ≥ δcα∆/ (1 − δ) gives (8). Condition (8) thus requires more than the one-round slashing budget: the multiplier 1 + δcα  
+
+> 1−δ
+
+is approximately 1 .038 at δ = 0 .95, c = 0 .01, α = 0 .2, and diverges as δ → 1, so proportional slashing alone cannot provide uniform repeated-game security in the patient-operator limit, motivating the mechanism in Section 5. For a finite horizon T , the gap condition in (7) becomes η < δcα∆ 
+
+> 1−δ
+
+ 1−O(δT ),so the infinite-horizon conclusion is already a good approximation once T ≳
+
+1/ log(1 /δ ), far below operational horizons of 10 4 to 10 6 queries. 
+
+4.3 Quantification on Deployed Protocols 
+
+Table 4 in Section G instantiates the gap of Lemma 1 on EigenAI [2], Ver-iLLM [22], and Sertn AVS [11], which share the memoryless bounded-slashing structure of Definition 4 and Theorems 2 and 5; Figure 4 maps the gap across the full ( cα, δ ) plane. Computing ∆ as the API-price differential between the contracted model and a quantized or distilled substitute, all three protocols ad-mit profitable repeated-game deviations at the percent scale—5 .4%–8 .2% for EigenAI, 2 .6%–3 .9% for VeriLLM, and 1 .5%–2 .5% for Sertn AVS at δ = 0 .95— despite satisfying the one-round IC test; the simulations of Section 7 show that adversary A4 realizes these gains under the calibrated dynamics. 
+
+4.4 A Generic Class Result 
+
+Theorem 1 is stated for the stage game in Section 3.2; we next extend the argument to a broader class of slashing protocols that captures the common structure of deployed verifiable-inference systems. 
+
+Definition 4 (Memoryless Bounded-Slashing Protocol). A slashing pro-tocol Π is (c, α max )-memoryless-bounded if, in every round t and after every Repeated-Game Security for Restaking-Based Verifiable Inference 9
+
+history ht: (i) the audit indicator is distributed as Bernoulli( c) and is indepen-dent of ht; (ii) any detected cheating event triggers slashing of at most αmax St,where αmax ∈ (0 , 1) ; and (iii) challenge probabilities, slashing magnitudes, and other protocol decisions depend on the history only through the current stake St.
+
+Theorem 2 (Generic Gap for Memoryless Protocols). Let Π be a (c, α max )-memoryless-bounded protocol with αmax ∈ (0 , 1) . For operational parameters 
+
+(S0, ∆, δ ) with ∆ > 0, δ ∈ (0 , 1) , and S0 > 0, define the one-round slack by 
+
+η = cα max S0 − ∆. If η < δcα max ∆ 
+
+> 1−δ
+
+, then Π fails ∞-SPIC under discount factor 
+
+δ. The deviation-profit fraction is bounded below by 
+
+Ω
+
+ δ(cα max )2
+
+1 − δ + δcα max 
+
+· S0
+
+r
+
+
+
+.
+
+Proof. The most favorable case for the protocol is one in which every detected cheating event uses the full allowable penalty αmax St. Any smaller penalty only increases the provider’s deviation payoff. Under this best-case penalty rule, the protocol reduces to the stage game in Section 3.2 with α = αmax , so Theorem 1 applies and yields both the threshold and the profit-fraction bound. The definition covers the slashing logic of EigenAI, VeriLLM, and Sertn AVS under the ranges in Table 4: the failure follows from memoryless audits and bounded proportional slashing, not from a particular implementation. The mechanism in Section 5 avoids the result by making audit intensity and penalties depend on the provider’s public history. The binary action model also extends to continuous cheating intensities with concave windfall and detection probability (Remark 4 in Section A): concentrat-ing the same effective deviation at full intensity preserves the gap bounds, so continuous effort choices change which deviation is worst, not whether the gap exists. 
+
+## 5 Mechanism Design for Long-Run IC 
+
+5.1 Design Goals 
+
+Theorem 2 rules out long-run IC for memoryless bounded-slashing mechanisms at deployed patience levels; restoring incentives requires future treatment to de-pend on public history, without giving up low-latency economics. We design for four properties: an explicit T -SPIC threshold, no per-query cryptographic verification, implementation through the EigenLayer ServiceManager interface, and bounded exposure for new operators. The mechanism combines three in-struments, each acting on the continuation payoff—the channel missing from Theorem 2: history-dependent challenges raise audit intensity after suspicious behavior, reputation-weighted slashing keeps penalties from falling with the re-maining stake, and vesting limits the value of cheating before exit. 10 Z. Shang et al. 
+
+5.2 History-Dependent Challenge Schedule 
+
+The protocol maintains a public suspicion score St ∈ R≥0 for each operator, updated from a normalized risk signal zt ∈ [0 , 1] combining (i) output-side dis-crepancy from a reference token-distribution sketch committed at registration, (ii) workload shifts in latency, prompt length, or response length relative to the operator’s baseline, and (iii) cross-provider agreement on redundant queries. The AVS challenger committee normalizes these components; per-signal calibration appears in Section C. The score follows an exponentially weighted update, 
+
+St+1 = (1 − λ)St + λz t, S0 = 0 , λ ∈ (0 , 1] . (10) Audit probability increases with suspicion, 
+
+c(St) = min {1, c 0 + βSt}, β > 0. (11) The floor c0 > 0 preserves baseline auditability at zero suspicion. For a stationary cheating rate p, let E[zt | p] = μ(p), with μ(0) = 0, μ′ > 0, and μ concave on [0 , 1]. The steady-state audit rate is ¯ c(p) = c0 + βμ (p), and the corresponding per-round payoff at stake St is E[uP | p] = r + p ∆ − ¯c(p)αS t
+
+.Because audit intensity rises with suspicious behavior, the expected penalty is no longer linear in the cheating rate: repeated cheating now raises future audit exposure, reducing the appeal of the corner deviation in Lemma 1. 
+
+Key assumption: signal response. Deterrence depends on μ′(0) > 0, with βμ ′(0) as the relevant deployment quantity: a substitute matching the contracted model across all signal channels while preserving the cost saving ∆ would degrade the mechanism to the memoryless baseline. Multiple signals mitigate this, as detailed in Section C. 
+
+5.3 Bayesian Reputation-Weighted Slashing 
+
+The second component prevents slashing exposure from falling mechanically with stake, using a two-type reputation model [14,17]: an operator is either a committed-honest type, which always plays H, or a mixed-strategic type, which cheats in each round with an unknown rate p† ∈ (0 , 1]. Let π0 = P[θ = C] denote the registration prior, and let ρt = P[θ = C | hpub  
+
+> t
+
+] be the public posterior after history hpub  
+
+> t
+
+. Writing st = 1 for a detected cheat and st = 0 otherwise, with 
+
+P[st = 1 | H] = 0 and P[st = 1 | C] = p† conditional on an audit, Bayes’ rule gives 
+
+ρt+1 =
+
+
+
+1, if st = 1 ,ρt(1 − p†)
+
+ρt(1 − p†) + (1 − ρt) , if st = 0 and the round was audited ,ρt, if the round was not audited .
+
+(12) Repeated-Game Security for Restaking-Based Verifiable Inference 11 
+
+A detected cheat is conclusive in the baseline model; a clean audit lowers the posterior, and an unaudited round carries no new information. The update in (12) depends on the unobserved p†, so we use a robust posterior in the sense of robust mechanism design [5]: at deployment, the AVS fixes an interval [ p, 1], where p is the smallest cheating rate it commits to deter, and works with the worst-case posterior over that interval. 
+
+Definition 5 (Robust Bayesian Posterior). Given public audit history hpub 
+
+> t
+
+and deployment interval [p, 1] , the robust posterior is ¯ρt = sup p†∈[p, 1] P[θ = C |
+
+hpub  
+
+> t
+
+, p †].
+
+The robust posterior admits a closed form (Lemma 2 in Section B): it follows the recursion in (12) with p† replaced by p, because the posterior map of a clean audit is decreasing in the candidate cheating rate on [ p, 1]. Hence ¯ ρt is a public function of the audit counts, the number of detected cheats, and the fixed parameters ( p, π 0). The slashing rule uses the robust posterior rather than current stake alone: if cheating is detected in an audited round, the penalty is slash t = ( α0 + α1 ¯ρt)St. (13) The baseline term α0 preserves the one-round incentive constraint at zero repu-tation risk; the reputation term raises the per-event penalty rate after suspicious public histories, breaking the stake-decay channel in Lemma 1. The floor p trades off deterrence of low-rate deviations against posterior decay speed for honest op-erators (Table 2). Under honest play, the robust posterior is a nonnegative supermartingale contracting by at least (1 − p) at each clean audit, so it decays geometrically to 0 (Lemma 3 in Section B). Two companion lemmas ibid. bound the operator-level costs of the reputation design: Lemma 4 shows that respawning under a fresh identity is unprofitable exactly when the registration prior exceeds π∗ 
+
+> 0
+
+=
+
+creg 
+
+ 1 − δ(1 − c0p)/(α1c0S), where creg is the identity-registration cost, and Lemma 5 shows that a new honest operator’s expected slashing exposure over its first τ rounds is at most ( α0 + π0α1)c0τ S 0, linear in π0.
+
+5.4 Time-Locked Stake with Vesting 
+
+Adaptive challenges and reputation-weighted slashing do not by themselves elim-inate cheat-then-exit deviations: a provider can cheat aggressively and withdraw before the reputation process creates enough exposure. We therefore keep stake slashable for τ rounds after an unbonding request. A deposit made at round td
+
+is fully slashable until the operator begins unbonding; if the operator requests withdrawal at round tu, the slashable balance vests linearly over [ tu, t u + τ ], 
+
+Bt = S max 
+
+
+
+0, 1 − (t − tu)+
+
+τ
+
+
+
+, t ≥ td, (14) 12 Z. Shang et al. 
+
+where ( x)+ = max {x, 0}, and slashing is charged against Bt rather than nominal stake. Rewards accrue during the vesting window, so vesting acts as a lockup rather than a transfer. Choosing τ so that δτ ≥ δ∗, where δ∗ is the threshold in Theorem 3, makes cheat-then-exit deviations face the same continuation dis-cipline as deviations that remain. The primitive is standard in proof-of-stake systems [9]; here it preserves incentive compatibility through the exit path. 
+
+Complete protocol. The protocol maintains, for each operator, nominal stake 
+
+St, slashable vested balance Bt, suspicion score St, robust posterior ¯ ρt, and de-posit/unbonding times ( td, t u). In each round, the operator serves the query, the AVS computes the public risk signal zt and updates St via (10), samples an audit with probability c(St), updates the posterior via Lemma 2, and applies (13) against the vested balance (14) when cheating is detected; the deployment parameters of Theorem 3 are fixed at launch. The construction is implementable as an EigenLayer ServiceManager extension [9]; the reference implementation (protocols.py:p3 step ) costs roughly 30 ,000–120 ,000 gas per round under Ta-ble 2. 
+
+## 6 Equilibrium Analysis 
+
+6.1 Main Theorem 
+
+Let μ(p) = E[zt | stationary cheating rate p], with μ(0) = 0, μ′ > 0, and μ con-cave on [0 , 1] (calibrated as μ(p) = 0 .45 p0.5 in Section C), and define the steady-state audit rate ¯ c(p) = c0 + βμ (p) and the steady-state reputation-weighted slashing rate ¯ α(p) = α0 + α1 ¯ρ(p), where ¯ ρ(p) ∈ [π0, 1] is the fixed point of the robust posterior update under stationary cheating and audit rate ¯ c(p). 
+
+Theorem 3 (Main Theorem). Fix parameters (S, c 0, β, λ, π 0, p, α 0, α 1, τ, ∆ )
+
+with S > 0, ∆ > 0, c0, β, λ ∈ (0 , 1) , π0 ∈ (0 , 1) , p ∈ (0 , 1] , τ ≥ 1, and α0, α 1 ≥ 0
+
+with α0 + α1 ≤ 1. Assume the risk-signal response μ in Section 5.2 satisfies 
+
+μ(0) = 0 , μ′ > 0, and μ concave on [0 , 1] , and that the steady-state robust posterior ¯ρ(·) from Definition 5 is concave-increasing on [p, 1] . The protocol in Section 5.4 then satisfies ∞-SPIC against any operator whose stationary devia-tion rate lies in [p, 1] whenever δ ≥ δ∗. The threshold δ∗ ∈ (0 , 1) is the unique solution to 
+
+∆ = ¯ c(pbr )¯ α(pbr )S
+
+
+
+1 + δ∗
+
+1 − δ∗
+
+ 1 − δ∗τ ¯c(pbr )¯ α(pbr )
+
+
+
+, (15) 
+
+where pbr ∈ (0 , 1] is the provider’s best-response cheating rate, characterized by 
+
+∆ = ¯ c(pbr )¯ α(pbr )S + pbr ddp 
+
+¯c(p)¯ α(p)
+
+> p=pbr
+
+S. (16) 
+
+δ∗ is decreasing in β, α1, τ , π0, and S, and increasing in ∆; weaker baseline auditing or slashing raises the threshold. Repeated-Game Security for Restaking-Based Verifiable Inference 13 
+
+Proof. The mechanism state ( St, ¯ρt, B t) is public, so public strategies suffice, and by the one-shot deviation principle [16, Thm. 2.1.1] it is enough to rule out profitable one-period deviations. Write h(p) = ¯ c(p)¯ α(p). Under a stationary deviation rate p, the provider gains p∆ per round and faces expected penalty 
+
+ph (p)S, giving per-round payoff Φ(p) = r + p(∆ − h(p)S). Since ¯ c = c0 + βμ is concave-increasing with μ, and ¯ α = α0 + α1 ¯ρ is concave-increasing by the regu-larity assumption on the robust-posterior fixed point, h is concave-increasing and 
+
+ph (p) is strictly convex on [ p, 1]. The best stationary deviation pbr is therefore unique and solves the first-order condition ∆ = h(pbr )S + pbr h′(pbr )S, which is (16), with the usual one-sided condition at a boundary. Under honest play, Lemma 3 gives ¯ ρt → 0 almost surely, so the long-run ex-posure of an honest operator vanishes beyond the baseline. Under the best sta-tionary deviation, the per-round gain pbr ∆ is offset by contemporaneous slashing 
+
+pbr h(pbr )S and by the vesting exposure h(pbr )2S δ (1 − δτ )/(1 − δ) that remains slashable if the operator exits: a withdrawal request still leaves the vested balance exposed to detection over the τ -round window, so cheat-then-exit deviations face the same continuation discipline as deviations that remain. Combining the two channels, deterrence of the best response requires 
+
+∆ ≤ h(pbr )S
+
+
+
+1 + δ
+
+1 − δ
+
+ 1 − δτ h(pbr )
+
+
+
+,
+
+whose boundary is (15). The right-hand side is strictly increasing in δ on (0 , 1), so the threshold δ∗ is unique, and the comparative statics follow from the implicit function theorem applied to (15). The three components interact multiplicatively in (15): challenges raise ¯ c(pbr ), reputation-weighted slashing raises ¯ α(pbr ), and vesting adds the 1 −δ∗τ exposure during withdrawal. The only non-primitive assumption of Theorem 3 is that the steady-state posterior ¯ ρ(·) is concave-increasing on [ p, 1], which holds by inspec-tion in the calibration (¯ ρ(p) = min {1, p }) and can otherwise be checked from the primitives on a grid (Remark 5 in Section C). 
+
+Finite-horizon bound. Theorem 3 is stated for the infinite-horizon game; The-orem 4 in Section A bounds the finite-horizon error at ε = O(δT −τ ) for any 
+
+δ ≥ δ∗—below 10 −9 at δ = 0 .95, τ = 100, T = 10 4—so we use the infinite-horizon characterization throughout. 
+
+6.2 Parameter Selection and Asymptotics 
+
+The theorem can also be read as a design equation: given a target patience range and cost saving ∆, the AVS fixes baseline audit and slashing rates for cold-state security, sets the vesting window for exit discipline, calibrates ( β, λ ) from the signal response μ, selects π0 above the anti-Sybil threshold of Lemma 4, and solves (15) for the remaining stake requirement. Table 2 in Section F reports representative values; the key point is the asymptotic contrast with memoryless slashing. 14 Z. Shang et al. 
+
+Corollary 1 (Bounded-Stake Asymptotic). Fix (c0, β, λ, π 0, α 0, α 1, ∆ ) ∈
+
+(0 , 1) 7 and τ ≥ 1. Let ¯h = ¯ c(pbr )¯ α(pbr ) as in Theorem 3. The minimum stake 
+
+S∗(δ) satisfying the SPIC condition in (15) has the finite limit 
+
+lim  
+
+> δ↑1
+
+S∗(δ) = ∆
+
+¯h(1 + τ ¯h) < ∞. (17) 
+
+By contrast, the strengthened one-round stake requirement implied by Theorem 1 is S∗
+
+> 1RIC
+
+(δ) = ∆cα 
+
+ 1 + δcα 
+
+> 1−δ
+
+, which diverges as δ → 1. Hence the stake ratio between the proposed mechanism and any memoryless proportional-slashing rule tends to zero for every fixed (c, α ) with α < 1.Robustness. The threshold is conservative: a bounded-rational provider obtains weakly lower deviation payoff than the best response pbr , so δ∗ upper-bounds the required patience. Numerically, δ∗ 
+
+> base
+
+= 0 .9322 at the stress calibration of Table 5, is insensitive to ±10% perturbations of any parameter except β (Section F), and drops further under the directly measured signal response (Section E). For heterogeneous patience, the AVS calibrates to the lower bound δ = 0 .94 from (1); noisy audits, collusion, and sub-threshold degradation are detailed in Section C. 
+
+## 7 Evaluation 
+
+7.1 Framework, Calibration, and Adversaries 
+
+We evaluate the theory with a Python discrete-event simulator (about 1,800 lines, seeded PCG64 randomness, 43 unit tests) implementing our mechanism P3 together with two memoryless baselines P1 and P2 (EigenAI-/VeriLLM-class designs under Definition 4); Section 7.1 adds simpler-fix variants. Three analytical checks validate the implementation against Lemma 1 (relative error below 1 .5%), Theorem 3 (machine precision), and Theorem 5 (two standard errors, Remark 2). The artifact is at https://github.com/Papers-Coding/ Repeated-Slashing .The calibration follows (1) with δ ∈ [0 .92 , 0.98] (lower bound δ = 0 .94), 
+
+∆/r ∈ [0 .15 , 0.40], and S0/r ∈ [10 3, 10 4] (Section E); the signal response μ(p) = 0.45 p0.5 is conservative against direct measurement ibid. The adversaries: A1 honest; A2 constant-rate; A3 periodic; A4 analytical best response from (16); A4 ′, its Monte Carlo correction with ¯ ρ measured empirically; A5, a UCB1 bandit; A6, cheat-then-exit; A7, vesting drain through the unbonding window (a no-op on P1/P2, isolating vesting’s contribution). 
+
+Long-run profit comparison. We report two complementary calibrations: a stress regime (Table 5 in Section G) that deliberately weakens P3’s cold-state slashing (α0 = 0 .10 vs. P1 α = 0 .50), isolating the history-dependent components a strong cold state would mask ( cα = 0 .10 for P1, 0 .08 for P2, binding 1-Round IC at S0/r = 3 .125, ∆/r = 0 .25, δ = 0 .95); and a deployment-aligned sweep (Table 8) with α0 at the EigenAI-class deployed value. Repeated-Game Security for Restaking-Based Verifiable Inference 15 
+
+Deployment regime (Table 8). With α0 set to the EigenAI-class deployed value 0.20 (preserving cold-state 1-Round IC), the cheat-then-exit deviation A6 turns net-negative on P3 ( −1.23 ± 2.87%) and the stationary best response A4 ′ is held to +2 .92 ± 1.53%; at α0 = 0 .30, A4 ′ falls to zero and A6 to −8.77%; at 
+
+α0 = 0 .50, A6 reaches −31 .44%. The deployment recommendation: surveyed memoryless protocols can drop the repeated-game gain to zero or below at no increase in nominal slashing. 
+
+Stress regime (Table 5). Under the cold-state-weakened stress setting, P3 still substantially deters the strongest adversaries: A6 is held to 9 .34% versus 13 .53% on P2 (a 31% reduction), A4 ′ to 6 .20% versus 13 .60% (54%), and the vesting-drain A7 to 6 .70% versus +10–14% on P1/P2 where the unbond is a no-op (52%, isolating the (1 − δτ ) factor in (15)). The analytical A4 row under-picks 
+
+p∗ ≈ 0.18 via ¯ ρ(p) ≈ p; the Monte Carlo corrected A4 ′ (p∗ ≈ 0.90) is the appropriate stationary stress test. The residuals reflect the deliberate cold-state weakening (Theorem 4 is below 10 −100 here), which the deployment sweep closes. 
+
+Comparison with simpler fixes. Three less structured alternatives—full slashing, single components in isolation, and a uniformly higher audit rate—all fall short of the full mechanism (Section G): full slashing (P1-FS) drives every strategic adversary net-negative ( −84% to −87%) but destroys the operator’s entire stake on each false-positive audit, so deployed systems keep α partial (Remark 3); the best single component, reputation-weighted slashing, holds A4 ′ to 12 .1% where the full mechanism holds it to 6 .2% (Table 6); and matching P3’s security by raising P1’s audit rate costs 1 .1×–2 .5× its baseline rate and is infeasible in the high-challenge regime (Figure 3). 
+
+Cost and efficiency. Table 7 in Section G reports the minimum analytical stake-to-reward ratio for ε-∞-SPIC ( ε = 10 −2, ∆/r = 0 .25), benchmarked against the repeated-game requirement (8). In the high-challenge regime ( cα = 0 .10), P3 reduces the required stake by about 30 × at δ = 0 .95 and by over 1 ,000 ×
+
+once δ ≥ 0.99; in the deployed-challenge regime ( cα = 0 .002), the reduction is 7%–43% over δ ∈ [0 .95 , 0.995]. Since calibrated operator patience lies near the upper end of [0 .92 , 0.98], deployed systems obtain a 10%–20% capital reduction, and P3 preserves the baseline audit overhead c0 under honest play (Lemma 3). 
+
+## 8 Conclusion 
+
+AVS parameters should be justified by the repeated-game equilibrium they sup-port, not only by a stage-game slashing inequality. Theorems 1 and 2 show that memoryless bounded-slashing protocols pass the one-round IC test while admitting profitable repeated-game deviations; the mechanism of Section 5 re-stores incentives with an explicit threshold (15) and bounded stake as δ → 1(Corollary 1), and the logic applies to any restaking-secured service with private actions, public audit signals, and proportional slashing. Open problems include 16 Z. Shang et al. 
+
+tight lower bounds on δ∗, collusion and challenger incentives, and guarantees beyond stationary deviations and single-respawn Sybil strategies. 
+
+## A Remaining Proofs 
+
+Proposition 1 (Hierarchy). For any T ≥ 1 and any δ ∈ (0 , 1) , T -SPIC implies 1-Round IC. The converse does not hold in general. Proof. Suppose that always-honest behavior is a subgame perfect equilibrium of 
+
+GT . By the one-shot deviation principle, after every history the provider cannot profit by deviating to C for a single round and then returning to the prescribed continuation strategy. In particular, this must hold at a history with current stake S and no prior slashing. The one-round payoff from honesty is r, while the expected payoff from cheating is r + ∆ − cαS . No profitable one-shot deviation therefore requires r ≥ r + ∆ − cαS , which is equivalent to cαS ≥ ∆.
+
+Theorem 4 (Finite-Horizon ε-SPIC). Under the parameters of Theorem 3, for any horizon T ≥ 2τ , the protocol satisfies ε-T -SPIC under any δ ≥ δ∗, with 
+
+ε ≤ δT −τ ∆
+
+(1 − δ)UP (HT ) = O(δT −τ ). (18) 
+
+Proof. The infinite-horizon argument of Theorem 3 can fail only near the termi-nal date, where the vesting continuation channel is truncated. In rounds before 
+
+T − τ , any withdrawal still leaves a full vesting window, so the one-shot devi-ation comparison in the proof of Theorem 3 applies unchanged. For the final τ
+
+rounds, the per-round cheating gain is at most ∆, so the maximal additional deviation gain is bounded by the discounted tail ∆trunc ≤ δT −τ ∆ Pτ −1 
+
+> s=0
+
+δs ≤
+
+δT −τ ∆/ (1 − δ). Dividing this tail by UP (HT ) = r(1 −δT )1−δ gives the stated bound. 
+
+Theorem 5 (Ejection-Robust Gap). Fix the parameters of Lemma 1 and suppose the protocol ejects the provider once stake falls below Smin ∈ (0 , S 0). Let 
+
+N ∗ =
+
+ log( S0/S min )log(1 /(1 − α)) 
+
+
+
+, τ ∼ NegBin( N ∗, c ),
+
+and define ζ = E[δτ ] = 
+
+ cδ 
+
+> 1−(1 −c)δ
+
+N ∗
+
+. Then the cheat-until-ejection strategy satisfies 
+
+∆U eject 
+
+UP (H) ≥ ∆U Lem . 1
+
+UP (H) − ζ
+
+
+
+1 + ∆r
+
+
+
+. (19) 
+
+Proof (Proof of Theorem 5). Let τ = inf {t : St < S min }. Under always-cheat 
+
+St = S0(1 − α)Nt with Nt the number of audited cheats, so ejection occurs after 
+
+N ∗ = ⌈log( S0/S min )/ log(1 /(1 −α)) ⌉ audits, τ ∼ NegBin( N ∗, c ), and ζ = E[δτ ] = (cδ/ (1 − (1 − c)δ)) N ∗
+
+. Cheat-until-ejection loses at most the post-τ continuation payoff E[P 
+
+> t≥τ
+
+δt(r + ∆)] ≤ ζ(r + ∆)/(1 − δ); dividing by UP (H) gives (19). The numerical example in Remark 2 shows the correction is negligible. Repeated-Game Security for Restaking-Based Verifiable Inference 17 
+
+Remark 2 (Magnitude of the ejection correction). For deployed ranges c ∈ [5 ·
+
+10 −3, 10 −2], α ∈ [0 .10 , 0.25], Smin /S 0 ∈ [10 −2, 10 −1], and δ ∈ [0 .9, 0.98], we obtain N ∗ ∈ [9 , 44], E[τ ] ∈ [10 3, 10 4], and ζ ∈ [10 −60 , 10 −9]. The correction is negligible relative to the 10 −2 scale of (5): minimum-stake ejection affects only the terminal boundary condition and does not close the repeated-game gap. 
+
+Proof (Proof of Corollary 1). Equation (15) can be written as 
+
+∆ = ¯hS 
+
+
+
+1 + δ(1 − δτ )1 − δ ¯h
+
+
+
+.
+
+Since δ(1 −δτ )1−δ → τ as δ → 1, the limiting stake requirement is (17). The diver-gence of the memoryless requirement follows directly from (8), whose right-hand side contains the factor δcα/ (1 − δ). 
+
+Remark 3 (The full-slashing limit). Suppose α = 1 and the provider exits, or is ejected, once its stake is exhausted. Under the binding one-round condition 
+
+cS 0 = ∆, the cheat-until-detection strategy earns r + ∆ per round until the first audit, loses the entire stake S0 upon detection, and collects nothing thereafter. Its payoff is 
+
+U full  
+
+> P
+
+= r + ∆ − cS 0
+
+1 − (1 − c)δ = r
+
+1 − (1 − c)δ < r
+
+1 − δ = UP (H), (20) so the one-round condition alone is sufficient under full slashing: detection now terminates the relationship, and the deviator loses the continuation value of all future rounds, not just a fraction of the current stake. Deployed systems nonetheless use partial slashing, because re-execution audits of LLM inference are noisy (floating-point nondeterminism and hardware heterogeneity can pro-duce false disagreement) and because full slashing couples each detected fault to immediate ejection, destabilizing the operator set under correlated events. Section 7.1 confirms this numerically: the full-slashing baseline drives every sim-ulated deviation net-negative, at a cost concentrated exactly where audits are imperfect. 
+
+Remark 4 (Continuous-action extension). The binary action model extends to continuous cheating intensities a ∈ [0 , 1] with increasing concave windfall ∆(a), 
+
+∆(0) = 0, and increasing concave detection probability π(a). For any stationary average intensity, the provider can be compared to a binary strategy concen-trating the same effective deviation at a = 1, so the gap bounds of Lemma 1 and Theorems 1 and 2 apply with ( ∆, α max ) replaced by ( ∆(1) , α max π(1)). Con-tinuous effort choices change which detectable deviation is the worst case; they do not remove the gap. 
+
+## B Protocol Lemmas 
+
+Lemma 2 (Closed-Form Robust Update). The robust posterior follows the recursion in (12) with p† replaced by p. Hence 
+
+¯ρt+1 = 1 if st = 1 ,18 Z. Shang et al. 
+
+and 
+
+¯ρt+1 = ¯ρt(1 − p)¯ρt(1 − p) + (1 − ¯ρt) after a clean audit .
+
+If the round is not audited, then ¯ρt+1 = ¯ ρt. In particular, ¯ρt is a public function of the audit counts, the number of detected cheats, and the fixed parameters (p, π 0).Proof. For a clean audit, the posterior map is 
+
+g(p) = ρ(1 − p)
+
+ρ(1 − p) + (1 − ρ) ,
+
+where ρ is the prior probability of the strategic type and p is the candidate cheating rate. The map is decreasing in p on [ p, 1], so the supremum in Defini-tion 5 is attained at p = p. If cheating is detected, the posterior is 1 for every admissible value of p†, since a detected cheat has probability zero under the committed-honest type. 
+
+Lemma 3 (Honest-Reputation Decay). For any p ∈ (0 , 1] , under honest play and any audit schedule measurable with respect to public history, the robust posterior ¯ρt is a supermartingale. In particular, E[¯ ρt+1 | hpub  
+
+> t
+
+] ≤ ¯ρt, and ¯ρt → 0
+
+almost surely. After each clean audit, the posterior contracts by at least a factor 
+
+(1 − p).Proof. Under honest play, every audited round is clean. By Lemma 2, a clean audit maps ¯ ρt to ¯ρt(1 − p)¯ρt(1 − p) + (1 − ¯ρt) ≤ (1 − p)¯ ρt.
+
+Unaudited rounds leave ¯ ρt unchanged. Hence ¯ ρt is a nonnegative supermartingale that contracts by at least the factor (1 −p) at each audit. Under the mechanism’s audit rule (11), c(St) ≥ c0 > 0 in every round, so audits occur infinitely often almost surely and ¯ ρt → 0 almost surely. 
+
+Lemma 4 (Anti-Sybil Condition). Let creg denote the cost of registering a fresh identity, including gas and AVS opt-in costs. Under honest play, define 
+
+V (¯ ρ0) = E
+
+X
+
+> t≥0
+
+δt (r − ct(α0 + α1 ¯ρt)S) ¯ρ0
+
+ .
+
+The value of starting with a clean reputation rather than the registration prior is 
+
+V (0) − V (π0) = α1π0c0S
+
+1 − δ(1 − c0p) . (21) 
+
+Respawning under a fresh identity is unprofitable if and only if 
+
+π0 ≥ π∗ 
+
+> 0
+
+= creg 
+
+ 1 − δ(1 − c0p)
+
+α1c0S . (22) Repeated-Game Security for Restaking-Based Verifiable Inference 19 
+
+Proof. Under honest play, E[¯ ρt | ¯ρ0 = π0] = π0(1 − c0p)t by Lemma 2, so 
+
+V (0) − V (π0) = X
+
+> t≥0
+
+δtc0α1S π 0(1 − c0p)t = α1π0c0S
+
+1 − δ(1 − c0p) ,
+
+and respawning is unprofitable exactly when this value does not exceed creg ,which rearranges to the stated threshold. 
+
+Lemma 5 (Cold-Start Exposure). A new honest operator has expected slash-ing exposure over the first τ rounds of at most (α0 + π0α1)c0τ S 0. Thus cold-start cost is linear in the registration prior π0.Proof. Under honest play, E[¯ ρt] ≤ π0 by Lemma 3, so per-round expected ex-posure is at most c0(α0 + α1π0)S0, and summing over the first τ rounds gives (α0 + π0α1)c0τ S 0.
+
+## C Robustness Details 
+
+Remark 5 (Interpreting the regularity condition). The only non-primitive as-sumption of Theorem 3 is that the steady-state posterior ¯ ρ(·) is concave-increasing on [ p, 1]: a higher stationary cheating rate raises steady-state suspicion with di-minishing marginal effect, so detection exposure cannot be diluted by cheating more uniformly. The assumption holds by inspection in the calibration of Sec-tion 7, where ¯ ρ(p) = min {1, p }; outside this case, ¯ ρ is the fixed point of the robust Bayes recursion of Lemma 2 under audit rate ¯ c(p), and the condition can be checked from the primitives ( c0, β, μ, p ) on a grid, which is how the arti-fact’s solver ( solve disc star.py ) computes pbr . What the condition rules out are signal responses in which a marginal increase of the cheating rate reduces 
+
+steady-state detection exposure; no reputation-based mechanism can deter in that regime, since the provider would then control its own penalty rate down-ward. 
+
+Signal response. Deterrence depends on μ′(0) > 0, with βμ ′(0) as the relevant deployment quantity. If a substitute matched the contracted model across all sig-nal channels while preserving the cost saving ∆, μ′(0) would approach zero and the mechanism would degrade to the memoryless baseline. Multiple signals miti-gate this: the output sketch is the most fragile channel, cross-provider agreement the hardest to evade, and a substitute close enough to pass output-side tests typ-ically gives up part of the cost saving that motivates cheating. Bounding μ′(0) under fully adversarial distribution matching remains an empirical limitation (Section E). The threshold in Theorem 3 is conservative with respect to provider optimiza-tion: a bounded-rational provider obtains weakly lower deviation payoff than the best-response pbr , so δ∗ is an upper bound on required patience. We calibrate the signal response as μ(p) = 0 .45 p0.5 [12,15], giving δ∗ 
+
+> base
+
+= 0 .9322 at the stress calibration of Table 5. Perturbing any parameter except β by ±10% shifts δ∗20 Z. Shang et al. 
+
+by less than 10 −5, and β ± 0.10 moves it within {0.9155 , 0.9469 } (Section F); in deployment, β is chosen from the audit budget and a target false-positive rate. If the true discount factor falls below the threshold, the error scales gradually with ( δ∗ − δ)+, recoverable by increasing S or τ . For heterogeneous patience, the AVS calibrates to the conservative lower bound δ = 0 .94 from (1). Chal-lenger collusion is handled by an m-of-n quorum requiring at least one honest challenger [9]. 
+
+## D Discussion: Strategic Protocols and General Deviations 
+
+One player or two? With a single strategic agent, every equilibrium concept collapses to an optimality condition: the analysis is a mechanism design problem in which the protocol commits to a rule and the provider best-responds, matching deployment, where AVSs commit to parameters at launch. The natural two-player extension endogenizes the audit policy: if audits are costly, the principal minimizes audit cost subject to the SPIC constraint, a Stackelberg problem for which (15) already supplies the agent’s best-response correspondence. 
+
+A Stackelberg audit-budget example. We solve the principal’s problem numeri-cally at the stress calibration of Section 7. Under honest play the suspicion score decays to zero (Lemma 3), so the honest-path audit cost is the baseline rate c0,and the principal minimizes c0 subject to δ∗(c0, β ) ≤ δtarget , with β bounded by a signal-quality budget. Since δ∗ is decreasing in both arguments (Theorem 3), the optimum for each β is the smallest c0 on the boundary δ∗ = δtarget . Table 1 reports the solution: at δtarget = 0 .95, raising the signal gain from β = 0 to 
+
+β = 0 .5 cuts the required baseline audit rate from 0 .370 to 0 .145 (a 2 .6× budget saving), and at β = 1 .0 the baseline rate vanishes. At the same stake, no uniform (history-independent) audit rate achieves the constraint at all: the strengthened condition (8) requires S > ∆δ/ (1 − δ), which fails at P3’s stake S/r = 0 .30. Signal responsiveness therefore substitutes for baseline audit budget, and his-tory dependence is what makes the stake level feasible in the first place. At the deployed-challenge stake of Table 7 ( S/r ≈ 120), deterrence is strong enough that the best response is pbr ≈ 0 and the optimum is pinned by the cold-state margin alone, so the tradeoff is degenerate there; the active regime is the one shown. 
+
+Stationary versus general deviations. The impossibility direction (Section 4) needs only the stationary always-cheat deviation, so it applies a fortiori to richer strategy classes. The constructive direction (Theorem 3) restricts to stationary mixed deviations with rates in [ p, 1]. Two observations narrow the gap: the one-shot deviation principle still applies, and the history-dependent schedule raises audit intensity exactly after the public signals that profitable non-stationary rounds generate; and Section 7 finds no profitable instance among non-stationary adversaries (periodic, bandit, cheat-then-exit, vesting-drain). Whether the guar-antee transfers formally to the full behavioral class is open. Repeated-Game Security for Restaking-Based Verifiable Inference 21 
+
+Table 1. Principal’s minimum baseline audit rate c∗ 
+
+> 0
+
+subject to δ∗ ≤ δtarget , computed by bisection at the stress calibration ( α0 = 0 .10, α1 = 0 .40, τ = 200, ∆/r = 0 .25, 
+
+S/r = 0 .30, μ(p) = 0 .45 p0.5) using exp stackelberg.py . “Uniform” is the constant memoryless audit rate satisfying (8) at the same stake; it is infeasible at every target because S/r = 0 .30 < ∆δ/ (1 − δ). The memoryless reference point securing this regime is P1’s own ( S/r, c, α ) = (7 .25 , 0.20 , 0.50). 
+
+δtarget β = 0 β = 0 .10 β = 0 .25 β = 0 .50 β = 1 .00.90 0.508 0.463 0.395 0.283 0.058 0.92 0.458 0.413 0.346 0.233 0.008 0.94 0.402 0.357 0.289 0.177 < 10 −4
+
+0.95 0.370 0.325 0.257 0.145 < 10 −4
+
+0.96 0.333 0.288 0.221 0.108 < 10 −4
+
+0.98 0.243 0.198 0.131 0.018 < 10 −4
+
+## E Calibration Details 
+
+This appendix records the source of every empirical parameter used in the cal-ibration of Section 7, together with the degrees of freedom a re-runner could per-turb. The artifact’s CALIBRATION PROVENANCE.md contains the machine-checkable version of the same chain. 
+
+Discount factor. The decomposition δ = (1 − rout )(1 − rcap ) is instantiated as follows. The per-round (one-day) opt-out hazard rout ∈ [0 .5% , 1.5%] is estimated from the EigenLayer deregistration event stream over a 90-day window, repro-ducible from the public EigenLayerServiceManager event log on the Eigen-Layer mainnet subgraph; the 25th-percentile lower bound rout = 0 .5% yields the conservative target δ = 0 .94 used in Section C. The per-round capital cost 
+
+rcap ∈ [0 .013% , 0.020%] is stETH staking yield (4 .7%–7 .4% APR divided by 365), with the 75th percentile rcap = 0 .014%. The two components are deployment-time estimates, so δ should be perturbed as a single quantity rather than through its constituents independently. 
+
+Risk-signal response. The response μ(p) = ap q uses a = 0 .45 and q = 0 .5. The square-root exponent reflects that token-level outputs of a substitute model show distinct distributional signatures at low injection rates, which are diluted by av-eraging at high rates; the closest published evidence is the knowledge-distillation detectability literature [12]. The amplitude anchors μ(1) = 0 .45, matching the empirical log-likelihood and latency gap between a contracted Llama-3-70B-class model and a quantized substitute [15]. The analytical characterization of δ∗ holds for any concave μ with μ(0) = 0 and μ′(0) > 0, so a perturbation of ( a, q ) only rescales the threshold; Section F shows the effect is below 10 −5.
+
+Empirical measurement of the response. We measured μ directly on an open model pair [19]: Qwen2.5-1.5B-Instruct (8-bit) as the contracted model, and its 22 Z. Shang et al. 
+
+4-bit quantized variant together with a 0.5B distilled variant as substitutes, over 200 templated prompts in five task categories, using the three signal channels of Section 5.2 (Figure 1; artifact exp mu measurement.py ). The composite sig-nal is concave in the cheating rate for both substitutes, structurally confirming the assumption: the windowed token-distribution sketch is strongly concave and saturates at low injection rates, which is the mechanism behind the concavity, while the per-query log-probability gap and workload channels are close to linear. The fitted responses are μ(p) = 0 .57 p0.83 (4-bit substitute) and μ(p) = 0 .83 p0.71 
+
+(0.5B substitute), both with R2 > 0.98: amplitude above, and concavity below, the conservative (0 .45 , 0.5) calibration. Recomputing the threshold with the mea-sured responses lowers δ∗ from 0 .9322 to 0 .909 and 0 .847 at the stress calibration, so the calibration used in the headline results understates deterrence. The mea-surement uses templated prompts; naturalistic workloads remain future work, and the artifact caches all generations for recomputation without re-inference. 0.0 0.2 0.4 0.6 0.8 1.0 cheating rate p        
+
+> 0.0 0.2 0.4 0.6 0.8 1.0 expected signal  μ(p)
+> (a) substitute: 4bit-quantized 1.5B
+> 0.0 0.2 0.4 0.6 0.8 1.0 cheating rate p
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> (b) substitute: 0.5B distilled
+> zlogprob
+> zsketch
+> zworkload
+> composite fit 0.834 p0.705
+> paper 0.45 p0.5
+> linear baseline
+
+Fig. 1. Measured risk-signal response μ(p) on Qwen2.5-1.5B-Instruct (8-bit) versus two substitutes: 4-bit quantization (panel a) and 0.5B distilled (panel b). The com-posite signal (red, with fitted ap q curve) is concave on both substitutes; the windowed token-sketch component drives the concavity, while the per-query log-probability and workload components are close to linear. The dashed line is the paper’s conservative calibration 0 .45 p0.5; the dotted line is the per-query linear baseline. 
+
+Cross-scale scaling of the response. We repeated the measurement at three contracted-model scales (Figure 2; artifact exp mu scaling.py ): Qwen2.5 1.5B, 7B, and 14B (8-bit) as contracted models, against nine substitutes covering 4-bit quantization at fixed parameters and distilled models down to 0.5B, with relative inference cost (parameters × weight bits) from 0 .5 down to 0 .03 of the contracted model. Every one of the nine fits is concave, with q ∈ [0 .70 , 0.89] and R2 ∈ [0 .978 , 0.996], and every amplitude lies above the conservative cali-bration, a ∈ [0 .54 , 1.02]. Quantization detectability is scale-invariant: the 4-bit substitutes give ( a, q ) = (0 .57 , 0.82) at 1.5B and (0 .54 , 0.79) at 7B. The ampli-tude grows with the contracted-to-substitute cost ratio x and saturates at the Repeated-Game Security for Restaking-Based Verifiable Inference 23 
+
+signal ceiling: a censored fit a ≈ min(1 , 0.45 x0.41 ) matches all nine points with 
+
+R2 = 0 .84 and recovers the calibration anchor 0 .45 at unit cost ratio. Recomput-ing the threshold at the stress calibration for each measured response lowers δ∗
+
+from 0 .9322 to between 0 .79 and 0 .92, so the analytical calibration understates deterrence at every measured scale. 0.0 0.2 0.4 0.6 0.8 1.0 cheating rate p       
+
+> 0.0 0.2 0.4 0.6 0.8 1.0 composite signal  μ(p)
+> (a) contracted: 7B (8bit)
+> 7b (4bit) 3b (4bit) 1.5b (4bit) 0.5b (4bit) paper 0.45 p0.5
+> 2510 20 30 cost ratio (contracted / substitute) 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 amplitude  a
+> (b) detectability scaling
+> 1.5bB 7bB 14bB fit min(1, 0.451 x0.41 ), R2= 0.84
+
+Fig. 2. Cross-scale detectability. Panel (a): measured composite response μ(p) for the 7B (8-bit) contracted model against four substitutes, with fitted ap q curves; the dashed line is the conservative calibration 0 .45 p0.5. Panel (b): fitted amplitude against the contracted-to-substitute cost ratio for all nine (contracted, substitute) pairs (marker shape denotes the contracted scale), with the censored fit min(1 , 0.45 x0.41 ); amplitude grows with the cost gap and saturates at the signal ceiling. 
+
+Protocol parameters and cheating gain. The per-protocol pairs ( c, α max ) in Ta-ble 4 are taken from the EigenAI and VeriLLM whitepapers and the Sertn AVS documentation, rounded to two significant digits [2,22,11]. The stake-to-reward ratio S0/r ∈ [10 3, 10 4] comes from the EigenLayer operator stake distribution. The cheating gain ∆/r ∈ [0 .15 , 0.40] is the API-price differential between the contracted model and a quantized or distilled substitute; it depends on the AVS’s pricing and substitute choice and should be treated as a deployment-fixed pa-rameter, not a universal constant. 
+
+What is not calibrated to deployment data. The headline simulation regime of Section 7 uses elevated ( c, α ) values, chosen so that 1-Round IC binds exactly on the memoryless baseline within the simulation’s seed budget, maximizing signal-to-noise rather than representativeness. Deployed-regime conclusions rely on the protocol whitepaper parameters above. 
+
+## F Sensitivity Analysis 
+
+Table 3 reports the effect of perturbing each calibration parameter on the thresh-old δ∗ of Theorem 3, computed with the fixed-point solver solve disc star.py 24 Z. Shang et al. 
+
+Table 2. Representative parameters for δ = 0 .95 and ∆/r = 0 .25 (EigenAI-comparable workload). α0 is set to the deployed memoryless value of Table 4, so cold-state security weakly dominates the one-round IC benchmark. Parameter Symbol Value Baseline challenge rate c0 0.01 Suspicion sensitivity β 0.50 Suspicion decay λ 0.02 with half-life ≈ 35 rounds Reputation prior π0 0.05 Robust cheating-rate floor p 0.10 Baseline slashing fraction α0 0.20 Reputation-weighted fraction α1 0.30 Vesting period τ 200 rounds 
+
+Table 3. Sensitivity of δ∗ (base value 0 .9322) to parameter perturbations at the stress calibration of Table 5. “ −”/“+” denote a 10% decrease/increase of the parameter (±0.03 for δ). Perturbation δ∗ at − δ∗ at + None (base) 0.9322 
+
+δ 0.9322 0.9322 
+
+τ 0.9322 0.9322 
+
+λ 0.9322 0.9322 
+
+π0 0.9322 0.9322 
+
+β 0.9469 0.9155 All, adversarial 0.9469 
+
+in the artifact at the stress calibration of Table 5. Every parameter except β
+
+moves δ∗ by less than 10 −5; β ± 0.10 moves δ∗ within {0.9155 , 0.9469 }, and per-turbing all parameters adversarially at once stays within the same band. The leverage of β is expected from (15), since β scales the steady-state audit rate directly. In deployment, β is chosen by inverting the suspicion-score gain against a target false-positive rate, so it is a design knob rather than an operational unknown. 
+
+## G Additional Evaluation Results 
+
+Comparison with simpler fixes. A natural question is whether the repeated-game gap can be closed by less structured changes to the collateral rule: full slashing, a single component of the mechanism in isolation, or a uniformly higher audit rate. We benchmark all three. 
+
+Full slashing. P1-FS replaces P1’s proportional slashing with full confiscation (α = 1), with ejection at zero stake. As Table 6 shows, full slashing drives every strategic adversary deeply net-negative ( −84% to −87%), confirming Remark 3: Repeated-Game Security for Restaking-Based Verifiable Inference 25 
+
+Table 4. Deviation-profit fraction ∆U/U P (H) from Lemma 1 on published pa-rameter ranges ( δ = 0 .95). Per-protocol source URLs and derivation notes are in 
+
+CALIBRATION PROVENANCE.md in the artifact. Protocol c α max ∆/r ∆U/U P (H)EigenAI [2] 0.01 0.20 0 .20–0 .30 5 .4%–8 .2% VeriLLM [22] 0.01 0.15 0 .20–0 .30 2 .6%–3 .9% Sertn AVS [11] 0 .005 0.10 0 .15–0 .25 1 .5%–2 .5% 0.90 0.92 0.94 0.96 0.98 discount factor        
+
+> 40
+> 30
+> 20
+> 10
+> 010 deviation profit  U/UH (%)
+> (a) simulated deviation profit at S0/r= 3.125
+> P1 (memoryless) P3 (ours)
+> 0.90 0.92 0.94 0.96 0.98 discount factor
+> 10 1
+> 10 0
+> 10 1
+> minimum stake  S0/r for  -SPIC
+> (b) required minimum stake (analytical)
+> P1 (memoryless) P3 (ours)
+
+Fig. 3. Sensitivity to operator patience, δ ∈ [0 .90 , 0.99]. Panel (a): simulated deviation profit of the stationary best response at the stress calibration, mean ± 95% CI; P3 overtakes P1 near the predicted threshold δ∗ ≈ 0.9322 of Theorem 3, and P1’s non-monotonicity reflects minimum-stake ejection at high δ. Panel (b): analytical minimum stake for ε-∞-SPIC (log scale); P3’s requirement stays bounded while the memoryless requirement (8) diverges, consistent with Corollary 1. 
+
+once detection terminates the relationship, the one-round condition suffices. The cost is borne exactly where audits are imperfect: every false-positive disagree-ment destroys the operator’s entire stake, and each detected fault ejects the operator, so the operator set churns under correlated events. Deployed systems therefore keep α partial, and the gap analysis of Section 4 applies to the whole partial-slashing regime. 
+
+Single components. The three ablation columns of Table 6 activate one compo-nent of P3 at a time: P3-chalOnly keeps history-dependent challenges ( α1 = 0, 
+
+τ = 0), P3-repOnly keeps reputation-weighted slashing ( β = 0, τ = 0), and P3-vestOnly keeps vesting ( β = 0, α1 = 0). No single component comes close to the full mechanism: the best, reputation-weighted slashing, holds A4 ′ to 12 .1% where the full mechanism holds it to 6 .2%, and the challenge-only and vesting-only variants are weaker than the P1 baseline they share the stress calibration with. The three instruments are complementary: challenges shrink the detection-free run length, reputation prevents penalty decay, and vesting closes the exit path. 
+
+Higher audit rates. The third candidate keeps P1’s memoryless structure and raises the constant audit probability to the rate c∗ that lets P1 match P3’s 26 Z. Shang et al. 
+
+Table 5. Long-run deviation-profit fraction ∆U/U P (H), mean ± 95% CI over 100 seeds at T = 10 5 (the honest benchmark A1 is 0 .0% everywhere and is omitted). Calibration: 
+
+δ = 0 .95, ∆/r = 0 .25, P1 ( c, α ) = (0 .20 , 0.50), P2 ( c, α ) = (0 .20 , 0.40), and P3 with 
+
+c0 = 0 .20, β = 0 .50, α0 = 0 .10, α1 = 0 .40, and τ = 200. Adversary P1 memoryless P2 memoryless P3 ours A2 constant cheat, p = 0 .5 +4 .15 ± 0.66% +5 .24 ± 0.59% +5 .06 ± 0.62% A3 periodic +10 .34 ± 0.93% +14 .09 ± 0.61% +6 .70 ± 1.11% A4 analytical best response +9 .44 ± 0.88% +13 .60 ± 0.53% +1 .77 ± 0.38% A4 ′ MC-corrected best response + 9.44 ± 0.88 % + 13 .60 ± 0.53 % + 6.20 ± 0.98 %A5 UCB1 bandit +6 .42 ± 0.75% +9 .19 ± 0.50% +4 .60 ± 0.85% A6 cheat then exit +11 .78 ± 0.79% +13 .53 ± 0.44% +9 .34 ± 1.42% A7 vesting drain +10 .31 ± 0.92% +14 .01 ± 0.60% +6 .70 ± 1.11% 
+
+Table 6. Deviation-profit fraction ∆U/U P (H) for simpler-fix baselines, mean ± 95% CI over 100 seeds at T = 10 5, stress calibration of Table 5. Single-component variants activate exactly one P3 component (see text) and inherit the stress cold state α0 = 0 .10. A1 is 0 .0% everywhere; A2/A3/A5 follow the same ordering. Adversary P1 P1-FS chalOnly repOnly vestOnly P3 A4 ′ best response +9 .44 ± 0.88% −86 .86 ± 3.83 % +19 .81 ± 0.22% +12 .08 ± 0.81% +20 .41 ± 0.23% +6 .20 ± 0.
+
+A6 cheat then exit +11 .78 ± 0.79% −83 .75 ± 4.41 % +18 .19 ± 0.24% +14 .07 ± 0.62% +18 .87 ± 0.25% +9 .34 ± 1.
+
+A7 vesting drain +10 .31 ± 0.92% −83 .75 ± 4.41 % +20 .10 ± 0.24% +15 .55 ± 0.80% +20 .67 ± 0.25% +6 .70 ± 1.
+
+security at P3’s own required stake, inverting (8). In the deployed-challenge regime, c∗ is feasible but grows from 1 .1× P3’s baseline audit rate at δ = 0 .95 to 2 .5× at δ = 0 .995, and a simulation check at δ = 0 .95 confirms the inversion is tight (A4 deviation profit −0.02% ± 0.08%). In the high-challenge regime the fix is infeasible at any rate: P3 requires only S0/r = 0 .23, and at that stake the per-round gain exceeds the expected penalty even at c = 1. Raising audit rates also raises verification cost linearly for every honest query, whereas P3 keeps the honest-path audit rate at c0.Figure 3 summarizes the patience dimension: above δ∗, P3’s required stake collapses while the memoryless requirement diverges, and the simulated devia-tion profit of the best response falls toward zero. Below δ∗, the stress-calibrated mechanism is somewhat weaker than P1 because its cold-state slashing was de-liberately lowered; the deployment sweep in Table 8 shows this gap closes once 
+
+α0 preserves cold-state 1-Round IC. 
+
+## References 
+
+1. Abreu, D., Pearce, D., Stacchetti, E.: Toward a theory of discounted repeated games with imperfect monitoring. Econometrica 58 (5), 1041–1063 (1990), https: //www.jstor.org/stable/2938299 Repeated-Game Security for Restaking-Based Verifiable Inference 27 
+
+Table 7. Minimum analytical stake S/r for ε = 10 −2-∞-SPIC at ∆/r =0.25. Memoryless requirements follow Theorem 1; P3 requirements invert (15) (exp cost comparison.py ). Deployed-cr uses EigenAI-class parameters ( c = 0.01, 
+
+α = 0 .20 for P1; P3 as in Table 2); high-cr uses the simulation calibration of Ta-ble 5. 
+
+Deployed-cr EigenAI-class High-cr simulated 
+
+δ P1 mem. P3 ours ratio P1 mem. P3 ours ratio 0.95 129 .8 120 .4 0.93 × 7.25 0.23 0.03 ×
+
+0.98 137 .3 114 .0 0.83 × 14 .75 0.10 0.007 ×
+
+0.99 149 .8 106 .7 0.71 × 27 .25 0.06 0.002 ×
+
+0.995 174 .8 99 .8 0.57 × 52 .25 0.04 0.0008 ×→ 1 ↗ ∞ finite → 0 ↗ ∞ finite → 010 4 10 3 10 2 10 1             
+
+> effective audit-slash product
+> 0.86 0.88 0.90 0.92 0.94 0.96 0.98 discount factor  EigenAI VeriLLM Sertn
+> (a) SPIC stake multiplier 1 + /(1 )
+> 1.01x 1.05x 1.10x 1.25x 1.5x 2x 4x 10x
+> 10 410 310 210 1
+> effective audit-slash product
+> 0.86 0.88 0.90 0.92 0.94 0.96 0.98
+> EigenAI VeriLLM Sertn
+> (b) Lemma 1 gap U/UHat S0/r= 5000
+> 0.1% 1% 10% 100% 10x
+> 1.01x 1.10x 1.5x 4x 30x 0.1% 1% 10% 100% 10x
+
+Fig. 4. Repeated-game gap on the ( cα, δ ) plane. Panel (a) reports the stake multiplier in (8), which is the factor by which ∞-SPIC requires more stake than 1-Round IC. Panel (b) reports the deviation-profit fraction in Lemma 1 at S0/r = 5 ,000. EigenAI, VeriLLM, and Sertn AVS lie in the 1 .05 to 1 .20 stake-multiplier band and the 1% to 10% deviation-profit band. 2. Alves, D.R., Patankar, V., Pereira, M., Stephens, J., Vaziri, N., Kannan, S.: Eige-nAI: Deterministic inference, verifiable results. arXiv preprint arXiv:2602.00182 (2026), https://arxiv.org/abs/2602.00182 
+
+3. Apple: Private cloud compute: A new frontier for AI privacy in the cloud. Apple Security Research Blog (2024), https://security.apple.com/blog/ private-cloud-compute/ 
+
+4. Avenhaus, R., Canty, M.J.: Compliance Quantified: An Introduction to Data Verification. Cambridge University Press (1996), https://doi.org/10.1017/ CBO9780511983252 
+
+5. Bergemann, D., Morris, S.: Robust mechanism design. Econometrica 73 (6), 1771– 1813 (2005), https://doi.org/10.1111/j.1468-0262.2005.00638.x 
+
+6. Buterin, V.: Don’t overload Ethereum’s consensus. Blog post (2023), https:// vitalik.eth.limo/general/2023/05/21/dont_overload.html 
+
+7. Daian, P., Goldfeder, S., Kell, T., Li, Y., Zhao, X., Bentov, I., Breidenbach, L., Juels, A.: Flash boys 2.0: Frontrunning in decentralized exchanges, miner ex-tractable value, and consensus instability. In: IEEE Symposium on Security and Privacy (S&P) (2020), https://doi.org/10.1109/SP40000.2020.00040 28 Z. Shang et al. 
+
+Table 8. Cold-start sweep on P3, using exp coldstart sweep.py with 30 seeds and 
+
+T = 10 4. The calibration matches Table 5 except that α0 varies and π0 = 0 .20. Entries report mean ± 95% confidence interval. The P3 column in Table 5 corresponds to the stress setting α0 = 0 .10. Once α0 preserves cold-state 1-Round IC, A6 becomes net-negative. A4 ′ is eliminated at α0 = 0 .30. 
+
+α0 A4 ′ on P3 A6 on P3 0.10 stress setting +6 .99 ± 1.78% +8 .80 ± 2.63% 0.15 +4 .84 ± 1.83% +5 .18 ± 2.91% 0.20 EigenAI-class deployed value +2 .92 ± 1.53% −1.23 ± 2.87% 0.30 +0 .00 ± 0.00% −8.77 ± 3.60% 0.50 P1 stress baseline +0 .00 ± 0.00% −31 .44 ± 4.68% 0.8 0.9 1.0 1.1 1.2                  
+
+> UP(t)/ UH(t)
+> A4' on P1 A4' on P2 A4' on P3
+> 02000 4000 6000 8000 10000 round t 0.8 0.9 1.0 1.1 1.2
+> UP(t)/ UH(t)
+> A6 on P1
+> 02000 4000 6000 8000 10000 round t
+> A6 on P2
+> 02000 4000 6000 8000 10000 round t
+> A6 on P3
+
+Fig. 5. Cumulative discounted payoff ratio UP (t)/U H (t) over time. The top panel re-ports A4 ′, the Monte Carlo corrected stationary best response. The bottom panel reports A6, the cheat-then-exit adversary. Shaded bands are 95% confidence intervals across 50 seeds at T = 10 4. P1 and P2 rise above the honest baseline quickly. P3 grows more slowly under the stress setting and is further disciplined by ejection and vesting. 8. Edgington, B.: Slashing (2023), https://eth2book.info/latest/part2/ incentives/slashing/ 
+
+9. EigenLayer: EigenLayer: The restaking collective. Whitepaper (2023), https://docs.eigencloud.xyz/assets/files/EigenLayer_ WhitePaper-88c47923ca0319870c611decd6e562ad.pdf 
+
+10. Fudenberg, D., Maskin, E.: The folk theorem in repeated games with discounting or with incomplete information. Econometrica 54 (3), 533–554 (1986), https:// www.jstor.org/stable/1911307 
+
+11. Gagich, C., Chan, R., Graham, S., Prangley, W.: Inference network-a verified inference network, https://public.inferencelabs.com/ inference-network-whitepaper.pdf 
+
+12. Gou, J., Yu, B., Maybank, S.J., Tao, D.: Knowledge distillation: A survey. Inter-national Journal of Computer Vision 129 , 1789–1819 (2021), https://doi.org/ 10.1007/s11263-021-01453-z Repeated-Game Security for Restaking-Based Verifiable Inference 29 13. Kalodner, H., Goldfeder, S., Chen, X., Weinberg, S.M., Felten, E.W.: Ar-bitrum: Scalable, private smart contracts. In: 27th USENIX Security Sym-posium (USENIX Security). pp. 1353–1370 (2018), https://www.usenix.org/ conference/usenixsecurity18/presentation/kalodner 
+
+14. Kreps, D.M., Wilson, R.: Reputation and imperfect information. Journal of Eco-nomic Theory 27 (2), 253–279 (1982), https://doi.org/10.1016/0022-0531(82) 90030-8 
+
+15. Lin, J., Tang, J., Tang, H., Yang, S., Chen, W.M., Wang, W.C., Xiao, G., Dang, X., Gan, C., Han, S.: AWQ: Activation-aware weight quantization for on-device LLM compression and acceleration. In: Proceedings of Machine Learning and Systems (MLSys) (2024), https://proceedings.mlsys.org/paper_files/paper/ 2024/hash/42a452cbafa9dd64e9ba4aa95cc1ef21-Abstract-Conference.html 
+
+16. Mailath, G.J., Samuelson, L.: Repeated Games and Reputations: Long-Run Re-lationships. Oxford University Press (2006), https://doi.org/10.1093/acprof: oso/9780195300796.001.0001 
+
+17. Milgrom, P., Roberts, J.: Predation, reputation, and entry deterrence. Jour-nal of Economic Theory 27 (2), 280–312 (1982), https://doi.org/10.1016/ 0022-0531(82)90031-X 
+
+18. Nodehi, H.A., Cadambe, V.R., Maddah-Ali, M.A.: Game of coding: Coding theory in the presence of rational adversaries, motivated by decentralized machine learn-ing. arXiv preprint arXiv:2601.02313 (2026), https://arxiv.org/abs/2601.02313 
+
+19. Qwen Team: Qwen2.5: A party of foundation models. Blog post (2024), https: //qwenlm.github.io/blog/qwen2.5/ 
+
+20. Shi, D., Joo, K.: A protocol for trustless verification under uncertainty. arXiv preprint arXiv:2507.00631 (2025), https://arxiv.org/abs/2507.00631 
+
+21. South, T., Camuto, A., Jain, S., Nguyen, S., Mahari, R., Paquin, C., Morton, J., Pentland, A.: Verifiable evaluations of machine learning models using zkSNARKs. arXiv preprint arXiv:2402.02675 (2024), https://arxiv.org/abs/2402.02675 
+
+22. Wang, K., Zhao, Z., Song, X., Li, Z., Xia, L., Tong, C., Shi, B., Qu, W., Yang, E., Ai, L.: VeriLLM: A lightweight framework for publicly verifiable decentralized inference. arXiv preprint arXiv:2509.24257 (2025), https://arxiv.org/abs/2509. 24257 
+
+23. Zkonduit: ezkl: Easy zero-knowledge inference. Open-source software (2023), 
+
+https://github.com/zkonduit/ezkl
