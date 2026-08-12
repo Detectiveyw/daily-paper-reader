@@ -1,0 +1,91 @@
+Title: On the Sensitivity to Errors in Homomorphic Computing: Single Transient Bit-flip Client-side Error Characterization
+
+URL Source: https://arxiv.org/pdf/2608.11155v1
+
+Published Time: Wed, 12 Aug 2026 01:25:52 GMT
+
+Number of Pages: 3
+
+Markdown Content:
+# On the Sensitivity to Errors in Homomorphic Computing: Single Transient Bit-flip Client-side Error Characterization 
+
+Matías Mazzanti 1, Vattana Chan 3, Karthik Swaminathan 2, Augusto Vega 2, Esteban Mocskos 1, Radha Venkatagiri 3
+
+> 1
+
+University of Buenos Aires, 2IBM T. J. Watson Research Center, 3 Georgetown University 
+
+Abstract —Homomorphic Encryption (HE) enables computa-tion on encrypted data without decryption and is a key primitive for privacy-preserving computation in sensitive domains such as healthcare, finance, and government. Its security relies on noise injection, which introduces intrinsic error sensitivity and raises concerns about the fault tolerance of HE systems, as hardware- and software-induced faults can evade traditional detection mechanisms and lead to silent data corruption. In this work, we analyze the sensitivity of HE to bit-level faults, focusing on the CKKS (Cheon–Kim–Kim–Song) scheme widely used for approximate arithmetic in AI and machine learning workloads. We identify homomorphic multiplication as the most error-sensitive operation in practical HE pipelines and characterize how faults propagate and amplify through it, exposing a critical robustness vulnerability and motivating the need for more resilient HE deployments. 
+
+I. I NTRODUCTION AND BACKGROUND 
+
+Cloud computing has profoundly changed the way busi-nesses and individuals use, process, and manage their data [1]. Despite the benefits of this approach, its adoption exacerbates some existing problems and generates new ones related to the security and privacy of user data [2]. In particular, delivering data to a third-party to be processed opens up different possibilities of compromising them, both by improper access or by a decision of the provider to give access to the data without authorization. One of the solutions to this problem resides in the use of data encryption schemes, which allow the data to only be interpreted by the holder of the key that allows decryption [3], [4]. However, most cryptographic schemes do not allow computation directly on encrypted data; instead, the data must be decrypted before processing. In this way, an external cloud computing provider can access the unencrypted data and; therefore, be able to compromise them. Homomorphic Encryption (HE) solves this challenge by allowing computation on encrypted data [5]. Although HE schemes have high computational and memory requirements, which have limited so far their widespread adoption, the great interest in developing new schemes and the recent development of aggressive optimizations (at both algorithm and hardware levels) has opened the door to its use in real-world applications. Figure 1 presents an overview of a typical HE setting that involves a client that makes use of third-party cloud services. Multiple HE schemes exist today, with different charac-teristics and supported capabilities. In this work, we focus Plaintext Ciphertext Ciphertext Plaintext   
+
+> Encode Encrypt Decrypt Decode
+> Computation on encrypted data
+> Client Side Server Side
+
+Fig. 1: Homomorphic encryption used in a typical business application: users send their data encrypted to a third-party service provider, where data is processed in its encrypted form. on CKKS (Cheon-Kim-Kim-Song) [6], [7], a popular HE scheme for AI and machine learning applications due to its floating-point arithmetic support. Fundamentally, schemes like CKKS base their hardness on a simple idea: add small errors (“noise”) to data to make relatively simple problems computationally intractable, an approach known as Learning With Errors (LWE) [8]. In other words, HE operations (such as additions and multiplications etc. ) take place within a “noisy” domain. In this paper, we present that 1). error resilience of FHE on client-side can be categorized into two: Addition pattern and Multiplication pattern across Vanilla and RNS, 2). Multiplica-tion pattern dominates addition pattern when a multiplication is performed on the server and 3). the two resilience patterns observed are parametric and data independent. 
+
+A. Silent Data Corruption 
+
+Errors occurring at different stages of CKKS execu-tion—encoding, encryption, decryption, and decoding can lead to three outcomes. Either the HE execution fails and the error is explicitly detected at decoding, the execution completes successfully while the error propagates across stages and manifests as silent data corruption (SDC) [9], or the error may be masked and have no observable effect on the output. The severity of SDC in HE applications stems from the error-centric nature of HE schemes themselves. In the en-crypted domain, data is inherently noisy by construction; consequently, additional errors induced by faulty hardware or software can become indistinguishable from the intrinsic HE noise, making detection extremely challenging. Figure 2 arXiv:2608.11155v1 [cs.AR] 11 Aug 2026 illustrates this effect, where plaintext data is encrypted by injecting random HE noise 1.1 0 1 1 0Original data 0 0 0 1 1HE error +        
+
+> Faulty CPU 1100101011Corrupted result
+> Bit error
+> Computation on encrypted data
+> Input to other HE computation stages
+
+Fig. 2: Illustrative scenario of a SDC case induced by a faulty CPU. The corrupted result incorporates both the HE error and the faulty hardware error. II. E RROR RESILIENCE ANALYSIS 
+
+This section presents preliminary error sensitivity results for CKKS. As illustrated in Figure 1, the encoding stage transforms user’s input data into a plaintext (ptx) , a polynomial of degree N that we will call p(X). This plaintext is then encrypted into a ciphertext , a pair of polynomials of degree 
+
+N each, that we will call c = ( c0(X), c 1(X)) . We adopt a single-bit error model. As such, each bit of every polynomial coefficient (in both the plaintext and the ciphertext) is flipped in sequence for the set of single-bit-flip fault injection experi-ments. After each bit error injection, we execute the entire HE pipeline, and compare the recovered data after decoding (last stage) against the original data using the Maximum Relative Error Percentage (MREP). We executed all experiments on an Intel i7-11700 CPU with 32 GB RAM and Arch Linux 257.5-1. 
+
+FHE optimizations and parameters. We use a custom C++ implementation of CKKS (C-CKKS) 2that supports native RNS, NTT, combined RNS+NTT arithmetic, and 64-bit coeffi-cient representations. We refer to the configuration where both RNS and NTT optimizations are disabled as Vanilla CKKS . All optimizations can be selectively enabled or disabled, enabling a controlled and fine-grained evaluation. This design allows systematic variation of critical FHE parameters such as the modulus Q, scaling factor ∆, ring dimension N, and slot/gap configurations—providing insight into CKKS behavior under error-driven conditions. Fault injection experiments are con-ducted using the open-source LLTFI [13] framework. 
+
+FHE pipeline configurations. We experimented FHE under various combinations of basic FHE computational opera-tions such as No Computation (NoComp), Addition (Add), Multiplication (Mult), Rotation (Rot), combinations of basic computational operations (i.e Add + Rot, Add + Mult, Rot 
+
+> 1In practice, encryption involves additional steps not depicted in the figure.
+> 2C-CKKS is implemented based on OpenFHE [10], HEaaN [6], SEAL [11] and PyFHE [12].
+
++ Mult etc. ) these basic computational blocks followed by boostrapping (Add + Mult + Boot). 
+
+A. FHE Error Resilience 
+
+Error resilience can be categorized into two: 1). Addition pattern and 2). Multiplication pattern. 
+
+Addition Pattern. We observe that, in Vanilla CKKS, bit-flips affecting values below the scaling factor ( ∆) or exceeding the modulus (Q) resilience lead to masked plaintext and both ciphertext components, c0 and c1. Bit-flips occurring on gap coefficients or on the N 
+
+> 2
+
+-th coefficient consistently produce fully masked effects in the plaintext and in c0, but not in c1. This behavior arises because gaps are present in the plaintext and are therefore encoded into c0, whereas c1
+
+corresponds to a sampled secret-key-dependent component. A closely related pattern is observed in RNS CKKS; however, individual coefficients do not exhibit scaling-factor ( ∆) or modulus ( Q) resilience, as each coefficient is represented using multiple limbs. 
+
+Multiplication pattern. An error-resilience profile closely resembling that of addition is observed in both Vanilla CKKS and RNS CKKS. However, in Vanilla CKKS, gap and N
+
+> 2
+> th
+
+coefficients remain resilient only up to a certain error threshold (see Fig. 3), whereas in RNS CKKS these coefficients exhibit no resilience and are completely corrupted. In contrast, CKKS configurations employing NTT and RNS+NTT arithmetic are fully susceptible to bit-flips, as any single bit-flip ultimately results in catastrophic decryption and decoding failures. Consequently, no distinct addition or multiplication error patterns can be identified under these configurations. 
+
+B. Multiplication Pattern Domination 
+
+Fig. 3: Error characterization of CKKS + M ult 1 with Gaps = 2, log Q = 60, log ∆ = 25, N = 64, ε = 0 .1. ptx’ , c′
+
+> 0
+
+, and c′
+
+> 1
+
+denote computed ciphertext-ciphertext c0, c1, and decrypted 
+
+ptx respectively. Our observations indicate that whenever a multiplication is performed on the server, the overall resilience profile consistently follows this pattern. 
+
+C. Parameter and Data Independence 
+
+Interestingly, the observed resilience heuristics are intrinsic to the scheme itself, rendering them independent of both parameters and data. III. C ONCLUSION 
+
+In this particular work, we bring a formal awareness of how errors that occur in the underlying hardware may corrupt the effectiveness of FHE under different parameters and configura-tions. First of all, error resilience of FHE on client-side can be formally categorized into Addition pattern and Multiplication pattern. Secondly, whenever a multiplication is performed on the server, a multiplication pattern dominates the pattern of addition. Finally, these resilience profiles categorized are data and parameter independent. REFERENCES [1] K. Konstantinos, M. Persefoni, F. Evangelia, M. Christos, and N. Mara, “Cloud computing and economic growth,” in Proceedings of the 19th Panhellenic Conference on Informatics , 2015, pp. 209–214. [2] J. Sen, “Security and privacy issues in cloud computing,” in Cloud technology: concepts, methodologies, tools, and applications . IGI global, 2015, pp. 1585–1630. [3] H. Williams, “A modification of the RSA public-key encryption pro-cedure (corresp.),” IEEE Transactions on Information Theory , vol. 26, no. 6, pp. 726–729, 1980. [4] T. Elgamal, “A public key cryptosystem and a signature scheme based on discrete logarithms,” IEEE Transactions on Information Theory , vol. 31, no. 4, pp. 469–472, 1985. [5] X. Yi, R. Paulet, E. Bertino, X. Yi, R. Paulet, and E. Bertino, Homo-morphic encryption . Springer, 2014. [6] J. H. Cheon, A. Kim, M. Kim, and Y. Song, “Homomorphic encryption for arithmetic of approximate numbers,” in Advances in Cryptology– ASIACRYPT 2017: 23rd International Conference on the Theory and Applications of Cryptology and Information Security, Hong Kong, China, December 3-7, 2017, Proceedings, Part I 23 . Springer, 2017, pp. 409– 437. [7] J. H. Cheon, K. Han, A. Kim, M. Kim, and Y. Song, “A full RNS variant of approximate homomorphic encryption,” in Selected Areas in Cryptography–SAC 2018: 25th International Conference, Calgary, AB, Canada, August 15–17, 2018, Revised Selected Papers 25 . Springer, 2019, pp. 347–368. [8] O. Regev, “On lattices, learning with errors, random linear codes, and cryptography,” in Proceedings of the Thirty-Seventh Annual ACM Symposium on Theory of Computing , ser. STOC ’05, 2005, p. 84–93. [Online]. Available: https://doi.org/10.1145/1060590.1060603 [9] H. D. Dixit, S. Pendharkar, M. Beadon, C. Mason, T. Chakravarthy, B. Muthiah, and S. Sankar, “Silent data corruptions at scale,” 2021. [Online]. Available: https://arxiv.org/abs/2102.11245 [10] A. A. Badawi, A. Alexandru, J. Bates, F. Bergamaschi, D. B. Cousins, S. Erabelli, N. Genise, S. Halevi, H. Hunt, A. Kim, Y. Lee, Z. Liu, D. Micciancio, C. Pascoe, Y. Polyakov, I. Quah, S. R.V., K. Rohloff, J. Saylor, D. Suponitsky, M. Triplett, V. Vaikuntanathan, and V. Zucca, “OpenFHE: Open-source fully homomorphic encryption library,” Cryptology ePrint Archive, Paper 2022/915, 2022. [Online]. Available: https://eprint.iacr.org/2022/915 [11] “Microsoft SEAL (release 4.1),” https://github.com/Microsoft/SEAL, Jan. 2023, microsoft Research, Redmond, WA. [12] S. Erabelli, “py-fhe: A Python library for fully homomorphic encryp-tion,” https://github.com/sarojaerabelli/py-fhe, 2020, gitHub repository, implemented BFV, CKKS, and CKKS bootstrapping schemes; MIT license. [13] U. K. Agarwal, A. Chan, and K. Pattabiraman, “Lltfi: Framework agnostic fault injection for machine learning applications (tools and artifact track),” in 2022 IEEE 33rd International Symposium on Software Reliability Engineering (ISSRE) , 2022, pp. 286–296.

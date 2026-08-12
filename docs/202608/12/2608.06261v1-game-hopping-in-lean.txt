@@ -1,0 +1,839 @@
+Title: Game Hopping in Lean
+
+URL Source: https://arxiv.org/pdf/2608.06261v1
+
+Published Time: Fri, 07 Aug 2026 01:20:27 GMT
+
+Number of Pages: 27
+
+Markdown Content:
+# Game Hopping in Lean 
+
+STEFAN DZIEMBOWSKI, University of Warsaw, Poland and IDEAS Research Institute, Poland 
+
+GRZEGORZ FABIAŃSKI, IDEAS Research Institute, Poland 
+
+DANIELE MICCIANCIO, University of California San Diego, USA 
+
+RAFAŁ STEFAŃSKI, IDEAS Research Institute, Poland We present HOPSCOTCH, a Lean 4 framework for mechanizing computationally sound, game-based cryp-tographic proofs. Security definitions are expressed as indistinguishability between stateful probabilistic oracles, and proofs follow the standard game-hopping paradigm. HOPSCOTCH uses a shallow embedding: oracles and reductions are ordinary Lean definitions, enabling direct integration with the full Lean ecosystem, including general mathematical theories from Mathlib, such as finite-group theory. A game-hopping proof in HOPSCOTCH is represented as an explicit formal object whose constructors correspond to the standard steps of a game-hopping argument, making proofs easier to construct, automate, and inspect. We prove a general computational soundness theorem that interprets these proof objects by constructing reductions against the assumptions they use and deriving a concrete bound on the advantage of any distinguisher. Observational equivalence between oracles is established using a state-abstraction methodology: a simple yet powerful approach that supports transformations such as adding or forgetting state and replacing eager sampling with lazy sampling. We illustrate the framework with formalized proofs of the IND-CCA security of encrypt-then-MAC, the security of ElGamal encryption from DDH, the implication from one-time secrecy to public-key IND-CPA security, and the GGM pseudorandom-function construction. To the best of our knowledge, the last is the first mechanized proof of GGM for non-constant depth. 
+
+1 Introduction 
+
+Modern cryptography relies on the paradigm of provable security, typically formalized via computa-tional game-based definitions. In this framework, the security of a primitive or protocol is expressed as a game played between a challenger and a computationally bounded adversary. Proving security involves constructing a sequence of game-based reductions – often referred to as game hopping or hybrid arguments – that bound the adversary’s advantage by reducing it to one or more known hard computational problems or basic cryptographic primitives. While conceptually elegant, manual game-based proofs are notoriously error-prone, monolithi-cally complex, and frequently plagued by subtle gaps. This has motivated a rich line of research into formal methods for cryptographic security analysis that offer the strong security guarantees of computational security definitions together with the reliability of mechanically verified and partially automated proofs. Domain-specific tools such as EasyCrypt [4] or CryptoVerif [6] have successfully automated large classes of game-based reductions. However, these specialized verifica-tion tools operate outside of general-purpose interactive theorem provers, forcing a stark trade-off: developers must choose between the automated convenience of a domain-specific tool and the foundational expressiveness and foundational soundness of a general-purpose proof assistant.  
+
+> Authors’ Contact Information: Stefan Dziembowski, University of Warsaw, Warsaw, Poland and IDEAS Research Institute, Warsaw, Poland; Grzegorz Fabiański, IDEAS Research Institute, Warsaw, Poland; Daniele Micciancio, University of California San Diego, La Jolla, USA; Rafał Stefański, IDEAS Research Institute, Warsaw, Poland. arXiv:2608.06261v1 [cs.CR] 6 Aug 2026 2Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański
+
+1.1 Our contribution 
+
+In this paper, we bridge this gap by introducing HOPSCOTCH 1, a computationally sound Lean 4 [9] framework for mechanizing game-based cryptographic proofs. The project’s source code is available under the MIT License on GitHub 2. HOPSCOTCH is designed to follow the structure of pen-and-paper security proofs written in the game-hopping paradigm [16, 17]: the user defines a sequence of games (oracles), justifies each hop either by an observational-equivalence argument or by a reduction to a cryptographic assumption, and obtains a mechanically checked reductionist security statement. The distinguishing features of HOPSCOTCH are the following. (1) Security definitions as oracle indistinguishability. Cryptographic security notions are expressed directly as indistinguishability statements between stateful probabilistic oracles. This matches the usual game-based presentation of cryptography: an adversary interacts with one of two oracles, and security means that no efficient adversary can tell which oracle it is interacting with. (2) Proofs as explicit formal objects. A HOPSCOTCH proof is not merely an unstructured Lean script proving an indistinguishability theorem. It is an explicit proof object whose constructors correspond to the steps of a cryptographic proof: reflexivity, symmetry, transi-tivity, observational equivalence, reduction hops, and hybrid sequences. The structure of such a proof object mirrors the structure of a game-hopping argument. (3) A computational interpretation of proof objects. We prove a general computational soundness theorem for these proof objects. A HOPSCOTCH proof records the structure of a game-hopping argument independently of any particular adversary. The soundness theorem then gives this adversary-free proof object its computational meaning: for every distinguisher against the endpoint oracles, it constructs the corresponding distinguishers against the assumptions used in the proof, and bounds the original advantage in terms of their advantages. (4) A shallow embedding in Lean. HOPSCOTCH does not introduce a separate programming language for games. Oracles, reductions, and adversaries are ordinary Lean definitions, written using Lean’s existing syntax and type system. This allows users to rely directly on the surrounding Lean ecosystem, including standard mathematical libraries, tactic automa-tion, and reasoning principles, rather than translating cryptographic games into a restricted domain-specific language. Moreover, domain-specific game-hopping automation can be freely interleaved with ordinary Lean proof development: every game-hopping proof obliga-tion can be discharged using the full power of Lean. In this sense, HOPSCOTCH combines the convenience of a specialized game-hopping framework with the expressiveness of a general-purpose proof assistant. (5) Support for parameter-dependent hybrid arguments. The framework supports hybrid sequences whose length is not fixed in advance, but may depend on the security parameter or on an explicit bound on the number of oracle queries made by the adversary. This is essential for formalizing many standard cryptographic arguments. (6) Observational equivalence by abstraction. For hops that are purely semantic, HOP-SCOTCH provides an abstraction methodology for proving observational equivalence between oracles. Instead of requiring users to reason in a relational program logic, the user   
+
+> 1This name stands for Hybrid Oracle Proofs of Security via a Calculus of Optimized Tactics for Cryptographic Hopping . It also refers to the children’s game: cryptographic game-hopping proofs likewise proceed through a sequence of carefully arranged hops, coin tosses, and, at least occasionally, some fun. Notably missing from the children’s game is the presence of an adversary.
+> 2https://github.com/ravst/Hopscotch Game Hopping in Lean 3
+
+supplies an abstraction function explaining how the state of one oracle represents the state of another. This logic-free technique captures common proof patterns such as forgetting irrelevant state, introducing redundant state, reshuffling state, and replacing eager sampling with lazy sampling. (7) Domain-specific proof automation. HOPSCOTCH provides tactics that automate re-curring steps in game-hopping proofs, reducing the amount of boilerplate and making formal proofs shorter and easier to read. This automation is enabled in part by the explicit proof-object representation, which gives the tactics a structured target to build rather than requiring them to manipulate an arbitrary Lean proof state. Together, these features allow HOPSCOTCH to cover a range of proof patterns that arise in standard cryptography: fixed sequences of games, reductions to cryptographic assumptions, query-bounded hybrids, lazy random-function implementations, and hybrid arguments whose length grows with the security parameter. We demonstrate this by mechanizing several representative proofs, including the IND-CCA security of the encrypt-then-MAC construction (Section 3.1), the security of ElGamal encryption from DDH (Section 3.2), the implication from one-time secrecy to public-key IND-CPA security (Section 3.3), and the GGM construction of pseudorandom functions (Section 3.4). To the best of our knowledge, this is the first mechanized proof of the GGM construction of non-constant depth (with [8] formalizing the GGM construction of depth 3). 
+
+1.2 Related work 
+
+As mentioned above, we are mainly interested in frameworks grounded in general-purpose theorem provers. Nevertheless, we would like to mention ProofFrog [12], a domain-specific tool that was one of the inspirations for HOPSCOTCH. ProofFrog presents proofs as explicit sequences of oracle games, with each hop justified by an assumption or by equivalence of adjacent games. The main difference is foundational: ProofFrog uses a dedicated C/Java-style language and a custom automatic checker based on syntactic equivalence heuristics, whereas HOPSCOTCH represents oracles as ordinary Lean definitions and justifies transformations by Lean theorems checked by Lean’s kernel. This makes ProofFrog lightweight and more automatic, while HOPSCOTCH offers a fallback to the full Lean environment when automation is not enough. The work most closely related to ours is VCVio [20, 21], a framework for formalizing crypto-graphic proofs in Lean. One subtle point is that the two cited versions of VCVio address somewhat different goals. The earlier version [21] provides a framework for modeling abstract oracle com-putations using free monads, whereas the more recent version [20] supports reasoning about the indistinguishability of stateful oracles. We initially developed HOPSCOTCH on top of the earlier version, while the newer version was developed concurrently with our work. After its release, we ported HOPSCOTCH to the new version, both to maintain compatibility and to benefit from its improved support for abstract oracle computations. Other foundational cryptographic frameworks in general-purpose theorem provers include CertiCrypt [22], FCF [15], and SSProve [1] in Rocq, and CryptHOL [5] in Isabelle/HOL. These systems provide rich languages and logics for constructing kernel-checked cryptographic proofs, using techniques such as probabilistic relational Hoare logic. Compared with these frameworks, including the recent version of VCVio, HOPSCOTCH provides two complementary features. First, it represents the domain-specific structure of a game-hopping argument as an explicit Lean object. Its constructors record equivalence hops, uses of assumptions, reductions, transitivity, and parameterized hybrid sequences. A generic soundness theorem gives this object a computational interpretation. For each cryptographic assumption appearing in the proof, it constructs a single adversary against that assumption, regardless of how many times the assumption is used — the 4 Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański 
+
+number of uses appears only as a multiplicative factor in the resulting concrete security bound. This is essential for our semi-formal 3 approach to establishing correct asymptotics for hybrid arguments whose length depends on the security parameter. In particular, the GGM security proof and the proof of public-key IND-CPA security from one-time secrecy fall into this category. To the best of our knowledge, we present the first framework with this functionality. Moreover, as mentioned before, the definition of an explicit proof object facilitates domain-specific proof automation. Second, HOPSCOTCH provides an abstraction-based method for proving observational equiva-lence of oracle implementations. The user supplies a function mapping the state of one oracle to the state of another and proves that it relates the initial states and commutes with every query. This approach often produces short proofs for changes of representation, duplicated or forgotten state, and delayed randomness. In particular, the randomized version of the abstraction allows relating implementations that sample randomness eagerly and lazily. This is a problem that is difficult to solve in pRHL, as attested by [14], where the authors present a solution by extending the syntax of EasyCrypt. Finally, we would like to mention that, similarly to most other tools, HOPSCOTCH does not verify the polynomial-time complexity of the reductions used in the proof. Instead, we rely on the concrete security bounds, or on verifying this external condition by the user. See 2.4 for more details. 
+
+Use of AI tools. We used AI-assisted tools during the development of the artifact and the prepara-tion of the manuscript. For the Lean code, we used Codex with GPT-5.5 [18], DeepSeek-V4 [10] and Aristotle by Harmonic [2]. Codex was particularly helpful in developing tactics and proving small auxiliary lemmas. Aristotle was used in a more autonomous mode: given the statement that every observationally equivalent pair of oracles factors through two abstractions, it constructed a proof together with several intermediate definitions and lemmas. For the manuscript, we used GPT-5.5 and Grammarly for rephrasing, editing, and spelling and grammar correction. 
+
+2 Framework 
+
+In this section, we give an overview of our game-hopping framework in Lean. Section 2.1 introduces our motivating example: the proof that IND-RAND security of an encryption scheme implies its IND-CPA security. Section 2.2 describes the basic components of our Lean framework, including cryptographic schemes, oracles, and oracle reductions. Section 2.3 explains how formal oracle indistinguishability proofs can be constructed in our framework, how this construction is automated by domain-specific tactics, and how the example IND-RAND-to-IND-CPA proof is formalized. Finally, Section 2.4 discusses the computational interpretation of our formal indistinguishability proofs. 
+
+2.1 Oracle Indistinguishability by Example 
+
+Many cryptographic security definitions can be understood as games between an adversary and a hidden system. The adversary may interact with the system by making queries and observing the replies, but should still be unable to learn which of two possible systems it is talking to. In this section, we model these systems as oracles : stateful randomized procedures that answer queries and may update their internal state. Security is then expressed as indistinguishability of oracles.  
+
+> 3i.e., based on external polynomial-time assumptions verified manually by the reader; see Section 2.4.2 for details. Game Hopping in Lean 5
+
+For example, consider an encryption scheme consisting of the following components: 
+
+Π𝜅 = ©«
+
+KeyGen : Dist (K 𝜅 )
+
+Enc : K𝜅 × M → Dist (C) 
+
+Dec : K𝜅 × C → M 
+
+ª®¬
+
+.
+
+Here, Dist denotes a probability distribution, M denotes the space of plaintext messages, C denotes the space of ciphertexts, and K𝜅 denotes the set of keys for security parameter 4 𝜅 ∈ N. It is common to treat a cryptographic scheme as a family of algorithms indexed by such a security parameter. In the asymptotic approach to computational security, this parameter is used to measure the adversary’s running time and its ability to distinguish the two systems: typically, the adversary’s running time should be polynomial in 𝜅 , while its probability of distinguishing the two oracles correctly should exceed random guessing only by a negligible function of 𝜅 . In the case of encryption schemes, the security parameter usually controls the length of the key. In practice, the scheme is instantiated with a single sufficiently large value of 𝜅 .A standard security notion for encryption schemes is indistinguishability under chosen-plaintext attack, or IND-CPA. It can be expressed as indistinguishability of two oracles, which we call 
+
+IndCpaLeft 𝜅 and IndCpaRight 𝜅 . Both oracles have an internal state consisting of a secret key 
+
+𝑘 ∈ K 𝜅 , sampled initially according to KeyGen . The two oracles accept the same kind of query: a pair of messages (𝑚 0, 𝑚 1) of equal length. The left oracle responds by encrypting the first message, sampling the value from Enc (𝑘, 𝑚 0). The right oracle responds by encrypting the second message, sampling the value from Enc (𝑘, 𝑚 1). The security claim is that IndCpaLeft 𝜅 and IndCpaRight 𝜅 are hard to distinguish, even though the adversary chooses the two candidate plaintexts in each query. Another common security notion for encryption schemes is real-or-random security, or IND-RAND. This notion compares a real encryption oracle with a random ciphertext oracle. Unlike the IND-CPA oracles above, these oracles accept queries consisting of a single message. The real oracle, 
+
+EncReal 𝜅 , stores a secret key 𝑘 ∈ K 𝜅 sampled according to KeyGen and, on query 𝑚 , returns a ciphertext sampled from Enc (𝑘, 𝑚 ). The oracle EncRand 𝜅 , accepts the same query 𝑚 , but ignores the contents of the message and returns a uniformly random ciphertext 5 of the appropriate length. The IND-RAND security claim is that these two oracles are hard to distinguish: encryptions of chosen messages should look like uniformly random ciphertexts. To illustrate the game-hopping proof strategy, let us present an informal overview of the proof that IND-RAND security implies IND-CPA security. For this, we require one more object, called an oracle reduction , which is one of the main ingredients of a game-hopping proof. Intuitively, an oracle reduction is itself an oracle, but instead of computing its replies on its own, it may query another oracle. We write the composition of an oracle reduction 𝑅 with an oracle O using the diamond notation 𝑅 ⋄ O . This denotes the oracle obtained by running 𝑅 while giving it access to O
+
+as its underlying oracle. We are now ready to present the game-hopping proof. The proof uses two simple oracle reduc-tions, 𝑅 𝐿 and 𝑅 𝑅 . Both reductions expose the IND-CPA query interface: they accept a pair (𝑚 0, 𝑚 1)
+
+of equal-length messages and return a ciphertext. They use access to an underlying oracle with the IND-RAND query interface, which takes single messages as queries and returns ciphertexts. The reduction 𝑅 𝐿 answers the query by forwarding 𝑚 0 to this underlying oracle and returning the ciphertext it receives. The reduction 𝑅 𝑅 does the same with 𝑚 1. If we combine 𝑅 𝐿 with the real encryption oracle EncReal 𝜅 , the resulting oracle behaves exactly like IndCpaLeft 𝜅 : it samples a            
+
+> 4The security parameter is usually denoted as 𝜆 , but we use 𝜅 as 𝜆 is a reserved keyword in Lean.
+> 5This is a common, but slightly stronger security definition compared to the standard IND-CPA. Our example is easily adapted to a definition perfectly equivalent to IND-CPA by replacing the random ciphertext with an encryption of a fixed message Enc (𝑘, 0|𝑚 |)of the same length as 𝑚 .6Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański
+
+key once, and on each query (𝑚 0, 𝑚 1), it returns an encryption of 𝑚 0. Since two oracles with the same behavior are clearly indistinguishable, we obtain the following indistinguishability relation (where, ≈ denotes the intuitive notion of oracle indistinguishability – this notation is used only in this informal example): 
+
+IndCpaLeft 𝜅 ≈ 𝑅 𝐿 ⋄ EncReal 𝜅 .
+
+By the IND-RAND assumption, EncReal 𝜅 is indistinguishable from EncRand 𝜅 . Indistinguishability is preserved under oracle reductions: if an adversary could distinguish 𝑅 𝐿 ⋄ EncReal 𝜅 from 𝑅 𝐿 ⋄
+
+EncRand 𝜅 , then we could build an adversary distinguishing EncReal 𝜅 from EncRand 𝜅 by simulating the reduction 𝑅 𝐿 . Hence: 
+
+𝑅 𝐿 ⋄ EncReal 𝜅 ≈ 𝑅 𝐿 ⋄ EncRand 𝜅 .
+
+Now consider 𝑅 𝐿 ⋄ EncRand 𝜅 . On input (𝑚 0, 𝑚 1), it queries the random ciphertext oracle on 𝑚 0.But EncRand 𝜅 ignores the contents of its input and returns a uniformly random ciphertext of the appropriate length. Since IND-CPA queries require 𝑚 0 and 𝑚 1 to have the same length, querying 
+
+EncRand 𝜅 on 𝑚 0 has the same observable behavior as querying it on 𝑚 1. Thus: 
+
+𝑅 𝐿 ⋄ EncRand 𝜅 ≈ 𝑅 𝑅 ⋄ EncRand 𝜅 .
+
+Applying the IND-RAND assumption once more, now through the reduction 𝑅 𝑅 , gives: 
+
+𝑅 𝑅 ⋄ EncRand 𝜅 ≈ 𝑅 𝑅 ⋄ EncReal 𝜅 .
+
+Finally, combining 𝑅 𝑅 with the real encryption oracle gives an oracle that behaves exactly like 
+
+IndCpaRight 𝜅 : it samples a key once, and on each query (𝑚 0, 𝑚 1), it returns an encryption of 𝑚 1.Therefore: 
+
+𝑅 𝑅 ⋄ EncReal 𝜅 ≈ IndCpaRight 𝜅 .
+
+Putting these steps together yields the following chain of game hops: 
+
+IndCpaLeft 𝜅 ≈ 𝑅 𝐿 ⋄EncReal 𝜅 ≈ 𝑅 𝐿 ⋄EncRand 𝜅 ≈ 𝑅 𝑅 ⋄EncRand 𝜅 ≈ 𝑅 𝑅 ⋄EncReal 𝜅 ≈ IndCpaRight 𝜅 .
+
+By transitivity of indistinguishability, IndCpaLeft 𝜅 and IndCpaRight 𝜅 are indistinguishable. Thus, assuming the real encryption oracle is indistinguishable from the random ciphertext oracle, the encryption scheme is IND-CPA secure. 
+
+2.2 Basic Components 
+
+We now describe how the game-hopping framework is represented in Lean, starting with its basic components: schemes, oracles, and oracle reductions. 
+
+2.2.1 Schemes. A cryptographic scheme may be any Lean object from which the relevant oracles will be constructed. However, it is usually most convenient to package the algorithms of a scheme as fields of a record. For instance, we represent a symmetric encryption scheme as presented 6 in Figure 1.                                    
+
+> 6The Lean listings are lightly simplified for readability, primarily by omitting implicit arguments, namespace qualifiers, typeclass instances, and inessential type annotations. As a result, the displayed snippets are illustrative and may not parse as written. We hope that their meaning is intuitively clear even to readers unfamiliar with Lean. The complete code is available in the project repository. Game Hopping in Lean 7
+> 1structure SymEncScheme (K : Type) (C : (msg_len : N)→Type) where
+> 2keyGen : PMF K
+> 3encrypt : K →BitVec n →PMF (C n)
+> 4decrypt : K →C n →BitVec n
+> 56structure SymEncSchemeFam (K : ( 𝜅 :N)→Type) (C : ( 𝜅 :N)→(n : N)→Type) where
+> 7scheme : ( 𝜅 :N)→SymEncScheme (K 𝜅 ) (C 𝜅 )
+> Fig. 1. Lean representation of symmetric encryption schemes and scheme families.
+
+In this model, keys are elements of an abstract parameter type K, messages are bit vectors BitVec n indexed by their length n, and ciphertexts are elements of a family of types C n , also indexed by the plaintext length. Thus, the encryption of an n-bit message has type C n . (This length-indexed representation will later allow the oracle EncRand to sample a ciphertext matching the length of the given plaintext.) The field keyGen is a probability distribution from which keys should be sampled, and encrypt is a randomized encryption algorithm. We also include the decryption algorithm for completeness, although it does not play a role in the security definitions. Randomness is represented using the probability mass function type PMF . Finally, SymEncSchemeFam lifts this representation to families of schemes indexed by the security parameter 𝜅 .
+
+2.2.2 Oracles. When modeling oracles, we separate their specifications from their implementations .The specification fixes the oracle interface: it describes which queries may be asked and what type of answer each query returns. The implementation describes how the oracle answers these queries. For example, the IND-CPA oracles IndCpaLeft 𝜅 and IndCpaRight 𝜅 have the same specification, but different implementations. To represent oracle specifications, we use the OracleSpec type from the VCVio library. It is parameterized by a type 𝜄 of queries, and assigns a return type to each query:     
+
+> def OracleSpec ( 𝜄 : Type) := 𝜄 →Type
+
+Thus, for a specification S : OracleSpec 𝜄 , an element i : 𝜄 represents an oracle query, and S i is the type of the corresponding answer. For example, the IND-CPA oracle interface can be represented by a query type with one constructor, containing a length n and two messages of this length. The answer type for such a query is C n , as shown in Figure 2.             
+
+> 1inductive IndCpaDomain : Type
+> 2| eavesdrop (n : N) (msgs : (BitVec n) ×(BitVec n))
+> 34def IndCpaSpec (C : N→Type) : OracleSpec IndCpaDomain :=
+> 5fun ⟨n, _ ⟩=> C n
+> Fig. 2. Lean representation of the IND-CPA oracle specification.
+
+An oracle implementation consists of an internal state type, an initial-state distribution, and a query implementation. Given a query and the current state, the query implementation returns a distribution over pairs consisting of an answer and an updated state. We represent such stateful probabilistic computations using the monadic type       
+
+> abbrev RState ( 𝜎 : Type) ( 𝛼 : Type) : Type := StateT 𝜎 PMF 𝛼 8Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański
+
+The type StateT 𝜎 M 𝛼 is defined as 𝜎 → M ( 𝛼 × 𝜎 ), so it directly captures a computation that transforms a state while producing a value. In our case, we instantiate M with the PMF monad to account for probabilistic choice. Thus, for an oracle specification S : OracleSpec 𝜄 and state type 
+
+𝜎 , a query implementation has type 
+
+(q : 𝜄 ) → RState 𝜎 (S q) 
+
+VCVio packages such functions as QueryImpl S (RState 𝜎 ), which we use in the definition of a random stateful oracle shown in Figure 3.  
+
+> 1
+
+structure OracleImpl {I : Type u} (O : OracleSpec I) where  
+
+> 2
+
+stateType : Type u  
+
+> 3
+
+initialState : PMF stateType  
+
+> 4
+
+queries : QueryImpl O (RState stateType) 
+
+Fig. 3. Lean representation of the random stateful oracle. 
+
+Thanks to the monadic representation, query implementations can be written in a style similar to imperative programming languages, using do notation. For example, see Figure 4 for the implemen-tation of the IndCpaLeft oracle. The EncReal and EncRand oracles are implemented similarly; see 
+
+GameHoppingInLean/Examples/SecurityDefinitions/IndCpaRand.lean in the accompanying Lean code.  
+
+> 1
+
+def IndCpaL (scheme : SymEncScheme K C) : OracleImpl (IndCpaSpec C) where  
+
+> 2
+
+stateType := K  
+
+> 3
+
+initialState := scheme.keyGen  
+
+> 4
+
+queries := fun ⟨_, (m 0, _) ⟩ => do  
+
+> 5
+
+/- Retrieve the secret key from the oracle state. -/  
+
+> 6
+
+let key ← get  
+
+> 7
+
+/- Sample the ciphertext from the possible encryptions of the left message. -/  
+
+> 8
+
+let c ← scheme.encrypt key m 0 
+
+> 9
+
+/- Return the ciphertext as the oracle output. -/  
+
+> 10
+
+return c  
+
+> 11 12
+
+-- Family of oracles, parameterized by the security parameter 𝜅 . 
+
+> 13
+
+def IndCpaLFam (schemeFam : SymEncSchemeFamily K C) :=  
+
+> 14
+
+fun 𝜅 => IndCpaL (schemeFam.scheme 𝜅 )
+
+Fig. 4. Lean implementation of the IND-CPA left oracle. 
+
+2.2.3 Oracle reductions. The next component of a game-hopping proof are oracle reductions . An oracle reduction is similar to an oracle: it consists of an internal state, an initialization procedure, and query implementations. Unlike a simple oracle, however, it might query another oracle of a fixed specification. Since only the specification of this underlying oracle is known, the reduction must be prepared to work with any implementation of the specification. To represent such computations, we use the VCVio type OracleComp S 𝛼 . This is an abstract computation that may query an oracle of specification S and returns a value of type 𝛼 . VCVio implements these computations using free monads. In addition to querying the underlying oracle, a reduction must also be able to access its own Game Hopping in Lean 9
+
+state and perform probabilistic sampling. We model these effects as abstract operations as well: get 
+
+and put for state, and sample for probabilistic choice. For this purpose, we define withPMFAndState ,which takes a specification S and extends it with the state and sampling operations; see Figure 5.  
+
+> 1
+
+/- The list of allowed operations for a reduction -/  
+
+> 2
+
+inductive withPMFAndStateI (I : Type) (S : Type) : Type  
+
+> 3
+
+| oracle (i : I) -- Send the query `i` to the underlying oracle  
+
+> 4
+
+| sample ( 𝛼 : Type) (d : PMF 𝛼 ) -- Sample a value from the distribution `d` 
+
+> 5
+
+| getState -- Get the current state of the reduction  
+
+> 6
+
+| setState (st : S) -- Update the state of the reduction to `st ` 
+
+> 78
+
+/- To define the specification, we specify the output types for each operation -/  
+
+> 9
+
+def withPMFAndStateSpec (S : Type) (O : OracleSpec I) :  
+
+> 10
+
+OracleSpec (withPMFAndStateI I S)  
+
+> 11
+
+| .oracle i => O i  
+
+> 12
+
+| .withPMFAndStateI.sample 𝛼 _ => 𝛼  
+
+> 13
+
+| .getState => S  
+
+> 14
+
+| .setState _ => Unit 
+
+Fig. 5. Extending the specification with state and sampling operations. 
+
+Initialization uses a slightly smaller effect signature. Since the reduction state has not yet been created, the initializer may query the underlying oracle and sample random values, but it cannot access or update the reduction state. We capture this using withPMF , a variant of withPMFAndState 
+
+that extends S only with the sampling operation. With these definitions, an oracle reduction has essentially the same structure as an oracle implementation, except that its initialization and query procedures are written in the appropriate OracleComp monads rather than in RState ; see Figure 6.  
+
+> 1
+
+/-- An oracle reduction is parametrized by both its input and output specifications. -/  
+
+> 2
+
+structure OracleReduction (O 1 : OracleSpec I 1) (O 2 : OracleSpec I 2) where  
+
+> 3
+
+stateType : Type  
+
+> 4
+
+initialState : OracleComp (withPMFSpec O 1) stateType  
+
+> 5
+
+queries : QueryImpl O 2 (OracleComp (withPMFAndStateSpec stateType O 1)) 
+
+Fig. 6. Definition of an oracle reduction. 
+
+For example, Figure 7 shows the oracle reduction 𝑅 𝐿 used in our running IND-RAND-to-IND-CPA example ( 𝑅 𝑅 is defined analogously). This first reduction is deliberately simple: in particular, it has no internal state. Later in the paper, we will consider more involved examples. 10 Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański          
+
+> 1def IndCpaRand_to_IndCpaL : OracleReduction (IndCpaRandSpec C) (IndCpaSpec C) where
+> 2stateType := Unit
+> 3initialState := return ()
+> 4queries := fun ⟨n, (m 0, _m 1)⟩=>
+> 5-- Pass m 0to the underlying oracle, and forward its output
+> 6OracleReduction.query (IndCpaRandDomain.ctxt n m 0)
+> Fig. 7. Definition of the RL reduction.
+
+Finally, the key property of oracle reductions is that they can be composed with concrete oracle implementations, yielding another concrete oracle implementation. The state of the composed oracle is the product of the reduction state and the state of the underlying oracle. Both the initialization and query procedures of the composed oracle are obtained using VCVio’s simulateQ operation. This operation interprets an abstract computation of type OracleComp S 𝛼 using a concrete query implementation of type QueryImpl S M , producing a computation of type M 𝛼 . In this case, we instantiate M with RState ( 𝜎 × 𝜏 ), the monad of stateful probabilistic computations that keeps track of both the reduction state, of type 𝜎 , and the underlying oracle state, of type 𝜏 . We implement this operation as the function:      
+
+> apply : OracleReduction O 1O2→OracleImpl O 1→OracleImpl O 2
+
+and introduce the diamond notation R ⋄ O for it. The definition can be found in GameHoppingInLean/ OracleReductions.lean in the accompanying Lean code. 
+
+2.3 Indistinguishability Proofs 
+
+We now describe the reasoning rules used to construct formal indistinguishability proofs. These rules correspond to the main steps of a game-hopping argument: replacing an oracle by an obser-vationally equivalent one, invoking a cryptographic assumption, applying an oracle reduction, and composing consecutive hops. We then describe the domain-specific tactics that automate parts of the construction of the indistinguishability proofs, and explain how we formalize the IND-RAND to IND-CPA argument from Section 2.1. 
+
+2.3.1 Observational equivalence. In this section, we formalize the idea that two oracle implementa-tions behave in the same way —a notion used to justify some of the hops in our example proof. It captures the situation where two oracles may differ in their internal implementation, but expose the same observable behavior. In this paper, we refer to this property as observational equivalence . Intu-itively, two oracles are observationally equivalent if no external observer, even a computationally unbounded one, can distinguish them by interacting with them. We define observational equivalence using query sequences. First, we introduce the procedure 
+
+> runQueries
+
+, which inputs a finite list of queries to an oracle (one by one) and returns the resulting distribution over lists of outputs. We then say that two oracles are observationally equivalent ( ObsEq )if, for every finite list of queries, running the two oracles on that list produces the same distribution over output lists. (The Lean implementation of runQueries and ObsEq are straightforward, so we do not include them as separate code snippets here; the definitions can be found in the accompanying Lean code). At first sight, this query-sequence formulation may seem weaker than an interactive one, since the entire list of queries is fixed in advance. In our setting, however, this causes no loss of gen-erality. Observational equivalence requires exact equality of output distributions, rather than an approximate notion of distributional equivalence, such as computational indistinguishability or Game Hopping in Lean 11 
+
+statistical closeness. As a result, the query-sequence and interactive formulations coincide: any adaptive interaction can be decomposed according to its possible query-output histories, and equal-ity for all fixed query sequences implies equality of the observer’s final output distribution. We have formalized this interactive–non-interactive equivalence in Lean as part of the computational soundness theorem, see lemma obsEq_eq_advantage_zero .Proving observational equivalence directly from the definition can be cumbersome, because it requires reasoning about arbitrary finite query sequences. For this reason, our framework provides two local proof principles, both based on the idea of abstracting oracle states called deterministic state abstraction and randomized state abstraction . Let us start by explaining the simpler, deterministic version. Let O1 and O2 be oracles with the same specification, but possibly different state types S1 
+
+and S2 . A deterministic state abstraction from O1 to O2 is a function f : S1 → S2 satisfying two conditions. First, applying f to the initial-state distribution of O1 gives the initial-state distribution of O2 . Second, the abstraction is preserved by every query: for every query q and state s1 : S1 ,running O1 from s1 and then applying f to the updated state gives the same distribution over replies and abstract states as first applying f to s1 and then running O2 . The formal statement is shown in Figure 8.                                     
+
+> 1def mapSecond (f : 𝛽 →𝛾 ) (p : 𝛼 ×𝛽 ) : 𝛼 ×𝛾 := (p.1, f p.2)
+> 23def mapInputState (f : S 1→S2) (m : RState S 2𝛼 ) (s : S 1) : PMF ( 𝛼 ×S2) :=
+> 4StateT.run m (f s)
+> 56def mapOutputState (f : S 1→S2) (m : RState S 1𝛼 ) (s : S 1) : PMF ( 𝛼 ×S2) :=
+> 7(StateT.run m s).map (mapSecond f)
+> 89def correctAbstraction (ro 1ro 2: OracleImpl O) (f : ro 1.stateType →ro 2.stateType) :=
+> 10 ro 1.initialState.map f = ro 2.initialState ∧
+> 11 ∀(query : O.Domain),
+> 12 mapOutputState f (ro 1.queries query) =
+> 13 mapInputState f (ro 2.queries query)
+> Fig. 8. Deterministic state abstraction.
+
+The key property of a correct abstraction is that it implies observational equivalence, as formalized by the theorem correctAbstractionImpliesObsEq . It can be shown by induction on the query sequence, while maintaining the joint distribution of the outputs produced so far and the current oracle state; treating these distributions separately would lose the necessary correlation. Let us now discuss the randomized state abstraction , in which the state map has type S1 → PMF S2 .Its correctness conditions have the same shape as in the deterministic case, except that PMF.map ,which applies a deterministic function to a distribution, is replaced by PMF.bind , which works with probabilistic functions. As in the deterministic case, the existence of a correct randomized abstraction implies observational equivalence; this is formalized as correctAbstractionBindImpliesObsEq . It might be worth noting that the randomized version generalizes the deterministic one, which can be recovered by lifting f : S1 → S2 to fun s1 => pure (f s1) . However, it is convenient to keep both principles in the framework. The deterministic version is simpler to use when it applies, while the randomized version is more expressive. The state abstraction technique is surprisingly expressive and easy to work with. In fact, it is the only proof principle we use in our examples to prove observational equivalence. Such equivalence 12 Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański 
+
+proofs often require relating two program executions, a task commonly supported by relational program logics such as pRHL. For the examples considered in this paper, however, the abstraction principle itself was sufficient to capture the required relationships between the two oracle states. As we will see in Section 3, deterministic abstractions can express state invariants, such as the fact that two fields of the O2 state are always equal. Randomized abstractions can additionally express probabilistic relationships, such as the fact that a field of the O2 state contains a fresh uniformly random value. This is useful when reasoning about oracles that cache random samples for future use. Finally, let us mention that randomized state abstraction can be formally shown to be complete for proving observational equivalence: if O1 and O2 are observationally equivalent, then this equivalence can be factored through an intermediate oracle using two randomized state abstractions. It is formalized in Lean as lemma behavioralRestricted_complete .
+
+2.3.2 Indistinguishability Assumptions. An indistinguishability proof is parameterized by the as-sumptions it is allowed to use. Each assumption is a pair of oracles that are assumed to be indistin-guishable. A proof may use many assumptions, but for the sake of the computational soundness theorem, we need to keep track of how many times each assumption is used. For this reason, we give each assumption an explicit name. This is modeled by the type IndAssumptions Idx that assigns an assumption to each index in Idx .Since assumptions may depend on the security parameter, we define IndAssumptionsFam to be an indexed set of assumptions parametrized by the security parameter 𝜅 . The index type Idx is fixed across all security parameters, but the oracle pair corresponding to an index may depend on the security parameter 𝜅 . For example, the IND-RAND family of assumptions is indexed by the singleton type Unit . For each 𝜅 , the unique index points to the assumption that EncReal 𝜅 is indistinguishable from EncRand 𝜅 .
+
+2.3.3 Formal Indistinguishability Proofs. We now describe how the framework represents game-hopping proofs. The central definition is the type IndistinguishabilityI . Its inhabitants are formal proofs certifying that two oracle implementations are indistinguishable under a given collection of assumptions and, optionally, a bound on the number of adversarial queries. Before we discuss the constructors of IndistinguishabilityI , let us start with its declaration:        
+
+> inductive IndistinguishableI (A : IndAssumptions Idx) : (b : N∞)→(o1 : OracleImpl O) →(o2 : OracleImpl O) →Type
+
+An element of IndistinguishabilityI A b o1 o2 is an abstract proof that the oracles o1 and o2 
+
+are indistinguishable, against adversaries that make at most b queries, assuming the indistinguisha-bility of all the oracle pairs in A. The query bound b is useful for arguments that first fix the number of oracle queries and then prove security uniformly for every such bound. We represent bounds using N∞, corresponding to N ∪ {∞} . When no explicit bound is needed, we use b := ∞.For oracle families (indexed by the security parameter), we lift this notion pointwise. The type  
+
+> Indistinguishable
+
+is used when the query bound is fixed to ∞: it requires an IndistinguishabilityI 
+
+proof for every security parameter. This is the form used in most of our examples. The type  
+
+> IndistinguishableWithQueryBound
+
+keeps the query bound explicit: it requires a IndistinguishabilityI 
+
+proof for every finite bound b and every security parameter 𝜅 . These two family-level notions are shown in Figure 9. Game Hopping in Lean 13                                    
+
+> 1def Indistinguishable
+> 2(AFam : IndAssumptionsFam)
+> 3(O1 O2 : ( 𝜅 :N)→OracleImpl O) : Type :=
+> 4(𝜅 :N)→IndistinguishableI (AFam 𝜅 )∞(O1 𝜅 ) (O2 𝜅 )
+> 56def IndistinguishableWithQueryBound
+> 7(AFam : IndAssumptionsFam)
+> 8(O1 O2 : ( 𝜅 :N)→OracleImpl O) : Type :=
+> 9(b : N)→(𝜅 :N)→IndistinguishableI (AFam 𝜅 ) b (O1 𝜅 ) (O2 𝜅 )
+> Fig. 9. Lifting indistinguishability to oracle families.
+
+For example, the type of a proof of IND-CPA security for a certain encryption scheme that does not use an explicit query can be defined as in Figure 10.   
+
+> 1def IndCpaProof (A : IndAssumptionsFam) (s : SymEncSchemeFamily K C) :=
+> 2Indistinguishable A (IndCpaLFam s) (IndCpaRFam s)
+> Fig. 10. Type of a proof that a certain encryption scheme is IND-CPA.
+
+Finally, let us discuss the constructors of IndistinguishabilityI . Each constructor represents either a proof principle for a single indistinguishability hop, or a structural principle for combining such hops into larger game-hopping proofs. (1) IndistinguishabilityI.obsEqB represents a hop between observationally equivalent oracles. Given a query bound b, it inputs a proof ObsEqBounded b O1 O2 and outputs IndistinguishabilityI A b O1 O2 , for any set of assumptions A. The predicate ObsEqBounded is the bounded version of observational equivalence: it compares the two oracles only on query lists of length at most 
+
+> b
+
+. When b := ∞, it coincides with the unbounded notion ObsEq . Since ObsEq always implies 
+
+> ObsEqBounded
+
+, we also provide the derived constructor IndistinguishabilityI.ofObsEq . It in-puts a proof ObsEq O1 O2 and outputs IndistinguishabilityI A b O1 O2 , for arbitrary A and b.This derived constructor is the one used in most of our examples. (2) IndistinguishabilityI.reduction represents the hop obtained by applying the same oracle re-duction on both sides of an indistinguishability proof. It inputs a proof IndistinguishabilityI A ∞ O1 O2 and outputs IndistinguishabilityI A b (R ⋄ O1) (R ⋄ O2) . The premise is un-bounded because R may ask several queries to the underlying oracle while answering a single external query. Thus a bound b on the composed oracle does not, by itself, determine a bound on the number of queries made to O1 or O2 . One could refine the constructor by also tracking query expansion of reductions: for example, if R asked at most 𝑞 oracle queries per external query, the premise could use the bound 𝑞 · 𝑏 instead of ∞. We do not include this refinement, since we are not aware of examples that require this kind of reasoning. (3) IndistinguishabilityI.assumption represents a hop between two oracles that are assumed to be indistinguishable. It inputs an index i : Idx and outputs IndistinguishabilityI A b O1 O2 ,where (O1, O2) is the pair of oracles stored in A under the index i.(4) IndistinguishabilityI.symm represents symmetry of the indistinguishability relation. It inputs  
+
+> IndistinguishabilityI A b O1 O2
+
+and outputs IndistinguishabilityI A b O2 O1 .14 Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański 
+
+(5) IndistinguishabilityI.trans represents transitivity of indistinguishability, and is used to com-pose adjacent hops. It inputs proofs IndistinguishabilityI A b O1 O2 and IndistinguishabilityI A b O2 O3 , and outputs a proof IndistinguishabilityI A b O1 O3 .(6) IndistinguishabilityI.longSequence represents the transitivity principle used in hybrid argu-ments. It inputs a natural number 𝑙 , a sequence of oracles 𝑂 0, 𝑂 1, . . . , 𝑂 𝑙 and, for every 𝑖 < 𝑙 , a proof IndistinguishabilityI A b (O i) (O (i + 1)) . It outputs a proof IndistinguishabilityI A b (O 0) (O l) . This principle could be derived by repeated applications of trans , but we keep it as a separate constructor to distinguish two uses of transitivity. Repeated applications of trans describe a fixed sequence of hops, whereas longSequence describes a family of hybrid arguments whose length may depend on parameters such as the security parameter 𝜅 or the query bound b.
+
+2.3.4 Automation and Domain-Specific Tactics. Let us now discuss the tactics introduced by our framework that automate the construction of IndistinguishabilityI proofs. The main tactic is 
+
+> game_hopping
+
+. It takes a fixed list of intermediate oracles written by the user in the proof script, 
+
+O0, O1, . . . , O𝑛 
+
+whose first and last elements match the current goal, and generates one subgoal for each concrete adjacent hop 
+
+O𝑖 ≈ O 𝑖 +1.
+
+It then tries to solve each subgoal automatically, using two methods: first, by recognizing a common reduction applied to both sides of an available assumption; and second, by proving observational equivalence. The resulting hop proofs are combined by repeated applications of the trans construc-tor. Any adjacent pair that cannot be solved automatically is left as a subgoal for the user. The assumption case is syntactic. The tactic tries to recognize goals of the form       
+
+> R⋄O1 ≈R⋄O2
+
+where the same reduction is applied to both sides. It then checks whether O1 and O2, possibly in the opposite order, match one of the assumptions available in the current IndAssumptions . Since assumptions are stored in an indexed family, the tactic must also guess the relevant index. This is done by enumerating simple index types, including units, booleans, products, and disjoint sums. This lightweight search is sufficient for our examples. The more interesting case is observational equivalence. For this, the framework provides tactics    
+
+> by_abstraction f by_abstraction ←f
+
+The first tactic attempts to prove that 𝑓 is a correct deterministic state abstraction from the left oracle to the right oracle; the second uses the same abstraction in the opposite direction. There are analogous tactics    
+
+> by_rand_abstraction f by_rand_abstraction ←f
+
+for randomized state abstractions. The game_hopping tactic only tries a small fixed collection of abstraction candidates. These include the identity map, which is useful when the two oracles have the same state type, and simple maps that add or remove a unit component, which occur when composing with a stateless reduction. If a hop requires a more nuanced abstraction, the automatic attempt fails and the user can provide the abstraction explicitly using by_abstraction or  
+
+> by_rand_abstraction
+
+in the remaining subgoal. The by_abstraction tactic, and its variants, reduce the goal to the local correctness conditions for a state abstraction. This requires proving that the abstraction preserves the initial-state distribution, and that it is preserved by every query from every starting state. The second obligation usually Game Hopping in Lean 15 
+
+requires more work. The tactic handles it by introducing the starting state and the query, and splitting on the possible query constructors. It then unfolds oracle definitions marked with the local attribute game_hopping_unfold and applies several groups of simplification lemmas. The first group, sReduction , eliminates the syntactic overhead introduced by oracle reductions. Its purpose is to inline the composition of a reduction with an oracle, so that an expression of the form R ⋄ O is displayed as an ordinary RState oracle. After this step, the remaining goal should no longer expose the internal plumbing of reduction application or calls to simulateQ . The next group, sStateT ,simplifies the resulting stateful computation. Its goal is to push the state st through the RState 
+
+monad, expanding get , put , and stateful binds until the goal is reduced, as far as possible, to an equality of pure probabilistic computations. At that point the main simplification procedure, sPMF , takes over. This tactic normalizes PMF 
+
+expressions by applying algebraic laws for probabilistic binds. In particular, among other rewrites, it uses simprocs that put independent samples into a canonical syntactic order, performing the following rewrite:      
+
+> let a ←X; let b ←Y; cont a b
+
+{ let b ← Y; let a ← X; cont a b 
+
+whenever, by inspecting the continuation syntactically, the occurrence of b precedes the occurrence of a. It also removes unused samples of the form    
+
+> let a ←X; cont
+
+{ cont 
+
+whenever a does not occur in cont . These syntactic normalizations are often enough to discharge the goal automatically. If these normalizations do not close the goal, the tactic runs split_ifs ,enabling reasoning by cases on the conditional branches used by the oracle, followed by simp_all ,which uses the hypotheses generated by these case splits to try to discharge the remaining goals. Any goals that remain are left for the user to solve manually. Since split_ifs can obscure the structure of the goal when automation fails, we also provide basic variants of the tactics, such as 
+
+> by_abstraction_basic
+
+. These variants omit the split_ifs and simp_all steps, leaving the goal in a more manageable form. Finally, the tactic simp only [GameHoppingPrettyPrintPMF] can be used to restore the do notation for PMF expressions, which is often more readable than the normalized form produced by sPMF .
+
+2.3.5 IND-RAND to IND-CPA Proof. We are now ready to present the formalization of the IND-RAND-to-IND-CPA argument from Section 2.1. The formal proof is shown in Figure 11. It is constructed using the game_hopping tactic, which, when provided with the list of intermediate oracles, automatically discharges all adjacent hops. 16 Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański                       
+
+> 1def indCpaRandImpliesIndCpa (schemeFam : SymEncSchemeFamily K C) :
+> 2IndCpaProof (IndCpaRandAssumptionFam schemeFam) schemeFam := by
+> 3intro 𝜅
+> 4let Enc := schemeFam.scheme 𝜅
+> 5game_hopping [
+> 6IndCpaL Enc,
+> 7(IndCpaRand_to_IndCpaL) ⋄(IndCpaRandReal Enc),
+> 8(IndCpaRand_to_IndCpaL) ⋄(IndCpaRandRand Enc),
+> 9(IndCpaRand_to_IndCpaR) ⋄(IndCpaRandRand Enc),
+> 10 (IndCpaRand_to_IndCpaR) ⋄(IndCpaRandReal Enc),
+> 11 IndCpaR Enc
+> 12 ]
+> Fig. 11. Complete proof that an IND-RAND-secure symmetric encryption scheme is IND-CPA secure.
+
+2.4 Computational Soundness 
+
+In this section, we provide the computational interpretation of the formal IndistinguishabilityI 
+
+proof. Specifically, we describe the computational soundness theorem, which we also formalized in Lean. At a high level, it states that if the assumptions used in the proof are hard to distinguish, then so is its conclusion. Let us begin by recalling the standard notion of computational indistinguishability. A distin-guisher for an oracle specification O is a randomized algorithm that interacts with an oracle of that specification and returns a Boolean. In our formalization, distinguishers are represented as follows: 
+
+> adversaryT O := OracleComp (withPMFSpec O) Bool
+
+The operation runDistinguisher d o : PMF Bool runs a distinguisher d : adversaryT O against an oracle implementation o : OracleImpl O . It samples the initial state of o, simulates the oracle com-putation using the query implementation of o, and returns the resulting distribution over Booleans. Given two oracle implementations o1 and o2 , the signed advantage of d, denoted advantage d o1 o2 ,is the difference between the probabilities that runDistinguisher d o1 and runDistinguisher d o2 
+
+return true . Usually, the advantage is defined as the absolute value of this difference, but we use the signed version because it has convenient algebraic properties: in particular, swapping the two oracles negates the advantage, and composing two hops adds the corresponding advantages. As briefly mentioned in Section 2.1, computational indistinguishability is an asymptotic property of oracle families indexed by the security parameter. Two oracle families o1 and o2 are computation-ally indistinguishable if no polynomial-time family of distinguishers can achieve a non-negligible advantage in distinguishing o1 𝜅 from o2 𝜅 , with both polynomial time and negligibility measured with respect to the security parameter 𝜅 .The definition of computational indistinguishability relies on the notion of polynomial time. Unfortunately, reasoning about a function’s running time is not directly supported in Lean. Defining polynomial time would first require choosing a computational model, such as Turing machines or a suitable 𝜆 -calculus, defining its running time, and expressing the relevant distinguishers and reductions in that model. While technically possible, this is currently impractical, especially since cryptographic adversaries require both randomness and oracle interaction. Developing a convenient framework capable of supporting this kind of reasoning is an important and interesting problem, but it is outside the scope of this paper — some foundational work on computation models is ongoing in the CSLib project [3]. For this reason, instead of directly formalizing asymptotic computational indistinguishability, our computational soundness theorem follows a concrete-security approach. Game Hopping in Lean 17 
+
+2.4.1 Concrete Security. In the concrete-security approach, the soundness theorem does not directly assert asymptotic computational indistinguishability. Instead, it gives an explicit reductionist interpretation of an IndistinguishabilityI proof: every distinguisher for the two oracles related by the proof can be transformed into distinguishers for the assumptions used in the proof, and the advantage of the original distinguisher is expressed in terms of the advantages of these assumption distinguishers. Specifically, let p be an indistinguishability proof of type IndistinguishabilityI A b o1 o2 and let d : adversaryT O be a distinguisher for the common specification of o1 and o2 , making at most  
+
+> b
+
+queries. The soundness theorem analyzes the proof p and, for each assumption used in the proof, constructs an oracle reduction from the distinguisher d to a distinguisher for that assumption. Composing this reduction with d yields a distinguisher for the corresponding assumption. There is one bookkeeping issue. The constructor symm reverses the direction of an indistinguisha-bility proof so that an assumption may be used either in its original direction or in the opposite direction. We track this by considering directed assumptions: for each assumption 𝑎 = (𝑂 1, 𝑂 2) ∈ 𝐴 ,we consider its reversal 𝑎 𝑅 = (𝑂 2, 𝑂 1) ∈ ¯𝐴 . An occurrence of 𝑎 in p is counted as a use of 𝑎 𝑅 if the path from that occurrence to the root of the proof passes through an odd number of symm 
+
+constructors; otherwise, it is counted as a use of 𝑎 .The computational soundness theorem (see theorem computationalSoundness in the Lean for-malization) constructs a reduction for each directed assumption 𝑎 ∈ 𝐴 ∪ ¯𝐴 that appears at least once in p. Let R𝑎 be the corresponding reduction, and let 𝑛 𝑎 be the number of times 𝑎 appears in p.The theorem then expresses the signed advantage of d as the following sum: 
+
+adv 𝑑 (𝑜 1, 𝑜 2) =∑︁  
+
+> 𝑎 ∈𝐴 ∪¯𝐴
+
+𝑛 𝑎 · adv 𝑑 ⋄ R 𝑎 (𝑎. 1, 𝑎. 2).
+
+Consequently, the usual unsigned advantage is bounded by 
+
+|adv 𝑑 (𝑜 1, 𝑜 2)| ≤ ∑︁  
+
+> 𝑎 ∈𝐴 ∪¯𝐴
+
+𝑛 𝑎 · | adv 𝑑 ⋄ R 𝑎 (𝑎. 1, 𝑎. 2)| .
+
+In this way, the theorem asserts that if the directed assumptions used in the proof are hard to distinguish, then the endpoint oracles o1 and o2 are hard to distinguish as well. It remains to explain how the reductions R𝑎 are constructed. This matters because these re-ductions are applied to the endpoint distinguisher d before it is run against the corresponding assumption. Thus, the security guarantee obtained from the theorem depends not only on the number of occurrences of each assumption, but also on the complexity of the produced reductions: the more complex the reductions are, the weaker the guarantee. The reduction R𝑎 is constructed as follows. For each occurrence of 𝑎 in the proof, the theorem follows the path from that occurrence to the root of the proof and composes the reductions appearing along this path. This produces a collection of reductions, one for each occurrence of 𝑎 :
+
+R𝑎, 1, . . . , R𝑎,𝑛 𝑎 ,
+
+The final reduction R𝑎 is a randomized parallel composition of this collection: during initialization, it samples an index 𝑘 ∈ { 1, . . . , 𝑛 𝑎 } uniformly at random and then behaves like R𝑎,𝑘 for the rest of the execution. Thus, R𝑎 is obtained by composing reductions that already appear in the proof, so its complexity can be judged by inspecting the proof object. This is one reason why  
+
+> IndistinguishabilityI
+
+lives in Type rather than Prop : we do not want proof irrelevance to erase information about how the proof was constructed. For a way of examining a proof object, see definition proof_constants_simp in Examples/Proofs/IndCpaRandImpliesIndCpa.lean .18 Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański 
+
+2.4.2 Asymptotic Computational Soundness Revisited. We conclude with a discussion of how, under suitable external complexity assumptions, the concrete soundness theorem can be used to recover the usual asymptotic notion of computational indistinguishability. One purpose of this discussion is to motivate future work on formalizing asymptotic computational indistinguishability in Lean. Let O1 and O2 be oracle families indexed by the security parameter 𝜅 , and suppose we are given a family of formal proofs establishing their indistinguishability, depending on 𝜅 and on a query bound 𝑏 . Assume that these proofs use a finite set of assumptions, perform a number of hops that is polynomial in 𝜅 and 𝑏 , and that each reduction R𝑎 constructed in the soundness theorem runs in polynomial time. Then the soundness theorem provides a negligible bound on the adversary’s advantage. In more detail, observe that if we fix a family of distinguishers 𝑑 𝜅 whose running time is bounded by a polynomial 𝑡 (𝜅 ), then we can instantiate the query bound 𝑏 with 𝑡 (𝜅 ), since an adversary cannot make more queries than its running time. Therefore, the coefficients 𝑛 𝑎 are polynomially bounded. The negligibility of the advantage of 𝑑 𝜅 now follows immediately from the concrete soundness theorem: it bounds the adversary’s advantage by a finite sum of negligible functions. An important question remains: when are the reductions R𝑎 polynomial-time? Informally, we argue that this holds provided the proof family satisfies the following complexity side conditions. These conditions are treated as external assumptions and are not formalized in Lean. (1) The depth of the proof objects is bounded by a constant, independently of 𝜅 and 𝑏 .(2) Every reduction used in the proof objects runs in polynomial time in 𝜅 , 𝑏 , and any indices introduced by surrounding longSequence steps. The discussion above assumes the non-uniform setting. Indeed, the reductions R𝑎,𝜅 produced by the soundness theorem may depend on the 𝜅 -th proof object. To obtain the same conclusion in a uniform setting, one should additionally require the proof family to be uniform in 𝜅 and 𝑏 .Intuitively, this means that the parameters 𝜅 and 𝑏 may determine the lengths of hybrid sequences and may appear as parameters to reductions and intermediate oracles, but they should not otherwise change the structure of the proof object. A weaker formal condition, which is still sufficient, is that the relevant proof object can be generated from 𝜅 and 𝑏 by a polynomial-time procedure. 
+
+3 Case Studies 
+
+In this section, we present several case studies of the framework. In a formal game-hopping proof, the main work is typically twofold: choosing suitable reductions and intermediate games, and proving the observational equivalences used by the hops. Pen-and-paper proofs usually focus on the former and leave the latter informal. Giving the full details of the constructions that we formalize would take up too much space, as it would require specifying the constructions, their security definitions, the reductions used in the proofs, and the intermediate games. This is also not the focus of the paper, which is concerned with ways of reasoning about game-hopping proofs in Lean. Accordingly, for each case study we briefly recall the cryptographic context and then focus on the proof idioms that arise in the formalization, especially those used to prove observational equivalence. These idioms mostly concern observational equivalence, and we often explain them using small illustrative examples that isolate the relevant reasoning pattern. 
+
+3.1 Encrypt-then-MAC 
+
+We begin our case studies with the Encrypt-then-MAC construction and its proof of security under chosen-ciphertext attacks. To state this result, we first define IND-CCA, a security notion stronger than IND-CPA. At a high level, IND-CCA security is a version of IND-CPA, where the adversary is additionally allowed to decrypt ciphertexts of their choice, provided that they were not previously Game Hopping in Lean 19 
+
+returned by an encryption query. More specifically, it is expressed as the indistinguishability of two oracles called EncDecLeft and EncDecRight. Both support two types of queries: encrypt (𝑚 0, 𝑚 1)
+
+and decrypt (𝑐 ). The state of each oracle consists of an encryption key and a set of ciphertexts. When EncDecLeft receives a query encrypt (𝑚 0, 𝑚 1), it encrypts 𝑚 0 using the encryption key, returns the resulting ciphertext, and adds it to the set. When it receives a query decrypt (𝑐 ), it returns the decryption of 𝑐 , unless 𝑐 belongs to the set, in which case it returns a fixed default message. The oracle EncDecRight is defined analogously. Another primitive required for the Encrypt-then-MAC construction is a message authentication code (MAC). It is a symmetric-key primitive that allows parties to authenticate messages. It consists of a key-generation algorithm and a deterministic tagging algorithm that takes a key and a message and returns a tag. Intuitively, a secure MAC is unforgeable: without knowing the key, an adversary cannot produce a valid tag for a message. We formalize this property as the indistinguishability of two oracles, MacReal and MacIdeal. Both support two types of queries: tag (𝑚 ) and check (𝑚, 𝑡 ),and both maintain internal state. The state of MacReal consists only of the secret key, whereas the state of MacIdeal additionally contains a set of message–tag pairs. Both oracles answer a query tag (𝑚 ) by computing and returning a tag 𝑡 for 𝑚 . In addition, MacIdeal records the pair 
+
+(𝑚, 𝑡 ) in its internal state. The two oracles differ in how they answer check (𝑚, 𝑡 ) queries. MacReal recomputes the tag of 𝑚 under the secret key and checks whether it is equal to 𝑡 , whereas MacIdeal checks whether the pair (𝑚, 𝑡 ) is recorded in its internal state. The Encrypt-then-MAC construction shows how to combine an IND-CPA-secure encryption scheme with a secure MAC to obtain an IND-CCA-secure encryption scheme. To encrypt a message, it encrypts the message using the IND-CPA scheme, computes a tag of the ciphertext, and returns the ciphertext-tag pair. To decrypt a pair (𝑐, 𝑡 ), it checks whether 𝑡 is a valid tag for 𝑐 ; if so, it decrypts 𝑐 , and otherwise returns a fixed default message. Intuitively, the construction is IND-CCA secure because MAC security makes decryption queries of EncDecLeft and EncDecRight always return the default message: the query either has an invalid tag, or uses a ciphertext that was previously returned by the encryption oracle and is therefore on the do-not-decrypt list. This observation reduces the IND-CCA security of the construction to the IND-CPA security of the underlying encryption scheme. 
+
+3.1.1 Formalization. The HOPSCOTCH proof that the Encrypt-then-MAC construction is IND-CCA secure is shown in Figure 12. The proof follows the lines of [12, Section 4.5]. We include the proof to illustrate another use of the game_hopping tactic, but we do not expect the reader to follow all of its details from the listing alone. For the full proof see Examples/Proofs/EncryptThenMacIndCca. lean in the repository. There are seven hops in the proof. Three follow the reduction-applied-to-assumption pattern and are solved automatically by the game_hopping tactic. The remaining four are observational-equivalence hops, each requiring an explicit abstraction function relating the states of the adjacent oracle implementations. Rather than spelling out the full definitions of those abstractions, we explain how these abstractions behave, occasionally using small illustrative examples. This lets us present the main proof ideas without introducing the full internal states of the reductions and oracles. 
+
+Reshuffling abstraction. The first abstraction, EtMMacReductionToIndCcaAbstraction , simply reshuf-fles parts of the oracle state. As a toy example, consider two oracles. The first has state N × Bool ,while the second has state given by a record with two fields, n : N and seen : Bool . Such a situation can arise when the first oracle is obtained by applying a reduction with state N to an oracle with state Bool , while the second oracle is written out directly. If the two implementations differ only 20 Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański  
+
+> 1
+
+def indCpaAndMacUfImpliesIndCcaEncryptThenMacFam  
+
+> 2
+
+(encFam : SymEncSchemeFamily KEnc (fun _ => BitVec))  
+
+> 3
+
+(macFam : MACSchemeFamily KMac Tag) :  
+
+> 4
+
+IndCcaProof  
+
+> 5
+
+(IndCpaAssumptionFam encFam ⊕ MACUFAssumptionFam macFam)  
+
+> 6
+
+(encryptThenMacFamily encFam macFam) := by  
+
+> 7
+
+intro 𝜅  
+
+> 8
+
+let enc := encFam.scheme 𝜅  
+
+> 9
+
+let mac := macFam.scheme 𝜅  
+
+> 10
+
+game_hopping [  
+
+> 11
+
+IndCcaL (encryptThenMac enc mac),  
+
+> 12
+
+(EtMFromMACLReduction enc) ⋄ (MACUFReal mac),  
+
+> 13
+
+(EtMFromMACLReduction enc) ⋄ (MACUFIdeal mac),  
+
+> 14
+
+(EtMFromIndCpaReduction mac) ⋄ (IndCpaL enc),  
+
+> 15
+
+(EtMFromIndCpaReduction mac) ⋄ (IndCpaR enc),  
+
+> 16
+
+(EtMFromMACRReduction enc) ⋄ (MACUFIdeal mac),  
+
+> 17
+
+(EtMFromMACRReduction enc) ⋄ (MACUFReal mac),  
+
+> 18
+
+IndCcaR (encryptThenMac enc mac)  
+
+> 19
+
+] 
+
+> 20
+
+· by_abstraction ← EtMMacReductionToIndCcaAbstraction  
+
+> 21
+
+· by_abstraction ← EtMIndCpaToMacIdealAbstraction  
+
+> 22
+
+· by_abstraction EtMIndCpaToMacIdealAbstraction  
+
+> 23
+
+· by_abstraction EtMMacReductionToIndCcaAbstraction 
+
+Fig. 12. Proof that the encrypt-then-MAC construction is IND-CCA secure. 
+
+in how this state is packaged, then they can be related by the abstraction fun (x, b) => { n := x, seen := b } . This abstraction does not hide or duplicate any information; it merely translates between two equivalent state representations. 
+
+Introducing redundancy. The second abstraction, EtMIndCpaToMacIdealAbstraction , is more in-teresting. It captures the fact that two fields in the state of the target oracle are always equal. As a toy example, consider two oracles implementing a set of bitvectors. They support two queries, add 
+
+and check , both taking a bitvector as input. The first oracle implements this functionality directly: its state is Finset (BitVec n) , add inserts the input into the set, and check tests membership in the set. The second oracle stores two copies of the set, maintaining a set of type Finset (BitVec n) ×
+
+Finset (BitVec n) . Its add query inserts the input into both sets, while check tests whether the input belongs to both of them. The two implementations are observationally equivalent because the two sets in the second oracle are always kept equal. This is proved using the abstraction from the direct implementation to the redundant one, given by fun s => (s, s) . This example is less artificial than it may seem: a similar situation arises in the encrypt-then-MAC proof, where the set of ciphertext-tag pairs returned by the encryption oracle is maintained both by the idealized MAC functionality and by the do-not-decrypt list. 
+
+3.2 ElGamal Encryption 
+
+The ElGamal encryption scheme [11, 19] is a group-based asymmetric encryption scheme. Like any public-key encryption scheme, it has two types of keys: a public key and a secret key. The public key is used to encrypt messages, while the secret key is used to decrypt them. Since the public key is available to the adversary, the security definition must require that even an adversary with access Game Hopping in Lean 21 
+
+to this key cannot learn information about the encrypted plaintext. In the indistinguishability formalization, this is captured by adding a public-key query, getPk , to the public-key versions of the IND-CPA and IND-RAND games. This query takes no input and returns the public key. For ElGamal, we prove a weaker security property, called one-time uniform ciphertexts. This is a one-shot version of the public-key version of the IND-RAND game, where the adversary is allowed to make at most one encryption query. The one-shot restriction is enforced in the oracle state by a Boolean flag recording whether the encryption query has already been used. Interestingly, for public-key encryption schemes, this one-time uniform-ciphertext property is enough to derive IND-RAND security, as we show in the next case study. To describe the ElGamal encryption scheme, let 𝐺 be a cyclic group of order 𝑞 , and let 𝑔 be a generator of 𝐺 . The relevant spaces are messages: 𝐺, ciphertexts: 𝐺 × 𝐺, public keys: 𝐺, secret keys: {0, . . . , 𝑞 − 1}.
+
+The secret keys are sampled uniformly at random, whereas the public keys are computed from the secret keys as pk = 𝑔 sk . The encryption algorithm takes a message 𝑚 ∈ 𝐺 , samples 𝑟 uniformly at random from {0, . . . , 𝑞 − 1}, and returns the following ciphertext: 
+
+(𝑔 𝑟 , pk 𝑟 · 𝑚 ).
+
+The decryption algorithm takes a ciphertext (𝑐 1, 𝑐 2) and returns 𝑐 2 · 𝑐 −sk  
+
+> 1
+
+, which is easily seen to recover the original message. The one-time uniform-ciphertext property of ElGamal follows from the decisional Diffie–Hellman (DDH) assumption [7]. This assumption states that the distributions 
+
+(𝑔 𝑎 , 𝑔 𝑏 , 𝑔 𝑎𝑏 ) and (𝑔 𝑎 , 𝑔 𝑏 , 𝑔 𝑐 )
+
+are computationally indistinguishable, where 𝑎, 𝑏, 𝑐 are sampled uniformly at random from {0, . . . , 𝑞 −
+
+1}. To express this assumption in our oracle-based framework, we view each of the two distributions as a stateless oracle. Each oracle supports a single query, sample , which takes no input and returns a sample from the corresponding distribution. The intuition behind the proof is as follows. An ElGamal ciphertext can be generated by sampling the triple (𝑔 sk , 𝑔 𝑟 , 𝑔 sk ·𝑟 ) and returning (𝑔 𝑟 , 𝑔 sk ·𝑟 ·𝑚 ). Since the adversary has access to the public key, they see a triple (𝑔 sk , 𝑔 𝑟 , 𝑔 sk ·𝑟 ·𝑚 ). By DDH, this triple is indistinguishable from (𝑔 sk , 𝑔 𝑟 , 𝑔 𝑐 ·𝑚 ), where 
+
+𝑐 is sampled uniformly at random. Therefore the ciphertext is indistinguishable from (𝑔 𝑟 , 𝑔 𝑐 · 𝑚 ).Since 𝑔 is a generator of 𝐺 , the element 𝑔 𝑐 is uniformly distributed over 𝐺 . Multiplying a uniformly sampled group element by a fixed message 𝑚 does not change this distribution. Thus (𝑔 𝑟 , 𝑔 𝑐 · 𝑚 )
+
+is distributed as (𝑥, 𝑦 ), where 𝑥 and 𝑦 are independent uniform elements of 𝐺 . It follows that the ciphertext is computationally indistinguishable from the uniform distribution over 𝐺 × 𝐺 .
+
+3.2.1 Formalization. For space reasons, we do not present a Lean figure with the proof of ElGamal. See Examples/Proofs/DDHImpliesElGamalOTUCPub.lean for the full proof, which follows the argument of [17, Section 3.3]. It consists of seven hops, one of which is a reduction-applied-to-assumption hop, and the remaining six are observational equivalence hops. These observational-equivalence hops require explicit abstraction functions and are solved using by_abstraction and 
+
+> by_rand_abstraction
+
+. The proofs are almost automatic, but they require group-specific simplifi-cation lemmas stored under GH_group_random_exp and GH_group_norm . In addition to reshuffling, the abstraction functions use two new idioms (they do not use the redundancy idiom). Below, we present them together with descriptions of the simplification lemmas. 
+
+Forgetting irrelevant information. This idiom is useful when part of the state never affects the oracle’s responses. Consider the following two oracles. The first oracle has state G × N. It is 22 Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański 
+
+initialized by sampling 𝑎 ← { 0, . . . , 𝑞 − 1} uniformly at random and storing the pair (𝑔 𝑎 , 𝑎 ). It supports a single query, getG , which returns the first component of the state. The second oracle has state G and behaves in the same way, except that it stores only 𝑔 𝑎 . To show that these two oracles are observationally equivalent, we can use the abstraction fun (x, _) => x , which forgets the irrelevant second component of the state. A similar situation arises in the ElGamal proof. 
+
+Delaying randomness. The second idiom used in the ElGamal proof is randomized abstraction. It is useful when one oracle samples random values eagerly and stores them for later, while another oracle samples the same values lazily when they are first needed. Consider two oracles, both supporting a single query, getN . The eager oracle has state N. It is initialized by sampling a value uniformly from {0, . . . , 𝑞 − 1}, and answers getN by returning the value stored in its state. The lazy oracle has state Option N (i.e. it either carries a natural number or is empty). It is initialized to the empty value none . When it receives a getN query, it checks its state: if the state is empty, it samples a value uniformly from {0, . . . , 𝑞 − 1}, stores it, and returns it; otherwise, it returns the value already stored in the state. To show that these two oracles are observationally equivalent, we use the following randomized abstraction from the lazy state to the eager one: 
+
+𝑠 ↦ →
+
+(
+
+uniform over {0, . . . , 𝑞 − 1} if 𝑠 = none ,𝑛 if 𝑠 = some (𝑛 ).
+
+This is a valid abstraction because it maps the initial lazy state, none , to the uniform initial distribu-tion of the eager oracle. It also commutes with the getN query. If the lazy state is none , then after the query the lazy oracle produces the distribution over output-state pairs (𝑛, some (𝑛 )) , where 𝑛 
+
+is sampled uniformly from {0, . . . , 𝑞 − 1}. Applying the abstraction to the state component maps this to the distribution (𝑛, 𝑛 ), again with 𝑛 uniform. On the other hand, if we apply the abstraction first to the empty state of the lazy oracle, we obtain the uniform distribution over eager states. The  
+
+> getN
+
+query then simply copies the state value to the output, giving the same distribution (𝑛, 𝑛 ) for uniformly sampled 𝑛 . Thus, replying to a query commutes with applying the abstraction. An example like this arises naturally in the ElGamal proof. To use the DDH assumption, we need to sample the value 𝑔 𝑟 together with 𝑔 sk during initialization. In contrast, the original ElGamal oracle samples 𝑔 𝑟 only when answering the encryption query. 
+
+Group-specific simplifications. To facilitate the formalization of the ElGamal proof (and hopefully future proofs), we developed two groups of simp lemmas: GH_group_norm and GH_group_random_exp .The first one, GH_group_norm , collects general algebraic and probabilistic facts about groups. It contains standard group identities, such as (𝑔 𝑎 )𝑏 = 𝑔 𝑎𝑏 , most of which are already present in Mathlib. It also contains probabilistic simplifications specific to uniform distributions over groups. For example, multiplying a uniformly sampled group element by a fixed group element preserves the uniform distribution, which gives rewrites of the following form:    
+
+> let x ←sampleGroupElem; cont (m * x)
+
+{ let x ← sampleGroupElem; cont x 
+
+Here, m is a fixed group element. The second attribute, GH_group_random_exp , contains a single special-purpose rewrite rule. It rewrites a uniformly sampled exponent applied to a generator into a uniformly sampled group element:    
+
+> let x ←sampleExponent; cont (g ^ x)
+
+{ let x ← sampleGroupElem; cont x 
+
+We keep this rule separate from GH_group_norm , because it can fire in surprising places and produce less convenient goals. Game Hopping in Lean 23 
+
+3.3 One-Time Secrecy Implies IND-CPA 
+
+Our next proof shows that one-time secrecy (OTS), i.e. the one-shot version of public-key IND-CPA security, implies public-key IND-CPA security. The public-key IND-CPA game is analogous to the symmetric-key version: the adversary submits pairs of messages and receives encryptions of either the left or the right component. The only additional feature is that the adversary may also request the public key through a getPk query, which takes no input. The OTS games have the same interface, but, as in the one-time uniform-ciphertexts game, allow only one non-default encryption query. Their state consists of the public key together with a Boolean flag recording whether an eavesdrop query has already been answered. On the first query eavesdrop(m 0,m 1), the left OTS oracle returns an encryption of 𝑚 0, while the right OTS oracle returns an encryption of 𝑚 1. Subsequent eavesdrop queries return a fixed default ciphertext. The  
+
+> getPk
+
+query is unrestricted and always returns the public key. The proof is a hybrid (i.e. longSequence ) argument that explicitly uses a bound on the number of queries made by the adversary. Fix a bound 𝑞 . We define hybrid oracles H𝑖 , for 0 ≤ 𝑖 ≤ 𝑞 , where H𝑖 
+
+answers the first 𝑖 eavesdrop(m 0,m 1) queries by encrypting 𝑚 1, and all later eavesdrop queries by encrypting 𝑚 0. Thus H0 is behaviorally equivalent to the left public-key IND-CPA oracle. Moreover, because an adversary making at most 𝑞 queries cannot see more than the first 𝑞 eavesdrop queries, 
+
+H𝑞 is behaviorally equivalent to the right public-key IND-CPA oracle. It remains to show that adjacent hybrids are indistinguishable. For each 𝑖 , we define a reduction R𝑖 that uses an OTS oracle as its underlying oracle. The reduction keeps a counter for eavesdrop queries. Before the counter reaches 𝑖 , it answers queries itself by requesting the public key from the OTS oracle and encrypting 
+
+𝑚 1. When the counter is exactly 𝑖 , it forwards the query to the OTS oracle. After that, it again answers queries itself, now encrypting 𝑚 0. Therefore R𝑖 ⋄ OTSLeft is behaviorally equivalent to 
+
+H𝑖 , while R𝑖 ⋄ OTSRight is behaviorally equivalent to H𝑖 +1. It follows that we can hop from H𝑖 to 
+
+H𝑖 +1. Chaining these 𝑞 hops gives indistinguishability of H0 and H𝑞 , which finishes the proof. 
+
+3.3.1 Formalization. As in the previous section, we do not include the Lean listing for the proof of OTS implies IND-CPA. See Examples/Proofs/OneTimeSecrecyImpliesIndCPAPub.lean for the full proof, which follows the outline of [12, Section 4.4]. The top-level proof consists of three hops: from the left IND-CPA oracle to H0, then from H0 to H𝑞 , and finally from H𝑞 to the right IND-CPA oracle. The first hop is an observational-equivalence hop, the second is a long-sequence hop, and the last is a bounded observational-equivalence hop, using ObsEqB . The long-sequence hop is itself built from the adjacent hybrid steps. For each 𝑖 , the proof of indistinguishability between 
+
+H𝑖 and H𝑖 +1 consists of three hops: from H𝑖 to R𝑖 ⋄ OTSLeft , then to R𝑖 ⋄ OTSRight , and finally to H𝑖 +1. The first and last of these are observational-equivalence hops, while the middle hop is a reduction-applied-to-assumption hop. The proof uses all of the deterministic abstraction idioms introduced so far: reshuffling, introduc-ing redundancy, and forgetting irrelevant information. It also uses a specialized bounded abstraction to prove the final bounded observational equivalence. The redundancy-introduction and forgetting idioms appear in slightly different forms than in the previous proof, so we discuss them below, together with the bounded observational-equivalence abstraction. 
+
+Forgetting irrelevant information. Consider the first hop from the left IND-CPA oracle to H0. The state of the left IND-CPA oracle consists only of the public key, sampled during initialization. The state of the hybrid oracle H0 consists of a counter for the number of eavesdrop queries and the public key. The counter is read and incremented, but it is irrelevant to the oracle’s responses: H0
+
+always encrypts the left message. Therefore, to prove observational equivalence between the two oracles, we abstract the counter away, using the abstraction fun (_, pk) => pk .24 Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański 
+
+Introducing redundancy. Now consider the hop from H𝑖 to R𝑖 ⋄ OTSLeft . The state of H𝑖 consists of a counter for the number of eavesdrop queries and the public key. The state of R𝑖 ⋄ OTSLeft 
+
+consists of the reduction’s counter together with the state of the OTS oracle, namely the public key and a flag recording whether the OTS oracle has already answered its one non-default eavesdrop 
+
+query. However, the value of this flag is determined by the counter: it is true exactly when the counter is greater than 𝑖 . For this reason, we prove the equivalence using the abstraction fun (c, pk) => (c, pk, c > i) .
+
+Bounded observational equivalence. Finally, consider the hop from H𝑞 to the right IND-CPA oracle. We want to show that these two oracles are indistinguishable for adversaries making at most 𝑞 queries. To capture this, we use a bounded version of abstraction. A bounded abstraction between oracles O1 and O2 consists of the usual abstraction function 𝑓 , mapping states of O1 to states of O2, together with a valuation function 𝑣 , mapping states of O1 to N. The valuation of every possible initial state of O1 must be at least the query bound 𝑞 , and processing a query should not decrease the valuation by more than one. The usual commutation condition is required only for starting states with non-zero valuation. The proof that such a bounded abstraction implies bounded observational equivalence follows the same structure as the ordinary abstraction argument; see  
+
+> correctAbstractionBoundImpliesObsEqBounded
+
+in the formalization. We apply this technique to the hop between H𝑞 and the right IND-CPA oracle. The state of H𝑞 
+
+consists of a counter for the number of eavesdrop queries and the public key, while the state of the right IND-CPA oracle consists only of the public key. The abstraction function fun (_, pk) => pk 
+
+forgets the counter, and the valuation function fun (c, _) => q - c counts how many eavesdrop 
+
+queries remain before the bound is reached. This is a correct bounded abstraction, but proving it in Lean might be cumbersome, as the definition of the bounded abstraction uses reasoning about 
+
+> PMF.support
+
+. For this reason, the formal proof uses a simpler indexed variant, correctAbstractionB .It is less general, but easier to use in practice. 
+
+3.4 GGM: Lifting Pseudorandom Generators to Pseudorandom Functions 
+
+Our final case study is the GGM construction [13], which transforms a length-doubling pseudo-random generator into a pseudorandom function. The formal proof is substantially larger than the previous case studies, so we describe only its main structure. It illustrates two features of the framework: a hybrid sequence of length 𝜅 , and the delayed-randomness idiom from the ElGamal proof, now applied to entire caches of random labels rather than to a single sampled value. These two features appear essential for handling arbitrary-depth instances of the construction. To the best of our knowledge, this is the first formal proof of the GGM construction at nonconstant depth and the first in a general-purpose proof assistant; CryptoZoo [8] formalizes the construction at depth 3. We begin by recalling the underlying primitive. A length-doubling PRG with seed length 𝜅 is a deterministic function 
+
+prg : BitVec 𝜅 → BitVec (2𝜅 ).
+
+It is secure if the distribution obtained by sampling a uniform seed 𝑠 ← BitVec 𝜅 and returning 
+
+prg (𝑠 ) is indistinguishable from the uniform distribution over BitVec (2𝜅 ). As usual, we express this as the indistinguishability of two stateless oracles, both supporting a single query sample . The real oracle samples a fresh seed 𝑠 and returns prg (𝑠 ), while the random oracle returns a uniformly sampled element of BitVec (2𝜅 ).The resulting primitive is a PRF. In our formalization, the input length of the PRF is also 𝜅 , so the same parameter controls both the seed length and the number of PRG iterations. Thus the PRF Game Hopping in Lean 25 
+
+is a deterministic function of type 
+
+prf : BitVec 𝜅 × BitVec 𝜅 → BitVec 𝜅. 
+
+It is secure if, for a uniformly sampled seed 𝑠 , the function 𝑥 ↦ → prf (𝑠, 𝑥 ) is indistinguishable from a uniformly sampled function 
+
+𝑟 : BitVec 𝜅 → BitVec 𝜅. 
+
+We again express this as indistinguishability of two oracles supporting a single query, eval(x) . The real oracle samples a seed 𝑠 during initialization and answers a query 𝑥 with prf (𝑠, 𝑥 ). The ideal oracle samples a total function 𝑟 during initialization and answers 𝑥 with 𝑟 (𝑥 ).The GGM construction works as follows. Given a length-doubling PRG prg , we define prg 0 (𝑠 )
+
+and prg 1 (𝑠 ) to be the first and second halves of prg (𝑠 ), respectively. Then the GGM pseudorandom function is defined by 
+
+prf (𝑠, 𝑥 ) = prg 𝑥 𝜅 
+
+ prg 𝑥 𝜅 −1 (. . . prg 𝑥 1 (𝑠 ) . . . ),
+
+where 𝑥 𝑖 is the 𝑖 -th bit of the input 𝑥 , in the order used by the implementation. The security of GGM is proved using a hybrid argument, formalized using longSequence with 𝜅 
+
+steps. The 𝑖 -th hybrid H𝑖 maintains a random function 
+
+𝑓 𝑖 : BitVec 𝑖 → BitVec 𝜅, 
+
+initialized uniformly at random. On a query 𝑥 = (𝑥 1, . . . , 𝑥 𝜅 ) ∈ BitVec 𝜅 , the oracle returns 
+
+H𝑖 (𝑥 ) = prg 𝑥 𝜅 
+
+ prg 𝑥 𝜅 −1 (. . . prg 𝑥 𝑖 +1 (𝑓 𝑖 (𝑥 1, . . . , 𝑥 𝑖 )) . . . ).
+
+The endpoints are the target oracles. Since BitVec 0 is a singleton, sampling 
+
+𝑓 0 : BitVec 0 → BitVec 𝜅 
+
+is equivalent to sampling a single seed. Thus H0 is the real GGM oracle. At the other endpoint, no PRG applications remain, so H𝜅 always answers according to a random function 𝑓 𝜅 . Thus H𝜅 is the ideal PRF oracle. The central step is to prove that each pair of adjacent hybrids, H𝑖 and H𝑖 +1, is indistinguishable. Rather than give the details of this step, we describe the two patterns that arise in the proof of GGM security. 
+
+3.4.1 Formalization. Our formalization, together with some explanatory comments, is available in Examples/Proofs/GGMSecurePRF.lean . Here we explain the two main patterns of the proof, both of which are instances of the delayed-randomness idiom. 
+
+Lazy cache. Consider an alternative, lazy implementation of the ideal PRF oracle. Instead of storing the entire random function in its state, it stores a partial function 
+
+𝑟 : BitVec 𝜅 → BitVec 𝜅 ∪ {⊥} .
+
+When the oracle receives a query eval (𝑥 ), it checks whether 𝑥 is already in the domain of 𝑟 . If so, it returns 𝑟 (𝑥 ). Otherwise, it samples a fresh value 𝑦 uniformly at random from BitVec 𝜅 , updates the cache by setting 𝑟 (𝑥 ) := 𝑦 , and returns 𝑦 . To prove that this lazy implementation is equivalent to the eager one (i.e., the ideal PRF oracle), we use a randomized abstraction. The abstraction maps a partial function 𝑟 to a distribution over total functions by keeping the values already stored in 𝑟 
+
+fixed, and sampling independent uniform values for all inputs outside the domain of 𝑟 .The main advantage of the lazy implementation is efficiency: it samples values only for inputs that are actually queried. Replacing the eager implementation with a lazy one therefore allows us to use polynomial-time reductions, as required by the computational definition of indistinguishability. The definition does not, however, require either the endpoint oracles or the intermediate oracles to run in polynomial time. 26 Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, and Rafał Stefański 
+
+Changing the granularity of the lazy cache. The second use of delayed randomness changes the granularity at which the lazy cache is filled. Consider a slightly more eager lazy cache: when queried on 𝑥 , it samples fresh random values not only for 𝑥 , but also for the input obtained by flipping the last bit of 𝑥 . Thus the cache is filled in pairs of inputs sharing the same prefix. We prove that this oracle is equivalent to the ordinary lazy cache by transitivity through the eager random-function oracle. Both lazy implementations are related to the eager oracle by the same randomized abstraction as above: complete the partial cache by sampling all missing values uniformly at random. This paired-cache oracle appears naturally in the GGM proof, since a single PRG call produces two outputs, prg 0 (𝑠 ) and prg 1 (𝑠 ).
+
+4 Conclusion and Future Work 
+
+There are several natural directions for extending HOPSCOTCH. First, we plan to formalize ad-ditional cryptographic constructions and protocols, using these case studies both to evaluate the framework and to identify recurring proof patterns that can be incorporated into stronger tactics. Second, the explicit structure of HOPSCOTCH proof objects makes the framework a promising tar-get for machine-assisted proof generation. In particular, we would like to investigate whether large language models can construct formal game-hopping proofs while preserving the structure and readability of their pen-and-paper counterparts. Third, we plan to extend the proof calculus with error-bounded transitions, including reasoning based on bad events, possibly by integrating tech-niques from probabilistic relational Hoare logic. Finally, formalizing probabilistic polynomial time would remove the remaining externally checked complexity conditions and yield fully mechanized computational-security statements. 
+
+Acknowledgments 
+
+This work was partially supported by the European Research Council (ERC) under the European Union’s Horizon 2020 Research and Innovation Programme (Grant No. PROCONTRA-885666), and partially supported by the U.S. National Science Foundation (NSF) under Award No. 2411704. Game Hopping in Lean 27 
+
+References 
+
+[1] Carmine Abate, Philipp G. Haselwarter, Exequiel Rivas, Antoine Van Muylder, Théo Winterhalter, Cătălin Hriţcu, Kenji Maillard, and Bas Spitters. 2021. SSProve: A Foundational Framework for Modular Cryptographic Proofs in Coq. In 2021 IEEE 34th Computer Security Foundations Symposium (CSF) . 1–15. doi:10.1109/CSF51468.2021.00048 [2] Tudor Achim, Alex Best, Alberto Bietti, Kevin Der, Mathïs Fédérico, Sergei Gukov, Daniel Halpern-Leistner, Kirsten Henningsgard, Yury Kudryashov, Alexander Meiburg, Martin Michelsen, Riley Patterson, Eric Rodriguez, Laura Scharff, Vikram Shanker, Vladmir Sicca, Hari Sowrirajan, Aidan Swope, Matyas Tamas, Vlad Tenev, Jonathan Thomm, Harold Williams, and Lawrence Wu. 2025. Aristotle: IMO-level Automated Theorem Proving. arXiv:2510.01346 [cs.AI] https://arxiv.org/abs/2510.01346 [3] Clark Barrett, Swarat Chaudhuri, Fabrizio Montesi, Jim Grundy, Pushmeet Kohli, Leonardo de Moura, Alexan-dre Rademaker, and Sorrachai Yingchareonthawornchai. 2026. CSLib: The Lean Computer Science Library. arXiv:2602.04846 [cs.LO] https://arxiv.org/abs/2602.04846 [4] Gilles Barthe, Benjamin Grégoire, Sylvain Heraud, and Santiago Zanella Béguelin. 2011. Computer-aided security proofs for the working cryptographer. In Annual Cryptology Conference . Springer, 71–90. [5] David A. Basin, Andreas Lochbihler, and S. Reza Sefidgar. 2020. CryptHOL: Game-Based Proofs in Higher-Order Logic. 
+
+Journal of Cryptology 33 (2020), 494 – 566. https://api.semanticscholar.org/CorpusID:8723421 [6] Bruno Blanchet. 2008. A computationally sound mechanized prover for security protocols. IEEE Transactions on Dependable and Secure Computing 5, 4 (2008), 193–207. [7] Dan Boneh. 1998. The Decision Diffie–Hellman Problem. In Algorithmic Number Theory (Lecture Notes in Computer Science, Vol. 1423) . Springer, 48–63. [8] Chris Brzuska, Christoph Egger, and Kirthivaasan Puniamurthy. 2024. CryptoZoo: A Viewer for Reduction Proofs. In 
+
+International Conference on Applied Cryptography and Network Security . Springer, 3–25. [9] Leonardo de Moura and Sebastian Ullrich. 2021. The Lean 4 Theorem Prover and Programming Language. In 
+
+Automated Deduction - CADE 28 - 28th International Conference on Automated Deduction, Virtual Event, July 12-15, 2021, Proceedings (Lecture Notes in Computer Science, Vol. 12699) , André Platzer and Geoff Sutcliffe (Eds.). Springer, 625–635. doi:10.1007/978-3-030-79876-5_37 [10] DeepSeek-AI, Anyi Xu, Bangcai Lin, Bing Xue, Bingxuan Wang, Bingzheng Xu, Bochao Wu, Bowei Zhang, Chaofan Lin, Chen Dong, and Chenchen Ling et al. 2026. DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence. arXiv:2606.19348 [cs.CL] https://arxiv.org/abs/2606.19348 [11] Taher ElGamal. 1985. A public key cryptosystem and a signature scheme based on discrete logarithms. IEEE transactions on information theory 31, 4 (1985), 469–472. [12] Ross Evans. 2024. ProofFrog: A tool for verifying game-hopping proofs. (2024). [13] Oded Goldreich, Shafi Goldwasser, and Silvio Micali. 1986. How to construct random functions. Journal of the ACM (JACM) 33, 4 (1986), 792–807. [14] Roberto Metere and Changyu Dong. 2023. A Direct Lazy Sampling Proof Technique in Probabilistic Relational Hoare Logic. arXiv preprint arXiv:2311.16844 (2023). [15] Adam Petcher and Greg Morrisett. 2014. The Foundational Cryptography Framework. arXiv:1410.3735 [cs.PL] https://arxiv.org/abs/1410.3735 [16] Mike Rosulek. 2021. The joy of cryptography . Oregon State University. [17] Victor Shoup. 2004. Sequences of games: a tool for taming complexity in security proofs. cryptology eprint archive 
+
+(2004). [18] Aaditya Singh, Adam Fry, Adam Perelman, Adam Tart, Adi Ganesh, Ahmed El-Kishky, Aidan McLaughlin, Aiden Low, AJ Ostrow, Akhila Ananthram, et al. 2025. Openai gpt-5 system card. arXiv preprint arXiv:2601.03267 (2025). [19] Yiannis Tsiounis and Moti Yung. 1998. On the security of ElGamal based encryption. In International Workshop on Public Key Cryptography . Springer, 117–134. [20] Devon Tuma, Quang Dao, James Waters, Alexander Hicks, and Nicholas Hopper. 2026. VCVio: Verified Cryptography in Lean via Oracle Effects and Handlers. Cryptology ePrint Archive, Paper 2026/899. https://eprint.iacr.org/2026/899 [21] Devon Tuma and Nicholas Hopper. 2024. VCVio: A Formally Verified Forking Lemma and Fiat-Shamir Transform, via a Flexible and Expressive Oracle Representation. Cryptology ePrint Archive (2024). [22] Santiago Zanella-Béguelin. 2010. Formal certification of game-based cryptographic proofs . Theses. École Nationale Supérieure des Mines de Paris. https://pastel.hal.science/pastel-00584350

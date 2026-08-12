@@ -6,29 +6,35 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-11
-- 运行时间：2026-08-11 20:05:56 UTC
+- 最新运行日期：2026-08-12
+- 运行时间：2026-08-12 21:15:03 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：4
 - 精读区：0
-- 速读区：2
+- 速读区：4
 
 ### 今日简报（AI）
-今日聚焦 AI 治理与加密经济安全的深度融合，探讨了去中心化推理安全与多智能体系统的稳定性保障。
-研究提出利用重复博弈模型强化再质押推理的安全性，并结合 Lyapunov 证书与零知识证明实现多智能体演化风险的精准管控。
-建议关注区块链激励机制与数学形式化验证在构建可信、可控 AI 基础设施中的关键应用。
-- 详情：[/202608/11/README](/202608/11/README)
+- 今日共生成 4 篇推荐（精读 0 篇，速读 4 篇）
+- 速读：《Game Hopping in Lean》（7.0/10）, 《How to Verify Consistency of Probabilistic Claims》（7.0/10）, 《A Lightweight Fault-Detection Scheme for Barrett Modular Multiplication Using Multiple Conditional Reduction Paths》（6.0/10）
+- 这些结果覆盖了当下较热的方向，建议先看精读区论文的关键问题与方法。
+- 详情：[/202608/12/README](/202608/12/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Repeated-Game Security for Restaking-Based Verifiable Inference](/202608/11/2608.09055v1-repeated-game-security-for-restaking-based-verifiable-inference)  
+1. [Game Hopping in Lean](/202608/12/2608.06261v1-game-hopping-in-lean)  
    标签：评分：7.0/10、query:fss-llm
-   evidence：无需zkML或TEE的可验证大模型推理
-2. [Joint Lyapunov Certificates for K-Agent Generative AI Governance: Stochastic Stability, Emergent Ensemble Risk, and Zero-Knowledge Governance Attestation](/202608/11/2608.09087v1-joint-lyapunov-certificates-for-k-agent-generative-ai-governance-stochastic-stability-emergent-ensemble-risk-and-zero-knowledge-governance-attestation)  
+   evidence：机械化密码学证明与安全定义
+2. [How to Verify Consistency of Probabilistic Claims](/202608/12/2608.11181v1-how-to-verify-consistency-of-probabilistic-claims)  
+   标签：评分：7.0/10、query:fss-llm
+   evidence：验证AI安全中概率主张的一致性
+3. [A Lightweight Fault-Detection Scheme for Barrett Modular Multiplication Using Multiple Conditional Reduction Paths](/202608/12/2608.10736v1-a-lightweight-fault-detection-scheme-for-barrett-modular-multiplication-using-multiple-conditional-reduction-paths)  
    标签：评分：6.0/10、query:fss-llm
-   evidence：AI模型的零知识治理证明
+   evidence：全同态加密与后量子加密硬件中模乘运算的故障检测
+4. [On the Sensitivity to Errors in Homomorphic Computing: Single Transient Bit-flip Client-side Error Characterization](/202608/12/2608.11155v1-on-the-sensitivity-to-errors-in-homomorphic-computing-single-transient-bit-flip-client-side-error-characterization)  
+   标签：评分：6.0/10、query:fss-llm
+   evidence：人工智能和机器学习的隐私保护计算
 
 
 <div class="dpr-home-promo-card">

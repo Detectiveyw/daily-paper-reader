@@ -1,0 +1,65 @@
+{
+  "label": "2026-08-12",
+  "date": "2026-08-12",
+  "generated_at": "2026-08-12T21:15:07",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202608/12/2608.06261v1-game-hopping-in-lean",
+      "section": "quick",
+      "title_en": "Game Hopping in Lean",
+      "authors": "Stefan Dziembowski, Grzegorz Fabiański, Daniele Micciancio, Rafał Stefański",
+      "date": "2026-08-06",
+      "pdf": "https://arxiv.org/pdf/2608.06261v1",
+      "score": "7.0",
+      "evidence": "机械化密码学证明与安全定义",
+      "tldr": "HOPSCOTCH 是一个基于 Lean 4 的密码学证明框架，旨在机械化计算安全的博弈跳跃证明。它采用浅嵌入方式，将预言机和归约定义为普通的 Lean 函数，从而无缝集成 Mathlib 等数学库。该框架通过显式的证明对象简化了证明的构建与自动化，并支持状态抽象方法来处理复杂的等价性变换。研究实现了包括 GGM 伪随机函数在内的多个经典协议的正式证明，展示了其在处理复杂密码学构造方面的强大能力。",
+      "tags": "query:fss-llm",
+      "abstract_en": "We present HOPSCOTCH, a Lean 4 framework for mechanizing computationally sound, game-based cryptographic proofs. Security definitions are expressed as indistinguishability between stateful probabilistic oracles, and proofs follow the standard game-hopping paradigm. HOPSCOTCH uses a shallow embedding: oracles and reductions are ordinary Lean definitions, enabling direct integration with the full Lean ecosystem, including general mathematical theories from Mathlib, such as finite-group theory. A game-hopping proof in HOPSCOTCH is represented as an explicit formal object whose constructors correspond to the standard steps of a game-hopping argument, making proofs easier to construct, automate, and inspect. We prove a general computational soundness theorem that interprets these proof objects by constructing reductions against the assumptions they use and deriving a concrete bound on the advantage of any distinguisher. Observational equivalence between oracles is established using a state-abstraction methodology: a simple yet powerful approach that supports transformations such as adding or forgetting state and replacing eager sampling with lazy sampling. We illustrate the framework with formalized proofs of the IND-CCA security of encrypt-then-MAC, the security of ElGamal encryption from DDH, the implication from one-time secrecy to public-key IND-CPA security, and the GGM pseudorandom-function construction. To the best of our knowledge, the last is the first mechanized proof of GGM for non-constant depth.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/12/2608.11181v1-how-to-verify-consistency-of-probabilistic-claims",
+      "section": "quick",
+      "title_en": "How to Verify Consistency of Probabilistic Claims",
+      "authors": "Orr Paradise, Oliver Richardson, Yoshua Bengio, Shafi Goldwasser",
+      "date": "2026-08-11",
+      "pdf": "https://arxiv.org/pdf/2608.11181v1",
+      "score": "7.0",
+      "evidence": "验证AI安全中概率主张的一致性",
+      "tldr": "本研究针对AI安全中的概率预测一致性问题，提出了一种交互式概率可检验证明（PCP）协议。通过将预测模型表示为概率和置信度电路，验证者仅需在多项式时间内访问少量数据点即可验证指数级概率主张的近似一致性。研究还证明了显式概率主张的近似一致性属于NP类，为构建能够证明自身诚实性的AI系统提供了复杂性理论基础。",
+      "tags": "query:fss-llm",
+      "abstract_en": "When a probabilistic predictor answers many conditional-probability queries, are its answers self-consistent, and can this be verified in polynomial time? This problem is of interest for AI safety, where safety is derived from honesty about probabilistic predictions of unwanted outcomes potentially caused by an AI action. We construct an interactive PCP as follows. Let a predictive model be specified by a probability circuit P and a circuit Q which outputs confidence in predictions. Together, P and Q implicitly specify exponentially many probabilistic claims. We show a protocol in which a polynomial-time verifier can verify the approximate consistency of (P,Q). The verifier is given the pair of circuits (P,Q), which it evaluates at only a few points; alongside them it is given a proof oracle, an encoding of a witnessing probability distribution allegedly consistent with the predictions of (P,Q), which it reads at a few locations while interacting with a single untrusted prover. En route, we must ensure the existence of a sparse witnessing distribution consistent with the model's predictions. To do so, we first consider witness distributions for the consistency of explicit probabilistic claims, rather than claims specified by a predictor: say m claims, each of the form Pr[Y = 1 | X = x] = p, over n Boolean variables. Building on work initiated by Nilsson (Artif. Intell., 1986), we place l_2-approximate probabilistic consistency of explicit claims in NP, with certificates of length O(mn + log B) in the input bit-precision B; we further show how a small additive completeness-soundness gap removes the dependence on B. Together these results provide a complexity-theoretic foundation for certifying the self-consistency of probabilistic predictors. We view our interactive PCP as a first step toward training predictive models to prove their own consistency.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/12/2608.10736v1-a-lightweight-fault-detection-scheme-for-barrett-modular-multiplication-using-multiple-conditional-reduction-paths",
+      "section": "quick",
+      "title_en": "A Lightweight Fault-Detection Scheme for Barrett Modular Multiplication Using Multiple Conditional Reduction Paths",
+      "authors": "Rourab Paul, Paresh Baidya, Krishnendu Guha, Amlan Chakrabarti",
+      "date": "2026-08-11",
+      "pdf": "https://arxiv.org/pdf/2608.10736v1",
+      "score": "6.0",
+      "evidence": "全同态加密与后量子加密硬件中模乘运算的故障检测",
+      "tldr": "针对格密码（PQC）和全同态加密（FHE）中核心的Barrett模乘运算，本文提出了一种轻量级的故障检测方案。由于模乘器易受侧信道攻击、硬件木马及老化导致的故障影响，研究引入了统计归约监测（SRM）方法。该方案通过多条件归约路径实现高效的随机和突发故障检测，在保证系统安全性的同时，显著降低了硬件开销，为加密基础设施提供了安全保障。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Polynomial multiplication is the most resource-, time-, and energy-critical operation in lattice-based Post-Quantum Cryptography (PQC) and Fully Homomorphic Encryption (FHE) schemes. Lattice-based PQC schemes such as Kyber and Dilithium have already been standardized, while lattice- based FHE schemes such as BGV, BFV, and CKKS are widely recognized as leading candidate in FHE area. Barrett Modular Multiplication (BMM) for polynomial multiplication is widely adopted in PQC and FHE hardware accelerators due to its hardware friendly nature and efficient modular reduction capabilities. However, Side-Channel Attacks (SCAs) and Hardware Trojans may introduce intentional faults, while aging and various other factors can cause unintentional faults. These faults may target the BM M unit, one of the most critical components of PQC and FHE infrastructures, potentially leading to information leakage and compromising system security. In this paper, we employ a Statistical Reduction Monitoring (SRM) method to protect the BM M unit against such adversarial conditions. The proposed approach incurs minimal hardware overhead while providing efficient detection of both random and bur",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/12/2608.11155v1-on-the-sensitivity-to-errors-in-homomorphic-computing-single-transient-bit-flip-client-side-error-characterization",
+      "section": "quick",
+      "title_en": "On the Sensitivity to Errors in Homomorphic Computing: Single Transient Bit-flip Client-side Error Characterization",
+      "authors": "Matías Mazzanti, Vattana Chan, Karthik Swaminathan, Augusto Vega, Esteban Mocskos, Radha Venkatagiri",
+      "date": "2026-08-11",
+      "pdf": "https://arxiv.org/pdf/2608.11155v1",
+      "score": "6.0",
+      "evidence": "人工智能和机器学习的隐私保护计算",
+      "tldr": "同态加密（HE）是隐私计算的关键，但其依赖噪声注入的特性使其对硬件或软件引发的位翻转错误高度敏感。本文针对广泛用于AI领域的CKKS方案，深入研究了单次瞬态位翻转错误对计算的影响。研究发现，同态乘法是HE流水线中最敏感的操作，错误会在此过程中显著传播和放大，揭示了HE系统在容错性方面的重大脆弱性，并强调了构建更具韧性的HE部署的必要性。",
+      "tags": "query:fss-llm",
+      "abstract_en": "Homomorphic Encryption (HE) enables computation on encrypted data without decryption and is a key primitive for privacy-preserving computation in sensitive domains such as healthcare, finance, and government. Its security relies on noise injection, which introduces intrinsic error sensitivity and raises concerns about the fault tolerance of HE systems, as hardware- and software-induced faults can evade traditional detection mechanisms and lead to silent data corruption.   In this work, we analyze the sensitivity of HE to bit-level faults, focusing on the CKKS (Cheon--Kim--Kim--Song) scheme widely used for approximate arithmetic in AI and machine learning workloads. We identify homomorphic multiplication as the most error-sensitive operation in practical HE pipelines and characterize how faults propagate and amplify through it, exposing a critical robustness vulnerability and motivating the need for more resilient HE deployments.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

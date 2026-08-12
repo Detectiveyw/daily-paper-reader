@@ -1,0 +1,171 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-12T21:14:43.072890+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 4,
+    "quick_skim_target": 11,
+    "quick_selected": 4
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2608.06261v1",
+      "title": "Game Hopping in Lean",
+      "abstract": "We present HOPSCOTCH, a Lean 4 framework for mechanizing computationally sound, game-based cryptographic proofs. Security definitions are expressed as indistinguishability between stateful probabilistic oracles, and proofs follow the standard game-hopping paradigm. HOPSCOTCH uses a shallow embedding: oracles and reductions are ordinary Lean definitions, enabling direct integration with the full Lean ecosystem, including general mathematical theories from Mathlib, such as finite-group theory. A game-hopping proof in HOPSCOTCH is represented as an explicit formal object whose constructors correspond to the standard steps of a game-hopping argument, making proofs easier to construct, automate, and inspect. We prove a general computational soundness theorem that interprets these proof objects by constructing reductions against the assumptions they use and deriving a concrete bound on the advantage of any distinguisher. Observational equivalence between oracles is established using a state-abstraction methodology: a simple yet powerful approach that supports transformations such as adding or forgetting state and replacing eager sampling with lazy sampling. We illustrate the framework with formalized proofs of the IND-CCA security of encrypt-then-MAC, the security of ElGamal encryption from DDH, the implication from one-time secrecy to public-key IND-CPA security, and the GGM pseudorandom-function construction. To the best of our knowledge, the last is the first mechanized proof of GGM for non-constant depth.",
+      "authors": [
+        "Stefan Dziembowski",
+        "Grzegorz Fabiański",
+        "Daniele Micciancio",
+        "Rafał Stefański"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LO"
+      ],
+      "published": "2026-08-06T16:52:16+00:00",
+      "link": "https://arxiv.org/pdf/2608.06261v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Mechanizing cryptographic proofs and security definitions",
+      "llm_evidence_cn": "机械化密码学证明与安全定义",
+      "llm_evidence": "机械化密码学证明与安全定义",
+      "canonical_evidence": "机械化密码学证明与安全定义",
+      "llm_tldr_en": "Presents HOPSCOTCH, a Lean 4 framework for formalizing game-based cryptographic proofs.",
+      "llm_tldr_cn": "介绍了 HOPSCOTCH，一个用于形式化基于博弈的密码学证明的 Lean 4 框架。",
+      "llm_tldr": "介绍了 HOPSCOTCH，一个用于形式化基于博弈的密码学证明的 Lean 4 框架。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Function Secret Sharing (FSS) protocols and theory",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.10736v1",
+      "title": "A Lightweight Fault-Detection Scheme for Barrett Modular Multiplication Using Multiple Conditional Reduction Paths",
+      "abstract": "Polynomial multiplication is the most resource-, time-, and energy-critical operation in lattice-based Post-Quantum Cryptography (PQC) and Fully Homomorphic Encryption (FHE) schemes. Lattice-based PQC schemes such as Kyber and Dilithium have already been standardized, while lattice- based FHE schemes such as BGV, BFV, and CKKS are widely recognized as leading candidate in FHE area. Barrett Modular Multiplication (BMM) for polynomial multiplication is widely adopted in PQC and FHE hardware accelerators due to its hardware friendly nature and efficient modular reduction capabilities. However, Side-Channel Attacks (SCAs) and Hardware Trojans may introduce intentional faults, while aging and various other factors can cause unintentional faults. These faults may target the BM M unit, one of the most critical components of PQC and FHE infrastructures, potentially leading to information leakage and compromising system security. In this paper, we employ a Statistical Reduction Monitoring (SRM) method to protect the BM M unit against such adversarial conditions. The proposed approach incurs minimal hardware overhead while providing efficient detection of both random and bur",
+      "authors": [
+        "Rourab Paul",
+        "Paresh Baidya",
+        "Krishnendu Guha",
+        "Amlan Chakrabarti"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-08-11T09:55:24+00:00",
+      "link": "https://arxiv.org/pdf/2608.10736v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Fault-detection for modular multiplication in FHE and PQC hardware",
+      "llm_evidence_cn": "全同态加密与后量子加密硬件中模乘运算的故障检测",
+      "llm_evidence": "全同态加密与后量子加密硬件中模乘运算的故障检测",
+      "canonical_evidence": "全同态加密与后量子加密硬件中模乘运算的故障检测",
+      "llm_tldr_en": "Develops a lightweight fault-detection scheme for Barrett modular multiplication used in FHE and PQC accelerators.",
+      "llm_tldr_cn": "为全同态加密和后量子加密加速器中的Barrett模乘运算开发了一种轻量级故障检测方案。",
+      "llm_tldr": "为全同态加密和后量子加密加速器中的Barrett模乘运算开发了一种轻量级故障检测方案。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Dealerless FSS architectures for secure distributed computation",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.11181v1",
+      "title": "How to Verify Consistency of Probabilistic Claims",
+      "abstract": "When a probabilistic predictor answers many conditional-probability queries, are its answers self-consistent, and can this be verified in polynomial time? This problem is of interest for AI safety, where safety is derived from honesty about probabilistic predictions of unwanted outcomes potentially caused by an AI action. We construct an interactive PCP as follows. Let a predictive model be specified by a probability circuit P and a circuit Q which outputs confidence in predictions. Together, P and Q implicitly specify exponentially many probabilistic claims. We show a protocol in which a polynomial-time verifier can verify the approximate consistency of (P,Q). The verifier is given the pair of circuits (P,Q), which it evaluates at only a few points; alongside them it is given a proof oracle, an encoding of a witnessing probability distribution allegedly consistent with the predictions of (P,Q), which it reads at a few locations while interacting with a single untrusted prover. En route, we must ensure the existence of a sparse witnessing distribution consistent with the model's predictions. To do so, we first consider witness distributions for the consistency of explicit probabilistic claims, rather than claims specified by a predictor: say m claims, each of the form Pr[Y = 1 | X = x] = p, over n Boolean variables. Building on work initiated by Nilsson (Artif. Intell., 1986), we place l_2-approximate probabilistic consistency of explicit claims in NP, with certificates of length O(mn + log B) in the input bit-precision B; we further show how a small additive completeness-soundness gap removes the dependence on B. Together these results provide a complexity-theoretic foundation for certifying the self-consistency of probabilistic predictors. We view our interactive PCP as a first step toward training predictive models to prove their own consistency.",
+      "authors": [
+        "Orr Paradise",
+        "Oliver Richardson",
+        "Yoshua Bengio",
+        "Shafi Goldwasser"
+      ],
+      "primary_category": "cs.CC",
+      "categories": [
+        "cs.CC",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-08-11T17:41:39+00:00",
+      "link": "https://arxiv.org/pdf/2608.11181v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Verifying consistency of probabilistic claims in AI safety",
+      "llm_evidence_cn": "验证AI安全中概率主张的一致性",
+      "llm_evidence": "验证AI安全中概率主张的一致性",
+      "canonical_evidence": "验证AI安全中概率主张的一致性",
+      "llm_tldr_en": "Constructs an interactive PCP protocol to verify the self-consistency of probabilistic model predictions.",
+      "llm_tldr_cn": "构建了一种交互式PCP协议，用于验证概率模型预测的自一致性。",
+      "llm_tldr": "构建了一种交互式PCP协议，用于验证概率模型预测的自一致性。",
+      "llm_tags": [
+        "query:fss-llm"
+      ],
+      "matched_query_tag": "query:fss-llm",
+      "matched_query_text": "Verifiable FSS protocols for malicious environments in LLM inference",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.11155v1",
+      "title": "On the Sensitivity to Errors in Homomorphic Computing: Single Transient Bit-flip Client-side Error Characterization",
+      "abstract": "Homomorphic Encryption (HE) enables computation on encrypted data without decryption and is a key primitive for privacy-preserving computation in sensitive domains such as healthcare, finance, and government. Its security relies on noise injection, which introduces intrinsic error sensitivity and raises concerns about the fault tolerance of HE systems, as hardware- and software-induced faults can evade traditional detection mechanisms and lead to silent data corruption.   In this work, we analyze the sensitivity of HE to bit-level faults, focusing on the CKKS (Cheon--Kim--Kim--Song) scheme widely used for approximate arithmetic in AI and machine learning workloads. We identify homomorphic multiplication as the most error-sensitive operation in practical HE pipelines and characterize how faults propagate and amplify through it, exposing a critical robustness vulnerability and motivating the need for more resilient HE deployments.",
+      "authors": [
+        "Matías Mazzanti",
+        "Vattana Chan",
+        "Karthik Swaminathan",
+        "Augusto Vega",
+        "Esteban Mocskos",
+        "Radha Venkatagiri"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR",
+        "cs.CR"
+      ],
+      "published": "2026-08-11T17:13:39+00:00",
+      "link": "https://arxiv.org/pdf/2608.11155v1",
+      "tags": [
+        "keyword:FSS LLM",
+        "query:FSS LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "privacy-preserving computation for AI and machine learning",
+      "llm_evidence_cn": "人工智能和机器学习的隐私保护计算",
+      "llm_evidence": "人工智能和机器学习的隐私保护计算",
+      "canonical_evidence": "人工智能和机器学习的隐私保护计算",
+      "llm_tldr_en": "Analyzes error sensitivity in Homomorphic Encryption (CKKS) used for approximate arithmetic in AI workloads.",
+      "llm_tldr_cn": "分析了用于AI工作负载近似运算的同态加密（CKKS）方案的错误敏感性。",
+      "llm_tldr": "分析了用于AI工作负载近似运算的同态加密（CKKS）方案的错误敏感性。",
+      "llm_tags": [
+        "query:fss-llm:composite"
+      ],
+      "matched_query_tag": "query:fss-llm:composite",
+      "matched_query_text": "Papers central to 近10年关于FSS的论文，涵盖浮点运算、恶意模型可验证性、大模型隐私推理及无Dealer架构。, especially work that connects or combines: P; Secure Transformer Inference; Distributed Comparison Function; M; Distributed Point Functions (DPF) in FSS; Function Secret Sharing (FSS) protocols and theory; Function Secret Sharing supporting floating point operations and verifiable security; Dealerless Function Secret Sharing architectures for private inference; Verifiable FSS protocols for malicious environments in LLM inference; Dealerless FSS architectures for secure distributed computation.",
+      "matched_requirement_id": "req-composite-fss-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

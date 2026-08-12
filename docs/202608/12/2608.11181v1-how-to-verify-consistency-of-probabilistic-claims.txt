@@ -1,0 +1,2802 @@
+Title: How to Verify Consistency of Probabilistic Claims
+
+URL Source: https://arxiv.org/pdf/2608.11181v1
+
+Published Time: Wed, 12 Aug 2026 01:31:23 GMT
+
+Number of Pages: 64
+
+Markdown Content:
+# How to Verify Consistency of Probabilistic Claims 
+
+Orr Paradise 1, Oliver Richardson 2, Yoshua Bengio 2, Shafi Goldwasser 3
+
+> 1
+
+EPFL 2Universit´ e de Montr´ eal, Mila – Quebec AI Institute, LawZero 3MIT, UC Berkeley 
+
+August 12, 2026 
+
+Abstract 
+
+When a probabilistic predictor answers many conditional-probability queries, are its answers self-consistent—and if so, can this be verified in polynomial-time? This problem is of interest for AI safety, when safety is derived from honesty about probabilistic predictions of unwanted outcomes potentially caused by an AI action. To address it, we construct an interactive PCP as follows. Let a predictive model be specified by a probability circuit P and a circuit Q which outputs confidence in predictions. P and Q together implicitly specify exponentially many probabilistic claims. We show a protocol in which a polynomial time verifier can verify ( P, Q )’s approximate consistency. The verifier is given the pair of circuits ( P, Q ), which it evaluates at only a few points; alongside them it is given a proof oracle, an encoding of a witnessing probability distribution allegedly consistent with the predictions of ( P, Q ), which it reads at a few locations while interacting with a single un-trusted prover. En-route to the above result, we need to ensure the existence of a sparse witnessing prob-ability distribution consistent with the model predictions. To do so, we first consider witness distributions for the consistency of explicit (rather than specified by a predictor) probabilistic claims: say m claims, each of the form “Pr[ Y = 1 | X = x] = p”, over n Boolean variables. Building on a body of literature initiated by Nilsson (Artif. Intel. 1986), we place ℓ2 approxi-mate probabilistic consistency of explicit claims in NP with certificates of length O(mn + log B)in the input bit-precision B; and further show how a small additive completeness–soundness gap removes dependence on the model’s precision B. This will be important for our interactive PCP constructions. Together these results provide a complexity-theoretic foundation for certifying the self-consistency of probabilistic predictors. We view the explicit Interactive PCP we present as the first step toward the eventual training of predictive models to prove their own consistency. 
+
+Correspondence to: papers@orrp.net , oliver.richardson@umontreal.ca 
+
+1arXiv:2608.11181v1 [cs.CC] 11 Aug 2026 1 Introduction 
+
+Suppose a probabilistic predictor claims that Pr[ X = 1] = 0 .9, Pr[ Y = 1 | X = 1] = 0 .9, and Pr[ Y = 1] = 0 .8. Although each pair of answers is plausible in isolation, the three cannot all be correct, since the first two imply that Pr[ Y = 1] ≥ 0.81. Yet intuitively the degree of inconsistency is relatively small. A predictor that implicitly contains the answers to many overlapping probability questions can exhibit much more complex versions of the same defect: subsets of claims may make sense locally, yet there is no single probability distribution that is consistent with them all. Is it possible to efficiently verify that the degree of inconsistency within a predictive model (e.g., the weights of a large neural network) is small? We remark that this question arises naturally in the context of AI safety: we do not want AI systems to manipulate us by giving conflicting answers in different contexts. The currently most advanced general-purpose AI systems show signs of misalignment, sometimes acting towards goals that go against the human designers’ intentions [BCP +25]. The Scientist AI [BCF +25, BRG +26] project aims to produce an unbiased consistent Bayesian predictor that promises use not only in scientific prediction, but also as a guardrail for an AI agent: by predicting the probability that a proposed agent action causes a specified type of harm. This approach can only work if the guardrail is based on a predictor that reflects a consistent probability distribution about events in the world, chosen in a non-strategic way (such as an approximation of a Bayesian posterior). 
+
+Self-consistency , and coherence with the observed facts, are properties that are more generally desirable for AIs. Indeed, consistent AI systems are also envisioned for scientific discovery: they will generate hypotheses, assign them probabilities in light of the available evidence, and update those probabilities as new information arrives—and in a way that is not designed to please a specific human user or reflect cultural biases inconsistent with facts. Such scientific reasoning is inherently probabilistic: a system does not necessarily know which hypothesis is true, but it must reason coherently under uncertainty. Whereas in the traditional mathematical claim setting we may ask a model to prove that a definite answer is correct ( cf. hallucination ), the natural question here is different: do the model’s probabilistic claims correspond to a single coherent view of a (probabilistic) world? And if perfect coherence is too much to ask of a learned model [ZG24], is it 
+
+approximately consistent, up to some threshold? Rewording this question using the terminology of Interactive Proof systems [GMR89], we ask: 
+
+Can powerful but un-trusted Prover(s) convince an efficient Verifier that the probabilistic claims made by a predictive model are jointly consistent? 
+
+In this paper, we answer these question(s) affirmatively. 
+
+Predictive Model Consistency 
+
+We formalize a predictive model by a pair of circuits ( P, Q ): a prediction circuit P and a confidence circuit Q.
+
+• P is a circuit, such as a neural network, that takes as input a description x of a context consisting of values assigned to a set of Boolean variables, and a variable y representing the target event of interest, and produces a (rational) number p = P (y | x) ∈ [0 , 1] that is to be interpreted as “the probability of y given x equals p”, i.e. , “Pr[ y | x] = p.” 
+
+• Q(x, y ) represents the confidence of the model in its prediction. This in particular allows the model to abstain from making predictions when uncertain and set Q = 0. 2Informally, we say that the model ( P, Q ) is (approximately) consistent if there exists a joint distribution μ over all variables that (approximately) agrees with P on all possible inputs where 
+
+Q > 0, in the sense that violations of μ(y | x) ≈ P (y|x) are small in aggregate over queries ( x, y ), weighted by Q. Formally, we propose the following measure of inconsistency of a distribution μ,with respect to a model ( P, Q ). Writing ∥Q∥1 for the sum of all confidence scores over all queries (x, y ), the model inconsistency is given by 
+
+Inc P,Q (μ) := 
+
+s 1
+
+∥Q∥1
+
+X
+
+> x,y
+
+Q(x, y ) ·
+
+
+
+μ(x ∧ y) − P (y | x) · μ(x)
+
+2
+
+(1) The proposed measure, which has been studied in the past [Pot14], is a simplified variant of the inconsistency measure developed in the theory of probabilistic dependency graphs [RH21, Ric22], which unifies and justifies many loss functions in machine learning via a natural information-theoretic measure of inconsistency. In contrast to [RH21, Ric22] (which uses relative entropy and thus requires averaging logarithms of real numbers), we use ℓ2 norm directly which allows us to work with polynomials and bring some of the machinery of interactive proofs to bear on the current problem. Furthermore, we believe it is better suited to the foundations of [BCF +25]. Putting it all together, the technical question we pose is 
+
+The Model -Consistency Problem: Given a predictive model (P, Q ) and a tolerance τ ≥ 0, is there an efficient way to verify that there exists μ such that Inc P,Q (μ) ≤ τ ?
+
+We emphasize that we do not ask whether the model’s predictions are true of the world, nor whether they are calibrated against empirical data; we ask only whether the model’s claims could all hold simultaneously under some distribution. This is the probabilistic analogue of logical con-sistency: a collection of deterministic claims is consistent if some assignment satisfies all of them, and a collection of probabilistic claims is consistent if some distribution does. Consistency is thus a necessary condition for trust rather than a sufficient one, and a model can certainly be coher-ent and wrong. Whereas consistency does not imply certainty, an in coherent model is not merely uncertain: it is internally inconsistent, and its answers cannot be understood as arising from any single probabilistic belief state. 
+
+The Verification Challenge 
+
+So, how can we hope to verify model consistency as defined above? The difficulty is one of scale. A variable is indexed by a d-bit string, so the model may refer to n = 2 d Boolean variables, and as the sample space consists of the 2 n joint assignments to them, the natural alleged witness distribution μ which would certify consistency is a vector of real numbers whose length is doubly exponential in d. This is an enormous object. Even putting aside concerns about real numbers and precision, it is hard to fathom how a verifier could efficiently compute or verify all the required marginals. For example, even Multi-Prover interactive proofs handle statements whose witnesses are exponentially long [BFL91], whereas the natural witness for our problem, the distribution μ,has doubly exponential description length. Thus, it is not clear, a priori, that a probabilistic polynomial-time Verifier can verify the consistency of a model with any amount of help. 
+
+The Sparse Support Distribution 
+
+A central step is to show the existence of another, “sparsely” supported, distribution that can serve as a proof witness in place of the naive one. Our route goes through a closely-related sub-problem. 3Rather than considering exponentially many variables encoded by a circuit, consider just n = d
+
+variables, and rather than letting a circuit implicitly encode exponentially many claims, suppose that they are given as an explicit Collection ( i.e. , multiset) P of Probabilistic Claims, referred to as a CPC hereafter. We call a CPC P consistent if there exists a joint distribution μ that agrees with all constituent claims, and focus on a notion of “approximate consistency” measured by a normalized ℓ2 norm. Given a CPC P and a tolerance τ ≥ 0 the problem Explicit Consistency is to decide whether there exists a probability measure μ ∈ ∆(2 n) over the n-hypercube of joint variable assignments such that 
+
+Inc P (μ) := 
+
+s 1
+
+|P| 
+
+X
+
+> (x,y,p )∈P
+
+
+
+μ(x ∩ y) − p · μ(x)
+
+2
+
+≤ τ. 
+
+It is not hard to see that Explicit -Consistency is NP -hard, as in the restricted case of tolerance 
+
+τ = 0 and probabilities p ∈ { 0, 1}, it essentially encodes a constraint satisfaction problem (CSP), from which this problem inherits hardness of approximation (see also Section 6). But is it in NP ,
+
+PSPACE , EXP , NEXP ? The obvious candidate for a consistency witness is a joint distribution 
+
+μ ∈ [0 , 1] 2n
+
+, which would seem to require exponential time and space to verify, putting aside issues of precision. At least in the consistent setting ( τ = 0), however, this is not the obstacle it appears to be: classical small-model theorems [FHM90, KM94, GKP88] show that a consistent collection of m claims is witnessed by a distribution supported on O(m) points, with probabilities that are rationals of polynomial bit-length, which places that case in NP (see Section 3). Prior work formalizing inconsistent settings ( τ > 0) has suggested the problem to be harder [KN95, RHS23]. What our setting needs is that this survives the passage to approximate consistency, and at a precision fine enough that the witness can be written into a proof oracle.           
+
+> Explicit -Consistency : verifying mexplicit claims Model -Consistency : verifying an entire predictive model
+> Pr[ y1|x1] = p1
+> ...Pr[ ym|xm] = pm
+> CPC P
+> short proof
+
+Verifier 
+
+> read in full
+> accept /reject
+> Predictive model ( P, Q )exponentially long proof oracle
+
+Verifier Prover 
+
+> two queries interaction poly queries
+> accept /reject
+
+Figure 1: Left: m probabilistic claims, collected, e.g. , as the outputs of a predictive model, are verified against a short proof certificate that the Verifier reads in full ( Explicit -Consistency ; Proposition 9). Right: the entire model is verified in one go via an Interactive PCP; the Verifier evaluates the model at two points, reads polynomially many positions of an exponentially long proof oracle, and interacts with a single untrusted Prover ( Model -Consistency ; Theorem 32). In both settings, the Verifier should accept if its input is probabilistically consistent, and reject otherwise. 
+
+In this paper we resolve both problems. We proceed to detail our full set of contributions: modeling and results. 41.1 Summary of Contributions 
+
+Throughout the paper, we let n be the number of Boolean variables in the system, m := |P| be the number of claims in the CPC, and B be the maximum binary precision among those claims. 
+
+Formalizing verifiable consistency. Our first contribution is the above modeling of the prob-lem of verifying the consistency of a probabilistic predictor, such as that of the ScientistAI [BRG +26, BCF +25]. The mutual consistency of explicitly given probabilistic claims is a classical question, going back to [Boo54] (see Section 3); our new subject is a predictive model, whose claims can be exponentially many but are specified implicitly by a circuit, and our goal is not to decide consistency but to verify it against an untrusted Prover. 
+
+Short witnesses for explicit consistency. We place Explicit -Consistency in NP , extending a classical line of work on probabilistic satisfiability (see Section 3 for related works). 
+
+Proposition (Proposition 9, informal) . There is a verifier for explicit probabilistic consistency that runs in time O(m3(B + log m)2 + m2n), with a certificate of length O(mn + log B), consist-ing of the support of a sparse witnessing distribution together with a single auxiliary prime, i.e. ,
+
+Explicit -Consistency ∈ NP .
+
+Next, by introducing a very small gap 1 between the completeness and soundness guarantees, we obtain a witness whose weights are written out explicitly, at low precision, and which the Verifier checks rather than computes. We note that at exact precision the weights alone grow quadratically in the number of claims, which is likely prohibitively expensive given that OpenAI, at the time of writing, serves over 2 billion queries per day. It is important to pay careful attention to the length of the proof, when envisioning deployment of the Interactive PCP below, where the witnessing distribution will need to be written out explicitly, weights included, inside the proof oracle. 
+
+Proposition (Proposition 8, informal) . Explicit -Consistency can be verified with a gap εgap with an explicit witness of length O(nm + m log(1 /ε gap )) , and in time O(m2(n + B log( m/εgap ))) .
+
+An Interactive PCP for model consistency. Our main result is an Interactive PCP (a proof oracle combined with an interactive proof with a single prover [KR08]) for Model -Consistency ,thereby showing the first probabilistically checkable proof system for model consistency. 
+
+Theorem (Theorem 38 with Corollary 33, informal) . Model -Consistency admits a polynomial-time Interactive PCP, verifying consistency up to an additive gap εgap = 2 −poly (ℓ,d,B ).
+
+Reed– μller: a marginal-verifiable encoding of distributions. The proof oracle at the heart of our protocol is built from a primitive that may be of independent interest: a locally-verifiable encoding of sparse distributions that enables delegation of marginal computation (Section 7). We present it as a self-contained library, which may be used to verify other properties than consistency: the encoding, a codeword-validity verifier, and a marginal verifier. Improvements to its parameters would carry over directly to Theorem 38 (see Remark 34).           
+
+> 1The gap is between values of the inconsistency measure: given a valid certificate it accepts whenever Inc (P)≤τ−
+> εgap , it rejects every certificate whenever Inc (P)> τ , and for Inc (P) in between no guarantee is made (Proposition 8).
+
+5Distributions as witnesses. Combining the existence of NP witnesses for Explicit -Consistency 
+
+and MIP = NEXP [BFL91] places Model -Consistency in MIP as a black-box corollary, (Corollary 18), but here we go substantially further. Building on the low-precision (gap) Carath´ eodory witness of Proposition 8, we give a direct construction, of an Interactive PCP in which the proof oracle encodes the witness, a sparsified probability distribution, and the interaction reduces approximate consistency to point queries on that distribution. The distinction is not merely cosmetic: the generic derivation compiles the problem into a computation-checking instance, losing the fact that the witness is a probability distribution and that the claims are conditional-probability constraints, whereas the explicit protocol preserves this structure. Put differently, where the IP, MIP and PCP tradition encodes proofs of determinis-tic mathematical facts, the object encoded here is a distribution. The protocol that drives this reduction and its analysis are developed in Section 8. We believe that for sub-classes of probabilistic predictions which arise in an AI setting, an Interactive PCP with efficient provers can be developed in the Self-Proving model of [AGPR25]. The two roles of “the prover” in an interactive PCP, a stateless proof oracle and a stateful Prover, can be played by a single model, assuming the Verifier can control its context: reset before each oracle query, and carried across interactive rounds (see Remark 1). Finally, we consider pointing the way to a new era for interactive and probabilistic proofs, a contribution in its own right. Our protocol extends the classical toolkit of probabilistic proof systems (multilinear extensions, the 
+
+SumCheck protocol, self-correction), now aimed at a new kind of problem domain. Ultimately, we argue, probabilistic consistency is a fundamental aspect of what is needed to trust AI systems. A highly inconsistent agent may be unable to reliably execute tasks, let alone reliably help with enhancing our knowledge. Indeed, much of training and inference in machine learning can be viewed as the process of resolving inconsistencies in probabilistic models [Ric22, Ric24]. Being highly intelligent and useful does not ensure consistency, and it is at this point inconsistency becomes a safety concern: we do not want highly intelligent systems whispering different things in our ears, which can be manipulative and dishonest. For these reasons, training for consistency is a key part of the Scientist AI approach to designing safe AI systems [BCF +25]—especially when combined with probabilistic claims that enforce consistency with a Bayesian posterior. Indeed, the Scientist AI they envision is essentially a circuit that implicitly encodes all succinctly specified probabilistic claims; for such a system, consistency is not a technical nicety but part of what it means to behave as a coherent scientific reasoner. Finally, many open problems emerge. Can we train AI systems to produce proofs of self-consistency of their claims for restricted classes of distributions? What exactly does it take to convince an auditor that an allegedly consistent model is, in fact, (mostly) consistent? We leave these questions to future work. 
+
+# 2 Technical overview 
+
+This section describes the ideas behind our two main results, the two verification settings of Fig-ure 1; the full proofs occupy the remainder of this paper. Section 2.1 outlines our proof that consistency admits a sparse witness: if a CPC of m claims is consistent, then some distribution supported on only m + 1 points is consistent with it as well, and in fact one whose exact description takes polynomially many bits, placing Explicit -Consistency in NP . Section 2.2 uses this witness as its starting point: to verify the consistency of a predictive model, whose implicit claims are ex-ponentially many, the Prover encodes a sparse witnessing distribution as a proof oracle, and the 6Verifier tests the model’s inconsistency against this encoding. 
+
+2.1 Explicit -Consistency ∈ NP and a low-precision witness for the gapped case 
+
+We start by describing the techniques used to establish the NP -verifier for Explicit -Consistency . Here the instance is explicit: a CPC P of m probabilistic claims ( x, y, p ) over n variables, together with a tolerance τ ≥ 0, and the question is whether some distribution μ ∈ ∆{0, 1}n satisfies 
+
+Inc P (μ) = 
+
+vuut 1
+
+m
+
+X
+
+> (x,y,p )∈P
+
+ μ(x ∩ y) − p · μ(x)2 ≤ τ. 
+
+The natural witness is the distribution itself, and therein lies the difficulty: a priori , μ is an arbitrary vector of 2 n nonnegative reals summing to one. Because the degree of inconsistency can be viewed as an ℓ2 norm of an m-dimensional constraint residual vector (the vector of the m summands above), Carath´ eodory’s theorem guarantees the existence of another distribution μ′ supported on only m + 1 points. We call these points z, and the distribution over them α. Thus we refer to a pair ( z, α ) ∈ ({0, 1}n)m+1 × [0 , 1] m+1 that has the same inconsistency as μ as a Carath´ eodory Witness . In symbols: for every μ ∈ ∆{0, 1}n there exist support points z = ( z1, . . . , z m+1 ) with zj ∈ { 0, 1}n and weights α ∈ ∆[ m + 1] such that 
+
+Inc P (μz,α ) = Inc P (μ), where μz,α (ω) := 
+
+> m+1
+
+X
+
+> j=1
+
+αj 1[zj = ω].
+
+However, Carath´ eodory’s theorem only guarantees the existence of a sparse vector of real 
+
+weights; the remaining work, which is where our analysis departs from the classical small-support arguments (see Section 3), is to obtain a distribution μ′′ representable exactly, by rational numbers of polynomial bit-length. To do this, we start by fixing the identities z of the support points in the Carath´ eodory witness, and formulate the problem as a convex optimization problem, specifically a quadratic program: writing Vz ∈ Zm×(m+1) for the matrix whose jth column lists the constraint residuals of the single point zj , rescaled to integers, the best weights for the support z are those minimizing ∥Vz α∥22
+
+subject to α ≥ 0 and P 
+
+> j
+
+αj = 1. Therefore, the square in our ℓ2 measure of inconsistency plays a critical role: it turns the stationary conditions of the optimization problem into a system of linear equations. Concretely, on the support of an optimal α the only active constraint is that the weights sum to one, and setting the gradient of the Lagrangian to zero gives the linear system 
+
+2V T 
+
+> z
+
+Vz 11T 0
+
+  αλ
+
+
+
+=
+
+0
+
+1
+
+
+
+over the support, where λ is the multiplier of the sum-to-one constraint (Equation (5)). We then argue that the size of the coefficients in this linear system of equations is small by Hadamard’s inequality, which bounds the magnitude of the determinant of a matrix; finally, we bound the denominator of the solution via Cramer’s Rule. In fact, the Verifier need not receive the weights at all: given the support, it solves this very system itself, exactly, and the determinant bounds now control its running time rather than the certificate’s length. The certificate for Proposition 9 is thus the support, O(mn ) bits, together with a single prime of O(log m + log B) bits, which lets the Verifier certify that the system is non-singular before it solves, and seeds the exact solve. 7Finally, the gapped case, which our Interactive PCP requires because its proof oracle must store the weights explicitly: the exact rational weights above may need O(m(B + log m)) bits each, but rounding each weight to O(log(1 /ε gap ) + log m) bits perturbs the squared inconsistency by at most 
+
+ε2gap (Lemma 10), and the completeness gap leaves exactly this much room: ( τ − εgap )2 + ε2gap ≤ τ 2.This is Claim 12, which yields the logarithmic-precision witness of Proposition 8. 
+
+2.2 An IPCP for Model -Consistency 
+
+We first briefly recall some probabilistic proof systems. In an interactive proof [GMR89], a polynomial-time Verifier tosses coins and exchanges messages with an all-powerful but untrusted Prover, 2 then accepts or rejects; the requirement is that some Prover convinces it of every true claim (completeness), and that no Prover strategy convinces it of a false one, except with small probability (soundness). In a probabilistically checkable proof (PCP) [AS98, FRS94] there is no interaction: the proof is a fixed string, possibly far too long to read in full, of which the Verifier inspects a few randomly chosen locations. An Interactive PCP (IPCP ) [KR08] combines the two: the Prover first commits to a proof string (the proof oracle ), and the interactive proof is then carried out, during which the Verifier may also query the oracle (Definition 29). The essential distinction is that the oracle is stateless: its answer at each location is fixed in advance, whereas the Prover answers each message having seen those that preceded it. Next, the cast (Figure 1, right). The instance is the model itself: the circuits ( P, Q ) and a tolerance τ , all held by the polynomial-time Verifier, which can afford to evaluate the circuits at a point but not to enumerate their claims. A witness is a distribution μ attaining Inc P,Q (μ) ≤ τ . As the model can be viewed as making 2 Θ( ℓd ) implicit probabilistic claims, even the sparse witness of Section 2.1 is an exponentially long object, with each of its support points being an assignment to all n = 2 d variables. Obviously, no polynomial-time Verifier can read such a witness in full, and it is thus encoded in a proof oracle π: an exponentially long string of which the Verifier reads a few locations of its choosing, while the untrusted Prover assists, interactively, in reducing statements about all of π to those few locations. In contrast to the PCP tradition, in which the string behind the oracle encodes a proof, here it encodes a distribution .The Verifier’s task boils down to confirming a single inequality: that the squared inconsistency 
+
+Inc 2(μ) of the model ( P, Q ) stays below the threshold τ 2. It must do so given only the access above: point queries to π, which allegedly encodes μ, and point evaluations of the model. Reducing this inequality to queries to π and evaluations of the model is the work of Section 8; Figure 2 depicts the reductions involved. For readability, this overview omits all normalization factors; they are restored in the full treatment of Section 8.2. It will be instructive to present the protocol as a sequence of randomized reductions: reducing a statement the Verifier cannot afford to check (a sum of 2 Θ( ℓd ) terms compared against a threshold), to statements that it can (evaluations of ˆP , ˆQ and π). The Verifier could not carry out such a reduction on its own; instead, each step is performed in interaction with the untrusted Prover, and is sound in the sense that if the statement before the step is false then, with high probability over the Verifier’s coins, so is the statement after it. The reduction used for the sums is the famous 
+
+SumCheck protocol [LFKN92], viewed as a randomized reduction from the claim that an exponential sum of a low-degree polynomial equals a given value to the claim that the polynomial takes a given value at a single random point ( cf. [Mei13, CFS17]). Figure 2 depicts the protocol in this light:   
+
+> 2Throughout this paper, the Prover is always written out in words; the symbol Pis reserved for the model’s probability circuit.
+
+8∥Q∥1 Inc 2(μ) ≤ τ 2∥Q∥1
+
+> the statement
+
+∥Q∥1 Inc 2(μ)ˆQ(ˆ q′) ˆQ(ˆ q) ·
+
+
+
+μ[(ˆ s=ˆb) ∩ ˆt=1] − μ[ˆ s=ˆb] ˆP (ˆ q)
+
+2
+
+Q P  
+
+> confidence circuit proof oracle π
+> probability circuit
+> SumCheck SumCheck
+> direct eval. direct eval.
+> VerMarginal VerMarginal
+> direct eval.
+> VerEnc
+
+Figure 2: The protocol as a chain of reductions: an arrow E → E′ means that verifying E reduces to verifying E′, interacting with the Prover via the sub-protocol labeling the arrow. The root is the statement the Verifier sets out to check; rounded boxes are intermediate expressions that get reduced further; and the bottom row holds the only objects accessed directly: the input circuits P, Q (gray), which the Verifier evaluates itself, and the proof oracle π (blue), written by the untrusted Prover and read at a few locations. The sub-protocols labeling the arrows ( SumCheck , VerEnc , VerMarginal ) are interactive, carried out with the Prover’s help; “evaluate” the Verifier does alone. Hats mark field-valued objects. 
+
+each arrow is one reduction, and the leaves are the only statements the Verifier checks directly. Why should the proof oracle be an encoding of that table, rather than the table itself? For two reasons. The quantities that the model’s claims refer to are marginals of μ, each a sum of exponentially many of its entries; storing the table as (the evaluations of) low-degree polynomials over a large field turns each marginal into a sum of polynomial values, exactly the kind of statement that SumCheck reduces to a few point queries. The Verifier must check, by reading a few locations and with the Prover’s interactive help, that it is close to a valid encoding of some distribution in the first place. The encoding that accomplishes both, which we term “Reed– μller,” is presented in Section 7 as a self-contained “library”; for this overview, we summarize its two capabilities: 
+
+• VerEnc : an interactive protocol verifying that an alleged codeword is close to a valid one. Validity is defined so that every valid codeword encodes a genuine distribution, with nonneg-ative weights summing to one (Definition 21); passing the test thus certifies at once proximity to the code and that the encoded object is a distribution. 
+
+• VerMarginal : an interactive protocol verifying any marginal of the underlying distribution, namely, the mass it places on a partial assignment to the variables. 3
+
+Conceptually, the protocol has three parts: it checks that π is close to a valid encoding of some 
+
+distribution ( VerEnc ); it obtains the marginals of that distribution to which the model’s claims  
+
+> 3The protocol proper calls the field-valued variant VerMarginoid , whose costs this overview quotes; the distinction is deferred to Section 7.
+
+9refer ( VerMarginal ); and it verifies, by SumCheck , that the model’s aggregate inconsistency against those marginals stays below the threshold. Figure 2 depicts how the parts fit together. Reading it top-down, we proceed with a strawman that gets progressively closer to the full protocol. 
+
+Reducing the threshold ∥Q∥1. The Verifier compares Inc 2(μ) against the threshold τ 2, and the former requires dividing by ∥Q∥1 = P 
+
+> q
+
+Q(q). Note that this is a sum over the set of all possible queries Q, which is of exponential size in the model’s input length. The first SumCheck reduces ∥Q∥1 to an evaluation at a random point ˆ q′ ∈ Flog |Q| , where F is a large finite field over which all of the protocol’s arithmetic runs. Here and throughout, hats mark objects over F: ˆQ is the polynomial extending Q to F (Fact 30), and the random point ˆ q′ is a vector of field elements, so it has the “shape” of a query but need not describe an actual one: 
+
+∥Q∥1 = X
+
+> q∈Q
+
+Q(q) SumCheck 
+
+7−−−−−−→ ˆQ(ˆ q′) .
+
+Verifying the inconsistency Inc 2. The root of the figure is the squared inconsistency Inc 2(μ), a sum over the query universe Q of an expression depending on the model ( P, Q ) and the marginals of the distribution μ. Verifying such a sum is precisely what the SumCheck protocol is designed for [LFKN92], so one SumCheck randomly-reduces it to a single uniformly random point ˆ q ∈ Flog |Q| :
+
+Inc 2(μ) = X
+
+> q∈Q
+
+Q(q) μ[( s=b) ∩ (t = 1)] − μ[s=b]P (q)2
+
+ySumCheck 
+
+ˆQ(ˆ q)
+
+
+
+μ[(ˆ s=ˆb) ∩ ˆt=1] − μ[ˆ s=ˆb] ˆP (ˆ q)
+
+2
+
+.
+
+Here ˆ s, ˆb, ˆt denote the blocks of the point ˆ q that, in a Boolean query q = ( s1, b 1, . . . , s ℓ, b ℓ, t ), would hold the context variable descriptions, the context bits, and the target. Four quantities are left at ˆq: the marginals μ[ˆ s=ˆb], μ [(ˆ s=ˆb) ∩ (ˆ t=1)] and the model values ˆP (ˆ q), ˆQ(ˆ q). We account for each in turn. 
+
+The marginals μ[ˆ s=ˆb], μ [(ˆ s=ˆb) ∩ (ˆ t=1)] . The first is the mass the encoded distribution places on the context read off ˆ q, and the second extends that context by requiring the target be true; that is, each is a marginal of μ. The marginal check VerMarginal (the second capability of the encoding) verifies each, reducing it to O(ℓ) point queries on the proof oracle: 
+
+μ[ˆ s=ˆb] , μ[(ˆ s=ˆb) ∩ (ˆ t=1)] VerMarginal 
+
+7−−−−−−−→ O(ℓ) point queries to π . 
+
+The model values ˆP (ˆ q), ˆQ(ˆ q), ˆQ(ˆ q′). These are the input circuits P, Q , viewed as the polynomials they compute (Fact 30), at the SumCheck s’ random points. The Verifier evaluates each itself, by running the circuit over F at a single point—no interaction with the Prover: ˆP (ˆ q) , ˆQ(ˆ q) , ˆQ(ˆ q′) F act 30 
+
+7−−−−−→ evaluations of the circuits P , Q . 
+
+Validity of the encoding. Every reduction above reads the proof oracle π as a genuine Rμ-encoding of a witnessing distribution, but a cheating Prover could instead supply an arbitrary string. The encoding check (VerEnc ), run once at the outset, certifies that π is close to a genuine codeword. It is the first capability of the encoding, and the one global check in the protocol: it reduces to nothing further. 10 All together, the protocol runs the encoding check once; two SumCheck s for Inc 2 and ∥Q∥1; two marginal checks for the marginals at ˆ q; and three direct circuit evaluations for ˆP (ˆ q), ˆQ(ˆ q), ˆQ(ˆ q′)(Fact 30). 4 Each sub-protocol runs with its own fresh randomness, and the oracle π is read only through VerEnc and VerMarginal . The honest proof oracle is constructed in Section 8.1, and the full protocol is given as Algorithm 6 and analyzed in Section 8.2; Section 8.3 then improves the efficiency of the direct evaluations by delegating them to the Prover. This gives an explicit route by which a model could, in principle, prove its own probabilistic consistency; Remark 1 elaborates. 
+
+Remark 1 (Learning the Prover?) . An IPCP can be viewed as a stateless prover (the proof oracle, whose answers depend only on the query location) and a stateful prover (the interactive Prover). These roles can be realized by a single model in a scenario where a user (Verifier) attempts to ascertain the probabilistic consistency of a (large language) model with which it is interacting. Namely, when training the model to act as a Prover [AGPR25], a single Self-Proving model Pθ
+
+can play both roles through its state or “context”: the Verifier implements the proof oracle by resetting Pθ’s context before each query ( cf. backtracking [BLM +25, RSS +25]), so that an answer cannot depend on the queries that preceded it, and implements the interactive Prover by letting the context persist across rounds. And of course, a proof oracle is equivalent to non-communicating provers [FRS94], which is how an IPCP [KR08] formally is a type of multi-prover interactive proof system [BFLS91]. 
+
+# 3 Related work 
+
+Verifying distribution properties. Verifying (or testing) consistency of predictive models can be viewed as an inverse problem to that of verifying properties of distributions. This is because in the latter settings, the Verifier is given access to samples from a distribution and is tasked with certifying whether a global property of this distribution holds. In the case that the property can be cast as a (possibly huge) set of probabilistic claims (constraints on the distribution’s marginals), this setting can be viewed as inverse to ours: in that setting access is given to the distribution and the task is to determine whether a set of claims hold, whereas in ours access is given to the claims (or a predictive model) and the task is to determine whether there exists a distribution consistent with them. In more detail, Interactive Proofs (IPs, [GMR89]) have been adapted to verify properties of distributions [CG18], and this setting has since been studied extensively, showing that a rich family of properties can be verified, including, e.g. , label-invariant properties [HR22, HR23, Her24, HR25a, HR25b, GHR25]. In the context of machine learning [GRSY21] introduced the IP-PAC systems, in which the Verifier certifies the accuracy of a given learned model with respect to a distribution (see also [MS23, GJK +24]). Without the aid of a prover, [GR00, BFR +00] studied property testing [RS96, GGR98] for distribution properties, wherein a Tester is given access to samples and determines a property of the distribution from which they were drawn (see survey [Can22]). Of this rich line of work, particularly relevant is when the tester can draw samples from marginals of the distribution in what is known as subcube-conditioned sampling [CRS15, BC18, CCK +21, CM24, CCR +25]: in the Boolean setting, a context x ∈ { 0, 1, ∗} n specifies a subcube, and the claim “Pr[ y = 1 | x] = p” is the (alleged) expectation of the yth coordinate conditioned on this subcube.  
+
+> 4We think of these as two evaluations of the model, one at ˆ qand the other at ˆ q′.
+
+11 Probabilistic Consistency. The pursuit of probabilistic consistency has been salient since the development of probability itself [Key21, Ram31]. [Boo54] posed it as the search for the “conditions of possible experience”, and Dutch book arguments , beginning with the coherence theorem of de Finetti [dF37], contend that a bettor who fails to be probabilistically consistent can be easily exploited. The standard axioms of probability, due to Kolmogorov [Kol50], are intended to ensure that a probability measure—which without constraints would be simply a function that assigns numbers in [0 , 1] to events in a σ-algebra—behaves as one would expect. The complexity of probabilistic satisfiability has been studied in several settings [Nil86, GKP88, FHM90, Luk01, KM94]. The question of whether m explicit unconditional probability claims can be jointly satisfied ( PSAT ) was posed by [Nil86], who recast it as a linear program; [GKP88] proved it NP -complete, with hardness already at two literals per clause. Via classical theory of linear programming, [GKP88] argue that the problem is in NP by appeal to the fact that a linear program with m constraints, corresponding to unconditional claims, has a solution supported on at most m + 1 points. They also show that the problem remains hard even for clauses of at most two literals. [FHM90] study a variant with inequalities, and bound the binary representation of the witnesses, placing the consistency problem for rational weights in NP under the standard model of computation (their Sec. 2.4). [GKP88, FHM90] both remark in passing that the construction can be extended to handle explicit conditional claims of the form Pr[ y | x] = p that we use (essentially our 
+
+Explicit -Consistency problem restricted to the case of τ = 0). Our proof of Proposition 9 is related to this classical approach, except that we operate in an inconsistency-tolerant setting ( τ ≥ 0) whose objective is not merely a constraint residual of a linear program, and at a precision that requires us to be more careful about certificate length and introduce a gapped analogue. Tolerance of inconsistency ( τ > 0) has received less attention, at least until recently. Kilian and Naor [KN95] call a set of statistics ε-inconsistent if every distribution violates one of them by at least ε, and prove that distinguishing consistent from ε-inconsistent statistics is NP -hard for a constant ε; however, they do not upper bound its complexity. [Pot14] proposes a family of ℓp-based inconsistency measures, including our Inc for p = 2, but only places its complexity in EXP . This kind of inconsistency minimization is useful for database consolidation [PT14]. These ℓp measures are surveyed in [DFPT18], where they are connected to the degree of vulnerability to Dutch books; the entropy-based divergences of [RH21] are a separate line. [RHS23] show that approximating a notion of inconsistency closely related to ours is #P -hard. In machine learning, probabilistic consistency appears not as a property to be decided but as one to be trained for [XN18, ZPIE17, JLKK19, KJPJ20, RSS +26]. Systems are trained to ensure consistency between different representations, in both generative [ZPIE17] and semi-supervised settings [KJPJ20]. Ensuring consistency between forward and backward probabilistic trajectories is a key idea behind Generative Flow Networks [BLD +23]. This has led to the Scientist AI project, which aims to generalize the techniques used to train GFlowNets for consistency to systems of exponentially more variables [BCF +25, FRG +26]—which is precisely the primary problem we tackle in this paper. It has been argued that all of these results fit together as part of a bigger theory of machine learning as probabilistic modeling that is tolerant to inconsistency [Ric24, Ric22]. 
+
+The Integer Carath´ eodory theorem. Previous work studied “Integer Carath´ eodory theo-rems” [CFS86, Seb90, ES06], in which any integer point in the conic hull of a Hilbert basis (or a finite set of integer vectors) is representable as an integer conic combination supported on linearly many basis vectors. Our bounds (Section 5) can be viewed as complementary in that they give a sparsity bound for rational convex combinations of Boolean vectors, with explicit control on the 12 bit-length of the coefficients. To the best of our understanding, our results fundamentally cannot be derived from the existing literature because, essentially, clearing denominators to reduce our setting to theirs would blow up coefficient magnitudes exponentially in the input precision, which would defeat our goal of a polynomial-length certificate. Also related is literature on “approximate Carath´ eodory theorems” [Bar15, MLVW17], however these results bound the ℓp-approximation er-ror of a sparse convex combination at a fixed support size, rather than the bit-complexity of an (almost-)exact stochastic representation. 
+
+Interactive Proofs and AI. IPs have been demonstrated to hold theoretical and empirical promise as a way of establishing trust in learned models (“AI Safety”). [ICA18] proposes using Debate Systems (with two competing provers, cf. [CFLS93, FK97]), later extended to the double-efficient setting in [BIP24] and studied further in [BIP25, BIM +26]. [AZWG21] introduced Prover– Verifier Games , in which a non-interactive ( NP -)Verifier is learned jointly with a Proof-generating model. This setting was used in large-scale experiments by OpenAI in [KCE +24], and generalized to that of Interactive Proofs (including MIPs and Zero Knowledge proof systems) in [HA25]. Relatedly, [WST +24] studied a variant ( MA-Classifiers ) towards obtaining more interpretable model outputs. [AGPR25] introduced Self-Proving models , which are trained to act as Provers in a prescribed IP, that is, generate proofs that convince a given Verifier. This approach, which formalizes earlier empirical work ( e.g. , [PS20]), can be viewed as complementary to our main result: We show how a proof oracle and a prover can convince a verifier of the consistency of a model; future work can explore whether both roles can be learned as Self-Proving models themselves. The two roles differ only in statefulness—the proof oracle is a stateless prover, the interactive prover a stateful one—so a single “generalist” model can play both: its “memory” is reset before each oracle query and persists across the interactive rounds ( cf. Remark 1 and recent empirical works [POC +23, DLT +24]). 
+
+Sum-of-squares and pseudodistributions. The Sum-of-Squares (SoS) hierarchy of [Nes00, Las01, Par03], and the pseudo-distribution viewpoint [BBH +12, BS14] share a conceptual resem-blance to our setting, in that their goal is to certify that a system of constraints admits a (perhaps approximate) probability-distribution solution. There are significant technical differences, however: A degree-d pseudo-distribution is a linear functional on degree-d polynomials with no guarantee of extending to a genuine distribution, and the relevant parameter is the polynomial degree d with a semidefinite program of size exponential in d; more importantly, the SoS hierarchy prescribes algorithms for deciding approximate consistency, whereas we offer algorithms for verifying a (dif-ferent notion of) approximate consistency. Namely, our setting instead measures inconsistency by 
+
+ℓ2 distance from a genuine distribution, parameterizes by a tolerance τ (and an additive gap ε), and our verification methods utilize an auxiliary proof or interactive proof system. 
+
+# 4 Conventions and definitions 
+
+For a natural number m ≥ 1, we use [ m] := {1, . . . , m } for the set of positive integers at most m.All logarithms are base 2. We write poly (·) for an unspecified polynomial in its arguments, and ˜O(·) suppresses factors polylogarithmic in the argument. For a finite set X, we write ∆ X for the set of all distributions ν over the elements of X, and use the same symbol ( ν, in this case) for both: (a) the simplex point (or probability mass function) ν : X → [0 , 1] satisfying P 
+
+> x∈X
+
+ν(x) = 1, 13 which uniquely corresponds to (b) the probability measure ν : 2 X → [0 , 1], assigning a probability to events E ⊆ X satisfying the Kolmogorov Axioms of probability ( i.e. , ν(X) = 1, and ν(A ∪ B) = ν(A) + ν(B) for all disjoint A, B ⊆ X) agreeing with the pmf form (a) on singletons and is extended by 
+
+ν(E) = P 
+
+> x∈E
+
+ν(x). In particular, the set of joint distributions on the n-dimensional hypercube is denoted ∆ {0, 1}n =∆2 n. Here and throughout, 2 n for a number n denotes the hypercube {0, 1}n, whereas 2 X for a set 
+
+X denotes its power set, as in (b) above. 
+
+Variables and partial assignments. Throughout this paper, n ∈ N will be used to refer to a number of Boolean variables. A (joint) assignment to all variables is therefore a point ω ∈ { 0, 1}n
+
+on the n-dimensional hypercube. We are especially interested in the restricted set of events on the hypercube, namely those with that can be described through partial assignments to variables. A partial assignment is x ∈ { 0, 1, ∗} n, where xi = ∗ should be interpreted as having the ith variable be unassigned in x. Assignment ω ∈ { 0, 1}n agrees with x, written w |= x, if, for all i ∈ [n], 
+
+xi ∈ { wi, ∗} ; that is, w and x agree on all non-∗ entries of x. Thus, we allow ourselves to implicitly regard the partial assignment x as the event {ω ∈ 2n : ∀i ∈ [n]. x i ∈ { ωi, ∗}} when discussing its probability. We will often be interested in a target event of the form y = 1 for some variable index 
+
+y ∈ [n], which we formally regard as the event {ω ∈ 2n : ωy = 1 }.
+
+Machines and oracles. Our model of computation is the Turing machine, and the running times of the combinatorial algorithms of Section 5 are counted in machine steps, that is, bit operations. An oracle machine M f is a machine M with query access to a function f : it may write down an input x and read back f (x), at unit cost per query. This is the access model behind every oracle in this paper, the proof oracle of the Interactive PCP (Definition 29) in particular. The superscript names the oracle: VerEnc Z,A  
+
+> F
+
+, for example, has query access to the pair of functions ( Z, A ). Circuits are Boolean unless stated otherwise, and the size |C| of a circuit C is its number of gates, inputs and outputs included. When a circuit is an explicit input to an algorithm, as the predictive model ( P, Q ) is to the Verifier of Section 8, the input length is Θ( |P |+|Q|); a polynomial-time Verifier may therefore run in time polynomial in |P | + |Q|, which in particular dominates the circuits’ own input length ℓ(d + 1) + d and output precision B.
+
+Precision of rational numbers. Except where noted otherwise, all numbers in the paper are assumed to be rational. A non-trivial part of our techniques is devoted to controlling the errors introduced when doing arithmetic over rational numbers, and so we must explicitly deal with how these numbers are represented. Throughout this paper we will say that a rational number q ∈ [0 , 1] is specified to precision 
+
+B ∈ N to mean that q is represented by a numerator q† as a B-bit string, so that q = q†/2B . For example, if we say that a Turing machine takes as input a rational number q ∈ [0 , 1] to precision 
+
+B, then it takes the B-bit string q†. The convention extends to collections: when several rationals 
+
+q1, . . . , q k are specified to a common precision B (as are, e.g. , the claims of a CPC and the weights of our witnessing distributions), the machine takes just the numerators ( q†
+
+> 1
+
+, . . . , q †
+
+> k
+
+), the shared denominator 2 B being given once. In any case, when analyzing running time or proof lengths, the description will be made explicit. 14 Finite fields and polynomials. For a field F of odd characteristic we let 2 −1 denote the inverse of 1 + 1 in F. For an n-variate polynomial φ ∈ F[X1, . . . , X n], the total degree of φ is the maximum, over its monomials, of the sum of the variables’ exponents, and its individual degree is the largest exponent with which any single variable appears in it. Working over a prime field, we identify the elements of F with the integers {0, . . . , |F| − 1}.An (in)equality asserted over Z compares these integer representatives as integers, rather than as field elements; unlike its over-F counterpart, such an assertion is sensitive to wraparound, and controlling it is what the field-size hypotheses of Section 8 are for. Running times in Sections 7 and 8 are counted in field operations (additions, multiplications, inversions, and samples of a uniformly random element of F), each of which costs poly (log |F|) bit operations. Finally, we say that a random vector is marginally uniform on a set of coordinates if each of those coordinates, viewed on its own, is uniformly distributed; nothing is implied about their joint distribution. 
+
+Pseudocode. We write x ← e for the assignment of the value e to x; inside a procedure call, 
+
+f (p ← e) runs f with the named parameter p set to e. We write a ?
+
+= b for an equality the Verifier asserts, rejecting if it fails. “Expect v from the Prover” receives a message from the (untrusted) Prover and names it v; nothing is assumed of v beyond its type. A sub-protocol invoked by the Verifier runs on the Verifier’s own fresh randomness, and “reject if it rejects” propagates its verdict. 
+
+4.1 Collections of Probabilistic Constraints (CPCs) and their inconsistency 
+
+We now formally define our object of study: a collection of probabilistic claims (CPC). When specified explicitly, this is the key data of an Explicit -Consistency instance; when specified succinctly, it is the data of a Model -Consistency instance. 
+
+Definition 2 (CPC specified to precision B). Let B, n ∈ N. A probabilistic claim specified to precision B is a tuple ( x, y, p ) where x ∈ { 0, 1, ∗} n is the context , y ∈ [n] is the target , and 
+
+p ∈ [0 , 1] ∩ 12B Z can be represented as p†/2B for some integer p† ∈ { 0, . . . , 2B − 1}. A Collection of Probabilistic Constraints (CPC) specified to precision B ∈ N is a multi-set 5 P of probabilistic claims all specified to precision B. We will commonly use m = |P| to refer to the number of claims, i.e. ,elements in the multi-set P. The length of P in bits is m(n log 2(3) + ⌈log 2 n⌉ + B) ∈ O(mn + mB ). 
+
+Definition 3 (Approximate consistency and Explicit -Consistency ). Let P be a CPC of m claims over n variables, and let μ ∈ ∆{0, 1}n. We define the (normalized, ℓ2-) inconsistency of μ with P
+
+to be 
+
+Inc P (μ) := 
+
+vuut 1
+
+|P| 
+
+X
+
+> (x,y,p )∈P
+
+ μ(x ∩ y) − p · μ(x)2, (2) and the inconsistency of the CPC instance P to be Inc (P) := inf μ∈∆{0,1}n Inc P (μ). For a given tolerance τ ≥ 0, we say that P is τ -consistent if Inc (P) ≤ τ . We let Explicit -Consistency denote the set of all pairs ( P, τ ) such that P is τ -consistent.      
+
+> 5We will still use P∈ P to denote membership in the multi-set, and use |P| to denote its size (sum of multiplicities).
+
+15 4.2 Predictive models and their consistency 
+
+In this paper, a (predictive) model is a computer program that takes as input a description of events 
+
+x and y and outputs a number to be interpreted as the conditional probability of y given x. Acommon example is neural predictive models, which are neural network architectures instantiated with a set of weights, and claims described by a sequence of natural language sentences. It is useful to allow the model to output a confidence score in addition to its prediction. In particular, a zero confidence score allows the model to abstain from making a prediction all together, a capability whose utility is well-studied [GKKM20a, GKKM20b, KK21a, KK21b, GHMS23]. 
+
+Definition 4 (Predictive model) . Fix a variable description length d ∈ N, a context length ℓ ∈ N,and a precision B ∈ N, and write n := 2 d for the number of variables these parameters address, indexed by their d-bit descriptions: ωz for z ∈ { 0, 1}d. A predictive model is a pair of Boolean circuits ( P, Q ), where P is the probability circuit and Q is the confidence circuit , each taking a query as input and outputting B bits. A query is a string 
+
+q = ( s1, b 1, . . . , s ℓ, b ℓ, t ) ∈ Q , Q := {0, 1}ℓ(d+1)+ d,
+
+where Q is the query universe . Its components are the variable descriptions s1, . . . , s ℓ ∈ { 0, 1}d of the context, the corresponding context bits b1, . . . , b ℓ ∈ { 0, 1}, and the target variable description 
+
+t ∈ { 0, 1}d. On a query q, the probability circuit outputs P (q) ∈ { 0, . . . , 2B − 1}, interpreted as an (alleged) probability P (q)/2B , and the confidence circuit outputs an integer Q(q) ∈ { 0, . . . , 2B − 1}.Fix a distribution μ over {0, 1}n. For a context ( s1, b 1, . . . , s ℓ, b ℓ) we abbreviate by s = b the event that every context literal holds, that is, ωsk = bk for all k ∈ [ℓ], and use square brackets 
+
+μ[s = b] for its probability under μ—note the square brackets: 
+
+μ[s = b] := μ ({ω ∈ { 0, 1}n : ωsk = bk for all k ∈ [ℓ]}) .
+
+Writing t = 1 for the target literal ωt = 1, we similarly write μ[( s = b) ∩ (t = 1)] for the probability of the context event together with ωt = 1. 
+
+Definition 5 (τ -consistent predictive models) . Let ( P, Q ) be a model with variable description length d and context length ℓ, and let μ be a distribution over {0, 1}n. Let ∥Q∥1 = P 
+
+> q∈Q
+
+Q(q)denote the total confidence the model places over all queries. 6
+
+Inc P,Q (μ) := 
+
+vuut 1
+
+∥Q∥1
+
+X
+
+> q=( s1,b 1,...,s ℓ,b ℓ,t )∈Q
+
+Q(q)
+
+
+
+μ[( s = b) ∩ (t = 1)] − P (q)2B μ[s = b]
+
+2
+
+Inc (P,Q ) := inf  
+
+> μ∈∆{0,1}n
+
+Inc P,Q (μ).
+
+For a tolerance τ , we say that ( P, Q ) is τ -consistent if Inc (P,Q ) ≤ τ , and define the set Model -Consistency 
+
+comprising all ( P, Q, τ ) such that ( P, Q ) is τ -consistent. 
+
+4.3 Aside: Models as implicit CPCs 
+
+The two inconsistency operators defined above deliberately share the symbol Inc : a predictive model is a succinct description of a collection of claims, and its inconsistency is the inconsistency of that collection. We formalize this next.          
+
+> 6We treat Q’s outputs as unsigned (nonnegative) integers, so ∥Q∥1=P
+> q|Q(q)|is the ℓ1-norm of Qover its inputs.
+
+16 Definition 6 (Implicit CPC) . Let ( P, Q ) be a predictive model. Call a query q = ( s1, b 1, . . . , s ℓ, b ℓ, t )
+
+conflicting if there are indices k̸ = k′ ∈ [ℓ] with sk = sk′ yet bk̸ = bk′ . The implicit CPC PP,Q is the multiset of claims over n = 2 d variables obtained as follows. For each q ∈ Q : if q is non-conflicting, let xq ∈ { 0, 1, ∗} n be the partial assignment with ( xq)sk = bk for all k ∈ [ℓ] and ∗ in all other entries, and add Q(q) copies of the claim  xq, ω t, P (q)/2B ; if q is conflicting, add Q(q) copies of the tautological claim  xq, ω t, 0, where xq sets ( xq)t = 0 and ∗ in all other entries. 
+
+Claim 7. For every distribution μ over {0, 1}n, Inc PP,Q (μ) = Inc (P,Q )(μ): the inconsistency of the implicit CPC, as a CPC, equals the inconsistency of the model, as a model. In particular, (P, Q )
+
+is τ -consistent if and only if PP,Q is. Proof. By construction, |P P,Q | = P 
+
+> q
+
+Q(q) = ∥Q∥1, and the claims group by the query that pro-duced them: each q contributes Q(q) copies of one claim. For a conflicting q the context event is empty, so μ[s = b] = μ[( s = b) ∩ (t = 1)] = 0 and q contributes 0 to the model sum; its tautological claim contributes μ(xq ∩ ωt) − 0 · μ(xq) = 0 to the CPC sum, since ( xq)t = 0. Both are weighted Q(q), so |P P,Q | = P 
+
+> q
+
+Q(q) = ∥Q∥1 is unchanged and the two sums agree term by term. For any query q = ( s1, b 1, . . . , s ℓ, b ℓ, t ), the claim ( xq, ω t, P (q)/2B ) has μ(xq) = μ[s = b] and 
+
+μ(xq ∩ ωt) = μ[( s = b) ∩ (t = 1)]. Therefore 
+
+Inc PP,Q (μ) = 
+
+vuut 1
+
+|P P,Q |
+
+X
+
+> (x,t,p )∈P P,Q
+
+ μ(x ∩ y) − p · μ(x)2
+
+=
+
+vuut 1
+
+|P P,Q |
+
+X   
+
+> (xq,ω t,P (q)/2B)∈P P,Q
+
+Q(q) μ(xq ∩ ωt) − P (q)2B · μ(xq)2
+
+=
+
+vuut 1
+
+∥Q∥1
+
+X
+
+> q∈Q
+
+Q(q)
+
+
+
+μ[( s = b) ∩ (t = 1)] − P (q)2B · μ[s = b]
+
+2
+
+= Inc (P,Q )(μ).
+
+In light of Claim 7, we use Inc for both operators without further comment. 
+
+# 5 Verifying consistency of probabilistic claims 
+
+This section is concerned with establishing the following two results. 
+
+Proposition 8. The Verifier V of Algorithm 1, which takes as input a collection of probabilistic claims P specified to precision B, a tolerance τ ≥ 0 and gap εgap > 0, has the properties of: 
+
+• Efficiency : V runs in time O(m2(n + B log( m/εgap ))) .
+
+• Soundness : if Inc P (μ) > τ for all μ ∈ ∆( {0, 1}n), then V (P, τ, π ) = reject for all certificates 
+
+π.
+
+• Completeness (up to εgap ): If Inc (P) ≤ τ − εgap , then there exists a proof certificate π such that V (P, τ, π ) = accept . Moreover, π satisfies: 
+
+• Near-linear length and logarithmic certificate precision : accepting proofs π consist of at most 
+
+m + 1 pairs (z, α ) with z ∈ { 0, 1}n and α ∈ [0 , 1] specified in binary to precision Bεgap ∈
+
+O(log( m/εgap )) —thus satisfying length( π) ∈ O(m(n + log( m/εgap ))) .
+
+17 Our main construct (Theorem 32) relies on Proposition 8. Crucially, the weights of the wit-nessing distribution are rounded so as to be specifiable in Bεgap ∈ O(log( m/εgap )) bits. As noted in Section 3, the complexity of verifying approximate consistency is of independent interest within its related literature, and so we then adapt Proposition 8 to obtain a gap-free variant: 
+
+Proposition 9 (Explicit -Consistency ∈ NP ). There exists a Verifier that, when run on input P, τ ,satisfies: 
+
+• Efficiency : The Verifier runs in O(m3(B + log m)2 + m2n) time. 
+
+• Completeness : If Inc (P) ≤ τ , there exists a proof certificate such that the Verifier accepts. 
+
+• Soundness : if Inc (P) > τ , the Verifier rejects regardless of the given proof certificate. 
+
+• Certificate length : proof certificates are of length O(mn + log B).
+
+To compare the two: In Proposition 8 the Prover sends the weights, rounded, and the Verifier only checks them; the rounding introduces the gap, but it buys weights whose precision scales logarithmically with m/ε gap . In Proposition 9 only the support vectors (and a prime number) are sent: the Verifier solves for the exact optimal weights, which removes the gap at the price of a precision polynomial in m and B, and a running time to match. The gap-free variant cannot be directly used for our main construct (Theorem 32), as elaborated in Remark 36. 
+
+5.1 The Verifier 
+
+Consider a finite collection of probabilistic claims P = {(xi, y i, p i)}mi=1 with each p ∈ Q representable as the integer p† := p·2B ∈ { 0, . . . , 2B −1}. Define the constraint residuals , a vector ϕ : {0, 1}n → Zm
+
+over the space of joint assignments to variables, according to: 
+
+ϕ(ω) := 
+
+h
+
+(2 B ωyi − p† 
+
+> i
+
+)1[ω |= xi]
+
+imi=1 ,
+
+whose components each have magnitude at most 2 B . The key feature of this representation is that 
+
+Inc 2 
+
+> P
+
+(μ) = 1
+
+m · 22B E
+
+> ω∼μ
+
+[ϕ(ω)] 22 = 1
+
+m
+
+> m
+
+X
+
+> i=1
+
+(μ(xi, y i) − μ(xi)pi)2 for all μ ∈ ∆{0, 1}n. (3) Carath´ eodory’s Theorem [Car07] states that any point in the convex hull of a set S ⊂ Rd can be expressed as a convex combination of at most d + 1 points from S. We will use this to demonstrate that, if there exists a distribution μ∗ with small constraint violation Inc P (μ∗) ≤ τ , then there also exists one supported on only m + 1 points. That sparsely supported distribution (or rather, a discretization of it) will ultimately be the proof certificate. To be more precise, start with the observation that {Eμ[ϕ] : μ ∈ ∆{0, 1}n} = conv {ϕ(ω) : ω ∈{0, 1}n} is convex by definition of the expectation. Therefore, by Carath´ eodory’s Theorem, for every μ, the point Eμ[ϕ] ∈ Rm can be expressed as a convex combination Eμ[ϕ] = Pm+1  
+
+> j=1
+
+αj ϕ(zj )of some joint assignments z1, . . . , z m+1 ∈ { 0, 1}n. This yields a (typically different) distribution 
+
+μ′ = μz,α ∈ ∆{0, 1}n with the same constraint residual as μ, but supported on only m + 1 points. 18 Stated more formally: 
+
+∀μ ∈ ∆( {0, 1}n). ∃α = ( αj )m+1  
+
+> j=1
+
+∈ ∆[ m + 1] , z ∈ ({0, 1}n)m+1 . Eμ[ϕ] = 
+
+> m+1
+
+X
+
+> j=1
+
+αj ϕ(zj ) = Eμz,α [ϕ],
+
+where μz,α (ω) := 
+
+> m+1
+
+X
+
+> j=1
+
+αj 1[zj = ω] has supp( μz,α ) ≤ m + 1 .
+
+We remark that such sparsification arguments have been used in the literature: the same fact appears as a statement about basic feasible solutions of a linear system in [GKP88], [KM94, Theorem 2.3], and is what enables the small-model theorem in [FHM90, Theorem 2.6], both in the service of placing exact ( τ = 0) consistency of unconditional claims in NP . The other key ingredient is a bound on the lengths of the rational coefficients of this witness, which [FHM90] repurposed from the non-negative integer linear programming literature [Chv83]. The bound that we prove in Lemma 13 serves the same role for us, although we must do it directly, since our ℓ2 inconsistency formulation cannot be cast as a linear program, and we also need to very precisely bound the bit complexity of the weights of an approximate witness (c.f., Remark 36). This leads us to Algorithm 1. Its certificate specifies the weights to precision Bεgap : per our convention, only the numerators α† 
+
+> j
+
+= 2 Bεgap αj are sent. 
+
+Algorithm 1: Verification of Approximate Probabilistic Consistency 
+
+Input: Collection P of m probabilistic claims to precision B, tolerance τ , gap εgap > 0. 
+
+Input: A proof certificate comprising: an integer k ∈ [m + 1], assignments 
+
+z1, . . . , z k ∈ { 0, 1}n, and weights α†
+
+> 1
+
+, . . . , α † 
+
+> k
+
+∈ { 0, . . . , 2Bεgap } for 
+
+Bεgap := ⌈log 2
+
+ 2( m + 1) 3/(ε2gap m)⌉. 
+
+> 1
+
+Check that the certificate is of the form declared above, and that P 
+
+> j
+
+α† 
+
+> j
+
+= 2 Bεgap , else 
+
+reject . 
+
+> 2
+
+Calculate inc 2 := X
+
+> (x,y,p )∈P
+
+ kX
+
+> j=1
+
+α† 
+
+> j
+
+(2 B zj,y − p†)1[zj |= x]
+
+2
+
+.
+
+Output: accept if inc 2 ≤ m · 22B+2 Bεgap · τ 2; else reject 
+
+Write Vz := ϕ(z1), ϕ (z2), · · · , ϕ (zk) ∈ Zm×k for the residual matrix of the support, whose jth column lists the constraint residuals of the single point zj . It is what ties the algorithm’s arithmetic back to the inconsistency it is meant to measure: for any weights α ∈ ∆[ k] over the support, 
+
+∥Vz α∥22 =
+
+> k
+
+X
+
+> j=1
+
+αj ϕ(zj ) 22 = m · 22B · Inc 2 
+
+> P
+
+(μz,α ), (4) so that inc 2 = 2 2Bεgap ∥Vz α∥22 = m(2 B+Bεgap )2 Inc 2 
+
+> P
+
+(μz,α ). Therefore, the final check of Algorithm 1 holds exactly when Inc P (μz,α ) ≤ τ , and the best weights for a given support are those minimizing 
+
+∥Vz α∥22 over the simplex. 
+
+Runtime Analysis. Let’s take a closer look at the calculation on the last line. In the inner sum, we: 19 1. calculate whether or not zj |= x, which involves comparing each of the n bits of x against the 
+
+n bits of zj , and hence takes n steps. 2. Subtract p†, a non-negative integer at most 2 B , from either 2 B or zero, depending on the bit 
+
+zjy ∈ { 0, 1}, which takes B steps, and produces a ( B + 1)-bit number. 3. Multiply this number by α† 
+
+> j
+
+, an integer at most 2 Bεgap . This can be done in 1 + BB εgap steps (since the additional bit is a sign that can be copied in one step) and produces a ( B+Bεgap )-bit number. We repeat these three steps k ≤ m + 1 times, which takes at most ( m + 1)(1 + n + B + BB εgap ) ∈
+
+O(m(n+BB εgap )) steps, and results in an integer that can be represented in 1+ B+Bεgap +log 2(m+1) bits. Then we square it, resulting in a number that can be represented in 2(1+ B+Bεgap +log 2(m+1)) bits, and sum over all m probabilistic claims in P, for a total of 
+
+m
+
+
+
+(m + 1)(1 + n + B + BB εgap )
+
+| {z }
+
+> inner loop
+
++ 4(1 + Bεgap + B + 2 log( m)) 2
+
+| {z }
+
+> accumulation
+
+
+
+∈ O(m2(n + BB εgap )) steps .
+
+Since Bεgap ∈ O(log( m/εgap )), this is O(m2(n + B log( m/εgap ))) steps. The modified Verifier of Section 5.3 runs the same accounting at a larger denominator, and pays for its solve on top. 
+
+Soundness. The proof π = ( z, α †) sent by the Prover exactly encodes a distribution μz,α , and by (4) the quantity computed on the last line satisfies inc 2 = m(2 B+Bεgap )2 Inc 2 
+
+> P
+
+(μz,α ), so the final check holds if and only if Inc P (μz,α ) ≤ τ . Therefore, if the Verifier accepts, μz,α itself is a distribution with Inc P (μz,α ) ≤ τ . The procedure is thus perfectly sound: the gap will be paid only in completeness. 
+
+5.2 Logarithmic-precision weights, at the cost of a gap (Proposition 8) 
+
+The honest Prover sends an approximate witness ( z, ˆα): a support z, and weights ˆ α rounded to 
+
+Bεgap bits, satisfying ∥α − ˆα∥∞ ≤ δ for the exact optimum α on that support. Two lemmas make the rounding precise: the first bounds the error it incurs, and the second shows that weights of any prescribed precision exist within any rounding radius. Claim 12 then puts them together, and Proposition 8 follows. 
+
+Lemma 10. If α, ˆα ∈ ∆[ m + 1] are such that ∥α − ˆα∥∞ ≤ δ, i.e. , ∀j ∈ [m + 1] . |αj − ˆαj | ≤ δ, then for all z = ( zj )m+1  
+
+> j=1
+
+, Inc 2 
+
+> P
+
+(μz, ˆα) − Inc 2 
+
+> P
+
+(μz,α ) ≤ 2δ(m + 1) 3/m .Proof. First, we show that, since α, ˆα ∈ ∆[ m + 1] are probabilities over [ m + 1] that are close in the sense that max i |αi − ˆαi| ≤ δ, then |αiαj − ˆαi ˆαj | ≤ 2δ − δ2 for all i, j ∈ [m + 1]. This is evident in the following picture: 20 αi ˆαi
+
+αj
+
+ˆαj
+
+> ≤δ
+> (0 , 0) (1 , 1)
+
+In this unit square, the difference between the areas of the red and blue rectangles can be at most 2δ.We now compute 
+
+m · 22B · Inc 2 
+
+> P
+
+(μz, ˆα) − Inc 2 
+
+> P
+
+(μz,α ) =
+
+> m+1
+
+X
+
+> j=1
+
+ˆαj ϕ(zj ) 22 −
+
+> m+1
+
+X
+
+> j=1
+
+αj ϕ(zj ) 22
+
+=
+
+> m
+
+X
+
+> i=1
+> m+1
+
+X
+
+> k=1
+> m+1
+
+X
+
+> j=1
+
+ˆαj ˆαkϕi(zj )ϕi(zk) − X
+
+> (x,y,p )∈P
+> m+1
+
+X
+
+> k=1
+> m+1
+
+X
+
+> j=1
+
+αj αkϕi(zj )ϕi(zk)
+
+=
+
+> m
+
+X
+
+> i=1
+> m+1
+
+X
+
+> k=1
+> m+1
+
+X
+
+> j=1
+
+(ˆ αj ˆαk − αj αk)ϕi(zj )ϕi(zk)
+
+≤
+
+> m
+
+X
+
+> i=1
+> m+1
+
+X
+
+> k=1
+> m+1
+
+X
+
+> j=1
+
+|ˆαj ˆαk − αj αk| | ϕi(zj )ϕi(zk)|≤ (2 δ − δ2)
+
+> m
+
+X
+
+> i=1
+> m+1
+
+X
+
+> k=1
+> m+1
+
+X
+
+> j=1
+
+|ϕ(zj )ϕ(zk)|≤ 2δ(m + 1) 3 · (2 B )2
+
+Canceling the 2 2B scaling factor and dividing by m gives the desired result. We will also need the following straightforward fact about the density of fixed-precision binary numbers on the simplex. 
+
+Lemma 11. For all α ∈ ∆[ m + 1] and B ∈ N, there exists an α′ ∈ ∆[ m + 1] satisfying ∥α − α′∥∞ ≤
+
+2−B whose components are rational numbers of the form α′ 
+
+> i
+
+= α† 
+
+> i
+
+/2B for some α† 
+
+> i
+
+∈ Z≥0.Proof of Lemma 11. Given α ∈ ∆[ m + 1], start by truncating the first B bits of its binary repre-sentation of each component, i.e. , define α′′ ∈ [0 , 1] m+1 to be the vector whose ith component is 
+
+⌊2B αi⌋/2B . Clearly ∥α − α′′ ∥∞ ≤ 2−B , but α′′ will not be a distribution since P 
+
+> i
+
+α′′  
+
+> i
+
+< 1 unless 2B α is already a vector of integers. Let β := 1 − P 
+
+> i
+
+α′′  
+
+> i
+
+be total mass missing from α′′ required for it to be a distribution. Since the number 1 and each α′′  
+
+> i
+
+is an integer multiple of 2 −B , so too is β. Let β† := β · 2B ∈ Z be that multiple. Since each ( αi − α′′  
+
+> i
+
+) < 2−B by the definition of rounding, we know that β, which is the sum across all m + 1 components of the vector must be at most 2 −B (m + 1), i.e. , β† < m + 1. 21 Finally, choose any vector v ∈ { 0, 1}m+1 with Hamming weight P 
+
+> i
+
+vi = β†, and let α′ := 
+
+α′′ +v ·2−B be the result of re-assigning all β† units of missing mass to distinct components. Clearly 
+
+α′ is non-negative, sums to one, and its components are rational with common denominator 2 B .Now to put the pieces together. The point is that the gap in the completeness hypothesis is exactly the room the rounding needs. 
+
+Claim 12 (Sparse witnesses at bounded precision) . Let τ ≥ εgap > 0 and let Bεgap =  log 2
+
+ 2( m +1) 3/(ε2gap m) ∈ O(log( 1/εgap ) + log m) as in Algorithm 1. If Inc P (μ) ≤ τ − εgap for some μ ∈
+
+∆( {0, 1}n), then there are assignments z = ( zj )m+1  
+
+> j=1
+
+and integer weights α† ∈ Zm+1  
+
+> ≥0
+
+with P 
+
+> j
+
+α† 
+
+> j
+
+=2Bεgap such that ˆμ := μz,α †2−Bε gap satisfies Inc P (ˆ μ) ≤ τ .Proof. By Carath´ eodory’s theorem, there are z ∈ ({0, 1}n)m+1 and α ∈ ∆[ m + 1] with Eμz,α [ϕ] = 
+
+Eμ[ϕ], hence Inc P (μz,α ) = Inc P (μ) ≤ τ −εgap . Set δ := ε2gap m/ (2( m+1) 3), so that 2 −Bεgap ≤ δ. By Lemma 11, applied at precision Bεgap , there is ˆ α = α†2−Bεgap ∈ ∆[ m+1] with ∥α− ˆα∥∞ ≤ 2−Bεgap ≤
+
+δ, and by Lemma 10 the rounding perturbs the squared inconsistency by at most 2 δ(m + 1) 3/m =
+
+ε2gap . Therefore 
+
+Inc 2 
+
+> P
+
+(ˆ μ) ≤ (τ − εgap )2 + ε2gap = τ 2 − 2εgap (τ − εgap ) ≤ τ 2,
+
+using τ ≥ εgap in the last step. 
+
+Proof of Proposition 8. Soundness is the soundness paragraph above: the final check of Algorithm 1 is exact, so any accepted certificate exhibits a distribution μz,α with Inc P (μz,α ) ≤ τ .For completeness, suppose Inc P (μ) ≤ τ −εgap for some μ; in particular τ ≥ εgap , since otherwise no such μ exists. The certificate ( z, α †) of Claim 12 has weights summing to 2 Bεgap , so it passes the first check, and the exact final check passes because Inc P (ˆ μ) ≤ τ . Its length is at most (m + 1)( n + Bεgap ) ∈ O(m(n + log( m/εgap ))). Efficiency is the runtime analysis above. In particular, if we care about numbers only up to the same precision as the problem instance, 
+
+e.g. , to 32-bit fixed point precision ( εgap = 2 −B ), then witness weights of length ( m + 1)(2 B + 1 + 3 log 2(m + 1)) ∈ O(mB + m log m) suffice. 
+
+5.3 Polynomial-precision weights, and no gap (Proposition 9) 
+
+To decide Explicit -Consistency rather than its gapped version, the Verifier needs the exact optimal weights for the support, and those are not short. If the claims are represented to 16 bits, and we have a meager m = 100 claims, the bound of Lemma 13 below already asks for some 4600 bits per weight; we expect the AI systems and probabilistic models that motivate our interest in the Explicit -Consistency problem to make many more claims, and for m equal to one million (2 megabytes of data) the figure is above 7 × 10 7 bits per weight, against the 105 that suffice at a gap of 2 −32 . The remedy is not to send them at all. The support determines them, as (4) already suggests and Lemma 13 will show, so the Verifier can solve for them itself, and the polynomial precision is paid in its running time rather than in the certificate. 22 The modified Verifier. Algorithm 1 is changed in one place. The certificate components 
+
+α†
+
+> 1
+
+, . . . , α † 
+
+> k
+
+are replaced by a single integer q. The Verifier constructs 
+
+Mz := 
+
+2V T 
+
+> z
+
+Vz 11T 0
+
+
+
+∈ Z(k+1) ×(k+1) and solves Mz
+
+αλ
+
+
+
+=
+
+0
+
+1
+
+
+
+(5) from the residual matrix Vz of Algorithm 1, as follows. It rejects unless q is prime and Mz is non-singular modulo q; it solves (5) over Q by q-adic lifting [Dix82], rejecting unless the returned ( α, λ )satisfies (5) under exact substitution over Z (concretely, writing α = α†/D and λ = λ†/D over the returned common denominator D > 0, it checks Mz (α†, λ †)T = ( 0, D )T over Z); and it rejects unless αj > 0 for every j ∈ [k]. It then writes α = α†/D over the returned common denominator 
+
+D, and runs the last two lines of Algorithm 1 with D in place of 2 Bεgap . The gap εgap plays no part in the modified Verifier: setting Bεgap was its only role. Soundness is the argument of the previous subsection verbatim: the Verifier ends holding a support and weights, so (4) makes its final check exact. Worth noting is that it uses nothing about 
+
+q. Whatever the Prover supplies, the Verifier accepts only a pair ( α, λ ) satisfying (5) under its own exact substitution check over Z, the last row of which reads 1Tα = 1, and only when every αj is strictly positive; so the accepted α is a distribution whether or not q was prime and whether or not it divided det Mz . The prime bears on completeness and on the running time, never on soundness. For completeness, suppose there exists a distribution μ ∈ ∆( {0, 1}n) with Inc P (μ) ≤ τ . By Carath´ eodory’s Theorem, we know there exists a μ′ that is supported on only m + 1 points with the same value; here, we show that in particular there exists one whose weights are pinned down by the support alone, and are rational numbers with O(mB + m log m) bits. For this, we need the following Lemma. 
+
+Lemma 13. If m + 1 ≥ k and V ∈ Zm×k is an integer matrix whose entries are bounded in magnitude by 2B , then the optimization problem 
+
+min  
+
+> α∈Rk
+
+V α 22 subject to α ≥ 0,
+
+> k
+
+X
+
+> i=1
+
+αi = 1 (6) 
+
+admits a rational solution α∗ whose components have a common denominator representable in 
+
+O(m log m + Bm ) bits. Moreover, writing S for the support of such a solution of minimal support, 
+
+s := |S|, and M for the matrix (5) formed from the columns VS :1. M is non-singular, so that (α∗ 
+
+> S
+
+, λ ) is the unique solution of M (a, λ )T = ( 0, 1) T;2. α∗ 
+
+> S
+
+> 0 entrywise; and 3. | det M | ≤  2B (m + 2) 2( m+2) .Proof. Let α ∈ ∆[ k] be a solution to (6) with minimal support S = {i ∈ [k] : αi > 0}, and let s := |S|. We will show that this solution has the desired rational property. Write αS for the restriction of α to its support, and VS ∈ Zm×s for the restriction of V to the corresponding columns. Since αS > 0 is positive in this subspace, αS ∈ ∆[ s] is the solution to the modified problem min  
+
+> a∈Rs
+
+VS a 22 subject to X
+
+> i∈S
+
+ai = 1 .
+
+The stationary point can be found with a single Lagrange multiplier λ corresponding to this one constraint. More precisely, the Lagrangian is given by L(a, λ ) = ∥VS a∥22 + λ(−1 + P 
+
+> i
+
+ai), and a 23 solution a must satisfy ∇L = 0. Since ∇a∥VS a∥22 = 2 V T 
+
+> S
+
+VS a, the stationary condition gives us the system of equations 0 = ∇a,λ L(a, λ ) = 
+
+2V T 
+
+> S
+
+VS a + λ11Ta − 1
+
+
+
+=
+
+2V T 
+
+> S
+
+VS 11T 0
+
+  aλ
+
+
+
+−
+
+01
+
+
+
+, (7) which is the system (5) formed from VS . Since it’s a linear system of equations with integer coefficients, it has a rational solution. To bound its magnitude, we use the form on the right-hand side of (7). Let M := 
+
+2V T 
+
+> S
+
+VS 11T 0
+
+
+
+∈ Z(s+1) ×(s+1) be the key matrix on the right. We claim that 
+
+M is non-singular. In search of contradiction, suppose that M y = 0 for some nonzero y = ( d, γ )T ∈ Rs+1 . This means that (a) 0 = 2 V T 
+
+> S
+
+VS d + γ1 and (b) 1Td = 0. Left-multiplying equation (a) by dT and substituting equation (b), we find that 0 = 2 dTV T 
+
+> S
+
+VS d + γd T1 = 2 dTV T 
+
+> S
+
+VS d = 2 ∥VS d∥22,
+
+from which it follows that VS d = 0. Plugging this back into equation (a) above, we find that 0 = γ1, meaning γ = 0. Since y = ( d, γ )̸ = 0 by assumption, this implies d̸ = 0. Altogether, this means we have a vector d ∈ Rs with the properties 
+
+d̸ = 0 , VS d = 0 , and 1Td = 0 ,
+
+meaning that ∥VS (a + d)∥22 = ∥VS a∥22 and 1T(a + d) = 1Ta = 1. In other words, if a is a solution to the optimization problem, so too is a + td , provided a + td ≥ 0. Since 1Td = 0 and d̸ = 0, some component of d is negative, so t∗ := min i:di<0(−ai/d i) is well defined and positive; a + t∗d is then non-negative, sums to one, and is zero in some component, so it is a solution to the optimization problem with strictly smaller support, contradicting minimality. Now that we know M ∈ Z(s+1) ×(s+1) is non-singular, we can apply Cramer’s rule, which tells us that the unique solution ( α∗, λ )T at component i is equal to (det Mi)/(det M ), where Mi is the matrix obtained by replacing the ith column of M by [0 , . . . , 0, 1] T. Since M and Mi have integer components, their determinants are integers, and thus α is a rational number whose common denominator divides | det M |. All that remains is to bound det M , for which we turn to Hadamard’s inequality [Had93], which states that the determinant of a matrix is at most the product of the L2 norms of its columns. Every entry of the upper-left block of M is twice a sum of m numbers, each a product of two integers of magnitude at most 2 B , and is thus at most 2 m · 22B in magnitude. The L2 norm of each column is therefore at most 2 m√s + 1 ·22B +1, and thus the common denominator is of the order det M ≤  2m√s + 1 · 22B + 1 s+1 
+
+≤  2B (m + 2) 2( m+2) ≤ 22( m+2)( B+⌈log 2(m+2) ⌉)
+
+∈ 2O(m log m+Bm )
+
+since s ≤ k ≤ m + 1. Therefore, it can be represented with O(m log m + Bm ) bits. Finally, the non-singularity of M bounds the support: were s > m + 1, the s columns of 
+
+h VS
+
+> 1T
+
+i
+
+∈ R(m+1) ×s
+
+would be linearly dependent, giving a nonzero d with VS d = 0 and 1Td = 0, which the argument above has just ruled out. 24 Let’s now apply Lemma 13 to finish off the proof of completeness. Recall that we are in the case where there exists a distribution μ with Inc P (μ) ≤ τ , and that Carath´ eodory’s theorem guarantees the existence of a witness ( z, α ) of m + 1 points. Applying Lemma 13 to V = Vz and taking S
+
+to be the support of a minimal-support optimum α∗, the Carath´ eodory weights α are feasible for (6), so ∥Vz α∗∥2 ≤ ∥ Vz α∥2, and (4) turns this into Inc P (μzS ,α ∗ 
+
+> S
+
+) ≤ Inc P (μz,α ) = Inc P (μ) ≤ τ . Its support satisfies s ≤ k = m + 1. The honest Prover sends exactly this support zS . The Verifier forms MzS , which is non-singular by clause 1, so the solve returns α∗ 
+
+> S
+
+and nothing else; these weights are strictly positive by clause 2, so the Verifier does not reject; and the final check passes because Inc P (μzS ,α ∗ 
+
+> S
+
+) ≤ τ . The weights themselves are never transmitted, so the certificate is 
+
+s · n ≤ (m + 1) n bits of support, together with the prime, which we bound next. It remains to exhibit the prime. Write BM := 2( m + 2)( B + ⌈log 2(m + 2) ⌉) ∈ O(m log m + Bm ), so that clause 3 of Lemma 13 bounds det MzS in magnitude by 2 BM . Being a nonzero integer of magnitude at most 2 BM , it has at most BM distinct prime divisors, so among the first BM + 1 primes there is one, call it q, that does not divide it; and by Chebyshev’s bound the ( BM + 1)st prime is O(BM log BM ), so q is representable in O(log BM ) = O(log m + log B) bits. 7 Elimination modulo q then certifies that det MzS̸ ≡ 0, hence that MzS is non-singular over Q, and seeds the 
+
+q-adic lifting of [Dix82], which returns the exact rational solution of (5) in O(m3(B + log m)2) bit operations. The certificate is therefore of length ( m + 1) n + O(log m + log B) ∈ O(mn + log B), as claimed. 
+
+Why the prime is sent. It is not needed for correctness, only for speed, and it is free: at 
+
+O(log m + log B) bits it does not affect the certificate length above, and at m equal to one million and B = 32 it is a 31-bit number. Its role is to spare the Verifier the search. A Verifier finding its own good prime would test candidates until one fails to divide det MzS , and there may be as many as BM bad ones, each ruled out by an elimination; a Verifier avoiding the question altogether, by fraction-free elimination over Z, would instead carry Θ( m(B + log m))-bit intermediates through Θ( m3) operations. Either route costs a factor of m or more over the bound above, and neither changes what the Verifier accepts, since the returned solution is checked exactly in any case. For the runtime, the accounting of the previous subsection applies with BM in place of Bεgap :its inner loop costs O(m2(n + BB M )) ⊆ O(m2n + m3B(B + log m)) and its accumulation costs 
+
+O(mB 2 
+
+> M
+
+) = O(m3(B + log m)2), so the final check costs O(m3(B + log m)2 + m2n); forming 2 V T 
+
+> z
+
+Vz
+
+and the exact substitution check cost O(m3(B +log m)2) as well, and adding the O(m3(B +log m)2)of the solve leaves the total unchanged, giving the O(m3(B + log m)2 + m2n) of Proposition 9. This completes its proof. 
+
+# 6 Hardness of approximating consistency in (deterministic) CPCs 
+
+In this section we observe that CPCs can be used to express CNF formulas in a straightforward and “lossless” fashion. 8 Consequently, we can use tight inapproximability results for Exact -kSAT to automatically obtain inapproximability of Explicit -Consistency to the same parameters, and Corol-lary 18 lifts this to NEXP -hardness of Model -Consistency .The reduction (Claim 16) preserves many properties of the source formula, such as bounded       
+
+> 7Concretely, at mequal to one million and B= 32, a 32-bit number suffices.
+> 8A related reduction has been documented in the theory probabilistic dependency graphs [RHS23], but the one we present here is more direct, and the inapproximability lifts more directly in the normalized ℓ2inconsistency measure.
+
+25 variable occurrence, arity, 9 and the fraction of violated clauses/claims by any assignment. However, 
+
+Explicit -Consistency allows distributions over assignments as “solutions.” To argue that the reduc-tion is gap-preserving, we (tightly) bound Inc (P) of the reduced CPCs in terms of the fraction of claims violated by an assignment in Lemma 15. 
+
+6.1 Violated claims and inconsistency in deterministic CPCs 
+
+The CPCs derived from CNFs are deterministic , in the sense that all claims are about events that occur (or do not occur) with certainty .
+
+Definition 14 (Deterministic CPC) . A CPC P is deterministic if for all ( x, y, p ) ∈ P it holds that 
+
+p ∈ { 0, 1}.10 We say that assignment w ∈ { 0, 1}n violates the claim ( x, y, p ) ∈ P if w agrees with the context x, and wy = 1 − p. We let Viol P (w) denote the fraction of claims in P violated by w,Viol P (w) := |{ P ∈ P : w violates P }| |P| , Viol( P) := min  
+
+> w∈{ 0,1}n
+
+Viol P (w).
+
+Lemma 15. Let P be a deterministic CPC. Then 
+
+Viol( P) ≤ Inc (P) ≤ pViol( P).
+
+Proof of Lemma 15. Let n be the number of variables of P. First, observe that for any ( x, y, p ) ∈ P 
+
+and any w ∈ { 0, 1}n, letting δw denote the point mass distribution supported on w,
+
+|δw(x ∩ y) − pδ w(x)| =
+
+(
+
+1 if w violates ( x, y, p )0 otherwise . (8) Because if w violates ( x, y, p ) then, by definition, w agrees with x which means that δw(x) = 1, but 
+
+wy = 1 − p. By case analysis, this means that δw(x ∩ y) = 1 − p, therefore ( δw(x ∩ y) − pδ w(x)) 2 = 1. Conversely, if w does not violate ( x, y, p ), then there are two possibilities: Either w does not extend x in which case δw(x) = δw(x ∩ y) = 0, or w agrees with x and wy = p, in which case 
+
+δw(x ∩ y) = p = pδ w(x). We now prove the lemma, starting from the leftmost inequality. Let n denote the number of variables of P, and let μ be a distribution over {0, 1}n. We will show that Inc P (μ) ≥ Viol( P). Let S = {w1, . . . , w s} denote the support of μ. Let δi := δwi denote the point mass distribution supported on wi, and so we write μ = Psi=1 αiδi where αi > 0 for all i ∈ [s] and P 
+
+> i
+
+αi = 1. Then we can write 
+
+Inc 2 
+
+> P
+
+(μ) = 1
+
+m
+
+X
+
+> (x,y,p )∈P
+
+|μ(x ∩ y) − pμ (x)|2 .
+
+= 1
+
+m
+
+X
+
+> (x,y,p )∈P
+> s
+
+X
+
+> i=1
+
+αi |δi(x ∩ y) − pδ i(x)|
+
+!2                                 
+
+> 9Formally, the arity of the probabilistic claim ( x, y, p ) is equal to k=k′+ 1, where k′is the number of non-∗
+> entries in x. The arity of a CPC Pis the maximal arity among its claims.
+> 10 Tedious comment: the precision-Bnumerator convention p=p†/2Bwith p†∈ { 0, . . . , 2B−1}excludes p= 1; for deterministic claims we admit the numerator p†= 2 Bas well, so that p∈ { 0,1}is representable at every precision. This adds one numerator value ( B+ 1 bits per claim) and affects no bound.
+
+26 Which, by the Cauchy–Schwartz inequality, is 
+
+Inc 2 
+
+> P
+
+(μ) ≥ 1
+
+m · 1
+
+m
+
+ X
+
+> (x,y,p )∈P
+> s
+
+X
+
+> i=1
+
+αi |δi(x ∩ y) − pδ i(x)|
+
+
+
+> 2
+
+=
+
+
+
+> s
+
+X
+
+> i=1
+
+αi · 1
+
+m
+
+X
+
+> (x,y,p )∈P
+
+|δi(x ∩ y) − pδ i(x)|
+
+
+
+> 2
+
+,
+
+By Equation (8) and definition of Viol( P) as min w Viol P (w) we have 
+
+Inc 2 
+
+> P
+
+(μ) ≥
+
+> s
+
+X
+
+> i=1
+
+αi Viol P (wi)
+
+!2
+
+≥ Viol( P) ·
+
+> s
+
+X
+
+> i=1
+
+αi
+
+!2
+
+= Viol( P)2.
+
+Taking the square root of both sides gives the lower bound. For the upper bound, let w ∈ { 0, 1}n, we will show that Viol P (w) = Inc 2 
+
+> P
+
+(δw) and so in particular Viol P (w) ≥ Inc 2(P). By Equation (8) and definition of Viol P (w) as the fraction of claims violated by w,
+
+Inc 2 
+
+> P
+
+(δw) = 1
+
+m
+
+X
+
+> (x,y,p )∈P
+
+(δw(x ∩ y) − pδ w(x)) 2 = Viol P (w),
+
+using the fact that the summands are Boolean (Equation (8)), therefore each summand’s square coincides with its absolute value. 
+
+Tightness of Lemma 15. The lower and upper bounds are of course attained for consistent deterministic CPCs, because all quantities are zero. Let us briefly detour to discuss tightness for inconsistent instances. The lower bound can still be an equality: consider a CPC containing just two contradictory claims {(∗, y, 0) , (∗, y, 1) }; then Viol( P) = 1 /2, and Inc P (U) = (1 /4+ 1 /4) = 1 /2as well for the uniform distribution over its single variable. For the upper bound, we first note that it becomes an equality if and only if the CPC is consistent. To see this, let P be an inconsistent deterministic CPC with |P| = m claims, and let 
+
+w∗ ∈ { 0, 1}n be a maximally satisfying assignment. Take any claim P ∈ P violated by w∗, and take wP ∈ { 0, 1}n to be any assignment that satisfies the claim P . Consider the distribution μ that assigns mass (1 − 1/m ) to w∗ and 1 /m mass to wP . Then any claim satisfied by w∗ is violated by 
+
+μ with probability at most 1 /m , but now P is violated by μ with probability (1 − 1/m ), giving 
+
+Inc P (μ)2 ≤ Viol P (w∗) − 1/|P| 2 < Viol P (w∗) = Viol( P) (9) That said, the inequality in Equation (9) (and the upper-bound of Lemma 15 more gener-ally) can approach equality as the number of claims m grows by simply adding more consistent claims: Consider a single-variable CPC Pm containing a single copy of {∗ , y, 0} and m − 1 copies of 
+
+{∗ , y, 1}. Then Viol( P) = 1 /m , but similarly to the argument before Equation (9), a distribution 
+
+μ that assigns y = 0 with probability 1 /m will have Inc P (μ)2 = Viol( P) − 1/m 2, so the ratio 
+
+Inc P (μ)2/ Viol( P) → 1 as m → ∞ .27 6.2 Reduction from Exact -kSAT .
+
+Let F be an Exact kCNF formula over n Boolean variables. We let |F | denote its number of clauses, and for any assignment w ∈ { 0, 1}n we let Viol F (w) denote the number of clauses violated by w in 
+
+F . We write Viol( F ) = 1
+
+|F | min  
+
+> w∈{ 0,1}n
+
+Viol F (w).
+
+Claim 16. There is a polynomial-time computable reduction mapping Exact kCNF formulas F to deterministic CPCs PF , such that Viol( F ) = Viol( PF ).Proof. Let F = {Fj }mj=1 be a Exact kCNF formula with m clauses over n variables. We write 
+
+Fj = ( j1 = b1 ∨ · · · ∨ jk = bk) for variables j1, . . . , j k ∈ [n] and bits b1, . . . , b k ∈ { 0, 1}.11 For each clause Fj , the reduction adds the Probabilistic Claim Pj = ( xj , j k, b k) where xjji = (1 − bi) for each 
+
+i ∈ [k − 1], and the rest of xj ’s entries are set to ∗. The output of the reduction is the instance 
+
+P = {Pj }mj=1 .Note that |F | = |P F |, and so to prove the claim it suffices to show that for any assignment w ∈{0, 1}n, the number of clauses of F that w violates equals the number of claims of P that w violates; since |F | = |P F |, the violated fractions then coincide as well. We will show a correspondance between violated clauses and claims: w violates the clause Fj = ( j1 = b1 ∨ · · · ∨ jk = bk) if and only if wji = 1 − bi for all i ∈ [k]. By construction, this is equivalent to having w extend xj but 
+
+wjk = 1 − bk, i.e. , w violates Pj .
+
+Claim 17. For all δ ∈ (0 , 2−k) and k ≥ 3, the following promise problem is NP -hard. The instance is a (deterministic) CPC P such that Inc (P) ≤ 2−k, and the goal is to distinguish 
+
+• YES: Inc (P) = 0 , from 
+
+• NO: Inc (P) ≥ 2−k − δ,Proof. Fix k ≥ 3 and δ ∈ (0 , 2−k). Theorems 6.5 and 6.14 of [H˚ as01] give a polynomial time reduction from any L ∈ NP to Exact kCNF formulas F mapping instances of L to 
+
+• YES: The set of satisfiable Exact kCNF formulas F , i.e. , Viol( F ) = 0, 
+
+• NO: The set of Exact kCNF formulas F such that Viol( F ) ≥ 2−k − δ.For each Exact kCNF F , we apply Claim 16 to obtain the corresponding deterministic CPC PF .We first observe that Inc (PF ) ≤ 2−k. This follows from the fact that a clause is violated by a random assignment with probability 2 −k: letting U denote the uniform distribution over {0, 1}n,
+
+Inc (PF ) ≤ Inc PF (U) = 
+
+vuut 1
+
+|F |
+
+X   
+
+> (xj,j k,b k)∈P F
+
+(U(xj ∩ jk) − bkU(xj )) 2 =
+
+s
+
+1
+
+|F | · | F | · 2−2k = 2 −k,
+
+where the rightmost equality uses the fact that xj has exactly k − 1 non-∗ entries. Completeness and soundness of the reduction follow from combining Claim 16 with Lemma 15. If Viol( F ) = 0 then by Claim 16, Viol( PF ) = 0, and so by Lemma 15, Inc (P) is sandwiched between zeros. Conversely, if Viol( F ) ≥ 2−k −δ then by the lower bound of the lemma, Inc (P) ≥ 2−k −δ.      
+
+> 11 Formally, bi= 0 indicates that the variable jiis negated in the clause, and we assume the j1, . . . , j kare sorted.
+
+28 6.3 NEXP -completeness of Model -Consistency 
+
+Recall the implicit CPC PP,Q of a predictive model (Definition 6): the exponentially long collection that has, for each query q ∈ Q , Q(q) copies of the claim ( xq, ω t, P (q)/2B ), and whose consistency is that of the model (Claim 7). With this translation in hand, NEXP -completeness is short to derive. 
+
+Corollary 18. Model -Consistency is NEXP -complete (under polynomial-time many-one reductions). Proof. For membership, let VNP be the verifier of Proposition 9, and let VNEXP be the verifier that, on input ( P, Q, τ ) and proof π, constructs PP,Q explicitly—in time 2 O(ℓd +B) · O(S), where S bounds the sizes of the circuits P and Q—and accepts if and only if VNP (PP,Q , τ, π ) accepts. By Claim 7, (P, Q ) is τ -consistent if and only if PP,Q is, so completeness and soundness are those of Proposition 9. Using the fact that || Q|| ∈ 2O(ℓd +B), Proposition 9 implies that running VNP on PP,Q takes time 
+
+|| Q|| 3(B + log || Q|| )2 + || Q|| 2n ∈ 2O(ℓd +B) with proofs of length O(|| Q|| · n + log B) ∈ 2O(ℓd +B), so all together VNEXP runs in time exponential in its input length. For hardness, Model -Consistency 
+
+is the succinct version of Explicit -Consistency , so the reduction of Claim 16 applies as a reduction from the SUCCINCT -Exact -kSAT problem (see, e.g. , [PY86, Gol08]). 
+
+Remark 19 (A pragmatic aside on implementation) . Producing a faithful implementation of the black-box construction underlying Corollary 18 (specification, code, and checking that the two match) is, in the authors’ own experience and despite considerable effort, well beyond the scope of an empirical pilot: we speculate it would occupy a graduate student fluent in the relevant literature for a semester or two: disentangling the Cook–Levin compilation and the BFLS arithmetization layers from one another. The remainder of this paper is dedicated to constructing an Interactive PCP that admits a self-contained specification (Algorithm 6) whose proof oracle is simply a specialized encoding of the witnessing distribution (Section 7); the same hypothetical graduate student should, on our reading, be able to get experiments running on top of Algorithm 6 in a matter of weeks. 
+
+# 7 Reed– μller: a marginal-verifiable distribution encoding 
+
+The PCP component of our IPCP will be a locally-verifiable encoding of distributions which enables efficient (interactive) verification of marginals. This is essentially an encoding of distributions that enables delegation of marginal computation ; we present it as a self-contained “library” consisting of the encoding method (Definition 21), codeword-validity verifier (Algorithm 3) and marginal verifier (Algorithm 5), which may be of independent interest. To keep the exposition self-contained, we open with a standalone motivating story, in the storytelling tradition of [Bab85, Bab90]. All-powerful Merlin (the Prover) holds a distribution μ over {0, 1}n, the truth-assignments to n propositions. Each proposition is named by a short address of d = log n bits; picture a sentence king Arthur (the Verifier) could scrawl on one line, a hundred bits or so, so that 
+
+n = 2 d ≈ 2100 . Merlin’s μ is the verdict of a finite engine, vastly smaller than the 2 n worlds it opines on, so it can deem only a modest number m of assignments possible. He describes it by its support: points z1, . . . , z m ∈ { 0, 1}n with weights μ(z1), . . . , μ (zm) ∈ [0 , 1]. (In the application this section serves, Carath´ eodory pins m = poly (n); see Section 5. In this section, 
+
+m is a free parameter.) Arthur, his computationally bounded sovereign, wants two assurances. First, that μ is a 29 distribution at all: that the weights are nonnegative and that 
+
+> m
+
+X
+
+> j=1
+
+μ(zj ) = 1 .
+
+Second, he wants to interrogate it. To learn, say, the chance that the first proposition holds and the second fails, Arthur must total the mass of every possible world that agrees: 
+
+μ(ω1 = 1 , ω 2 = 0) = X
+
+> j:zj, 1=1 , z j, 2=0
+
+μ(zj ).
+
+Each such question is a sum over Merlin’s m possible worlds, costing Ω( m) to answer by hand. And m is the least of Arthur’s troubles: his entire budget is poly (d) = poly (log n), so he cannot even tour the n = 2 d propositions, let alone audit a sum over worlds. This section is the remedy. Merlin encodes μ once, as π(μ), and hands it over; thereafter, with a few rounds of interaction and his own coin flips, Arthur convinces himself that μ is a genuine distribution in time O(log m + log n), and verifies any marginal μ(ω1 = 1 , ω 2 =0) just as cheaply. More generally, he verifies the marginal on any ℓ propositions in time 
+
+O(ℓ log m + log n). The encoding of μ is a Reed–Muller encoding of the support vectors and their weights (in binary); as such, we denote it Rμ.12 
+
+Before we define it, we first recall the notion of a multilinear extension .
+
+Definition 20 (i-linear, multilinear extension) . Fix k ∈ N and i ∈ [k], we say that a function 
+
+f : Fk → F is i-linear if, for all x1, . . . , x i−1, x i+1 , . . . , x k ∈ F, the univariate function f ′ : F → F
+
+defined by f ′(ξ) := f (x1, . . . , ξ, . . . , x k) is linear. We say that a function f is multilinear if it is 
+
+i-linear in each of its coordinates. For a function g0 : {0, 1}k → { 0, 1}, its multilinear extension ˆg : Fk → F is defined by ˆ g(x) := P 
+
+> x′∈{ 0,1}k
+
+g0(x′) Qki=1 
+
+ xix′ 
+
+> i
+
++ (1 − xi)(1 − x′
+
+> i
+
+). It is the only multilinear function agreeing with g0
+
+on the entirety of {0, 1}k.
+
+Definition 21 (Rμ). Let n, m, B ∈ N and let μ be a distribution over {0, 1}n. Assume that μ
+
+is supported on m points with weights expressible as B-bit precision rationals; that is, there are 
+
+z1, . . . , z m ∈ { 0, 1}n, and α†
+
+> 1
+
+, . . . , α † 
+
+> m
+
+∈ { 0, . . . , 2B − 1} such that μ is supported on zj with weight 
+
+μ[zj ] = α† 
+
+> j
+
+/2B .For j ∈ [m], i ∈ [n] we let zj,i denote the ith coordinate of zj . Similarly, for j ∈ [m] and 
+
+β ∈ { 0, . . . , B − 1} let α† 
+
+> j,β
+
+denote the βth bit of α† 
+
+> j
+
+, such that α† 
+
+> j
+
+= PB−1 
+
+> β=0
+
+2β α† 
+
+> j,β
+
+. We denote 
+
+Z0 : {0, 1}log m × { 0, 1}log n → { 0, 1} Z0(j, i ) = zj,i 
+
+A0 : {0, 1}log m × { 0, 1}log B → { 0, 1} A0(j, β ) = α†
+
+> j,β
+
+For a finite field F, let ˜Z (resp. ˜A) denote the multilinear extension of Z0 (resp. A0). A
+
+RμF(n, m, B )-encoding of μ is the pair ( ˜Z, ˜A). We use RμF(n, m, B ) to denote the set of all such valid encodings. Namely, ( Z, A ) ∈ RμF(n, m, B ) if and only if 1. Multilinearity: Both Z and A are multilinear.  
+
+> 12 The notation reads as “Reed– μller,” a Reed–Muller (RM) encoding of the distribution μ.
+
+30 2. Booleanity: For any j ∈ { 0, 1}log m, i ∈ { 0, 1}log n, and β ∈ { 0, 1}log B it holds that {Z(j, i ), 
+
+A(j, β )} ⊆ { 0, 1}.3. Unit measure: For j ∈ { 0, 1}log m, let a† 
+
+> j
+
+∈ { 0, . . . , 2B − 1} be the integer represented by the 
+
+B-bit string ( A(j, β )) β∈{ 0,1}log B . Then P  
+
+> j∈{ 0,1}log m
+
+a† 
+
+> j
+
+= 2 B .We note that Rμ is not an error-correcting code in the standard sense, because a distribution μ
+
+supported on m vectors z1, . . . , z m may be encoded in one of m! ways (one for each ordering of its support vectors). One could require the vectors z1, . . . , z m to be ordered lexicographically, but then one would also have to test that an alleged codeword respects this order—an added complication which is entirely unnecessary for our purposes. Hereafter when we consider an encoding of μ, we let it be an encoding in an arbitrary order. 
+
+7.1 Prerequisites: the sum-check protocol, and four multilinear gadgets 
+
+We recall the sum-check protocol [LFKN92], modified slightly for convenience. 
+
+Algorithm 2: SumCheck F(val , rounds , deg ). 
+
+Input: rounds , deg ∈ N, a finite field F of odd characteristic, and val ∈ F.
+
+Output: ˆy ∈ Frounds and ˆ v ∈ F. 
+
+> 1
+
+Verifier : Initialize the running value u ← v. 
+
+> 2
+
+for k = 1 , . . . , rounds do  
+
+> 3
+
+Prover : Send a1, a 2, . . . , a deg ∈ F. 
+
+> 4
+
+Verifier : Compute a0 := 2 −1 · (u − a1 − a2 − · · · − adeg ) where 2 −1 is over F. Sample ˆyk ∈ F uniformly at random and send ˆ yk to the Prover. Update u ← Pdeg  
+
+> i=0
+
+ai ˆyik. 
+
+> 5
+
+Verifier : Output ˆ v ← u and ˆ y ← (ˆ y1, . . . , ˆyrounds ). 
+
+Fact 22 ([LFKN92]) . Let r, d ∈ N, a finite field F of odd characteristic, and v ∈ F. Let φ ∈
+
+F[Y1, . . . , Y r] be an r-variate polynomial that has individual degree at most d in each of its variables. 
+
+(ˆ v, ˆy) denote the output of SumCheck F(val ← v, rounds ← r, deg ← d), noting that this is a random variable determined by the sampled ˆy. Then, 
+
+• Completeness. If v = P 
+
+> y∈{ 0,1}r
+
+φ(y) over F then there exists an honest Prover such that 
+
+ˆv = φ(ˆ y) with probability 1 over ˆy.
+
+• Soundness. Otherwise, ˆv = φ(ˆ y) with probability at most rd/ |F|.Furthermore, Algorithm 2 has r many rounds, in which the Prover (resp. Verifier) sends a total of r · d (resp. r) field elements. The Verifier makes a total of O(rd ) field operations. Lastly, ˆy is distributed marginally uniformly in Frounds .
+
+Algorithm 2 is the sum-check protocol of [LFKN92], presented with two cosmetic changes that streamline its use as a subroutine. First, the per-round equality gk(0) + gk(1) = uk−1 that the standard Verifier checks is instead enforced by construction: In the standard protocol the Prover sends, in round k, an individual degree-d polynomial gk(Y ) = Pdi=0 aiY i, and the Verifier checks 
+
+gk(0) + gk(1) = uk−1 before sampling ˆ yk and updating uk ← gk(ˆ yk); whereas in Algorithm 2 the Prover sends only the d non-free coefficients a1, . . . , a d, and the Verifier sets the free coefficient to 
+
+a0 ← 2−1(uk−1 − a1 − · · · − ad), the unique value for which gk(0) + gk(1) = uk−1.13 Second, the   
+
+> 13 This is the one place odd characteristic of Fis used
+
+31 final test ur ?
+
+= φ(ˆ y) that the standard Verifier asserts is deferred: Algorithm 2 outputs the pair (ˆ y, ˆv) = (ˆ y, u r) and leaves the comparison ˆ v ?
+
+= φ(ˆ y) to its caller. We find this presentation useful for two reasons: The Verifier of Algorithm 2 never rejects; it only samples randomness and maintains the running value u, so its actions depend on v, r, and 
+
+d alone and never on φ. And the round polynomials gk never enter the Verifier’s computation: they are objects of the analysis, not of the protocol. We still name the parties Prover and Verifier because, facing forward, each invocation of Algorithm 2 in Section 8.2 will be run by the main protocol’s Verifier. The protocols accompanying Rμ below rely on four multilinear polynomials “gadgets.” We collect them here. 
+
+eq : For t ∈ N and ˆ y, y ′ ∈ Ft,
+
+eq (ˆ y, y ′) := 
+
+> t
+
+Y
+
+> i=1
+
+ˆyiy′ 
+
+> i
+
++ (1 − ˆyi)(1 − y′
+
+> i
+
+). (10) On Boolean ˆ y, y ′ it equals 1 if ˆ y = y′ and 0 otherwise, so it is the (unique) multilinear extension of the equality indicator on {0, 1}t.
+
+vec2int : For β ∈ Flog B ,
+
+vec2int (β) = vec2int (β1, . . . , β log B ) :=  
+
+> log B
+
+Y
+
+> k=1
+
+1 + βk(2 2k−1
+
+− 1) . (11) It is multilinear, and on a Boolean β ∈ { 0, 1}log B it equals 2 raised to the integer value of the bit string β (with β1 the least significant bit). These are exactly the coefficients that decode an integer from its binary expansion: P  
+
+> β∈{ 0,1}log B
+
+vec2int (β)aβ is the integer with bits ( aβ )β . The Verifier can compute vec2int ( ˆβ) in O(log B) field operations at any ˆβ ∈ Flog B .
+
+weight : For an oracle A : Flog m+log B → F and j ∈ Flog m, write 
+
+weight A(j) := X 
+
+> β∈{ 0,1}log B
+
+vec2int (β) · A(j, β ), (12) the integer that vec2int decodes from the bits A stores in its j-th row. On a codeword, A holds the weight bits, so weight A(j) = α† 
+
+> j
+
+is the integer weight numerator of the j-th support point and 
+
+weight A(j)/2B = μ[zj ] its probability mass; for an arbitrary multilinear A it is the same F-linear combination of the rows A(·, β ), hence multilinear in j.
+
+agree : Fix an oracle Z : Flog m+log n → F, points s = ( s1, . . . , s ℓ) with sk ∈ Flog n, and bits b =(b1, . . . , b ℓ) ∈ Fℓ. For j ∈ Flog m,
+
+agree Zb,s (j) := 
+
+> ℓ
+
+Y
+
+> k=1
+
+bkZ(j, s k) + (1 − bk)(1 − Z(j, s k)) . (13) 32 Each factor is the equality indicator between the bit bk and the value Z(j, s k), so agree Zb,s (j) is just 
+
+eq of the bit-vector b against the slice-values ( Z(j, s k)) ℓk=1 :
+
+agree Zb,s (j) = eq (b, (Z(j, s k)) ℓk=1 ).
+
+For multilinear Z the map j 7 → agree Zb,s (j) has individual degree at most ℓ in j, and on a codeword it indicates, at Boolean j, whether the j-th support point satisfies every context literal zj,s k = bk.
+
+7.2 Verifying proximity to the code 
+
+Proximity is measured in relative Hamming distance: for functions f, g : Fk → F, dist( f, g ) := Pr x∼Fk [f (x)̸ = g(x)] is the fraction of inputs on which they disagree, and f is δ-far from a set of func-tions if dist( f, g ) ≥ δ for every g in the set (otherwise δ-close to it). For the pairs at hand, the worst part governs: the distance between ( Z, A ) and a codeword ( ˜Z, ˜A) is max {dist( Z, ˜Z), dist( A, ˜A)}.Algorithm 3 tests that a pair of oracles ( Z, A ) is close to a valid codeword: that both Z and A
+
+are multilinear, that each is Boolean on the hypercube, and that the masses A encodes sum to one. 
+
+Fact 23 ([BFL91, FGL +96]) . Let f : Fk → F. Consider a tester as follows: (1) Sample i ∈ [k]
+
+uniformly at random; (2) Sample three points x, y, z ∈ Fk that differ only on the ith coordinate, uniformly at random; (3) Accept if and only if f (x), f (y), f (z) agree with an i-linear function. Then, for any δ ∈ (0 , 1) such that 6k/ |F| < δ < 1/2,1. Completeness: If f is multilinear, the tester accepts with probability 1.2. Soundness: If f is δ-far from multilinear in relative Hamming distance, the tester accepts with probability at most 1 − δ/k .
+
+We note that although [FGL +96] state the soundness of their tester only for δ ≥ 0.1, Fact 23 follows immediately from their intermediate argument in Lemma 4.3.1.3. Namely, their lemma guarantees rejection with probability at least 3(1 − δ)δ/k − 3/|F|. We then use the additional assumptions made in Fact 23 to obtain 3(1 − δ)δk − 3
+
+|F| ≥ 3δ
+
+2k − 3
+
+|F| ≥ 3δ
+
+2k − δ
+
+2k = δk ,
+
+using first the assumption that δ < 1/2, then the assumption that 6 k/ |F| < δ .
+
+Claim 24. Suppose F is a prime field with 2B < |F|, and VerEnc Z,A  
+
+> F
+
+(δ, ε ) is run on Z : Flog m+log n →
+
+F and A : Flog m+log B → F such that 
+
+m·(2 B −1) < |F|, 6· log m + max(log n, log B)
+
+|F| < δ < 12 , 10 · log m + max(log n, log B)
+
+|F| ≤ ε (17) 
+
+Then, 
+
+• Completeness: If (Z, A ) ∈ RμF(n, m, B ), there exists an honest Prover such that the Verifier accepts with probability 1. 
+
+• Soundness: If 
+
+min  
+
+> ( ˜Z, ˜A)∈RμF(n,m,B )
+
+max {dist( Z, ˜Z), dist( A, ˜A)} ≥ δ, 
+
+then the Verifier accepts with probability at most ε.
+
+33 Algorithm 3: VerEnc Z,A  
+
+> F
+
+(δ, ε )
+
+Input: Finite field F, a proximity parameter δ ∈ (0 , 1), and a soundness parameter 
+
+ε ∈ (0 , 1). Oracle access to Z : Flog m+log n → F and A : Flog m+log B → F for 
+
+n, m, B ∈ N. 
+
+> 1
+
+Repeat the multilinearity test of Fact 23 (log m + log n) max {ln(1 /ε )/δ, 2/ε } times on oracle Z, and (log m + log B) max {ln(1 /ε )/δ, 2/ε } times on oracle A. Reject if any test rejects.  
+
+> 2
+
+Sample a random y′ ∈ Flog m+log n and send it to the Prover. Run (ˆ v, ˆy) := SumCheck F(val ← 0, rounds ← log m + log n, deg ← 3) Assert that ˆv ?
+
+=  Z2(ˆ y) − Z(ˆ y) · eq (ˆ y, y ′). (14)  
+
+> 3
+
+Sample a random x′ ∈ Flog m+log B and send it to the Prover. Run (ˆ u, ˆx) := SumCheck F(val ← 0, rounds ← log m + log B, deg ← 3) Assert that ˆu ?
+
+=  A2(ˆ x) − A(ˆ x) · eq (ˆ x, x ′). (15)  
+
+> 4
+
+Run 
+
+
+
+ˆw, (ˆ j, ˆβ)
+
+
+
+:= SumCheck F(val ← 2B , rounds ← log m + log B, deg ← 2); here we mean that ˆ w ∈ F is the first output, and (ˆ j, ˆβ) is the second output, with ˆ j ∈ Flog m and ˆβ ∈ Flog B . Assert that ˆw ?
+
+= A(ˆ j, ˆβ) · vec2int ( ˆβ). (16)  
+
+> 5
+
+If any assertion failed, reject. Otherwise, accept. 
+
+Furthermore, the Verifier runs in O (log m + log n + log B) max {log(1 /ε )/δ, 1/ε } field operations. Proof. At a high level, the Verifier tests that Z and A are close to multilinear (amplifying this test, by repetition, to soundness ε), and then SumCheck s that each is Boolean on the hyper-cube (Equations (14) and (15)) and that the masses encoded by A sum to one (Equation (16)). The three SumCheck s are sound by the assumption on the field size, namely, |F| ≥ Ω((log m +max(log n, log B)) /ε ). We will first show that Equations (14) to (16) establish completeness and soundness under the assumption that Z and A were multilinear, and remove this assumption in the end. Rather than separating completeness and soundness, we will show that each check of the Verifier asserts a necessary property of Rμ, and that if all properties are met then ( Z, A ) ∈ Rμ.
+
+Booleanity of a multilinear Z. For any fixed y′ ∈ Flog m+log n, consider the polynomial 
+
+Gy′ (y) =  Z2(y) − Z(y) · eq (y, y ′).
+
+34 It is a (log m + log n)-variate polynomial. By Z’s assumed multilinearity, Gy′ has individual degree at most 3. Finally, if Z was Boolean on {0, 1}log( m)+log n then for Boolean-entry y, Z2(y) = Z(y), therefore for all y′ ∈ Flog m+log n
+
+X  
+
+> y∈{ 0,1}log m+log n
+
+(Z2(y) − Z(y)) eq (y, y ′) = X  
+
+> y∈{ 0,1}log m+log n
+
+0 · eq (y, y ′) = 0 Therefore, Fact 22 applied to SumCheck (0 , log m + log n, 3) implies that Equation (14) is satisfied with probability 1 if the Prover participates honestly in the protocol. For soundness, suppose that Z is not Boolean on the hypercube. Then there exists y∗ ∈{0, 1}log m+log n such that Z2(y∗) − Z(y∗)̸ = 0. Consider the polynomial 
+
+F (y′) := X  
+
+> y∈{ 0,1}log m+log n
+
+(Z2(y) − Z(y)) eq (y, y ′).
+
+We have F (y∗) = Z2(y∗) − Z(y∗)̸ = 0, and F has total degree at most log m + log n, therefore, by the Schwartz–Zippel lemma [Sch80, Zip79], Pr   
+
+> y′∼Flog m+log n
+
+F (y′) = 0  ≤ log m + log n
+
+|F| .
+
+Assuming F (y′)̸ = 0 for the y′ sampled and sent by Verifier, by soundness of SumCheck , the Verifier accepts with probability at most 3 · (log m + log n)/|F|. Combining with a union bound, we have that the Verifier accepts Equation (14) with probability at most log m + log n
+
+|F| + 3(log m + log n)
+
+|F| = 4(log m + log n)
+
+|F| ≤ 25 ε, 
+
+where the last inequality uses 10(log m + log n)/|F| ≤ ε from Equation (17). 
+
+Booleanity of a multilinear A. By an identical argument, we have that if A was Boolean on the hypercube then Equation (15) is satisfied with probability 1; else, Equation (15) is satisfied with probability at most 4(log m + log B)/|F| ≤ 25 ε.
+
+Unit measure of a multilinear A. Assume that A was Boolean on its hypercube (otherwise, see pre-vious case). The argument is similar to the previous one, but simpler, with vec2int (Equation (11)) decoding the weight numerators from the bits stored in A.Suppose A encodes probabilities that sum to 1; that is, letting α† 
+
+> j
+
+= P 
+
+> β
+
+vec2int (β)A(j, β ), the assumption is that P 
+
+> j
+
+α† 
+
+> j
+
+= 2 B . Then, 
+
+X  
+
+> j∈{ 0,1}log m
+> β∈{ 0,1}log B
+
+A(j, β ) · vec2int (β) = X 
+
+> j∈{ 0,1}log m
+
+α† 
+
+> j
+
+= 2 B .
+
+The summand on the left hand side above has individual degree at most 2. Thus, Fact 22 applied to 
+
+SumCheck (2 B , log m+log B, 2) implies that an honest Prover convinces the Verifier with probability 1. 35 For soundness, suppose A was Boolean on the hypercube but did not have unit measure, P 
+
+> j,β
+
+A(j, β )vec2int (β)̸ = 2 B over Z. We claim the inequality holds over F as well; indeed, by Booleanity of A, the following holds over Z,0 ≤ X  
+
+> j∈{ 0,1}log m
+> β∈{ 0,1}log B
+
+A(j, β )vec2int (β) ≤ 2log m X 
+
+> β∈{ 0,1}log B
+
+vec2int (β) = m(2 B − 1) < |F|.
+
+Therefore, Fact 22 implies that Equation (16) holds with probability at most 2(log m+log B)/|F| ≤  
+
+> 15
+
+ε, again by 10(log m + log B)/|F| ≤ ε of Equation (17). 
+
+Non-multilinear Z and A. We now remove the assumption that Z and A are multilinear. Let ˜Z, ˜A be the multilinear polynomials closest to Z, A , at relative Hamming distances δZ := dist( Z, ˜Z)and δA := dist( A, ˜A), and write R := ⌈(log m + log n) max {ln(1 /ε )/δ, 2/ε }⌉ for the number of multilinearity repetitions on Z (the count for A is analogous). We are in the soundness case, meaning that ( Z, A ) is δ-far from every codeword; therefore at least one of the next two situations holds: 
+
+(i) Z or A is δ-far from multilinear. Say δZ ≥ δ, so Z is in particular δ-far from multilinear. Since 6(log m+log n)/|F| < δ < 1/2, Fact 23 applies at proximity δ, and each of the R multilinearity tests on Z accepts with probability at most 1 − δ/ (log m + log n); hence they all accept with probability at most 
+
+
+
+1 − δ  
+
+> log m+log n
+
+R
+
+≤ e−Rδ/ (log m+log n) ≤ e− ln(1 /ε ) = ε, 
+
+using R ≥ (log m + log n) ln(1 /ε )/δ .
+
+(ii) Both Z and A are δ-close to multilinear, but ( ˜Z, ˜A) /∈ Rμ. Here δZ , δ A < δ , yet ˜Z or ˜A
+
+is non-Boolean, or ˜A is not of unit measure—otherwise ( Z, A ) would be δ-close to the codeword ( ˜Z, ˜A), contrary to assumption. We treat the case that ˜Z is non-Boolean—the other two failures are handled identically by Equations (15) and (16). By the multilinear case above applied to ˜Z,together with the at-most-δZ chance that the marginally-uniform query into Z for Equation (14) lands where Z̸ = ˜Z, Equation (14) accepts with probability at most 4(log m + log n)/|F| + δZ ; we split on whether the multilinearity test can see the defect. If δZ ≤ 6(log m+log n)/|F|, then Z is below the detection threshold of Fact 23, but Equation (14) alone already suffices: Pr[accept] ≤ 4(log m + log n)
+
+|F| + δZ ≤ 10(log m + log n)
+
+|F| ≤ ε, 
+
+by Equation (17). Otherwise 6(log m+log n)/|F| < δ Z < δ < 1/2, so Fact 23 applies at proximity δZ
+
+and the multilinearity test on Z accepts with probability at most (1 −δZ /(log m+log n)) R ≤ e−2δZ /ε ,using R ≥ 2(log m + log n)/ε . Acceptance requires both this test and Equation (14) to pass, on independent randomness, so multiplying and using 4(log m + log n)/|F| ≤ 25 ε,Pr[accept] ≤ e−2δZ /ε   25 ε + δZ
+
+ = 25 εe −2δZ /ε + δZ e−2δZ /ε ≤ 25 ε + ε
+
+2e < ε, 
+
+using e−2δZ /ε ≤ 1 for the first term and max x≥0 xe −2x/ε = ε/ (2 e) (attained at x = ε/ 2) for the second. In every situation the Verifier accepts with probability at most ε, which is the soundness claim. 36 Remark 25. The field size |F| ≥ m2B is needed only for the unit-measure check, where the sum-check on Equation (16) verifies the integer identity P 
+
+> j
+
+α† 
+
+> j
+
+= 2 B and the partial sums, which can reach m(2 B −1), must not wrap around in F. It could be avoided in an IP, by fingerprinting [Fre77]: have the Verifier issue a random prime p of size poly (B, n, log m) and check the identity modulo p.However, the field F is then determined only during the protocol’s runtime, thereby losing the clean conceptual cut of having a distribution encoded as ( Z, A ). We prefer the cleaner presentation. On a technical level, our full protocol (Algorithm 6) pays an exponential field size regardless, so the saving would not help our overarching goal. 
+
+7.3 Verifying a succinctly-specified marginal 
+
+We give two protocols. The first, VerMarginoid (Algorithm 4), is the one our main construction (the IPCP of Section 8.2) actually calls. It runs on multilinear oracles and verifies P 
+
+> j
+
+weight A(j)agree Zb,s (j)over F for a given b, s . We call this a marginoid rather than a marginal because its context is spec-ified over F: the variable descriptions s1, . . . , s ℓ ∈ Flog n and the truth values b1, . . . , b ℓ ∈ F range over the field, so the pair ( s, b ) need not describe any actual event {ωsk = bk}k. When s and b are Boolean and ( Z, A ) is a codeword the marginoid is a genuine marginal mass; in general it is only the marginal-shaped algebraic value that the sum-check manipulates. This is all that Section 8.2 needs. For completeness, and because it may be of independent interest, we then package VerMarginoid 
+
+into the self-contained primitive VerMarginal (Algorithm 5). It verifies a genuine marginal up to tolerance τ using self-correction : recovering the value of the nearby codeword at a point by querying the given (possibly corrupted) oracle at correlated random points (Fact 27). It will not be used downstream in this paper, however. 
+
+Algorithm 4: VerMarginoid Z,A  
+
+> F
+
+(v, s 1, b 1, . . . , s ℓ, b ℓ)
+
+Input: Finite field F, v, b 1, . . . , b ℓ ∈ F, and s1, . . . , s ℓ ∈ Flog n. Oracle access to 
+
+Z : Flog m+log n → F and A : Flog m+log B → F. 
+
+> 1
+
+Run (ˆ v, ˆj) := SumCheck F(val ← v, rounds ← log m, deg ← ℓ + 1)  
+
+> 2
+
+Expect w ∈ F to be sent from the Prover. Run ( ˆ w, ˆβ) := SumCheck F(val ← w, rounds ← log B, deg ← 2)  
+
+> 3
+
+Accept if and only if ˆw ?
+
+= vec2int ( ˆβ) · A(ˆ j, ˆβ), and (18) ˆv ?
+
+= w · agree Zb,s (ˆ j). (19) 
+
+Claim 26. Fix a finite field F, v, b 1, . . . , b ℓ ∈ F, and s1, . . . , s ℓ ∈ Flog n, and suppose VerMarginoid 
+
+is run with multilinear oracles Z : Flog m+log n → F and A : Flog m+log B → F. Recall the gadgets 
+
+vec2int and agree Zb,s (j) from Equations (11) and (13) .
+
+37 • Completeness: There exists an honest Prover such that if 
+
+v = X  
+
+> j∈{ 0,1}log m
+> β∈{ 0,1}log B
+
+vec2int (β)A(j, β )agree Zb,s (j) (20) 
+
+then the Verifier accepts with probability 1. 
+
+• Soundness: If Equation (20) does not hold then regardless of the Prover’s messages, the Verifier accepts with probability at most (( ℓ + 1) log m + 2 log B)/|F|.Furthermore, the Verifier runs in O(( ℓ + 1) log m + log B) field operations, makes ℓ queries to Z
+
+and one query to A. The query to A is marginally uniform on Flog m+log B , and each query to Z is marginally uniform in its first log m coordinates. Proof. We use the shorthand weight A(ˆ j) = P 
+
+> β
+
+vec2int (β)A(ˆ j, β ) throughout this proof (see Equa-tion (12)) At a high level, the first SumCheck reduces the claimed value v to the evaluation 
+
+weight A(ˆ j)agree Zb,s (ˆ j) at a random ˆ j, and the second reduces the Prover’s alleged value of weight A(ˆ j)to a single query to A. We first record the degrees of the two summands, then prove completeness and soundness. 
+
+Degrees of the two summands. Denote 
+
+φ(j) := weight A(j)agree Zb,s (j) and ψˆj (β) := vec2int (β)A(ˆ j, β ).
+
+Because Z is multilinear, for each fixed sk the map j 7 → Z(j, s k) is multilinear. Therefore, each factor bkZ(j, s k) + (1 − bk)(1 − Z(j, s k)) has individual degree 1 in each coordinate of j, and their product agree Zb,s (j) has individual degree at most ℓ. Since weight A is multilinear in j (Equation (12)), the product φ(•) = weight A(•) · agree Zb,s (•) has individual degree at most ℓ + 1 in each of its log m
+
+variables. As for ψˆj : vec2int (β) = Qlog Bk=1 (1 + βk(2 2k−1
+
+− 1)) is multilinear in β, and so is A(ˆ j, β ) for fixed ˆ j, so ψˆj has individual degree at most 2 in each of its log B variables. These are the degree parameters passed to the two invocations of Algorithm 2. 
+
+Completeness. Assume Equation (20); that is, v = P  
+
+> j∈{ 0,1}log m
+
+φ(j). Run the honest Fact 22 Prover for φ in the first SumCheck (its individual degree is at most ℓ + 1, as required); by com-pleteness of Fact 22, ˆ v = φ(ˆ j) = weight A(ˆ j)agree Zb,s (ˆ j) with probability 1. Next, let the Prover send w := weight A(ˆ j) = P  
+
+> β∈{ 0,1}log B
+
+ψˆj (β) and answer honestly as per Fact 22 for ψˆj in the second 
+
+SumCheck ; then ˆ w = ψˆj ( ˆβ) = vec2int ( ˆβ)A(ˆ j, ˆβ) with probability 1, so Equation (18) holds. Finally, ˆv = weight A(ˆ j)agree Zb,s (ˆ j) = w · agree Zb,s (ˆ j), so Equation (19) holds as well, and the Verifier accepts with probability 1. 
+
+Soundness. Suppose Equation (20) fails; that is, v̸ = P  
+
+> j∈{ 0,1}log m
+
+φ(j). Fix any Prover, and distinguish two events according to the value w it sends: either the Verifier accepts and w =
+
+weight A(ˆ j), or the Verifier accepts and w̸ = weight A(ˆ j). Suppose the Verifier accepts and w = weight A(ˆ j). Then Equation (19) is ˆ v = wagree Zb,s (ˆ j) = 
+
+weight A(ˆ j)agree Zb,s (ˆ j) = φ(ˆ j). Since v̸ = P 
+
+> j
+
+φ(j), by soundness of the first SumCheck , the Verifier accepts with probability at most ( ℓ + 1) log m/ |F|.38 Now suppose w̸ = weight A(ˆ j). Then w̸ = P 
+
+> β
+
+ψˆj (β), so by soundness of the second SumCheck ,Equation (18) holds with probability at most 2 log B/ |F|.By a union bound, the Verifier accepts with probability at most (ℓ + 1) log m + 2 log B
+
+|F| .
+
+Complexity and smoothness. 14 Both follow from Fact 22. The two SumCheck s cost O(( ℓ +1) log m) and O(log B) field operations, and their outputs ˆ j, ˆβ are marginally uniform. To evaluate Equation (19), the Verifier computes agree Zb,s (ˆ j) directly via the ℓ queries Z(ˆ j, s k); to evaluate Equation (18), it computes vec2int ( ˆβ) directly and makes the single query A(ˆ j, ˆβ). We now package VerMarginoid as the standalone primitive VerMarginal . Given oracles ( Z, A )close to a codeword for a distribution μ, it certifies that an alleged value v agrees, within a tolerance 
+
+τ , with the true marginal mass of a context—the denominator-cleared probability 2 B μ[s1, b 1, . . . , s ℓ, b ℓ]. The Prover commits to that mass, the Verifier checks it against v by an integer comparison ex-actly as the tolerance test of VerConsist (Algorithm 6), and the commitment is certified by running 
+
+VerMarginoid on the self-corrected oracle. 
+
+Fact 27 ([BLR90]) . Fix a field F, k ≤ | F| − 2, and f : Fk → F. Consider the following procedure 
+
+SelfCorrect f
+
+> F
+
+(x) for input x ∈ Fk:1. Sample r ∈ Fk uniformly at random. 2. Query f (x + r), f (x + 2 r), . . . , f (x + ( k + 1) r).3. Compute g : F → F the unique polynomial of degree at most k such that g(i) = f (x + ir ) for all i ∈ [k + 1] .4. Output g(0) .For any δ ∈ (0 , 1) , if f is δ-close to a multilinear ˜f : Fk → F, then SelfCorrect f
+
+> F
+
+(x) outputs ˜f (x)
+
+with probability at least 1 − (k + 1) δ. SelfCorrect makes k + 1 marginally uniform queries to f , and runs in time O(k2) field operations. 15 
+
+In fact, only the sk argument to Z needs to be self-corrected, but we self-correct the entire query Z(ˆ j, s k) for simplicity of notation. 
+
+Corollary 28 (Marginal certification within a tolerance) . Fix m, n, B ∈ N and a prime field F
+
+with log m + log n ≤ | F| − 2 and 2B < |F|. Let π = ( Z, A ) be functions that are δ-close, in relative Hamming distance, to a codeword ( eZ, eA) ∈ RμF(n, m, B ) encoding a distribution μ over {0, 1}n.Fix a context s1, . . . , s ℓ ∈ [n] with bits b1, . . . , b ℓ ∈ { 0, 1}, an alleged value v ∈ F, and a tolerance 
+
+τ = τ †/2B with integer numerator τ † ∈ { 0, . . . , 2B }. Then VerMarginal Z,A (v, s 1, b 1, . . . , s ℓ, b ℓ, τ )
+
+satisfies:    
+
+> 14 Smoothness [KT00], i.e. that the Verifier’s oracle queries are (marginally) uniformly distributed over the proof, is a well-studied property of PCPs [Par21, AC25, BHPT24]; we rely on it repeatedly, as it drives both the self-correction of Fact 27 and the passage from the oracle to a nearby codeword in the soundness proof of Theorem 32.
+> 15 More precisely, given precomputed interpolation weights, the running time is O(k) scalar field operations plus
+> O(k) vector additions.
+
+39 Algorithm 5: VerMarginal Z,A (v, s 1, b 1, . . . , s ℓ, b ℓ, τ )
+
+Input: Finite field F, an alleged value v ∈ F, a context s1, . . . , s ℓ ∈ [n] with bits 
+
+b1, . . . , b ℓ ∈ { 0, 1}, and a tolerance τ = τ †/2B given to precision B by an integer numerator τ † ∈ { 0, . . . , 2B }. Oracle access to Z : Flog m+log n → F and 
+
+A : Flog m+log B → F that are δ-close to a codeword.  
+
+> 1
+
+Expect v∗ ∈ F from the Prover. Treating v∗ and v as integers in {0, . . . , |F| − 1}, reject unless, 
+
+v∗ − v < τ † over Z. (21)  
+
+> 2
+
+Run VerMarginoid Z,A  
+
+> F
+
+(v∗, s 1, b 1, . . . , s ℓ, b ℓ), replacing each query Z(ˆ j, s k) with 
+
+SelfCorrect Z 
+
+> F
+
+(ˆ j, s k) (Fact 27). Accept if and only if it accepts. 
+
+• Completeness: if π = ( eZ, eA) is exactly the codeword and |μ[s1, b 1, . . . , s ℓ, b ℓ] − v/ 2B | < τ ,there is an honest Prover with which the Verifier accepts with probability 1.
+
+• Soundness: if |μ[s1, b 1, . . . , s ℓ, b ℓ] − v/ 2B | ≥ τ , then regardless of the Prover’s messages the Verifier accepts with probability 
+
+O
+
+ ℓ log m + log B
+
+|F| + ℓ(log m + log n)δ
+
+
+
+.
+
+• Complexity: the Verifier makes O ℓ log m + ℓ log n marginally-uniform queries to Z and one to A, exchanges O(ℓ log m + log B) field elements with the Prover, and runs in O ℓ(log m +log n)2 + log B field operations, plus O(log |F|) bit operations for the integer comparison. Proof. Write μ† := 2 B μ[s1, b 1, . . . , s ℓ, b ℓ]. Note that, for the Rμ-encoding ( eZ, eA) of μ, the value certified by Claim 26 (the right-hand side of Equation (20)) is 
+
+X
+
+> j
+
+weight A(j)agree eZb,s (j) = X 
+
+> j:∀k z j,s k=bk
+
+α† 
+
+> j
+
+= μ†,
+
+indeed weight A(j) = α† 
+
+> j
+
+is the integer weight of zj (Equation (12)), and agree eZb,s (j) is the Boolean indicator that zj,s k = bk for all k (Definition 21 and Eq. (13)). Because 0 ≤ μ† ≤ 2B < |F|, the integer comparison Equation (21) against a Prover message claiming μ† is unambiguous. 
+
+Completeness. The honest Prover sends v∗ := μ†. Since |μ† − v| < τ †, Equation (21) holds. On the exact codeword every SelfCorrect returns eZ(ˆ j, s k) with probability 1, so the second step is 
+
+VerMarginoid on ( eZ, eA) with claimed value v∗ = μ†; by Claim 26 it accepts with probability 1. 
+
+Soundness. Suppose |μ† − v| ≥ τ † and fix any Prover sending some v∗ as its message. If the Verifier accepts then Equation (21) holds, i.e. , |v∗ − v| < τ †. Then v∗̸ = μ† over F. The second step is therefore VerMarginoid run with claimed value v∗̸ = μ† and each Z-query self-corrected. By Fact 27 (with k = log m+log n ≤ | F|− 2), each of the ℓ self-corrected queries returns eZ(ˆ j, s k) except with probability (log m + log n + 1) δ, and the single A-query is marginally uniform on Flog m+log B
+
+(Claim 26), agreeing with eA except with probability δ. Conditioned on all of these agreements, the run is then exactly VerMarginoid against the multilinear codeword ( eZ, eA), whose true value is μ†.Since v∗̸ = μ†, Equation (20) fails and Claim 26 bounds acceptance by (( ℓ + 1) log m + 2 log B)/|F|.Conclude with a union bound. 40 Complexity. Each SelfCorrect makes log m+log n+1 marginally-uniform queries and O((log m+log n)2) field operations (Fact 27), and there are ℓ of them; the integer comparison Equation (21) costs O(log |F|) bit operations on the lifted representatives, and the remaining cost, including the 
+
+O(ℓ log m + log B) field elements of Prover communication, is that of Claim 26. 
+
+# 8 Verifying consistency of predictive models 
+
+The main contribution of this section is an explicit polynomial-time Interactive PCP ( IPCP ) for 
+
+Model -Consistency : a protocol in which the Verifier is given an (alleged) Rμ-encoding (Section 7) of a consistent distribution, and uses it to certify consistency of a given predictive model. We note the consequence we do not pursue: Corollary 18 composed with MIP = NEXP [BFL91] gives that Model -Consistency admits a MIP , namely, polynomial-time Verifier interacting with two provers. 16 One could then hope to augment the training of ( P, Q ) with the training of two Provers 
+
+P1, P 2 towards a predictive model that proves its own consistency (see Remark 1). The practical obstacle to such a programme is not (only) the cost of running P1, P 2: they may be worst-case exponential-time, but perhaps more efficient on average and may even be trained for average success by Reinforcement Learning from Verifier Feedback (RLVF) or Transcript Learning (TL) [AGPR25]. However, before one trains an honest Prover by RLVF (resp. TL), one needs an implementation of the Verifier (resp. honest Prover) to learn against: code that, on input the witnessing distribution μ
+
+underlying ( P, Q )’s consistency, produces the messages an honest P1, P 2 would send. Attempting to follow the rationale of Corollary 18, this code is the composition of two generic constructions. The first is the Cook–Levin [Coo71, Lev73] reduction of ( P, Q, τ, V NEXP ) into a succinct CNF formula, which discards the convex-geometric semantics of the Carath´ eodory witness. The second is the BFLS honest Prover strategy [BFLS91] which runs on top of the succinct CNF. The IPCP we construct in this section is designed towards clearing this obstacle by explicitly describing the Verifier and honest Prover. Namely, the proof oracle is the Rμ-encoding of the witnessing distribution, and the SumCheck s that reduce the inconsistency inequality to queries on that oracle admit an arguably self-contained, implementable specification (Algorithm 6). We reflect in Section 9 on what was natural about the resulting protocol: how it factors into a model-specific “witness” core and a model-agnostic “proving” overlay, which we hope opens a route to training self-proving predictive models in the spirit of [AGPR25]. 
+
+Definition 29 (Interactive PCP [KR08]) . An Interactive PCP (IPCP ) is an interactive proof in which the Verifier additionally has oracle access to a proof string π fixed before the interaction begins (the PCP). It is measured by the Verifier runtime ; the PCP length , the number of symbols of π;the query complexity , the number of point queries the Verifier makes to π; and the communication 
+
+exchanged with the Prover. Importantly, the oracle cannot adapt to the interaction, whereas the Prover can; this is what sep-arates an IPCP from an interactive proof, and since a proof oracle is equivalent to non-communicating provers [FRS94], an IPCP is a special case of a multi-prover proof. As elsewhere, we specify only the Verifier, and describe the honest Prover and proof string when proving completeness.   
+
+> 16 Equivalently, a polynomial time Verifier querying an exponential length PCP. We stick with the MIP strawman, but our informal argument would apply to a PCP just the same.
+
+41 8.1 Setup: from a witnessing distribution to the proof oracle 
+
+Fix a predictive model ( P, Q ) with variable description length d, context length ℓ, and precision 
+
+B. We write n := 2 d for the number of (implicit) Boolean variables, and recall that P ’s probability denominator is 2 B . For readability, we omit the subscript from Inc (P,Q ), writing simply Inc for the model inconsistency. 
+
+Queries. Recall from Section 4.2 that a query is a string q = ( s1, b 1, . . . , s ℓ, b ℓ, t ) ∈ Q , with 
+
+Q := {0, 1}ℓ(d+1)+ d the query universe , sk ∈ { 0, 1}d the description of the kth context variable, 
+
+bk ∈ { 0, 1} the corresponding context bit, and t ∈ { 0, 1}d the target-variable description. For example, q = ( s1, 0, s 5, 1, t ) is asking for the probability that the variable ωt is true conditioned on ωs1 = 0 and ωs5 = 1. We abbreviate ∥Q∥ := ∥Q∥1 = P 
+
+> q∈Q
+
+Q(q), the number of (confidence-weighted) claims implicit in ( P, Q ); note that ∥Q∥1 ≤ |Q| · 2B ∈ 2O(ℓd +B).We now describe what the Prover of a consistent model must do to come up with the proof oracle: find a distribution μ⋆ consistent with the model ( P, Q ), sparsify it, and encode the sparse result. 
+
+Step 1: find any witnessing distribution. Suppose ( P, Q ) is ( τ − εgap )-consistent for some gap εgap > 0: by definition, there is some distribution μ⋆ over {0, 1}n with Inc (P,Q )(μ⋆) ≤ τ − εgap .Nothing more is assumed of μ⋆; its support may well be all of {0, 1}n.
+
+Step 2: sparsify. By the Carath´ eodory step of Section 5 applied to the implicit CPC PP,Q 
+
+(Definition 6 and Claim 7), in the low-precision explicit form of Proposition 8 (gap εgap ), the witness μ⋆ can be traded for a sparse distribution μz,α with 
+
+• support vectors z1, . . . , z m ∈ { 0, 1}n, with m = ∥Q∥1 + 1, 17 and 
+
+• weights αj = α† 
+
+> j
+
+/2B′
+
+for integers α† 
+
+> j
+
+∈ { 0, . . . , 2B′
+
+− 1} with Pmj=1 α† 
+
+> j
+
+= 2 B′
+
+, where the denominator’s bit-length B′ is the certificate precision Bεgap of Proposition 8 at this m,rounded up to a power of two as Definition 21 requires, so that B′ ∈ O(log ∥Q∥+log(1 /ε gap )) ⊆
+
+O(ℓd + B + log(1 /ε gap )), 18 
+
+• such that Inc PP,Q (μz,α ) ≤ τ .The sparsification costs the additive εgap slack in completeness. Throughout the rest of this section we work exclusively with the low-precision witness; Remark 36 explains why the exact witness of Lemma 13 is not used here. 
+
+Step 3: encode. The Prover encodes μ using RμF(n, m, B ′), for sufficiently large field F. Namely, the proof oracle is the codeword π = ( Z, A ), where as in Definition 21, Z is the multilinear extension of the support-vector table ( j, i ) 7 → zj,i and A that of the weight-bit table ( j, β ) 7 → (α† 
+
+> j
+
+)β .        
+
+> 17 Proposition 8 gives a support of at most this size, and Definition 21 permits the zero-weight padding. We assume, here and throughout, that ∥Q∥1+ 1 is a power of two, so that log mis an integer as Definition 21 requires; the decoupled variant described in Remark 31 removes this assumption.
+> 18 Proposition 8 also permits α†
+> j= 2 Bεgap , a point mass, which the range above excludes. Such a witness is brought into range by duplicating its support vector.
+
+42 From this point onward π = ( Z, A ) denotes an alleged RμF(n, m, B ′)-codeword—a pair of func-tions over F of the types prescribed by Definition 21. The predictive model ( P, Q ) is given as a pair of circuits taking an input query q given as a bit-string. The Verifier in our protocol will eventually want to compute the outputs of these circuits on F-valued queroids ˆ q; this is done by arithmetizing each circuit, i.e. , deriving polynomials ˆP , ˆQ
+
+by replacing Boolean gates by their arithmetic form over F: negation is replaced by a 7 → 1 − a,conjunction by ( a, b ) 7 → ab , and disjunction by ( a, b ) 7 → a + b − ab .
+
+Fact 30 (Naive) . Let C be a Boolean circuit with n inputs and S many gates, computing a function 
+
+{0, 1}n → { 0, . . . , M − 1} with M < |F|. The polynomial ˆC ∈ F[X1, . . . , X n] is obtained by replacing each Boolean gate with its arithmetic form over F. Then, for any Boolean input x ∈ { 0, 1}n,
+
+ˆC(x) = C(x), and for any ˆx ∈ Fn, ˆC(ˆ x) is computable in O(S) field operations. 
+
+We let ˆP , ˆQ denote the polynomials obtained by this naive arithmetization, and let ∆ denote an upper bound on their degrees (a scalar, not to be confused with the simplex ∆ X, which always takes a set argument). The protocol presented in this section costs linearly in ∆, which is itself exponential in the circuits’ depth in the worst case; Section 8.3 then shows how doubly-efficient interactive proofs [GKR15, Tha13] replace the dependency on ∆ by one on the depth, and improve the dependency on S.
+
+Parameter glossary. Denominators are written as explicit powers of two. We collect, for refer-ence, all symbols used throughout the rest of Section 8: 
+
+• d: variable description length, so that n := 2 d is the number of (implicit) Boolean variables. 
+
+• ℓ: context length, the number of variables conditioned upon in each query. 
+
+• B: precision of the model ( P, Q ), formally number of output gates of P and Q.
+
+• τ = τ †/2B : the consistency tolerance from Model -Consistency , given to precision B with integer numerator τ †.
+
+• εgap > 0: the slack parameter from the gap variant of Model -Consistency .
+
+• Q := {0, 1}ℓ(d+1)+ d: the query universe; each q ∈ Q is parsed as q = ( s1, b 1, . . . , s ℓ, b ℓ, t ). 
+
+• ∥Q∥1: the number of (multiplicity-weighted) claims implicit in ( P, Q ). 19 
+
+• m = ∥Q∥1 + 1: support size of the sparsified witness. 
+
+• PP,Q : the implicit CPC of ( P, Q ), as defined in Definition 6. 
+
+• B′: bit-length of the weights of the sparsified witnessing distribution. 
+
+• F: the finite field over which all arithmetic and oracles are evaluated; specified in Section 8.2. 
+
+• π = ( Z, A ): the proof oracle, i.e. , the PCP component of the IPCP. With Z : Flog m × Fd → F
+
+and A : Flog m × Flog B′
+
+→ F.
+
+> 19 We may omit the subscript 1 for readability
+
+43 Remark 31 (Support size m and the length of the proof π). The honest oracle has length m =
+
+∥Q∥1 + 1, the length parameter of the codeword RμF(n, m, B ′), fixed the moment π is given. The Verifier cannot compute ∥Q∥1 = P 
+
+> q
+
+Q(q) on its own (it is a sum over all of Q), but it can read 
+
+m off π’s type signature, recover ∥Q∥1 = m − 1, and reject out of hand any oracle whose declared length exceeds the a-priori cap m ≤ 2B |Q| + 1. The honest length thus depends on the particular input, through ∥Q∥1, not only on the input length. Instance-dependent proof length is common in the literature: e.g. , the IPCP oracle of [KR08] is polynomial in the witness size, and the interactive oracle proofs of [RR24] are made to approach the witness length. The instance-dependence may nonetheless be undesirable in our context, e.g. , as it complicates preparing a uniform-length “batch” for feeding into a GPU; one regains uniformity by padding π up to the maximal length O(2 ℓd ) with further zero-weight dummy support vectors. We prefer the variable length for its granularity, and for the conceptual point it portrays: a more confident model, or one with more implicit claims (a larger ∥Q∥1 in either case), requires a longer proof. We also note that m = ∥Q∥1 +1 tracks the model’s total confidence rather than the true support size of the witness, which a resourceful Prover might make smaller still. A modest modification would enable this efficiency: Instead of identifying ∥Q∥1 with m − 1, the Verifier reads only the support size m off π’s type signature and asks the Prover for ∥Q∥1 as a separate field element; it certifies this alleged value by the ∥Q∥1-SumCheck (now seeded at the alleged value), uses the certified ∥Q∥1 in the threshold (27) in place of m − 1, and checks over Z that m ≤ 2( ∥Q∥1 + 1) (the Carath´ eodory cap, doubled to absorb padding the support up to a power of two). The honest Prover could then encode the witness at its true support size (at most ∥Q∥1 + 1, and often far smaller), and the proof would shrink accordingly. We keep the simpler protocol above, in which the oracle’s length has m = ∥Q∥1 + 1. 
+
+8.2 The full protocol and analysis 
+
+We now formalize the protocol sketched in Section 2.2. 
+
+Queroids. Recall that a query q ∈ Q is parsed into its components q = ( s1, b 1, . . . , s ℓ, b ℓ, t ), with 
+
+sk ∈ { 0, 1}d, bk ∈ { 0, 1}, and t ∈ { 0, 1}d. The SumCheck s below run over F, so they manipulate the 
+
+F-valued analogue of a query: ˆq = (ˆ s1, ˆb1, . . . , ˆsℓ, ˆbℓ, ˆt) where ˆs1, . . . , ˆsℓ, ˆt ∈ Fd and ˆb1, . . . , ˆbℓ ∈ F. (22) We call such an ˆ q a queroid (in the same spirit as the marginoid of Section 7): it has the shape of a query, but its elements are in F, so it may not describe any actual query. A genuine query asks for the mass of an event such as ωs1 = b1; once the description ˆ s1 and the “bit” ˆb1 are non-Boolean, no such event exists. 
+
+Gadgets. The protocol adapts three of the multilinear gadgets of Section 7. The first is agree Zb,s 
+
+of Equation (13), modified for covenience: 
+
+agree Z (ˆ j, ˆq) = agree Z (ˆ j, ˆs1, ˆb1, . . . , ˆsℓ, ˆbℓ, ˆt) := 
+
+> ℓ
+
+Y
+
+> k=1
+
+ˆbk ˆZ(ˆ j, ˆsk) + 
+
+
+
+1 − ˆbk
+
+  
+
+1 − ˆZ(ˆ j, ˆsk)
+
+ 
+
+. (23) The only difference is that we promoted b, s from subscript to an argument q = ( b, s, t ), but the target variable description t is ignored. 44 The second is vec2int of Equation (11), here in its log B′-variate form vec2int ( ˆβ) = Qlog B′
+
+> k=1
+
+ 1 + ˆβk(2 2k−1
+
+− 1) , which on a Boolean β ∈ { 0, 1}log B′
+
+equals 2 raised to the integer value of β (as a field element). The Verifier evaluates vec2int ( ˆβ) in O(log B′) field operations at any ˆβ ∈ Flog B′
+
+.20 
+
+The third is the weight numerator weight A(j) = P  
+
+> β∈{ 0,1}log B′
+
+vec2int (β)A(j, β ) of Equation (12), here at precision B′: on the codeword π it is the integer weight α† 
+
+> j
+
+of the j-th support vector, so that weight A(j)/2B′
+
+is the probability mass placed on that vector. 
+
+Marginoids. The key quantities that connect the oracle π = ( Z, A ) to the inconsistency are the two (denominator-cleared) marginoids 
+
+μ†[ˆ s = ˆb] := X 
+
+> j∈{ 0,1}log m
+
+weight A(j)agree Z (j, ˆq) (24) 
+
+μ†[(ˆ s = ˆb) ∩ (ˆ t = 1)] := X 
+
+> j∈{ 0,1}log m
+
+weight A(j)agree Z (j, ˆq)Z(j, ˆt),
+
+whose context (ˆ s, ˆb) and target ˆ t are the components of ˆ q, parsed as in Equation (22). 21 They are 
+
+marginoids because ˆ q is over F: on a Boolean query q they are the genuine (denominator-cleared) marginals 2 B′
+
+μ[s = b] and 2 B′
+
+μ[( s = b) ∩ (t = 1)]. However, for a non-Boolean queroid ˆ q they are only marginal-shaped F-vectors. The quantity the protocol ultimately tests is the denominator-cleared inconsistency Inc †,
+
+Inc † := X
+
+> q∈Q
+
+Q(q) 2B μ†[( s = b) ∩ (t = 1)] − P (q)μ†[s = b]2. (25) The dagger follows the convention of τ † and α† 
+
+> j
+
+: Inc † is the integer obtained from the squared inconsistency by clearing all denominators (with the square superscript omitted for readability). As we soon prove, when π is the Rμ-codeword witnessing distribution μ, Inc † has the closed form 
+
+Inc † = 2 2( B+B′) · ∥ Q∥1 · Inc (P,Q )(μ)2, (26) so that checking Inc † ≤ τ 222( B+B′)∥Q∥1 is equivalent to Inc (P,Q )(μ) ≤ τ .Algorithm 6 is an IPCP in the sense of Definition 29, with the PCP length counted in F-symbols; Theorem 32 below bounds its four complexity measures. 
+
+Theorem 32 (Explicit IPCP for Model -Consistency ). For every εsound , ε gap > 0, Algorithm 6 is an IPCP Verifier for Model -Consistency with the following properties. Let (P, Q ) be a predictive model whose circuits have size ≤ S, with arithmetizations ˆP , ˆQ of degree ≤ ∆. Let τ = τ †/2B
+
+be the consistency threshold for τ † ∈ { 0, . . . , 2B − 1}. Let F be a prime field such that |F| ≥ 
+
+2O(ℓd +B+log(1 /ε gap )) · ∆/ε sound .
+
+• Completeness. There exist a proof oracle and an honest Prover such that, if (P, Q ) is (τ −
+
+εgap )-consistent, the Verifier accepts with probability 1.                            
+
+> 20 The doubly-exponential constants 2 2k−1
+> for k≤log B′are precomputed once, each by k−1 repeated squar-ings, for O((log B′)2) field operations in total; each subsequent evaluation of vec2int then costs only the O(log B′)multiplications of Equation (11).
+> 21 In μ†[( s=b)∩(t= 1)] we spell the query event as ( s=b)∩(t= 1); the μ[·] notation of the preliminaries would abbreviate it as the context event intersected with the target, but spelling out that the target variable is required to be true is clearer here.
+
+45 Algorithm 6: VerConsist π(P, Q ; τ, ε sound , ε gap )
+
+Input: Predictive model ( P, Q ) with description length d, context length ℓ and precision 
+
+B, given as arithmetic circuits of degree at most ∆ (Fact 30); tolerance 
+
+τ = τ †/2B ≥ 0; soundness error εsound > 0; and soundness gap εgap > 0. 
+
+Oracle: π = ( Z, A ), with Z : Flog m × Fd → F and A : Flog m × Flog B′
+
+→ F. 
+
+> 1
+
+Read the dimensions m, B ′ ∈ N off the signature of the oracle π, and reject unless 
+
+m ≤ 2B |Q| + 1, 2 2( B+B′)(m − 1) < |F|, and m(2 B′
+
+− 1) < |F|. 
+
+> 2
+
+Run VerEnc π
+
+> F
+
+(δ ← εsound /8ℓ+12 , ε ← εsound /4), and reject if it rejects.  
+
+> 3
+
+Expect vInc ∈ F from the Prover, and reject unless, as integers, 
+
+vInc ≤ (τ †)222B′
+
+· (m − 1) over Z. (27)  
+
+> 4
+
+Run (ˆ vInc , ˆq) := SumCheck F(val ← vInc , rounds ← ℓ(d + 1) + d, deg ← 3∆ + 2) ,
+
+(ˆ vm, ˆq′) := SumCheck F(val ← m − 1, rounds ← ℓ(d + 1) + d, deg ← ∆) ,
+
+and parse ˆ q = (ˆ s1, ˆb1, . . . , ˆsℓ, ˆbℓ, ˆt) for ˆ s1, . . . , ˆsℓ, ˆt ∈ Fd and ˆb1, . . . , ˆbℓ ∈ F. 
+
+> 5
+
+Expect vμ†[ˆ s=ˆb], v μ†[(ˆ s=ˆb)∩(ˆ t=1)] ∈ F from the Prover, and run 
+
+VerMarginoid π
+
+> F
+
+(vμ†[ˆ s=ˆb]; ˆ s1, ˆb1, . . . , ˆsℓ, ˆbℓ) and 
+
+VerMarginoid π
+
+> F
+
+(vμ†[(ˆ s=ˆb)∩(ˆ t=1)] ; ˆ s1, ˆb1, . . . , ˆsℓ, ˆbℓ, ˆt, 1) . 
+
+> 6
+
+Compute the model values ˆP (ˆ q), ˆQ(ˆ q), ˆQ(ˆ q′) ∈ F directly, by evaluating the circuits P, Q at ˆq and ˆ q′ over F (Fact 30).  
+
+> 7
+
+Accept if and only if VerEnc and both VerMarginoid accepted, and ˆvInc 
+
+> ?
+
+= ˆQ(ˆ q) ·
+
+
+
+2B vμ†[(ˆ s=ˆb)∩(ˆ t=1)] − ˆP (ˆ q) · vμ†[ˆ s=ˆb]
+
+2
+
+and ˆvm ?
+
+= ˆQ(ˆ q′) over F. (28) 
+
+• Soundness. If (P, Q ) is not τ -consistent, the Verifier accepts with probability at most εsound ,regardless of the proof oracle and the Prover. 
+
+• Verifier runtime. poly (ℓ, d, B, log(1 /ε gap ), 1/ε sound ) + O(|P | + |Q| + ∆ ℓd ) field operations. 
+
+• PCP length and query complexity. The proof oracle consists of |F|O(ℓd +B) symbols of F, of which the Verifier reads poly (ℓ, d, B, log(1 /ε gap ), log(1 /ε sound )) /ε sound .
+
+• Communication. Prover messages altogether have total length poly (ℓ, d, B, log(1 /ε gap ), log(1 /ε sound )) +O(∆ ℓd ).
+
+Corollary 33 (Boolean IPCP) . Theorem 32 holds with the proof oracle over the Boolean alphabet, each F-symbol written in binary. The bounds remain asymptotically the same, with a PCP length 
+
+46 of 
+
+2poly (ℓ,d,B ) ·
+
+ ∆
+
+εgap · εsound 
+
+O(ℓd +B)
+
+Proof. Evaluating each gate over F in topological order takes O(S) field operations and returns ˆC(ˆ x), where ˆC is the polynomial in X1, . . . , X n that the output gate computes. The arithmetic gates agree with the Boolean connectives on {0, 1} (¬a = 1 − a, a ∧ b = ab , a ∨ b = a + b − ab ), so ˆC
+
+extends C off the cube; the hypothesis M < |F| guarantees the integer value is read back without reduction. For the degree, induct over the gates: an input and a constant compute polynomials of degree 1 and 0, an addition gate one of degree at most the maximum of its inputs’, and a multiplication gate one of degree at most their sum—which is the syntactic degree, so deg ˆC ≤ ∆. Only multiplication gates raise the degree, and each at most doubles it, so along a path of length 
+
+D it at most doubles D times: ∆ ≤ 2D; and D ≤ S gives ∆ ≤ 2S .
+
+Proof of Theorem 32. At a high level, the encoding test VerEnc pins π to a genuine codeword. The two VerMarginoid calls then return true marginoids of the encoded distribution, the three direct circuit evaluations (Fact 30) supply the true model values, and the SumCheck s certify that the Prover’s vInc is the actual inconsistency and that the total mass ∥Q∥1 equals its known value 
+
+m − 1. At that point the integer threshold (27) turns “ Inc † exceeds the bound” into a deterministic rejection. Both directions of the proof rest on Equation (26), which we now prove. For any codeword 
+
+eπ = ( eZ, eA) ∈ RμF(n, m, B ′) encoding a distribution μ, the two marginoids of Equation (24), computed for eπ, are, on a Boolean query q = ( s1, b 1, . . . , s ℓ, b ℓ, t ), 
+
+μ†[s = b] = X
+
+> j
+
+weight A(j)agree Z (j, q ) = 2 B′
+
+μ[s = b],μ†[( s = b) ∩ (t = 1)] = X
+
+> j
+
+weight A(j)agree Z (j, q )Z(j, t ) = 2 B′
+
+μ[( s = b) ∩ (t = 1)] .
+
+Indeed, weight A(j) = α† 
+
+> j
+
+is the integer weight (Definition 21), agree Z (j, q ) = 1[∀k z j,s k = bk]indicates the context, and Z(j, t ) = zj,t . Substituting into Equation (25) and pulling out 2 B+B′
+
+,2B μ†[( s = b) ∩ (t = 1)] − P (q)μ†[s = b] = 2 B+B′ 
+
+μ[( s = b) ∩ (t = 1)] − P (q)2B μ[s = b]
+
+
+
+,
+
+therefore Inc † = 2 2( B+B′)∥Q∥1 Inc (μ)2,
+
+which is Equation (26). Therefore, the check in Equation (27) holds if and only if Inc (μ) ≤ τ .Before we turn to completeness and soundness, we argue that the field F is large enough to avoid wraparounds. By Claim 12, whenever ( P, Q ) is ( τ − εgap )-consistent there is a witness 
+
+μ with Inc (μ) ≤ τ , supported on z1, . . . , z m with integer weights summing to 2 B′
+
+where B′ ∈
+
+O(log m + log(1 /ε gap )). The honest proof oracle is exactly the codeword π = RμF(n, m, B ′) of this μ (Definition 21). (If a single point of μ carries weight 2 B′
+
+, which Definition 21 cannot store in B′ bits, the Prover lists that point twice in z with the mass split evenly; the support is a multiset, so this encodes the same distribution with every stored weight in {0, . . . , 2B′
+
+− 1}.) Write M := 2 B+ℓ(d+1)+ d; as observed in Remark 31, ∥Q∥1 ≤ M for any confidence circuit Q. By assumption, 
+
+|F| > 22( B+B′)M ≥ 22( B+B′)∥Q∥1. (29) 47 Since Inc (μ) ≤ 1 for every distribution μ, the true inconsistency of any encoded μ satisfies 
+
+Inc † = 2 2( B+B′)∥Q∥1 Inc (μ)2 ≤ 22( B+B′)∥Q∥1 ≤ 22( B+B′)M < |F|,
+
+and likewise ∥Q∥1 ≤ M < |F|. Therefore, whenever vInc equals Inc † over F and the ∥Q∥1-SumCheck 
+
+has pinned the mass to m − 1, their integer lifts in (27) are exactly Inc † and ∥Q∥1 = m − 1, no wraparounds. For an adversarial oracle the same holds with the declared dimensions: the dimension check of Algorithm 6 enforces 2 2( B+B′)(m − 1) < |F| and m(2 B′
+
+− 1) < |F| for the ( m, B ′) read off 
+
+π’s signature, so the lifted comparison in (27) is wraparound-free for any oracle the Prover supplies, once the ∥Q∥1-SumCheck has pinned the mass to m − 1 (as in the case analysis below); the honest oracle passes the check by Equation (29). Throughout the analysis below, each cited bound (Fact 22 and Claims 24 and 26) holds for every fixed claimed value and every Prover strategy, over the sub-protocol’s own fresh coins; conditioning on the transcript prefix that fixes that value and averaging therefore preserves each bound, so the failure events may be union-bounded even though the Prover chooses vμ†[ˆ s=ˆb], v μ†[(ˆ s=ˆb)∩(ˆ t=1)] only after ˆ q is public. 
+
+Completeness. Suppose ( P, Q ) is ( τ − εgap )-consistent, and let μ be the aforementioned sparse distribution so Inc (μ) ≤ τ . The proof oracle is the codeword π (whose dimensions pass the check of Algorithm 6, by m ≤ M + 1 and Equation (29)), and the honest Prover sends vInc =22( B+B′)∥Q∥1 Inc (μ)2 and the true marginoids vμ†[ˆ s=ˆb] = μ†[ˆ s = ˆb] and vμ†[(ˆ s=ˆb)∩(ˆ t=1)] = μ†[(ˆ s =ˆb) ∩ (ˆ t = 1)] (the total mass ∥Q∥1 = m − 1 is determined by π’s length, not sent), and plays the honest strategies of Claims 24 and 26. The threshold (27) then holds over Z: the lifts are exactly Inc † and ∥Q∥1 (by Equation (29), as recorded above), and Inc † = 2 2B 22B′
+
+∥Q∥1 Inc (μ)2 ≤
+
+(τ †)222B′
+
+∥Q∥1 since Inc (μ) ≤ τ = τ †/2B . VerEnc accepts because π is a genuine codeword; each 
+
+VerMarginoid accepts with probability 1 because vμ†[ˆ s=ˆb], v μ†[(ˆ s=ˆb)∩(ˆ t=1)] satisfy Equation (20); and the model values ˆP (ˆ q), ˆQ(ˆ q), ˆQ(ˆ q′) are the Verifier’s own evaluations of the circuits (Fact 30). Finally, both equalities of (28) hold by construction: the Inc †-SumCheck runs on the polynomial 
+
+q 7 → ˆQ(q) 2B μ†[( s = b) ∩ (t = 1)] − ˆP (q)μ†[s = b]2, so its output is that polynomial at ˆ q,ˆvInc = ˆQ(ˆ q) 2B μ†[(ˆ s = ˆb) ∩ (ˆ t = 1)] − ˆP (ˆ q)μ†[ˆ s = ˆb]2 = ˆQ(ˆ q) 2B vμ†[(ˆ s=ˆb)∩(ˆ t=1)] − ˆP (ˆ q)vμ†[ˆ s=ˆb]
+
+2,
+
+likewise ˆ vm = ˆQ(ˆ q′), since the ∥Q∥1-SumCheck runs on ˆQ, which agrees with Q on Q (Fact 30). Therefore, the Verifier accepts with probability 1. 
+
+Soundness. Now suppose ( P, Q ) is not τ -consistent. Fix any proof oracle π and any Prover; we bound the acceptance probability by cases. Let δ = εsound /8ℓ+12 .If π is δ-far from all Rμ codewords, then by Claim 24 (with soundness parameter εsound /4) 
+
+VerEnc accepts with probability at most εsound /4. Otherwise π is δ-close to a codeword eπ = ( eZ, eA) ∈ Rμ encoding a genuine distribution eμ. The rest of the protocol reads the oracle at 2 ℓ + 3 points, each uniform over its oracle’s domain: the 
+
+A-reads by Claim 26, and the Z-reads (ˆ j, ˆsk), (ˆ j, ˆt) because ˆ sk, ˆt are coins of the Inc †-SumCheck ,independent of the fresh ˆ j. By a union bound, all of these reads agree with eπ except with probability (2 ℓ + 3) δ ≤ εsound /4. Condition on all queries landing in the agreement region; every subprotocol now behaves as if run on eπ. Now, 48 • If vμ†[ˆ s=ˆb]̸ = 2 B′
+
+eμ[s = b], the corresponding VerMarginoid accepts with probability at most    
+
+> (ℓ+1) log m+2 log B′
+> |F|
+
+by Claim 26. Similarly for vμ†[(ˆ s=ˆb)∩(ˆ t=1)] = 2 B′
+
+eμ[( s = b) ∩ (t = 1)], but with 
+
+ℓ + 2 instead of ℓ + 1 in the numerator. 
+
+• If vInc ̸ = Inc †, the corresponding SumCheck in Equation (28) passes with probability at most (3∆ + 2) log |Q| /|F|. Here we use the assumption that ˆP and ˆQ have degree at most ∆ and that the marginoids are multilinear in q.
+
+• If m̸ = ∥Q∥1 + 1, the corresponding SumCheck in Equation (28) passes with probability at most ∆ log |Q| /|F|. Here we similarly use the degree bound on ˆP and ˆQ.If instead all the above equalities hold, then by the assumption on |F| and Equation (26), 
+
+Inc † > (τ †)222B′
+
+∥Q∥1 over Z, so the threshold check fails and the Verifier rejects. Collecting these bounds, the Verifier accepts with probability at most Pr[ accept ] ≤ εsound 
+
+4 + εsound 
+
+4 + (2 ℓ + 3) log m + 4 log B′ + (4∆ + 2) log |Q| |F| .
+
+The preceding bound gives Pr[ accept ] ≤ εsound as soon as |F| exceeds twice its numerator divided by εsound . It remains to confirm that this, and the field hypotheses (17) of the encoding test (Claim 24, at soundness parameter εsound /4), hold for a field of the theorem’s size—on top of the wraparound bound (29) assumed above. The encoding test’s no-wrap condition m(2 B′
+
+− 1) < |F|
+
+is itself implied by (29), and every remaining condition is polynomial in the model parameters, ∆, and 1 /ε sound . Each is monotone in m, so the Verifier certifies them at the a-priori cap m ≤ M + 1 (Remark 31), never needing the true support size. As (29) is 2 O(ℓd +B)poly (1 /ε gap ) and dominates, the theorem’s field size |F| ≥ 2O(ℓd +B)poly (1 /ε gap ) · ∆/ε sound satisfies them all. 
+
+The four complexity measures. The PCP length is the size of the oracle π = ( Z, A ): it con-sists of |F|log m+d + |F|log m+log B′
+
+symbols (Definition 21), exponential in ℓ, d, B, log(1 /ε gap ), and log(1 /ε sound ). The other three measures are additive over the sub-protocols; the table below collects their contributions, writing b := log m + d + log B′ = O(ℓd + B) and recalling δ = εsound /(4(2 ℓ + 3)), log |Q| = ℓ(d + 1) + d, and log |F| = O(ℓd + B + log(1 /ε gap ) + log(1 /ε sound )) bits per element. oracle queries communication ( F-elts) Verifier ops 
+
+VerEnc b log(1 /ε sound )/δ b log(1 /ε sound ) b log(1 /ε sound )/δ 
+
+VerMarginoid (×2) ℓ ℓ log m + log B′ ℓ log m + log B′
+
+Direct SumCheck s ( ×2) 0 ∆ log |Q| ∆ log |Q| 
+
+model evaluations ( ×3) 0 0 |P | + |Q|
+
+all entries O(·). Only VerEnc and the two VerMarginoid read the oracle, VerEnc dominating; the query total is O ℓ(ℓd +B +log(1 /ε gap )) log(1 /ε sound )/ε sound 
+
+. Summing the communication column and converting at log |F| bits per element gives ∆ · poly (ℓ, d, B, log(1 /ε gap ), log(1 /ε sound )), its only circuit-dependent term being the direct SumCheck s. And at poly (log |F|) per field operation, the Verifier runs in O(|P | + |Q|)poly (log |F|) + ∆ · poly (ℓ, d, B, log(1 /ε gap ), 1/ε sound ), its only circuit-dependent term being the three circuit evaluations. 
+
+Remark 34 (On the 1 /ε sound in the query complexity) . The 1 /ε sound in the query complexity enters through the proximity parameter δ = εsound /(4(2 ℓ + 3)) of the encoding test (Claim 24); we wonder whether it can be brought down to poly log(1 /ε sound ). For example, one could encode the 49 witness not by its multilinear extension but by an extension of higher individual degree (though perhaps lower total degree), admitting a more query-efficient proximity test; the higher individual degree would propagate into the SumCheck s and hence into the field size. We have not attempted this direction beyond this sketch. 
+
+Remark 35 (A single evaluation point) . The two direct SumCheck s of Algorithm 6 range over the same universe Q, and their soundness does not require independent randomness: the union bound in the proof of Theorem 32 sums the two error events whatever their joint distribution. The Verifier may therefore run both SumCheck s on a single stream of coins, making ˆ q′ = ˆ q: the final checks (28) then evaluate the model at one queroid (the value ˆQ(ˆ q) serves both equalities), and the three VerifyMLE calls of Theorem 38 become two. The one requirement is that each round’s two messages be committed before that round’s coin is revealed. Running the SumCheck s in lockstep (both round-k polynomials, then the coin) satisfies it with a single Prover, and the protocol remains an IPCP , so Section 8.3 and the compilers of Remark 40 still apply. Running them sequentially with one Prover does not: having seen the first transcript, the Prover knows every coin of the second 
+
+SumCheck in advance, and can choose its final round’s coefficients so that the residual claim lands exactly on ˆQ(ˆ q), passing on a false claim with probability 1 − O(1 /|F|). Sequential order is sound again when the ∥Q∥1-SumCheck is played by a prover isolated from the first transcript: formally a second prover, and in the self-proving instantiation one further context reset (Remark 1). 
+
+Remark 36 (The gap and the exact-witness instantiation) . Running Algorithm 6 with the exact rational witness of Lemma 13 (no gap) preserves completeness and soundness, but the threshold 
+
+τ 222( B+B′)∥Q∥1 has bit-length 2 O(ℓd +B), so the field required by the proof of Theorem 32 becomes single-exponentially large. The IPCP statement above does not apply to this instantiation. This does not contradict Corollary 18: that corollary obtains its polynomial-time Verifier by Cook– Levin arithmetization of the NP verifier underlying Proposition 9, foregoing Carath´ eodory structure entirely. Theorem 32 should be read as an explicit but (slightly) weaker counterpart of Corollary 18. Nor can the support-only design of Proposition 9 be imported here to dispense with the gap, though in the explicit setting it costs no completeness slack at all. Its Verifier cannot even write down the linear system it would solve, the side of which is m = ∥Q∥1 + 1 = 2 Θ( ℓd ), and delegating the solve to the Prover does not help: that design relocates the weights’ computation , not their 
+
+precision . By Lemma 13 the exact weights are ratios of determinants of Θ( m(B + log m)) bits, and whatever carries them, oracle or messages, forces log |F| of that order. It would also owe a local 
+
+check of positivity for exponentially many weights, which RμF (Definition 21) gets for free from its unsigned representation; and delegating a generic computation is the move Corollary 18 already makes in full, which Remark 19 is our reason for not making. 
+
+8.3 Improved efficiency with delegation of computation 
+
+The dependence on the degree ∆ in Theorem 32, exponential in the circuit depth in the worst case, stems from a single design choice: the Verifier reads each model value ˆP (ˆ q), ˆQ(ˆ q), ˆQ(ˆ q′) by evaluating the circuit as the high-degree polynomial it computes. The standard machinery of 
+
+delegation of computation removes it. We replace each direct evaluation by a call to VerifyMLE 
+
+(Fact 37), now letting PMLE , Q MLE denote the multilinear extensions of P, Q : rather than evaluate the circuit itself, the Verifier receives an alleged value from the Prover and has VerifyMLE certify it through interaction. This is the same move, from a quantity the Verifier computes to one a sub-protocol certifies, as the passage from VerMarginoid to VerMarginal in Section 7. The fact underlying VerifyMLE is a doubly-efficient interactive proof for circuit evaluation: it 50 delegates the evaluation to the Prover, at a cost scaling with the circuit’s depth D rather than its degree. 
+
+Fact 37 ([Tha13]) . Let C be a layered arithmetic circuit over a field F with n inputs, depth D,and size S, computing a function {0, 1}n → { 0, . . . , M − 1} for M < |F|, and let CMLE : Fn → F be its multilinear extension. 22 There is a Verifier VerifyMLE F(C, ˆx, y ) such that, for any ˆx ∈ Fn and 
+
+ˆy ∈ F,
+
+• Completeness: there is an honest Prover for which, if ˆy = CMLE (ˆ x), the Verifier accepts with probability 1.
+
+• Soundness: if ˆy̸ = CMLE (ˆ x), the Verifier accepts with probability O(D(n + log S)/|F|), regard-less of the Prover. 
+
+• Complexity: the communication is O(D(n + log S)) field elements and the Verifier runs in 
+
+O(S +D(n+log S)) field operations. The S term shrinks to polylog S if C is logspace-uniform. 
+
+Theorem 38 (Explicit IPCP for Model -Consistency , with model delegation) . Let (P, Q ) be a predic-tive model whose circuits are layered, each with depth ≤ D and size ≤ S. Run Algorithm 6 with the direct circuit evaluations replaced by the calls VerifyMLE F(P, ˆq, P MLE (ˆ q)) , VerifyMLE F(Q, ˆq, Q MLE (ˆ q)) ,and VerifyMLE F(Q, ˆq′, Q MLE (ˆ q′)) of Fact 37, and the two direct SumCheck s at degrees 5 and 1. The result is an IPCP Verifier for Model -Consistency with completeness and soundness as in Theo-rem 32, with PCP length and query complexity unchanged, and with the following bounds, polyno-mial in the depth D in place of the degree ∆, over any prime field with |F| ≥ 2O(ℓd +B+log(1 /ε gap )) ·
+
+poly (ℓ, d, B, D, log S)/ε sound :
+
+• Verifier runtime. poly (ℓ, d, B, log(1 /ε gap ), 1/ε sound ), plus the three VerifyMLE calls, O(|P | +
+
+|Q| + D(ℓd + log S)) field operations. 
+
+• Communication. poly (ℓ, d, B, log(1 /ε gap ), log(1 /ε sound )) , plus the three VerifyMLE transcripts, 
+
+O(D(ℓd + log S)) field elements. Proof. The substitution changes the protocol in three places; everywhere else the analysis of The-orem 32 applies verbatim. 
+
+Model values. The values PMLE (ˆ q), Q MLE (ˆ q), Q MLE (ˆ q′) are now supplied by the Prover and certified by VerifyMLE rather than computed by the Verifier. By Fact 37, with input length n =log |Q| = ℓ(d + 1) + d, each call is complete on the true value and, on a false value, accepts with probability O(D(log |Q| + log S)/|F|). In the soundness union bound this replaces the zero error of direct evaluation with O(D(log |Q| + log S)/|F|) from the three VerifyMLE calls, restoring the bound of the GKR-based protocol. 
+
+SumCheck degrees. With PMLE , Q MLE multilinear the Inc †-summand QMLE (q)(2 B μ†[( s = b) ∩
+
+(t = 1)] − PMLE (q)μ†[s = b]) 2 has individual q-degree deg QMLE + 2(deg PMLE + 1) = 5 and the 
+
+∥Q∥1-summand QMLE (q) degree 1 (the marginoids being multilinear in q as before). The two direct 
+
+SumCheck s thus contribute 6 log |Q| /|F| to the soundness bound and O(log |Q| ) field elements each to the communication, and the degree ∆ disappears from every bound. The field size (29) and the wraparound argument are unchanged (they never involved ∆), so collecting the soundness terms                 
+
+> 22 We emphasize that CMLE is the multilinear extension of the function computed by C, not the polynomial ˆC
+> of Fact 30; the two agree only on {0,1}n. The primitive below, with these exact costs, is obtained by running the protocol of [Tha13] on the wide circuit made of 2 nparallel copies of C, the wth hardwired to input w: the multilinear extension of its output layer is CMLE , and its width enters the costs only through its logarithm, n+ log S.
+
+51 gives the stated |F| ≥ 2O(ℓd +B+log(1 /ε gap )) · poly (ℓ, d, B, D, log S)/ε sound , dominated as before by the wraparound term. 
+
+Verifier work and communication. The Verifier no longer evaluates P, Q ; its circuit-dependent cost is the three VerifyMLE calls, each O(S + D(ℓd + log S)) field operations and O(D(ℓd + log S)) communication by Fact 37, hence O(|P | + |Q| + D(ℓd + log S)) and O(D(ℓd + log S)) in total. The per-call S term is the cost of evaluating the layered circuit once, as Fact 37 requires. A circuit that is not already layered is first layered: this preserves the depth D and increases the size to at most 
+
+O(SD ), so the |P | + |Q| term grows to ( |P | + |Q|)D, while log( SD ) = O(log S) (as D ≤ S) leaves the field size and communication unchanged. Since D ≤ S, every bound above is polynomial in the model size for circuits of any depth, removing the constant- or logarithmic-depth restriction under which Theorem 32 is polynomial. And by the argument of Corollary 33, Theorem 38 too holds with the proof oracle over the Boolean alphabet, with ∆ replaced by poly (ℓ, d, B, D, log S) in the PCP length. 
+
+Remark 39 (Verifier efficiency for uniform models) . The only Verifier costs in Theorem 38 that depend on the size of ( P, Q ) are reading the input circuits and the three VerifyMLE calls. If the model is instead given succinctly , as a logspace-uniform layered circuit family accessed through its description, then the uniform clause of Fact 37 brings each VerifyMLE call to poly (D, ℓd, log S)field operations, and the Verifier runs in poly (ℓ, d, B, D, log S, log(1 /ε gap ), 1/ε sound ) time overall— polylogarithmic in the circuit size. The honest Prover remains exponential-time (it writes the proof oracle), so this is Verifier-side efficiency only, in the spirit of doubly-efficient interactive proofs [GKR15]. 
+
+Remark 40 (Succinct arguments for Model -Consistency ). The delegated Verifier of Theorem 38 runs in polynomial time, reads its oracle at polynomially many points, and exchanges polynomially many bits, so standard compilers turn the protocol into a succinct argument for Model -Consistency 
+
+at no asymptotic cost. Two apply, each trading an assumption for a guarantee: 
+
+• Collision-resistant hashing yields a public-coin interactive argument [Kil92]: the Prover com-mits the oracle by a single Merkle tree, and the interaction runs in the clear. The oracle is exponentially long, but the honest Prover is already exponential-time (it writes π), so the commitment costs nothing asymptotically, as in the universal arguments of [BG02]. 
+
+• A random oracle yields a non-interactive argument [Mic00]: apply the Fiat–Shamir transform to the resulting public-coin interactive oracle proof [BCS16]. Two caveats attach. Negligible soundness is obtained by parallel repetition before the interactive compilation; repetition does not survive the Fiat–Shamir transform (a cheating prover grinds the hash round by round), so the non-interactive route instead requires round-by-round soundness, which our protocol is expected to acquire once its plain oracle reads are replaced by self-corrected ones (Fact 27); we do not prove this here. The knowledge guarantee is only the weak, bit-by-bit one of [BG02], an exponentially long witness being too large to extract outright. Here “succinct” means 
+
+poly (|x|, λ ) communication and Verifier time (polynomial in the instance, not polylogarithmic), which, unlike the base Theorem 32, holds for circuits of any depth by Theorem 38. A user can thus certify a model’s consistency against a poly (|x|, λ ) certificate, at the price of computational rather than unconditional soundness. 52 9 Conclusions and open problems 
+
+We gave an explicit Interactive PCP for deciding whether a predictive model ( P, Q ) is consistent up to an ℓ2 threshold, with a Verifier whose only access to the model is a few point evaluations of its circuits, together with a few queries to a proof oracle encoding a witnessing distribution (Theorem 32). We close with what we find natural about the construction, and with the questions it leaves open. 
+
+A “natural” factorization. Against an honest Prover, every object of Algorithm 6 carries a meaning: the oracle ( Z, A ) is a Reed–Muller encoding of a witnessing distribution μ, the SumCheck sexpress the inconsistency and the threshold ∥Q∥1 as marginals of μ, and VerEnc pins the encoding’s validity to fixed constants, the way a checksum does. The protocol thus factors into a model-specific, semantically probabilistic witness core and a model-agnostic proving overlay. Following the pipeline of Section 8.1, the route from a trained model to one that proves its own consistency then partitions into stages of decreasing “magic”: learning ( P, Q ), finding a witnessing distribution, sparsifying it, and finally a purely classical proving overlay (the encoding and the 
+
+SumCheck s) that could itself be replaced by a learned component, towards an end-to-end Self-Proving model in the spirit of [AGPR25]. The two roles the IPCP requires, a stateless oracle and a stateful Prover, come “for free” from a single model that controls its context (Remark 1). We leave a formal account of this factorization, and its consequences for learnability, to future work. 
+
+An exact Prover for an approximate statement. The statement our protocol proves is approximate by design: the Verifier certifies consistency up to the threshold τ , promising acceptance only when the model is ( τ − εgap )-consistent. The honest Prover enjoys none of this slack. To run Algorithm 6 it must compute the inconsistency attained by its witness exactly : Inc † (Equation (25)) is a sum over all of Q, an integer of O(ℓd +B +log(1 /ε gap )) bits, and the Prover commits to it as vInc 
+
+before the SumCheck s begin, each round of which then demands an exact partial sum of the same kind. A Prover that commits to anything else, say an estimate of Inc † from sampled queries, is caught by the final check (28) exactly as a cheating Prover would be (Fact 22); the tolerance enters only once, as the integer comparison (27) of the exact committed value against the threshold. (The single-exponential field of Theorem 32 is the same exactness on the Verifier’s side: F must carry Inc †
+
+at full precision, without wraparound.) So although we never ask whether the model is consistent exactly, we do ask the Prover for its inconsistency exactly, and the benefit of verifying approximate 
+
+consistency is lost on the one party that computes: a Prover that estimates rather than sums, as a learned Prover would, has no accepting strategy. The remedy, we believe, is a SumCheck in which approximation is native. The sum-check protocol for approximate computations of [BDG +26] proves exactly such claims, P 
+
+> x
+
+g(x) ≈ H with g low-degree over the reals, its Verifier accepting Prover messages that are themselves only approximately consistent. Whether our protocol can be soundly instantiated over it, so that the honest Prover need only estimate its witness’s inconsistency to within the gap, is a main question we leave open. 
+
+Further directions. 
+
+• Other loss functions. The squared ℓ2 measure is what turns the witness’s stationarity condi-tions into a linear system (Section 5); the SumCheck protocol accommodates the higher-degree summand of an ℓp measure directly, while the witness analysis would have to be redone for 53 integer p > 2. More interestingly, one could consider the cross-entropy loss whose non-polynomial summand puts it beyond the arithmetization route taken here. 
+
+• Zero-knowledge. In the explicit setting the queries reveal the user’s inputs, so a variant that hides them is desirable; the encoding-and-SumCheck machinery is standard enough that known zero-knowledge techniques plausibly apply. 
+
+• Succinctness and delegation. These are separate axes: Remark 40 compiles the IPCP into a poly (|x|, λ )-size argument, while Section 8.3 removes the depth dependence of the model evaluations. Neither subsumes the other. 
+
+# AI Use Disclosure 
+
+We used AI tools for research assistance, including brainstorming, identifying relevant references, suggesting potentially useful theorems or high-level organizational skeletons, and double-checking our work. All material in the paper was written and verified by the authors. 
+
+# Acknowledgements 
+
+We are grateful to Avishay Tal for important comments and contributions to earlier versions of this work. OP thanks Thomas Bourgeat, Alessandro Chiesa, L´ ena¨ ıc Chizat, Nicolas Flammarion, Tal Herman, Viktor Kunˇ cak, Nicholas Spooner, Justin Thaler, Thomas Vidick and Guy Weissenberg for helpful comments. 
+
+# References 
+
+[AC25] Josh Alman and Lijie Chen. Efficient construction of rigid matrices using an np oracle. 
+
+SIAM Journal on Computing , 54(4):FOCS19–102, 2025. [AGPR25] Noga Amit, Shafi Goldwasser, Orr Paradise, and Guy N Rothblum. A theory for worst-case vs. average-case guarantees for llms. In The Thirty-ninth Annual Confer-ence on Neural Information Processing Systems (NeurIPS) , 2025. [AS98] Sanjeev Arora and Shmuel Safra. Probabilistic checking of proofs: A new characteri-zation of NP. J. ACM , 45(1):70–122, 1998. [AZWG21] Cem Anil, Guodong Zhang, Yuhuai Wu, and Roger B. Grosse. Learning to give checkable answers with prover-verifier games. CoRR , abs/2108.12099, 2021. [Bab85] L´ aszl´ o Babai. Trading group theory for randomness. In Robert Sedgewick, editor, 
+
+Proceedings of the 17th Annual ACM Symposium on Theory of Computing, May 6-8, 1985, Providence, Rhode Island, USA , pages 421–429. ACM, 1985. [Bab90] L´ aszl´ o Babai. E-mail and the unexpected power of interaction. In Proceedings: Fifth Annual Structure in Complexity Theory Conference, Universitat Polit` ecnica de Catalunya, Barcelona, Spain, July 8-11, 1990 , pages 30–44. IEEE Computer Society, 1990. 54 [Bar15] Siddharth Barman. Approximating nash equilibria and dense bipartite subgraphs via an approximate version of caratheodory’s theorem. In Rocco A. Servedio and Ronitt Rubinfeld, editors, Proceedings of the Forty-Seventh Annual ACM on Symposium on Theory of Computing, STOC 2015, Portland, OR, USA, June 14-17, 2015 , pages 361–369. ACM, 2015. [BBH +12] Boaz Barak, Fernando G. S. L. Brand˜ ao, Aram W. Harrow, Jonathan A. Kelner, David Steurer, and Yuan Zhou. Hypercontractivity, sum-of-squares proofs, and their applications. In Howard J. Karloff and Toniann Pitassi, editors, Proceedings of the 44th Symposium on Theory of Computing Conference, STOC 2012, New York, NY, USA, May 19 - 22, 2012 , pages 307–326. ACM, 2012. [BC18] Rishiraj Bhattacharyya and Sourav Chakraborty. Property testing of joint distri-butions using conditional samples. ACM Trans. Comput. Theory , 10(4):16:1–16:20, 2018. [BCF +25] Yoshua Bengio, Michael Cohen, Damiano Fornasiere, Joumana Ghosn, Pietro Greiner, Matt MacDermott, S¨ oren Mindermann, Adam Oberman, Jesse Richardson, Oliver Richardson, Marc-Antoine Rondeau, Pierre-Luc St-Charles, and David Williams-King. Superintelligent agents pose catastrophic risks: Can scientist ai offer a safer path?, 2025. [BCP +25] Yoshua Bengio, Stephen Clare, Carina Prunkl, Shalaleh Rismani, Maksym An-driushchenko, Ben Bucknall, Philip Fox, Tiancheng Hu, Cameron Jones, Sam Man-ning, et al. International ai safety report 2025: first key update: capabilities and risk implications. arXiv preprint arXiv:2510.13653 , 2025. [BCS16] Eli Ben-Sasson, Alessandro Chiesa, and Nicholas Spooner. Interactive oracle proofs. In Martin Hirt and Adam D. Smith, editors, Theory of Cryptography - 14th Inter-national Conference, TCC 2016-B, Beijing, China, October 31 - November 3, 2016, Proceedings, Part II , Lecture Notes in Computer Science, pages 31–60, 2016. [BDG +26] Dor Bitan, Zachary DeStefano, Shafi Goldwasser, Yuval Ishai, Yael Tauman Kalai, and Justin Thaler. Sum-check protocol for approximate computations. In Joan Dae-men and Emmanuel Thom´ e, editors, Advances in Cryptology - EUROCRYPT 2026 - 45th Annual International Conference on the Theory and Applications of Crypto-graphic Techniques, Rome, Italy, May 10-14, 2026, Proceedings, Part VII , volume 16547 of Lecture Notes in Computer Science , pages 209–238. Springer, 2026. [BFL91] L´ aszl´ o Babai, Lance Fortnow, and Carsten Lund. Non-deterministic exponential time has two-prover interactive protocols. Comput. Complex. , 1:3–40, 1991. [BFLS91] L´ aszl´ o Babai, Lance Fortnow, Leonid A. Levin, and Mario Szegedy. Checking com-putations in polylogarithmic time. In Cris Koutsougeras and Jeffrey Scott Vitter, editors, Proceedings of the 23rd Annual ACM Symposium on Theory of Computing, May 5-8, 1991, New Orleans, Louisiana, USA , pages 21–31. ACM, 1991. [BFR +00] Tugkan Batu, Lance Fortnow, Ronitt Rubinfeld, Warren D. Smith, and Patrick White. Testing that distributions are close. In 41st Annual Symposium on Foundations of Computer Science, FOCS 2000, Redondo Beach, California, USA, November 12-14, 2000 , pages 259–269. IEEE Computer Society, 2000. 55 [BG02] Boaz Barak and Oded Goldreich. Universal arguments and their applications. Pro-ceedings 17th IEEE Annual Conference on Computational Complexity , pages 194–203, 2002. [BHPT24] Amey Bhangale, Prahladh Harsha, Orr Paradise, and Avishay Tal. Rigid matrices from rectangular pcps. SIAM Journal on Computing , 53(2):480–523, 2024. [BIM +26] Jonah Brown-Cohen, Geoffrey Irving, Simon C. Marshall, Ilan Newman, Georgios Pil-iouras, and Mario Szegedy. Debate is efficient with your time. CoRR , abs/2602.08630, 2026. [BIP24] Jonah Brown-Cohen, Geoffrey Irving, and Georgios Piliouras. Scalable AI safety via doubly-efficient debate. In Ruslan Salakhutdinov, Zico Kolter, Katherine A. Heller, Adrian Weller, Nuria Oliver, Jonathan Scarlett, and Felix Berkenkamp, editors, Forty-first International Conference on Machine Learning, ICML 2024, Vienna, Austria, July 21-27, 2024 , Proceedings of Machine Learning Research, pages 4585–4602. PMLR / OpenReview.net, 2024. [BIP25] Jonah Brown-Cohen, Geoffrey Irving, and Georgios Piliouras. Avoiding obfuscation with prover-estimator debate. CoRR , abs/2506.13609, 2025. [BLD +23] Yoshua Bengio, Salem Lahlou, Tristan Deleu, Edward J Hu, Mo Tiwari, and Em-manuel Bengio. Gflownet foundations. Journal of Machine Learning Research ,24(210):1–55, 2023. [BLM +25] Edoardo Botta, Yuchen Li, Aashay Mehta, Jordan T. Ash, Cyril Zhang, and Andrej Risteski. On the query complexity of verifier-assisted language generation. In Aarti Singh, Maryam Fazel, Daniel Hsu, Simon Lacoste-Julien, Felix Berkenkamp, Tegan Maharaj, Kiri Wagstaff, and Jerry Zhu, editors, Forty-second International Confer-ence on Machine Learning, ICML 2025, Vancouver, BC, Canada, July 13-19, 2025 ,Proceedings of Machine Learning Research. PMLR / OpenReview.net, 2025. [BLR90] Manuel Blum, Michael Luby, and Ronitt Rubinfeld. Self-testing/correcting with ap-plications to numerical problems. In Symposium on the Theory of Computing , 1990. [Boo54] George Boole. An Investigation of the Laws of Thought, on Which Are Founded the Mathematical Theories of Logic and Probabilities . Walton and Maberly, London, 1854. [BRG +26] Yoshua Bengio, Oliver Richardson, Tom´ aˇ s Gavenˇ ciak, Michael Cohen, Rory Svarc, Damiano Fornasiere, Gael Gendron, David Hyland, Aton Kamanda, Adam Oberman, Francis Rhys Ward, Anna Gavenˇ ciak, Jacob Livingston Slosser, Vincent Mai, Iulian Serban, and Joumana Ghosn. Safety from honesty in a disinterested ai predictor, 2026. [BS14] Boaz Barak and David Steurer. Sum-of-squares proofs and the quest toward optimal algorithms. CoRR , abs/1404.5236, 2014. [Can22] Cl´ ement L. Canonne. Topics and techniques in distribution testing: A biased but representative sample. Found. Trends Commun. Inf. Theory , 19(6):1032–1198, 2022. [Car07] Constantin Carath´ eodory. ¨Uber den variabilit¨ atsbereich der koeffizienten von poten-zreihen, die gegebene werte nicht annehmen. Mathematische Annalen , 64(1):95–115, 1907. 56 [CCK +21] Cl´ ement L. Canonne, Xi Chen, Gautam Kamath, Amit Levi, and Erik Waingarten. Random restrictions of high dimensional distributions and uniformity testing with subcube conditioning. In D´ aniel Marx, editor, Proceedings of the 2021 ACM-SIAM Symposium on Discrete Algorithms, SODA 2021, Virtual Conference, January 10 -13, 2021 , pages 321–336. SIAM, 2021. [CCR +25] Deeparnab Chakrabarty, Xi Chen, Simeon Ristic, C. Seshadhri, and Erik Waingarten. Monotonicity testing of high-dimensional distributions with subcube conditioning. In Michal Kouck´ y and Nikhil Bansal, editors, Proceedings of the 57th Annual ACM Symposium on Theory of Computing, STOC 2025, Prague, Czechia, June 23-27, 2025 ,pages 1019–1030. ACM, 2025. [CFLS93] Anne Condon, Joan Feigenbaum, Carsten Lund, and Peter W. Shor. Probabilistically checkable debate systems and approximation algorithms for pspace-hard functions. In S. Rao Kosaraju, David S. Johnson, and Alok Aggarwal, editors, Proceedings of the Twenty-Fifth Annual ACM Symposium on Theory of Computing, May 16-18, 1993, San Diego, CA, USA , pages 305–314. ACM, 1993. [CFS86] William J. Cook, Jean Fonlupt, and Alexander Schrijver. An integer analogue of carath´ eodory’s theorem. J. Comb. Theory B , 40(1):63–70, 1986. [CFS17] Alessandro Chiesa, Michael A. Forbes, and Nicholas Spooner. A zero knowledge sumcheck and its applications. Electron. Colloquium Comput. Complex. , TR17, 2017. [CG18] Alessandro Chiesa and Tom Gur. Proofs of proximity for distribution testing. In Anna R. Karlin, editor, 9th Innovations in Theoretical Computer Science Conference, ITCS 2018, Cambridge, MA, USA, January 11-14, 2018 , LIPIcs, pages 53:1–53:14. Schloss Dagstuhl - Leibniz-Zentrum f¨ ur Informatik, 2018. [Chv83] Vasek Chvatal. Linear Programming . W. H. Freeman and Company, San Francisco, 1983. Page 145. [CM24] Xi Chen and Cassandra Marcussen. Uniformity testing over hypergrids with subcube conditioning. In David P. Woodruff, editor, Proceedings of the 2024 ACM-SIAM Symposium on Discrete Algorithms, SODA 2024, Alexandria, VA, USA, January 7-10, 2024 , pages 4338–4370. SIAM, 2024. [Coo71] Stephen A. Cook. The complexity of theorem-proving procedures. In Michael A. Harrison, Ranan B. Banerji, and Jeffrey D. Ullman, editors, Proceedings of the 3rd Annual ACM Symposium on Theory of Computing, May 3-5, 1971, Shaker Heights, Ohio, USA , pages 151–158. ACM, 1971. [CRS15] Cl´ ement L. Canonne, Dana Ron, and Rocco A. Servedio. Testing probability distri-butions using conditional samples. SIAM J. Comput. , 44(3):540–616, 2015. [dF37] Bruno de Finetti. La pr´ evision : ses lois logiques, ses sources subjectives. Annales de l’Institut Henri Poincar´ e, 7(1):1–68, 1937. English translation in Kyburg and Smokler, eds., Studies in Subjective Probability , Wiley, 1964. [DFPT18] Glauber De Bona, Marcelo Finger, Nico Potyka, and Matthias Thimm. Inconsistency measurement in probabilistic logic. In John Grant and Maria Vanina Martinez, ed-itors, Measuring Inconsistency in Information , volume 73 of Studies in Logic , pages 235–269. College Publications, 2018. 57 [Dix82] John D. Dixon. Exact solution of linear equations using P-adic expansions. Nu-merische Mathematik , 40(1):137–141, 1982. [DLT +24] Yilun Du, Shuang Li, Antonio Torralba, Joshua B. Tenenbaum, and Igor Mordatch. Improving factuality and reasoning in language models through multiagent debate. In Ruslan Salakhutdinov, Zico Kolter, Katherine A. Heller, Adrian Weller, Nuria Oliver, Jonathan Scarlett, and Felix Berkenkamp, editors, Forty-first International Conference on Machine Learning, ICML 2024, Vienna, Austria, July 21-27, 2024 ,Proceedings of Machine Learning Research, pages 11733–11763. PMLR / OpenRe-view.net, 2024. [ES06] Friedrich Eisenbrand and Gennady Shmonin. Carath´ eodory bounds for integer cones. 
+
+Oper. Res. Lett. , 34(5):564–568, 2006. [FGL +96] Uriel Feige, Shafi Goldwasser, L´ aszl´ o Lov´ asz, Shmuel Safra, and Mario Szegedy. In-teractive proofs and the hardness of approximating cliques. J. ACM , 43(2):268–292, 1996. [FHM90] Ronald Fagin, Joseph Y. Halpern, and Nimrod Megiddo. A logic for reasoning about probabilities. Inf. Comput. , 87(1/2):78–128, 1990. [FK97] Uriel Feige and Joe Kilian. Making games short (extended abstract). In Frank Thom-son Leighton and Peter W. Shor, editors, Proceedings of the Twenty-Ninth Annual ACM Symposium on the Theory of Computing, El Paso, Texas, USA, May 4-6, 1997 ,pages 506–516. ACM, 1997. [Fre77] Rusins Freivalds. Probabilistic machines can use less running time. In Bruce Gilchrist, editor, Information Processing, Proceedings of the 7th IFIP Congress 1977, Toronto, Canada, August 8-12, 1977 , pages 839–842. North-Holland, 1977. [FRG +26] Damiano Fornasiere, Oliver Richardson, Ga¨ el Gendron, Iulian Serban, and Yoshua Bengio. The scientist ai: Safe by design, by not desiring, 2026. [FRS94] Lance Fortnow, John Rompel, and Michael Sipser. On the power of multi-prover interactive protocols. Theor. Comput. Sci. , 134(2):545–557, 1994. [GGR98] Oded Goldreich, Shafi Goldwasser, and Dana Ron. Property testing and its connection to learning and approximation. J. ACM , 45(4):653–750, 1998. [GHMS23] Surbhi Goel, Steve Hanneke, Shay Moran, and Abhishek Shetty. Adversarial re-silience in sequential prediction via abstention. In Alice Oh, Tristan Naumann, Amir Globerson, Kate Saenko, Moritz Hardt, and Sergey Levine, editors, Advances in Neu-ral Information Processing Systems 36: Annual Conference on Neural Information Processing Systems 2023, NeurIPS 2023, New Orleans, LA, USA, December 10 - 16, 2023 , 2023. [GHR25] Oded Goldreich, Tal Herman, and Guy N. Rothblum. Interactive proof systems for FARNESS. Electron. Colloquium Comput. Complex. , TR25, 2025. [GJK +24] Tom Gur, Mohammad Mahdi Jahanara, Mohammad Mahdi Khodabandeh, Ninad Rajgopal, Bahar Salamatian, and Igor Shinkar. On the power of interactive proofs for learning. In Bojan Mohar, Igor Shinkar, and Ryan O’Donnell, editors, Proceedings of 
+
+58 the 56th Annual ACM Symposium on Theory of Computing, STOC 2024, Vancouver, BC, Canada, June 24-28, 2024 , pages 1063–1070. ACM, 2024. [GKKM20a] Shafi Goldwasser, Adam Tauman Kalai, Yael Kalai, and Omar Montasser. Beyond perturbations: Learning guarantees with arbitrary adversarial test examples. In Hugo Larochelle, Marc’Aurelio Ranzato, Raia Hadsell, Maria-Florina Balcan, and Hsuan-Tien Lin, editors, Advances in Neural Information Processing Systems 33: Annual Conference on Neural Information Processing Systems 2020, NeurIPS 2020, December 6-12, 2020, virtual , 2020. [GKKM20b] Shafi Goldwasser, Adam Tauman Kalai, Yael Tauman Kalai, and Omar Montasser. Identifying unpredictable test examples with worst-case guarantees. In Information Theory and Applications Workshop, ITA 2020, San Diego, CA, USA, February 2-7, 2020 , pages 1–14. IEEE, 2020. [GKP88] George F. Georgakopoulos, Dimitris J. Kavvadias, and Christos H. Papadimitriou. Probabilistic satisfiability. J. Complex. , 4(1):1–11, 1988. [GKR15] Shafi Goldwasser, Yael Tauman Kalai, and Guy N. Rothblum. Delegating computa-tion: Interactive proofs for muggles. J. ACM , 62(4):27:1–27:64, 2015. [GMR89] Shafi Goldwasser, Silvio Micali, and Charles Rackoff. The knowledge complexity of interactive proof systems. SIAM J. Comput. , 18(1):186–208, 1989. [Gol08] Oded Goldreich. Computational complexity - a conceptual perspective . Cambridge University Press, 2008. [GR00] Oded Goldreich and Dana Ron. On testing expansion in bounded-degree graphs. 
+
+Electron. Colloquium Comput. Complex. , TR00, 2000. [GRSY21] Shafi Goldwasser, Guy N. Rothblum, Jonathan Shafer, and Amir Yehudayoff. Inter-active proofs for verifying machine learning. In James R. Lee, editor, 12th Innovations in Theoretical Computer Science Conference, ITCS 2021, Virtual Conference, Jan-uary 6-8, 2021 , LIPIcs, pages 41:1–41:19. Schloss Dagstuhl - Leibniz-Zentrum f¨ ur Informatik, 2021. [HA25] Lewis Hammond and Sam Adam-Day. Neural interactive proofs. In The Thirteenth International Conference on Learning Representations, ICLR 2025, Singapore, April 24-28, 2025 . OpenReview.net, 2025. [Had93] Jacques Hadamard. R´ esolution d’une question relative aux d´ eterminants. Bull. des sciences math. , 2:240–246, 1893. [H˚ as01] Johan H˚ astad. Some optimal inapproximability results. J. ACM , 48(4):798–859, 2001. [Her24] Tal Herman. Public coin interactive proofs for label-invariant distribution properties. In Amit Kumar and Noga Ron-Zewi, editors, Approximation, Randomization, and Combinatorial Optimization. Algorithms and Techniques, APPROX/RANDOM 2024, London School of Economics, London, UK, August 28-30, 2024 , LIPIcs, pages 72:1– 72:23. Schloss Dagstuhl - Leibniz-Zentrum f¨ ur Informatik, 2024. 59 [HR22] Tal Herman and Guy N. Rothblum. Verifying the unseen: interactive proofs for label-invariant distribution properties. In Stefano Leonardi and Anupam Gupta, editors, 
+
+STOC ’22: 54th Annual ACM SIGACT Symposium on Theory of Computing, Rome, Italy, June 20 - 24, 2022 , pages 1208–1219. ACM, 2022. [HR23] Tal Herman and Guy N. Rothblum. Doubley-efficient interactive proofs for distri-bution properties. In 64th IEEE Annual Symposium on Foundations of Computer Science, FOCS 2023, Santa Cruz, CA, USA, November 6-9, 2023 , pages 743–751. IEEE, 2023. [HR25a] Tal Herman and Guy N. Rothblum. How to verify any (reasonable) distribution prop-erty: Computationally sound argument systems for distributions. In The Thirteenth International Conference on Learning Representations, ICLR 2025, Singapore, April 24-28, 2025 . OpenReview.net, 2025. [HR25b] Tal Herman and Guy N. Rothblum. Proving natural distribution properties is harder than testing them. In 66th IEEE Annual Symposium on Foundations of Computer Science, FOCS 2025, Sydney, Australia, December 14-17, 2025 , pages 2003–2016. IEEE, 2025. [ICA18] Geoffrey Irving, Paul Christiano, and Dario Amodei. Ai safety via debate. arXiv preprint arXiv:1805.00899 , 2018. [JLKK19] Jisoo Jeong, Seungeui Lee, Jeesoo Kim, and Nojun Kwak. Consistency-based semi-supervised learning for object detection. Advances in neural information processing systems , 32, 2019. [KCE +24] Jan Hendrik Kirchner, Yining Chen, Harri Edwards, Jan Leike, Nat McAleese, and Yuri Burda. Prover-verifier games improve legibility of LLM outputs. CoRR ,abs/2407.13692, 2024. [Key21] John Maynard Keynes. A Treatise on Probability . Macmillan, London, 1921. [Kil92] Joe Kilian. A note on efficient zero-knowledge proofs and arguments (extended ab-stract). In S. Rao Kosaraju, Mike Fellows, Avi Wigderson, and John A. Ellis, editors, 
+
+Proceedings of the 24th Annual ACM Symposium on Theory of Computing, May 4-6, 1992, Victoria, British Columbia, Canada , pages 723–732. ACM, 1992. [KJPJ20] Jongmok Kim, Jooyoung Jang, Hyunwoo Park, and SeongAh Jeong. Struc-tured consistency loss for semi-supervised semantic segmentation. arXiv preprint arXiv:2001.04647 , 2020. [KK21a] Adam Kalai and Varun Kanade. Towards optimally abstaining from prediction with OOD test examples. In Marc’Aurelio Ranzato, Alina Beygelzimer, Yann N. Dauphin, Percy Liang, and Jennifer Wortman Vaughan, editors, Advances in Neural Infor-mation Processing Systems 34: Annual Conference on Neural Information Processing Systems 2021, NeurIPS 2021, December 6-14, 2021, virtual , pages 12774–12785, 2021. [KK21b] Adam Tauman Kalai and Varun Kanade. Efficient learning with arbitrary covariate shift. In Vitaly Feldman, Katrina Ligett, and Sivan Sabato, editors, Algorithmic Learning Theory, 16-19 March 2021, Virtual Conference, Worldwide , Proceedings of Machine Learning Research, pages 850–864. PMLR, 2021. 60 [KM94] Daphne Koller and Nimrod Megiddo. Constructing small sample spaces satisfying given constraints. SIAM J. Discret. Math. , 7(2):260–274, 1994. [KN95] Joe Kilian and Moni Naor. On the complexity of statistical reasoning (extended ab-tract). In Third Israel Symposium on Theory of Computing and Systems, ISTCS 1995, Tel Aviv, Israel, January 4-6, 1995, Proceedings , pages 209–217. IEEE Com-puter Society, 1995. [Kol50] A.N. Kolmogorov. Foundations of the theory of probability . Chelsea Publishing Com-pany, 1950. [KR08] Yael Tauman Kalai and Ran Raz. Interactive PCP. In Luca Aceto, Ivan Damg˚ ard, Leslie Ann Goldberg, Magn´ us M. Halld´ orsson, Anna Ing´ olfsd´ ottir, and Igor Walukiewicz, editors, Automata, Languages and Programming, 35th Interna-tional Colloquium, ICALP 2008, Reykjavik, Iceland, July 7-11, 2008, Proceedings, Part II - Track B: Logic, Semantics, and Theory of Programming & Track C: Se-curity and Cryptography Foundations , volume 5126 of Lecture Notes in Computer Science , pages 536–547. Springer, 2008. [KT00] Jonathan Katz and Luca Trevisan. On the efficiency of local decoding procedures for error-correcting codes. In Proceedings of the thirty-second annual ACM symposium on Theory of computing , pages 80–86, 2000. [Las01] Jean B. Lasserre. Global optimization with polynomials and the problem of moments. 
+
+SIAM J. Optim. , 11(3):796–817, 2001. [Lev73] Leonid A. Levin. Universal sequential search problems. Problems of Information Transmission , 9(3):115–116, 1973. Russian original: Problemy Peredachi Informatsii. [LFKN92] Carsten Lund, Lance Fortnow, Howard J. Karloff, and Noam Nisan. Algebraic meth-ods for interactive proof systems. J. ACM , 39(4):859–868, 1992. [Luk01] Thomas Lukasiewicz. Probabilistic logic programming with conditional constraints. 
+
+ACM Trans. Comput. Log. , 2(3):289–339, 2001. [Mei13] Or Meir. Ip = pspace using error-correcting codes. SIAM Journal on Computing ,42(1):380–403, 2013. [Mic00] Silvio Micali. Computationally sound proofs. SIAM J. Comput. , 30(4):1253–1298, 2000. [MLVW17] Vahab S. Mirrokni, Renato Paes Leme, Adrian Vladu, and Sam Chiu-wai Wong. Tight bounds for approximate carath´ eodory and beyond. In Doina Precup and Yee Whye Teh, editors, Proceedings of the 34th International Conference on Machine Learning, ICML 2017, Sydney, NSW, Australia, 6-11 August 2017 , volume 70 of Proceedings of Machine Learning Research , pages 2440–2448. PMLR, 2017. [MS23] Saachi Mutreja and Jonathan Shafer. PAC verification of statistical algorithms. In Gergely Neu and Lorenzo Rosasco, editors, The Thirty Sixth Annual Conference on Learning Theory, COLT 2023, 12-15 July 2023, Bangalore, India , Proceedings of Machine Learning Research, pages 5021–5043. PMLR, 2023. 61 [Nes00] Yurii Nesterov. Squared functional systems and optimization problems. In High performance optimization , pages 405–440. Springer, 2000. [Nil86] Nils J. Nilsson. Probabilistic logic. Artif. Intell. , 28(1):71–87, 1986. [Par03] Pablo A. Parrilo. Semidefinite programming relaxations for semialgebraic problems. 
+
+Math. Program. , 96(2):293–320, 2003. [Par21] Orr Paradise. Smooth and strong pcps. computational complexity , 30(1):1, 2021. [POC +23] Joon Sung Park, Joseph C. O’Brien, Carrie Jun Cai, Meredith Ringel Morris, Percy Liang, and Michael S. Bernstein. Generative agents: Interactive simulacra of human behavior. In Sean Follmer, Jeff Han, J¨ urgen Steimle, and Nathalie Henry Riche, editors, Proceedings of the 36th Annual ACM Symposium on User Interface Software and Technology, UIST 2023, San Francisco, CA, USA, 29 October 2023- 1 November 2023 , pages 2:1–2:22. ACM, 2023. [Pot14] Nico Potyka. Linear programs for measuring inconsistency in probabilistic logics. In 
+
+Proceedings of the 14th International Conference on Principles of Knowledge Repre-sentation and Reasoning (KR 2014) , pages 568–577, 2014. [PS20] Stanislas Polu and Ilya Sutskever. Generative language modeling for automated the-orem proving. CoRR , abs/2009.03393, 2020. [PT14] Nico Potyka and Matthias Thimm. Consolidation of probabilistic knowledge bases by inconsistency minimization. In Proceedings of the 21st European Conference on Artificial Intelligence (ECAI 2014) , pages 729–734. IOS Press, 2014. [PY86] Christos H. Papadimitriou and Mihalis Yannakakis. A note on succinct representations of graphs. Inf. Control. , 71(3):181–185, 1986. [Ram31] Frank P. Ramsey. Truth and probability. In R. B. Braithwaite, editor, The Founda-tions of Mathematics and Other Logical Essays , pages 156–198. Kegan Paul, Trench, Trubner & Co., London, 1931. [RH21] Oliver Richardson and Joseph Y. Halpern. Probabilistic dependency graphs. In 
+
+Thirty-Fifth AAAI Conference on Artificial Intelligence, AAAI 2021, Thirty-Third Conference on Innovative Applications of Artificial Intelligence, IAAI 2021, The Eleventh Symposium on Educational Advances in Artificial Intelligence, EAAI 2021, Virtual Event, February 2-9, 2021 , pages 12174–12181. AAAI Press, 2021. [RHS23] Oliver E. Richardson, Joseph Y. Halpern, and Christopher De Sa. Inference for prob-abilistic dependency graphs. In Robin J. Evans and Ilya Shpitser, editors, Uncertainty in Artificial Intelligence, UAI 2023, July 31 - 4 August 2023, Pittsburgh, PA, USA ,volume 216 of Proceedings of Machine Learning Research , pages 1741–1751. PMLR, 2023. [Ric22] Oliver E. Richardson. Loss as the inconsistency of a probabilistic dependency graph: Choose your model, not your loss function. In Gustau Camps-Valls, Francisco J. R. Ruiz, and Isabel Valera, editors, International Conference on Artificial Intelligence and Statistics, AISTATS 2022, 28-30 March 2022, Virtual Event , volume 151 of Pro-ceedings of Machine Learning Research , pages 2706–2735. PMLR, 2022. 62 [Ric24] Oliver Ethan Richardson. A Unified Theory of Probabilistic Modeling, Dependence, and Inconsistency . Cornell University, 2024. [RR24] Noga Ron-Zewi and Ron Rothblum. Local proofs approaching the witness length. J. ACM , 71(3):18, 2024. [RS96] Ronitt Rubinfeld and Madhu Sudan. Robust characterizations of polynomials with applications to program testing. SIAM J. Comput. , 25(2):252–271, 1996. [RSS +25] Dhruv Rohatgi, Abhishek Shetty, Donya Saless, Yuchen Li, Ankur Moitra, Andrej Risteski, and Dylan J. Foster. Taming imperfect process verifiers: A sampling per-spective on backtracking. CoRR , abs/2510.03149, 2025. [RSS +26] Oliver E. Richardson, Mandana Suso Samiei, Mehran Shakerinava, Joseph D. Viviano, Abdessamad El Kabid, Ali Parviz, and Yoshua Bengio. Local inconsistency resolution: The interplay between attention and control in probabilistic models. In International Conference on Artificial Intelligence and Statistics (AISTATS) , 2026. [Sch80] Jacob T. Schwartz. Fast probabilistic algorithms for verification of polynomial iden-tities. J. ACM , 27(4):701–717, 1980. [Seb90] Andr´ as Seb¨ o. Hilbert bases, caratheodory’s theorem and combinatorial optimization. In Ravi Kannan and William R. Pulleyblank, editors, Proceedings of the 1st Inte-ger Programming and Combinatorial Optimization Conference, Waterloo, Ontorio, Canada, May 28-30 1990 , pages 431–455. University of Waterloo Press, 1990. [Tha13] Justin Thaler. Time-optimal interactive proofs for circuit evaluation. In Ran Canetti and Juan A. Garay, editors, Advances in Cryptology - CRYPTO 2013 - 33rd Annual Cryptology Conference, Santa Barbara, CA, USA, August 18-22, 2013. Proceedings, Part II , Lecture Notes in Computer Science, pages 71–89. Springer, 2013. [WST +24] Stephan W¨ aldchen, Kartikey Sharma, Berkant Turan, Max Zimmer, and Sebastian Pokutta. Interpretability guarantees with merlin-arthur classifiers. In Sanjoy Das-gupta, Stephan Mandt, and Yingzhen Li, editors, International Conference on Artifi-cial Intelligence and Statistics, 2-4 May 2024, Palau de Congressos, Valencia, Spain ,volume 238 of Proceedings of Machine Learning Research , pages 1963–1971. PMLR, 2024. [XN18] S. Xu and King Ngi Ngan. Hierarchical parsing net: Semantic scene parsing from global scene to objects. IEEE Transactions on Multimedia , 20(10):2653–2664, 2018. [ZG24] Jian-Qiao Zhu and Tom Griffiths. Incoherent probability judgments in large language models. In Larissa K. Samuelson, Stefan Frank, Mariya Toneva, Allyson Mackey, and Eliot Hazeltine, editors, Proceedings of the 46th Annual Meeting of the Cogni-tive Science Society, CogSci 2024, Rotterdam, The Netherlands, July 24-27, 2024 .cognitivesciencesociety.org, 2024. [Zip79] Richard Zippel. Probabilistic algorithms for sparse polynomials. In Edward W. Ng, editor, Symbolic and Algebraic Computation, EUROSAM ’79, An International Sym-posiumon Symbolic and Algebraic Computation, Marseille, France, June 1979, Pro-ceedings , volume 72 of Lecture Notes in Computer Science , pages 216–226. Springer, 1979. 63 [ZPIE17] Jun-Yan Zhu, Taesung Park, Phillip Isola, and Alexei A. Efros. Unpaired image-to-image translation using cycle-consistent adversarial networks. In IEEE International Conference on Computer Vision, ICCV 2017, Venice, Italy, October 22-29, 2017 ,pages 2242–2251. IEEE Computer Society, 2017. 64
